@@ -1,18 +1,19 @@
 import { getRequestConfig } from "next-intl/server";
+import { notFound } from "next/navigation";
 
-// Minimal static messages for testing (copied from working test project)
-const staticMessages = {
-  Test: {
-    title: "Test Title (Static)"
+// Define the supported locales
+const locales = ["en", "ar"];
+
+export default getRequestConfig(async ({ locale }) => {
+  // Validate that the incoming `locale` parameter is valid
+  // If the locale is not supported, redirect to the not found page
+  if (!locales.includes(locale as any)) {
+    notFound();
   }
-};
-
-export default getRequestConfig(async ({locale}) => {
-  // Fallback to 'en' if locale is undefined
-  const safeLocale = locale ?? 'en';
-  // Return static messages along with the validated locale
+  // Assert that locale is a string after the check
+  const validLocale = locale as string;
   return {
-    locale: safeLocale,
-    messages: staticMessages // <-- المشكلة هنا: يتم إرجاع رسائل ثابتة فقط
+    locale: validLocale, // Use the asserted locale
+    messages: (await import(`./i18n/locales/${validLocale}.json`)).default
   };
-}); 
+});

@@ -1,36 +1,36 @@
 import React from 'react';
-import { NextIntlClientProvider, useMessages } from 'next-intl'; // <-- تأكد من استيراد useMessages
+import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
-
-// لا تستورد getI18nConfig هنا
 
 const locales = ['en', 'ar'];
 
-export default function RootLayout({ children, params: { locale } }: {
+// Function to load messages dynamically
+async function getMessages(locale: string) {
+  try {
+    return (await import(`../../i18n/locales/${locale}.json`)).default;
+  } catch (error) {
+    notFound();
+  }
+}
+
+export default async function RootLayout({ children, params: { locale } }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  // التحقق من اللغة المدعومة
+  // Validate locale
   if (!locales.includes(locale)) {
     notFound();
   }
 
-  // استخدم useMessages هنا
-  const messages = useMessages();
-
-  // يمكنك إضافة تحقق إضافي إذا أردت، لكن useMessages يجب أن توفر الرسائل
-  if (!messages) {
-     console.error(`Messages not loaded for locale: ${locale}`);
-     // قد تحتاج لمعالجة هذا بشكل مختلف، لكن notFound قد يكون مناسبًا
-     notFound();
-  }
+  // Load messages asynchronously
+  const messages = await getMessages(locale);
 
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
     <html lang={locale} dir={dir}>
       <body>
-        {/* تأكد من تمرير الرسائل الصحيحة هنا */}
+        {/* Pass the loaded messages to the provider */}
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
@@ -38,3 +38,4 @@ export default function RootLayout({ children, params: { locale } }: {
     </html>
   );
 }
+
