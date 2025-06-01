@@ -1,43 +1,28 @@
 import React from 'react';
-import { NextIntlClientProvider } from 'next-intl';
+import { NextIntlClientProvider, useMessages } from 'next-intl'; // <-- تأكد من استيراد useMessages
 import { notFound } from 'next/navigation';
 
-// استيراد الدالة المصدرة من i18n.ts
-// نفترض أن i18n.ts يصدر دالة getRequestConfig أو ما شابهها
-// يجب التأكد من أن المسار صحيح
-import getI18nConfig from '../../i18n'; // تعديل المسار إذا لزم الأمر
+// لا تستورد getI18nConfig هنا
 
 const locales = ['en', 'ar'];
 
-// جعل المكون async للحصول على الرسائل
-export default async function RootLayout({ children, params: { locale } }: {
+export default function RootLayout({ children, params: { locale } }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  console.log(`--- [Original Project - Step 3] layout.tsx: Rendering with locale: ${locale} ---`);
-
   // التحقق من اللغة المدعومة
   if (!locales.includes(locale)) {
     notFound();
   }
 
-  let messages;
-  try {
-    // استدعاء الدالة المصدرة من i18n.ts للحصول على الإعدادات (بما في ذلك الرسائل)
-    // تمرير كائن يحتوي على locale
-    const config = await getI18nConfig({ requestLocale: locale });
-    messages = config.messages;
-    console.log(`--- [Original Project - Step 3] layout.tsx: Successfully got messages for locale: ${locale} ---`);
-  } catch (error) {
-    console.error(`--- [Original Project - Step 3] layout.tsx: Failed to get messages for locale ${locale}:`, error);
-    // يمكنك اختيار عرض خطأ أو استخدام notFound()
-    notFound();
-  }
+  // استخدم useMessages هنا
+  const messages = useMessages();
 
-  // التأكد من تحميل الرسائل
+  // يمكنك إضافة تحقق إضافي إذا أردت، لكن useMessages يجب أن توفر الرسائل
   if (!messages) {
-    console.error(`--- [Original Project - Step 3] layout.tsx: Messages object is missing for locale: ${locale} ---`);
-    notFound();
+     console.error(`Messages not loaded for locale: ${locale}`);
+     // قد تحتاج لمعالجة هذا بشكل مختلف، لكن notFound قد يكون مناسبًا
+     notFound();
   }
 
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -45,8 +30,7 @@ export default async function RootLayout({ children, params: { locale } }: {
   return (
     <html lang={locale} dir={dir}>
       <body>
-        <h1>Original Project - Step 3 Layout (Locale: {locale})</h1>
-        {/* تمرير الرسائل مباشرة إلى المزود */}
+        {/* تأكد من تمرير الرسائل الصحيحة هنا */}
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
