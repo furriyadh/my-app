@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const IntegrationSection: React.FC = () => {
-  const { t } = useTranslations('common');
+  const t = useTranslations('integration');
 
   return (
     <section className="section-8">

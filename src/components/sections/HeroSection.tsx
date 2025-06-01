@@ -14,8 +14,8 @@ declare global {
 }
 
 const HeroSection: React.FC = () => {
-  const t = useTranslations('common');
-  
+  const t = useTranslations('hero');
+
   // تهيئة مكتبة AOS للتأثيرات الحركية عند التمرير
   useEffect(() => {
     if (typeof window !== 'undefined' && window.AOS) {

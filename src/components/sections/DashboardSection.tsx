@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const DashboardSection: React.FC = () => {
-  const { t } = useTranslations('common');
+  const t = useTranslations('dashboard');
 
   return (
     <section className="section-6 py-4 py-md-5">

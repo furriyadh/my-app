@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const ReviewsSection: React.FC = () => {
-  const { t } = useTranslations('common');
+  const t = useTranslations('reviews');
 
   return (
     <section className="section-3 py-4">

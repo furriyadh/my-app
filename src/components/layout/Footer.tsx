@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 const Footer: React.FC = () => {
-  const t = useTranslations('common');
-  
+  const t = useTranslations('footer');
+
   return (
     <footer className="py-4">
       <div className="container my-md-5 mx-auto px-4">

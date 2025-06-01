@@ -13,7 +13,7 @@ import BudgetSection from '@/components/sections/BudgetSection';
 import IntegrationSection from '@/components/sections/IntegrationSection';
 
 export default function HomePage() {
-  const t = useTranslations('common');
+  const t = useTranslations('home');
   
   // تفعيل تأثيرات AOS عند تحميل الصفحة
   useEffect(() => {

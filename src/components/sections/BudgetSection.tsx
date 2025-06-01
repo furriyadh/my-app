@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const BudgetSection: React.FC = () => {
-  const { t } = useTranslations('common');
+  const t = useTranslations('budget');
   return (
     <section className="section-7 py-4 py-md-5 my-md-5">
       <div className="container my-md-2 mx-auto px-4">

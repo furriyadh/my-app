@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 // مكون التنقل بين الصفحات
 const Navigation: React.FC = () => {
-  const { t } = useTranslations('common');
+  const t = useTranslations('navigation');
   const pathname = usePathname();
   const router = useRouter();
   

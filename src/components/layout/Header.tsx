@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 const Header: React.FC = () => {
-  const t = useTranslations('common');
+  const t = useTranslations('header');
   const router = useRouter();
 
   return (
