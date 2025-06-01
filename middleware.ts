@@ -5,11 +5,13 @@ export default createMiddleware({
   locales: ['en', 'ar'],
 
   // اللغة الافتراضية المستخدمة إذا لم يتم تحديد لغة
-  defaultLocale: 'en'
+  defaultLocale: 'en',
+
+  // *** إضافة: تحديد استراتيجية بادئة اللغة لتطابق الإعدادات العامة ***
+  localePrefix: 'always'
 });
 
 export const config = {
-  // تطابق فقط المسارات التي تحتاج إلى تدويل (Internationalization)
-  // استبعد المسارات التي لا تحتاج لترجمة مثل ملفات الصور أو واجهات برمجة التطبيقات
+  // تطابق فقط المسارات التي تحتاج إلى تدويل
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
 };

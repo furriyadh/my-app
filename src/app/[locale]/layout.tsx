@@ -1,16 +1,15 @@
-import { NextIntlClientProvider, useMessages } from 'next-intl';
+import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { ReactNode } from 'react';
 
-// يمكن تعريف اللغات هنا أو استيرادها من مكان مشترك
 const locales = ['en', 'ar'];
 
-// دالة لجلب الرسائل (يمكن وضعها هنا أو في i18n.ts إذا أردت)
-// تأكد من أن المسار صحيح بالنسبة لموقع هذا الملف
 async function getMessages(locale: string) {
   try {
+    // تأكد من أن المسار صحيح بالنسبة لموقع هذا الملف
     return (await import(`../../i18n/locales/${locale}.json`)).default;
   } catch (error) {
+    console.error(`Error loading messages for locale ${locale}:`, error);
     notFound();
   }
 }
@@ -24,28 +23,41 @@ type Props = {
   params: { locale: string };
 };
 
-export default async function LocaleLayout({ children, params: { locale } }: Props) {
-  // التحقق من أن اللغة مدعومة
+// تمرير كائن props كاملاً
+export default async function LocaleLayout(props: Props) {
+  // استخدام await props.params
+  const params = await props.params;
+  const locale = params.locale;
+  const children = props.children; // استخراج children
+
   if (!locales.includes(locale)) {
     notFound();
   }
 
-  // جلب الرسائل للغة الحالية
-  const messages = await getMessages(locale);
+  let messages;
+  try {
+    messages = await getMessages(locale);
+  } catch (error) {
+    console.error("Failed to get messages in layout", error);
+    notFound();
+  }
 
-  // تحديد اتجاه اللغة
+  // التأكد من تحميل الرسائل قبل المتابعة
+  if (!messages) {
+      console.error(`Messages could not be loaded for locale: ${locale}`);
+      notFound(); // أو التعامل مع الخطأ بطريقة أخرى
+  }
+
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
     <html lang={locale} dir={dir}>
       <body>
-        {/* توفير الرسائل للمكونات الفرعية (مهم جداً!) */}
+        {/* إعادة إضافة NextIntlClientProvider */}
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {/* يمكنك إضافة مكونات التخطيط المشتركة هنا مثل Header, Footer */} 
           {children}
         </NextIntlClientProvider>
       </body>
     </html>
   );
 }
-

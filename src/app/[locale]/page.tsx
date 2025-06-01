@@ -1,4 +1,3 @@
-
 'use client'; // Added because useEffect is a client hook
 
 import React, { useEffect } from 'react';
@@ -39,4 +38,3 @@ export default function HomePage() {
     </>
   );
 }
-

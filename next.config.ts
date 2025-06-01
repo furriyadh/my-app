@@ -1,13 +1,17 @@
+import {NextConfig} from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+// استدعاء الـ plugin وتحديد مسار ملف إعدادات الطلب
+const withNextIntl = createNextIntlPlugin(
+  './src/i18n.ts'
+);
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['shown.io'],
   },
-  // إزالة الخيار التجريبي appDir
-  // experimental: {
-  //   appDir: true,
-  // },
   // تكوين المسارات الثابتة للأصول
   async rewrites() {
     return [
@@ -27,4 +31,5 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+// تصدير الإعدادات بعد دمجها مع next-intl
+export default withNextIntl(nextConfig);
