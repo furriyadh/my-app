@@ -1,41 +1,23 @@
-import {notFound} from 'next/navigation';
 import {getRequestConfig} from 'next-intl/server';
-import type {AbstractIntlMessages} from 'next-intl';
 
-// تحديد نوع الرسائل
-type Messages = AbstractIntlMessages;
-
-// قائمة اللغات المدعومة
-const locales = ['en', 'ar'];
+// Minimal static messages for testing (copied from working test project)
+const staticMessages = {
+  Test: {
+    title: "Test Title (Static)"
+  }
+};
 
 export default getRequestConfig(async ({locale}) => {
-  // التحقق من أن اللغة المطلوبة مدعومة
-  if (!locales.includes(locale as any)) notFound();
+  // Log the received locale to check if it's passed correctly
+  console.log(`--- [Original Project - Step 1] i18n.ts: Received locale: ${locale} ---`);
 
-  try {
-    // استيراد ملف اللغة المطلوب ديناميكياً
-    // تأكد من أن المسار صحيح بالنسبة لموقع هذا الملف
-    const module: { default: Messages } = await import(`./i18n/locales/${locale}.json`);
-    return {
-      messages: module.default
-    };
-  } catch (error) {
-    console.error(`Could not load locale messages for ${locale}:`, error);
+  // Basic validation and default locale
+  const validatedLocale = locale && ['en', 'ar'].includes(locale) ? locale : 'en';
+  console.log(`--- [Original Project - Step 1] i18n.ts: Using locale: ${validatedLocale} ---`);
 
-    // محاولة تحميل اللغة الإنجليزية كلغة احتياطية
-    if (locale !== 'en') { // تجنب المحاولة مرتين إذا كانت اللغة المطلوبة هي الإنجليزية أصلاً
-      console.log('Attempting to load fallback locale: en');
-      try {
-        const fallbackModule: { default: Messages } = await import(`./i18n/locales/en.json`);
-        return {
-          messages: fallbackModule.default
-        };
-      } catch (fallbackError) {
-        console.error(`Could not load fallback locale messages (en):`, fallbackError);
-      }
-    }
-
-    // إذا فشل كل شيء، أظهر خطأ أو صفحة 404
-    notFound(); // أو يمكنك رمي خطأ throw new Error(...);
-  }
+  // Return static messages along with the validated locale
+  return {
+    locale: validatedLocale,
+    messages: staticMessages
+  };
 });

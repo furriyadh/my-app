@@ -1,51 +1,43 @@
+import React from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
-import { ReactNode } from 'react';
+
+// استيراد الدالة المصدرة من i18n.ts
+// نفترض أن i18n.ts يصدر دالة getRequestConfig أو ما شابهها
+// يجب التأكد من أن المسار صحيح
+import getI18nConfig from '../../i18n'; // تعديل المسار إذا لزم الأمر
 
 const locales = ['en', 'ar'];
 
-async function getMessages(locale: string) {
-  try {
-    // تأكد من أن المسار صحيح بالنسبة لموقع هذا الملف
-    return (await import(`../../i18n/locales/${locale}.json`)).default;
-  } catch (error) {
-    console.error(`Error loading messages for locale ${locale}:`, error);
-    notFound();
-  }
-}
-
-export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
-
-type Props = {
-  children: ReactNode;
+// جعل المكون async للحصول على الرسائل
+export default async function RootLayout({ children, params: { locale } }: {
+  children: React.ReactNode;
   params: { locale: string };
-};
+}) {
+  console.log(`--- [Original Project - Step 3] layout.tsx: Rendering with locale: ${locale} ---`);
 
-// تمرير كائن props كاملاً
-export default async function LocaleLayout(props: Props) {
-  // استخدام await props.params
-  const params = await props.params;
-  const locale = params.locale;
-  const children = props.children; // استخراج children
-
+  // التحقق من اللغة المدعومة
   if (!locales.includes(locale)) {
     notFound();
   }
 
   let messages;
   try {
-    messages = await getMessages(locale);
+    // استدعاء الدالة المصدرة من i18n.ts للحصول على الإعدادات (بما في ذلك الرسائل)
+    // تمرير كائن يحتوي على locale
+    const config = await getI18nConfig({ requestLocale: locale });
+    messages = config.messages;
+    console.log(`--- [Original Project - Step 3] layout.tsx: Successfully got messages for locale: ${locale} ---`);
   } catch (error) {
-    console.error("Failed to get messages in layout", error);
+    console.error(`--- [Original Project - Step 3] layout.tsx: Failed to get messages for locale ${locale}:`, error);
+    // يمكنك اختيار عرض خطأ أو استخدام notFound()
     notFound();
   }
 
-  // التأكد من تحميل الرسائل قبل المتابعة
+  // التأكد من تحميل الرسائل
   if (!messages) {
-      console.error(`Messages could not be loaded for locale: ${locale}`);
-      notFound(); // أو التعامل مع الخطأ بطريقة أخرى
+    console.error(`--- [Original Project - Step 3] layout.tsx: Messages object is missing for locale: ${locale} ---`);
+    notFound();
   }
 
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -53,7 +45,8 @@ export default async function LocaleLayout(props: Props) {
   return (
     <html lang={locale} dir={dir}>
       <body>
-        {/* إعادة إضافة NextIntlClientProvider */}
+        <h1>Original Project - Step 3 Layout (Locale: {locale})</h1>
+        {/* تمرير الرسائل مباشرة إلى المزود */}
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
