@@ -13,7 +13,7 @@ interface FooterLinkProps {
 
 const FooterLink: React.FC<FooterLinkProps> = ({ href, label, isExternal = false }) => (
   <li>
-    <Link
+    <Link 
       href={href}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}

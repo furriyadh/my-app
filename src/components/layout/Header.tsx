@@ -14,7 +14,7 @@ const Header: React.FC = () => {
 
   // Helper for locale-prefixed internal links
   const localePrefixed = (path: string) => `/${locale}${path}`;
-
+  
   // External app links with lang parameter
   const appLink = (path: string) => `https://app.shown.io${path}?lang=${locale}`;
 

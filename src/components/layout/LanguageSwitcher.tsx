@@ -10,7 +10,7 @@ export default function LanguageSwitcher() {
   const pathname = usePathname();
 
   const otherLocale = locale === 'ar' ? 'en' : 'ar';
-  const targetPath = pathname.startsWith(`/${locale}`)
+  const targetPath = pathname.startsWith(`/${locale}`) 
     ? pathname.replace(`/${locale}`, `/${otherLocale}`)
     : `/${otherLocale}${pathname}`;
 
