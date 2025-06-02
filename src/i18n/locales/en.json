@@ -2,12 +2,13 @@
   "nav": {
     "integrations": "Integrations",
     "pricing": "Pricing",
-    "partners": "Partners Program",
+    "partners": "Partners",
     "api": "API",
     "blog": "Blog"
   },
   "header": {
-    "createAccount": "Create Free Account"
+    "createAccount": "Create Free Account",
+    "login": "Login"
   },
   "hero": {
     "title": {
@@ -95,11 +96,18 @@
     "cta": "View all integrations"
   },
   "footer": {
+    "companyBrief": "Shown is an AI-powered advertising platform that helps businesses grow through targeted and effective ads across various channels.",
+    "sections": {
+      "product": "Product",
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal"
+    },
     "links": {
       "integrations": "Integrations",
       "pricing": "Pricing",
-      "partners": "Partners Program",
-      "api": "Shown API",
+      "partners": "Partners",
+      "api": "API",
       "roadmap": "Product Roadmap",
       "about": "About Us",
       "careers": "Careers",
@@ -110,13 +118,14 @@
       "facebookAds": "Facebook Ads",
       "instagramAds": "Instagram Ads",
       "microsoftAds": "Microsoft Ads",
-      "twitterAds": "Twitter Ads"
+      "twitterAds": "X (Twitter) Ads"
     },
     "legal": {
       "cookies": "Cookie Policy",
       "privacy": "Privacy Policy",
       "terms": "Terms of Use",
       "support": "Support Center"
-    }
+    },
+    "copyright": "© {year}, Shown. All rights reserved."
   }
 }

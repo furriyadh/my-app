@@ -2,7 +2,7 @@
 const locales = ["en", "ar"];
 
 // Used when no locale matches
-const defaultLocale = "en";
+const defaultLocale = "ar";
 
 // Use default: `always`
 const localePrefix = "always";

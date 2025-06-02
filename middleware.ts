@@ -7,7 +7,7 @@ const intlMiddleware = createMiddleware({
   locales: ['en', 'ar'],
 
   // اللغة الافتراضية المستخدمة إذا لم يتم تحديد لغة
-  defaultLocale: 'en', // تأكد أنها اللغة التي تريدها كافتراضية
+  defaultLocale: 'ar', // تأكد أنها اللغة التي تريدها كافتراضية
 
   // تحديد استراتيجية بادئة اللغة (دائمًا أضف البادئة)
   localePrefix: 'always'
