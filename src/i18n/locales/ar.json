@@ -2,12 +2,13 @@
   "nav": {
     "integrations": "التكاملات",
     "pricing": "الأسعار",
-    "partners": "برنامج الشركاء",
+    "partners": "شركاؤنا",
     "api": "واجهة برمجة التطبيقات",
     "blog": "المدونة"
   },
   "header": {
-    "createAccount": "أنشئ حساباً مجانياً"
+    "createAccount": "أنشئ حساباً مجانياً",
+    "login": "تسجيل الدخول"
   },
   "hero": {
     "title": {
@@ -95,28 +96,36 @@
     "cta": "عرض جميع التكاملات"
   },
   "footer": {
+    "companyBrief": "Shown عبارة عن منصة إعلانية مدعومة بالذكاء الاصطناعي تساعد الشركات على تحقيق النمو من خلال الإعلانات المستهدفة والفعالة عبر مختلف القنوات.",
+    "sections": {
+      "product": "المنتج",
+      "company": "الشركة",
+      "resources": "المصادر",
+      "legal": "قانوني"
+    },
     "links": {
       "integrations": "التكاملات",
       "pricing": "الأسعار",
-      "partners": "برنامج الشركاء",
-      "api": "واجهة برمجة التطبيقات المعروضة",
+      "partners": "شركاؤنا",
+      "api": "واجهة برمجة التطبيقات",
       "roadmap": "خارطة طريق المنتج",
       "about": "من نحن",
       "careers": "الوظائف",
       "press": "الصحافة والإعلام",
       "contact": "تواصل معنا",
       "blog": "المدونة",
-      "googleAds": "Google Ads",
-      "facebookAds": "Facebook Ads",
-      "instagramAds": "Instagram Ads",
-      "microsoftAds": "Microsoft Ads",
-      "twitterAds": "Twitter Ads"
+      "googleAds": "إعلانات Google",
+      "facebookAds": "إعلانات Facebook",
+      "instagramAds": "إعلانات Instagram",
+      "microsoftAds": "إعلانات Microsoft",
+      "twitterAds": "إعلانات X (Twitter)"
     },
     "legal": {
       "cookies": "سياسة ملفات تعريف الارتباط",
       "privacy": "سياسة الخصوصية",
       "terms": "شروط الاستخدام",
       "support": "مركز الدعم"
-    }
+    },
+    "copyright": "© {year}, Shown. جميع الحقوق محفوظة."
   }
-} 
+}
