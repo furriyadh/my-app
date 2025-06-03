@@ -1,0 +1,88 @@
+// prisma/schema.prisma
+
+// هذا هو الجزء الذي يحدد مولد عميل Prisma.
+// عميل Prisma هو مكتبة Node.js يتم إنشاؤها تلقائياً
+// للسماح لك بالتفاعل مع قاعدة بياناتك بطريقة آمنة للنوع.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// هذا هو الجزء الذي يحدد مصدر بيانات قاعدة البيانات (DBMS).
+// هنا نحدد أننا نستخدم PostgreSQL.
+// رابط الاتصال بقاعدة البيانات يتم جلبه من متغير البيئة "DATABASE_URL"
+// الذي قمت بتعيينه في ملف .env.local وفي إعدادات Vercel.
+datasource db {
+  provider = "postgresql" // النوع: PostgreSQL (مناسب لـ Vercel Postgres و Prisma Accelerate)
+  url      = env("DATABASE_URL") // هذا هو الصحيح! يجب أن يكون اسم المتغير "DATABASE_URL" فقط
+}
+
+// ----------------------------------------------------
+// نماذج بيانات المستخدمين (User Data Models)
+// ----------------------------------------------------
+
+// نموذج المستخدم (User Model)
+// يمثل هذا النموذج مستخدماً في نظام لوحة تحكم العملاء الخاصة بك.
+model User {
+  id                  String    @id @default(cuid()) // معرف فريد للمستخدم (CUID هو معرف آمن للويب)
+  email               String    @unique // البريد الإلكتروني للمستخدم، يجب أن يكون فريداً لكل مستخدم
+  passwordHash        String // كلمة المرور المشفرة (لا تخزن كلمات المرور كنص عادي أبداً!)
+  name                String? // اسم المستخدم (اختياري، يمكن أن يكون null)
+  
+  // هذا هو الحقل الأساسي لربط العميل بحسابه الإعلاني في Google Ads.
+  // سيحتوي على معرف العميل (Customer ID) من Google Ads لهذا المستخدم.
+  googleAdsCustomerId String?
+
+  createdAt           DateTime  @default(now()) // تاريخ إنشاء المستخدم (يُسجل تلقائياً عند الإنشاء)
+  updatedAt           DateTime  @updatedAt // تاريخ آخر تحديث للمستخدم (يُحدث تلقائياً عند التعديل)
+
+  // علاقات NextAuth.js (ضرورية لعمل NextAuth.js مع PrismaAdapter)
+  accounts            Account[] // يمثل المستخدم مالكاً لحسابات مصادقة متعددة
+  sessions            Session[] // يمثل المستخدم مالكاً لجلسات دخول متعددة
+}
+
+// ----------------------------------------------------
+// نماذج NextAuth.js (Required for Prisma Adapter)
+// هذه النماذج ضرورية لكي يتمكن NextAuth.js من تخزين بيانات المصادقة والجلسات في قاعدة البيانات الخاصة بك.
+// ----------------------------------------------------
+
+// نموذج Account (حساب المصادقة)
+// يستخدم لتخزين معلومات ربط المستخدم مع مزود خدمة مصادقة معين (مثل Google OAuth، أو Credentials)
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// نموذج Session (الجلسة)
+// يستخدم لتخزين معلومات الجلسة.
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// نموذج VerificationToken (رمز التحقق)
+// يستخدم عادة لعمليات التحقق من البريد الإلكتروني أو إعادة تعيين كلمة المرور.
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
