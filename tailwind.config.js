@@ -45,6 +45,6 @@ module.exports = {
     },
   },
   plugins: [
-    require('tailwindcss-rtl'),
+    // require(\'tailwindcss-rtl\'), // Temporarily disabled due to incompatibility with Tailwind CSS v4
   ],
 };
