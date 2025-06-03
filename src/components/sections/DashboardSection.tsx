@@ -1,10 +1,11 @@
 import React from 'react';
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// Removed useTranslations import and usage
+
 const DashboardSection: React.FC = () => {
-  const t = useTranslations('dashboard');
+  // Removed const t = ('dashboard');
 
   return (
     <section className="section-6 py-4 py-md-5">
@@ -13,14 +14,14 @@ const DashboardSection: React.FC = () => {
           className="text-3xl font-medium text-center mb-4" 
           data-aos="fade-up"
         >
-          {t('dashboard.title.first')} <br/>
-          <span className="text-gradient-purple">{t('dashboard.title.second')}</span>
+          لوحة تحكم شاملة <br/> {/* Replaced {t('dashboard.title.first')} */}
+          <span className="text-gradient-purple">لإدارة أعمالك</span> {/* Replaced {t('dashboard.title.second')} */}
         </h2>
         <p 
           className="text-gray-700 text-center max-w-3xl mx-auto mb-8" 
           data-aos="fade-in"
         >
-          {t('dashboard.description')}
+          احصل على رؤى قيمة واتخذ قرارات مستنيرة بناءً على بيانات دقيقة ومحدثة. {/* Replaced {t('dashboard.description')} */}
         </p>
         
         <div 
@@ -28,10 +29,10 @@ const DashboardSection: React.FC = () => {
           data-aos="fade-in"
         >
           <Link 
-            href="https://app.shown.io/create-account?lang=ar" 
+            href="https://app.shown.io/create-account?lang=ar" // External link kept as is
             className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white font-medium hover:opacity-90 transition-opacity"
           >
-            {t('dashboard.cta')}
+            إنشاء حساب {/* Replaced {t('dashboard.cta')} - Matched previous CTA */}
           </Link>
         </div>
         
@@ -43,13 +44,13 @@ const DashboardSection: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6 h-full">
               <Image 
                 src="/assets/images/cont-1.svg" 
-                alt="Dashboard overview"
+                alt="نظرة عامة على لوحة التحكم" // Changed alt text to Arabic
                 width={500}
                 height={300}
                 className="w-full h-auto mb-4"
               />
-              <h3 className="text-xl font-medium">{t('dashboard.overview.title')}</h3>
-              <p className="text-gray-700 mt-2">{t('dashboard.overview.description')}</p>
+              <h3 className="text-xl font-medium">نظرة عامة شاملة</h3> {/* Replaced {t('dashboard.overview.title')} */}
+              <p className="text-gray-700 mt-2">تابع جميع مؤشرات الأداء الرئيسية في مكان واحد.</p> {/* Replaced {t('dashboard.overview.description')} */}
             </div>
           </div>
           
@@ -60,13 +61,13 @@ const DashboardSection: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6 h-full">
               <Image 
                 src="/assets/images/cont-2.svg" 
-                alt="Data-driven decisions"
+                alt="قرارات مبنية على البيانات" // Changed alt text to Arabic
                 width={400}
                 height={300}
                 className="w-full h-auto mb-4"
               />
-              <h3 className="text-xl font-medium">{t('dashboard.decisions.title')}</h3>
-              <p className="text-gray-700 mt-2">{t('dashboard.decisions.description')}</p>
+              <h3 className="text-xl font-medium">قرارات مبنية على البيانات</h3> {/* Replaced {t('dashboard.decisions.title')} */}
+              <p className="text-gray-700 mt-2">استخدم التحليلات المتقدمة لتحسين استراتيجياتك.</p> {/* Replaced {t('dashboard.decisions.description')} */}
             </div>
           </div>
         </div>
@@ -76,3 +77,4 @@ const DashboardSection: React.FC = () => {
 };
 
 export default DashboardSection;
+

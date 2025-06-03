@@ -1,9 +1,7 @@
 import React from 'react';
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const TestimonialsSection: React.FC = () => {
-  const t = useTranslations('testimonials');
 
   return (
     <section className="testimonials py-4 mb-5 mt-4">
@@ -13,18 +11,18 @@ const TestimonialsSection: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <Image 
                 src="/assets/images/pricing/stars.svg" 
-                alt="Five stars" 
+                alt="خمس نجوم" // Changed alt text to Arabic
                 width={120} 
                 height={24} 
                 className="mb-1"
               />
               <p className="text-gray-700 text-lg">
-                {t('testimonials.first.content')}
+                "أداة رائعة تتيح لك إنشاء إعلانات احترافية في دقائق. سهلة الاستخدام وتوفر الوقت والجهد."
               </p>
               <div className="flex items-center mt-3">
                 <Image 
                   src="/assets/images/pricing/test1.png" 
-                  alt="Testimonial author" 
+                  alt="مؤلف الشهادة" // Changed alt text to Arabic
                   width={40} 
                   height={40} 
                   className="rounded-full"
@@ -38,18 +36,18 @@ const TestimonialsSection: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <Image 
                 src="/assets/images/pricing/stars.svg" 
-                alt="Five stars" 
+                alt="خمس نجوم" // Changed alt text to Arabic
                 width={120} 
                 height={24} 
                 className="mb-1"
               />
               <p className="text-gray-700 text-lg">
-                {t('testimonials.second.content')}
+                "لقد غيرت Shown.io طريقة عملنا، فقد أصبح إنشاء الإعلانات أسرع وأكثر فعالية بكثير."
               </p>
               <div className="flex items-center mt-3">
                 <Image 
                   src="/assets/images/pricing/test2.png" 
-                  alt="Testimonial author" 
+                  alt="مؤلف الشهادة" // Changed alt text to Arabic
                   width={40} 
                   height={40} 
                   className="rounded-full"
@@ -63,18 +61,18 @@ const TestimonialsSection: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <Image 
                 src="/assets/images/pricing/stars.svg" 
-                alt="Five stars" 
+                alt="خمس نجوم" // Changed alt text to Arabic
                 width={120} 
                 height={24} 
                 className="mb-1"
               />
               <p className="text-gray-700 text-lg">
-                {t('testimonials.third.content')}
+                "لا أصدق مدى سهولة استخدام هذه الأداة! أوصي بها بشدة لأي شخص يحتاج إلى إعلانات عالية الجودة بسرعة."
               </p>
               <div className="flex items-center mt-3">
                 <Image 
                   src="/assets/images/pricing/test3.png" 
-                  alt="Testimonial author" 
+                  alt="مؤلف الشهادة" // Changed alt text to Arabic
                   width={40} 
                   height={40} 
                   className="rounded-full"

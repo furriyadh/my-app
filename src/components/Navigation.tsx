@@ -1,26 +1,27 @@
+
+'use client'; // Keep if other client hooks/interactions remain, remove if not needed
+
 import React from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-// مكون التنقل بين الصفحات
+import { usePathname } from 'next/navigation'; // Keep for isActive logic
+// Removed useRouter as it was only used for language change
+// Removed useTranslations
+
+// مكون التنقل بين الصفحات (نسخة معدلة للعربية فقط)
 const Navigation: React.FC = () => {
-  const t = useTranslations('navigation');
-  const pathname = usePathname();
-  const router = useRouter();
+  // Removed t = ('navigation');
+  const pathname = usePathname(); // Keep for isActive
+  // Removed router = useRouter();
   
-  // تحديد اللغة الحالية من المسار
-  const currentLocale = pathname?.split('/')[1] || 'ar';
+  // Removed currentLocale logic
+  // Removed changeLanguage function
   
-  // تغيير اللغة
-  const changeLanguage = (newLocale: string) => {
-    // استبدال اللغة الحالية في المسار
-    const newPath = pathname?.replace(`/${currentLocale}`, `/${newLocale}`);
-    router.push(newPath || `/${newLocale}`);
-  };
-  
-  // التحقق من الصفحة النشطة
+  // التحقق من الصفحة النشطة (تم تبسيطه ليعمل بدون بادئة اللغة)
   const isActive = (path: string) => {
-    return pathname?.includes(path);
+    // Check if the current pathname (without query params) ends with the path
+    // or exactly matches the path (for root)
+    const currentPath = pathname?.split('?')[0];
+    return currentPath === path || (path !== '/' && currentPath?.endsWith(path));
   };
   
   return (
@@ -29,48 +30,42 @@ const Navigation: React.FC = () => {
         <div className="flex justify-between items-center">
           {/* القائمة الرئيسية */}
           <div className="hidden md:flex space-x-6 rtl:space-x-reverse">
+            {/* Links updated to remove locale prefix and use hardcoded Arabic text */}
             <Link 
-              href={`/${currentLocale}/integrations`}
+              href="/integrations"
               className={`text-gray-700 hover:text-primary-600 transition-colors ${isActive('/integrations') ? 'font-medium text-primary-600' : ''}`}
             >
-              {t('nav.integrations')}
+              التكاملات {/* Replaced {t('nav.integrations')} */}
             </Link>
             <Link 
-              href={`/${currentLocale}/pricing`}
+              href="/pricing"
               className={`text-gray-700 hover:text-primary-600 transition-colors ${isActive('/pricing') ? 'font-medium text-primary-600' : ''}`}
             >
-              {t('nav.pricing')}
+              الأسعار {/* Replaced {t('nav.pricing')} */}
             </Link>
             <Link 
-              href={`/${currentLocale}/partners`}
+              href="/partners"
               className={`text-gray-700 hover:text-primary-600 transition-colors ${isActive('/partners') ? 'font-medium text-primary-600' : ''}`}
             >
-              {t('nav.partners')}
+              الشركاء {/* Replaced {t('nav.partners')} */}
             </Link>
             <Link 
-              href={`/${currentLocale}/api`}
+              href="/api"
               className={`text-gray-700 hover:text-primary-600 transition-colors ${isActive('/api') ? 'font-medium text-primary-600' : ''}`}
             >
-              {t('nav.api')}
+              API {/* Replaced {t('nav.api')} - Or use واجهة برمجة التطبيقات */}
             </Link>
             <Link 
-              href={`/${currentLocale}/blog`}
+              href="/blog"
               className={`text-gray-700 hover:text-primary-600 transition-colors ${isActive('/blog') ? 'font-medium text-primary-600' : ''}`}
             >
-              {t('nav.blog')}
+              المدونة {/* Replaced {t('nav.blog')} */}
             </Link>
           </div>
           
-          {/* مفتاح تغيير اللغة */}
+          {/* تم إزالة مفتاح تغيير اللغة */}
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            <button 
-              onClick={() => changeLanguage(currentLocale === 'ar' ? 'en' : 'ar')}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
-            >
-              {currentLocale === 'ar' ? 'English' : 'العربية'}
-            </button>
-            
-            {/* زر القائمة للشاشات الصغيرة */}
+             {/* زر القائمة للشاشات الصغيرة - Kept for mobile responsiveness */}
             <button className="md:hidden text-gray-700 focus:outline-none">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -84,3 +79,4 @@ const Navigation: React.FC = () => {
 };
 
 export default Navigation;
+

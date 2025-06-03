@@ -1,9 +1,7 @@
 import React from 'react';
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const OptimizationSection: React.FC = () => {
-  const t = useTranslations('optimization');
 
   return (
     <section className="section-5 py-4">
@@ -12,13 +10,13 @@ const OptimizationSection: React.FC = () => {
           className="text-3xl font-medium text-center mb-6" 
           data-aos="fade-up"
         >
-          <span className="text-gradient-purple">{t('optimization.title')}</span>
+          <span className="text-gradient-purple">تحسين أدائك الإعلاني بذكاء</span>
         </h2>
         <p 
           className="text-gray-700 text-center max-w-3xl mx-auto mb-10" 
           data-aos="fade-in"
         >
-          {t('optimization.description')}
+          نساعدك على تحليل أداء إعلاناتك واكتشاف الفرص لتحسينها بشكل مستمر، لضمان حصولك على أفضل عائد على استثمارك.
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
@@ -32,7 +30,7 @@ const OptimizationSection: React.FC = () => {
                 height={300}
                 className="w-full h-auto mb-4"
               />
-              <h3 className="text-xl font-medium">{t('optimization.keywords')}</h3>
+              <h3 className="text-xl font-medium">تحسين الكلمات المفتاحية</h3>
             </div>
           </div>
           
@@ -46,7 +44,7 @@ const OptimizationSection: React.FC = () => {
                 height={300}
                 className="w-full h-auto mb-4"
               />
-              <h3 className="text-xl font-medium">{t('optimization.abTesting')}</h3>
+              <h3 className="text-xl font-medium">اختبار A/B</h3>
             </div>
           </div>
           
@@ -60,7 +58,7 @@ const OptimizationSection: React.FC = () => {
                 height={300}
                 className="w-full h-auto mb-4"
               />
-              <h3 className="text-xl font-medium">{t('optimization.targeting')}</h3>
+              <h3 className="text-xl font-medium">اقتراحات الاستهداف</h3>
             </div>
           </div>
         </div>

@@ -1,8 +1,6 @@
-
 'use client'; // Added because useEffect is a client hook
 
 import React, { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -14,7 +12,6 @@ declare global {
 }
 
 const HeroSection: React.FC = () => {
-  const t = useTranslations('hero');
 
   // تهيئة مكتبة AOS للتأثيرات الحركية عند التمرير
   useEffect(() => {
@@ -34,15 +31,15 @@ const HeroSection: React.FC = () => {
             className="text-4xl md:text-5xl font-medium mx-auto text-center" 
             data-aos="fade-up"
           >
-            {t('hero.title.first')} <br /> 
-            {t('hero.title.second')} <span className="text-gradient-purple">{t('hero.title.highlight')}</span> {t('hero.title.third')}
+            أنشئ إعلانات <br /> 
+            جذابة وفعالة لـ <span className="text-gradient-purple">عملك</span> بذكاء
           </h1>
           <h3 
             className="text-xl md:text-2xl pt-0 mb-4 my-md-4 mx-auto text-center text-gray-700" 
             data-aos="fade-in" 
             data-aos-delay="500"
           >
-            {t('hero.subtitle')}
+            بفضل الذكاء الاصطناعي، يمكنك الحصول على إعلانات احترافية ومؤثرة في دقائق معدودة، لتجذب عملائك وتحقق أفضل النتائج.
           </h3>
         </div>
         
@@ -55,10 +52,10 @@ const HeroSection: React.FC = () => {
             href="https://app.shown.io/create-account?lang=ar" 
             className="sbtn inline-block transition-all hover:shadow-lg"
           >
-            {t('hero.cta.button')}
+            ابدأ الآن مجاناً
           </Link>
           <p className="p-4 font-medium text-gray-600 text-sm">
-            {t('hero.cta.companies')}
+            تستخدمه أكثر من 5000 شركة حول العالم
           </p>
         </div>
         
@@ -104,4 +101,3 @@ const HeroSection: React.FC = () => {
 };
 
 export default HeroSection;
-

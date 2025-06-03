@@ -1,9 +1,10 @@
 import React from 'react';
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
+// Removed useTranslations import and usage
+
 const BudgetSection: React.FC = () => {
-  const t = useTranslations('budget');
+  // Removed const t = ('budget');
   return (
     <section className="section-7 py-4 py-md-5 my-md-5">
       <div className="container my-md-2 mx-auto px-4">
@@ -12,8 +13,10 @@ const BudgetSection: React.FC = () => {
             className="lg:w-5/12" 
             data-aos="fade-left"
           >
-            <h2 className="text-3xl font-medium mb-4">{t('budget.title')}</h2>
-            <p className="text-gray-700">{t('budget.description')}</p>
+            {/* Replaced t('budget.title') with hardcoded Arabic text */}
+            <h2 className="text-3xl font-medium mb-4">تحكم في ميزانيتك</h2> 
+            {/* Replaced t('budget.description') with hardcoded Arabic text */}
+            <p className="text-gray-700">راقب نفقاتك وحقق أهدافك المالية بسهولة.</p> 
           </div>
           <div 
             className="lg:w-7/12 relative text-end counter-block" 
@@ -22,14 +25,14 @@ const BudgetSection: React.FC = () => {
           >
             <Image 
               src="/assets/images/baln-count-e.svg" 
-              alt="Balance counter"
+              alt="عداد الميزانية" // Changed alt text to Arabic
               width={500}
               height={300}
               className="w-[90%] h-auto"
             />
             <Image 
               src="/assets/images/home-4ee.gif" 
-              alt="Balance animation"
+              alt="رسم متحرك للميزانية" // Changed alt text to Arabic
               width={600}
               height={400}
               className="counter-balance absolute end-0 bottom-0 w-full h-auto"
@@ -42,3 +45,4 @@ const BudgetSection: React.FC = () => {
 };
 
 export default BudgetSection;
+

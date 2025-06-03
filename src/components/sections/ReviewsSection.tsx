@@ -1,9 +1,7 @@
 import React from 'react';
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const ReviewsSection: React.FC = () => {
-  const t = useTranslations('reviews');
 
   return (
     <section className="section-3 py-4">
@@ -12,17 +10,17 @@ const ReviewsSection: React.FC = () => {
           <div className="col mx-auto text-center" data-aos="fade-in">
             <Image 
               src="/assets/images/reviews.svg" 
-              alt="Reviews" 
+              alt="التقييمات" // Changed alt text to Arabic
               width={800}
               height={100}
               className="hidden md:block mx-auto"
             />
             <p className="md:hidden text-3xl font-medium">
-              {t('reviews.title')} <span className="text-gradient-purple">{t('reviews.highlight')}</span>
+              موثوق بنا من قبل الآلاف حول العالم <span className="text-gradient-purple">بمتوسط تقييم</span>
             </p>
             <Image 
               src="/assets/images/trustpilot-m.svg" 
-              alt="Trustpilot" 
+              alt="تراست بايلوت" // Changed alt text to Arabic
               width={200}
               height={50}
               className="md:hidden mx-auto mt-2"

@@ -1,20 +1,26 @@
-import React from 'react';
+import { ThemeProvider } from "@/components/theme-provider"
+import { ReactNode } from "react";
 
-// هذا هو ملف التخطيط الرئيسي المطلوب بواسطة Next.js App Router
-// يجب أن يحتوي على وسوم <html> و <body> الأساسية.
-export default function RootLayout({ children }: {
-  children: React.ReactNode;
-}) {
-  // لا تحتاج لإضافة أي وسوم خاصة باللغة هنا،
-  // لأن التخطيط المتداخل في [locale]/layout.tsx سيهتم بذلك.
+type RootLayoutProps = {
+  children: ReactNode;
+};
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    // الوسوم الأساسية المطلوبة
-    <html>
-      <body>
-        {/* سيتم عرض محتوى التخطيط المتداخل أو الصفحة هنا */}
-        {children}
-      </body>
-    </html>
-  );
+    <>
+      <html lang="ar" suppressHydrationWarning>
+        <head />
+        <body>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+    </>
+  )
 }
-
