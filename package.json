@@ -13,6 +13,7 @@
     "@fullcalendar/interaction": "^6.1.17",
     "@fullcalendar/react": "^6.1.17",
     "@headlessui/react": "^2.2.2",
+    "@supabase/supabase-js": "^2.50.0",
     "apexcharts": "^4.7.0",
     "i18next": "^25.2.1",
     "material-symbols": "^0.31.2",
