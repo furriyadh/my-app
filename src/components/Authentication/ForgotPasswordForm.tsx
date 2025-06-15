@@ -1,10 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { supabase } from "@/utils/supabase/client"; // Import supabase client
 
 const ForgotPasswordForm: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage("");
+    setIsLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/authentication/update-password`, // Redirect to a page where user can set new password
+    });
+
+    if (error) {
+      setMessage(`Error: ${error.message}`);
+    } else {
+      setMessage("Password reset email sent! Please check your inbox.");
+    }
+    setIsLoading(false);
+  };
+
   return (
     <>
       <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]">
@@ -46,26 +68,34 @@ const ForgotPasswordForm: React.FC = () => {
                 </p>
               </div>
 
-              <div className="mb-[15px] relative">
-                <label className="mb-[10px] md:mb-[12px] text-black dark:text-white font-medium block">
-                  Email Address
-                </label>
-                <input
-                  type="text"
-                  className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
-                  placeholder="example@trezo.com"
-                />
-              </div>
+              <form onSubmit={handleResetPassword}> {/* Add form and onSubmit */}
+                <div className="mb-[15px] relative">
+                  <label className="mb-[10px] md:mb-[12px] text-black dark:text-white font-medium block">
+                    Email Address
+                  </label>
+                  <input
+                    type="email" // Changed type to email
+                    className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
+                    placeholder="example@gmail.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <button
-                type="submit"
-                className="md:text-md block w-full text-center transition-all rounded-md font-medium mt-[20px] md:mt-[25px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
-              >
-                <span className="flex items-center justify-center gap-[5px]">
-                  <i className="material-symbols-outlined">autorenew</i>
-                  Reset Password
-                </span>
-              </button>
+                {message && <p className="text-center mt-4 text-sm text-gray-600">{message}</p>} {/* Display messages */}
+
+                <button
+                  type="submit"
+                  className="md:text-md block w-full text-center transition-all rounded-md font-medium mt-[20px] md:mt-[25px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
+                  disabled={isLoading} // Disable button when loading
+                >
+                  <span className="flex items-center justify-center gap-[5px]">
+                    <i className="material-symbols-outlined">autorenew</i>
+                    {isLoading ? "Sending..." : "Reset Password"}
+                  </span>
+                </button>
+              </form>
 
               <p className="mt-[15px] md:mt-[20px]">
                 Back to{" "}

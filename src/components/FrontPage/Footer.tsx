@@ -194,14 +194,12 @@ const Footer: React.FC = () => {
         <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] bg-white dark:bg-[#0c1427] text-center">
           <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
             <p className="leading-[1.6]">
-              © <span className="text-purple-500">Trezo</span> is Proudly Owned
-              by{" "}
+              © <span className="text-purple-500">2025, Furriyadh</span> All rights reserved.{" "}
               <a
-                href="https://envytheme.com/"
+                href="https://furriyadh.com/"
                 target="_blank"
                 className="text-primary-500 transition-all hover:underline"
               >
-                EnvyTheme
               </a>
             </p>
           </div>
