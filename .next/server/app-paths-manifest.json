@@ -1,8 +1,14 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/authentication/logout/page": "app/authentication/logout/page.js",
-  "/dashboard/my-profile/page": "app/dashboard/my-profile/page.js",
+  "/authentication/sign-in/page": "app/authentication/sign-in/page.js",
+  "/authentication/sign-up/page": "app/authentication/sign-up/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/page": "app/page.js"
+  "/my-profile/page": "app/my-profile/page.js",
+  "/settings/change-password/page": "app/settings/change-password/page.js",
+  "/settings/connections/page": "app/settings/connections/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/settings/privacy-policy/page": "app/settings/privacy-policy/page.js",
+  "/settings/terms-conditions/page": "app/settings/terms-conditions/page.js"
 }

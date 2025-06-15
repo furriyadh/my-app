@@ -13558,6 +13558,7 @@ button.swiper-pagination-bullet {
   :root, :host {
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --color-red-50: oklch(97.1% .013 17.38);
     --color-red-100: oklch(93.6% .032 17.717);
     --color-red-200: oklch(88.5% .062 18.334);
     --color-red-300: oklch(80.8% .114 19.571);
@@ -13584,6 +13585,7 @@ button.swiper-pagination-bullet {
     --color-amber-700: oklch(55.5% .163 48.998);
     --color-amber-800: oklch(47.3% .137 46.201);
     --color-amber-900: oklch(41.4% .112 45.904);
+    --color-green-50: oklch(98.2% .018 155.826);
     --color-green-100: oklch(96.2% .044 156.743);
     --color-green-200: oklch(92.5% .084 155.995);
     --color-green-300: oklch(87.1% .15 154.449);
@@ -13666,6 +13668,7 @@ button.swiper-pagination-bullet {
     --ease-in: cubic-bezier(.4, 0, 1, 1);
     --ease-out: cubic-bezier(0, 0, .2, 1);
     --ease-in-out: cubic-bezier(.4, 0, .2, 1);
+    --animate-spin: spin 1s linear infinite;
     --aspect-video: 16 / 9;
     --default-transition-duration: .15s;
     --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
@@ -14555,6 +14558,10 @@ button.swiper-pagination-bullet {
     margin-right: -35px;
   }
 
+  .mr-3 {
+    margin-right: calc(var(--spacing) * 3);
+  }
+
   .mr-\[8px\] {
     margin-right: 8px;
   }
@@ -14875,6 +14882,10 @@ button.swiper-pagination-bullet {
     height: calc(var(--spacing) * 10);
   }
 
+  .h-12 {
+    height: calc(var(--spacing) * 12);
+  }
+
   .h-\[2px\] {
     height: 2px;
   }
@@ -15007,6 +15018,10 @@ button.swiper-pagination-bullet {
     height: 90px;
   }
 
+  .h-\[100px\] {
+    height: 100px;
+  }
+
   .h-\[110px\] {
     height: 110px;
   }
@@ -15097,6 +15112,10 @@ button.swiper-pagination-bullet {
 
   .w-10 {
     width: calc(var(--spacing) * 10);
+  }
+
+  .w-12 {
+    width: calc(var(--spacing) * 12);
   }
 
   .w-\[2px\] {
@@ -15225,6 +15244,10 @@ button.swiper-pagination-bullet {
 
   .w-\[90px\] {
     width: 90px;
+  }
+
+  .w-\[100px\] {
+    width: 100px;
   }
 
   .w-\[110px\] {
@@ -15411,6 +15434,10 @@ button.swiper-pagination-bullet {
 
   .transform {
     transform: var(--tw-rotate-x, ) var(--tw-rotate-y, ) var(--tw-rotate-z, ) var(--tw-skew-x, ) var(--tw-skew-y, );
+  }
+
+  .animate-spin {
+    animation: var(--animate-spin);
   }
 
   .cursor-not-allowed {
@@ -15742,6 +15769,11 @@ button.swiper-pagination-bullet {
     border-bottom-width: 1px;
   }
 
+  .border-b-2 {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 2px;
+  }
+
   .border-l {
     border-left-style: var(--tw-border-style);
     border-left-width: 1px;
@@ -15808,6 +15840,10 @@ button.swiper-pagination-bullet {
     border-color: var(--color-gray-500);
   }
 
+  .border-green-200 {
+    border-color: var(--color-green-200);
+  }
+
   .border-info-200 {
     border-color: var(--color-info-200);
   }
@@ -15838,6 +15874,10 @@ button.swiper-pagination-bullet {
 
   .border-purple-600 {
     border-color: var(--color-purple-600);
+  }
+
+  .border-red-200 {
+    border-color: var(--color-red-200);
   }
 
   .border-secondary-200 {
@@ -16036,6 +16076,10 @@ button.swiper-pagination-bullet {
     background-color: var(--color-gray-800);
   }
 
+  .bg-green-50 {
+    background-color: var(--color-green-50);
+  }
+
   .bg-green-500 {
     background-color: var(--color-green-500);
   }
@@ -16114,6 +16158,10 @@ button.swiper-pagination-bullet {
 
   .bg-purple-700 {
     background-color: var(--color-purple-700);
+  }
+
+  .bg-red-50 {
+    background-color: var(--color-red-50);
   }
 
   .bg-secondary-50 {
@@ -16259,6 +16307,10 @@ button.swiper-pagination-bullet {
 
   .p-6 {
     padding: calc(var(--spacing) * 6);
+  }
+
+  .p-8 {
+    padding: calc(var(--spacing) * 8);
   }
 
   .p-10 {
@@ -17147,6 +17199,10 @@ button.swiper-pagination-bullet {
     color: var(--color-gray-900);
   }
 
+  .text-green-600 {
+    color: var(--color-green-600);
+  }
+
   .text-info-400 {
     color: var(--color-info-400);
   }
@@ -17189,6 +17245,10 @@ button.swiper-pagination-bullet {
 
   .text-purple-600 {
     color: var(--color-purple-600);
+  }
+
+  .text-red-600 {
+    color: var(--color-red-600);
   }
 
   .text-secondary-500 {
@@ -21929,6 +21989,14 @@ button.swiper-pagination-bullet {
     border-color: var(--color-gray-700);
   }
 
+  .dark\:border-green-800:where([class="dark"], [class="dark"] *) {
+    border-color: var(--color-green-800);
+  }
+
+  .dark\:border-red-800:where([class="dark"], [class="dark"] *) {
+    border-color: var(--color-red-800);
+  }
+
   .dark\:border-t-gray-800:where([class="dark"], [class="dark"] *) {
     border-top-color: var(--color-gray-800);
   }
@@ -21983,6 +22051,26 @@ button.swiper-pagination-bullet {
     background-color: var(--color-gray-800);
   }
 
+  .dark\:bg-green-900\/20:where([class="dark"], [class="dark"] *) {
+    background-color: #0d542b33;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .dark\:bg-green-900\/20:where([class="dark"], [class="dark"] *) {
+      background-color: color-mix(in oklab, var(--color-green-900) 20%, transparent);
+    }
+  }
+
+  .dark\:bg-red-900\/20:where([class="dark"], [class="dark"] *) {
+    background-color: #82181a33;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .dark\:bg-red-900\/20:where([class="dark"], [class="dark"] *) {
+      background-color: color-mix(in oklab, var(--color-red-900) 20%, transparent);
+    }
+  }
+
   .dark\:bg-white:where([class="dark"], [class="dark"] *) {
     background-color: var(--color-white);
   }
@@ -22029,8 +22117,16 @@ button.swiper-pagination-bullet {
     color: var(--color-gray-400);
   }
 
+  .dark\:text-green-400:where([class="dark"], [class="dark"] *) {
+    color: var(--color-green-400);
+  }
+
   .dark\:text-primary-600:where([class="dark"], [class="dark"] *) {
     color: var(--color-primary-600);
+  }
+
+  .dark\:text-red-400:where([class="dark"], [class="dark"] *) {
+    color: var(--color-red-400);
   }
 
   .dark\:text-white:where([class="dark"], [class="dark"] *) {
@@ -25100,6 +25196,12 @@ html[dir="rtl"] .trezo-card .trezo-card-content .chat-body ul li {
   syntax: "*";
   inherits: false;
   initial-value: 1;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 

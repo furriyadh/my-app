@@ -61,7 +61,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               src="/images/logo-icon.svg"
               alt="logo-icon"
               width={120}
-              height={20}
+              height={25}
             />
           </Link>
 
@@ -199,9 +199,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             {/* My Profile, Settings, Logout links */}
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <Link
-                href="/dashboard/my-profile"
+                href="/my-profile"
                 className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
-                  pathname === "/dashboard/my-profile" ? "active" : ""
+                  pathname === "/my-profile" ? "active" : ""
                 }`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
@@ -213,9 +213,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <Link
-                href="/dashboard/settings"
+                href="/settings"
                 className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
-                  pathname === "/dashboard/settings" ? "active" : ""
+                  pathname === "/settings" ? "active" : ""
                 }`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
