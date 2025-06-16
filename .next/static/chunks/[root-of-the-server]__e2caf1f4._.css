@@ -13626,6 +13626,7 @@ button.swiper-pagination-bullet {
     --color-black: #3a4252;
     --color-white: #fff;
     --spacing: .25rem;
+    --container-md: 28rem;
     --container-xl: 36rem;
     --text-xs: 12px;
     --text-xs--line-height: calc(1 / .75);
@@ -13683,6 +13684,8 @@ button.swiper-pagination-bullet {
     --color-primary-400: #757dff;
     --color-primary-500: #605dff;
     --color-primary-600: #4936f5;
+    --color-primary-700: #3e2ad8;
+    --color-primary-800: #3225ae;
     --color-secondary-50: #eef6ff;
     --color-secondary-100: #daebff;
     --color-secondary-200: #bddcff;
@@ -15350,6 +15353,10 @@ button.swiper-pagination-bullet {
     max-width: 960px;
   }
 
+  .max-w-md {
+    max-width: var(--container-md);
+  }
+
   .max-w-xl {
     max-width: var(--container-xl);
   }
@@ -15454,6 +15461,10 @@ button.swiper-pagination-bullet {
 
   .list-disc {
     list-style-type: disc;
+  }
+
+  .appearance-none {
+    appearance: none;
   }
 
   .grid-cols-1 {
@@ -15880,6 +15891,10 @@ button.swiper-pagination-bullet {
     border-color: var(--color-red-200);
   }
 
+  .border-red-400 {
+    border-color: var(--color-red-400);
+  }
+
   .border-secondary-200 {
     border-color: var(--color-secondary-200);
   }
@@ -16164,6 +16179,10 @@ button.swiper-pagination-bullet {
     background-color: var(--color-red-50);
   }
 
+  .bg-red-100 {
+    background-color: var(--color-red-100);
+  }
+
   .bg-secondary-50 {
     background-color: var(--color-secondary-50);
   }
@@ -16339,6 +16358,10 @@ button.swiper-pagination-bullet {
 
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
+  }
+
+  .px-3 {
+    padding-inline: calc(var(--spacing) * 3);
   }
 
   .px-4 {
@@ -16729,6 +16752,10 @@ button.swiper-pagination-bullet {
     text-align: left;
   }
 
+  .align-baseline {
+    vertical-align: baseline;
+  }
+
   .align-bottom {
     vertical-align: bottom;
   }
@@ -17013,6 +17040,11 @@ button.swiper-pagination-bullet {
     line-height: var(--leading-relaxed);
   }
 
+  .leading-tight {
+    --tw-leading: var(--leading-tight);
+    line-height: var(--leading-tight);
+  }
+
   .\!font-medium {
     --tw-font-weight: var(--font-weight-medium) !important;
     font-weight: var(--font-weight-medium) !important;
@@ -17249,6 +17281,10 @@ button.swiper-pagination-bullet {
 
   .text-red-600 {
     color: var(--color-red-600);
+  }
+
+  .text-red-700 {
+    color: var(--color-red-700);
   }
 
   .text-secondary-500 {
@@ -17739,6 +17775,12 @@ button.swiper-pagination-bullet {
   }
 
   @media (hover: hover) {
+    .hover\:bg-primary-700:hover {
+      background-color: var(--color-primary-700);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:bg-purple-500:hover {
       background-color: var(--color-purple-500);
     }
@@ -17825,6 +17867,12 @@ button.swiper-pagination-bullet {
   @media (hover: hover) {
     .hover\:text-primary-600:hover {
       color: var(--color-primary-600);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-primary-800:hover {
+      color: var(--color-primary-800);
     }
   }
 
@@ -18015,6 +18063,12 @@ button.swiper-pagination-bullet {
   @media (width >= 40rem) {
     .sm\:grid {
       display: grid;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .sm\:inline {
+      display: inline;
     }
   }
 
@@ -20293,10 +20347,6 @@ button.swiper-pagination-bullet {
     margin-left: 2px;
   }
 
-  .ltr\:ml-\[8px\]:where(:dir(ltr), [dir="ltr"], [dir="ltr"] *) {
-    margin-left: 8px;
-  }
-
   .ltr\:ml-\[10px\]:where(:dir(ltr), [dir="ltr"], [dir="ltr"] *) {
     margin-left: 10px;
   }
@@ -21148,10 +21198,6 @@ button.swiper-pagination-bullet {
 
   .rtl\:mr-\[2px\]:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
     margin-right: 2px;
-  }
-
-  .rtl\:mr-\[8px\]:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
-    margin-right: 8px;
   }
 
   .rtl\:mr-\[10px\]:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
@@ -22051,6 +22097,10 @@ button.swiper-pagination-bullet {
     background-color: var(--color-gray-800);
   }
 
+  .dark\:bg-gray-900:where([class="dark"], [class="dark"] *) {
+    background-color: var(--color-gray-900);
+  }
+
   .dark\:bg-green-900\/20:where([class="dark"], [class="dark"] *) {
     background-color: #0d542b33;
   }
@@ -22111,6 +22161,10 @@ button.swiper-pagination-bullet {
 
   .dark\:\!text-gray-400:where([class="dark"], [class="dark"] *) {
     color: var(--color-gray-400) !important;
+  }
+
+  .dark\:text-gray-300:where([class="dark"], [class="dark"] *) {
+    color: var(--color-gray-300);
   }
 
   .dark\:text-gray-400:where([class="dark"], [class="dark"] *) {
