@@ -11,7 +11,7 @@ const SignInForm: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -19,20 +19,52 @@ const SignInForm: React.FC = () => {
     setMessage("");
     setIsLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
-    } else if (data.user) {
-      setMessage("Login successful! Redirecting...");
-      router.push("/dashboard"); // Redirect to dashboard after successful login
-    } else {
-      setMessage("Login failed. Please check your credentials.");
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          setMessage("بيانات تسجيل الدخول غير صحيحة. يرجى التحقق من البريد الإلكتروني وكلمة المرور.");
+        } else {
+          setMessage(`خطأ في تسجيل الدخول: ${error.message}`);
+        }
+      } else if (data.user) {
+        setMessage("");
+        router.push("/dashboard");
+      } else {
+        setMessage("فشل تسجيل الدخول. يرجى التحقق من بياناتك.");
+      }
+    } catch (err: any) {
+      setMessage("حدث خطأ غير متوقع أثناء عملية تسجيل الدخول.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
+  };
+
+  const handleOAuthSignIn = async (provider: "google" | "facebook" | "apple") => {
+    setIsLoading(true);
+    setMessage("");
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) {
+        setMessage(`خطأ في المصادقة: ${error.message}`);
+      } else {
+        setMessage("");
+      }
+    } catch (err: any) {
+      setMessage("حدث خطأ غير متوقع أثناء عملية المصادقة.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -44,14 +76,31 @@ const SignInForm: React.FC = () => {
       <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]">
         <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] items-center">
-            <div className="xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1">
+            <div className="xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1 relative overflow-hidden">
               <Image
                 src="/images/sign-in.jpg"
                 alt="sign-in-image"
-                className="rounded-[25px]"
+                className="rounded-[25px] object-cover w-full h-full"
                 width={646}
                 height={804}
               />
+              {/* Overlay for dark gradient effect and text */}
+              <div className="absolute inset-0 rounded-[25px] flex flex-col justify-center items-center text-white p-4"
+                   style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)" }}>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4" style={{ color: 'white' }}>
+                  Welcome back to Furriyadh!
+                </h2>
+                <p className="text-base md:text-lg text-center leading-relaxed" style={{ color: 'white' }}>
+                  Continue your journey with us and unlock the full potential of your business.
+                </p>
+                <div className="flex justify-center mt-4">
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                </div>
+              </div>
             </div>
 
             <div className="xl:ltr:pl-[90px] xl:rtl:pr-[90px] 2xl:ltr:pl-[120px] 2xl:rtl:pr-[120px] order-1 lg:order-2">
@@ -80,10 +129,59 @@ const SignInForm: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between mb-[20px] md:mb-[23px] gap-[12px]">
-                {/* Social sign-in buttons removed */}
+                <div className="grow">
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignIn("google")}
+                    className="block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500"
+                    disabled={isLoading}
+                  >
+                    <Image
+                      src="/images/icons/google.svg"
+                      className="inline-block"
+                      alt="google"
+                      width={25}
+                      height={25}
+                    />
+                  </button>
+                </div>
+
+                <div className="grow">
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignIn("facebook")}
+                    className="block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500"
+                    disabled={isLoading}
+                  >
+                    <Image
+                      src="/images/icons/facebook2.svg"
+                      className="inline-block"
+                      alt="facebook"
+                      width={25}
+                      height={25}
+                    />
+                  </button>
+                </div>
+
+                <div className="grow">
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignIn("apple")}
+                    className="block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500"
+                    disabled={isLoading}
+                  >
+                    <Image
+                      src="/images/icons/apple.svg"
+                      className="inline-block"
+                      alt="apple"
+                      width={25}
+                      height={25}
+                    />
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleSignIn}> {/* Added form tag and onSubmit handler */}
+              <form onSubmit={handleSignIn}>
                 <div className="mb-[15px] relative">
                   <label className="mb-[10px] md:mb-[12px] text-black dark:text-white font-medium block">
                     Email Address
@@ -103,7 +201,7 @@ const SignInForm: React.FC = () => {
                     Password
                   </label>
                   <input
-                    type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                    type={showPassword ? "text" : "password"}
                     className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
                     id="password"
                     placeholder="Type password"
@@ -115,13 +213,13 @@ const SignInForm: React.FC = () => {
                     className="absolute text-lg ltr:right-[20px] rtl:left-[20px] bottom-[12px] transition-all hover:text-primary-500"
                     id="toggleButton"
                     type="button"
-                    onClick={togglePasswordVisibility} // Add onClick handler
+                    onClick={togglePasswordVisibility}
                   >
-                    <i className={showPassword ? "ri-eye-line" : "ri-eye-off-line"}></i> {/* Toggle icon */}
+                    <i className={showPassword ? "ri-eye-line" : "ri-eye-off-line"}></i>
                   </button>
                 </div>
 
-                {message && <p className="text-center mt-4 text-sm text-gray-600">{message}</p>} {/* Display messages */}
+                {message && <p className="text-center mt-4 text-sm text-gray-600">{message}</p>}
 
                 <Link
                   href="/authentication/forgot-password"
@@ -133,7 +231,7 @@ const SignInForm: React.FC = () => {
                 <button
                   type="submit"
                   className="md:text-md block w-full text-center transition-all rounded-md font-medium mt-[20px] md:mt-[25px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
-                  disabled={isLoading} // Disable button when loading
+                  disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-[5px]">
                     <i className="material-symbols-outlined">login</i>
@@ -143,7 +241,7 @@ const SignInForm: React.FC = () => {
               </form>
 
               <p className="mt-[15px] md:mt-[20px]">
-                Don’t have an account.{" "}
+                Don\"t have an account.{" "}
                 <Link
                   href="/authentication/sign-up"
                   className="text-primary-500 transition-all font-semibold hover:underline"

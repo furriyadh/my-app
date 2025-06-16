@@ -20,43 +20,75 @@ const SignUpForm: React.FC = () => {
     setMessage("");
     setIsLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName }, // Store full name in user metadata
-      },
-    });
+    try {
+      // First, try to sign in the user. If successful, it means the user already exists.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
-    } else if (data.user) {
-      setMessage("Registration successful! Redirecting...");
-      // Redirect to dashboard after successful registration
-      router.push("/dashboard");
-    } else {
-      setMessage("Registration initiated. Please check your email for confirmation.");
-      // In some Supabase configurations, email confirmation is required before user is active
+      if (!signInError) {
+        // If sign-in was successful, the user already exists and is now logged in.
+        setMessage("");
+        router.push("/dashboard");
+        return;
+      } else if (signInError.message.includes("Invalid login credentials")) {
+        // If sign-in failed due to invalid credentials, it likely means the user exists
+        // but the provided password for sign-up doesn\"t match their existing account.
+        setMessage("المستخدم موجود بالفعل. يرجى تسجيل الدخول.");
+        setIsLoading(false);
+        return;
+      }
+
+      // If sign-in failed for other reasons (e.g., user not found), proceed with sign-up attempt.
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName }, // Store full name in user metadata
+        },
+      });
+
+      if (signUpError) {
+        setMessage(`خطأ في التسجيل: ${signUpError.message}`);
+      } else if (data.user) {
+        // Check if email confirmation is required
+        if (data.user.identities && data.user.identities.length === 0) {
+          setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
+        } else {
+          setMessage("Registration successful! Redirecting...");
+          router.push("/dashboard");
+        }
+      } else {
+        setMessage("Registration initiated. Please check your email for confirmation.");
+      }
+    } catch (err: any) {
+      setMessage("حدث خطأ غير متوقع أثناء عملية التسجيل.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple') => {
+  const handleOAuthSignIn = async (provider: "google" | "facebook" | "apple") => {
     setIsLoading(true);
     setMessage("");
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: provider,
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`, // Redirect after successful OAuth
-      },
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`, // Redirect after successful OAuth
+        },
+      });
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+      } else {
+        setMessage("");
+      }
+    } catch (err: any) {
+      setMessage("حدث خطأ غير متوقع أثناء عملية المصادقة.");
+    } finally {
       setIsLoading(false);
-    } else {
-      // Supabase will handle the redirect, so no need for router.push here
-      // The user will be redirected to the OAuth provider, then back to redirectTo URL
     }
   };
 
@@ -69,14 +101,31 @@ const SignUpForm: React.FC = () => {
       <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[120px] xl:py-[135px]">
         <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] items-center">
-            <div className="xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1">
+            <div className="xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1 relative overflow-hidden">
               <Image
                 src="/images/sign-up.jpg"
                 alt="sign-up-image"
-                className="rounded-[25px]"
+                className="rounded-[25px] object-cover w-full h-full"
                 width={646}
                 height={804}
               />
+              {/* Overlay for dark gradient effect and text */}
+              <div className="absolute inset-0 rounded-[25px] flex flex-col justify-center items-center text-white p-4"
+                   style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)' }}>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4" style={{ color: 'white' }}>
+                  20,000+ small businesses & entrepreneurs are growing with Furriyadh.
+                </h2>
+                <p className="text-base md:text-lg text-center leading-relaxed" style={{ color: 'white' }}>
+                  Furriyadh is like a digital marketing guru sitting near me and saving my time by doing all the manual work!
+                </p>
+                <div className="flex justify-center" style={{ marginTop: '5px' }}>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                  <i className="material-symbols-outlined text-yellow-400">star</i>
+                </div>
+              </div>
             </div>
 
             <div className="xl:ltr:pl-[90px] xl:rtl:pr-[90px] 2xl:ltr:pl-[120px] 2xl:rtl:pr-[120px] order-1 lg:order-2">
@@ -108,7 +157,7 @@ const SignUpForm: React.FC = () => {
                 <div className="grow">
                   <button
                     type="button"
-                    onClick={() => handleOAuthSignIn('google')}
+                    onClick={() => handleOAuthSignIn("google")}
                     className="block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500"
                   >
                     <Image
@@ -124,7 +173,7 @@ const SignUpForm: React.FC = () => {
                 <div className="grow">
                   <button
                     type="button"
-                    onClick={() => handleOAuthSignIn('facebook')}
+                    onClick={() => handleOAuthSignIn("facebook")}
                     className="block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500"
                   >
                     <Image
@@ -140,7 +189,7 @@ const SignUpForm: React.FC = () => {
                 <div className="grow">
                   <button
                     type="button"
-                    onClick={() => handleOAuthSignIn('apple')}
+                    onClick={() => handleOAuthSignIn("apple")}
                     className="block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500"
                   >
                     <Image
@@ -150,7 +199,7 @@ const SignUpForm: React.FC = () => {
                       width={25}
                       height={25}
                     />
-                  </button>
+                    </button>
                 </div>
               </div>
 

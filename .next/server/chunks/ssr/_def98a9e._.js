@@ -65,7 +65,11 @@ __turbopack_context__.n(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$c
 
 var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
 {
-}}),
+const e = new Error(`Could not parse module '[project]/src/components/Authentication/SignUpForm.tsx'
+
+Unterminated string constant`);
+e.code = 'MODULE_UNPARSEABLE';
+throw e;}}),
 "[project]/src/app/authentication/sign-up/page.tsx [app-rsc] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
 
