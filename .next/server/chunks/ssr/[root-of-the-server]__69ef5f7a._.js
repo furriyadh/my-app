@@ -201,42 +201,72 @@ const SignUpForm = ()=>{
         e.preventDefault();
         setMessage("");
         setIsLoading(true);
-        const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: fullName
-                }
+        try {
+            // First, try to sign in the user. If successful, it means the user already exists.
+            const { error: signInError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].auth.signInWithPassword({
+                email,
+                password
+            });
+            if (!signInError) {
+                // If sign-in was successful, the user already exists and is now logged in.
+                setMessage("");
+                router.push("/dashboard");
+                return;
+            } else if (signInError.message.includes("Invalid login credentials")) {
+                // If sign-in failed due to invalid credentials, it likely means the user exists
+                // but the provided password for sign-up doesn\"t match their existing account.
+                setMessage("المستخدم موجود بالفعل. يرجى تسجيل الدخول.");
+                setIsLoading(false);
+                return;
             }
-        });
-        if (error) {
-            setMessage(`Error: ${error.message}`);
-        } else if (data.user) {
-            setMessage("Registration successful! Redirecting...");
-            // Redirect to dashboard after successful registration
-            router.push("/dashboard");
-        } else {
-            setMessage("Registration initiated. Please check your email for confirmation.");
-        // In some Supabase configurations, email confirmation is required before user is active
+            // If sign-in failed for other reasons (e.g., user not found), proceed with sign-up attempt.
+            const { data, error: signUpError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName
+                    }
+                }
+            });
+            if (signUpError) {
+                setMessage(`خطأ في التسجيل: ${signUpError.message}`);
+            } else if (data.user) {
+                // Check if email confirmation is required
+                if (data.user.identities && data.user.identities.length === 0) {
+                    setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
+                } else {
+                    setMessage("Registration successful! Redirecting...");
+                    router.push("/dashboard");
+                }
+            } else {
+                setMessage("Registration initiated. Please check your email for confirmation.");
+            }
+        } catch (err) {
+            setMessage("حدث خطأ غير متوقع أثناء عملية التسجيل.");
+        } finally{
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
     const handleOAuthSignIn = async (provider)=>{
         setIsLoading(true);
         setMessage("");
-        const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].auth.signInWithOAuth({
-            provider: provider,
-            options: {
-                redirectTo: `${window.location.origin}/dashboard`
+        try {
+            const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].auth.signInWithOAuth({
+                provider: provider,
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`
+                }
+            });
+            if (error) {
+                setMessage(`Error: ${error.message}`);
+            } else {
+                setMessage("");
             }
-        });
-        if (error) {
-            setMessage(`Error: ${error.message}`);
+        } catch (err) {
+            setMessage("حدث خطأ غير متوقع أثناء عملية المصادقة.");
+        } finally{
             setIsLoading(false);
-        } else {
-        // Supabase will handle the redirect, so no need for router.push here
-        // The user will be redirected to the OAuth provider, then back to redirectTo URL
         }
     };
     const togglePasswordVisibility = ()=>{
@@ -251,21 +281,109 @@ const SignUpForm = ()=>{
                     className: "grid grid-cols-1 lg:grid-cols-2 gap-[25px] items-center",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1",
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                src: "/images/sign-up.jpg",
-                                alt: "sign-up-image",
-                                className: "rounded-[25px]",
-                                width: 646,
-                                height: 804
-                            }, void 0, false, {
-                                fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                lineNumber: 73,
-                                columnNumber: 15
-                            }, this)
-                        }, void 0, false, {
+                            className: "xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1 relative overflow-hidden",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
+                                    src: "/images/sign-up.jpg",
+                                    alt: "sign-up-image",
+                                    className: "rounded-[25px] object-cover w-full h-full",
+                                    width: 646,
+                                    height: 804
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                    lineNumber: 105,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "absolute inset-0 rounded-[25px] flex flex-col justify-center items-center text-white p-4",
+                                    style: {
+                                        background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)'
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                            className: "text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4",
+                                            style: {
+                                                color: 'white'
+                                            },
+                                            children: "20,000+ small businesses & entrepreneurs are growing with Furriyadh."
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                            lineNumber: 115,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-base md:text-lg text-center leading-relaxed",
+                                            style: {
+                                                color: 'white'
+                                            },
+                                            children: "Furriyadh is like a digital marketing guru sitting near me and saving my time by doing all the manual work!"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                            lineNumber: 118,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex justify-center",
+                                            style: {
+                                                marginTop: '5px'
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
+                                                    className: "material-symbols-outlined text-yellow-400",
+                                                    children: "star"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                                    lineNumber: 122,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
+                                                    className: "material-symbols-outlined text-yellow-400",
+                                                    children: "star"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                                    lineNumber: 123,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
+                                                    className: "material-symbols-outlined text-yellow-400",
+                                                    children: "star"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                                    lineNumber: 124,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
+                                                    className: "material-symbols-outlined text-yellow-400",
+                                                    children: "star"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                                    lineNumber: 125,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
+                                                    className: "material-symbols-outlined text-yellow-400",
+                                                    children: "star"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                                    lineNumber: 126,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                            lineNumber: 121,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
+                                    lineNumber: 113,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                            lineNumber: 72,
+                            lineNumber: 104,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -279,7 +397,7 @@ const SignUpForm = ()=>{
                                     height: 38
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 83,
+                                    lineNumber: 132,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -290,7 +408,7 @@ const SignUpForm = ()=>{
                                     height: 38
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 90,
+                                    lineNumber: 139,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -301,7 +419,7 @@ const SignUpForm = ()=>{
                                             children: "Sign Up to Furriyadh Dashboard"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 99,
+                                            lineNumber: 148,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -309,13 +427,13 @@ const SignUpForm = ()=>{
                                             children: "Sign Up with social account or enter your details"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 102,
+                                            lineNumber: 151,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 98,
+                                    lineNumber: 147,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -325,7 +443,7 @@ const SignUpForm = ()=>{
                                             className: "grow",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                 type: "button",
-                                                onClick: ()=>handleOAuthSignIn('google'),
+                                                onClick: ()=>handleOAuthSignIn("google"),
                                                 className: "block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                                                     src: "/images/icons/google.svg",
@@ -335,24 +453,24 @@ const SignUpForm = ()=>{
                                                     height: 25
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 114,
+                                                    lineNumber: 163,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                lineNumber: 109,
+                                                lineNumber: 158,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 108,
+                                            lineNumber: 157,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: "grow",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                 type: "button",
-                                                onClick: ()=>handleOAuthSignIn('facebook'),
+                                                onClick: ()=>handleOAuthSignIn("facebook"),
                                                 className: "block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                                                     src: "/images/icons/facebook2.svg",
@@ -362,24 +480,24 @@ const SignUpForm = ()=>{
                                                     height: 25
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 130,
+                                                    lineNumber: 179,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                lineNumber: 125,
+                                                lineNumber: 174,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 124,
+                                            lineNumber: 173,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: "grow",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                 type: "button",
-                                                onClick: ()=>handleOAuthSignIn('apple'),
+                                                onClick: ()=>handleOAuthSignIn("apple"),
                                                 className: "block text-center w-full rounded-md transition-all py-[8px] md:py-[10.5px] px-[15px] md:px-[25px] text-black dark:text-white border border-[#D6DAE1] bg-white dark:bg-[#0a0e19] dark:border-[#172036] shadow-sm hover:border-primary-500",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                                                     src: "/images/icons/apple.svg",
@@ -389,23 +507,23 @@ const SignUpForm = ()=>{
                                                     height: 25
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 146,
+                                                    lineNumber: 195,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                lineNumber: 141,
+                                                lineNumber: 190,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 140,
+                                            lineNumber: 189,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 156,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -420,7 +538,7 @@ const SignUpForm = ()=>{
                                                     children: "Full Name"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 159,
+                                                    lineNumber: 208,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -432,13 +550,13 @@ const SignUpForm = ()=>{
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 162,
+                                                    lineNumber: 211,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 158,
+                                            lineNumber: 207,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -449,7 +567,7 @@ const SignUpForm = ()=>{
                                                     children: "Email Address"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 173,
+                                                    lineNumber: 222,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -462,13 +580,13 @@ const SignUpForm = ()=>{
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 176,
+                                                    lineNumber: 225,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 172,
+                                            lineNumber: 221,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -480,7 +598,7 @@ const SignUpForm = ()=>{
                                                     children: "Password"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 188,
+                                                    lineNumber: 237,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -493,7 +611,7 @@ const SignUpForm = ()=>{
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 191,
+                                                    lineNumber: 240,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -506,20 +624,20 @@ const SignUpForm = ()=>{
                                                             className: showPassword ? "ri-eye-line" : "ri-eye-off-line"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                            lineNumber: 206,
+                                                            lineNumber: 255,
                                                             columnNumber: 21
                                                         }, this),
                                                         " "
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                    lineNumber: 200,
+                                                    lineNumber: 249,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 187,
+                                            lineNumber: 236,
                                             columnNumber: 17
                                         }, this),
                                         message && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -527,7 +645,7 @@ const SignUpForm = ()=>{
                                             children: message
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 210,
+                                            lineNumber: 259,
                                             columnNumber: 29
                                         }, this),
                                         " ",
@@ -543,7 +661,7 @@ const SignUpForm = ()=>{
                                                         children: "person_4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                        lineNumber: 218,
+                                                        lineNumber: 267,
                                                         columnNumber: 21
                                                     }, this),
                                                     isLoading ? "Signing Up..." : "Sign Up",
@@ -551,18 +669,18 @@ const SignUpForm = ()=>{
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                                lineNumber: 217,
+                                                lineNumber: 266,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 212,
+                                            lineNumber: 261,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 157,
+                                    lineNumber: 206,
                                     columnNumber: 15
                                 }, this),
                                 " ",
@@ -577,7 +695,7 @@ const SignUpForm = ()=>{
                                             children: "Terms of Service"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 226,
+                                            lineNumber: 275,
                                             columnNumber: 17
                                         }, this),
                                         " ",
@@ -589,13 +707,13 @@ const SignUpForm = ()=>{
                                             children: "Privacy Policy"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 233,
+                                            lineNumber: 282,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 224,
+                                    lineNumber: 273,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -609,35 +727,35 @@ const SignUpForm = ()=>{
                                             children: "Sign In"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                            lineNumber: 243,
+                                            lineNumber: 292,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                                    lineNumber: 241,
+                                    lineNumber: 290,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                            lineNumber: 82,
+                            lineNumber: 131,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                    lineNumber: 71,
+                    lineNumber: 103,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-                lineNumber: 70,
+                lineNumber: 102,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/Authentication/SignUpForm.tsx",
-            lineNumber: 69,
+            lineNumber: 101,
             columnNumber: 7
         }, this)
     }, void 0, false);
