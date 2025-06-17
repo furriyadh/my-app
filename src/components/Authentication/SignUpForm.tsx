@@ -12,7 +12,7 @@ const SignUpForm: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -31,31 +31,13 @@ const SignUpForm: React.FC = () => {
 
       if (signUpError) {
         if (signUpError.message.includes("User already registered")) {
-          // User already exists, try to sign them in
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (!signInError) {
-            setMessage("المستخدم موجود بالفعل وتم تسجيل الدخول بنجاح.");
-            router.push("/dashboard");
-          } else {
-            setMessage("المستخدم موجود بالفعل ولكن كلمة المرور غير صحيحة. يرجى تسجيل الدخول بكلمة المرور الصحيحة.");
-          }
+          setMessage("هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول أو التحقق من بريدك الإلكتروني لتأكيد حسابك.");
         } else {
           setMessage(`خطأ في التسجيل: ${signUpError.message}`);
         }
       } else if (data.user) {
-        // تم التسجيل بنجاح، لا حاجة لإنشاء ملف شخصي هنا، سيتم التعامل معه بواسطة UserService
-        if (data.user.identities && data.user.identities.length === 0) {
-          setMessage(
-            "تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك."
-          );
-        } else {
-          setMessage("تم التسجيل بنجاح! يتم التوجيه...");
-          router.push("/dashboard");
-        }
+        // لا نقوم بتسجيل الدخول التلقائي، فقط نطلب من المستخدم تأكيد البريد الإلكتروني
+        setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
       } else {
         setMessage("بدأت عملية التسجيل. يرجى التحقق من بريدك الإلكتروني للتأكيد.");
       }
@@ -73,7 +55,7 @@ const SignUpForm: React.FC = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`, // Redirect after successful OAuth
+          redirectTo: `${window.location.origin}/dashboard`,
         },
       });
 
@@ -106,7 +88,6 @@ const SignUpForm: React.FC = () => {
                 width={646}
                 height={804}
               />
-              {/* Overlay for dark gradient effect and text */}
               <div className="absolute inset-0 rounded-[25px] flex flex-col justify-center items-center text-white p-4"
                    style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)' }}>
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4" style={{ color: 'white' }}>
@@ -200,7 +181,7 @@ const SignUpForm: React.FC = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleSignUp}> {/* Added form tag and onSubmit handler */}
+              <form onSubmit={handleSignUp}>
                 <div className="mb-[15px] relative">
                   <label className="mb-[10px] md:mb-[12px] text-black dark:text-white font-medium block">
                     Full Name
@@ -220,7 +201,6 @@ const SignUpForm: React.FC = () => {
                     Email Address
                   </label>
                   <input
-                    // Changed type to email
                     type="email"
                     className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
                     placeholder="example@gmail.com"
@@ -235,7 +215,7 @@ const SignUpForm: React.FC = () => {
                     Password
                   </label>
                   <input
-                    type={showPassword ? "text" : "password"} // Toggle type based on showPassword state
+                    type={showPassword ? "text" : "password"}
                     className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
                     id="password"
                     placeholder="Type password"
@@ -247,25 +227,25 @@ const SignUpForm: React.FC = () => {
                     className="absolute text-lg ltr:right-[20px] rtl:left-[20px] bottom-[12px] transition-all hover:text-primary-500"
                     id="toggleButton"
                     type="button"
-                    onClick={togglePasswordVisibility} // Add onClick handler
+                    onClick={togglePasswordVisibility}
                   >
-                    <i className={showPassword ? "ri-eye-line" : "ri-eye-off-line"}></i> {/* Toggle icon */}
+                    <i className={showPassword ? "ri-eye-line" : "ri-eye-off-line"}></i>
                   </button>
                 </div>
 
-                {message && <p className="text-center mt-4 text-sm text-gray-600">{message}</p>} {/* Display messages */}
+                {message && <p className="text-center mt-4 text-sm text-gray-600">{message}</p>}
 
                 <button
                   type="submit"
                   className="md:text-md block w-full text-center transition-all rounded-md font-medium my-[20px] md:my-[25px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
-                  disabled={isLoading} // Disable button when loading
+                  disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-[5px]">
                     <i className="material-symbols-outlined">person_4</i>
-                    {isLoading ? "Signing Up..." : "Sign Up"} {/* Change text when loading */}
+                    {isLoading ? "Signing Up..." : "Sign Up"}
                   </span>
                 </button>
-              </form> {/* Closed form tag */}
+              </form>
 
               <p className="!leading-[1.6]">
                 By confirming your email, you agree to our{" "}
