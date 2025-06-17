@@ -55,7 +55,7 @@ const ConfirmEmailContent: React.FC = () => {
               </span>
 
               <Link
-                href="/dashboard/ecommerce/"
+                href="/dashboard/"
                 className="md:text-md block w-full text-center transition-all rounded-md font-medium mt-[20px] md:mt-[25px] lg:mt-[30px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
               >
                 <span className="flex items-center justify-center gap-[5px]">
