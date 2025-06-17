@@ -1,11 +1,9 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/authentication/logout/page": "app/authentication/logout/page.js",
   "/authentication/sign-in/page": "app/authentication/sign-in/page.js",
   "/authentication/sign-up/page": "app/authentication/sign-up/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/front-pages/features/page": "app/front-pages/features/page.js",
   "/page": "app/page.js",
   "/settings/page": "app/settings/page.js"
 }

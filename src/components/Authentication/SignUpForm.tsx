@@ -21,46 +21,43 @@ const SignUpForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // First, try to sign in the user. If successful, it means the user already exists.
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (!signInError) {
-        // If sign-in was successful, the user already exists and is now logged in.
-        setMessage("");
-        router.push("/dashboard");
-        return;
-      } else if (signInError.message.includes("Invalid login credentials")) {
-        // If sign-in failed due to invalid credentials, it likely means the user exists
-        // but the provided password for sign-up doesn\"t match their existing account.
-        setMessage("المستخدم موجود بالفعل. يرجى تسجيل الدخول.");
-        setIsLoading(false);
-        return;
-      }
-
-      // If sign-in failed for other reasons (e.g., user not found), proceed with sign-up attempt.
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: fullName }, // Store full name in user metadata
+          data: { full_name: fullName },
         },
       });
 
       if (signUpError) {
-        setMessage(`خطأ في التسجيل: ${signUpError.message}`);
-      } else if (data.user) {
-        // Check if email confirmation is required
-        if (data.user.identities && data.user.identities.length === 0) {
-          setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
+        if (signUpError.message.includes("User already registered")) {
+          // User already exists, try to sign them in
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (!signInError) {
+            setMessage("المستخدم موجود بالفعل وتم تسجيل الدخول بنجاح.");
+            router.push("/dashboard");
+          } else {
+            setMessage("المستخدم موجود بالفعل ولكن كلمة المرور غير صحيحة. يرجى تسجيل الدخول بكلمة المرور الصحيحة.");
+          }
         } else {
-          setMessage("Registration successful! Redirecting...");
+          setMessage(`خطأ في التسجيل: ${signUpError.message}`);
+        }
+      } else if (data.user) {
+        // تم التسجيل بنجاح، لا حاجة لإنشاء ملف شخصي هنا، سيتم التعامل معه بواسطة UserService
+        if (data.user.identities && data.user.identities.length === 0) {
+          setMessage(
+            "تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك."
+          );
+        } else {
+          setMessage("تم التسجيل بنجاح! يتم التوجيه...");
           router.push("/dashboard");
         }
       } else {
-        setMessage("Registration initiated. Please check your email for confirmation.");
+        setMessage("بدأت عملية التسجيل. يرجى التحقق من بريدك الإلكتروني للتأكيد.");
       }
     } catch (err: any) {
       setMessage("حدث خطأ غير متوقع أثناء عملية التسجيل.");

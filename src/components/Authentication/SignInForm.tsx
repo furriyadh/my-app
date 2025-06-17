@@ -28,6 +28,8 @@ const SignInForm: React.FC = () => {
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           setMessage("بيانات تسجيل الدخول غير صحيحة. يرجى التحقق من البريد الإلكتروني وكلمة المرور.");
+        } else if (error.message.includes("Email not confirmed")) {
+          setMessage("البريد الإلكتروني غير مؤكد. يرجى التحقق من بريدك الوارد لتأكيد حسابك.");
         } else {
           setMessage(`خطأ في تسجيل الدخول: ${error.message}`);
         }
