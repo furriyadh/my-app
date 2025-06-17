@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import SubscriptionsComponent from "@/components/Dashboard/Subscriptions";
 import CreditsComponent from "@/components/Dashboard/Credits";
 import PaymentsComponent from "@/components/Dashboard/Payments"; // Import PaymentsComponent
@@ -9,6 +9,15 @@ import PaymentsComponent from "@/components/Dashboard/Payments"; // Import Payme
 const DashboardPage: React.FC = () => {
   const searchParams = useSearchParams();
   const section = searchParams.get("section") || "overview";
+  const router = useRouter();
+
+  useEffect(() => {
+    // تحقق مما إذا كان هناك أي معلمات في عنوان URL بعد #
+    if (window.location.hash) {
+      // قم بإزالة الجزء الخاص بالـ hash من عنوان URL
+      router.replace(window.location.pathname, undefined, { shallow: true });
+    }
+  }, [router]);
 
   const renderSection = () => {
     switch (section) {

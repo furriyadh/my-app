@@ -5,8 +5,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { UserService } from '@/services/userService';
-import { UserProfile } from '@/types/user';
+import { UserService } from "@/services/userService";
+import { UserProfile } from "@/types/user";
+import { supabase } from "@/utils/supabase/client"; // استيراد supabase
 
 const AccountSettingsForm: React.FC = () => {
   // حالة لتخزين بيانات المستخدم
@@ -27,7 +28,7 @@ const AccountSettingsForm: React.FC = () => {
     facebook_url: "",
     twitter_url: "",
     linkedin_url: "",
-    youtube_url: ""
+    youtube_url: "",
   });
 
   // حالات التحكم
@@ -40,37 +41,56 @@ const AccountSettingsForm: React.FC = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // جلب بيانات المستخدم عند تحميل المكون
+  // جلب بيانات المستخدم عند تحميل المكون أو تغيير حالة المصادقة
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const result = await UserService.getCurrentUserProfile();
-        
+        console.log("Fetch User Data Result:", result); // سجل تصحيح
+
         if (result.error) {
           setError(result.error);
         } else if (result.data) {
           setUserData(result.data);
+          console.log("User Data after setting state:", result.data); // سجل تصحيح
         }
       } catch (err) {
-        setError('حدث خطأ غير متوقع أثناء جلب البيانات');
+        setError("حدث خطأ غير متوقع أثناء جلب البيانات");
+        console.error("Error fetching user data:", err); // سجل تصحيح
       } finally {
         setLoading(false);
       }
     };
 
+    // جلب البيانات عند تحميل المكون لأول مرة
     fetchUserData();
-  }, []);
+
+    // الاستماع لتغييرات حالة المصادقة
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+          console.log("Auth state changed:", event, session); // سجل تصحيح
+          fetchUserData(); // إعادة جلب البيانات عند تسجيل الدخول أو الخروج
+        }
+      }
+    );
+
+    // تنظيف المستمع عند إلغاء تحميل المكون
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []); // لا توجد تبعيات هنا لأن المستمع يتعامل مع التغييرات
 
   // دالة لتحديث البيانات
   const handleInputChange = (field: keyof UserProfile, value: string) => {
-    setUserData(prev => ({
+    setUserData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // إخفاء رسائل النجاح والخطأ عند التعديل
     if (successMessage) setSuccessMessage(null);
     if (error) setError(null);
@@ -83,48 +103,62 @@ const AccountSettingsForm: React.FC = () => {
       setError(null);
       setSuccessMessage(null);
 
-      const result = await UserService.updateUserProfile(userData);
-      
+      // معالجة حقل تاريخ الميلاد: إذا كان فارغًا، أرسل null بدلاً من سلسلة فارغة
+      const dataToSave = {
+        ...userData,
+        date_of_birth: userData.date_of_birth === "" ? null : userData.date_of_birth,
+      };
+      console.log("Data to Save:", dataToSave); // سجل تصحيح
+
+      const result = await UserService.updateUserProfile(dataToSave);
+      console.log("Update User Profile Result:", result); // سجل تصحيح
+
       if (result.error) {
         setError(result.error);
       } else {
-        setSuccessMessage('تم حفظ التغييرات بنجاح!');
+        setSuccessMessage("تم حفظ التغييرات بنجاح!");
         if (result.data) {
           setUserData(result.data);
+          console.log("User Data after update and setting state:", result.data);
         }
       }
     } catch (err) {
-      setError('حدث خطأ غير متوقع أثناء حفظ التغييرات');
+      setError("حدث خطأ غير متوقع أثناء حفظ التغييرات");
+      console.error("Error saving user data:", err); // سجل تصحيح
     } finally {
       setSaving(false);
     }
   };
 
   // دالة لرفع الصورة
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      
+
       try {
         setUploadingImage(true);
         setError(null);
 
         const result = await UserService.uploadProfileImage(file);
-        
+        console.log("Upload Image Result:", result); // سجل تصحيح
+
         if (result.error) {
           setError(result.error);
         } else if (result.url) {
           // تحديث رابط الصورة في البيانات
           const updatedData = { ...userData, profile_image_url: result.url };
           setUserData(updatedData);
-          
+
           // حفظ رابط الصورة في قاعدة البيانات
           await UserService.updateUserProfile({ profile_image_url: result.url });
-          
-          setSuccessMessage('تم رفع الصورة بنجاح!');
+
+          setSuccessMessage("تم رفع الصورة بنجاح!");
         }
       } catch (err) {
-        setError('حدث خطأ أثناء رفع الصورة');
+        setError("حدث خطأ أثناء رفع الصورة");
+        console.error("Error uploading image:", err); // سجل تصحيح
       } finally {
         setUploadingImage(false);
       }
@@ -161,7 +195,7 @@ const AccountSettingsForm: React.FC = () => {
             <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
-        
+
         {successMessage && (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4 mb-4">
             <p className="text-green-600 dark:text-green-400">{successMessage}</p>
@@ -175,78 +209,78 @@ const AccountSettingsForm: React.FC = () => {
 
         <div className="sm:grid sm:grid-cols-2 sm:gap-[25px]">
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               First Name
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.first_name}
-              onChange={(e) => handleInputChange('first_name', e.target.value)}
+              onChange={(e) => handleInputChange("first_name", e.target.value)}
               placeholder="أدخل الاسم الأول"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Last Name
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.last_name}
-              onChange={(e) => handleInputChange('last_name', e.target.value)}
+              onChange={(e) => handleInputChange("last_name", e.target.value)}
               placeholder="أدخل اسم العائلة"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Email Address
             </label>
             <input
               type="email"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="أدخل البريد الإلكتروني"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Phone Number
             </label>
             <input
               type="tel"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
               placeholder="أدخل رقم الهاتف"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Address
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.address}
-              onChange={(e) => handleInputChange('address', e.target.value)}
+              onChange={(e) => handleInputChange("address", e.target.value)}
               placeholder="أدخل العنوان"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Country
             </label>
-            <select 
+            <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.country}
-              onChange={(e) => handleInputChange('country', e.target.value)}
+              onChange={(e) => handleInputChange("country", e.target.value)}
             >
               <option value="">Select</option>
               <option value="saudi-arabia">Saudi Arabia</option>
@@ -275,25 +309,25 @@ const AccountSettingsForm: React.FC = () => {
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Date Of Birth
             </label>
             <input
               type="date"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
-              value={userData.date_of_birth}
-              onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+              value={userData.date_of_birth || ""}
+              onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Gender
             </label>
-            <select 
+            <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.gender}
-              onChange={(e) => handleInputChange('gender', e.target.value)}
+              onChange={(e) => handleInputChange("gender", e.target.value)}
             >
               <option value="">Select</option>
               <option value="male">Male</option>
@@ -303,13 +337,13 @@ const AccountSettingsForm: React.FC = () => {
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Your Skills
             </label>
-            <select 
+            <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.skills}
-              onChange={(e) => handleInputChange('skills', e.target.value)}
+              onChange={(e) => handleInputChange("skills", e.target.value)}
             >
               <option value="">Select</option>
               <option value="leadership">Leadership</option>
@@ -330,13 +364,13 @@ const AccountSettingsForm: React.FC = () => {
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Your Profession
             </label>
-            <select 
+            <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.profession}
-              onChange={(e) => handleInputChange('profession', e.target.value)}
+              onChange={(e) => handleInputChange("profession", e.target.value)}
             >
               <option value="">Select</option>
               <option value="software-engineer">Software Engineer</option>
@@ -364,201 +398,111 @@ const AccountSettingsForm: React.FC = () => {
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Company Name
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.company_name}
-              onChange={(e) => handleInputChange('company_name', e.target.value)}
+              onChange={(e) => handleInputChange("company_name", e.target.value)}
               placeholder="أدخل اسم الشركة"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
               Company Website
             </label>
             <input
-              type="url"
+              type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.company_website}
-              onChange={(e) => handleInputChange('company_website', e.target.value)}
-              placeholder="https://example.com"
+              onChange={(e) => handleInputChange("company_website", e.target.value)}
+              placeholder="أدخل موقع الشركة"
             />
           </div>
 
           <div className="sm:col-span-2 mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
-              Add Your Bio
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
+              Bio
             </label>
             <textarea
-              className="h-[140px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] p-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
-              placeholder="اكتب نبذة عن نفسك..."
+              className="min-h-[100px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] py-[15px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.bio}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
+              onChange={(e) => handleInputChange("bio", e.target.value)}
+              placeholder="أدخل نبذة عنك"
             ></textarea>
           </div>
-        </div>
 
-        <h5 className="!text-lg !mb-[6px] !mt-[20px] md:!mt-[25px]">Profile Image</h5>
-        <p className="mb-[20px] md:mb-[25px]">
-          This will be displayed on your profile.
-        </p>
-
-        <div id="fileUploader">
-          <div className="relative flex items-center justify-center overflow-hidden rounded-md py-[88px] px-[20px] border border-gray-200 dark:border-[#172036]">
-            {uploadingImage ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-3"></div>
-                <p>جاري رفع الصورة...</p>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center">
-                <div className="w-[35px] h-[35px] border border-gray-100 dark:border-[#15203c] flex items-center justify-center rounded-md text-primary-500 text-lg ltr:mr-[12px] rtl:ml-[12px]">
-                  <i className="ri-upload-2-line"></i>
-                </div>
-                <p className="leading-[1.5]">
-                  <strong className="text-black dark:text-white">
-                    Click to upload
-                  </strong>
-                  <br /> your profile image
-                </p>
-              </div>
-            )}
-            <input
-              type="file"
-              id="fileInput"
-              accept="image/*"
-              className="absolute top-0 left-0 right-0 bottom-0 rounded-md z-[1] opacity-0 cursor-pointer"
-              onChange={handleFileChange}
-              disabled={uploadingImage}
-            />
-          </div>
-
-          {/* عرض الصورة الحالية */}
-          {userData.profile_image_url && (
-            <div className="mt-[10px]">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">الصورة الحالية:</p>
-              <div className="relative w-[100px] h-[100px]">
-                <Image
-                  src={userData.profile_image_url}
-                  alt="profile-image"
-                  width={100}
-                  height={100}
-                  className="rounded-md object-cover"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Image Previews */}
-          <div className="mt-[10px] flex flex-wrap gap-2">
-            {selectedImages.map((image, index) => (
-              <div key={index} className="relative w-[50px] h-[50px]">
-                <Image
-                  src={URL.createObjectURL(image)}
-                  alt="product-preview"
-                  width={50}
-                  height={50}
-                  className="rounded-md object-cover"
-                />
-                <button
-                  type="button"
-                  className="absolute top-[-5px] right-[-5px] bg-orange-500 text-white w-[20px] h-[20px] flex items-center justify-center rounded-full text-xs rtl:right-auto rtl:left-[-5px]"
-                  onClick={() => handleRemoveImage(index)}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <h5 className="!text-lg !mb-[20px] !mt-[20px] md:!mt-[25px]">
-          Social Media Profiles
-        </h5>
-        <div className="sm:grid sm:grid-cols-2 sm:gap-[25px]">
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
-              Facebook
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
+              Facebook URL
             </label>
             <input
-              type="url"
+              type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.facebook_url}
-              onChange={(e) => handleInputChange('facebook_url', e.target.value)}
-              placeholder="https://www.facebook.com/username"
+              onChange={(e) => handleInputChange("facebook_url", e.target.value)}
+              placeholder="أدخل رابط فيسبوك"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
-              X (Twitter)
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
+              Twitter URL
             </label>
             <input
-              type="url"
+              type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.twitter_url}
-              onChange={(e) => handleInputChange('twitter_url', e.target.value)}
-              placeholder="https://x.com/username"
+              onChange={(e) => handleInputChange("twitter_url", e.target.value)}
+              placeholder="أدخل رابط تويتر"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
-              LinkedIn
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
+              LinkedIn URL
             </label>
             <input
-              type="url"
+              type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.linkedin_url}
-              onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
-              placeholder="https://www.linkedin.com/in/username"
+              onChange={(e) => handleInputChange("linkedin_url", e.target.value)}
+              placeholder="أدخل رابط لينكد إن"
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
-            <label className="mb-[10px] text-black dark:text-white font-medium block">
-              YouTube
+            <label className="mb-[10px] font-medium block text-black dark:text-white">
+              YouTube URL
             </label>
             <input
-              type="url"
+              type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.youtube_url}
-              onChange={(e) => handleInputChange('youtube_url', e.target.value)}
-              placeholder="https://www.youtube.com/channel/username"
+              onChange={(e) => handleInputChange("youtube_url", e.target.value)}
+              placeholder="أدخل رابط يوتيوب"
             />
           </div>
         </div>
 
-        <div className="mt-[20px] md:mt-[25px]">
+        <div className="mt-[25px] md:mt-[30px] lg:mt-[40px] flex items-center justify-end gap-[15px]">
           <button
             type="button"
-            className="font-medium inline-block transition-all rounded-md md:text-md ltr:mr-[15px] rtl:ml-[15px] py-[10px] md:py-[12px] px-[20px] md:px-[22px] bg-danger-500 text-white hover:bg-danger-400 disabled:opacity-50"
+            className="py-[15px] px-[25px] rounded-md text-black dark:text-white font-semibold text-md transition-all bg-gray-100 dark:bg-[#172036] hover:bg-gray-200 dark:hover:bg-[#1c2742]"
             onClick={handleCancel}
-            disabled={saving}
           >
-            Cancel
+            الغاء
           </button>
-
           <button
-            type="button"
-            className="font-medium inline-block transition-all rounded-md md:text-md py-[10px] md:py-[12px] px-[20px] md:px-[22px] bg-primary-500 text-white hover:bg-primary-400 disabled:opacity-50"
+            type="submit"
+            className="py-[15px] px-[25px] rounded-md text-white font-semibold text-md transition-all bg-primary-500 hover:bg-primary-400"
             onClick={handleSaveChanges}
             disabled={saving}
           >
-            <span className="inline-block relative ltr:pl-[29px] rtl:pr-[29px]">
-              {saving ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2"></div>
-              ) : (
-                <i className="material-symbols-outlined ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2">
-                  check
-                </i>
-              )}
-              {saving ? 'جاري الحفظ...' : 'Update Profile'}
-            </span>
+            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
           </button>
         </div>
       </form>

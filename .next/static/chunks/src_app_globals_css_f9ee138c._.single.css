@@ -1599,6 +1599,10 @@
     max-height: 90vh;
   }
 
+  .min-h-\[100px\] {
+    min-height: 100px;
+  }
+
   .min-h-\[189px\] {
     min-height: 189px;
   }
@@ -1975,6 +1979,10 @@
 
   .resize {
     resize: both;
+  }
+
+  .resize-y {
+    resize: vertical;
   }
 
   .list-disc {
@@ -4245,6 +4253,18 @@
   @media (hover: hover) {
     .hover\:bg-gray-100:hover {
       background-color: var(--color-gray-100);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-gray-200:hover {
+      background-color: var(--color-gray-200);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-gray-300:hover {
+      background-color: var(--color-gray-300);
     }
   }
 
@@ -8720,6 +8740,18 @@
   @media (hover: hover) {
     .dark\:hover\:bg-\[\#0a0e19\]:where([class="dark"], [class="dark"] *):hover {
       background-color: #0a0e19;
+    }
+  }
+
+  @media (hover: hover) {
+    .dark\:hover\:bg-\[\#1c2742\]:where([class="dark"], [class="dark"] *):hover {
+      background-color: #1c2742;
+    }
+  }
+
+  @media (hover: hover) {
+    .dark\:hover\:bg-\[\#212e48\]:where([class="dark"], [class="dark"] *):hover {
+      background-color: #212e48;
     }
   }
 
