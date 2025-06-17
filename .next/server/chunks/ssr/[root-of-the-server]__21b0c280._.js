@@ -143,8 +143,8 @@ class UserService {
                     const newProfile = {
                         user_id: user.id,
                         email: user.email || '',
-                        first_name: '',
-                        last_name: '',
+                        first_name: user.user_metadata?.full_name?.split(" ")[0] || "",
+                        last_name: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
                         phone: '',
                         address: '',
                         country: '',
