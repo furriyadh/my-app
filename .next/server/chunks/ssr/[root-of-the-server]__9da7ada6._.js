@@ -212,7 +212,7 @@ const SignInForm = ()=>{
                     setMessage(`خطأ في تسجيل الدخول: ${error.message}`);
                 }
             } else if (data.user) {
-                setMessage("تم تسجيل الدخول بنجاح! جاري التحويل...");
+                setMessage("");
                 router.push("/dashboard");
             } else {
                 setMessage("فشل تسجيل الدخول. يرجى التحقق من بياناتك.");
@@ -236,7 +236,7 @@ const SignInForm = ()=>{
             if (error) {
                 setMessage(`خطأ في المصادقة: ${error.message}`);
             } else {
-                setMessage("جاري التحويل إلى مزود المصادقة...");
+                setMessage("");
             }
         } catch (err) {
             setMessage("حدث خطأ غير متوقع أثناء عملية المصادقة.");
