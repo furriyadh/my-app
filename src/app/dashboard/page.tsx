@@ -1,66 +1,67 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import AdSpend from "@/components/Dashboard/Marketing/AdSpend";
+import CostPerThousand from "@/components/Dashboard/Marketing/CostPerThousand";
+import CostPerClick from "@/components/Dashboard/Marketing/CostPerClick";
+import ClickThroughRate from "@/components/Dashboard/Marketing/ClickThroughRate";
+import PerformanceOverview from "@/components/Dashboard/Marketing/PerformanceOverview";
+import DownloadMobileApp from "@/components/Dashboard/Marketing/DownloadMobileApp";
+import Highlights from "@/components/Dashboard/Marketing/Highlights";
+import Channels from "@/components/Dashboard/Marketing/Channels";
+import ExternalLinks from "@/components/Dashboard/Marketing/ExternalLinks";
+import InstagramCampaigns from "@/components/Dashboard/Marketing/InstagramCampaigns";
+import Cta from "@/components/Dashboard/Marketing/Cta";
+import InstagramSubscriber from "@/components/Dashboard/Marketing/InstagramSubscriber";
+import Campaigns from "@/components/Dashboard/Marketing/Campaigns";
 
-export default async function DashboardPage() {
-  const supabase = createClient()
-
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
-    redirect('/authentication/sign-in')
-  }
-
+export default function Page() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            مرحباً بك في لوحة التحكم
-          </h1>
-          <div className="space-y-4">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                معلومات المستخدم
-              </h2>
-              <p className="text-blue-800 dark:text-blue-200">
-                <strong>البريد الإلكتروني:</strong> {data.user.email}
-              </p>
-              <p className="text-blue-800 dark:text-blue-200">
-                <strong>معرف المستخدم:</strong> {data.user.id}
-              </p>
-              <p className="text-blue-800 dark:text-blue-200">
-                <strong>تاريخ التسجيل:</strong> {new Date(data.user.created_at).toLocaleDateString('ar-SA')}
-              </p>
-              {data.user.user_metadata?.full_name && (
-                <p className="text-blue-800 dark:text-blue-200">
-                  <strong>الاسم الكامل:</strong> {data.user.user_metadata.full_name}
-                </p>
-              )}
-            </div>
-            
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
-                حالة الجلسة
-              </h2>
-              <p className="text-green-800 dark:text-green-200">
-                ✅ تم تسجيل الدخول بنجاح
-              </p>
-              <p className="text-green-800 dark:text-green-200">
-                🔐 الجلسة نشطة ومحمية
-              </p>
-            </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[25px] mb-[25px]">
+        <AdSpend />
 
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
-                ملاحظة مهمة
-              </h2>
-              <p className="text-yellow-800 dark:text-yellow-200">
-                هذه الصفحة محمية ولا يمكن الوصول إليها إلا بعد تسجيل الدخول. 
-                البيانات المعروضة هنا خاصة بالمستخدم المسجل دخوله حالياً فقط.
-              </p>
-            </div>
+        <CostPerThousand />
+
+        <CostPerClick />
+
+        <ClickThroughRate />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[25px] mb-[25px]">
+        <div className="lg:col-span-2">
+          <PerformanceOverview />
+        </div>
+
+        <div className="lg:col-span-1">
+          <DownloadMobileApp />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[25px] mb-[25px]">
+        <div className="lg:col-span-1">
+          <Highlights />
+
+          <Channels />
+        </div>
+
+        <div className="lg:col-span-2">
+          <Campaigns />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px]">
+            <ExternalLinks />
+
+            <InstagramCampaigns />
           </div>
         </div>
       </div>
-    </div>
-  )
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-[25px] mb-[25px]">
+        <div className="lg:col-span-1">
+          <Cta />
+        </div>
+
+        <div className="lg:col-span-3">
+          <InstagramSubscriber />
+        </div>
+      </div>
+    </>
+  );
 }

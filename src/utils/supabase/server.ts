@@ -1,8 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createClient() { // جعل الدالة async
-  const cookieStore = await cookies() // إضافة await هنا
+export async function createClient() {
+  const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,7 +14,7 @@ export async function createClient() { // جعل الدالة async
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, value, options) // تم تصحيح طريقة الاستدعاء هنا
+            cookieStore.set(name, value, options)
           } catch (error) {
             // The `cookies()` helper can only be called from a Server Component or Server Action.
             // This error is typically caused by an attempt to set a cookie from a Client Component.
@@ -23,7 +23,7 @@ export async function createClient() { // جعل الدالة async
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, '', options) // تم تصحيح طريقة الاستدعاء هنا
+            cookieStore.set(name, '', options)
           } catch (error) {
             // The `cookies()` helper can only be called from a Server Component or Server Action.
             // This error is typically caused by by an attempt to set a cookie from a Client Component.
