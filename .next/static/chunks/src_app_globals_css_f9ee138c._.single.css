@@ -2455,6 +2455,10 @@
     border-color: var(--color-success-500);
   }
 
+  .border-success-600 {
+    border-color: var(--color-success-600);
+  }
+
   .border-warning-200 {
     border-color: var(--color-warning-200);
   }

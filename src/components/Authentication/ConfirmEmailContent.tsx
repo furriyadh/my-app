@@ -1,10 +1,74 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { supabase } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 const ConfirmEmailContent: React.FC = () => {
+  const router = useRouter();
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [message, setMessage] = useState("جاري معالجة تأكيد البريد الإلكتروني...");
+
+  useEffect(() => {
+    const handleEmailConfirmation = async () => {
+      try {
+        // التحقق من وجود access_token في URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (accessToken && refreshToken) {
+          // تعيين الجلسة باستخدام الرموز المميزة
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('خطأ في تعيين الجلسة:', error);
+            setMessage("حدث خطأ أثناء تأكيد البريد الإلكتروني. يرجى المحاولة مرة أخرى.");
+            setIsProcessing(false);
+          } else if (data.session) {
+            setMessage("تم تأكيد البريد الإلكتروني بنجاح! يتم التوجيه إلى لوحة التحكم...");
+            // انتظار قصير قبل التوجيه
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, 2000);
+          }
+        } else {
+          // إذا لم توجد رموز مميزة، فقط اعرض صفحة التأكيد
+          setMessage("تم تأكيد البريد الإلكتروني بنجاح!");
+          setIsProcessing(false);
+        }
+      } catch (error) {
+        console.error('خطأ في معالجة تأكيد البريد الإلكتروني:', error);
+        setMessage("حدث خطأ أثناء تأكيد البريد الإلكتروني. يرجى المحاولة مرة أخرى.");
+        setIsProcessing(false);
+      }
+    };
+
+    // تشغيل معالجة تأكيد البريد الإلكتروني
+    handleEmailConfirmation();
+
+    // الاستماع لتغييرات حالة المصادقة
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          setMessage("تم تأكيد البريد الإلكتروني بنجاح! يتم التوجيه إلى لوحة التحكم...");
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 2000);
+        }
+      }
+    );
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, [router]);
+
   return (
     <>
       <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]">
@@ -40,29 +104,40 @@ const ConfirmEmailContent: React.FC = () => {
                   Welcome back to Furriyadh!
                 </h1>
                 <p className="font-medium leading-[1.5] lg:text-md text-[#445164] dark:text-gray-400">
-                  Your mail is verified! Your account is now safe from unwanted
-                  activities.
+                  {message}
                 </p>
               </div>
 
               <div className="flex items-center justify-center bg-[#f5f7f8] text-success-600 rounded-full w-[120px] h-[120px] dark:bg-[#15203c]">
-                <i className="material-symbols-outlined !text-[55px]">done</i>
+                {isProcessing ? (
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-success-600"></div>
+                ) : (
+                  <i className="material-symbols-outlined !text-[55px]">done</i>
+                )}
               </div>
 
               <span className="block font-medium text-black dark:text-white md:text-md mt-[20px]">
-                Your Email Verified{" "}
-                <span className="text-success-600">Successfully!</span>
+                {isProcessing ? (
+                  "جاري المعالجة..."
+                ) : (
+                  <>
+                    Your Email Verified{" "}
+                    <span className="text-success-600">Successfully!</span>
+                  </>
+                )}
               </span>
 
-              <Link
-                href="/dashboard/"
-                className="md:text-md block w-full text-center transition-all rounded-md font-medium mt-[20px] md:mt-[25px] lg:mt-[30px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
-              >
-                <span className="flex items-center justify-center gap-[5px]">
-                  <i className="material-symbols-outlined">login</i>
-                  Back To Home
-                </span>
-              </Link>
+              {!isProcessing && (
+                <Link
+                  href="/dashboard/"
+                  className="md:text-md block w-full text-center transition-all rounded-md font-medium mt-[20px] md:mt-[25px] lg:mt-[30px] py-[12px] px-[25px] text-white bg-primary-500 hover:bg-primary-400"
+                >
+                  <span className="flex items-center justify-center gap-[5px]">
+                    <i className="material-symbols-outlined">login</i>
+                    Go To Dashboard
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
