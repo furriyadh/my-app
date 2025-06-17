@@ -206,7 +206,6 @@ const AccountSettingsForm: React.FC = () => {
         <p className="mb-[20px] md:mb-[25px]">
           Update your photo and personal details here.
         </p>
-
         <div className="sm:grid sm:grid-cols-2 sm:gap-[25px]">
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">

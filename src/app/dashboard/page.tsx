@@ -1,98 +1,66 @@
-"use client";
+import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import SubscriptionsComponent from "@/components/Dashboard/Subscriptions";
-import CreditsComponent from "@/components/Dashboard/Credits";
-import PaymentsComponent from "@/components/Dashboard/Payments"; // Import PaymentsComponent
+export default async function DashboardPage() {
+  const supabase = createClient()
 
-const DashboardPage: React.FC = () => {
-  const searchParams = useSearchParams();
-  const section = searchParams.get("section") || "overview";
-  const router = useRouter();
-
-  useEffect(() => {
-    // تحقق مما إذا كان هناك أي معلمات في عنوان URL بعد #
-    if (window.location.hash) {
-      // قم بإزالة الجزء الخاص بالـ hash من عنوان URL
-      router.replace(window.location.pathname, undefined, { shallow: true });
-    }
-  }, [router]);
-
-  const renderSection = () => {
-    switch (section) {
-      case "subscriptions":
-        return <SubscriptionsComponent />;
-      case "credits":
-        return <CreditsComponent />;
-      case "payments": // Add payments case
-        return <PaymentsComponent />;
-      case "overview":
-      default:
-        return (
-          <div className="bg-white dark:bg-[#0c1427] rounded-lg p-6">
-            <h1 className="text-2xl font-bold text-black dark:text-white mb-4">
-              لوحة التحكم الرئيسية
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              مرحبًا بك في لوحة التحكم الخاصة بـ Furriyadh. يمكنك التنقل بين الأقسام المختلفة من خلال الشريط الجانبي.
-            </p>
-            
-            {/* Quick Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">📊</span>
-                  </div>
-                  <h3 className="font-semibold text-black dark:text-white">الحملات النشطة</h3>
-                </div>
-                <p className="text-2xl font-bold text-black dark:text-white">3</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">من أصل 3 متاحة</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">💰</span>
-                  </div>
-                  <h3 className="font-semibold text-black dark:text-white">الرصيد المتاح</h3>
-                </div>
-                <p className="text-2xl font-bold text-black dark:text-white">$0</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">يحتاج إلى شحن</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">⭐</span>
-                  </div>
-                  <h3 className="font-semibold text-black dark:text-white">الخطة الحالية</h3>
-                </div>
-                <p className="text-2xl font-bold text-black dark:text-white">أساسية</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">$29/شهر</p>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-black dark:text-white mb-4">النشاط الأخير</h2>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-                <p className="text-gray-600 dark:text-gray-400 text-center">
-                  لا توجد أنشطة حديثة لعرضها
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-    }
-  };
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data?.user) {
+    redirect('/authentication/sign-in')
+  }
 
   return (
-    <div className="min-h-screen">
-      {renderSection()}
-    </div>
-  );
-};
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            مرحباً بك في لوحة التحكم
+          </h1>
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                معلومات المستخدم
+              </h2>
+              <p className="text-blue-800 dark:text-blue-200">
+                <strong>البريد الإلكتروني:</strong> {data.user.email}
+              </p>
+              <p className="text-blue-800 dark:text-blue-200">
+                <strong>معرف المستخدم:</strong> {data.user.id}
+              </p>
+              <p className="text-blue-800 dark:text-blue-200">
+                <strong>تاريخ التسجيل:</strong> {new Date(data.user.created_at).toLocaleDateString('ar-SA')}
+              </p>
+              {data.user.user_metadata?.full_name && (
+                <p className="text-blue-800 dark:text-blue-200">
+                  <strong>الاسم الكامل:</strong> {data.user.user_metadata.full_name}
+                </p>
+              )}
+            </div>
+            
+            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
+                حالة الجلسة
+              </h2>
+              <p className="text-green-800 dark:text-green-200">
+                ✅ تم تسجيل الدخول بنجاح
+              </p>
+              <p className="text-green-800 dark:text-green-200">
+                🔐 الجلسة نشطة ومحمية
+              </p>
+            </div>
 
-export default DashboardPage;
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                ملاحظة مهمة
+              </h2>
+              <p className="text-yellow-800 dark:text-yellow-200">
+                هذه الصفحة محمية ولا يمكن الوصول إليها إلا بعد تسجيل الدخول. 
+                البيانات المعروضة هنا خاصة بالمستخدم المسجل دخوله حالياً فقط.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
