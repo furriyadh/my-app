@@ -21,26 +21,6 @@ const SignUpForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // First, try to sign in the user. If successful, it means the user already exists.
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (!signInError) {
-        // If sign-in was successful, the user already exists and is now logged in.
-        setMessage("");
-        router.push("/dashboard");
-        return;
-      } else if (signInError.message.includes("Invalid login credentials")) {
-        // If sign-in failed due to invalid credentials, it likely means the user exists
-        // but the provided password for sign-up doesn\"t match their existing account.
-        setMessage("المستخدم موجود بالفعل. يرجى تسجيل الدخول.");
-        setIsLoading(false);
-        return;
-      }
-
-      // If sign-in failed for other reasons (e.g., user not found), proceed with sign-up attempt.
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -50,14 +30,19 @@ const SignUpForm: React.FC = () => {
       });
 
       if (signUpError) {
-        setMessage(`خطأ في التسجيل: ${signUpError.message}`);
+        if (signUpError.message.includes("User already registered")) {
+          setMessage("المستخدم موجود بالفعل. يرجى تسجيل الدخول.");
+        } else {
+          setMessage(`خطأ في التسجيل: ${signUpError.message}`);
+        }
       } else if (data.user) {
         // Check if email confirmation is required
         if (data.user.identities && data.user.identities.length === 0) {
           setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
         } else {
-          setMessage("Registration successful! Redirecting...");
-          router.push("/dashboard");
+          setMessage("تم التسجيل بنجاح! جاري التوجيه...");
+          // Force a page refresh to update the auth state
+          window.location.href = "/dashboard";
         }
       } else {
         setMessage("Registration initiated. Please check your email for confirmation.");

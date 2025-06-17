@@ -32,8 +32,9 @@ const SignInForm: React.FC = () => {
           setMessage(`خطأ في تسجيل الدخول: ${error.message}`);
         }
       } else if (data.user) {
-        setMessage("");
-        router.push("/dashboard");
+        setMessage("تم تسجيل الدخول بنجاح! جاري التوجيه...");
+        // Force a page refresh to update the auth state
+        window.location.href = "/dashboard";
       } else {
         setMessage("فشل تسجيل الدخول. يرجى التحقق من بياناتك.");
       }
