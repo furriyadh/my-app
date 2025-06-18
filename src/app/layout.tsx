@@ -1,6 +1,6 @@
-// import "material-symbols"; // تم إزالة هذا السطر
-// import "react-calendar/dist/Calendar.css"; // تم إزالة هذا السطر
+import "material-symbols";
 import "remixicon/fonts/remixicon.css";
+import "react-calendar/dist/Calendar.css";
 import "swiper/css";
 import "swiper/css/bundle";
 
