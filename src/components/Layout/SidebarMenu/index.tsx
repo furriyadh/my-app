@@ -238,6 +238,26 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
                 <span className="title leading-none">Logout</span>
               </Link>
             </div>
+
+            {/* AD CAMPAIGNS Section */}
+            <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs mt-[20px]">
+              AD CAMPAIGNS
+            </span>
+
+            {/* New Campaign Link */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/campaigns/new"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/campaigns/new" ? "active" : ""
+                }`}
+              >
+                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
+                  add
+                </i>
+                <span className="title leading-none">New Campaign</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
