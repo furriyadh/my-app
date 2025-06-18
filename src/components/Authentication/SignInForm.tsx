@@ -33,10 +33,20 @@ const SignInForm: React.FC = () => {
         } else {
           setMessage(`خطأ في تسجيل الدخول: ${error.message}`);
         }
-      } else if (data.user) {
+      } else if (data.user && data.session) {
         setMessage("تم تسجيل الدخول بنجاح! جاري التوجيه...");
-        // Force a page refresh to update the auth state
-        window.location.href = "/dashboard";
+        
+        // التأكد من حفظ الجلسة في localStorage
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+        
+        // انتظار قصير للتأكد من حفظ الجلسة ثم التوجيه
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh(); // إعادة تحديث الصفحة للتأكد من تطبيق حالة المصادقة
+        }, 1000);
       } else {
         setMessage("فشل تسجيل الدخول. يرجى التحقق من بياناتك.");
       }

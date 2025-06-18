@@ -32,9 +32,17 @@ const ConfirmEmailContent: React.FC = () => {
             setIsProcessing(false);
           } else if (data.session) {
             setMessage("تم تأكيد البريد الإلكتروني بنجاح! يتم التوجيه إلى لوحة التحكم...");
-            // انتظار قصير قبل التوجيه
+            
+            // التأكد من حفظ الجلسة في localStorage
+            await supabase.auth.setSession({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token
+            });
+            
+            // انتظار قصير قبل التوجيه للتأكد من حفظ الجلسة
             setTimeout(() => {
               router.push("/dashboard");
+              router.refresh(); // إعادة تحديث الصفحة للتأكد من تطبيق حالة المصادقة
             }, 2000);
           }
         } else {
@@ -54,11 +62,19 @@ const ConfirmEmailContent: React.FC = () => {
 
     // الاستماع لتغييرات حالة المصادقة
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (event === 'SIGNED_IN' && session) {
           setMessage("تم تأكيد البريد الإلكتروني بنجاح! يتم التوجيه إلى لوحة التحكم...");
+          
+          // التأكد من حفظ الجلسة في localStorage
+          await supabase.auth.setSession({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token
+          });
+          
           setTimeout(() => {
             router.push("/dashboard");
+            router.refresh(); // إعادة تحديث الصفحة للتأكد من تطبيق حالة المصادقة
           }, 2000);
         }
       }
