@@ -170,7 +170,7 @@ const SignInForm = ()=>{
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-            className: "auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]",
+            className: "auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[120px] xl:py-[135px]",
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -180,7 +180,7 @@ const SignInForm = ()=>{
                             className: "xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1 relative overflow-hidden",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                    src: "/images/sign-in.jpg",
+                                    src: "/images/sign-up.jpg",
                                     alt: "sign-in-image",
                                     className: "rounded-[25px] object-cover w-full h-full",
                                     width: 646,
@@ -193,7 +193,7 @@ const SignInForm = ()=>{
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "absolute inset-0 rounded-[25px] flex flex-col justify-center items-center text-white p-4",
                                     style: {
-                                        background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)"
+                                        background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)'
                                     },
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -204,7 +204,7 @@ const SignInForm = ()=>{
                                             children: "Welcome back to Furriyadh!"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 103,
+                                            lineNumber: 102,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -215,12 +215,23 @@ const SignInForm = ()=>{
                                             children: "Continue your journey with us and unlock the full potential of your business."
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 106,
+                                            lineNumber: 105,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "flex justify-center mt-4",
+                                            className: "flex justify-center",
+                                            style: {
+                                                marginTop: '5px'
+                                            },
                                             children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
+                                                    className: "material-symbols-outlined text-yellow-400",
+                                                    children: "star"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Authentication/SignInForm.tsx",
+                                                    lineNumber: 109,
+                                                    columnNumber: 19
+                                                }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
                                                     className: "material-symbols-outlined text-yellow-400",
                                                     children: "star"
@@ -252,25 +263,17 @@ const SignInForm = ()=>{
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
                                                     lineNumber: 113,
                                                     columnNumber: 19
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("i", {
-                                                    className: "material-symbols-outlined text-yellow-400",
-                                                    children: "star"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 114,
-                                                    columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 109,
+                                            lineNumber: 108,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 101,
+                                    lineNumber: 100,
                                     columnNumber: 15
                                 }, this)
                             ]
@@ -290,7 +293,7 @@ const SignInForm = ()=>{
                                     height: 38
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 120,
+                                    lineNumber: 119,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -301,7 +304,7 @@ const SignInForm = ()=>{
                                     height: 38
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 127,
+                                    lineNumber: 126,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -312,7 +315,7 @@ const SignInForm = ()=>{
                                             children: "Welcome back to Furriyadh!"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 136,
+                                            lineNumber: 135,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -320,13 +323,13 @@ const SignInForm = ()=>{
                                             children: "Sign In with social account or enter your details"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 139,
+                                            lineNumber: 138,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 135,
+                                    lineNumber: 134,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -347,17 +350,17 @@ const SignInForm = ()=>{
                                                     height: 25
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 152,
+                                                    lineNumber: 151,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                lineNumber: 146,
+                                                lineNumber: 145,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 145,
+                                            lineNumber: 144,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -375,17 +378,17 @@ const SignInForm = ()=>{
                                                     height: 25
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 169,
+                                                    lineNumber: 168,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                lineNumber: 163,
+                                                lineNumber: 162,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 162,
+                                            lineNumber: 161,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -403,23 +406,23 @@ const SignInForm = ()=>{
                                                     height: 25
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 186,
+                                                    lineNumber: 185,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                lineNumber: 180,
+                                                lineNumber: 179,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 179,
+                                            lineNumber: 178,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 144,
+                                    lineNumber: 143,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -433,7 +436,7 @@ const SignInForm = ()=>{
                                                     children: "Email Address"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 199,
+                                                    lineNumber: 198,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -445,13 +448,13 @@ const SignInForm = ()=>{
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 202,
+                                                    lineNumber: 201,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 198,
+                                            lineNumber: 197,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -463,7 +466,7 @@ const SignInForm = ()=>{
                                                     children: "Password"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 213,
+                                                    lineNumber: 212,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -476,7 +479,7 @@ const SignInForm = ()=>{
                                                     required: true
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 216,
+                                                    lineNumber: 215,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -488,18 +491,18 @@ const SignInForm = ()=>{
                                                         className: showPassword ? "ri-eye-line" : "ri-eye-off-line"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                        lineNumber: 231,
+                                                        lineNumber: 230,
                                                         columnNumber: 21
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                    lineNumber: 225,
+                                                    lineNumber: 224,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 212,
+                                            lineNumber: 211,
                                             columnNumber: 17
                                         }, this),
                                         message && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -507,7 +510,7 @@ const SignInForm = ()=>{
                                             children: message
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 235,
+                                            lineNumber: 234,
                                             columnNumber: 29
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -516,7 +519,7 @@ const SignInForm = ()=>{
                                             children: "Forgot Password?"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 237,
+                                            lineNumber: 236,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -531,25 +534,25 @@ const SignInForm = ()=>{
                                                         children: "login"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                        lineNumber: 250,
+                                                        lineNumber: 249,
                                                         columnNumber: 21
                                                     }, this),
                                                     isLoading ? "Signing In..." : "Sign In"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                                lineNumber: 249,
+                                                lineNumber: 248,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 244,
+                                            lineNumber: 243,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 197,
+                                    lineNumber: 196,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -563,19 +566,19 @@ const SignInForm = ()=>{
                                             children: "Sign Up"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                            lineNumber: 258,
+                                            lineNumber: 257,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                                    lineNumber: 256,
+                                    lineNumber: 255,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/Authentication/SignInForm.tsx",
-                            lineNumber: 119,
+                            lineNumber: 118,
                             columnNumber: 13
                         }, this)
                     ]
