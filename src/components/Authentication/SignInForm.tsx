@@ -86,27 +86,26 @@ const SignInForm: React.FC = () => {
 
   return (
     <>
-      <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]">
+      <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[120px] xl:py-[135px]">
         <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] items-center">
             <div className="xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1 relative overflow-hidden">
               <Image
-                src="/images/sign-in.jpg"
+                src="/images/sign-up.jpg"
                 alt="sign-in-image"
                 className="rounded-[25px] object-cover w-full h-full"
                 width={646}
                 height={804}
               />
-              {/* Overlay for dark gradient effect and text */}
               <div className="absolute inset-0 rounded-[25px] flex flex-col justify-center items-center text-white p-4"
-                   style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)" }}>
+                   style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)' }}>
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4" style={{ color: 'white' }}>
                   Welcome back to Furriyadh!
                 </h2>
                 <p className="text-base md:text-lg text-center leading-relaxed" style={{ color: 'white' }}>
                   Continue your journey with us and unlock the full potential of your business.
                 </p>
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center" style={{ marginTop: '5px' }}>
                   <i className="material-symbols-outlined text-yellow-400">star</i>
                   <i className="material-symbols-outlined text-yellow-400">star</i>
                   <i className="material-symbols-outlined text-yellow-400">star</i>
