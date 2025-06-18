@@ -56,20 +56,21 @@ export class UserService {
             youtube_url: ''
           };
 
-          const { data: newData, error: insertError } = await supabase
+          // استخدام upsert بدلاً من insert لضمان عدم تكرار user_id
+          const { data: newData, error: upsertError } = await supabase
             .from('user_profiles')
-            .insert([newProfile])
+            .upsert(newProfile, { onConflict: 'user_id' })
             .select()
             .single();
 
-          if (insertError) {
-            console.error("UserService: Error creating new profile:", JSON.stringify(insertError, null, 2)); // سجل تصحيح مفصل
+          if (upsertError) {
+            console.error("UserService: Error creating/updating new profile with upsert:", JSON.stringify(upsertError, null, 2)); // سجل تصحيح مفصل
             return {
               data: null,
-              error: `خطأ في إنشاء الملف الشخصي: ${insertError.message}`
+              error: `خطأ في إنشاء/تحديث الملف الشخصي: ${upsertError.message}`
             };
           }
-          console.log("UserService: New profile created:", newData);
+          console.log("UserService: New profile created/updated:", newData);
           return {
             data: newData,
             error: null

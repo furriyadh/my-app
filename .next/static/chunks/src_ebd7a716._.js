@@ -1,9 +1,216 @@
 (globalThis.TURBOPACK = globalThis.TURBOPACK || []).push([typeof document === "object" ? document.currentScript : undefined, {
 
-"[project]/src/services/userService.ts [app-client] (ecmascript)": (function(__turbopack_context__) {
+"[project]/src/services/userService.ts [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
 
-var { g: global, __dirname, k: __turbopack_refresh__, m: module, e: exports } = __turbopack_context__;
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
+// خدمات المستخدم (User Services)
+// مسار: src/services/userService.ts
+__turbopack_context__.s({
+    "UserService": (()=>UserService)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/utils/supabase/client.ts [app-client] (ecmascript)");
+;
+class UserService {
+    // جلب بيانات المستخدم الحالي
+    static async getCurrentUserProfile() {
+        console.log("UserService: Attempting to fetch current user profile...");
+        try {
+            // الحصول على الجلسة الحالية أولاً
+            const { data: { session }, error: sessionError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].auth.getSession();
+            if (sessionError || !session || !session.user) {
+                console.error("UserService: Session error or no user in session:", sessionError);
+                return {
+                    data: null,
+                    error: 'المستخدم غير مسجل الدخول أو الجلسة غير صالحة'
+                };
+            }
+            const user = session.user; // استخدام المستخدم من الجلسة
+            console.log("UserService: User found from session:", user.id);
+            // جلب بيانات الملف الشخصي
+            const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from('user_profiles').select('*').eq('user_id', user.id).single();
+            if (error) {
+                console.error("UserService: Error fetching user profile from DB:", JSON.stringify(error, null, 2)); // سجل تصحيح مفصل
+                // إذا لم يوجد ملف شخصي، إنشاء واحد جديد بالبيانات الأساسية
+                if (error.code === 'PGRST116') {
+                    console.log("UserService: No profile found, creating new one...");
+                    const newProfile = {
+                        user_id: user.id,
+                        email: user.email || '',
+                        first_name: user.user_metadata?.full_name?.split(" ")[0] || "",
+                        last_name: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
+                        phone: '',
+                        address: '',
+                        country: '',
+                        date_of_birth: null,
+                        gender: '',
+                        skills: '',
+                        profession: '',
+                        company_name: '',
+                        company_website: '',
+                        bio: '',
+                        facebook_url: '',
+                        twitter_url: '',
+                        linkedin_url: '',
+                        youtube_url: ''
+                    };
+                    // استخدام upsert بدلاً من insert لضمان عدم تكرار user_id
+                    const { data: newData, error: upsertError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from('user_profiles').upsert(newProfile, {
+                        onConflict: 'user_id'
+                    }).select().single();
+                    if (upsertError) {
+                        console.error("UserService: Error creating/updating new profile with upsert:", JSON.stringify(upsertError, null, 2)); // سجل تصحيح مفصل
+                        return {
+                            data: null,
+                            error: `خطأ في إنشاء/تحديث الملف الشخصي: ${upsertError.message}`
+                        };
+                    }
+                    console.log("UserService: New profile created/updated:", newData);
+                    return {
+                        data: newData,
+                        error: null
+                    };
+                }
+                return {
+                    data: null,
+                    error: `خطأ في جلب البيانات: ${error.message}`
+                };
+            }
+            console.log("UserService: Profile fetched successfully:", data);
+            return {
+                data: data,
+                error: null
+            };
+        } catch (error) {
+            console.error("UserService: Unexpected error in getCurrentUserProfile:", error);
+            return {
+                data: null,
+                error: `خطأ غير متوقع: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
+            };
+        }
+    }
+    // تحديث بيانات المستخدم
+    static async updateUserProfile(profileData) {
+        console.log("UserService: Attempting to update user profile with data:", profileData);
+        try {
+            // الحصول على الجلسة الحالية أولاً
+            const { data: { session }, error: sessionError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].auth.getSession();
+            if (sessionError || !session || !session.user) {
+                console.error("UserService: Session error or no user in session during update:", sessionError);
+                return {
+                    data: null,
+                    error: 'المستخدم غير مسجل الدخول أو الجلسة غير صالحة'
+                };
+            }
+            const user = session.user; // استخدام المستخدم من الجلسة
+            console.log("UserService: User found for update from session:", user.id);
+            // استخدام upsert لإنشاء أو تحديث الملف الشخصي
+            const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from('user_profiles').upsert({
+                ...profileData,
+                user_id: user.id,
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'user_id'
+            }).select();
+            if (error) {
+                console.error("UserService: Error updating user profile:", JSON.stringify(error, null, 2)); // سجل تصحيح مفصل
+                return {
+                    data: null,
+                    error: `خطأ في تحديث البيانات: ${error.message}`
+                };
+            }
+            // بما أننا أزلنا .single()، فإن data ستكون مصفوفة. نأخذ العنصر الأول.
+            console.log("UserService: Profile updated successfully:", data);
+            return {
+                data: data && data.length > 0 ? data[0] : null,
+                error: null
+            };
+        } catch (error) {
+            console.error("UserService: Unexpected error in updateUserProfile:", error);
+            return {
+                data: null,
+                error: `خطأ غير متوقع: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
+            };
+        }
+    }
+    // رفع صورة الملف الشخصي
+    static async uploadProfileImage(file) {
+        console.log("UserService: Attempting to upload profile image...");
+        try {
+            const { data: { user }, error: authError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].auth.getUser();
+            if (authError || !user) {
+                console.error("UserService: Auth error or no user found for image upload:", authError);
+                return {
+                    url: null,
+                    error: 'المستخدم غير مسجل الدخول'
+                };
+            }
+            console.log("UserService: User found for image upload:", user.id);
+            // إنشاء اسم فريد للملف
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+            console.log("UserService: Uploading file with name:", fileName);
+            // رفع الملف إلى Supabase Storage
+            const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].storage.from('profile-images').upload(fileName, file);
+            if (error) {
+                console.error("UserService: Error uploading image to storage:", error);
+                return {
+                    url: null,
+                    error: `خطأ في رفع الصورة: ${error.message}`
+                };
+            }
+            console.log("UserService: Image uploaded to storage:", data);
+            // الحصول على الرابط العام للصورة
+            const { data: { publicUrl } } = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].storage.from('profile-images').getPublicUrl(fileName);
+            console.log("UserService: Public URL for image:", publicUrl);
+            return {
+                url: publicUrl,
+                error: null
+            };
+        } catch (error) {
+            console.error("UserService: Unexpected error in uploadProfileImage:", error);
+            return {
+                url: null,
+                error: `خطأ غير متوقع: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
+            };
+        }
+    }
+    // حذف الملف الشخصي
+    static async deleteUserProfile() {
+        console.log("UserService: Attempting to delete user profile...");
+        try {
+            const { data: { user }, error: authError } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].auth.getUser();
+            if (authError || !user) {
+                console.error("UserService: Auth error or no user found for profile deletion:", authError);
+                return {
+                    success: false,
+                    error: 'المستخدم غير مسجل الدخول'
+                };
+            }
+            console.log("UserService: User found for profile deletion:", user.id);
+            const { error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$utils$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from('user_profiles').delete().eq('user_id', user.id);
+            if (error) {
+                console.error("UserService: Error deleting user profile:", error);
+                return {
+                    success: false,
+                    error: `خطأ في حذف الملف الشخصي: ${error.message}`
+                };
+            }
+            console.log("UserService: User profile deleted successfully.");
+            return {
+                success: true,
+                error: null
+            };
+        } catch (error) {
+            console.error("UserService: Unexpected error in deleteUserProfile:", error);
+            return {
+                success: false,
+                error: `خطأ غير متوقع: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
+            };
+        }
+    }
+}
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
 }
@@ -606,7 +813,7 @@ const AccountSettingsForm = ()=>{
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                     type: "date",
                                     className: "h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500",
-                                    value: userData.date_of_birth ? userData.date_of_birth : "",
+                                    value: userData.date_of_birth || "",
                                     onChange: (e)=>handleInputChange("date_of_birth", e.target.value)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/settings/page.tsx",
@@ -631,7 +838,7 @@ const AccountSettingsForm = ()=>{
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                    className: "h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 dark:text-white",
+                                    className: "h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white",
                                     value: userData.gender,
                                     onChange: (e)=>handleInputChange("gender", e.target.value),
                                     children: [
@@ -839,7 +1046,7 @@ const AccountSettingsForm = ()=>{
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                    className: "h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 dark:text-white",
+                                    className: "h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white",
                                     value: userData.profession,
                                     onChange: (e)=>handleInputChange("profession", e.target.value),
                                     children: [
