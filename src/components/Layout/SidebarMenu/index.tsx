@@ -75,47 +75,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
         </div>
 
         <div className="pt-[89px] px-[22px] pb-[20px] h-screen overflow-y-scroll sidebar-custom-scrollbar">
-          {/* Organization Section */}
-          <div className="organization-section mb-[20px]">
-            <div className="flex items-center justify-between cursor-pointer" onClick={toggleOrganizationDropdown}>
-              <div className="flex items-center">
-                {/* Replaced f-icon.svg with a simple 'F' text */}
-                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  F
-                </div>
-                <span className="font-semibold ltr:ml-[10px] rtl:mr-[10px]">ORGANIZATION</span>
-              </div>
-              <i className="material-symbols-outlined">{isOrganizationDropdownOpen ? 'expand_less' : 'expand_more'}</i>
-            </div>
-            {isOrganizationDropdownOpen && (
-              <div className="dropdown-content mt-[10px]">
-                <div className="flex items-center justify-between py-[8px] px-[14px] rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c]">
-                  <span>furriyadh</span>
-                  <i className="material-symbols-outlined text-primary-500">check</i>
-                </div>
-                {canAddMoreBusinesses() ? (
-                  <Link
-                    href="/business-creation"
-                    className="flex items-center py-[8px] px-[14px] rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c] mt-[5px]"
-                  >
-                    <i className="material-symbols-outlined ltr:mr-[7px] rtl:ml-[7px]">add</i>
-                    <span>Create business</span>
-                  </Link>
-                ) : (
-                  <div className="mt-[5px] px-[14px]">
-                    <p className="text-sm text-gray-500 mb-[8px]">
-                      {getUpgradeMessage()}
-                    </p>
-                    <button className="text-sm bg-primary-500 text-white px-[12px] py-[6px] rounded-md hover:bg-primary-600 transition-all">
-                      Upgrade Plan
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="accordion">
             <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs">
               Main
             </span>
@@ -138,57 +97,72 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               </Link>
             </div>
 
-            {/* Billing Section */}
+            {/* Advertising Platforms Section */}
+            <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs mt-[20px]">
+              Advertising Platforms
+            </span>
+
+            {/* Google Ads */}
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <button
                 className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
-                  (pathname === "/dashboard" && (new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'credits' || new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'subscriptions' || new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'payments')) ? "active" : ""
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section')?.includes('google') ? "active" : ""
                 }`}
                 type="button"
-                onClick={() => toggleAccordion(1)} // Use a new index for Billing
+                onClick={() => toggleAccordion(2)}
               >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  account_balance
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">G</span>
+                  </div>
+                </div>
+                <span className="title leading-none">Google Ads</span>
+                <i className="material-symbols-outlined ltr:ml-auto rtl:mr-auto text-gray-400">
+                  {openIndex === 2 ? 'expand_less' : 'expand_more'}
                 </i>
-                <span className="title leading-none">Billing</span>
-                <span className="ltr:ml-auto rtl:mr-auto text-sm text-gray-500 dark:text-gray-400"> US${remainingBalance}</span>
               </button>
 
-              <div
-                className={`accordion-collapse ${
-                  openIndex === 1 ? "open" : "hidden"
-                }`}
-              >
+              <div className={`accordion-collapse ${openIndex === 2 ? "open" : "hidden"}`}>
                 <div className="pt-[4px]">
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/dashboard?section=credits"
+                        href="/dashboard?section=google-dashboard"
                         className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
-                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'credits' ? "active" : ""
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'google-dashboard' ? "active" : ""
                         }`}
                       >
-                        Credits
+                        Dashboard
                       </Link>
                     </li>
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/dashboard?section=subscriptions"
+                        href="/dashboard?section=google-campaigns"
                         className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
-                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'subscriptions' ? "active" : ""
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'google-campaigns' ? "active" : ""
                         }`}
                       >
-                        Subscriptions
+                        Campaigns
                       </Link>
                     </li>
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/dashboard?section=payments"
+                        href="/dashboard?section=google-keywords"
                         className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
-                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'payments' ? "active" : ""
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'google-keywords' ? "active" : ""
                         }`}
                       >
-                        Payments
+                        Keywords
+                      </Link>
+                    </li>
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/dashboard?section=new-campaign"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'new-campaign' ? "active" : ""
+                        }`}
+                      >
+                        New Campaign
                       </Link>
                     </li>
                   </ul>
@@ -196,12 +170,154 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               </div>
             </div>
 
-            {/* My Profile, Settings, Logout links */}
+            {/* YouTube Ads */}
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <Link
-                href="/my-profile"
+                href="/dashboard?section=youtube-ads"
                 className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
-                  pathname === "/my-profile" ? "active" : ""
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'youtube-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                    <span className="text-white text-xs">▶</span>
+                  </div>
+                </div>
+                <span className="title leading-none">YouTube Ads</span>
+              </Link>
+            </div>
+
+            {/* Facebook Ads */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=facebook-ads"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'facebook-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">f</span>
+                  </div>
+                </div>
+                <span className="title leading-none">Facebook Ads</span>
+              </Link>
+            </div>
+
+            {/* X Ads (Twitter) */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=x-ads"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'x-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">X</span>
+                  </div>
+                </div>
+                <span className="title leading-none">X Ads</span>
+              </Link>
+            </div>
+
+            {/* Instagram Ads */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=instagram-ads"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'instagram-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <span className="text-white text-xs">📷</span>
+                  </div>
+                </div>
+                <span className="title leading-none">Instagram Ads</span>
+              </Link>
+            </div>
+
+            {/* LinkedIn Ads */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=linkedin-ads"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'linkedin-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-blue-700 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">in</span>
+                  </div>
+                </div>
+                <span className="title leading-none">LinkedIn Ads</span>
+              </Link>
+            </div>
+
+            {/* Microsoft Ads */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=microsoft-ads"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'microsoft-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">⊞</span>
+                  </div>
+                </div>
+                <span className="title leading-none">Microsoft Ads</span>
+              </Link>
+            </div>
+
+            {/* TikTok Ads */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=tiktok-ads"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'tiktok-ads' ? "active" : ""
+                }`}
+              >
+                <div className="w-5 h-5 ltr:mr-[7px] rtl:ml-[7px] flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">♬</span>
+                  </div>
+                </div>
+                <span className="title leading-none">TikTok Ads</span>
+              </Link>
+            </div>
+
+            {/* Account Management Section */}
+            <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs mt-[20px]">
+              Account Management
+            </span>
+
+            {/* Billing Link */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=billing"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'billing' ? "active" : ""
+                }`}
+              >
+                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
+                  receipt_long
+                </i>
+                <span className="title leading-none">Billing</span>
+                <span className="rounded-full font-medium inline-block text-center w-[20px] h-[20px] text-[11px] leading-[20px] text-orange-500 bg-orange-50 dark:bg-[#ffffff14] ltr:ml-auto rtl:mr-auto">
+                  US$0
+                </span>
+              </Link>
+            </div>
+
+            {/* My Profile Link */}
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/dashboard?section=my-profile"
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'my-profile' ? "active" : ""
                 }`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
@@ -211,11 +327,12 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               </Link>
             </div>
 
+            {/* Settings Link */}
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <Link
-                href="/settings"
+                href="/dashboard?section=settings"
                 className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
-                  pathname === "/settings" ? "active" : ""
+                  pathname === "/dashboard" && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('section') === 'settings' ? "active" : ""
                 }`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
@@ -225,20 +342,101 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               </Link>
             </div>
 
+            {/* Organization Section */}
+            {/* <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs mt-[20px]">
+              Organization
+            </span>
+
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/authentication/logout"
+              <button
                 className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${
-                  pathname === "/authentication/logout" ? "active" : ""
+                  isOrganizationDropdownOpen ? "active" : ""
                 }`}
+                type="button"
+                onClick={toggleOrganizationDropdown}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  logout
+                  business
                 </i>
-                <span className="title leading-none">Logout</span>
-              </Link>
-            </div>
-          </div>
+                <span className="title leading-none">Organization</span>
+                <i className="material-symbols-outlined ltr:ml-auto rtl:mr-auto text-gray-400">
+                  {isOrganizationDropdownOpen ? 'expand_less' : 'expand_more'}
+                </i>
+              </button>
+
+              <div className={`accordion-collapse ${isOrganizationDropdownOpen ? "open" : "hidden"}`}>
+                <div className="pt-[4px]">
+                  <ul className="sidebar-sub-menu">
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/dashboard?section=organization-profile"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'organization-profile' ? "active" : ""
+                        }`}
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/dashboard?section=organization-users"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'organization-users' ? "active" : ""
+                        }`}
+                      >
+                        Users
+                      </Link>
+                    </li>
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/dashboard?section=organization-roles"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'organization-roles' ? "active" : ""
+                        }`}
+                      >
+                        Roles
+                      </Link>
+                    </li>
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/dashboard?section=organization-settings"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${
+                          pathname === "/dashboard" && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('section') === 'organization-settings' ? "active" : ""
+                        }`}
+                      >
+                        Settings
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div> */}
+
+            {/* Add Business Button */}
+            {/* {canAddMoreBusinesses() ? (
+              <button
+                type="button"
+                className="flex items-center justify-center w-full py-[9px] px-[14px] rounded-md bg-primary-500 text-white font-medium transition-all hover:bg-primary-600 mt-[20px]"
+              >
+                <i className="material-symbols-outlined ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
+                  add
+                </i>
+                Add Business
+              </button>
+            ) : (
+              <div className="mt-[20px] text-center text-sm text-gray-500">
+                <p>You have reached the limit of businesses for your plan.</p>
+                <p className="text-primary-500 cursor-pointer" onClick={() => alert(getUpgradeMessage())}>
+                  Upgrade your plan
+                </p>
+              </div>
+            )} */}
+
+            {/* Remaining Balance */}
+            {/* <div className="mt-[20px] text-center text-sm text-gray-500">
+              <p>Remaining Balance: ${remainingBalance.toFixed(2)}</p>
+            </div> */}
+
         </div>
       </div>
     </>
@@ -246,3 +444,5 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 };
 
 export default SidebarMenu;
+// This code defines a SidebarMenu component that renders a sidebar with various links and sections.
+// It includes links for different advertising platforms, account management, and organization management.                                

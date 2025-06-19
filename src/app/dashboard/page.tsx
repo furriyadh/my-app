@@ -4,7 +4,10 @@ import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import SubscriptionsComponent from "@/components/Dashboard/Subscriptions";
 import CreditsComponent from "@/components/Dashboard/Credits";
-import PaymentsComponent from "@/components/Dashboard/Payments"; // Import PaymentsComponent
+import PaymentsComponent from "@/components/Dashboard/Payments";
+import NewCampaign from "@/components/Dashboard/NewCampaign"; // Import NewCampaign component
+import MainDashboard from "@/components/Dashboard/MainDashboard"; // Import MainDashboard component
+import GoogleAdsDashboard from "@/components/Dashboard/GoogleAds"; // Import GoogleAds component
 
 const DashboardPage: React.FC = () => {
   const searchParams = useSearchParams();
@@ -16,66 +19,33 @@ const DashboardPage: React.FC = () => {
         return <SubscriptionsComponent />;
       case "credits":
         return <CreditsComponent />;
-      case "payments": // Add payments case
+      case "payments":
         return <PaymentsComponent />;
+      case "new-campaign": // Add new case for New Campaign
+        return <NewCampaign />;
+      // Google Ads sections
+      case "google-dashboard":
+      case "google-campaigns":
+      case "google-keywords":
+        return <GoogleAdsDashboard />;
+      // Other platform sections (placeholder for now)
+      case "youtube-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">YouTube Ads Dashboard</h2><p>Coming soon...</p></div>;
+      case "facebook-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">Facebook Ads Dashboard</h2><p>Coming soon...</p></div>;
+      case "x-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">X Ads Dashboard</h2><p>Coming soon...</p></div>;
+      case "instagram-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">Instagram Ads Dashboard</h2><p>Coming soon...</p></div>;
+      case "linkedin-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">LinkedIn Ads Dashboard</h2><p>Coming soon...</p></div>;
+      case "microsoft-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">Microsoft Ads Dashboard</h2><p>Coming soon...</p></div>;
+      case "tiktok-ads":
+        return <div className="p-6"><h2 className="text-2xl font-bold">TikTok Ads Dashboard</h2><p>Coming soon...</p></div>;
       case "overview":
       default:
-        return (
-          <div className="bg-white dark:bg-[#0c1427] rounded-lg p-6">
-            <h1 className="text-2xl font-bold text-black dark:text-white mb-4">
-              لوحة التحكم الرئيسية
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              مرحبًا بك في لوحة التحكم الخاصة بـ Furriyadh. يمكنك التنقل بين الأقسام المختلفة من خلال الشريط الجانبي.
-            </p>
-            
-            {/* Quick Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">📊</span>
-                  </div>
-                  <h3 className="font-semibold text-black dark:text-white">الحملات النشطة</h3>
-                </div>
-                <p className="text-2xl font-bold text-black dark:text-white">3</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">من أصل 3 متاحة</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">💰</span>
-                  </div>
-                  <h3 className="font-semibold text-black dark:text-white">الرصيد المتاح</h3>
-                </div>
-                <p className="text-2xl font-bold text-black dark:text-white">$0</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">يحتاج إلى شحن</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">⭐</span>
-                  </div>
-                  <h3 className="font-semibold text-black dark:text-white">الخطة الحالية</h3>
-                </div>
-                <p className="text-2xl font-bold text-black dark:text-white">أساسية</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">$29/شهر</p>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-black dark:text-white mb-4">النشاط الأخير</h2>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-                <p className="text-gray-600 dark:text-gray-400 text-center">
-                  لا توجد أنشطة حديثة لعرضها
-                </p>
-              </div>
-            </div>
-          </div>
-        );
+        return <MainDashboard />;
     }
   };
 
@@ -87,3 +57,6 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
+// This code defines a DashboardPage component that renders different sections of a dashboard based on the URL search parameters.
+// It includes sections for subscriptions, credits, payments, a new campaign creation form, and a main dashboard.
+// It also includes a Google Ads dashboard with various sub-sections, and placeholders for other advertising platforms like YouTube Ads, Facebook Ads, etc.           
