@@ -8,7 +8,7 @@ import Channels from "@/components/Dashboard/Channels";
 import InstagramCampaigns from "@/components/Dashboard/InstagramCampaigns";
 import Cta from "@/components/Dashboard/Cta";
 import Campaigns from "@/components/Dashboard/Campaigns";
-import MapComponent from "@/components/Events/MapComponent";
+import MarkersMap from "@/components/Maps/MarkersMap"; // Updated import for MarkersMap
 
 export default function MainDashboard() {
   return (
@@ -32,24 +32,16 @@ export default function MainDashboard() {
           <DownloadMobileApp />
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[25px] mb-[25px]">
-        <div className="lg:col-span-1">
-          <Channels />
-        </div>
-
         <div className="lg:col-span-2">
           <Campaigns />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px]">
             {/* Removed ExternalLinks */}
-            <MapComponent /> {/* Added MapComponent */}
+            <MarkersMap /> {/* Added MarkersMap */}
 
             <InstagramCampaigns />
           </div>
         </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-[25px] mb-[25px]">
         <div className="lg:col-span-1">
           <Cta />
