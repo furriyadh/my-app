@@ -45,13 +45,13 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('خطأ في جلب الجلسة:', error);
+          console.error("خطأ في جلب الجلسة:", error);
           setIsAuthenticated(false);
         } else {
           setIsAuthenticated(!!session);
         }
       } catch (error) {
-        console.error('خطأ غير متوقع في التحقق من المصادقة:', error);
+        console.error("خطأ غير متوقع في التحقق من المصادقة:", error);
         setIsAuthenticated(false);
       }
     };
@@ -61,17 +61,17 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     // الاستماع لتغييرات حالة المصادقة
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('تغيير حالة المصادقة:', event, session);
+        console.log("تغيير حالة المصادقة:", event, session);
         
-        if (event === 'SIGNED_IN' && session) {
+        if (event === "SIGNED_IN" && session) {
           setIsAuthenticated(true);
-        } else if (event === 'SIGNED_OUT' || !session) {
+        } else if (event === "SIGNED_OUT" || !session) {
           setIsAuthenticated(false);
           // إعادة توجيه إلى صفحة تسجيل الدخول إذا كان المستخدم في صفحة محمية
           if (!isAuthPage) {
-            router.push('/authentication/sign-in');
+            router.push("/authentication/sign-in");
           }
-        } else if (event === 'TOKEN_REFRESHED' && session) {
+        } else if (event === "TOKEN_REFRESHED" && session) {
           setIsAuthenticated(true);
         }
       }
@@ -85,7 +85,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   // إعادة توجيه المستخدمين غير المصادق عليهم إلى صفحة تسجيل الدخول
   useEffect(() => {
     if (isAuthenticated === false && !isAuthPage) {
-      router.push('/authentication/sign-in');
+      router.push("/authentication/sign-in");
     }
   }, [isAuthenticated, isAuthPage, router]);
 
