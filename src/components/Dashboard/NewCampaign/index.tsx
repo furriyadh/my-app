@@ -33,6 +33,7 @@ const NewCampaign = () => {
   
   // Form data
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [websiteUrlError, setWebsiteUrlError] = useState(''); // New state for URL error
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [campaignName, setCampaignName] = useState('');
@@ -111,7 +112,294 @@ const NewCampaign = () => {
     { code: 'KW', name: 'Kuwait' },
   ];
 
+  // Function to validate website URL
+  const validateWebsiteUrl = (url: string) => {
+    if (!url.startsWith('https://')) {
+      return 'يجب أن يبدأ رابط الموقع بـ https://';
+    }
+
+    const forbiddenDomains = [
+      'sites.google.com',
+      'wix.com',
+      'site123.com',
+      'blogspot.com',
+      'wordpress.com',
+      'weebly.com',
+      'jimdo.com',
+      'strikingly.com',
+      'squarespace.com',
+      'medium.com',
+      'tumblr.com',
+      'github.io',
+      'netlify.app',
+      'vercel.app',
+      'glitch.me',
+      'repl.co',
+      'codepen.io',
+      'jsfiddle.net',
+      'codesandbox.io',
+      'webflow.io',
+      'framer.app',
+      'carrd.co',
+      'page.link',
+      'bit.ly',
+      'tinyurl.com',
+      'goo.gl',
+      't.co',
+      'ow.ly',
+      'buff.ly',
+      'rebrandly.com',
+      'is.gd',
+      's.id',
+      'qr.net',
+      'app.link',
+      'linktr.ee',
+      'bio.link',
+      'many.link',
+      'beacons.ai',
+      'flowcode.com',
+      'snipfeed.co',
+      'allmylinks.com',
+      'direct.me',
+      'taplink.cc',
+      'lnk.bio',
+      'campsite.bio',
+      'solo.to',
+      'url.bio',
+      'contactin.bio',
+      'linkin.bio',
+      'linkpop.com',
+      'link.tree',
+      'link.bio',
+      'link.pages',
+      'link.profile',
+      'link.directory',
+      'link.website',
+      'link.page',
+      'link.me',
+      'link.fm',
+      'link.ly',
+      'link.cx',
+      'link.id',
+      'link.click',
+      'link.fun',
+      'link.link',
+      'link.zone',
+      'link.space',
+      'link.world',
+      'link.global',
+      'link.site',
+      'link.co',
+      'link.net',
+      'link.org',
+      'link.info',
+      'link.biz',
+      'link.xyz',
+      'link.top',
+      'link.club',
+      'link.blog',
+      'link.shop',
+      'link.store',
+      'link.online',
+      'link.tech',
+      'link.digital',
+      'link.media',
+      'link.art',
+      'link.design',
+      'link.dev',
+      'link.cloud',
+      'link.data',
+      'link.ai',
+      'link.io',
+      'link.app',
+      'link.me',
+      'link.us',
+      'link.ca',
+      'link.uk',
+      'link.de',
+      'link.fr',
+      'link.es',
+      'link.it',
+      'link.jp',
+      'link.cn',
+      'link.in',
+      'link.au',
+      'link.nz',
+      'link.za',
+      'link.sg',
+      'link.hk',
+      'link.tw',
+      'link.kr',
+      'link.my',
+      'link.ph',
+      'link.th',
+      'link.vn',
+      'link.id',
+      'link.mx',
+      'link.br',
+      'link.ar',
+      'link.cl',
+      'link.pe',
+      'link.co',
+      'link.ve',
+      'link.uy',
+      'link.py',
+      'link.ec',
+      'link.bo',
+      'link.pa',
+      'link.cr',
+      'link.gt',
+      'link.hn',
+      'link.sv',
+      'link.ni',
+      'link.cu',
+      'link.do',
+      'link.pr',
+      'link.jm',
+      'link.tt',
+      'link.bs',
+      'link.bb',
+      'link.lc',
+      'link.gd',
+      'link.vc',
+      'link.dm',
+      'link.ag',
+      'link.kn',
+      'link.ai',
+      'link.tc',
+      'link.vg',
+      'link.ky',
+      'link.bm',
+      'link.gp',
+      'link.mq',
+      'link.gf',
+      'link.bl',
+      'link.mf',
+      'link.pm',
+      'link.sh',
+      'link.fk',
+      'link.gs',
+      'link.hm',
+      'link.aq',
+      'link.bv',
+      'link.cc',
+      'link.cd',
+      'link.cf',
+      'link.cg',
+      'link.ci',
+      'link.cm',
+      'link.cv',
+      'link.dj',
+      'link.dz',
+      'link.eh',
+      'link.er',
+      'link.et',
+      'link.ga',
+      'link.gh',
+      'link.gm',
+      'link.gn',
+      'link.gq',
+      'link.gw',
+      'link.ke',
+      'link.km',
+      'link.lr',
+      'link.ls',
+      'link.ly',
+      'link.ma',
+      'link.mg',
+      'link.ml',
+      'link.mr',
+      'link.mu',
+      'link.mw',
+      'link.mz',
+      'link.na',
+      'link.ne',
+      'link.ng',
+      'link.rw',
+      'link.sc',
+      'link.sd',
+      'link.sl',
+      'link.sn',
+      'link.so',
+      'link.ss',
+      'link.st',
+      'link.sz',
+      'link.td',
+      'link.tg',
+      'link.tn',
+      'link.tz',
+      'link.ug',
+      'link.yt',
+      'link.zm',
+      'link.zw',
+      'link.ad',
+      'link.al',
+      'link.am',
+      'link.at',
+      'link.az',
+      'link.ba',
+      'link.be',
+      'link.bg',
+      'link.by',
+      'link.ch',
+      'link.cy',
+      'link.cz',
+      'link.dk',
+      'link.ee',
+      'link.fi',
+      'link.ge',
+      'link.gr',
+      'link.hr',
+      'link.hu',
+      'link.ie',
+      'link.is',
+      'link.li',
+      'link.lt',
+      'link.lu',
+      'link.lv',
+      'link.mc',
+      'link.md',
+      'link.me',
+      'link.mk',
+      'link.mt',
+      'link.nl',
+      'link.no',
+      'link.pl',
+      'link.pt',
+      'link.ro',
+      'link.rs',
+      'link.ru',
+      'link.se',
+      'link.si',
+      'link.sk',
+      'link.sm',
+      'link.tr',
+      'link.ua',
+      'link.va',
+      'link.xk'
+    ];
+
+    const domain = new URL(url).hostname;
+    const isForbidden = forbiddenDomains.some(forbiddenDomain => domain.includes(forbiddenDomain));
+
+    if (isForbidden) {
+      return 'الرجاء إدخال رابط دومين خاص (غير مجاني).';
+    }
+
+    return ''; // No error
+  };
+
   const handleNext = () => {
+    if (currentStep === 1) {
+      const error = validateWebsiteUrl(websiteUrl);
+      if (error) {
+        setWebsiteUrlError(error);
+        return;
+      } else {
+        setWebsiteUrlError('');
+      }
+    }
+
     if (currentStep === 5 && !selectedPlatform) {
       setShowPlatformModal(true);
       return;
@@ -230,7 +518,7 @@ const NewCampaign = () => {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1: return websiteUrl.length > 0;
+      case 1: return websiteUrl.length > 0 && !websiteUrlError; // Check for error
       case 2: return selectedLanguage.length > 0;
       case 3: return selectedLocation.length > 0;
       case 4: return campaignName.length > 0;
@@ -263,9 +551,15 @@ const NewCampaign = () => {
               type="url"
               placeholder="https://www.example.com"
               value={websiteUrl}
-              onChange={(e ) => setWebsiteUrl(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-lg"
+              onChange={(e) => {
+                setWebsiteUrl(e.target.value);
+                setWebsiteUrlError(''); // Clear error on change
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-center text-lg ${
+                websiteUrlError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
+              }`}
             />
+            {websiteUrlError && <p className="text-red-500 text-sm mt-2">{websiteUrlError}</p>}
           </div>
         );
 
@@ -427,17 +721,15 @@ const NewCampaign = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Keywords</h2>
-              <p className="text-gray-600">أدخل الكلمات المفتاحية التي تصف منتجك أو خدمتك</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Enter keywords for your campaign</h2>
+              <p className="text-gray-600">أدخل الكلمات المفتاحية التي تصف منتجاتك أو خدماتك</p>
             </div>
             <textarea
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+              placeholder="مثال: أحذية رياضية، ملابس رجالية، تسويق رقمي"
               rows={5}
-              placeholder="مثال: تسويق رقمي، إعلانات جوجل، تحسين محركات البحث"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
             ></textarea>
-            <div className="text-sm text-gray-500">
-              <p>سيتم استخدام هذه الكلمات المفتاحية لاستهداف الجمهور المناسب.</p>
-            </div>
+            <p className="text-sm text-gray-500">افصل بين الكلمات المفتاحية بفاصلة (,) أو سطر جديد.</p>
           </div>
         );
 
@@ -446,13 +738,13 @@ const NewCampaign = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose your budget</h2>
-              <p className="text-gray-600">اختر الميزانية التي تناسب حملتك الإعلانية</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Set your daily budget</h2>
+              <p className="text-gray-600">اختر ميزانيتك اليومية للحملة الإعلانية</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {budgetOptions.map((option, index) => (
+              {budgetOptions.map((option) => (
                 <div
-                  key={index}
+                  key={option.amount}
                   className={`border rounded-lg p-4 cursor-pointer transition-all ${
                     selectedBudget === option.amount
                       ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
@@ -460,10 +752,10 @@ const NewCampaign = () => {
                   }`}
                   onClick={() => handleBudgetSelect(option.amount)}
                 >
-                  <div className="font-bold text-xl mb-2">${option.amount}</div>
+                  <div className="font-bold text-xl text-gray-800">${option.amount}</div>
                   <div className="text-sm text-gray-600">{option.description}</div>
                   {option.recommended && (
-                    <span className="mt-2 inline-block text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Recommended</span>
+                    <span className="mt-2 inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Recommended</span>
                   )}
                 </div>
               ))}
@@ -475,15 +767,24 @@ const NewCampaign = () => {
                 }`}
                 onClick={handleCustomBudget}
               >
-                <div className="font-bold text-xl mb-2">Custom Budget</div>
-                <div className="text-sm text-gray-600">أدخل ميزانية مخصصة لحملتك.</div>
+                <div className="font-bold text-xl text-gray-800">Custom</div>
+                <div className="text-sm text-gray-600">Set your own daily budget</div>
               </div>
             </div>
-            {selectedBudget && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <h3 className="font-semibold text-blue-900 mb-2">Estimated Results:</h3>
-                <p className="text-blue-700">Impressions: {impressions.toLocaleString()}</p>
-                <p className="text-blue-700">Clicks: {clicks.toLocaleString()}</p>
+
+            {selectedBudget !== null && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <h3 className="font-semibold text-blue-800 mb-2">Estimated Results (per day)</h3>
+                <div className="flex justify-around text-gray-700">
+                  <div>
+                    <p className="text-2xl font-bold">{impressions.toLocaleString()}</p>
+                    <p className="text-sm">Impressions</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{clicks.toLocaleString()}</p>
+                    <p className="text-sm">Clicks</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -499,48 +800,81 @@ const NewCampaign = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">Company Name</label>
-                <input type="text" id="companyName" value={billingDetails.companyName} onChange={(e) => handleBillingDetailsChange('companyName', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                <input
+                  type="text"
+                  id="companyName"
+                  value={billingDetails.companyName}
+                  onChange={(e) => handleBillingDetailsChange('companyName', e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
               </div>
               <div>
                 <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
-                <select id="country" value={billingDetails.country} onChange={(e) => handleBillingDetailsChange('country', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <select
+                  id="country"
+                  value={billingDetails.country}
+                  onChange={(e) => handleBillingDetailsChange('country', e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
                   <option value="">Select Country</option>
-                  {countries.map(country => (
+                  {countries.map((country) => (
                     <option key={country.code} value={country.code}>{country.name}</option>
                   ))}
                 </select>
               </div>
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
-                <input type="text" id="city" value={billingDetails.city} onChange={(e) => handleBillingDetailsChange('city', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                <input
+                  type="text"
+                  id="city"
+                  value={billingDetails.city}
+                  onChange={(e) => handleBillingDetailsChange('city', e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
               </div>
               <div>
                 <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">Postal Code</label>
-                <input type="text" id="postalCode" value={billingDetails.postalCode} onChange={(e) => handleBillingDetailsChange('postalCode', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                <input
+                  type="text"
+                  id="postalCode"
+                  value={billingDetails.postalCode}
+                  onChange={(e) => handleBillingDetailsChange('postalCode', e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
               </div>
               <div className="md:col-span-2">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-                <input type="text" id="address" value={billingDetails.address} onChange={(e) => handleBillingDetailsChange('address', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                <input
+                  type="text"
+                  id="address"
+                  value={billingDetails.address}
+                  onChange={(e) => handleBillingDetailsChange('address', e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
               </div>
               <div className="md:col-span-2">
                 <label htmlFor="vatNumber" className="block text-sm font-medium text-gray-700">VAT Number (Optional)</label>
-                <input type="text" id="vatNumber" value={billingDetails.vatNumber} onChange={(e) => handleBillingDetailsChange('vatNumber', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                <input
+                  type="text"
+                  id="vatNumber"
+                  value={billingDetails.vatNumber}
+                  onChange={(e) => handleBillingDetailsChange('vatNumber', e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
               </div>
             </div>
           </div>
         );
 
       case 10:
-        const totalAmount = calculateTotal();
         return (
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment</h2>
               <p className="text-gray-600">اختر طريقة الدفع لإتمام حملتك</p>
             </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="font-semibold text-blue-900 mb-2">Order Summary</h3>
-              <p className="text-blue-700">Total Amount: ${totalAmount.toFixed(2)} {selectedCurrency}</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center mb-4">
+              <h3 className="font-semibold text-blue-800 mb-2">Total Amount Due: {calculateTotal().toFixed(2)} {selectedCurrency}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
@@ -552,7 +886,7 @@ const NewCampaign = () => {
                 onClick={() => handlePaymentMethodSelect('credit_card')}
               >
                 <div className="font-medium text-gray-800">Credit Card</div>
-                <div className="text-sm text-gray-600">ادفع باستخدام بطاقتك الائتمانية.</div>
+                <div className="text-sm text-gray-500">Visa, MasterCard, American Express</div>
               </div>
               <div
                 className={`border rounded-lg p-4 cursor-pointer transition-all ${
@@ -563,20 +897,12 @@ const NewCampaign = () => {
                 onClick={() => handlePaymentMethodSelect('paypal')}
               >
                 <div className="font-medium text-gray-800">PayPal</div>
-                <div className="text-sm text-gray-600">ادفع باستخدام حساب PayPal الخاص بك.</div>
+                <div className="text-sm text-gray-500">Pay securely with your PayPal account</div>
               </div>
             </div>
             {hasExistingBalance && (
-              <div
-                className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                  selectedPaymentMethod === 'balance'
-                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                onClick={() => handlePaymentMethodSelect('balance')}
-              >
-                <div className="font-medium text-gray-800">Use Existing Balance</div>
-                <div className="text-sm text-gray-600">استخدم رصيدك الحالي للدفع.</div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <p className="text-green-800 font-medium">لديك رصيد كافٍ في حسابك. سيتم خصم المبلغ منه.</p>
               </div>
             )}
           </div>
@@ -588,108 +914,152 @@ const NewCampaign = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 w-full max-w-3xl">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#E8EAF6] to-[#E0F2F7] flex items-center justify-center p-4 overflow-hidden">
+      {/* AI-inspired glowing particles/lines in background */}
+      <div className="absolute inset-0 z-0 opacity-30">
+        {/* Example of a simple glowing circle - more complex animations can be added */}
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 left-1/2 w-32 h-32 bg-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl z-10 backdrop-filter backdrop-blur-sm bg-opacity-80">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">New Campaign</h1>
-          <button onClick={() => window.history.back()} className="text-gray-500 hover:text-gray-700">
+          <button onClick={() => window.location.href = '/dashboard'} className="text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="flex justify-between mb-8">
+        {/* Progress Indicator */}
+        <div className="flex justify-between items-center mb-8">
           {steps.map((step) => (
-            <div key={step.id} className="flex flex-col items-center">
+            <div key={step.id} className="flex flex-col items-center relative">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                  currentStep === step.id
-                    ? 'bg-blue-500'
-                    : step.completed
-                    ? 'bg-green-500'
-                    : 'bg-gray-300'
+                  step.completed ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
               >
-                {step.completed && currentStep !== step.id ? <Check className="w-4 h-4" /> : step.id}
+                {step.completed ? <Check className="w-4 h-4" /> : step.id}
               </div>
-              <p className="text-xs mt-2 text-center text-gray-600">{step.title}</p>
+              <p className={`text-xs mt-2 ${step.completed ? 'text-blue-600' : 'text-gray-500'}`}>{step.title}</p>
+              {step.id < steps.length && (
+                <div
+                  className={`absolute left-full top-4 w-16 h-0.5 ${
+                    step.completed ? 'bg-blue-500' : 'bg-gray-300'
+                  } transform -translate-x-1/2`}
+                ></div>
+              )}
             </div>
           ))}
         </div>
 
+        {/* Step Content */}
         <div className="mb-8">
           {renderStepContent()}
         </div>
 
+        {/* Navigation Buttons */}
         <div className="flex justify-between">
           <button
             onClick={handleBack}
             disabled={currentStep === 1 || isGeneratingAds || isProcessingPayment}
-            className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className={`px-6 py-3 rounded-lg font-semibold transition-colors duration-300 ease-in-out transform hover:scale-105 ${
+              currentStep === 1 || isGeneratingAds || isProcessingPayment
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
+            }`}
           >
-            <ChevronLeft className="w-5 h-5 mr-2" />
+            <ChevronLeft className="w-5 h-5 inline-block mr-2" />
             Back
           </button>
           <button
             onClick={handleNext}
             disabled={!canProceed() || isGeneratingAds || isProcessingPayment}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`px-6 py-3 rounded-lg font-semibold transition-colors duration-300 ease-in-out transform hover:scale-105 ${
+              !canProceed() || isGeneratingAds || isProcessingPayment
+                ? 'bg-blue-300 text-white cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
+            }`}
           >
             {isGeneratingAds || isProcessingPayment ? 'Processing...' : getButtonText()}
           </button>
         </div>
-
-        {/* Modals */}
-        {showPlatformModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
-              <h3 className="text-xl font-bold mb-4">Please select a platform</h3>
-              <button onClick={() => setShowPlatformModal(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg">OK</button>
-            </div>
-          </div>
-        )}
-
-        {showAccountModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
-              <h3 className="text-xl font-bold mb-4">Please select an ad account</h3>
-              <button onClick={() => setShowAccountModal(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg">OK</button>
-            </div>
-          </div>
-        )}
-
-        {showGoogleAuth && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
-              <h3 className="text-xl font-bold mb-4">Connect to Google Ads</h3>
-              <p className="mb-4">Please authorize your Google Ads account to proceed.</p>
-              <button onClick={handleGoogleAuth} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Connect Google Ads</button>
-            </div>
-          </div>
-        )}
-
-        {showCustomBudgetModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-              <h3 className="text-xl font-bold mb-4">Enter Custom Budget</h3>
-              <input
-                type="number"
-                value={customBudget}
-                onChange={(e) => setCustomBudget(e.target.value)}
-                placeholder="Minimum $3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
-              />
-              <div className="flex justify-end space-x-2">
-                <button onClick={() => setShowCustomBudgetModal(false)} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg">Cancel</button>
-                <button onClick={handleCustomBudgetSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Modals */}
+      {showPlatformModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Select a Platform</h2>
+            <p className="text-gray-600 mb-6">Please select a platform to proceed.</p>
+            <button onClick={() => setShowPlatformModal(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Got It</button>
+          </div>
+        </div>
+      )}
+
+      {showAccountModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Select an Ad Account</h2>
+            <p className="text-gray-600 mb-6">Please select an ad account to proceed.</p>
+            <button onClick={() => setShowAccountModal(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Got It</button>
+          </div>
+        </div>
+      )}
+
+      {showGoogleAuth && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Connect Google Ads Account</h2>
+            <p className="text-gray-600 mb-6">You chose to use your own Google Ads account. Please connect it now.</p>
+            <button onClick={handleGoogleAuth} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Connect Account</button>
+          </div>
+        </div>
+      )}
+
+      {showCustomBudgetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Set Custom Daily Budget</h2>
+            <input
+              type="number"
+              placeholder="Enter amount (min $3)"
+              value={customBudget}
+              onChange={(e) => setCustomBudget(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg mb-4"
+            />
+            <div className="flex justify-end space-x-4">
+              <button onClick={() => setShowCustomBudgetModal(false)} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg">Cancel</button>
+              <button onClick={handleCustomBudgetSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isGeneratingAds && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Generating Ads...</h2>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-600">Please wait while we generate your ads.</p>
+          </div>
+        </div>
+      )}
+
+      {isProcessingPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Processing Payment...</h2>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-600">Please wait while your payment is processed.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default NewCampaign;
-// Note: This code is a simplified version of a multi-step campaign creation form.
-// It does not include actual API calls or state management for production use.   
+
+
