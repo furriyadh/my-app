@@ -7562,26 +7562,29 @@ __turbopack_context__.s({
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Dashboard$2f$AdAuctionInsights$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/Dashboard/AdAuctionInsights.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/client/app-dir/link.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Dashboard$2f$AudienceInsights$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/Dashboard/AudienceInsights.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trending-up.js [app-client] (ecmascript) <export default as TrendingUp>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trending-down.js [app-client] (ecmascript) <export default as TrendingDown>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/eye.js [app-client] (ecmascript) <export default as Eye>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mouse$2d$pointer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MousePointer$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/mouse-pointer.js [app-client] (ecmascript) <export default as MousePointer>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/dollar-sign.js [app-client] (ecmascript) <export default as DollarSign>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/users.js [app-client] (ecmascript) <export default as Users>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$funnel$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Filter$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/funnel.js [app-client] (ecmascript) <export default as Filter>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$download$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Download$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/download.js [app-client] (ecmascript) <export default as Download>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/refresh-cw.js [app-client] (ecmascript) <export default as RefreshCw>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$search$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Search$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/search.js [app-client] (ecmascript) <export default as Search>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/plus.js [app-client] (ecmascript) <export default as Plus>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$ellipsis$2d$vertical$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MoreVertical$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/ellipsis-vertical.js [app-client] (ecmascript) <export default as MoreVertical>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/play.js [app-client] (ecmascript) <export default as Play>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$square$2d$pen$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Edit$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/square-pen.js [app-client] (ecmascript) <export default as Edit>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$copy$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Copy$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/copy.js [app-client] (ecmascript) <export default as Copy>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/target.js [app-client] (ecmascript) <export default as Target>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$globe$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Globe$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/globe.js [app-client] (ecmascript) <export default as Globe>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$monitor$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Monitor$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/monitor.js [app-client] (ecmascript) <export default as Monitor>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-alert.js [app-client] (ecmascript) <export default as AlertCircle>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2d$big$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CheckCircle$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-check-big.js [app-client] (ecmascript) <export default as CheckCircle>");
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
-;
 ;
 ;
 ;
@@ -7595,6 +7598,8 @@ const GoogleAdsDashboard = ()=>{
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [campaigns, setCampaigns] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [metricCards, setMetricCards] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [apiError, setApiError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [apiSuccess, setApiSuccess] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     // Function to get date range based on selected option
     const getDateRange = (option)=>{
         const today = new Date();
@@ -7652,296 +7657,218 @@ const GoogleAdsDashboard = ()=>{
                 };
         }
     };
-    // Fetch campaigns data from Google Ads API
+    // Fetch campaigns data from Google Ads API via Next.js API Route
     const fetchCampaignsData = async (timePeriod)=>{
         try {
             setIsLoading(true);
+            setApiError(null);
+            setApiSuccess(false);
             const customerId = "3271710441"; // Customer ID (without dashes)
             const { startDate, endDate } = getDateRange(timePeriod);
-            const response = await fetch(`/api/google-ads?customer_id=${customerId}&data_type=campaigns&start_date=${startDate}&end_date=${endDate}`);
+            console.log('🚀 Calling Next.js API Route...');
+            console.log('📅 Date range:', {
+                startDate,
+                endDate,
+                customerId
+            });
+            // Call Next.js API Route instead of Supabase Edge Function
+            const response = await fetch('/api/google-ads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    loginCustomerId: customerId,
+                    startDate: startDate,
+                    endDate: endDate,
+                    dataType: 'campaigns'
+                })
+            });
             if (!response.ok) {
-                throw new Error("Failed to fetch campaigns data");
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            // Check if we have real data
-            if (data && Array.isArray(data) && data.length > 0) {
-                setCampaigns(data);
-                // Calculate metrics from campaigns data
-                const totalSpend = data.reduce((sum, campaign)=>sum + (campaign.spend || 0), 0);
-                const totalImpressions = data.reduce((sum, campaign)=>sum + (campaign.impressions || 0), 0);
-                const totalClicks = data.reduce((sum, campaign)=>sum + (campaign.clicks || 0), 0);
-                const totalConversions = data.reduce((sum, campaign)=>sum + (campaign.conversions || 0), 0);
-                const avgCtr = totalImpressions > 0 ? totalClicks / totalImpressions * 100 : 0;
-                const avgCpc = totalClicks > 0 ? totalSpend / totalClicks : 0;
+            const result = await response.json();
+            console.log('✅ API Response:', result);
+            if (result.success && result.data) {
+                // Process real Google Ads data
+                const { campaigns: campaignsData, summary } = result.data;
+                setCampaigns(campaignsData || []);
+                setApiSuccess(true);
+                // Create metric cards from summary data
                 const calculatedMetrics = [
                     {
-                        title: 'Total Spend',
-                        value: `$${totalSpend.toFixed(2)}`,
+                        title: 'Total Cost',
+                        value: `$${summary.totalCost.toFixed(2)}`,
                         change: '+12.5%',
                         trend: 'up',
                         icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
                             className: "w-6 h-6"
                         }, void 0, false, {
                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 144,
+                            lineNumber: 186,
                             columnNumber: 19
                         }, this),
                         color: 'bg-blue-500'
                     },
                     {
                         title: 'Impressions',
-                        value: totalImpressions.toLocaleString(),
+                        value: summary.totalImpressions.toLocaleString(),
                         change: '+8.3%',
                         trend: 'up',
                         icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
                             className: "w-6 h-6"
                         }, void 0, false, {
                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 152,
+                            lineNumber: 194,
                             columnNumber: 19
                         }, this),
                         color: 'bg-green-500'
                     },
                     {
                         title: 'Clicks',
-                        value: totalClicks.toLocaleString(),
+                        value: summary.totalClicks.toLocaleString(),
                         change: '+15.2%',
                         trend: 'up',
                         icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mouse$2d$pointer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MousePointer$3e$__["MousePointer"], {
                             className: "w-6 h-6"
                         }, void 0, false, {
                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 160,
+                            lineNumber: 202,
                             columnNumber: 19
                         }, this),
                         color: 'bg-purple-500'
                     },
                     {
                         title: 'CTR',
-                        value: `${avgCtr.toFixed(2)}%`,
+                        value: `${summary.avgCtr.toFixed(2)}%`,
                         change: '+0.3%',
                         trend: 'up',
                         icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
                             className: "w-6 h-6"
                         }, void 0, false, {
                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 168,
+                            lineNumber: 210,
                             columnNumber: 19
                         }, this),
                         color: 'bg-orange-500'
-                    },
-                    {
-                        title: 'Avg. CPC',
-                        value: `$${avgCpc.toFixed(2)}`,
-                        change: '-5.1%',
-                        trend: 'down',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 176,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-red-500'
-                    },
-                    {
-                        title: 'Conversions',
-                        value: totalConversions.toLocaleString(),
-                        change: '+22.1%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 184,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-indigo-500'
                     }
                 ];
                 setMetricCards(calculatedMetrics);
+                setApiError(null);
             } else {
-                // No real data available - set to default zero values
-                setCampaigns([]);
-                setMetricCards([
-                    {
-                        title: 'Total Spend',
-                        value: '$0.00',
-                        change: '0.0%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 199,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-blue-500'
-                    },
-                    {
-                        title: 'Impressions',
-                        value: '0',
-                        change: '0.0%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 207,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-green-500'
-                    },
-                    {
-                        title: 'Clicks',
-                        value: '0',
-                        change: '0.0%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mouse$2d$pointer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MousePointer$3e$__["MousePointer"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 215,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-purple-500'
-                    },
-                    {
-                        title: 'CTR',
-                        value: '0.00%',
-                        change: '0.0%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 223,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-orange-500'
-                    },
-                    {
-                        title: 'Avg. CPC',
-                        value: '$0.00',
-                        change: '0.0%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 231,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-red-500'
-                    },
-                    {
-                        title: 'Conversions',
-                        value: '0',
-                        change: '0.0%',
-                        trend: 'up',
-                        icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
-                            className: "w-6 h-6"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 239,
-                            columnNumber: 19
-                        }, this),
-                        color: 'bg-indigo-500'
-                    }
-                ]);
+                // Handle API error
+                const errorMessage = result.error || result.message || 'Unknown error occurred';
+                setApiError(errorMessage);
+                // Show demo data on error
+                showDemoData();
             }
         } catch (err) {
             console.error("Error fetching campaigns data:", err);
-            setCampaigns([]);
-            setMetricCards([
-                {
-                    title: 'Total Spend',
-                    value: '$0.00',
-                    change: '0.0%',
-                    trend: 'up',
-                    icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                        className: "w-6 h-6"
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 253,
-                        columnNumber: 17
-                    }, this),
-                    color: 'bg-blue-500'
-                },
-                {
-                    title: 'Impressions',
-                    value: '0',
-                    change: '0.0%',
-                    trend: 'up',
-                    icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
-                        className: "w-6 h-6"
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 261,
-                        columnNumber: 17
-                    }, this),
-                    color: 'bg-green-500'
-                },
-                {
-                    title: 'Clicks',
-                    value: '0',
-                    change: '0.0%',
-                    trend: 'up',
-                    icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mouse$2d$pointer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MousePointer$3e$__["MousePointer"], {
-                        className: "w-6 h-6"
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 269,
-                        columnNumber: 17
-                    }, this),
-                    color: 'bg-purple-500'
-                },
-                {
-                    title: 'CTR',
-                    value: '0.00%',
-                    change: '0.0%',
-                    trend: 'up',
-                    icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
-                        className: "w-6 h-6"
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 277,
-                        columnNumber: 17
-                    }, this),
-                    color: 'bg-orange-500'
-                },
-                {
-                    title: 'Avg. CPC',
-                    value: '$0.00',
-                    change: '0.0%',
-                    trend: 'up',
-                    icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                        className: "w-6 h-6"
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 285,
-                        columnNumber: 17
-                    }, this),
-                    color: 'bg-red-500'
-                },
-                {
-                    title: 'Conversions',
-                    value: '0',
-                    change: '0.0%',
-                    trend: 'up',
-                    icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
-                        className: "w-6 h-6"
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 293,
-                        columnNumber: 17
-                    }, this),
-                    color: 'bg-indigo-500'
-                }
-            ]);
+            setApiError(`Failed to fetch data: ${err.message || 'Connection error occurred'}`);
+            // Show demo data on error
+            showDemoData();
         } finally{
             setIsLoading(false);
         }
+    };
+    // Show demo data when API fails
+    const showDemoData = ()=>{
+        setCampaigns([
+            {
+                id: 'campaign-1',
+                name: 'Search Campaign - Demo',
+                status: 'Enabled',
+                type: 'Search',
+                budget: 4900,
+                budgetType: 'Daily',
+                spend: 245.50,
+                impressions: 1250,
+                clicks: 89,
+                ctr: 7.12,
+                avgCpc: 2.76,
+                cost: 245.50,
+                conversions: 12,
+                conversionRate: 13.48,
+                costPerConversion: 20.46,
+                searchImpressionShare: 85.2
+            },
+            {
+                id: 'campaign-2',
+                name: 'Display Campaign - Demo',
+                status: 'Enabled',
+                type: 'Display',
+                budget: 3000,
+                budgetType: 'Daily',
+                spend: 189.30,
+                impressions: 3420,
+                clicks: 156,
+                ctr: 4.56,
+                avgCpc: 1.21,
+                cost: 189.30,
+                conversions: 8,
+                conversionRate: 5.13,
+                costPerConversion: 23.66,
+                searchImpressionShare: 72.8
+            }
+        ]);
+        setMetricCards([
+            {
+                title: 'Total Cost',
+                value: '$434.80',
+                change: '+12.5%',
+                trend: 'up',
+                icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
+                    className: "w-6 h-6"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                    lineNumber: 283,
+                    columnNumber: 15
+                }, this),
+                color: 'bg-blue-500'
+            },
+            {
+                title: 'Impressions',
+                value: '4,670',
+                change: '+8.3%',
+                trend: 'up',
+                icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
+                    className: "w-6 h-6"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                    lineNumber: 291,
+                    columnNumber: 15
+                }, this),
+                color: 'bg-green-500'
+            },
+            {
+                title: 'Clicks',
+                value: '245',
+                change: '+15.2%',
+                trend: 'up',
+                icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mouse$2d$pointer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MousePointer$3e$__["MousePointer"], {
+                    className: "w-6 h-6"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                    lineNumber: 299,
+                    columnNumber: 15
+                }, this),
+                color: 'bg-purple-500'
+            },
+            {
+                title: 'CTR',
+                value: '5.24%',
+                change: '+0.3%',
+                trend: 'up',
+                icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
+                    className: "w-6 h-6"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                    lineNumber: 307,
+                    columnNumber: 15
+                }, this),
+                color: 'bg-orange-500'
+            }
+        ]);
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "GoogleAdsDashboard.useEffect": ()=>{
@@ -7950,8 +7877,15 @@ const GoogleAdsDashboard = ()=>{
     }["GoogleAdsDashboard.useEffect"], [
         selectedPeriod
     ]);
+    const normalizeStatus = (status)=>{
+        if (status === 'ENABLED') return 'Enabled';
+        if (status === 'PAUSED') return 'Paused';
+        if (status === 'REMOVED') return 'Removed';
+        return status;
+    };
     const getStatusColor = (status)=>{
-        switch(status){
+        const normalizedStatus = normalizeStatus(status);
+        switch(normalizedStatus){
             case 'Enabled':
                 return 'text-green-600 bg-green-50';
             case 'Paused':
@@ -7969,7 +7903,7 @@ const GoogleAdsDashboard = ()=>{
                     className: "w-4 h-4"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 322,
+                    lineNumber: 341,
                     columnNumber: 16
                 }, this);
             case 'Display':
@@ -7977,7 +7911,7 @@ const GoogleAdsDashboard = ()=>{
                     className: "w-4 h-4"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 324,
+                    lineNumber: 343,
                     columnNumber: 16
                 }, this);
             case 'Shopping':
@@ -7985,7 +7919,7 @@ const GoogleAdsDashboard = ()=>{
                     className: "w-4 h-4"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 326,
+                    lineNumber: 345,
                     columnNumber: 16
                 }, this);
             case 'Video':
@@ -7993,7 +7927,7 @@ const GoogleAdsDashboard = ()=>{
                     className: "w-4 h-4"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 328,
+                    lineNumber: 347,
                     columnNumber: 16
                 }, this);
             case 'Performance Max':
@@ -8001,7 +7935,7 @@ const GoogleAdsDashboard = ()=>{
                     className: "w-4 h-4"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 330,
+                    lineNumber: 349,
                     columnNumber: 16
                 }, this);
             default:
@@ -8009,14 +7943,14 @@ const GoogleAdsDashboard = ()=>{
                     className: "w-4 h-4"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 332,
+                    lineNumber: 351,
                     columnNumber: 16
                 }, this);
         }
     };
     const filteredCampaigns = campaigns.filter((campaign)=>{
         const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'All' || campaign.status === filterStatus;
+        const matchesStatus = filterStatus === 'All' || normalizeStatus(campaign.status) === filterStatus;
         return matchesSearch && matchesStatus;
     });
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8024,449 +7958,509 @@ const GoogleAdsDashboard = ()=>{
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "mb-8",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "flex items-center justify-between mb-4",
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                    className: "text-3xl font-bold text-gray-900 flex items-center",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mr-3",
-                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                className: "text-white text-lg font-bold",
-                                                children: "G"
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center justify-between mb-4",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                                        className: "text-3xl font-bold text-gray-900 flex items-center",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mr-3",
+                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-white text-lg font-bold",
+                                                    children: "G"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                    lineNumber: 369,
+                                                    columnNumber: 17
+                                                }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 350,
-                                                columnNumber: 17
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 349,
-                                            columnNumber: 15
-                                        }, this),
-                                        "Google Ads Dashboard"
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 348,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-gray-600 mt-1",
-                                    children: "Manage and optimize your Google Ads campaigns"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 354,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 347,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center space-x-3",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                    value: selectedPeriod,
-                                    onChange: (e)=>setSelectedPeriod(e.target.value),
-                                    className: "px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            children: "Today"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 362,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            children: "Yesterday"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 363,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            children: "Last 7 days"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 364,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            children: "Last 14 days"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 365,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            children: "Last 30 days"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 366,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            children: "Last 90 days"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 367,
-                                            columnNumber: 15
-                                        }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 357,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                    href: "/dashboard?section=new-campaign",
-                                    className: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
-                                            className: "w-4 h-4 mr-2"
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 370,
-                                            columnNumber: 15
-                                        }, this),
-                                        "New Campaign"
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 369,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 356,
-                            columnNumber: 11
-                        }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                    lineNumber: 346,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                lineNumber: 345,
-                columnNumber: 7
-            }, this),
-            isLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8",
-                children: Array.from({
-                    length: 6
-                }).map((_, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "h-12 bg-gray-200 rounded mb-4"
-                            }, void 0, false, {
-                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 382,
-                                columnNumber: 15
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "h-8 bg-gray-200 rounded mb-2"
-                            }, void 0, false, {
-                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 383,
-                                columnNumber: 15
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "h-4 bg-gray-200 rounded"
-                            }, void 0, false, {
-                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 384,
-                                columnNumber: 15
-                            }, this)
-                        ]
-                    }, index, true, {
-                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 381,
-                        columnNumber: 13
-                    }, this))
-            }, void 0, false, {
-                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                lineNumber: 379,
-                columnNumber: 9
-            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8",
-                children: metricCards.map((metric, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex items-center justify-between mb-4",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: `${metric.color} p-3 rounded-lg text-white`,
-                                        children: metric.icon
+                                                lineNumber: 368,
+                                                columnNumber: 15
+                                            }, this),
+                                            "Google Ads"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 367,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-gray-600 mt-1",
+                                        children: "Manage and monitor your advertising campaigns"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                        lineNumber: 393,
-                                        columnNumber: 17
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: `flex items-center text-sm font-medium ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`,
+                                        lineNumber: 373,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 366,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center space-x-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: ()=>fetchCampaignsData(selectedPeriod),
+                                        disabled: isLoading,
+                                        className: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50",
                                         children: [
-                                            metric.trend === 'up' ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__["TrendingUp"], {
-                                                className: "w-4 h-4 mr-1"
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
+                                                className: `w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 399,
-                                                columnNumber: 44
-                                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__["TrendingDown"], {
-                                                className: "w-4 h-4 mr-1"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 399,
-                                                columnNumber: 86
+                                                lineNumber: 381,
+                                                columnNumber: 15
                                             }, this),
-                                            metric.change
+                                            "Refresh Data"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 376,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                        value: selectedPeriod,
+                                        onChange: (e)=>setSelectedPeriod(e.target.value),
+                                        className: "px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                children: "Last 7 days"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 389,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                children: "Today"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 390,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                children: "Yesterday"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 391,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                children: "Last 14 days"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 392,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                children: "Last 30 days"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 393,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                children: "Last 90 days"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 394,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 384,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$download$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Download$3e$__["Download"], {
+                                                className: "w-4 h-4 mr-2"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 397,
+                                                columnNumber: 15
+                                            }, this),
+                                            "Export Data"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
                                         lineNumber: 396,
-                                        columnNumber: 17
+                                        columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 392,
-                                columnNumber: 15
+                                lineNumber: 375,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                        lineNumber: 365,
+                        columnNumber: 9
+                    }, this),
+                    apiError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
+                                className: "w-5 h-5 text-red-500 mr-3"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 406,
+                                columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                        className: "text-2xl font-bold text-gray-900 mb-1",
-                                        children: metric.value
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-red-800 font-medium",
+                                        children: "API Connection Issue"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                        lineNumber: 404,
-                                        columnNumber: 17
+                                        lineNumber: 408,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-gray-600 text-sm",
-                                        children: metric.title
+                                        className: "text-red-600 text-sm",
+                                        children: apiError
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                        lineNumber: 405,
-                                        columnNumber: 17
+                                        lineNumber: 409,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-red-600 text-sm",
+                                        children: "Showing demo data instead."
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 410,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 403,
-                                columnNumber: 15
+                                lineNumber: 407,
+                                columnNumber: 13
                             }, this)
                         ]
-                    }, index, true, {
+                    }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 391,
-                        columnNumber: 13
-                    }, this))
-            }, void 0, false, {
-                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                lineNumber: 389,
-                columnNumber: 9
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8",
-                children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "lg:col-span-1",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Dashboard$2f$AdAuctionInsights$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 416,
-                            columnNumber: 11
-                        }, this)
-                    }, void 0, false, {
+                        lineNumber: 405,
+                        columnNumber: 11
+                    }, this),
+                    apiSuccess && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2d$big$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CheckCircle$3e$__["CheckCircle"], {
+                                className: "w-5 h-5 text-green-500 mr-3"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 417,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-green-800 font-medium",
+                                        children: "Google Ads API Connected Successfully"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 419,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-green-600 text-sm",
+                                        children: "Showing real data from your Google Ads account."
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 420,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 418,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 415,
-                        columnNumber: 9
+                        lineNumber: 416,
+                        columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "lg:col-span-1",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Dashboard$2f$AudienceInsights$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 421,
-                            columnNumber: 11
-                        }, this)
-                    }, void 0, false, {
+                        className: "flex items-center justify-between mb-6",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center space-x-4",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "relative",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$search$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Search$3e$__["Search"], {
+                                                className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 429,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                type: "text",
+                                                placeholder: "Search campaigns...",
+                                                value: searchTerm,
+                                                onChange: (e)=>setSearchTerm(e.target.value),
+                                                className: "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 430,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 428,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                        value: filterStatus,
+                                        onChange: (e)=>setFilterStatus(e.target.value),
+                                        className: "px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "All",
+                                                children: "All Status"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 443,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "Enabled",
+                                                children: "Enabled"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 444,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "Paused",
+                                                children: "Paused"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 445,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "Removed",
+                                                children: "Removed"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 446,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 438,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 427,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                className: "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
+                                        className: "w-4 h-4 mr-2"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 450,
+                                        columnNumber: 13
+                                    }, this),
+                                    "Create Campaign"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 449,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 420,
+                        lineNumber: 426,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                lineNumber: 413,
+                lineNumber: 364,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8",
+                children: metricCards.map((card, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-white rounded-xl shadow-sm border border-gray-200 p-6",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-4",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: `w-12 h-12 rounded-lg ${card.color} flex items-center justify-center text-white`,
+                                        children: card.icon
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 461,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: `flex items-center text-sm ${card.trend === 'up' ? 'text-green-600' : 'text-red-600'}`,
+                                        children: [
+                                            card.trend === 'up' ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__["TrendingUp"], {
+                                                className: "w-4 h-4 mr-1"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 465,
+                                                columnNumber: 40
+                                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__["TrendingDown"], {
+                                                className: "w-4 h-4 mr-1"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                lineNumber: 465,
+                                                columnNumber: 82
+                                            }, this),
+                                            card.change
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                        lineNumber: 464,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 460,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                className: "text-gray-600 text-sm font-medium mb-1",
+                                children: card.title
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 469,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-gray-900",
+                                children: card.value
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 470,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, index, true, {
+                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                        lineNumber: 459,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                lineNumber: 457,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "bg-white rounded-xl shadow-sm border border-gray-200",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "p-6 border-b border-gray-200",
+                        className: "px-6 py-4 border-b border-gray-200",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center justify-between mb-4",
+                            className: "flex items-center justify-between",
                             children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                    className: "text-lg font-semibold text-gray-900",
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                    className: "text-xl font-semibold text-gray-900",
                                     children: "Campaigns"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 429,
+                                    lineNumber: 479,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "flex items-center space-x-3",
+                                    className: "flex items-center space-x-2",
                                     children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "relative",
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-sm text-gray-500",
                                             children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$search$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Search$3e$__["Search"], {
-                                                    className: "w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 432,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                    type: "text",
-                                                    placeholder: "Search campaigns...",
-                                                    value: searchTerm,
-                                                    onChange: (e)=>setSearchTerm(e.target.value),
-                                                    className: "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 433,
-                                                    columnNumber: 17
-                                                }, this)
+                                                filteredCampaigns.length,
+                                                " campaigns"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 431,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                            value: filterStatus,
-                                            onChange: (e)=>setFilterStatus(e.target.value),
-                                            className: "px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                    value: "All",
-                                                    children: "All Status"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 446,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                    value: "Enabled",
-                                                    children: "Enabled"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 447,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                    value: "Paused",
-                                                    children: "Paused"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 448,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                    value: "Removed",
-                                                    children: "Removed"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 449,
-                                                    columnNumber: 17
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 441,
+                                            lineNumber: 481,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            className: "p-2 text-gray-400 hover:text-gray-600",
+                                            className: "p-2 hover:bg-gray-100 rounded-lg transition-colors",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$funnel$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Filter$3e$__["Filter"], {
-                                                className: "w-5 h-5"
+                                                className: "w-4 h-4 text-gray-500"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 452,
+                                                lineNumber: 485,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 451,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            className: "p-2 text-gray-400 hover:text-gray-600",
-                                            onClick: ()=>fetchCampaignsData(selectedPeriod),
-                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
-                                                className: "w-5 h-5"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 455,
-                                                columnNumber: 17
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 454,
+                                            lineNumber: 484,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 430,
+                                    lineNumber: 480,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 428,
+                            lineNumber: 478,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 427,
+                        lineNumber: 477,
                         columnNumber: 9
                     }, this),
                     isLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "p-12 text-center",
+                        className: "p-8 text-center",
                         children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
+                                className: "w-8 h-8 animate-spin mx-auto mb-4 text-blue-500"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 463,
+                                lineNumber: 493,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-gray-500",
-                                children: "Loading campaigns..."
+                                className: "text-gray-600",
+                                children: "Loading campaigns data..."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                lineNumber: 464,
+                                lineNumber: 494,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 462,
+                        lineNumber: 492,
                         columnNumber: 11
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "overflow-x-auto",
@@ -8479,25 +8473,10 @@ const GoogleAdsDashboard = ()=>{
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                 className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                    type: "checkbox",
-                                                    className: "rounded border-gray-300"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 472,
-                                                    columnNumber: 21
-                                                }, this)
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 471,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                                                 children: "Campaign"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 474,
+                                                lineNumber: 501,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -8505,254 +8484,330 @@ const GoogleAdsDashboard = ()=>{
                                                 children: "Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 475,
+                                                lineNumber: 504,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
                                                 className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                children: "Budget"
+                                                children: "Cost"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 476,
+                                                lineNumber: 507,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                children: "Spend"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 477,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
+                                                className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                                                 children: "Impressions"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 478,
+                                                lineNumber: 510,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
+                                                className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                                                 children: "Clicks"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 479,
+                                                lineNumber: 513,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
+                                                className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                                                 children: "CTR"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 480,
+                                                lineNumber: 516,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
+                                                className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                                                 children: "Avg. CPC"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 481,
+                                                lineNumber: 519,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                className: "px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                children: "Conversions"
+                                                className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+                                                children: "Actions"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                lineNumber: 482,
+                                                lineNumber: 522,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                        lineNumber: 470,
+                                        lineNumber: 500,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 469,
+                                    lineNumber: 499,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
                                     className: "bg-white divide-y divide-gray-200",
-                                    children: filteredCampaigns.length > 0 ? filteredCampaigns.map((campaign)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                    children: filteredCampaigns.map((campaign)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
                                             className: "hover:bg-gray-50",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                                     className: "px-6 py-4 whitespace-nowrap",
-                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                        type: "checkbox",
-                                                        className: "rounded border-gray-300"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                        lineNumber: 490,
-                                                        columnNumber: 25
-                                                    }, this)
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 489,
-                                                    columnNumber: 23
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900",
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center",
                                                         children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "mr-2",
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "flex-shrink-0 mr-3",
                                                                 children: getCampaignTypeIcon(campaign.type)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                                lineNumber: 494,
-                                                                columnNumber: 27
+                                                                lineNumber: 532,
+                                                                columnNumber: 25
                                                             }, this),
-                                                            campaign.name
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "text-sm font-medium text-gray-900",
+                                                                        children: campaign.name
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                        lineNumber: 536,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "text-sm text-gray-500",
+                                                                        children: campaign.type
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                        lineNumber: 539,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                lineNumber: 535,
+                                                                columnNumber: 25
+                                                            }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                        lineNumber: 493,
-                                                        columnNumber: 25
+                                                        lineNumber: 531,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 492,
-                                                    columnNumber: 23
+                                                    lineNumber: 530,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                                     className: "px-6 py-4 whitespace-nowrap",
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                        className: `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(campaign.status)}`,
-                                                        children: campaign.status
+                                                        className: `inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(campaign.status)}`,
+                                                        children: normalizeStatus(campaign.status)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                        lineNumber: 499,
-                                                        columnNumber: 25
+                                                        lineNumber: 546,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 498,
-                                                    columnNumber: 23
+                                                    lineNumber: 545,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
+                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
                                                     children: [
                                                         "$",
-                                                        campaign.budget.toFixed(2)
+                                                        campaign.cost.toFixed(2)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 503,
-                                                    columnNumber: 23
+                                                    lineNumber: 550,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
-                                                    children: [
-                                                        "$",
-                                                        campaign.spend.toFixed(2)
-                                                    ]
-                                                }, void 0, true, {
-                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 504,
-                                                    columnNumber: 23
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
+                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
                                                     children: campaign.impressions.toLocaleString()
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 505,
-                                                    columnNumber: 23
+                                                    lineNumber: 553,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
+                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
                                                     children: campaign.clicks.toLocaleString()
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 506,
-                                                    columnNumber: 23
+                                                    lineNumber: 556,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
+                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
                                                     children: [
                                                         campaign.ctr.toFixed(2),
                                                         "%"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 507,
-                                                    columnNumber: 23
+                                                    lineNumber: 559,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
+                                                    className: "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
                                                     children: [
                                                         "$",
                                                         campaign.avgCpc.toFixed(2)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 508,
-                                                    columnNumber: 23
+                                                    lineNumber: 562,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                                     className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500",
-                                                    children: campaign.conversions.toLocaleString()
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex items-center space-x-2",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                className: "p-1 hover:bg-gray-100 rounded transition-colors",
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$square$2d$pen$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Edit$3e$__["Edit"], {
+                                                                    className: "w-4 h-4"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                    lineNumber: 568,
+                                                                    columnNumber: 27
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                lineNumber: 567,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                className: "p-1 hover:bg-gray-100 rounded transition-colors",
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$copy$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Copy$3e$__["Copy"], {
+                                                                    className: "w-4 h-4"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                    lineNumber: 571,
+                                                                    columnNumber: 27
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                lineNumber: 570,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                className: "p-1 hover:bg-gray-100 rounded transition-colors",
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$ellipsis$2d$vertical$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MoreVertical$3e$__["MoreVertical"], {
+                                                                    className: "w-4 h-4"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                    lineNumber: 574,
+                                                                    columnNumber: 27
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                                lineNumber: 573,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                                        lineNumber: 566,
+                                                        columnNumber: 23
+                                                    }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                                    lineNumber: 509,
-                                                    columnNumber: 23
+                                                    lineNumber: 565,
+                                                    columnNumber: 21
                                                 }, this)
                                             ]
                                         }, campaign.id, true, {
                                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 488,
-                                            columnNumber: 21
-                                        }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                            colSpan: 10,
-                                            className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center",
-                                            children: "No campaigns data available."
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                            lineNumber: 514,
-                                            columnNumber: 21
-                                        }, this)
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                        lineNumber: 513,
-                                        columnNumber: 19
-                                    }, this)
+                                            lineNumber: 529,
+                                            columnNumber: 19
+                                        }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                                    lineNumber: 485,
+                                    lineNumber: 527,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                            lineNumber: 468,
+                            lineNumber: 498,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                        lineNumber: 467,
+                        lineNumber: 497,
+                        columnNumber: 11
+                    }, this),
+                    !isLoading && filteredCampaigns.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "p-8 text-center",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$search$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Search$3e$__["Search"], {
+                                className: "w-12 h-12 mx-auto mb-4 text-gray-400"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 587,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-gray-600 mb-2",
+                                children: "No campaigns found"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 588,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-gray-500 text-sm",
+                                children: "Try adjusting your search or filter criteria"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                                lineNumber: 589,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                        lineNumber: 586,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-                lineNumber: 426,
+                lineNumber: 476,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Dashboard$2f$AdAuctionInsights$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                        lineNumber: 596,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Dashboard$2f$AudienceInsights$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                        fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                        lineNumber: 597,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
+                lineNumber: 595,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/Dashboard/GoogleAds/index.tsx",
-        lineNumber: 343,
+        lineNumber: 362,
         columnNumber: 5
     }, this);
 };
-_s(GoogleAdsDashboard, "F3oALe0nwbRodjSJ53HlUwn39qA=");
+_s(GoogleAdsDashboard, "IIEvo0JfLXr4BszzxYSJyG2aiPA=");
 _c = GoogleAdsDashboard;
 const __TURBOPACK__default__export__ = GoogleAdsDashboard;
 var _c;
