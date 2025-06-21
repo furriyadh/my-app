@@ -1,1 +1,12 @@
 node_modules
+# Environment variables
+.env.local
+.env
+.env.production
+.env.development
+
+# API Keys and Secrets
+google_ads_client.py
+credentials.json
+*.key
+*.pem
