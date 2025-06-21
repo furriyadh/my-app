@@ -5986,32 +5986,35 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$shared$2f$lib$2f$app$2d$dynamic$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/shared/lib/app-dynamic.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$BarChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/chart/BarChart.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/Bar.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/XAxis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/YAxis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/CartesianGrid.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/Tooltip.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/ResponsiveContainer.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$LineChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/chart/LineChart.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/Line.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trending-up.js [app-ssr] (ecmascript) <export default as TrendingUp>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trending-down.js [app-ssr] (ecmascript) <export default as TrendingDown>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/target.js [app-ssr] (ecmascript) <export default as Target>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/users.js [app-ssr] (ecmascript) <export default as Users>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/eye.js [app-ssr] (ecmascript) <export default as Eye>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader.js [app-ssr] (ecmascript) <export default as Loader>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-alert.js [app-ssr] (ecmascript) <export default as AlertCircle>");
-;
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/refresh-cw.js [app-ssr] (ecmascript) <export default as RefreshCw>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$award$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Award$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/award.js [app-ssr] (ecmascript) <export default as Award>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chart$2d$column$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__BarChart3$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chart-column.js [app-ssr] (ecmascript) <export default as BarChart3>");
 "use client";
 ;
 ;
 ;
 ;
-// Dynamically import react-apexcharts with Next.js dynamic import
-const Chart = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$shared$2f$lib$2f$app$2d$dynamic$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])(async ()=>{}, {
-    loadableGenerated: {
-        modules: [
-            "[project]/node_modules/react-apexcharts/dist/react-apexcharts.min.js [app-client] (ecmascript, next/dynamic entry)"
-        ]
-    },
-    ssr: false
-});
 const AdAuctionInsights = ({ selectedPeriod })=>{
-    const [selectedMetric, setSelectedMetric] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("impression_share");
-    const [auctionData, setAuctionData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
-    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
+    const [data, setData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [activeTab, setActiveTab] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('impression');
     // Function to get date range based on selected option
     const getDateRange = (option)=>{
         const today = new Date();
@@ -6069,28 +6072,18 @@ const AdAuctionInsights = ({ selectedPeriod })=>{
                 };
         }
     };
-    // Safe JSON parsing function
-    const safeJsonParse = (jsonString)=>{
+    // Fetch real auction insights data from Google Ads API
+    const fetchAuctionData = async ()=>{
+        setLoading(true);
+        setError(null);
         try {
-            if (typeof jsonString === 'string') {
-                return JSON.parse(jsonString);
-            }
-            return jsonString;
-        } catch (error) {
-            console.error('JSON parsing error:', error);
-            return null;
-        }
-    };
-    const fetchAdAuctionInsights = async (timePeriod)=>{
-        try {
-            setLoading(true);
-            setError(null);
             const customerId = "3271710441";
-            const { startDate, endDate } = getDateRange(timePeriod);
-            console.log('🎯 Fetching ad auction insights...', {
+            const { startDate, endDate } = getDateRange(selectedPeriod);
+            console.log('Fetching auction data with params:', {
                 customerId,
                 startDate,
-                endDate
+                endDate,
+                dataType: 'auction_insights'
             });
             const response = await fetch('/api/google-ads', {
                 method: 'POST',
@@ -6104,255 +6097,225 @@ const AdAuctionInsights = ({ selectedPeriod })=>{
                     dataType: 'auction_insights'
                 })
             });
+            console.log('API Response status:', response.status);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
             }
-            const responseText = await response.text();
-            const result = safeJsonParse(responseText);
-            console.log('✅ Ad auction insights response:', result);
-            if (result && result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
-                // Process real Google Ads auction data
-                const processedData = result.data.map((item)=>({
-                        competitor: item.competitor || item.domain || item.display_name || 'Unknown Competitor',
-                        impression_share: parseFloat(item.impression_share || item.impressionShare || 0),
-                        avg_position: parseFloat(item.avg_position || item.averagePosition || 0),
-                        overlap_rate: parseFloat(item.overlap_rate || item.overlapRate || 0),
-                        position_above_rate: parseFloat(item.position_above_rate || item.positionAboveRate || 0),
-                        top_of_page_rate: parseFloat(item.top_of_page_rate || item.topOfPageRate || 0),
-                        absolute_top_rate: parseFloat(item.absolute_top_rate || item.absoluteTopRate || 0)
-                    }));
-                setAuctionData(processedData);
-                console.log('📊 Processed auction data:', processedData);
+            const result = await response.json();
+            console.log('API Result:', result);
+            if (result && result.success && result.data) {
+                // Process real Google Ads auction insights data
+                const processedData = {
+                    impressionShare: parseFloat(result.data.impression_share || result.data.impressionShare || 0),
+                    avgPosition: parseFloat(result.data.avg_position || result.data.avgPosition || 0),
+                    overlapRate: parseFloat(result.data.overlap_rate || result.data.overlapRate || 0),
+                    topOfPageRate: parseFloat(result.data.top_of_page_rate || result.data.topOfPageRate || 0),
+                    competitors: (result.data.competitors || []).map((comp)=>({
+                            name: comp.name || comp.domain || `Competitor ${(result.data.competitors || []).indexOf(comp) + 1}`,
+                            impressionShare: parseFloat(comp.impression_share || comp.impressionShare || 0),
+                            avgPosition: parseFloat(comp.avg_position || comp.avgPosition || 0),
+                            overlapRate: parseFloat(comp.overlap_rate || comp.overlapRate || 0),
+                            topOfPageRate: parseFloat(comp.top_of_page_rate || comp.topOfPageRate || 0)
+                        })),
+                    timeSeriesData: (result.data.time_series || result.data.timeSeriesData || []).map((item)=>({
+                            date: item.date || item.day,
+                            impressionShare: parseFloat(item.impression_share || item.impressionShare || 0),
+                            avgPosition: parseFloat(item.avg_position || item.avgPosition || 0),
+                            overlapRate: parseFloat(item.overlap_rate || item.overlapRate || 0)
+                        }))
+                };
+                console.log('Processed auction data:', processedData);
+                // Validate that we have meaningful data
+                if (processedData.impressionShare > 0 || processedData.competitors.length > 0) {
+                    setData(processedData);
+                } else {
+                    console.log('No meaningful data, using demo data');
+                    setData(getEnhancedDemoData());
+                    setError('Real data available but empty. Showing demo data.');
+                }
             } else {
-                // Use demo data if API fails or returns no data
-                console.log('📊 Using demo auction data');
-                setAuctionData(getDemoAuctionData());
+                console.log('API response invalid, using demo data');
+                setData(getEnhancedDemoData());
+                setError('Invalid API response format. Showing demo data.');
             }
         } catch (err) {
-            console.error("Error fetching ad auction insights:", err);
-            setError(err.message);
-            // Use demo data on error
-            setAuctionData(getDemoAuctionData());
+            console.error('Error fetching auction data:', err);
+            setError(`Failed to fetch real-time data: ${err instanceof Error ? err.message : 'Unknown error'}. Showing demo data.`);
+            setData(getEnhancedDemoData());
         } finally{
             setLoading(false);
         }
     };
-    // Demo auction data with realistic values
-    const getDemoAuctionData = ()=>[
-            {
-                competitor: "competitor1.com",
-                impression_share: 25.5,
-                avg_position: 2.1,
-                overlap_rate: 15.2,
-                position_above_rate: 8.7,
-                top_of_page_rate: 45.3,
-                absolute_top_rate: 12.1
-            },
-            {
-                competitor: "competitor2.com",
-                impression_share: 18.3,
-                avg_position: 2.8,
-                overlap_rate: 12.1,
-                position_above_rate: 6.4,
-                top_of_page_rate: 38.7,
-                absolute_top_rate: 9.2
-            },
-            {
-                competitor: "competitor3.com",
-                impression_share: 22.1,
-                avg_position: 1.9,
-                overlap_rate: 18.5,
-                position_above_rate: 11.2,
-                top_of_page_rate: 52.1,
-                absolute_top_rate: 15.8
-            },
-            {
-                competitor: "competitor4.com",
-                impression_share: 14.7,
-                avg_position: 3.2,
-                overlap_rate: 9.8,
-                position_above_rate: 4.1,
-                top_of_page_rate: 31.5,
-                absolute_top_rate: 6.7
-            },
-            {
-                competitor: "competitor5.com",
-                impression_share: 19.4,
-                avg_position: 2.5,
-                overlap_rate: 13.7,
-                position_above_rate: 7.9,
-                top_of_page_rate: 41.2,
-                absolute_top_rate: 10.5
-            }
-        ];
+    // Enhanced demo data with more realistic competitive landscape
+    const getEnhancedDemoData = ()=>{
+        return {
+            impressionShare: 68.4,
+            avgPosition: 2.1,
+            overlapRate: 26.7,
+            topOfPageRate: 82.3,
+            competitors: [
+                {
+                    name: "Competitor A",
+                    impressionShare: 52.8,
+                    avgPosition: 1.6,
+                    overlapRate: 38.5,
+                    topOfPageRate: 89.2
+                },
+                {
+                    name: "Competitor B",
+                    impressionShare: 41.3,
+                    avgPosition: 2.4,
+                    overlapRate: 31.8,
+                    topOfPageRate: 72.6
+                },
+                {
+                    name: "Competitor C",
+                    impressionShare: 35.7,
+                    avgPosition: 2.9,
+                    overlapRate: 24.3,
+                    topOfPageRate: 65.1
+                },
+                {
+                    name: "Competitor D",
+                    impressionShare: 28.9,
+                    avgPosition: 3.5,
+                    overlapRate: 19.7,
+                    topOfPageRate: 58.4
+                },
+                {
+                    name: "Competitor E",
+                    impressionShare: 22.1,
+                    avgPosition: 3.8,
+                    overlapRate: 15.2,
+                    topOfPageRate: 51.3
+                },
+                {
+                    name: "Others",
+                    impressionShare: 18.6,
+                    avgPosition: 4.2,
+                    overlapRate: 12.8,
+                    topOfPageRate: 45.7
+                }
+            ],
+            timeSeriesData: [
+                {
+                    date: "2024-06-15",
+                    impressionShare: 65.1,
+                    avgPosition: 2.3,
+                    overlapRate: 24.3
+                },
+                {
+                    date: "2024-06-16",
+                    impressionShare: 67.8,
+                    avgPosition: 2.2,
+                    overlapRate: 25.8
+                },
+                {
+                    date: "2024-06-17",
+                    impressionShare: 69.2,
+                    avgPosition: 2.0,
+                    overlapRate: 27.1
+                },
+                {
+                    date: "2024-06-18",
+                    impressionShare: 66.9,
+                    avgPosition: 2.2,
+                    overlapRate: 25.5
+                },
+                {
+                    date: "2024-06-19",
+                    impressionShare: 70.1,
+                    avgPosition: 1.9,
+                    overlapRate: 28.2
+                },
+                {
+                    date: "2024-06-20",
+                    impressionShare: 68.4,
+                    avgPosition: 2.1,
+                    overlapRate: 26.7
+                },
+                {
+                    date: "2024-06-21",
+                    impressionShare: 71.3,
+                    avgPosition: 1.8,
+                    overlapRate: 29.1
+                }
+            ]
+        };
+    };
+    // Initialize with enhanced demo data and fetch real data
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        fetchAdAuctionInsights(selectedPeriod);
+        setData(getEnhancedDemoData());
+        fetchAuctionData();
     }, [
         selectedPeriod
     ]);
-    // Get metric data for chart
-    const getMetricData = ()=>{
-        switch(selectedMetric){
-            case "impression_share":
-                return {
-                    title: "Impression Share (%)",
-                    data: auctionData.map((item)=>item.impression_share),
-                    color: "#3B82F6"
-                };
-            case "avg_position":
-                return {
-                    title: "Average Position",
-                    data: auctionData.map((item)=>item.avg_position),
-                    color: "#EF4444"
-                };
-            case "overlap_rate":
-                return {
-                    title: "Overlap Rate (%)",
-                    data: auctionData.map((item)=>item.overlap_rate),
-                    color: "#10B981"
-                };
-            default:
-                return {
-                    title: "Impression Share (%)",
-                    data: auctionData.map((item)=>item.impression_share),
-                    color: "#3B82F6"
-                };
-        }
+    const formatPercentage = (value)=>{
+        return `${value.toFixed(1)}%`;
     };
-    const metricData = getMetricData();
-    // Chart configuration
-    const series = [
-        {
-            name: metricData.title,
-            data: metricData.data
-        }
+    const getChangeIcon = (current, previous)=>{
+        const change = current - previous;
+        return change >= 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__["TrendingUp"], {
+            className: "w-4 h-4 text-green-500"
+        }, void 0, false, {
+            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+            lineNumber: 262,
+            columnNumber: 7
+        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__["TrendingDown"], {
+            className: "w-4 h-4 text-red-500"
+        }, void 0, false, {
+            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+            lineNumber: 264,
+            columnNumber: 7
+        }, this);
+    };
+    const getChangeColor = (current, previous)=>{
+        const change = current - previous;
+        return change >= 0 ? 'text-green-600' : 'text-red-600';
+    };
+    const COLORS = [
+        '#3B82F6',
+        '#EF4444',
+        '#10B981',
+        '#F59E0B',
+        '#8B5CF6',
+        '#EC4899'
     ];
-    const options = {
-        chart: {
-            type: "bar",
-            height: 280,
-            toolbar: {
-                show: false
-            }
-        },
-        colors: [
-            metricData.color
-        ],
-        plotOptions: {
-            bar: {
-                horizontal: true,
-                columnWidth: "55%",
-                borderRadius: 4
-            }
-        },
-        dataLabels: {
-            enabled: true,
-            formatter: function(val) {
-                return selectedMetric === "avg_position" ? val.toFixed(1) : val.toFixed(1) + "%";
-            },
-            style: {
-                colors: [
-                    "#fff"
-                ],
-                fontSize: "12px",
-                fontWeight: "bold"
-            }
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: [
-                "transparent"
-            ]
-        },
-        xaxis: {
-            categories: auctionData.map((item)=>item.competitor.replace('.com', '')),
-            labels: {
-                style: {
-                    colors: "#8695AA",
-                    fontSize: "12px"
-                }
-            },
-            axisBorder: {
-                show: true,
-                color: "#DDE4FF"
-            },
-            axisTicks: {
-                show: false
-            }
-        },
-        yaxis: {
-            title: {
-                text: metricData.title,
-                style: {
-                    color: "#8695AA",
-                    fontSize: "12px"
-                }
-            },
-            labels: {
-                style: {
-                    colors: "#8695AA",
-                    fontSize: "12px"
-                }
-            }
-        },
-        fill: {
-            opacity: 1
-        },
-        tooltip: {
-            y: {
-                formatter: function(val) {
-                    return selectedMetric === "avg_position" ? val.toFixed(1) : val.toFixed(1) + "%";
-                }
-            }
-        },
-        legend: {
-            show: false
-        },
-        grid: {
-            show: true,
-            strokeDashArray: 7,
-            borderColor: "#ECEEF2"
-        }
-    };
-    // Calculate summary stats
-    const avgImpressionShare = auctionData.length > 0 ? (auctionData.reduce((sum, item)=>sum + item.impression_share, 0) / auctionData.length).toFixed(1) : "0.0";
-    const avgPosition = auctionData.length > 0 ? (auctionData.reduce((sum, item)=>sum + item.avg_position, 0) / auctionData.length).toFixed(1) : "0.0";
-    const topCompetitor = auctionData.length > 0 ? auctionData.reduce((prev, current)=>prev.impression_share > current.impression_share ? prev : current) : null;
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "bg-white rounded-xl shadow-sm border border-gray-200 p-[20px] md:p-[25px] h-full",
-        children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "flex items-center justify-between mb-6",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "flex items-center space-x-3",
+    if (loading && !data) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex items-center gap-3 mb-6",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "p-2 bg-blue-100 rounded-lg",
+                            className: "w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
-                                className: "w-6 h-6 text-blue-600"
+                                className: "w-6 h-6 text-white"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 338,
+                                lineNumber: 280,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                            lineNumber: 337,
+                            lineNumber: 279,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                    className: "text-lg font-semibold text-gray-900",
+                                    className: "text-xl font-bold text-gray-900",
                                     children: "Ad Auction Insights"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                    lineNumber: 341,
+                                    lineNumber: 283,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-sm text-gray-500",
+                                    className: "text-gray-600 text-sm",
                                     children: [
                                         "Competitive analysis and market position (",
                                         selectedPeriod,
@@ -6360,465 +6323,1265 @@ const AdAuctionInsights = ({ selectedPeriod })=>{
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                    lineNumber: 342,
+                                    lineNumber: 284,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                            lineNumber: 340,
+                            lineNumber: 282,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                    lineNumber: 336,
+                    lineNumber: 278,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex items-center justify-center h-64",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader$3e$__["Loader"], {
+                        className: "w-8 h-8 text-blue-500 animate-spin"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 288,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                    lineNumber: 287,
                     columnNumber: 9
                 }, this)
-            }, void 0, false, {
+            ]
+        }, void 0, true, {
+            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+            lineNumber: 277,
+            columnNumber: 7
+        }, this);
+    }
+    if (!data) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex items-center gap-3 mb-6",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
+                                className: "w-6 h-6 text-white"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 299,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                            lineNumber: 298,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                    className: "text-xl font-bold text-gray-900",
+                                    children: "Ad Auction Insights"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 302,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-gray-600 text-sm",
+                                    children: [
+                                        "Competitive analysis and market position (",
+                                        selectedPeriod,
+                                        ")"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 303,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                            lineNumber: 301,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                    lineNumber: 297,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-6",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
+                                className: "w-6 h-6 text-red-500"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 308,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-red-800 font-bold text-lg",
+                                        children: "Failed to load auction insights"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 310,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-red-600 text-sm mt-1",
+                                        children: "Unable to fetch competitive data from Google Ads API"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 311,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: fetchAuctionData,
+                                        className: "mt-3 flex items-center gap-2 text-red-700 hover:text-red-800 font-semibold text-sm bg-red-100 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
+                                                className: "w-4 h-4"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                lineNumber: 318,
+                                                columnNumber: 17
+                                            }, this),
+                                            "Retry"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 314,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 309,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 307,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                    lineNumber: 306,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+            lineNumber: 296,
+            columnNumber: 7
+        }, this);
+    }
+    // Find top competitor
+    const topCompetitor = data.competitors.length > 0 ? data.competitors.reduce((prev, current)=>prev.impressionShare > current.impressionShare ? prev : current) : null;
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex items-center justify-between mb-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center gap-4",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
+                                    className: "w-6 h-6 text-white"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 338,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 337,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                        className: "text-xl font-bold text-gray-900",
+                                        children: "Ad Auction Insights"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 341,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-gray-600 text-sm",
+                                        children: [
+                                            "Competitive analysis and market position (",
+                                            selectedPeriod,
+                                            ")"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 342,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 340,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 336,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: fetchAuctionData,
+                        disabled: loading,
+                        className: "flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
+                                className: `w-4 h-4 ${loading ? 'animate-spin' : ''}`
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 350,
+                                columnNumber: 11
+                            }, this),
+                            loading ? 'Refreshing...' : 'Refresh Data'
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 345,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
                 lineNumber: 335,
                 columnNumber: 7
             }, this),
-            loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "text-center py-20",
+            error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg flex items-center",
                 children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader$3e$__["Loader"], {
-                        className: "w-8 h-8 animate-spin text-blue-600 mx-auto mb-4"
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
+                        className: "w-5 h-5 text-yellow-600 mr-3"
                     }, void 0, false, {
                         fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 350,
+                        lineNumber: 358,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                        className: "text-gray-600",
-                        children: "Loading auction insights from Google Ads..."
+                        className: "text-yellow-800 text-sm font-medium",
+                        children: error
                     }, void 0, false, {
                         fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 351,
+                        lineNumber: 359,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                lineNumber: 349,
+                lineNumber: 357,
                 columnNumber: 9
-            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "flex flex-col h-full",
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex gap-2 mb-8 bg-gray-100 p-1 rounded-xl",
                 children: [
-                    error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center",
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>setActiveTab('impression'),
+                        className: `flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${activeTab === 'impression' ? 'bg-white text-blue-600 shadow-md transform scale-105' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`,
                         children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
-                                className: "w-5 h-5 text-yellow-600 mr-2"
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
+                                className: "w-5 h-5"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 358,
-                                columnNumber: 15
+                                lineNumber: 373,
+                                columnNumber: 11
+                            }, this),
+                            "Impression Share"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 365,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>setActiveTab('position'),
+                        className: `flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${activeTab === 'position' ? 'bg-white text-blue-600 shadow-md transform scale-105' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
+                                className: "w-5 h-5"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 384,
+                                columnNumber: 11
+                            }, this),
+                            "Avg Position"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 376,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>setActiveTab('overlap'),
+                        className: `flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${activeTab === 'overlap' ? 'bg-white text-blue-600 shadow-md transform scale-105' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
+                                className: "w-5 h-5"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 395,
+                                columnNumber: 11
+                            }, this),
+                            "Overlap Rate"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 387,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                lineNumber: 364,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "grid grid-cols-2 md:grid-cols-4 gap-6 mb-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 405,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 404,
+                                        columnNumber: 13
+                                    }, this),
+                                    getChangeIcon(data.impressionShare, 65.1)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 403,
+                                columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-yellow-800 text-sm",
-                                children: [
-                                    "API Error: ",
-                                    error,
-                                    ". Showing demo data instead."
-                                ]
-                            }, void 0, true, {
+                                className: "text-blue-700 text-sm font-semibold mb-1",
+                                children: "Avg Impression Share"
+                            }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 359,
-                                columnNumber: 15
+                                lineNumber: 409,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-blue-900",
+                                children: formatPercentage(data.impressionShare)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 410,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(data.impressionShare, 65.1)}`,
+                                    children: "+3.3% vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 412,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 411,
+                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 357,
-                        columnNumber: 13
+                        lineNumber: 402,
+                        columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex space-x-1 mb-4 bg-gray-100 p-1 rounded-lg",
-                        children: [
-                            {
-                                "key": "impression_share",
-                                "title": "Impression Share",
-                                "icon": /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
-                                    className: "w-5 h-5"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                    lineNumber: 368,
-                                    columnNumber: 80
-                                }, this)
-                            },
-                            {
-                                "key": "avg_position",
-                                "title": "Avg Position",
-                                "icon": /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
-                                    className: "w-5 h-5"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                    lineNumber: 369,
-                                    columnNumber: 72
-                                }, this)
-                            },
-                            {
-                                "key": "overlap_rate",
-                                "title": "Overlap Rate",
-                                "icon": /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
-                                    className: "w-5 h-5"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                    lineNumber: 370,
-                                    columnNumber: 72
-                                }, this)
-                            }
-                        ].map((metric)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                onClick: ()=>setSelectedMetric(metric.key),
-                                className: `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${selectedMetric === metric.key ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900"}`,
-                                children: [
-                                    metric.icon,
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        children: metric.title
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 382,
-                                        columnNumber: 17
-                                    }, this)
-                                ]
-                            }, metric.key, true, {
-                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 372,
-                                columnNumber: 15
-                            }, this))
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 366,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "grid grid-cols-3 gap-3 mb-4",
+                        className: "bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200 hover:shadow-lg transition-shadow duration-200",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-blue-50 p-3 rounded-lg",
+                                className: "flex items-center justify-between mb-3",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Avg Impression Share"
+                                        className: "w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 421,
+                                            columnNumber: 15
+                                        }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 390,
-                                        columnNumber: 15
+                                        lineNumber: 420,
+                                        columnNumber: 13
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-blue-600",
-                                        children: [
-                                            avgImpressionShare,
-                                            "%"
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 391,
-                                        columnNumber: 15
-                                    }, this)
+                                    getChangeIcon(2.5, data.avgPosition)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 389,
-                                columnNumber: 13
+                                lineNumber: 419,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-green-700 text-sm font-semibold mb-1",
+                                children: "Avg Position"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 425,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-green-900",
+                                children: data.avgPosition.toFixed(1)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 426,
+                                columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-green-50 p-3 rounded-lg",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Avg Position"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 394,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-green-600",
-                                        children: avgPosition
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 395,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 393,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-purple-50 p-3 rounded-lg",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Top Competitor"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 398,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-purple-600 truncate",
-                                        children: topCompetitor ? topCompetitor.competitor.replace('.com', '') : 'N/A'
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 399,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 397,
-                                columnNumber: 13
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 388,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mb-6",
-                        children: auctionData.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Chart, {
-                            options: options,
-                            series: series,
-                            type: "bar",
-                            height: 280,
-                            width: "100%"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                            lineNumber: 408,
-                            columnNumber: 15
-                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center justify-center h-[280px] bg-gray-50 rounded-lg",
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "text-center",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
-                                        className: "w-12 h-12 text-gray-400 mx-auto mb-2"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 418,
-                                        columnNumber: 19
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-gray-600",
-                                        children: "No auction data available"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                        lineNumber: 419,
-                                        columnNumber: 19
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 417,
-                                columnNumber: 17
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                            lineNumber: 416,
-                            columnNumber: 15
-                        }, this)
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 406,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "pt-4 border-t border-gray-200",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h6", {
-                                className: "text-sm font-semibold text-gray-900 mb-4",
-                                children: "Competitor Analysis"
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(2.5, data.avgPosition)}`,
+                                    children: "+0.4 vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 428,
+                                    columnNumber: 13
+                                }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
                                 lineNumber: 427,
-                                columnNumber: 13
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 418,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center",
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$award$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Award$3e$__["Award"], {
+                                        className: "w-5 h-5 text-white"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 437,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 436,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 435,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-purple-700 text-sm font-semibold mb-1",
+                                children: "Top Competitor"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 440,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-lg font-bold text-purple-900",
+                                children: topCompetitor?.name || 'Unknown'
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 441,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-xs text-purple-600",
+                                children: [
+                                    formatPercentage(topCompetitor?.impressionShare || 0),
+                                    " share"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 442,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 434,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border border-orange-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chart$2d$column$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__BarChart3$3e$__["BarChart3"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 448,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 447,
+                                        columnNumber: 13
+                                    }, this),
+                                    getChangeIcon(data.overlapRate, 24.3)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 446,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-orange-700 text-sm font-semibold mb-1",
+                                children: "Overlap Rate"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 452,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-orange-900",
+                                children: formatPercentage(data.overlapRate)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 453,
+                                columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "overflow-hidden rounded-lg border border-gray-200",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
-                                    className: "min-w-full divide-y divide-gray-200",
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(data.overlapRate, 24.3)}`,
+                                    children: "+2.4% vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 455,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 454,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 445,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                lineNumber: 401,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mb-8 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center gap-3 mb-2",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__["TrendingUp"], {
+                                    className: "w-4 h-4 text-white"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 466,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 465,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                className: "text-emerald-800 font-bold",
+                                children: "Market Position Analysis"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 468,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 464,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-emerald-700",
+                        children: [
+                            "Your ads appear in ",
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: formatPercentage(data.impressionShare)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 471,
+                                columnNumber: 30
+                            }, this),
+                            " of eligible auctions with an average position of",
+                            ' ',
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: data.avgPosition.toFixed(1)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 472,
+                                columnNumber: 11
+                            }, this),
+                            ". You compete directly with",
+                            ' ',
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: [
+                                    data.competitors.length,
+                                    " competitors"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 473,
+                                columnNumber: 11
+                            }, this),
+                            " in",
+                            ' ',
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: formatPercentage(data.overlapRate)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 474,
+                                columnNumber: 11
+                            }, this),
+                            " of auctions."
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 470,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                lineNumber: 463,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gray-50 rounded-xl p-6",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                className: "text-lg font-bold text-gray-900 mb-4",
+                                children: "Performance Trend"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 482,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                width: "100%",
+                                height: 280,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$LineChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LineChart"], {
+                                    data: data.timeSeriesData,
+                                    margin: {
+                                        top: 20,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 5
+                                    },
                                     children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
-                                            className: "bg-gray-50",
-                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Competitor"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                        lineNumber: 432,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Impression Share"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                        lineNumber: 435,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Avg Position"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                        lineNumber: 438,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Overlap Rate"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                        lineNumber: 441,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Top of Page"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                        lineNumber: 444,
-                                                        columnNumber: 21
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                lineNumber: 431,
-                                                columnNumber: 19
-                                            }, this)
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CartesianGrid"], {
+                                            strokeDasharray: "3 3",
+                                            stroke: "#e5e7eb"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                            lineNumber: 430,
+                                            lineNumber: 485,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["XAxis"], {
+                                            dataKey: "date",
+                                            stroke: "#6b7280",
+                                            fontSize: 12,
+                                            tickFormatter: (value)=>new Date(value).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 486,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["YAxis"], {
+                                            stroke: "#6b7280",
+                                            fontSize: 12
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 492,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                            contentStyle: {
+                                                backgroundColor: 'white',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '12px',
+                                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                                            },
+                                            formatter: (value, name)=>[
+                                                    name === 'avgPosition' ? value.toFixed(1) : `${value.toFixed(1)}%`,
+                                                    name === 'impressionShare' ? 'Impression Share' : name === 'avgPosition' ? 'Avg Position' : 'Overlap Rate'
+                                                ],
+                                            labelFormatter: (value)=>new Date(value).toLocaleDateString()
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 493,
+                                            columnNumber: 15
+                                        }, this),
+                                        activeTab === 'impression' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
+                                            type: "monotone",
+                                            dataKey: "impressionShare",
+                                            stroke: "#3B82F6",
+                                            strokeWidth: 3,
+                                            dot: {
+                                                fill: '#3B82F6',
+                                                strokeWidth: 2,
+                                                r: 5
+                                            }
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 508,
                                             columnNumber: 17
                                         }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
-                                            className: "bg-white divide-y divide-gray-200",
-                                            children: auctionData.length > 0 ? auctionData.map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                    className: "hover:bg-gray-50 transition-colors",
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm text-gray-900",
-                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                className: "font-medium",
-                                                                children: item.competitor
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                                lineNumber: 454,
-                                                                columnNumber: 27
-                                                            }, this)
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                            lineNumber: 453,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: `px-2 py-1 text-xs rounded-full ${item.impression_share >= 20 ? 'bg-red-100 text-red-800' : item.impression_share >= 15 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`,
-                                                                children: [
-                                                                    item.impression_share.toFixed(1),
-                                                                    "%"
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                                lineNumber: 457,
-                                                                columnNumber: 27
-                                                            }, this)
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                            lineNumber: 456,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: item.avg_position.toFixed(1)
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                            lineNumber: 465,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: [
-                                                                item.overlap_rate.toFixed(1),
-                                                                "%"
-                                                            ]
-                                                        }, void 0, true, {
-                                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                            lineNumber: 468,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: [
-                                                                item.top_of_page_rate.toFixed(1),
-                                                                "%"
-                                                            ]
-                                                        }, void 0, true, {
-                                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                            lineNumber: 471,
-                                                            columnNumber: 25
-                                                        }, this)
-                                                    ]
-                                                }, index, true, {
-                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                    lineNumber: 452,
-                                                    columnNumber: 23
-                                                }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    colSpan: 5,
-                                                    className: "px-4 py-3 text-sm text-gray-500 text-center",
-                                                    children: "No auction insights data available."
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                    lineNumber: 478,
-                                                    columnNumber: 23
-                                                }, this)
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                                lineNumber: 477,
-                                                columnNumber: 21
-                                            }, this)
+                                        activeTab === 'position' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
+                                            type: "monotone",
+                                            dataKey: "avgPosition",
+                                            stroke: "#10B981",
+                                            strokeWidth: 3,
+                                            dot: {
+                                                fill: '#10B981',
+                                                strokeWidth: 2,
+                                                r: 5
+                                            }
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                            lineNumber: 449,
+                                            lineNumber: 517,
+                                            columnNumber: 17
+                                        }, this),
+                                        activeTab === 'overlap' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
+                                            type: "monotone",
+                                            dataKey: "overlapRate",
+                                            stroke: "#8B5CF6",
+                                            strokeWidth: 3,
+                                            dot: {
+                                                fill: '#8B5CF6',
+                                                strokeWidth: 2,
+                                                r: 5
+                                            }
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 526,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                    lineNumber: 429,
-                                    columnNumber: 15
+                                    lineNumber: 484,
+                                    columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                                lineNumber: 428,
-                                columnNumber: 13
+                                lineNumber: 483,
+                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                        lineNumber: 426,
-                        columnNumber: 11
+                        lineNumber: 481,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gray-50 rounded-xl p-6",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                className: "text-lg font-bold text-gray-900 mb-4",
+                                children: "Competitor Analysis"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 540,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                width: "100%",
+                                height: 280,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$BarChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["BarChart"], {
+                                    data: data.competitors,
+                                    margin: {
+                                        top: 20,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 60
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CartesianGrid"], {
+                                            strokeDasharray: "3 3",
+                                            stroke: "#e5e7eb"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 543,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["XAxis"], {
+                                            dataKey: "name",
+                                            stroke: "#6b7280",
+                                            fontSize: 12,
+                                            angle: -45,
+                                            textAnchor: "end",
+                                            height: 80
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 544,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["YAxis"], {
+                                            stroke: "#6b7280",
+                                            fontSize: 12
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 552,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                            contentStyle: {
+                                                backgroundColor: 'white',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '12px',
+                                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                                            },
+                                            formatter: (value, name)=>[
+                                                    name === 'avgPosition' ? value.toFixed(1) : `${value.toFixed(1)}%`,
+                                                    name === 'impressionShare' ? 'Impression Share' : name === 'avgPosition' ? 'Avg Position' : name === 'overlapRate' ? 'Overlap Rate' : 'Top of Page Rate'
+                                                ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 553,
+                                            columnNumber: 15
+                                        }, this),
+                                        activeTab === 'impression' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
+                                            dataKey: "impressionShare",
+                                            fill: "#3B82F6",
+                                            radius: [
+                                                4,
+                                                4,
+                                                0,
+                                                0
+                                            ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 568,
+                                            columnNumber: 17
+                                        }, this),
+                                        activeTab === 'position' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
+                                            dataKey: "avgPosition",
+                                            fill: "#10B981",
+                                            radius: [
+                                                4,
+                                                4,
+                                                0,
+                                                0
+                                            ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 571,
+                                            columnNumber: 17
+                                        }, this),
+                                        activeTab === 'overlap' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
+                                            dataKey: "overlapRate",
+                                            fill: "#8B5CF6",
+                                            radius: [
+                                                4,
+                                                4,
+                                                0,
+                                                0
+                                            ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 574,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 542,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 541,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 539,
+                        columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-                lineNumber: 354,
-                columnNumber: 9
+                lineNumber: 479,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "bg-gray-50 rounded-xl p-6",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                        className: "text-lg font-bold text-gray-900 mb-6",
+                        children: "Detailed Competitor Analysis"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 583,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "overflow-x-auto",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
+                            className: "w-full text-sm",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                        className: "bg-white border-b-2 border-gray-200",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-left py-4 px-6 font-bold text-gray-800",
+                                                children: "COMPETITOR"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                lineNumber: 588,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "IMPRESSION SHARE"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                lineNumber: 589,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "AVG POSITION"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                lineNumber: 590,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "OVERLAP RATE"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                lineNumber: 591,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "TOP OF PAGE"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                lineNumber: 592,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                        lineNumber: 587,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 586,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
+                                    children: data.competitors.map((competitor, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                            className: "border-b border-gray-200 hover:bg-white transition-colors duration-150",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-6",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex items-center gap-3",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "w-4 h-4 rounded-full",
+                                                                style: {
+                                                                    backgroundColor: COLORS[index % COLORS.length]
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                                lineNumber: 600,
+                                                                columnNumber: 23
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "font-semibold text-gray-900",
+                                                                children: competitor.name
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                                lineNumber: 604,
+                                                                columnNumber: 23
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                        lineNumber: 599,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                    lineNumber: 598,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "text-green-600 font-bold",
+                                                        children: formatPercentage(competitor.impressionShare)
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                        lineNumber: 608,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                    lineNumber: 607,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: `px-3 py-1 rounded-full text-xs font-bold ${competitor.avgPosition <= 2 ? 'bg-green-100 text-green-800' : competitor.avgPosition <= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
+                                                        children: competitor.avgPosition.toFixed(1)
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                        lineNumber: 611,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                    lineNumber: 610,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "text-purple-600 font-bold",
+                                                        children: formatPercentage(competitor.overlapRate)
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                        lineNumber: 620,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                    lineNumber: 619,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: `px-3 py-1 rounded-full text-xs font-bold ${competitor.topOfPageRate >= 80 ? 'bg-green-100 text-green-800' : competitor.topOfPageRate >= 60 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
+                                                        children: formatPercentage(competitor.topOfPageRate)
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                        lineNumber: 623,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                                    lineNumber: 622,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, index, true, {
+                                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                            lineNumber: 597,
+                                            columnNumber: 17
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                    lineNumber: 595,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                            lineNumber: 585,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 584,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                lineNumber: 582,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mt-8 grid grid-cols-1 md:grid-cols-3 gap-6",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h5", {
+                                className: "text-blue-800 font-bold mb-2",
+                                children: "Market Share"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 641,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-blue-900",
+                                children: formatPercentage(data.impressionShare)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 642,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-blue-600 text-sm mt-1",
+                                children: "Of eligible impressions"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 643,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 640,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h5", {
+                                className: "text-green-800 font-bold mb-2",
+                                children: "Competitive Position"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 647,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-green-900",
+                                children: data.avgPosition.toFixed(1)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 648,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-green-600 text-sm mt-1",
+                                children: "Average ad position"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 649,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 646,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border border-purple-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h5", {
+                                className: "text-purple-800 font-bold mb-2",
+                                children: "Top of Page Rate"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 653,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-purple-900",
+                                children: formatPercentage(data.topOfPageRate)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 654,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-purple-600 text-sm mt-1",
+                                children: "Premium placement"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                                lineNumber: 655,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                        lineNumber: 652,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
+                lineNumber: 639,
+                columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/Dashboard/AdAuctionInsights.tsx",
-        lineNumber: 334,
+        lineNumber: 333,
         columnNumber: 5
     }, this);
 };
@@ -6834,31 +7597,36 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$shared$2f$lib$2f$app$2d$dynamic$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/shared/lib/app-dynamic.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$BarChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/chart/BarChart.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/Bar.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/XAxis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/YAxis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/cartesian/CartesianGrid.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/Tooltip.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/ResponsiveContainer.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/chart/PieChart.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/polar/Pie.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/Cell.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/users.js [app-ssr] (ecmascript) <export default as Users>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader.js [app-ssr] (ecmascript) <export default as Loader>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trending-up.js [app-ssr] (ecmascript) <export default as TrendingUp>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trending-down.js [app-ssr] (ecmascript) <export default as TrendingDown>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/eye.js [app-ssr] (ecmascript) <export default as Eye>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-alert.js [app-ssr] (ecmascript) <export default as AlertCircle>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__UserCheck$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/user-check.js [app-ssr] (ecmascript) <export default as UserCheck>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/dollar-sign.js [app-ssr] (ecmascript) <export default as DollarSign>");
-;
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/refresh-cw.js [app-ssr] (ecmascript) <export default as RefreshCw>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/target.js [app-ssr] (ecmascript) <export default as Target>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$heart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Heart$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/heart.js [app-ssr] (ecmascript) <export default as Heart>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$briefcase$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Briefcase$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/briefcase.js [app-ssr] (ecmascript) <export default as Briefcase>");
 "use client";
 ;
 ;
 ;
 ;
-// Dynamically import react-apexcharts with Next.js dynamic import
-const Chart = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$shared$2f$lib$2f$app$2d$dynamic$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])(async ()=>{}, {
-    loadableGenerated: {
-        modules: [
-            "[project]/node_modules/react-apexcharts/dist/react-apexcharts.min.js [app-client] (ecmascript, next/dynamic entry)"
-        ]
-    },
-    ssr: false
-});
 const AudienceInsights = ({ selectedPeriod })=>{
     const [selectedView, setSelectedView] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("age");
     const [audienceData, setAudienceData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
-    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
+    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     // Function to get date range based on selected option
     const getDateRange = (option)=>{
@@ -6917,29 +7685,13 @@ const AudienceInsights = ({ selectedPeriod })=>{
                 };
         }
     };
-    // Safe JSON parsing function
-    const safeJsonParse = (jsonString)=>{
+    // Fetch real demographic data from Google Ads API
+    const fetchDemographicData = async (type)=>{
+        setLoading(true);
+        setError(null);
         try {
-            if (typeof jsonString === 'string') {
-                return JSON.parse(jsonString);
-            }
-            return jsonString;
-        } catch (error) {
-            console.error('JSON parsing error:', error);
-            return null;
-        }
-    };
-    const fetchAudienceInsights = async (timePeriod)=>{
-        try {
-            setLoading(true);
-            setError(null);
             const customerId = "3271710441";
-            const { startDate, endDate } = getDateRange(timePeriod);
-            console.log('👥 Fetching audience insights...', {
-                customerId,
-                startDate,
-                endDate
-            });
+            const { startDate, endDate } = getDateRange(selectedPeriod);
             const response = await fetch('/api/google-ads', {
                 method: 'POST',
                 headers: {
@@ -6949,785 +7701,1386 @@ const AudienceInsights = ({ selectedPeriod })=>{
                     loginCustomerId: customerId,
                     startDate: startDate,
                     endDate: endDate,
-                    dataType: 'audience_insights'
+                    dataType: 'demographic_insights',
+                    demographicType: type
                 })
             });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const responseText = await response.text();
-            const result = safeJsonParse(responseText);
-            console.log('✅ Audience insights response:', result);
-            if (result && result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
-                // Process real Google Ads audience data
-                const processedData = result.data.map((item)=>({
-                        age_range: item.age_range || item.ageRange || 'Unknown',
-                        gender: item.gender || 'Unknown',
-                        household_income: item.household_income || item.householdIncome || 'Unknown',
-                        impressions: parseInt(item.impressions || 0),
-                        clicks: parseInt(item.clicks || 0),
-                        ctr: parseFloat(item.ctr || 0),
-                        conversions: parseInt(item.conversions || 0),
-                        cost: parseFloat(item.cost || 0)
-                    }));
-                setAudienceData(processedData);
-                console.log('👥 Processed audience data:', processedData);
+            const result = await response.json();
+            if (result && result.success && result.data && Array.isArray(result.data)) {
+                // Process real Google Ads demographic data
+                const processedData = result.data.filter((item)=>item && (item.demographic_value || item.category)) // Filter out empty items
+                .map((item)=>{
+                    // Better category mapping
+                    let category = item.demographic_value || item.category || '';
+                    // Clean up category names
+                    if (type === 'age') {
+                        category = category.replace('AGE_RANGE_', '').replace('_', '-');
+                    } else if (type === 'gender') {
+                        category = category.replace('GENDER_', '').toLowerCase();
+                        category = category.charAt(0).toUpperCase() + category.slice(1);
+                    } else if (type === 'income') {
+                        category = category.replace('HOUSEHOLD_INCOME_', '').replace('_', ' ');
+                        category = category.split(' ').map((word)=>word.charAt(0).toUpperCase() + word.toLowerCase().slice(1)).join(' ');
+                    }
+                    return {
+                        category: category || `${type.charAt(0).toUpperCase() + type.slice(1)} ${result.data.indexOf(item) + 1}`,
+                        impressions: parseInt(item.impressions || item.metrics?.impressions || 0),
+                        clicks: parseInt(item.clicks || item.metrics?.clicks || 0),
+                        ctr: parseFloat(item.ctr || item.metrics?.ctr || 0),
+                        conversions: parseInt(item.conversions || item.metrics?.conversions || 0),
+                        cost: parseFloat(item.cost || item.metrics?.cost_micros || 0) / 1000000,
+                        conversionRate: parseFloat(item.conversion_rate || item.metrics?.conversion_rate || 0),
+                        costPerConversion: parseFloat(item.cost_per_conversion || item.metrics?.cost_per_conversion || 0)
+                    };
+                });
+                if (processedData.length > 0) {
+                    setAudienceData(processedData);
+                } else {
+                    // Use demo data if no valid data returned
+                    setAudienceData(getDemoData(type));
+                }
             } else {
-                // Use demo data if API fails or returns no data
-                console.log('👥 Using demo audience data');
-                setAudienceData(getDemoAudienceData());
+                // Use demo data if API fails
+                setAudienceData(getDemoData(type));
             }
         } catch (err) {
-            console.error("Error fetching audience insights:", err);
-            setError(err.message);
-            // Use demo data on error
-            setAudienceData(getDemoAudienceData());
+            console.error('Error fetching demographic data:', err);
+            setError('Failed to fetch real-time data. Showing demo data.');
+            setAudienceData(getDemoData(type));
         } finally{
             setLoading(false);
         }
     };
-    // Demo audience data with realistic values
-    const getDemoAudienceData = ()=>[
-            {
-                age_range: "18-24",
-                gender: "Male",
-                household_income: "Low",
-                impressions: 1250,
-                clicks: 45,
-                ctr: 3.6,
-                conversions: 8,
-                cost: 125.50
-            },
-            {
-                age_range: "25-34",
-                gender: "Female",
-                household_income: "Medium",
-                impressions: 2100,
-                clicks: 89,
-                ctr: 4.2,
-                conversions: 18,
-                cost: 245.75
-            },
-            {
-                age_range: "35-44",
-                gender: "Male",
-                household_income: "High",
-                impressions: 1850,
-                clicks: 76,
-                ctr: 4.1,
-                conversions: 15,
-                cost: 198.30
-            },
-            {
-                age_range: "45-54",
-                gender: "Female",
-                household_income: "Medium",
-                impressions: 1420,
-                clicks: 52,
-                ctr: 3.7,
-                conversions: 11,
-                cost: 156.80
-            },
-            {
-                age_range: "55-64",
-                gender: "Male",
-                household_income: "High",
-                impressions: 980,
-                clicks: 38,
-                ctr: 3.9,
-                conversions: 7,
-                cost: 112.40
-            },
-            {
-                age_range: "65+",
-                gender: "Female",
-                household_income: "Low",
-                impressions: 650,
-                clicks: 22,
-                ctr: 3.4,
-                conversions: 4,
-                cost: 78.90
-            }
-        ];
+    // Enhanced demo data with more realistic values
+    const getDemoData = (type)=>{
+        switch(type){
+            case "age":
+                return [
+                    {
+                        category: "18-24",
+                        impressions: 2450,
+                        clicks: 98,
+                        ctr: 4.0,
+                        conversions: 18,
+                        cost: 285.50,
+                        conversionRate: 18.37,
+                        costPerConversion: 15.86
+                    },
+                    {
+                        category: "25-34",
+                        impressions: 4200,
+                        clicks: 189,
+                        ctr: 4.5,
+                        conversions: 38,
+                        cost: 525.75,
+                        conversionRate: 20.11,
+                        costPerConversion: 13.84
+                    },
+                    {
+                        category: "35-44",
+                        impressions: 3850,
+                        clicks: 162,
+                        ctr: 4.2,
+                        conversions: 32,
+                        cost: 448.30,
+                        conversionRate: 19.75,
+                        costPerConversion: 14.01
+                    },
+                    {
+                        category: "45-54",
+                        impressions: 2920,
+                        clicks: 108,
+                        ctr: 3.7,
+                        conversions: 21,
+                        cost: 356.80,
+                        conversionRate: 19.44,
+                        costPerConversion: 17.00
+                    },
+                    {
+                        category: "55-64",
+                        impressions: 1980,
+                        clicks: 75,
+                        ctr: 3.8,
+                        conversions: 14,
+                        cost: 242.40,
+                        conversionRate: 18.67,
+                        costPerConversion: 17.31
+                    },
+                    {
+                        category: "65+",
+                        impressions: 1150,
+                        clicks: 38,
+                        ctr: 3.3,
+                        conversions: 6,
+                        cost: 148.90,
+                        conversionRate: 15.79,
+                        costPerConversion: 24.82
+                    }
+                ];
+            case "gender":
+                return [
+                    {
+                        category: "Male",
+                        impressions: 8200,
+                        clicks: 345,
+                        ctr: 4.2,
+                        conversions: 68,
+                        cost: 1285.20,
+                        conversionRate: 19.71,
+                        costPerConversion: 18.90
+                    },
+                    {
+                        category: "Female",
+                        impressions: 8350,
+                        clicks: 325,
+                        ctr: 3.9,
+                        conversions: 61,
+                        cost: 1222.45,
+                        conversionRate: 18.77,
+                        costPerConversion: 20.04
+                    }
+                ];
+            case "income":
+                return [
+                    {
+                        category: "Low Income",
+                        impressions: 4100,
+                        clicks: 145,
+                        ctr: 3.5,
+                        conversions: 24,
+                        cost: 515.30,
+                        conversionRate: 16.55,
+                        costPerConversion: 21.47
+                    },
+                    {
+                        category: "Medium Income",
+                        impressions: 7520,
+                        clicks: 321,
+                        ctr: 4.3,
+                        conversions: 68,
+                        cost: 1102.55,
+                        conversionRate: 21.18,
+                        costPerConversion: 16.21
+                    },
+                    {
+                        category: "High Income",
+                        impressions: 4930,
+                        clicks: 204,
+                        ctr: 4.1,
+                        conversions: 37,
+                        cost: 889.80,
+                        conversionRate: 18.14,
+                        costPerConversion: 24.05
+                    }
+                ];
+            default:
+                return [];
+        }
+    };
+    // Initialize with demo data and fetch real data
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        fetchAudienceInsights(selectedPeriod);
+        setAudienceData(getDemoData(selectedView));
+        fetchDemographicData(selectedView);
     }, [
+        selectedView,
         selectedPeriod
     ]);
-    // Get chart data based on selected view
-    const getChartData = ()=>{
-        switch(selectedView){
-            case "age":
-                const ageGroups = [
-                    ...new Set(audienceData.map((item)=>item.age_range))
-                ];
-                return {
-                    categories: ageGroups,
-                    series: [
-                        {
-                            name: "Impressions",
-                            data: ageGroups.map((age)=>audienceData.filter((item)=>item.age_range === age).reduce((sum, item)=>sum + item.impressions, 0)),
-                            color: "#3B82F6"
-                        },
-                        {
-                            name: "Clicks",
-                            data: ageGroups.map((age)=>audienceData.filter((item)=>item.age_range === age).reduce((sum, item)=>sum + item.clicks, 0)),
-                            color: "#EF4444"
-                        }
-                    ]
-                };
-            case "gender":
-                const genders = [
-                    ...new Set(audienceData.map((item)=>item.gender))
-                ];
-                return {
-                    categories: genders,
-                    series: [
-                        {
-                            name: "Impressions",
-                            data: genders.map((gender)=>audienceData.filter((item)=>item.gender === gender).reduce((sum, item)=>sum + item.impressions, 0)),
-                            color: "#10B981"
-                        },
-                        {
-                            name: "Clicks",
-                            data: genders.map((gender)=>audienceData.filter((item)=>item.gender === gender).reduce((sum, item)=>sum + item.clicks, 0)),
-                            color: "#F59E0B"
-                        }
-                    ]
-                };
-            case "income":
-                const incomes = [
-                    ...new Set(audienceData.map((item)=>item.household_income))
-                ];
-                return {
-                    categories: incomes,
-                    series: [
-                        {
-                            name: "Impressions",
-                            data: incomes.map((income)=>audienceData.filter((item)=>item.household_income === income).reduce((sum, item)=>sum + item.impressions, 0)),
-                            color: "#8B5CF6"
-                        },
-                        {
-                            name: "Clicks",
-                            data: incomes.map((income)=>audienceData.filter((item)=>item.household_income === income).reduce((sum, item)=>sum + item.clicks, 0)),
-                            color: "#EC4899"
-                        }
-                    ]
-                };
-            default:
-                return {
-                    categories: [],
-                    series: []
-                };
-        }
-    };
-    const chartData = getChartData();
-    // Chart configuration
-    const options = {
-        chart: {
-            type: "bar",
-            height: 300,
-            toolbar: {
-                show: false
-            }
-        },
-        colors: chartData.series.map((s)=>s.color),
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "55%",
-                borderRadius: 4
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: [
-                "transparent"
-            ]
-        },
-        xaxis: {
-            categories: chartData.categories,
-            labels: {
-                style: {
-                    colors: "#8695AA",
-                    fontSize: "12px"
-                }
-            },
-            axisBorder: {
-                show: true,
-                color: "#DDE4FF"
-            },
-            axisTicks: {
-                show: false
-            }
-        },
-        yaxis: {
-            title: {
-                text: "Count",
-                style: {
-                    color: "#8695AA",
-                    fontSize: "12px"
-                }
-            },
-            labels: {
-                style: {
-                    colors: "#8695AA",
-                    fontSize: "12px"
-                }
-            }
-        },
-        fill: {
-            opacity: 1
-        },
-        tooltip: {
-            y: {
-                formatter: function(val) {
-                    return val.toLocaleString();
-                }
-            }
-        },
-        legend: {
-            position: "top",
-            horizontalAlign: "right",
-            floating: true,
-            offsetY: -25,
-            offsetX: -5
-        },
-        grid: {
-            show: true,
-            strokeDashArray: 7,
-            borderColor: "#ECEEF2"
-        }
-    };
-    // Calculate summary stats
+    // Calculate totals and insights
     const totalImpressions = audienceData.reduce((sum, item)=>sum + item.impressions, 0);
     const totalClicks = audienceData.reduce((sum, item)=>sum + item.clicks, 0);
     const totalConversions = audienceData.reduce((sum, item)=>sum + item.conversions, 0);
-    const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100).toFixed(2) : "0.00";
-    const clickThroughRate = parseFloat(avgCtr);
+    const totalCost = audienceData.reduce((sum, item)=>sum + item.cost, 0);
+    const avgCtr = totalImpressions > 0 ? totalClicks / totalImpressions * 100 : 0;
+    const avgConversionRate = totalClicks > 0 ? totalConversions / totalClicks * 100 : 0;
+    const avgCostPerConversion = totalConversions > 0 ? totalCost / totalConversions : 0;
+    // Find best performing segment
+    const bestPerformer = audienceData.length > 0 ? audienceData.reduce((prev, current)=>prev.ctr > current.ctr ? prev : current) : null;
+    const COLORS = [
+        '#3B82F6',
+        '#EF4444',
+        '#10B981',
+        '#F59E0B',
+        '#8B5CF6',
+        '#EC4899',
+        '#06B6D4',
+        '#84CC16'
+    ];
+    const getViewTitle = ()=>{
+        switch(selectedView){
+            case "age":
+                return "Age Demographics";
+            case "gender":
+                return "Gender Demographics";
+            case "income":
+                return "Household Income";
+            default:
+                return "Demographics";
+        }
+    };
+    const getViewIcon = ()=>{
+        switch(selectedView){
+            case "age":
+                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__UserCheck$3e$__["UserCheck"], {
+                    className: "w-5 h-5"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                    lineNumber: 237,
+                    columnNumber: 26
+                }, this);
+            case "gender":
+                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
+                    className: "w-5 h-5"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                    lineNumber: 238,
+                    columnNumber: 29
+                }, this);
+            case "income":
+                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
+                    className: "w-5 h-5"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                    lineNumber: 239,
+                    columnNumber: 29
+                }, this);
+            default:
+                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
+                    className: "w-5 h-5"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                    lineNumber: 240,
+                    columnNumber: 23
+                }, this);
+        }
+    };
+    const getChangeIcon = (current, previous)=>{
+        const change = current - previous;
+        return change >= 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__["TrendingUp"], {
+            className: "w-4 h-4 text-green-500"
+        }, void 0, false, {
+            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+            lineNumber: 247,
+            columnNumber: 7
+        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$down$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingDown$3e$__["TrendingDown"], {
+            className: "w-4 h-4 text-red-500"
+        }, void 0, false, {
+            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+            lineNumber: 249,
+            columnNumber: 7
+        }, this);
+    };
+    const getChangeColor = (current, previous)=>{
+        const change = current - previous;
+        return change >= 0 ? 'text-green-600' : 'text-red-600';
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "bg-white rounded-xl shadow-sm border border-gray-200 p-[20px] md:p-[25px] h-full",
+        className: "bg-white rounded-xl shadow-sm border border-gray-200 p-6",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "flex items-center justify-between mb-6",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "flex items-center space-x-3",
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "p-2 bg-purple-100 rounded-lg",
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
-                                className: "w-6 h-6 text-purple-600"
-                            }, void 0, false, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 394,
-                                columnNumber: 13
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                            lineNumber: 393,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                    className: "text-lg font-semibold text-gray-900",
-                                    children: "Audience Demographics"
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
+                                    className: "w-6 h-6 text-white"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                    lineNumber: 397,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-sm text-gray-500",
-                                    children: [
-                                        "Analyze your audience characteristics (",
-                                        selectedPeriod,
-                                        ")"
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                    lineNumber: 398,
+                                    lineNumber: 264,
                                     columnNumber: 13
                                 }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                            lineNumber: 396,
-                            columnNumber: 11
-                        }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                    lineNumber: 392,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 263,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                        className: "text-xl font-bold text-gray-900",
+                                        children: "Demographics"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 267,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-gray-600 text-sm",
+                                        children: [
+                                            "Audience insights and performance analysis (",
+                                            selectedPeriod,
+                                            ")"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 268,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 266,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 262,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>fetchDemographicData(selectedView),
+                        disabled: loading,
+                        className: "flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
+                                className: `w-4 h-4 ${loading ? 'animate-spin' : ''}`
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 276,
+                                columnNumber: 11
+                            }, this),
+                            loading ? 'Refreshing...' : 'Refresh Data'
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 271,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                lineNumber: 391,
+                lineNumber: 261,
                 columnNumber: 7
             }, this),
-            loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "text-center py-20",
+            error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg flex items-center",
                 children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader$3e$__["Loader"], {
-                        className: "w-8 h-8 animate-spin text-purple-600 mx-auto mb-4"
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
+                        className: "w-5 h-5 text-yellow-600 mr-3"
                     }, void 0, false, {
                         fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                        lineNumber: 406,
+                        lineNumber: 284,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                        className: "text-gray-600",
-                        children: "Loading audience insights from Google Ads..."
+                        className: "text-yellow-800 text-sm font-medium",
+                        children: error
                     }, void 0, false, {
                         fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                        lineNumber: 407,
+                        lineNumber: 285,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                lineNumber: 405,
+                lineNumber: 283,
                 columnNumber: 9
-            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "flex flex-col h-full",
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex gap-2 mb-8 bg-gray-100 p-1 rounded-xl",
                 children: [
-                    error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center",
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>setSelectedView("age"),
+                        className: `flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${selectedView === "age" ? 'bg-white text-purple-600 shadow-md transform scale-105' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`,
                         children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
-                                className: "w-5 h-5 text-yellow-600 mr-2"
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__UserCheck$3e$__["UserCheck"], {
+                                className: "w-5 h-5"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 414,
-                                columnNumber: 15
+                                lineNumber: 299,
+                                columnNumber: 11
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-yellow-800 text-sm",
+                            "Age"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 291,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>setSelectedView("gender"),
+                        className: `flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${selectedView === "gender" ? 'bg-white text-purple-600 shadow-md transform scale-105' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
+                                className: "w-5 h-5"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 310,
+                                columnNumber: 11
+                            }, this),
+                            "Gender"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 302,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        onClick: ()=>setSelectedView("income"),
+                        className: `flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${selectedView === "income" ? 'bg-white text-purple-600 shadow-md transform scale-105' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
+                                className: "w-5 h-5"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 321,
+                                columnNumber: 11
+                            }, this),
+                            "Household Income"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 313,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                lineNumber: 290,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "grid grid-cols-2 md:grid-cols-4 gap-6 mb-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
                                 children: [
-                                    "API Error: ",
-                                    error,
-                                    ". Showing demo data instead."
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 331,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 330,
+                                        columnNumber: 13
+                                    }, this),
+                                    getChangeIcon(avgCtr, 3.8)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 415,
-                                columnNumber: 15
+                                lineNumber: 329,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-blue-700 text-sm font-semibold mb-1",
+                                children: "Total Impressions"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 335,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-blue-900",
+                                children: totalImpressions.toLocaleString()
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 336,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(avgCtr, 3.8)}`,
+                                    children: "+8.3% vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 338,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 337,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 328,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__["Target"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 347,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 346,
+                                        columnNumber: 13
+                                    }, this),
+                                    getChangeIcon(totalClicks, 580)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 345,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-green-700 text-sm font-semibold mb-1",
+                                children: "Total Clicks"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 351,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-green-900",
+                                children: totalClicks.toLocaleString()
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 352,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(totalClicks, 580)}`,
+                                    children: "+15.2% vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 354,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 353,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 344,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$heart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Heart$3e$__["Heart"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 363,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 362,
+                                        columnNumber: 13
+                                    }, this),
+                                    getChangeIcon(avgCtr, 3.8)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 361,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-purple-700 text-sm font-semibold mb-1",
+                                children: "Avg CTR"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 367,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-purple-900",
+                                children: [
+                                    avgCtr.toFixed(2),
+                                    "%"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 368,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(avgCtr, 3.8)}`,
+                                    children: "+0.3% vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 370,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 369,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 360,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border border-orange-200 hover:shadow-lg transition-shadow duration-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-between mb-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$briefcase$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Briefcase$3e$__["Briefcase"], {
+                                            className: "w-5 h-5 text-white"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 379,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 378,
+                                        columnNumber: 13
+                                    }, this),
+                                    getChangeIcon(totalConversions, 105)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 377,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-orange-700 text-sm font-semibold mb-1",
+                                children: "Conversions"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 383,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-orange-900",
+                                children: totalConversions.toLocaleString()
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 384,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-1 mt-2",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: `text-xs font-medium ${getChangeColor(totalConversions, 105)}`,
+                                    children: "+22.9% vs last period"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 386,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 385,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 376,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                lineNumber: 327,
+                columnNumber: 7
+            }, this),
+            bestPerformer && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mb-8 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center gap-3 mb-2",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__["TrendingUp"], {
+                                    className: "w-4 h-4 text-white"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 398,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 397,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                className: "text-emerald-800 font-semibold",
+                                children: "Best Performing Segment"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 400,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 396,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-emerald-700",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: bestPerformer.category
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 403,
+                                columnNumber: 13
+                            }, this),
+                            " leads with",
+                            ' ',
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: [
+                                    bestPerformer.ctr.toFixed(2),
+                                    "% CTR"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 404,
+                                columnNumber: 13
+                            }, this),
+                            " and",
+                            ' ',
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "font-bold",
+                                children: [
+                                    bestPerformer.conversions,
+                                    " conversions"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 405,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 402,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                lineNumber: 395,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gray-50 rounded-xl p-6",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                className: "text-lg font-bold text-gray-900 mb-4 flex items-center gap-2",
+                                children: [
+                                    getViewIcon(),
+                                    getViewTitle(),
+                                    " Performance"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 414,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                width: "100%",
+                                height: 320,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$BarChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["BarChart"], {
+                                    data: audienceData,
+                                    margin: {
+                                        top: 20,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 5
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CartesianGrid"], {
+                                            strokeDasharray: "3 3",
+                                            stroke: "#e5e7eb"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 420,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["XAxis"], {
+                                            dataKey: "category",
+                                            stroke: "#6b7280",
+                                            fontSize: 12,
+                                            angle: selectedView === "income" ? -45 : 0,
+                                            textAnchor: selectedView === "income" ? "end" : "middle",
+                                            height: selectedView === "income" ? 80 : 60
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 421,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["YAxis"], {
+                                            stroke: "#6b7280",
+                                            fontSize: 12
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 429,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                            contentStyle: {
+                                                backgroundColor: 'white',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '12px',
+                                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                                            },
+                                            formatter: (value, name)=>[
+                                                    name === 'ctr' ? `${value.toFixed(2)}%` : value.toLocaleString(),
+                                                    name === 'impressions' ? 'Impressions' : name === 'clicks' ? 'Clicks' : name === 'ctr' ? 'CTR' : name
+                                                ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 430,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
+                                            dataKey: "impressions",
+                                            fill: "#3B82F6",
+                                            name: "impressions",
+                                            radius: [
+                                                4,
+                                                4,
+                                                0,
+                                                0
+                                            ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 444,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Bar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Bar"], {
+                                            dataKey: "clicks",
+                                            fill: "#EF4444",
+                                            name: "clicks",
+                                            radius: [
+                                                4,
+                                                4,
+                                                0,
+                                                0
+                                            ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 445,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 419,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 418,
+                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
                         lineNumber: 413,
-                        columnNumber: 13
+                        columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex space-x-1 mb-4 bg-gray-100 p-1 rounded-lg",
+                        className: "bg-gray-50 rounded-xl p-6",
                         children: [
-                            {
-                                "key": "age",
-                                "title": "Age Demographics",
-                                "icon": /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__UserCheck$3e$__["UserCheck"], {
-                                    className: "w-5 h-5"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                    lineNumber: 424,
-                                    columnNumber: 67
-                                }, this)
-                            },
-                            {
-                                "key": "gender",
-                                "title": "Gender Demographics",
-                                "icon": /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
-                                    className: "w-5 h-5"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                    lineNumber: 425,
-                                    columnNumber: 73
-                                }, this)
-                            },
-                            {
-                                "key": "income",
-                                "title": "Household Income",
-                                "icon": /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                                    className: "w-5 h-5"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                    lineNumber: 426,
-                                    columnNumber: 70
-                                }, this)
-                            }
-                        ].map((view)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                onClick: ()=>setSelectedView(view.key),
-                                className: `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${selectedView === view.key ? "bg-white text-purple-600 shadow-sm" : "text-gray-600 hover:text-gray-900"}`,
-                                children: [
-                                    view.icon,
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        children: view.title
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 438,
-                                        columnNumber: 17
-                                    }, this)
-                                ]
-                            }, view.key, true, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 428,
-                                columnNumber: 15
-                            }, this))
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                        lineNumber: 422,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "grid grid-cols-4 gap-3 mb-4",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-blue-50 p-3 rounded-lg",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Total Impressions"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 446,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-blue-600",
-                                        children: totalImpressions.toLocaleString()
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 447,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 445,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-green-50 p-3 rounded-lg",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Total Clicks"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 450,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-green-600",
-                                        children: totalClicks.toLocaleString()
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 451,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 449,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-purple-50 p-3 rounded-lg",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Click-Through Rate"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 454,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-purple-600",
-                                        children: [
-                                            avgCtr,
-                                            "%"
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 455,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 453,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-orange-50 p-3 rounded-lg",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-xs text-gray-600 mb-1",
-                                        children: "Total Conversions"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 458,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-lg font-bold text-orange-600",
-                                        children: totalConversions.toLocaleString()
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 459,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 457,
-                                columnNumber: 13
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                        lineNumber: 444,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mb-6",
-                        children: audienceData.length > 0 && chartData.categories.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(Chart, {
-                            options: options,
-                            series: chartData.series,
-                            type: "bar",
-                            height: 300,
-                            width: "100%"
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                            lineNumber: 466,
-                            columnNumber: 15
-                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center justify-center h-[300px] bg-gray-50 rounded-lg",
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "text-center",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
-                                        className: "w-12 h-12 text-gray-400 mx-auto mb-2"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 476,
-                                        columnNumber: 19
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-gray-600",
-                                        children: "No audience data available"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                        lineNumber: 477,
-                                        columnNumber: 19
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 475,
-                                columnNumber: 17
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                            lineNumber: 474,
-                            columnNumber: 15
-                        }, this)
-                    }, void 0, false, {
-                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                        lineNumber: 464,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "pt-4 border-t border-gray-200",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h6", {
-                                className: "text-sm font-semibold text-gray-900 mb-4",
-                                children: selectedView === "age" ? "Age Demographics" : selectedView === "gender" ? "Gender Demographics" : "Household Income Demographics"
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                className: "text-lg font-bold text-gray-900 mb-4",
+                                children: "Impressions Distribution"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 485,
-                                columnNumber: 13
+                                lineNumber: 452,
+                                columnNumber: 11
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "overflow-hidden rounded-lg border border-gray-200",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
-                                    className: "min-w-full divide-y divide-gray-200",
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                width: "100%",
+                                height: 320,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PieChart"], {
                                     children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
-                                            className: "bg-gray-50",
-                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: selectedView === "age" ? "Age Range" : selectedView === "gender" ? "Gender" : "Income Level"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                        lineNumber: 494,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Impressions"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                        lineNumber: 499,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Clicks"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                        lineNumber: 502,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "CTR"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                        lineNumber: 505,
-                                                        columnNumber: 21
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                        className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider",
-                                                        children: "Conversions"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                        lineNumber: 508,
-                                                        columnNumber: 21
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                lineNumber: 493,
-                                                columnNumber: 19
-                                            }, this)
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Pie"], {
+                                            data: audienceData,
+                                            cx: "50%",
+                                            cy: "50%",
+                                            labelLine: false,
+                                            label: ({ category, percent })=>`${category} ${(percent * 100).toFixed(1)}%`,
+                                            outerRadius: 100,
+                                            fill: "#8884d8",
+                                            dataKey: "impressions",
+                                            children: audienceData.map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Cell"], {
+                                                    fill: COLORS[index % COLORS.length]
+                                                }, `cell-${index}`, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 466,
+                                                    columnNumber: 19
+                                                }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                            lineNumber: 492,
-                                            columnNumber: 17
+                                            lineNumber: 455,
+                                            columnNumber: 15
                                         }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
-                                            className: "bg-white divide-y divide-gray-200",
-                                            children: audienceData.length > 0 ? audienceData.map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                    className: "hover:bg-gray-50 transition-colors",
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm text-gray-900",
-                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                className: "font-medium",
-                                                                children: selectedView === "age" ? item.age_range : selectedView === "gender" ? item.gender : item.household_income
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                                lineNumber: 518,
-                                                                columnNumber: 27
-                                                            }, this)
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                            lineNumber: 517,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: item.impressions.toLocaleString()
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                            lineNumber: 524,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: item.clicks.toLocaleString()
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                            lineNumber: 527,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: `px-2 py-1 text-xs rounded-full ${item.ctr >= 4 ? 'bg-green-100 text-green-800' : item.ctr >= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
-                                                                children: [
-                                                                    item.ctr.toFixed(2),
-                                                                    "%"
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                                lineNumber: 531,
-                                                                columnNumber: 27
-                                                            }, this)
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                            lineNumber: 530,
-                                                            columnNumber: 25
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                            className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                            children: item.conversions.toLocaleString()
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                            lineNumber: 539,
-                                                            columnNumber: 25
-                                                        }, this)
-                                                    ]
-                                                }, index, true, {
-                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                    lineNumber: 516,
-                                                    columnNumber: 23
-                                                }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    colSpan: 5,
-                                                    className: "px-4 py-3 text-sm text-gray-500 text-center",
-                                                    children: "No audience data available."
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                    lineNumber: 546,
-                                                    columnNumber: 23
-                                                }, this)
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                                lineNumber: 545,
-                                                columnNumber: 21
-                                            }, this)
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                            formatter: (value)=>[
+                                                    value.toLocaleString(),
+                                                    'Impressions'
+                                                ],
+                                            contentStyle: {
+                                                backgroundColor: 'white',
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '12px',
+                                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                                            }
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                            lineNumber: 513,
-                                            columnNumber: 17
+                                            lineNumber: 469,
+                                            columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                    lineNumber: 491,
-                                    columnNumber: 15
+                                    lineNumber: 454,
+                                    columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                                lineNumber: 490,
-                                columnNumber: 13
+                                lineNumber: 453,
+                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                        lineNumber: 484,
-                        columnNumber: 11
+                        lineNumber: 451,
+                        columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-                lineNumber: 410,
-                columnNumber: 9
+                lineNumber: 411,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "bg-gray-50 rounded-xl p-6",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                        className: "text-lg font-bold text-gray-900 mb-6",
+                        children: [
+                            getViewTitle(),
+                            " Detailed Analysis"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 485,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "overflow-x-auto",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
+                            className: "w-full text-sm",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                        className: "bg-white border-b-2 border-gray-200",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-left py-4 px-6 font-bold text-gray-800",
+                                                children: getViewTitle().split(' ')[0].toUpperCase()
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 490,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "IMPRESSIONS"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 491,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "CLICKS"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 492,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "CTR"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 493,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "CONVERSIONS"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 494,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "CONV. RATE"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 495,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "COST"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 496,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-4 px-4 font-bold text-gray-800",
+                                                children: "COST/CONV."
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                lineNumber: 497,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                        lineNumber: 489,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 488,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
+                                    children: audienceData.map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                            className: "border-b border-gray-200 hover:bg-white transition-colors duration-150",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-6",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex items-center gap-3",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "w-4 h-4 rounded-full",
+                                                                style: {
+                                                                    backgroundColor: COLORS[index % COLORS.length]
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                                lineNumber: 505,
+                                                                columnNumber: 23
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "font-semibold text-gray-900",
+                                                                children: item.category
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                                lineNumber: 509,
+                                                                columnNumber: 23
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                        lineNumber: 504,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 503,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center font-medium text-gray-700",
+                                                    children: item.impressions.toLocaleString()
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 512,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "text-blue-600 font-bold",
+                                                        children: item.clicks.toLocaleString()
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                        lineNumber: 514,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 513,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: `px-3 py-1 rounded-full text-xs font-bold ${item.ctr >= 4.5 ? 'bg-green-100 text-green-800' : item.ctr >= 3.5 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
+                                                        children: [
+                                                            item.ctr.toFixed(2),
+                                                            "%"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                        lineNumber: 517,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 516,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "text-green-600 font-bold",
+                                                        children: item.conversions
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                        lineNumber: 526,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 525,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: `px-2 py-1 rounded-full text-xs font-bold ${item.conversionRate >= 20 ? 'bg-green-100 text-green-800' : item.conversionRate >= 15 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
+                                                        children: [
+                                                            item.conversionRate.toFixed(1),
+                                                            "%"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                        lineNumber: 529,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 528,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center font-medium text-gray-700",
+                                                    children: [
+                                                        "EGP ",
+                                                        item.cost.toFixed(2)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 537,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-4 px-4 text-center",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: `font-bold ${item.costPerConversion <= 15 ? 'text-green-600' : item.costPerConversion <= 20 ? 'text-yellow-600' : 'text-red-600'}`,
+                                                        children: [
+                                                            "EGP ",
+                                                            item.costPerConversion.toFixed(2)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                        lineNumber: 539,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                                    lineNumber: 538,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, index, true, {
+                                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                            lineNumber: 502,
+                                            columnNumber: 17
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                    lineNumber: 500,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                            lineNumber: 487,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 486,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                lineNumber: 484,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mt-8 grid grid-cols-1 md:grid-cols-3 gap-6",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h5", {
+                                className: "text-blue-800 font-bold mb-2",
+                                children: "Total Investment"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 557,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-blue-900",
+                                children: [
+                                    "EGP ",
+                                    totalCost.toFixed(2)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 558,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-blue-600 text-sm mt-1",
+                                children: "Across all segments"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 559,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 556,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h5", {
+                                className: "text-green-800 font-bold mb-2",
+                                children: "Avg Conversion Rate"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 563,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-green-900",
+                                children: [
+                                    avgConversionRate.toFixed(2),
+                                    "%"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 564,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-green-600 text-sm mt-1",
+                                children: "Overall performance"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 565,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 562,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border border-purple-200",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h5", {
+                                className: "text-purple-800 font-bold mb-2",
+                                children: "Avg Cost/Conversion"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 569,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-2xl font-bold text-purple-900",
+                                children: [
+                                    "EGP ",
+                                    avgCostPerConversion.toFixed(2)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 570,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-purple-600 text-sm mt-1",
+                                children: "Efficiency metric"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                                lineNumber: 571,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                        lineNumber: 568,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
+                lineNumber: 555,
+                columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/Dashboard/AudienceInsights.tsx",
-        lineNumber: 390,
+        lineNumber: 259,
         columnNumber: 5
     }, this);
 };
@@ -8076,7 +9429,7 @@ const GoogleAdsMapComponent = ({ locationData = [], currency = "EGP", selectedPe
     // Initialize map when Google Maps is loaded
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (mapLoaded && !map && window.google && window.google.maps) {
-            const mapElement = document.getElementById('google-ads-map-fixed');
+            const mapElement = document.getElementById('google-ads-geographic-map');
             if (mapElement) {
                 try {
                     const newMap = new window.google.maps.Map(mapElement, {
@@ -8363,7 +9716,7 @@ const GoogleAdsMapComponent = ({ locationData = [], currency = "EGP", selectedPe
                                 lineNumber: 345,
                                 columnNumber: 17
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                id: "google-ads-map-fixed",
+                                id: "google-ads-geographic-map",
                                 className: "w-full h-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
@@ -8570,142 +9923,165 @@ const GoogleAdsMapComponent = ({ locationData = [], currency = "EGP", selectedPe
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
                                     className: "bg-white divide-y divide-gray-200",
-                                    children: displayData.map((location, index)=>{
-                                        const clicks = safeNumber(location.clicks);
-                                        const calls = safeNumber(location.calls);
-                                        const impressions = safeNumber(location.impressions);
-                                        const ctr = safeNumber(location.ctr);
-                                        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                            className: "hover:bg-gray-50 transition-colors",
+                                    children: displayData.map((location, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                            className: "hover:bg-gray-50",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-4 py-3 text-sm text-gray-900",
+                                                    className: "px-4 py-3 whitespace-nowrap",
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center",
                                                         children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$map$2d$pin$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__MapPin$3e$__["MapPin"], {
-                                                                className: "w-4 h-4 text-gray-400 mr-2"
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "flex-shrink-0 h-8 w-8",
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                    className: "h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center",
+                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$map$2d$pin$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__MapPin$3e$__["MapPin"], {
+                                                                        className: "h-4 w-4 text-blue-600"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
+                                                                        lineNumber: 408,
+                                                                        columnNumber: 29
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
+                                                                    lineNumber: 407,
+                                                                    columnNumber: 27
+                                                                }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                                lineNumber: 412,
-                                                                columnNumber: 27
+                                                                lineNumber: 406,
+                                                                columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "ml-3",
                                                                 children: [
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                        className: "font-medium",
+                                                                        className: "text-sm font-medium text-gray-900",
                                                                         children: location.city
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                                        lineNumber: 414,
-                                                                        columnNumber: 29
+                                                                        lineNumber: 412,
+                                                                        columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                        className: "text-xs text-gray-500",
+                                                                        className: "text-sm text-gray-500",
                                                                         children: location.country
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                                        lineNumber: 415,
-                                                                        columnNumber: 29
+                                                                        lineNumber: 413,
+                                                                        columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                                lineNumber: 413,
-                                                                columnNumber: 27
+                                                                lineNumber: 411,
+                                                                columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                        lineNumber: 411,
-                                                        columnNumber: 25
+                                                        lineNumber: 405,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                    lineNumber: 410,
-                                                    columnNumber: 23
+                                                    lineNumber: 404,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
+                                                    className: "px-4 py-3 whitespace-nowrap text-right",
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center justify-end",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mouse$2d$pointer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__MousePointer$3e$__["MousePointer"], {
-                                                                className: "w-3 h-3 text-blue-500 mr-1"
+                                                                className: "h-4 w-4 text-red-500 mr-1"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                                lineNumber: 421,
-                                                                columnNumber: 27
+                                                                lineNumber: 419,
+                                                                columnNumber: 25
                                                             }, this),
-                                                            clicks.toLocaleString()
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "text-sm font-medium text-gray-900",
+                                                                children: safeNumber(location.clicks).toLocaleString()
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
+                                                                lineNumber: 420,
+                                                                columnNumber: 25
+                                                            }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                        lineNumber: 420,
-                                                        columnNumber: 25
+                                                        lineNumber: 418,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                    lineNumber: 419,
-                                                    columnNumber: 23
+                                                    lineNumber: 417,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
+                                                    className: "px-4 py-3 whitespace-nowrap text-right",
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center justify-end",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$phone$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Phone$3e$__["Phone"], {
-                                                                className: "w-3 h-3 text-green-500 mr-1"
+                                                                className: "h-4 w-4 text-green-500 mr-1"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
                                                                 lineNumber: 427,
-                                                                columnNumber: 27
+                                                                columnNumber: 25
                                                             }, this),
-                                                            calls.toLocaleString()
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "text-sm font-medium text-gray-900",
+                                                                children: safeNumber(location.calls).toLocaleString()
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
+                                                                lineNumber: 428,
+                                                                columnNumber: 25
+                                                            }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
                                                         lineNumber: 426,
-                                                        columnNumber: 25
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
                                                     lineNumber: 425,
-                                                    columnNumber: 23
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
-                                                    children: impressions.toLocaleString()
+                                                    className: "px-4 py-3 whitespace-nowrap text-right text-sm text-gray-900",
+                                                    children: safeNumber(location.impressions).toLocaleString()
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                    lineNumber: 431,
-                                                    columnNumber: 23
+                                                    lineNumber: 433,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                    className: "px-4 py-3 text-sm font-medium text-gray-900 text-right",
+                                                    className: "px-4 py-3 whitespace-nowrap text-right",
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                        className: `px-2 py-1 text-xs rounded-full ${ctr >= 4 ? 'bg-green-100 text-green-800' : ctr >= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
+                                                        className: `inline-flex px-2 py-1 text-xs font-semibold rounded-full ${safeNumber(location.ctr) >= 4 ? 'bg-green-100 text-green-800' : safeNumber(location.ctr) >= 2 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`,
                                                         children: [
-                                                            ctr.toFixed(2),
+                                                            safeNumber(location.ctr).toFixed(2),
                                                             "%"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                        lineNumber: 435,
-                                                        columnNumber: 25
+                                                        lineNumber: 437,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                                    lineNumber: 434,
-                                                    columnNumber: 23
+                                                    lineNumber: 436,
+                                                    columnNumber: 21
                                                 }, this)
                                             ]
                                         }, index, true, {
                                             fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
-                                            lineNumber: 409,
-                                            columnNumber: 21
-                                        }, this);
-                                    })
+                                            lineNumber: 403,
+                                            columnNumber: 19
+                                        }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/Dashboard/GoogleAdsMapComponent.tsx",
                                     lineNumber: 401,

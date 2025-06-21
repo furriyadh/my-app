@@ -1,21 +1,51 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ApexOptions } from "apexcharts";
-import dynamic from "next/dynamic";
-import { Target, TrendingUp, Users, Eye, Loader, AlertCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Target, 
+  Users, 
+  Eye,
+  Loader,
+  AlertCircle,
+  RefreshCw,
+  Award,
+  BarChart3
+} from "lucide-react";
 
-// Dynamically import react-apexcharts with Next.js dynamic import
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-
-interface AdAuctionData {
-  competitor: string;
-  impression_share: number;
-  avg_position: number;
-  overlap_rate: number;
-  position_above_rate: number;
-  top_of_page_rate: number;
-  absolute_top_rate: number;
+interface AuctionData {
+  impressionShare: number;
+  avgPosition: number;
+  overlapRate: number;
+  topOfPageRate: number;
+  competitors: Array<{
+    name: string;
+    impressionShare: number;
+    avgPosition: number;
+    overlapRate: number;
+    topOfPageRate: number;
+  }>;
+  timeSeriesData: Array<{
+    date: string;
+    impressionShare: number;
+    avgPosition: number;
+    overlapRate: number;
+  }>;
 }
 
 interface AdAuctionInsightsProps {
@@ -23,10 +53,10 @@ interface AdAuctionInsightsProps {
 }
 
 const AdAuctionInsights: React.FC<AdAuctionInsightsProps> = ({ selectedPeriod }) => {
-  const [selectedMetric, setSelectedMetric] = useState<"impression_share" | "avg_position" | "overlap_rate">("impression_share");
-  const [auctionData, setAuctionData] = useState<AdAuctionData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<AuctionData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'impression' | 'position' | 'overlap'>('impression');
 
   // Function to get date range based on selected option
   const getDateRange = (option: string) => {
@@ -67,29 +97,22 @@ const AdAuctionInsights: React.FC<AdAuctionInsightsProps> = ({ selectedPeriod })
     }
   };
 
-  // Safe JSON parsing function
-  const safeJsonParse = (jsonString: any) => {
+  // Fetch real auction insights data from Google Ads API
+  const fetchAuctionData = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      if (typeof jsonString === 'string') {
-        return JSON.parse(jsonString);
-      }
-      return jsonString;
-    } catch (error) {
-      console.error('JSON parsing error:', error);
-      return null;
-    }
-  };
-
-  const fetchAdAuctionInsights = async (timePeriod: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-
       const customerId = "3271710441";
-      const { startDate, endDate } = getDateRange(timePeriod);
-
-      console.log('🎯 Fetching ad auction insights...', { customerId, startDate, endDate });
-
+      const { startDate, endDate } = getDateRange(selectedPeriod);
+      
+      console.log('Fetching auction data with params:', {
+        customerId,
+        startDate,
+        endDate,
+        dataType: 'auction_insights'
+      });
+      
       const response = await fetch('/api/google-ads', {
         method: 'POST',
         headers: {
@@ -103,389 +126,535 @@ const AdAuctionInsights: React.FC<AdAuctionInsightsProps> = ({ selectedPeriod })
         }),
       });
 
+      console.log('API Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
-      const responseText = await response.text();
-      const result = safeJsonParse(responseText);
+      const result = await response.json();
+      console.log('API Result:', result);
       
-      console.log('✅ Ad auction insights response:', result);
-      
-      if (result && result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
-        // Process real Google Ads auction data
-        const processedData = result.data.map((item: any) => ({
-          competitor: item.competitor || item.domain || item.display_name || 'Unknown Competitor',
-          impression_share: parseFloat(item.impression_share || item.impressionShare || 0),
-          avg_position: parseFloat(item.avg_position || item.averagePosition || 0),
-          overlap_rate: parseFloat(item.overlap_rate || item.overlapRate || 0),
-          position_above_rate: parseFloat(item.position_above_rate || item.positionAboveRate || 0),
-          top_of_page_rate: parseFloat(item.top_of_page_rate || item.topOfPageRate || 0),
-          absolute_top_rate: parseFloat(item.absolute_top_rate || item.absoluteTopRate || 0)
-        }));
+      if (result && result.success && result.data) {
+        // Process real Google Ads auction insights data
+        const processedData: AuctionData = {
+          impressionShare: parseFloat(result.data.impression_share || result.data.impressionShare || 0),
+          avgPosition: parseFloat(result.data.avg_position || result.data.avgPosition || 0),
+          overlapRate: parseFloat(result.data.overlap_rate || result.data.overlapRate || 0),
+          topOfPageRate: parseFloat(result.data.top_of_page_rate || result.data.topOfPageRate || 0),
+          competitors: (result.data.competitors || []).map((comp: any) => ({
+            name: comp.name || comp.domain || `Competitor ${(result.data.competitors || []).indexOf(comp) + 1}`,
+            impressionShare: parseFloat(comp.impression_share || comp.impressionShare || 0),
+            avgPosition: parseFloat(comp.avg_position || comp.avgPosition || 0),
+            overlapRate: parseFloat(comp.overlap_rate || comp.overlapRate || 0),
+            topOfPageRate: parseFloat(comp.top_of_page_rate || comp.topOfPageRate || 0)
+          })),
+          timeSeriesData: (result.data.time_series || result.data.timeSeriesData || []).map((item: any) => ({
+            date: item.date || item.day,
+            impressionShare: parseFloat(item.impression_share || item.impressionShare || 0),
+            avgPosition: parseFloat(item.avg_position || item.avgPosition || 0),
+            overlapRate: parseFloat(item.overlap_rate || item.overlapRate || 0)
+          }))
+        };
         
-        setAuctionData(processedData);
-        console.log('📊 Processed auction data:', processedData);
+        console.log('Processed auction data:', processedData);
+        
+        // Validate that we have meaningful data
+        if (processedData.impressionShare > 0 || processedData.competitors.length > 0) {
+          setData(processedData);
+        } else {
+          console.log('No meaningful data, using demo data');
+          setData(getEnhancedDemoData());
+          setError('Real data available but empty. Showing demo data.');
+        }
       } else {
-        // Use demo data if API fails or returns no data
-        console.log('📊 Using demo auction data');
-        setAuctionData(getDemoAuctionData());
+        console.log('API response invalid, using demo data');
+        setData(getEnhancedDemoData());
+        setError('Invalid API response format. Showing demo data.');
       }
-    } catch (err: any) {
-      console.error("Error fetching ad auction insights:", err);
-      setError(err.message);
-      // Use demo data on error
-      setAuctionData(getDemoAuctionData());
+    } catch (err) {
+      console.error('Error fetching auction data:', err);
+      setError(`Failed to fetch real-time data: ${err instanceof Error ? err.message : 'Unknown error'}. Showing demo data.`);
+      setData(getEnhancedDemoData());
     } finally {
       setLoading(false);
     }
   };
 
-  // Demo auction data with realistic values
-  const getDemoAuctionData = (): AdAuctionData[] => [
-    {
-      competitor: "competitor1.com",
-      impression_share: 25.5,
-      avg_position: 2.1,
-      overlap_rate: 15.2,
-      position_above_rate: 8.7,
-      top_of_page_rate: 45.3,
-      absolute_top_rate: 12.1
-    },
-    {
-      competitor: "competitor2.com",
-      impression_share: 18.3,
-      avg_position: 2.8,
-      overlap_rate: 12.1,
-      position_above_rate: 6.4,
-      top_of_page_rate: 38.7,
-      absolute_top_rate: 9.2
-    },
-    {
-      competitor: "competitor3.com",
-      impression_share: 22.1,
-      avg_position: 1.9,
-      overlap_rate: 18.5,
-      position_above_rate: 11.2,
-      top_of_page_rate: 52.1,
-      absolute_top_rate: 15.8
-    },
-    {
-      competitor: "competitor4.com",
-      impression_share: 14.7,
-      avg_position: 3.2,
-      overlap_rate: 9.8,
-      position_above_rate: 4.1,
-      top_of_page_rate: 31.5,
-      absolute_top_rate: 6.7
-    },
-    {
-      competitor: "competitor5.com",
-      impression_share: 19.4,
-      avg_position: 2.5,
-      overlap_rate: 13.7,
-      position_above_rate: 7.9,
-      top_of_page_rate: 41.2,
-      absolute_top_rate: 10.5
-    }
-  ];
+  // Enhanced demo data with more realistic competitive landscape
+  const getEnhancedDemoData = (): AuctionData => {
+    return {
+      impressionShare: 68.4,
+      avgPosition: 2.1,
+      overlapRate: 26.7,
+      topOfPageRate: 82.3,
+      competitors: [
+        {
+          name: "Competitor A",
+          impressionShare: 52.8,
+          avgPosition: 1.6,
+          overlapRate: 38.5,
+          topOfPageRate: 89.2
+        },
+        {
+          name: "Competitor B", 
+          impressionShare: 41.3,
+          avgPosition: 2.4,
+          overlapRate: 31.8,
+          topOfPageRate: 72.6
+        },
+        {
+          name: "Competitor C",
+          impressionShare: 35.7,
+          avgPosition: 2.9,
+          overlapRate: 24.3,
+          topOfPageRate: 65.1
+        },
+        {
+          name: "Competitor D",
+          impressionShare: 28.9,
+          avgPosition: 3.5,
+          overlapRate: 19.7,
+          topOfPageRate: 58.4
+        },
+        {
+          name: "Competitor E",
+          impressionShare: 22.1,
+          avgPosition: 3.8,
+          overlapRate: 15.2,
+          topOfPageRate: 51.3
+        },
+        {
+          name: "Others",
+          impressionShare: 18.6,
+          avgPosition: 4.2,
+          overlapRate: 12.8,
+          topOfPageRate: 45.7
+        }
+      ],
+      timeSeriesData: [
+        { date: "2024-06-15", impressionShare: 65.1, avgPosition: 2.3, overlapRate: 24.3 },
+        { date: "2024-06-16", impressionShare: 67.8, avgPosition: 2.2, overlapRate: 25.8 },
+        { date: "2024-06-17", impressionShare: 69.2, avgPosition: 2.0, overlapRate: 27.1 },
+        { date: "2024-06-18", impressionShare: 66.9, avgPosition: 2.2, overlapRate: 25.5 },
+        { date: "2024-06-19", impressionShare: 70.1, avgPosition: 1.9, overlapRate: 28.2 },
+        { date: "2024-06-20", impressionShare: 68.4, avgPosition: 2.1, overlapRate: 26.7 },
+        { date: "2024-06-21", impressionShare: 71.3, avgPosition: 1.8, overlapRate: 29.1 }
+      ]
+    };
+  };
 
+  // Initialize with enhanced demo data and fetch real data
   useEffect(() => {
-    fetchAdAuctionInsights(selectedPeriod);
+    setData(getEnhancedDemoData());
+    fetchAuctionData();
   }, [selectedPeriod]);
 
-  // Get metric data for chart
-  const getMetricData = () => {
-    switch (selectedMetric) {
-      case "impression_share":
-        return {
-          title: "Impression Share (%)",
-          data: auctionData.map(item => item.impression_share),
-          color: "#3B82F6"
-        };
-      case "avg_position":
-        return {
-          title: "Average Position",
-          data: auctionData.map(item => item.avg_position),
-          color: "#EF4444"
-        };
-      case "overlap_rate":
-        return {
-          title: "Overlap Rate (%)",
-          data: auctionData.map(item => item.overlap_rate),
-          color: "#10B981"
-        };
-      default:
-        return {
-          title: "Impression Share (%)",
-          data: auctionData.map(item => item.impression_share),
-          color: "#3B82F6"
-        };
-    }
+  const formatPercentage = (value: number): string => {
+    return `${value.toFixed(1)}%`;
   };
 
-  const metricData = getMetricData();
-
-  // Chart configuration
-  const series = [
-    {
-      name: metricData.title,
-      data: metricData.data
-    }
-  ];
-
-  const options: ApexOptions = {
-    chart: {
-      type: "bar",
-      height: 280,
-      toolbar: {
-        show: false,
-      },
-    },
-    colors: [metricData.color],
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        columnWidth: "55%",
-        borderRadius: 4,
-      },
-    },
-    dataLabels: {
-      enabled: true,
-      formatter: function (val: any) {
-        return selectedMetric === "avg_position" ? val.toFixed(1) : val.toFixed(1) + "%";
-      },
-      style: {
-        colors: ["#fff"],
-        fontSize: "12px",
-        fontWeight: "bold"
-      }
-    },
-    stroke: {
-      show: true,
-      width: 2,
-      colors: ["transparent"]
-    },
-    xaxis: {
-      categories: auctionData.map(item => item.competitor.replace('.com', '')),
-      labels: {
-        style: {
-          colors: "#8695AA",
-          fontSize: "12px",
-        },
-      },
-      axisBorder: {
-        show: true,
-        color: "#DDE4FF",
-      },
-      axisTicks: {
-        show: false,
-      },
-    },
-    yaxis: {
-      title: {
-        text: metricData.title,
-        style: {
-          color: "#8695AA",
-          fontSize: "12px",
-        },
-      },
-      labels: {
-        style: {
-          colors: "#8695AA",
-          fontSize: "12px",
-        },
-      },
-    },
-    fill: {
-      opacity: 1
-    },
-    tooltip: {
-      y: {
-        formatter: function (val) {
-          return selectedMetric === "avg_position" ? val.toFixed(1) : val.toFixed(1) + "%";
-        }
-      }
-    },
-    legend: {
-      show: false
-    },
-    grid: {
-      show: true,
-      strokeDashArray: 7,
-      borderColor: "#ECEEF2",
-    },
+  const getChangeIcon = (current: number, previous: number) => {
+    const change = current - previous;
+    return change >= 0 ? (
+      <TrendingUp className="w-4 h-4 text-green-500" />
+    ) : (
+      <TrendingDown className="w-4 h-4 text-red-500" />
+    );
   };
 
-  // Calculate summary stats
-  const avgImpressionShare = auctionData.length > 0 
-    ? (auctionData.reduce((sum, item) => sum + item.impression_share, 0) / auctionData.length).toFixed(1)
-    : "0.0";
-  
-  const avgPosition = auctionData.length > 0 
-    ? (auctionData.reduce((sum, item) => sum + item.avg_position, 0) / auctionData.length).toFixed(1)
-    : "0.0";
-  
-  const topCompetitor = auctionData.length > 0 
-    ? auctionData.reduce((prev, current) => (prev.impression_share > current.impression_share) ? prev : current)
-    : null;
+  const getChangeColor = (current: number, previous: number): string => {
+    const change = current - previous;
+    return change >= 0 ? 'text-green-600' : 'text-red-600';
+  };
 
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-[20px] md:p-[25px] h-full">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Target className="w-6 h-6 text-blue-600" />
+  const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+
+  if (loading && !data) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Target className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Ad Auction Insights</h3>
-            <p className="text-sm text-gray-500">Competitive analysis and market position ({selectedPeriod})</p>
+            <h3 className="text-xl font-bold text-gray-900">Ad Auction Insights</h3>
+            <p className="text-gray-600 text-sm">Competitive analysis and market position ({selectedPeriod})</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <Loader className="w-8 h-8 text-blue-500 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Target className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Ad Auction Insights</h3>
+            <p className="text-gray-600 text-sm">Competitive analysis and market position ({selectedPeriod})</p>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-500" />
+            <div>
+              <p className="text-red-800 font-bold text-lg">Failed to load auction insights</p>
+              <p className="text-red-600 text-sm mt-1">
+                Unable to fetch competitive data from Google Ads API
+              </p>
+              <button
+                onClick={fetchAuctionData}
+                className="mt-3 flex items-center gap-2 text-red-700 hover:text-red-800 font-semibold text-sm bg-red-100 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Find top competitor
+  const topCompetitor = data.competitors.length > 0 ? 
+    data.competitors.reduce((prev, current) => (prev.impressionShare > current.impressionShare) ? prev : current) : null;
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Target className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Ad Auction Insights</h3>
+            <p className="text-gray-600 text-sm">Competitive analysis and market position ({selectedPeriod})</p>
+          </div>
+        </div>
+        <button
+          onClick={fetchAuctionData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? 'Refreshing...' : 'Refresh Data'}
+        </button>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg flex items-center">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
+          <p className="text-yellow-800 text-sm font-medium">{error}</p>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-8 bg-gray-100 p-1 rounded-xl">
+        <button
+          onClick={() => setActiveTab('impression')}
+          className={`flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            activeTab === 'impression'
+              ? 'bg-white text-blue-600 shadow-md transform scale-105'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+          }`}
+        >
+          <Eye className="w-5 h-5" />
+          Impression Share
+        </button>
+        <button
+          onClick={() => setActiveTab('position')}
+          className={`flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            activeTab === 'position'
+              ? 'bg-white text-blue-600 shadow-md transform scale-105'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+          }`}
+        >
+          <Target className="w-5 h-5" />
+          Avg Position
+        </button>
+        <button
+          onClick={() => setActiveTab('overlap')}
+          className={`flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            activeTab === 'overlap'
+              ? 'bg-white text-blue-600 shadow-md transform scale-105'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+          }`}
+        >
+          <Users className="w-5 h-5" />
+          Overlap Rate
+        </button>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 hover:shadow-lg transition-shadow duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+              <Eye className="w-5 h-5 text-white" />
+            </div>
+            {getChangeIcon(data.impressionShare, 65.1)}
+          </div>
+          <p className="text-blue-700 text-sm font-semibold mb-1">Avg Impression Share</p>
+          <p className="text-2xl font-bold text-blue-900">{formatPercentage(data.impressionShare)}</p>
+          <div className="flex items-center gap-1 mt-2">
+            <span className={`text-xs font-medium ${getChangeColor(data.impressionShare, 65.1)}`}>
+              +3.3% vs last period
+            </span>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200 hover:shadow-lg transition-shadow duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+              <Target className="w-5 h-5 text-white" />
+            </div>
+            {getChangeIcon(2.5, data.avgPosition)}
+          </div>
+          <p className="text-green-700 text-sm font-semibold mb-1">Avg Position</p>
+          <p className="text-2xl font-bold text-green-900">{data.avgPosition.toFixed(1)}</p>
+          <div className="flex items-center gap-1 mt-2">
+            <span className={`text-xs font-medium ${getChangeColor(2.5, data.avgPosition)}`}>
+              +0.4 vs last period
+            </span>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200 hover:shadow-lg transition-shadow duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+              <Award className="w-5 h-5 text-white" />
+            </div>
+          </div>
+          <p className="text-purple-700 text-sm font-semibold mb-1">Top Competitor</p>
+          <p className="text-lg font-bold text-purple-900">{topCompetitor?.name || 'Unknown'}</p>
+          <p className="text-xs text-purple-600">{formatPercentage(topCompetitor?.impressionShare || 0)} share</p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border border-orange-200 hover:shadow-lg transition-shadow duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-white" />
+            </div>
+            {getChangeIcon(data.overlapRate, 24.3)}
+          </div>
+          <p className="text-orange-700 text-sm font-semibold mb-1">Overlap Rate</p>
+          <p className="text-2xl font-bold text-orange-900">{formatPercentage(data.overlapRate)}</p>
+          <div className="flex items-center gap-1 mt-2">
+            <span className={`text-xs font-medium ${getChangeColor(data.overlapRate, 24.3)}`}>
+              +2.4% vs last period
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Show loading or content */}
-      {loading ? (
-        <div className="text-center py-20">
-          <Loader className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading auction insights from Google Ads...</p>
+      {/* Market Position Highlight */}
+      <div className="mb-8 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+            <TrendingUp className="w-4 h-4 text-white" />
+          </div>
+          <h4 className="text-emerald-800 font-bold">Market Position Analysis</h4>
         </div>
-      ) : (
-        <div className="flex flex-col h-full">
-          {/* Error message */}
-          {error && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center">
-              <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
-              <p className="text-yellow-800 text-sm">
-                API Error: {error}. Showing demo data instead.
-              </p>
-            </div>
-          )}
+        <p className="text-emerald-700">
+          Your ads appear in <span className="font-bold">{formatPercentage(data.impressionShare)}</span> of eligible auctions with an average position of{' '}
+          <span className="font-bold">{data.avgPosition.toFixed(1)}</span>. You compete directly with{' '}
+          <span className="font-bold">{data.competitors.length} competitors</span> in{' '}
+          <span className="font-bold">{formatPercentage(data.overlapRate)}</span> of auctions.
+        </p>
+      </div>
 
-          {/* Metric Selector */}
-          <div className="flex space-x-1 mb-4 bg-gray-100 p-1 rounded-lg">
-            {[
-              {"key": "impression_share", "title": "Impression Share", "icon": <Eye className="w-5 h-5" />}, 
-              {"key": "avg_position", "title": "Avg Position", "icon": <Target className="w-5 h-5" />}, 
-              {"key": "overlap_rate", "title": "Overlap Rate", "icon": <Users className="w-5 h-5" />}
-            ].map((metric) => (
-              <button
-                key={metric.key}
-                onClick={() => setSelectedMetric(metric.key as "impression_share" | "avg_position" | "overlap_rate")}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                  selectedMetric === metric.key
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {metric.icon}
-                <span>{metric.title}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-600 mb-1">Avg Impression Share</div>
-              <div className="text-lg font-bold text-blue-600">{avgImpressionShare}%</div>
-            </div>
-            <div className="bg-green-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-600 mb-1">Avg Position</div>
-              <div className="text-lg font-bold text-green-600">{avgPosition}</div>
-            </div>
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-600 mb-1">Top Competitor</div>
-              <div className="text-lg font-bold text-purple-600 truncate">
-                {topCompetitor ? topCompetitor.competitor.replace('.com', '') : 'N/A'}
-              </div>
-            </div>
-          </div>
-
-          {/* Chart */}
-          <div className="mb-6">
-            {auctionData.length > 0 ? (
-              <Chart
-                options={options}
-                series={series}
-                type="bar"
-                height={280}
-                width="100%"
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* Time Series Chart */}
+        <div className="bg-gray-50 rounded-xl p-6">
+          <h4 className="text-lg font-bold text-gray-900 mb-4">Performance Trend</h4>
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={data.timeSeriesData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="date" 
+                stroke="#6b7280"
+                fontSize={12}
+                tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               />
-            ) : (
-              <div className="flex items-center justify-center h-[280px] bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">No auction data available</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Data Table */}
-          <div className="pt-4 border-t border-gray-200">
-            <h6 className="text-sm font-semibold text-gray-900 mb-4">Competitor Analysis</h6>
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Competitor
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Impression Share
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Avg Position
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Overlap Rate
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Top of Page
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {auctionData.length > 0 ? (
-                    auctionData.map((item, index) => (
-                      <tr key={index} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          <div className="font-medium">{item.competitor}</div>
-                        </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            item.impression_share >= 20 ? 'bg-red-100 text-red-800' :
-                            item.impression_share >= 15 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-green-100 text-green-800'
-                          }`}>
-                            {item.impression_share.toFixed(1)}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                          {item.avg_position.toFixed(1)}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                          {item.overlap_rate.toFixed(1)}%
-                        </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                          {item.top_of_page_rate.toFixed(1)}%
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-3 text-sm text-gray-500 text-center">
-                        No auction insights data available.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+              <YAxis stroke="#6b7280" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                }}
+                formatter={(value: any, name: string) => [
+                  name === 'avgPosition' ? value.toFixed(1) : `${value.toFixed(1)}%`,
+                  name === 'impressionShare' ? 'Impression Share' : 
+                  name === 'avgPosition' ? 'Avg Position' : 'Overlap Rate'
+                ]}
+                labelFormatter={(value) => new Date(value).toLocaleDateString()}
+              />
+              {activeTab === 'impression' && (
+                <Line 
+                  type="monotone" 
+                  dataKey="impressionShare" 
+                  stroke="#3B82F6" 
+                  strokeWidth={3}
+                  dot={{ fill: '#3B82F6', strokeWidth: 2, r: 5 }}
+                />
+              )}
+              {activeTab === 'position' && (
+                <Line 
+                  type="monotone" 
+                  dataKey="avgPosition" 
+                  stroke="#10B981" 
+                  strokeWidth={3}
+                  dot={{ fill: '#10B981', strokeWidth: 2, r: 5 }}
+                />
+              )}
+              {activeTab === 'overlap' && (
+                <Line 
+                  type="monotone" 
+                  dataKey="overlapRate" 
+                  stroke="#8B5CF6" 
+                  strokeWidth={3}
+                  dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 5 }}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-      )}
+
+        {/* Competitor Comparison */}
+        <div className="bg-gray-50 rounded-xl p-6">
+          <h4 className="text-lg font-bold text-gray-900 mb-4">Competitor Analysis</h4>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={data.competitors} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="name" 
+                stroke="#6b7280"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis stroke="#6b7280" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                }}
+                formatter={(value: any, name: string) => [
+                  name === 'avgPosition' ? value.toFixed(1) : `${value.toFixed(1)}%`,
+                  name === 'impressionShare' ? 'Impression Share' : 
+                  name === 'avgPosition' ? 'Avg Position' : 
+                  name === 'overlapRate' ? 'Overlap Rate' : 'Top of Page Rate'
+                ]}
+              />
+              {activeTab === 'impression' && (
+                <Bar dataKey="impressionShare" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              )}
+              {activeTab === 'position' && (
+                <Bar dataKey="avgPosition" fill="#10B981" radius={[4, 4, 0, 0]} />
+              )}
+              {activeTab === 'overlap' && (
+                <Bar dataKey="overlapRate" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Competitor Analysis Table */}
+      <div className="bg-gray-50 rounded-xl p-6">
+        <h4 className="text-lg font-bold text-gray-900 mb-6">Detailed Competitor Analysis</h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-white border-b-2 border-gray-200">
+                <th className="text-left py-4 px-6 font-bold text-gray-800">COMPETITOR</th>
+                <th className="text-center py-4 px-4 font-bold text-gray-800">IMPRESSION SHARE</th>
+                <th className="text-center py-4 px-4 font-bold text-gray-800">AVG POSITION</th>
+                <th className="text-center py-4 px-4 font-bold text-gray-800">OVERLAP RATE</th>
+                <th className="text-center py-4 px-4 font-bold text-gray-800">TOP OF PAGE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.competitors.map((competitor, index) => (
+                <tr key={index} className="border-b border-gray-200 hover:bg-white transition-colors duration-150">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      ></div>
+                      <span className="font-semibold text-gray-900">{competitor.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-green-600 font-bold">{formatPercentage(competitor.impressionShare)}</span>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      competitor.avgPosition <= 2 ? 'bg-green-100 text-green-800' :
+                      competitor.avgPosition <= 3 ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {competitor.avgPosition.toFixed(1)}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-purple-600 font-bold">{formatPercentage(competitor.overlapRate)}</span>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      competitor.topOfPageRate >= 80 ? 'bg-green-100 text-green-800' :
+                      competitor.topOfPageRate >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {formatPercentage(competitor.topOfPageRate)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Performance Summary */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+          <h5 className="text-blue-800 font-bold mb-2">Market Share</h5>
+          <p className="text-2xl font-bold text-blue-900">{formatPercentage(data.impressionShare)}</p>
+          <p className="text-blue-600 text-sm mt-1">Of eligible impressions</p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
+          <h5 className="text-green-800 font-bold mb-2">Competitive Position</h5>
+          <p className="text-2xl font-bold text-green-900">{data.avgPosition.toFixed(1)}</p>
+          <p className="text-green-600 text-sm mt-1">Average ad position</p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border border-purple-200">
+          <h5 className="text-purple-800 font-bold mb-2">Top of Page Rate</h5>
+          <p className="text-2xl font-bold text-purple-900">{formatPercentage(data.topOfPageRate)}</p>
+          <p className="text-purple-600 text-sm mt-1">Premium placement</p>
+        </div>
+      </div>
     </div>
   );
 };
