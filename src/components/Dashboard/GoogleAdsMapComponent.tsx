@@ -193,7 +193,7 @@ const GoogleAdsMapComponent: React.FC<GoogleAdsMapComponentProps> = ({
   // Initialize map when Google Maps is loaded
   useEffect(() => {
     if (mapLoaded && !map && window.google && window.google.maps) {
-      const mapElement = document.getElementById('google-ads-map-fixed');
+      const mapElement = document.getElementById('google-ads-geographic-map');
       if (mapElement) {
         try {
           const newMap = new window.google.maps.Map(mapElement, {
@@ -331,7 +331,7 @@ const GoogleAdsMapComponent: React.FC<GoogleAdsMapComponentProps> = ({
       ) : (
         <>
           <div className="mb-6">
-            {/* Interactive Google Map with fixed ID */}
+            {/* Interactive Google Map with unique ID */}
             <div className="rounded-lg overflow-hidden border border-gray-200 h-[400px] relative">
               {mapError ? (
                 <div className="flex items-center justify-center h-full bg-gray-100">
@@ -349,7 +349,7 @@ const GoogleAdsMapComponent: React.FC<GoogleAdsMapComponentProps> = ({
                   </div>
                 </div>
               ) : (
-                <div id="google-ads-map-fixed" className="w-full h-full"></div>
+                <div id="google-ads-geographic-map" className="w-full h-full"></div>
               )}
             </div>
           </div>
@@ -399,50 +399,53 @@ const GoogleAdsMapComponent: React.FC<GoogleAdsMapComponentProps> = ({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {displayData.map((location, index) => {
-                  const clicks = safeNumber(location.clicks);
-                  const calls = safeNumber(location.calls);
-                  const impressions = safeNumber(location.impressions);
-                  const ctr = safeNumber(location.ctr);
-                  
-                  return (
-                    <tr key={index} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 text-gray-400 mr-2" />
-                          <div>
-                            <div className="font-medium">{location.city}</div>
-                            <div className="text-xs text-gray-500">{location.country}</div>
+                {displayData.map((location, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-8 w-8">
+                          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <MapPin className="h-4 w-4 text-blue-600" />
                           </div>
                         </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        <div className="flex items-center justify-end">
-                          <MousePointer className="w-3 h-3 text-blue-500 mr-1" />
-                          {clicks.toLocaleString()}
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">{location.city}</div>
+                          <div className="text-sm text-gray-500">{location.country}</div>
                         </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        <div className="flex items-center justify-end">
-                          <Phone className="w-3 h-3 text-green-500 mr-1" />
-                          {calls.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        {impressions.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          ctr >= 4 ? 'bg-green-100 text-green-800' :
-                          ctr >= 3 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {ctr.toFixed(2)}%
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end">
+                        <MousePointer className="h-4 w-4 text-red-500 mr-1" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {safeNumber(location.clicks).toLocaleString()}
                         </span>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end">
+                        <Phone className="h-4 w-4 text-green-500 mr-1" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {safeNumber(location.calls).toLocaleString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right text-sm text-gray-900">
+                      {safeNumber(location.impressions).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        safeNumber(location.ctr) >= 4 
+                          ? 'bg-green-100 text-green-800' 
+                          : safeNumber(location.ctr) >= 2 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {safeNumber(location.ctr).toFixed(2)}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

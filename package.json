@@ -33,6 +33,7 @@
     "react-i18next": "^15.5.3",
     "react-simple-wysiwyg": "^3.2.2",
     "react-svg-worldmap": "^2.0.0-alpha.16",
+    "recharts": "^2.15.4",
     "remixicon": "^4.6.0",
     "swiper": "^11.2.6",
     "tailwind-scrollbar": "^4.0.2"
