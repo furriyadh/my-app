@@ -1,10 +1,7 @@
 const CHUNK_PUBLIC_PATH = "server/app/api/google-ads/route.js";
 const runtime = require("../../../chunks/[turbopack]_runtime.js");
-runtime.loadChunk("server/chunks/[root-of-the-server]__3d978b16._.js");
+runtime.loadChunk("server/chunks/[root-of-the-server]__57dc13f7._.js");
 runtime.loadChunk("server/chunks/node_modules_next_ec6582e0._.js");
-runtime.loadChunk("server/chunks/node_modules_tr46_816df9d9._.js");
-runtime.loadChunk("server/chunks/node_modules_ws_686b49a1._.js");
-runtime.loadChunk("server/chunks/node_modules_@supabase_auth-js_dist_module_4e4e8dc6._.js");
 runtime.loadChunk("server/chunks/node_modules_mime-db_9ebaabbe._.js");
 runtime.loadChunk("server/chunks/node_modules_axios_dist_node_axios_cjs_48309a18._.js");
 runtime.loadChunk("server/chunks/node_modules_google-ads-node_build_protos_protos_json_d5e66ad3._.js");
@@ -125,9 +122,9 @@ runtime.loadChunk("server/chunks/node_modules_google-ads-api_build_src_protos_au
 runtime.loadChunk("server/chunks/node_modules_google-ads-api_build_src_protos_autogen_resourceNames_9ced830b.js");
 runtime.loadChunk("server/chunks/node_modules_google-ads-api_build_src_protos_index_1934dc16.js");
 runtime.loadChunk("server/chunks/node_modules_google-ads-api_build_src_b6965885._.js");
-runtime.loadChunk("server/chunks/node_modules_@supabase_e24b992b._.js");
-runtime.loadChunk("server/chunks/node_modules_a4db1fcf._.js");
-runtime.loadChunk("server/chunks/[root-of-the-server]__4e7850be._.js");
+runtime.loadChunk("server/chunks/node_modules_tr46_816df9d9._.js");
+runtime.loadChunk("server/chunks/node_modules_14023dae._.js");
+runtime.loadChunk("server/chunks/[root-of-the-server]__0516f08f._.js");
 runtime.getOrInstantiateRuntimeModule("[project]/.next-internal/server/app/api/google-ads/route/actions.js [app-rsc] (server actions loader, ecmascript)", CHUNK_PUBLIC_PATH);
 runtime.getOrInstantiateRuntimeModule("[project]/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/src/app/api/google-ads/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)", CHUNK_PUBLIC_PATH);
 module.exports = runtime.getOrInstantiateRuntimeModule("[project]/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/src/app/api/google-ads/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)", CHUNK_PUBLIC_PATH).exports;
