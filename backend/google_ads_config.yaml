@@ -1,0 +1,24 @@
+customer_id: YOUR_CUSTOMER_ID
+developer_token: YOUR_DEVELOPER_TOKEN
+logging:
+  disable_existing_loggers: false
+  formatters:
+    default_fmt:
+      datefmt: '%Y-%m-%d %H:%M:%S'
+      format: '[%(asctime)s - %(levelname)s] %(message)s'
+  handlers:
+    default_handler:
+      class: logging.StreamHandler
+      formatter: default_fmt
+  loggers:
+    google.ads.googleads:
+      handlers:
+      - default_handler
+      level: INFO
+  version: 1
+oauth2:
+  access_token: YOUR_ACCESS_TOKEN
+  client_id: YOUR_CLIENT_ID
+  client_secret: YOUR_CLIENT_SECRET
+  refresh_token: YOUR_REFRESH_TOKEN
+use_proto_plus: true
