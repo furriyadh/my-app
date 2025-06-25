@@ -8,19 +8,20 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
-from ..services.google_ads_client import GoogleAdsClient
-from ..services.mcc_manager import MCCManager
-from ..services.oauth_handler import OAuthHandler
-from ..utils.validators import GoogleAdsValidator
-from ..utils.helpers import format_currency, format_percentage, calculate_performance_score
-from ..utils.database import DatabaseManager
-from .auth import login_required
+from services.google_ads_client import GoogleAdsClientService
+from services.mcc_manager import MCCManager
+from services.oauth_handler import OAuthHandler
+from utils.validators import GoogleAdsValidator
+from utils.helpers import format_currency, format_percentage, calculate_performance_score
+from utils.database import DatabaseManager
+from auth import login_required
+from utils.helpers import generate_campaign_id, sanitize_text
 
 # إنشاء Blueprint
 accounts_bp = Blueprint('accounts', __name__)
 
 # إعداد الخدمات
-google_ads_client = GoogleAdsClient()
+google_ads_client = GoogleAdsClientService()
 mcc_manager = MCCManager()
 oauth_handler = OAuthHandler()
 db_manager = DatabaseManager()

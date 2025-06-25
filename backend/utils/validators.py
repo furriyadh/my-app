@@ -978,3 +978,62 @@ def validate_callback_data(data: Dict[str, Any]) -> Dict[str, Any]:
 # تحديث قائمة __all__
 __all__.append('validate_callback_data')
 
+class GoogleAdsValidator:
+    """فئة التحقق من إعدادات Google Ads API"""
+
+    @staticmethod
+    def validate_oauth2_credentials(config: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        """
+        التحقق من صحة بيانات اعتماد OAuth2 في إعدادات Google Ads.
+        تتطلب إما (client_id, client_secret, refresh_token) أو (json_key_file_path).
+        """
+        oauth2_config = config.get("oauth2", {})
+        
+        # تحقق من تدفق تطبيق مثبت (installed application flow)
+        client_id = oauth2_config.get("client_id")
+        client_secret = oauth2_config.get("client_secret")
+        refresh_token = oauth2_config.get("refresh_token")
+
+        if client_id and client_secret and refresh_token:
+            return True, None
+        
+        # تحقق من تدفق حساب الخدمة (service account flow)
+        json_key_file_path = oauth2_config.get("json_key_file_path")
+        if json_key_file_path and os.path.exists(json_key_file_path):
+            return True, None
+        
+        return False, "Your YAML file is incorrectly configured for OAuth2. You need to define credentials for either the OAuth2 installed application flow ((\'client_id\', \'client_secret\', \'refresh_token\')) or service account flow ((\'json_key_file_path\',))."
+
+    @staticmethod
+    def validate_developer_token(config: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        """التحقق من وجود Developer Token."""
+        developer_token = config.get("account", {}).get("developer_token")
+        if developer_token:
+            return True, None
+        return False, "Developer token is missing in the configuration."
+
+    @staticmethod
+    def validate_customer_id(config: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        """التحقق من وجود Customer ID."""
+        customer_id = config.get("account", {}).get("customer_id")
+        if customer_id:
+            # يمكن إضافة تحقق إضافي لتنسيق الـ ID إذا لزم الأمر
+            return True, None
+        return False, "Customer ID is missing in the configuration."
+
+    @staticmethod
+    def validate_google_ads_config(config: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        """التحقق الشامل من إعدادات Google Ads."""
+        is_valid, error_msg = GoogleAdsValidator.validate_developer_token(config)
+        if not is_valid:
+            return False, error_msg
+        
+        is_valid, error_msg = GoogleAdsValidator.validate_oauth2_credentials(config)
+        if not is_valid:
+            return False, error_msg
+            
+        is_valid, error_msg = GoogleAdsValidator.validate_customer_id(config)
+        if not is_valid:
+            return False, error_msg
+
+        return True, None
