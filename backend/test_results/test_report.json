@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-06-25T10:38:07.612406",
+  "total_tests": 8,
+  "successful_tests": 1,
+  "failed_tests": 7,
+  "success_rate": 12.5,
+  "total_time": 5.487335920333862,
+  "test_results": {
+    "test_1_configuration_loading": {
+      "success": false,
+      "error": "name 'RichHandler' is not defined",
+      "message": "خطأ في تحميل الإعدادات: name 'RichHandler' is not defined"
+    },
+    "test_2_api_authentication": {
+      "success": false,
+      "error": "لم يتم تحميل الإعدادات بعد",
+      "message": "يجب تشغيل اختبار الإعدادات أولاً"
+    },
+    "test_3_mcc_connection_and_clients": {
+      "success": false,
+      "error": "لم يتم تحميل الإعدادات بعد"
+    },
+    "test_4_single_client_data_collection": {
+      "success": false,
+      "error": "لم يتم تحميل الإعدادات بعد"
+    },
+    "test_5_data_export_functionality": {
+      "success": false,
+      "error": "لم يتم تحميل الإعدادات بعد"
+    },
+    "test_6_visualization_capabilities": {
+      "success": true,
+      "visualization_results": {
+        "line_chart": {
+          "success": true,
+          "path": "test_results\\test_line_chart.png"
+        },
+        "pie_chart": {
+          "success": true,
+          "path": "test_results\\test_pie_chart.png"
+        },
+        "bar_chart": {
+          "success": true,
+          "path": "test_results\\test_bar_chart.png"
+        }
+      },
+      "message": "تم اختبار إنشاء المخططات البيانية بنجاح"
+    },
+    "test_7_ai_analysis_features": {
+      "success": false,
+      "error": "لم يتم تحميل الإعدادات بعد"
+    },
+    "test_8_auto_discovery_simulation": {
+      "success": false,
+      "error": "لم يتم تحميل الإعدادات بعد"
+    }
+  }
+}

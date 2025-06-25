@@ -1,0 +1,718 @@
+{
+  "report_timestamp": "2025-06-25T11:24:37.981501",
+  "mcc_customer_id": "9252466178",
+  "summary_statistics": {
+    "total_clients_processed": 46,
+    "total_clients_failed": 2,
+    "success_rate": 95.83333333333334,
+    "total_campaigns": 0,
+    "total_keywords": 0,
+    "total_ads": 0
+  },
+  "processed_clients": [
+    {
+      "client_name": "شركة الخالدية لتركيب المواد العازلة ذ.م.م",
+      "client_id": 3584839390,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\شركة الخالدية لتركيب المواد العازلة ذ.م.م\\شركة الخالدية لتركيب المواد العازلة ذ.م.م_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\شركة الخالدية لتركيب المواد العازلة ذ.م.م\\csv\\شركة الخالدية لتركيب المواد العازلة ذ.م.م_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\شركة الخالدية لتركيب المواد العازلة ذ.م.م\\شركة الخالدية لتركيب المواد العازلة ذ.م.م_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\شركة الخالدية لتركيب المواد العازلة ذ.م.م\\reports\\شركة الخالدية لتركيب المواد العازلة ذ.م.م_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "003",
+      "client_id": 7764947294,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\003\\003_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\003\\csv\\003_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\003\\003_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\003\\reports\\003_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "uae#3",
+      "client_id": 9178262796,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\uae#3\\uae#3_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\uae#3\\csv\\uae#3_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\uae#3\\uae#3_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\uae#3\\reports\\uae#3_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ARIZONA DOCUMENTS CLEARING SERVICES L.L.C",
+      "client_id": 1365478905,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C\\csv\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C\\reports\\ARIZONA DOCUMENTS CLEARING SERVICES L.L.C_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Dawenly.com",
+      "client_id": 4747043945,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Dawenly.com\\Dawenly.com_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Dawenly.com\\csv\\Dawenly.com_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\Dawenly.com\\Dawenly.com_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\Dawenly.com\\reports\\Dawenly.com_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Furriyadh Ads",
+      "client_id": 4426727631,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Furriyadh Ads\\Furriyadh Ads_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Furriyadh Ads\\csv\\Furriyadh Ads_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\Furriyadh Ads\\Furriyadh Ads_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\Furriyadh Ads\\reports\\Furriyadh Ads_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Furriyadh Ads",
+      "client_id": 3167132117,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Furriyadh Ads\\Furriyadh Ads_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Furriyadh Ads\\csv\\Furriyadh Ads_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\Furriyadh Ads\\Furriyadh Ads_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\Furriyadh Ads\\reports\\Furriyadh Ads_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Life Clean",
+      "client_id": 6052475703,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Life Clean\\Life Clean_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Life Clean\\csv\\Life Clean_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\Life Clean\\Life Clean_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\Life Clean\\reports\\Life Clean_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "KUN PENG CAPITAL L.L.C",
+      "client_id": 3465151535,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\KUN PENG CAPITAL L.L.C\\KUN PENG CAPITAL L.L.C_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\KUN PENG CAPITAL L.L.C\\csv\\KUN PENG CAPITAL L.L.C_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\KUN PENG CAPITAL L.L.C\\KUN PENG CAPITAL L.L.C_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\KUN PENG CAPITAL L.L.C\\reports\\KUN PENG CAPITAL L.L.C_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Furriyadh Ads 2",
+      "client_id": 9676402862,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Furriyadh Ads 2\\Furriyadh Ads 2_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Furriyadh Ads 2\\csv\\Furriyadh Ads 2_client_info_20250625_112435.csv"
+        ],
+        "json": "google_ads_data\\clients\\Furriyadh Ads 2\\Furriyadh Ads 2_data_20250625_112435.json",
+        "html_report": "google_ads_data\\clients\\Furriyadh Ads 2\\reports\\Furriyadh Ads 2_report_20250625_112435.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Furriyadh.com",
+      "client_id": 2211446803,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Furriyadh.com\\Furriyadh.com_data_20250625_112435.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Furriyadh.com\\csv\\Furriyadh.com_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\Furriyadh.com\\Furriyadh.com_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\Furriyadh.com\\reports\\Furriyadh.com_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Socialytech.com - تنظيف شامل جدة",
+      "client_id": 1138932758,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Socialytech.com - تنظيف شامل جدة\\Socialytech.com - تنظيف شامل جدة_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Socialytech.com - تنظيف شامل جدة\\csv\\Socialytech.com - تنظيف شامل جدة_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\Socialytech.com - تنظيف شامل جدة\\Socialytech.com - تنظيف شامل جدة_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\Socialytech.com - تنظيف شامل جدة\\reports\\Socialytech.com - تنظيف شامل جدة_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Socialytech.com - تنسيق حدائق الرياض",
+      "client_id": 2342625088,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Socialytech.com - تنسيق حدائق الرياض\\Socialytech.com - تنسيق حدائق الرياض_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Socialytech.com - تنسيق حدائق الرياض\\csv\\Socialytech.com - تنسيق حدائق الرياض_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\Socialytech.com - تنسيق حدائق الرياض\\Socialytech.com - تنسيق حدائق الرياض_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\Socialytech.com - تنسيق حدائق الرياض\\reports\\Socialytech.com - تنسيق حدائق الرياض_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Socialytech.com - عجوة المدينة",
+      "client_id": 8703343207,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Socialytech.com - عجوة المدينة\\Socialytech.com - عجوة المدينة_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Socialytech.com - عجوة المدينة\\csv\\Socialytech.com - عجوة المدينة_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\Socialytech.com - عجوة المدينة\\Socialytech.com - عجوة المدينة_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\Socialytech.com - عجوة المدينة\\reports\\Socialytech.com - عجوة المدينة_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Sss",
+      "client_id": 4873012143,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Sss\\Sss_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Sss\\csv\\Sss_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\Sss\\Sss_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\Sss\\reports\\Sss_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "WADY-ALNAIL3",
+      "client_id": 4768193662,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\WADY-ALNAIL3\\WADY-ALNAIL3_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\WADY-ALNAIL3\\csv\\WADY-ALNAIL3_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\WADY-ALNAIL3\\WADY-ALNAIL3_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\WADY-ALNAIL3\\reports\\WADY-ALNAIL3_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "تنظيف مكيفات الرياض - الطائف",
+      "client_id": 1640856717,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\تنظيف مكيفات الرياض - الطائف\\تنظيف مكيفات الرياض - الطائف_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\تنظيف مكيفات الرياض - الطائف\\csv\\تنظيف مكيفات الرياض - الطائف_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\تنظيف مكيفات الرياض - الطائف\\تنظيف مكيفات الرياض - الطائف_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\تنظيف مكيفات الرياض - الطائف\\reports\\تنظيف مكيفات الرياض - الطائف_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "شراء اثاث مستعمل بالرياض",
+      "client_id": 1611272223,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\شراء اثاث مستعمل بالرياض\\شراء اثاث مستعمل بالرياض_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\شراء اثاث مستعمل بالرياض\\csv\\شراء اثاث مستعمل بالرياض_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\شراء اثاث مستعمل بالرياض\\شراء اثاث مستعمل بالرياض_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\شراء اثاث مستعمل بالرياض\\reports\\شراء اثاث مستعمل بالرياض_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "شركة الجلالة",
+      "client_id": 3271710441,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\شركة الجلالة\\شركة الجلالة_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\شركة الجلالة\\csv\\شركة الجلالة_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\شركة الجلالة\\شركة الجلالة_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\شركة الجلالة\\reports\\شركة الجلالة_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "شركة تركيب طارد الحمام بالرياض",
+      "client_id": 1523199133,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\شركة تركيب طارد الحمام بالرياض\\شركة تركيب طارد الحمام بالرياض_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\شركة تركيب طارد الحمام بالرياض\\csv\\شركة تركيب طارد الحمام بالرياض_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\شركة تركيب طارد الحمام بالرياض\\شركة تركيب طارد الحمام بالرياض_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\شركة تركيب طارد الحمام بالرياض\\reports\\شركة تركيب طارد الحمام بالرياض_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "شركة تصميم مواقع الويب",
+      "client_id": 4758493556,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\شركة تصميم مواقع الويب\\شركة تصميم مواقع الويب_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\شركة تصميم مواقع الويب\\csv\\شركة تصميم مواقع الويب_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\شركة تصميم مواقع الويب\\شركة تصميم مواقع الويب_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\شركة تصميم مواقع الويب\\reports\\شركة تصميم مواقع الويب_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "شركة نقل عفش بالرياض",
+      "client_id": 6278689109,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\شركة نقل عفش بالرياض\\شركة نقل عفش بالرياض_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\شركة نقل عفش بالرياض\\csv\\شركة نقل عفش بالرياض_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\شركة نقل عفش بالرياض\\شركة نقل عفش بالرياض_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\شركة نقل عفش بالرياض\\reports\\شركة نقل عفش بالرياض_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "مكافحة حشرات الدمام",
+      "client_id": 4754274923,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\مكافحة حشرات الدمام\\مكافحة حشرات الدمام_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\مكافحة حشرات الدمام\\csv\\مكافحة حشرات الدمام_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\مكافحة حشرات الدمام\\مكافحة حشرات الدمام_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\مكافحة حشرات الدمام\\reports\\مكافحة حشرات الدمام_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "نقل عفش القاهرة",
+      "client_id": 2993469425,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\نقل عفش القاهرة\\نقل عفش القاهرة_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\نقل عفش القاهرة\\csv\\نقل عفش القاهرة_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\نقل عفش القاهرة\\نقل عفش القاهرة_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\نقل عفش القاهرة\\reports\\نقل عفش القاهرة_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "نقل عفش - منطقة الرياض - دمام",
+      "client_id": 6464330164,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\نقل عفش - منطقة الرياض - دمام\\نقل عفش - منطقة الرياض - دمام_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\نقل عفش - منطقة الرياض - دمام\\csv\\نقل عفش - منطقة الرياض - دمام_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\نقل عفش - منطقة الرياض - دمام\\نقل عفش - منطقة الرياض - دمام_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\نقل عفش - منطقة الرياض - دمام\\reports\\نقل عفش - منطقة الرياض - دمام_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -9",
+      "client_id": 9757147645,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -9\\ٍ Socialytech.com -9_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -9\\csv\\ٍ Socialytech.com -9_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -9\\ٍ Socialytech.com -9_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -9\\reports\\ٍ Socialytech.com -9_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Client_8482295252",
+      "client_id": 8482295252,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Client_8482295252\\Client_8482295252_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Client_8482295252\\csv\\Client_8482295252_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\Client_8482295252\\Client_8482295252_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\Client_8482295252\\reports\\Client_8482295252_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "مؤسسة النوور لقطع غيار السيارات",
+      "client_id": 3225487107,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\مؤسسة النوور لقطع غيار السيارات\\مؤسسة النوور لقطع غيار السيارات_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\مؤسسة النوور لقطع غيار السيارات\\csv\\مؤسسة النوور لقطع غيار السيارات_client_info_20250625_112436.csv"
+        ],
+        "json": "google_ads_data\\clients\\مؤسسة النوور لقطع غيار السيارات\\مؤسسة النوور لقطع غيار السيارات_data_20250625_112436.json",
+        "html_report": "google_ads_data\\clients\\مؤسسة النوور لقطع غيار السيارات\\reports\\مؤسسة النوور لقطع غيار السيارات_report_20250625_112436.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ",
+      "client_id": 8010551307,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ_data_20250625_112436.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ\\csv\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ\\reports\\ﻋﺑدﷲ ﺑن ﺣﺳﯾن ﺑن ظﺎﻓر اﻟﯾﺎﻣﻲ_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ALASSAD-GLASS",
+      "client_id": 7991891884,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ALASSAD-GLASS\\ALASSAD-GLASS_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ALASSAD-GLASS\\csv\\ALASSAD-GLASS_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ALASSAD-GLASS\\ALASSAD-GLASS_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ALASSAD-GLASS\\reports\\ALASSAD-GLASS_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل",
+      "client_id": 9856282546,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل\\csv\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل\\reports\\ﻣؤﺳﺳﺔ ﻋﺑداﻟﻌزﯾز ﻋدﻧﺎن ﺑن ﻓﺗﯾﻧﻲ ﺳﺎﻟم ﻟﻠﺗﻣوﯾل_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود",
+      "client_id": 2883992096,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود\\csv\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود\\reports\\ﻣؤﺳﺳﺔ اﺑﺗﮭﺎل ﻓﺎﺋز زﺣﯾف اﻟﻣﺎﻟﻛﻲ ﻟﻧﻘل اﻟطرود_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Guangzhou Chingo Cosmetic Co., Ltd",
+      "client_id": 7635058143,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Guangzhou Chingo Cosmetic Co., Ltd\\Guangzhou Chingo Cosmetic Co., Ltd_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Guangzhou Chingo Cosmetic Co., Ltd\\csv\\Guangzhou Chingo Cosmetic Co., Ltd_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\Guangzhou Chingo Cosmetic Co., Ltd\\Guangzhou Chingo Cosmetic Co., Ltd_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\Guangzhou Chingo Cosmetic Co., Ltd\\reports\\Guangzhou Chingo Cosmetic Co., Ltd_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "Jiaxing Joyan Houseware Products Co., Ltd.",
+      "client_id": 7199595215,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\Jiaxing Joyan Houseware Products Co., Ltd.\\Jiaxing Joyan Houseware Products Co., Ltd._data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\Jiaxing Joyan Houseware Products Co., Ltd.\\csv\\Jiaxing Joyan Houseware Products Co., Ltd._client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\Jiaxing Joyan Houseware Products Co., Ltd.\\Jiaxing Joyan Houseware Products Co., Ltd._data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\Jiaxing Joyan Houseware Products Co., Ltd.\\reports\\Jiaxing Joyan Houseware Products Co., Ltd._report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "مكافحة حشرات وتسليك مجاري",
+      "client_id": 2803407490,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\مكافحة حشرات وتسليك مجاري\\مكافحة حشرات وتسليك مجاري_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\مكافحة حشرات وتسليك مجاري\\csv\\مكافحة حشرات وتسليك مجاري_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\مكافحة حشرات وتسليك مجاري\\مكافحة حشرات وتسليك مجاري_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\مكافحة حشرات وتسليك مجاري\\reports\\مكافحة حشرات وتسليك مجاري_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "مكتب اتقان للترجمة الكويت",
+      "client_id": 8961531343,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\مكتب اتقان للترجمة الكويت\\مكتب اتقان للترجمة الكويت_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\مكتب اتقان للترجمة الكويت\\csv\\مكتب اتقان للترجمة الكويت_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\مكتب اتقان للترجمة الكويت\\مكتب اتقان للترجمة الكويت_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\مكتب اتقان للترجمة الكويت\\reports\\مكتب اتقان للترجمة الكويت_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com - دهانات ابها وخميس",
+      "client_id": 7996907731,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com - دهانات ابها وخميس\\ٍ Socialytech.com - دهانات ابها وخميس_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com - دهانات ابها وخميس\\csv\\ٍ Socialytech.com - دهانات ابها وخميس_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com - دهانات ابها وخميس\\ٍ Socialytech.com - دهانات ابها وخميس_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com - دهانات ابها وخميس\\reports\\ٍ Socialytech.com - دهانات ابها وخميس_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -10",
+      "client_id": 8907555846,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -10\\ٍ Socialytech.com -10_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -10\\csv\\ٍ Socialytech.com -10_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -10\\ٍ Socialytech.com -10_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -10\\reports\\ٍ Socialytech.com -10_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -11",
+      "client_id": 2641070999,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -11\\ٍ Socialytech.com -11_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -11\\csv\\ٍ Socialytech.com -11_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -11\\ٍ Socialytech.com -11_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -11\\reports\\ٍ Socialytech.com -11_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -2",
+      "client_id": 4204241113,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -2\\ٍ Socialytech.com -2_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -2\\csv\\ٍ Socialytech.com -2_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -2\\ٍ Socialytech.com -2_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -2\\reports\\ٍ Socialytech.com -2_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -3",
+      "client_id": 4569659788,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -3\\ٍ Socialytech.com -3_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -3\\csv\\ٍ Socialytech.com -3_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -3\\ٍ Socialytech.com -3_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -3\\reports\\ٍ Socialytech.com -3_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -4",
+      "client_id": 9934079698,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -4\\ٍ Socialytech.com -4_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -4\\csv\\ٍ Socialytech.com -4_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -4\\ٍ Socialytech.com -4_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -4\\reports\\ٍ Socialytech.com -4_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -5",
+      "client_id": 6068802195,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -5\\ٍ Socialytech.com -5_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -5\\csv\\ٍ Socialytech.com -5_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -5\\ٍ Socialytech.com -5_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -5\\reports\\ٍ Socialytech.com -5_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -6",
+      "client_id": 9909813023,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -6\\ٍ Socialytech.com -6_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -6\\csv\\ٍ Socialytech.com -6_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -6\\ٍ Socialytech.com -6_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -6\\reports\\ٍ Socialytech.com -6_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -7",
+      "client_id": 8041207180,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -7\\ٍ Socialytech.com -7_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -7\\csv\\ٍ Socialytech.com -7_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -7\\ٍ Socialytech.com -7_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -7\\reports\\ٍ Socialytech.com -7_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    },
+    {
+      "client_name": "ٍ Socialytech.com -8",
+      "client_id": 7088239913,
+      "saved_files": {
+        "excel": "google_ads_data\\clients\\ٍ Socialytech.com -8\\ٍ Socialytech.com -8_data_20250625_112437.xlsx",
+        "csv": [
+          "google_ads_data\\clients\\ٍ Socialytech.com -8\\csv\\ٍ Socialytech.com -8_client_info_20250625_112437.csv"
+        ],
+        "json": "google_ads_data\\clients\\ٍ Socialytech.com -8\\ٍ Socialytech.com -8_data_20250625_112437.json",
+        "html_report": "google_ads_data\\clients\\ٍ Socialytech.com -8\\reports\\ٍ Socialytech.com -8_report_20250625_112437.html"
+      },
+      "campaigns_count": 0,
+      "keywords_count": 0,
+      "ads_count": 0
+    }
+  ],
+  "failed_clients": [
+    "أ / حازم فني صيانة تكييف",
+    "أ / هيثم حمدي - مركز التوحد الرياض"
+  ],
+  "success_log": [
+    {
+      "timestamp": "2025-06-25T11:24:35.075895",
+      "query": "Client Accounts",
+      "customer_id": "9252466178",
+      "execution_time": 2.0945825576782227,
+      "rows_returned": 48
+    }
+  ],
+  "error_log": []
+}
