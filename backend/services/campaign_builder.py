@@ -11,7 +11,7 @@ import json
 import re
 
 from .ai_processor import AIProcessor
-from .google_ads_client import GoogleAdsClient
+from .google_ads_client import GoogleAdsClientService
 from .website_analyzer import WebsiteAnalyzer
 
 class CampaignBuilder:
@@ -21,7 +21,7 @@ class CampaignBuilder:
         """تهيئة بناء الحملات"""
         self.logger = logging.getLogger(__name__)
         self.ai_processor = AIProcessor()
-        self.google_ads_client = GoogleAdsClient()
+        self.google_ads_client = GoogleAdsClientService()
         self.website_analyzer = WebsiteAnalyzer()
         
         self.logger.info("تم تهيئة بناء الحملات الذكي")
