@@ -14,9 +14,9 @@ from services.campaign_builder import CampaignBuilder
 from utils.validators import validate_url
 from utils.helpers import generate_analysis_id, sanitize_text
 from utils.helpers import sanitize_text
-from services.ai_analyzer import AIAnalyzer
+from services.ai_processor import AIProcessor
 from utils.database import DatabaseManager
-from auth import login_required
+from routes.auth import login_required
 
 # إنشاء Blueprint
 ai_bp = Blueprint('ai', __name__)
