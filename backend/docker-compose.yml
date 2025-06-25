@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # خدمة Backend - Google Ads AI Platform
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: google_ads_ai_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=False
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./google_ads_data:/app/google_ads_data
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - google_ads_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # خدمة Redis للتخزين المؤقت
+  redis:
+    image: redis:7-alpine
+    container_name: google_ads_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - google_ads_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # خدمة Nginx (اختيارية - للإنتاج )
+  nginx:
+    image: nginx:alpine
+    container_name: google_ads_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - google_ads_network
+    profiles:
+      - production
+
+  # خدمة مراقبة الأداء (اختيارية)
+  monitoring:
+    image: prom/prometheus
+    container_name: google_ads_monitoring
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    restart: unless-stopped
+    networks:
+      - google_ads_network
+    profiles:
+      - monitoring
+
+# الشبكات
+networks:
+  google_ads_network:
+    driver: bridge
+    name: google_ads_network
+
+# التخزين المستمر
+volumes:
+  redis_data:
+    driver: local
+    name: google_ads_redis_data
+  prometheus_data:
+    driver: local
+    name: google_ads_prometheus_data
+
+# إعدادات إضافية
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
