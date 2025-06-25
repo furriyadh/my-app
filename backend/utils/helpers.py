@@ -25,6 +25,10 @@ from typing import Dict, Any, Optional, List, Union, Tuple
 from decimal import Decimal
 from functools import wraps
 import time
+def generate_analysis_id() -> str:
+    """توليد معرف فريد للتحليلات."""
+    return str(uuid.uuid4())
+
 
 # استيراد دوال التحقق من validators مع معالجة أخطاء متقدمة
 try:
