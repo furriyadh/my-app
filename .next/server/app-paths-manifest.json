@@ -1,3 +1,6 @@
 {
+  "/authentication/sign-in/page": "app/authentication/sign-in/page.js",
+  "/authentication/sign-up/page": "app/authentication/sign-up/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/page": "app/page.js"
 }

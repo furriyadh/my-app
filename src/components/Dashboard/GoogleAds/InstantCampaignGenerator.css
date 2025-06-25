@@ -1,0 +1,47 @@
+/* InstantCampaignGenerator.css */
+.instant-campaign-generator {
+  @apply min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6;
+}
+
+.instant-campaign-generator .card {
+  @apply backdrop-blur-sm bg-white/80 shadow-xl;
+}
+
+.instant-campaign-generator .gradient-border {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4);
+  padding: 2px;
+  border-radius: 12px;
+}
+
+.instant-campaign-generator .gradient-border > div {
+  @apply bg-white rounded-[10px];
+}
+
+.instant-campaign-generator .floating-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.instant-campaign-generator .pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  to { box-shadow: 0 0 30px rgba(139, 92, 246, 0.5); }
+}
+
+.instant-campaign-generator .shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
