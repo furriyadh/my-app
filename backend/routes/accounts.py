@@ -14,7 +14,7 @@ from services.oauth_handler import OAuthHandler
 from utils.validators import GoogleAdsValidator
 from utils.helpers import format_currency, format_percentage, calculate_performance_score
 from utils.database import DatabaseManager
-from auth import login_required
+from routes.auth import login_required
 from utils.helpers import generate_campaign_id, sanitize_text
 
 # إنشاء Blueprint
