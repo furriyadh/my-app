@@ -1,0 +1,24 @@
+{
+    "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.rightClickBehavior": "default",
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "terminal.integrated.env.windows": {
+        "PYTHONIOENCODING": "utf-8"
+    },
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "editor.fontSize": 14,
+    "editor.wordWrap": "on",
+    "files.encoding": "utf8",
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "python.defaultInterpreterPath": "python",
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true
+    },
+    "workbench.colorTheme": "Default Dark+",
+    "explorer.openEditors.visible": 1
+}

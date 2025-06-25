@@ -1,0 +1,28 @@
+{
+  "campaigns": [
+    {
+      "name": "حملة تجريبية 1",
+      "status": "ENABLED",
+      "budget": 1000,
+      "impressions": 5000,
+      "clicks": 250,
+      "ctr": 5.0
+    },
+    {
+      "name": "حملة تجريبية 2",
+      "status": "PAUSED",
+      "budget": 2000,
+      "impressions": 8000,
+      "clicks": 400,
+      "ctr": 5.0
+    },
+    {
+      "name": "حملة تجريبية 3",
+      "status": "ENABLED",
+      "budget": 1500,
+      "impressions": 6000,
+      "clicks": 300,
+      "ctr": 5.0
+    }
+  ]
+}

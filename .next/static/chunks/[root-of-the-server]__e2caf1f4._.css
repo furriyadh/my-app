@@ -13988,6 +13988,10 @@ button:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#), input:where([type=
   pointer-events: none;
 }
 
+.visible:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+  visibility: visible;
+}
+
 .absolute:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
   position: absolute;
 }
@@ -15590,6 +15594,10 @@ button:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#), input:where([type=
 
 .basis-full:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
   flex-basis: 100%;
+}
+
+.border-collapse:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+  border-collapse: collapse;
 }
 
 .-translate-x-1\/2:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
