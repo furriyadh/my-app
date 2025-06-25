@@ -1,0 +1,76 @@
+/* AIProcessor.css */
+.ai-processor {
+  @apply min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6;
+}
+
+.ai-processor .processing-glow {
+  animation: processing-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes processing-glow {
+  from { 
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+    border-color: rgba(147, 51, 234, 0.5);
+  }
+  to { 
+    box-shadow: 0 0 40px rgba(147, 51, 234, 0.6);
+    border-color: rgba(147, 51, 234, 0.8);
+  }
+}
+
+.ai-processor .step-pulse {
+  animation: step-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes step-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.ai-processor .brain-animation {
+  animation: brain-think 3s ease-in-out infinite;
+}
+
+@keyframes brain-think {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+  25% { 
+    transform: scale(1.1) rotate(90deg);
+    filter: hue-rotate(90deg);
+  }
+  50% { 
+    transform: scale(1.2) rotate(180deg);
+    filter: hue-rotate(180deg);
+  }
+  75% { 
+    transform: scale(1.1) rotate(270deg);
+    filter: hue-rotate(270deg);
+  }
+}
+
+.ai-processor .success-bounce {
+  animation: success-bounce 0.6s ease-out;
+}
+
+@keyframes success-bounce {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.ai-processor .gradient-text {
+  background: linear-gradient(45deg, #8b5cf6, #ec4899, #06b6d4);
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

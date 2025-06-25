@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/DELL/my-site/src/components/Dashboard/GoogleAds/InstantCampaignGenerator.css"],"sourcesContent":["\r\n"],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 5, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/DELL/my-site/src/components/Dashboard/GoogleAds/AIProcessor.css"],"sourcesContent":["\r\n"],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 9, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/DELL/my-site/src/components/Dashboard/GoogleAds/AccountSelector.css"],"sourcesContent":["\r\n"],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 13, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/DELL/my-site/src/components/Dashboard/GoogleAds/CampaignResults.css"],"sourcesContent":["\r\n"],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 17, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/DELL/my-site/src/components/Dashboard/GoogleAds/GoogleOAuth.css"],"sourcesContent":["\r\n"],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 21, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/DELL/my-site/src/components/Dashboard/GoogleAds/CampaignDashboard.css"],"sourcesContent":["\r\n"],"names":[],"mappings":"","debugId":null}}]
+}
