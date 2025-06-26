@@ -1,13 +1,10 @@
 (globalThis.TURBOPACK_CHUNK_LISTS = globalThis.TURBOPACK_CHUNK_LISTS || []).push({
     script: typeof document === "object" ? document.currentScript : undefined,
     chunks: [
-  "static/chunks/node_modules_react-apexcharts_dist_react-apexcharts_min_89255609.js",
-  "static/chunks/src_ce4fb8b1._.js",
-  "static/chunks/node_modules_@react-google-maps_api_dist_esm_d50285f1.js",
-  "static/chunks/node_modules_chart_js_dist_fe1f3c5e._.js",
-  "static/chunks/node_modules_framer-motion_dist_es_1315c24f._.js",
-  "static/chunks/node_modules_motion-dom_dist_es_fa3ea29e._.js",
-  "static/chunks/node_modules_1a1f23e2._.js"
+  "static/chunks/src_91894acd._.js",
+  "static/chunks/node_modules_lodash_90f72504._.js",
+  "static/chunks/node_modules_recharts_es6_72f5abf6._.js",
+  "static/chunks/node_modules_09f7746e._.js"
 ],
     source: "dynamic"
 });

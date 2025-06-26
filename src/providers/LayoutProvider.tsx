@@ -3,7 +3,7 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarMenu from "@/components/Layout/SidebarMenu";
-import Header from "@/components/Layout/Header";
+import Header from "@/components/Layout/Header/index";
 import Footer from "@/components/Layout/Footer";
 import { supabase } from "@/utils/supabase/client";
 
