@@ -4,6 +4,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
+  // تعريف baseUrl في بداية الدالة ليكون متاحاً في جميع أنحاء الدالة
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
   try {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
@@ -12,10 +15,8 @@ export async function GET(req: NextRequest) {
 
     console.log('OAuth Callback received:', { code: !!code, state, error });
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
     // التحقق من وجود خطأ في OAuth
-    if (error ) {
+    if (error) {
       console.error('OAuth Error:', error);
       const errorMessage = encodeURIComponent('حدث خطأ أثناء ربط حساب Google Ads: ' + error);
       const redirectUrl = new URL('/dashboard', baseUrl);
@@ -32,72 +33,66 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(redirectUrl.toString());
     }
 
-    // التحقق من state للأمان (اختياري)
-    // يمكنك إضافة التحقق من state هنا إذا كنت تحفظه في localStorage
-
     // تحديد redirectUri بناءً على البيئة
     const currentRedirectUri = process.env.NODE_ENV === 'production'
       ? 'https://furriyadh.com/api/oauth/callback'
       : 'http://localhost:3000/api/oauth/callback';
 
-    // تبادل authorization code مع access token
-    const tokenResponse = await exchangeCodeForToken(code, currentRedirectUri );
-    
-    if (!tokenResponse.success) {
-      console.error('Failed to exchange code for token:', tokenResponse.error);
-      const errorMessage = encodeURIComponent('فشل في الحصول على رمز الوصول من Google');
+    console.log('DEBUG: currentRedirectUri:', currentRedirectUri);
+
+    const tokenResponse = await exchangeCodeForToken(code, currentRedirectUri);
+
+    if (tokenResponse.success) {
+      console.log('✅ Token exchange successful, redirecting to dashboard...');
+      // هنا يمكنك حفظ الـ access_token والـ refresh_token في قاعدة البيانات أو في جلسة المستخدم
+      // ثم إعادة توجيه المستخدم إلى لوحة التحكم
+      const redirectUrl = new URL('/dashboard', baseUrl);
+      redirectUrl.searchParams.set('success', 'true');
+      redirectUrl.searchParams.set('access_token', tokenResponse.access_token);
+      if (tokenResponse.refresh_token) {
+        redirectUrl.searchParams.set('refresh_token', tokenResponse.refresh_token);
+      }
+      return NextResponse.redirect(redirectUrl.toString());
+    } else {
+      console.error('❌ Token exchange failed:', tokenResponse.error);
+      const errorMessage = encodeURIComponent('فشل في الحصول على رمز الوصول من Google: ' + tokenResponse.error);
       const redirectUrl = new URL('/dashboard', baseUrl);
       redirectUrl.searchParams.set('error', errorMessage);
       return NextResponse.redirect(redirectUrl.toString());
     }
 
-    // حفظ access token (يمكنك حفظه في قاعدة البيانات أو localStorage)
-    console.log('✅ OAuth successful, access token received');
-
-    // إعادة توجيه إلى صفحة إنشاء الحملة مع معلومات الحساب المربوط
-    const successUrl = new URL('/new-campaign', baseUrl);
-    successUrl.searchParams.set('account_type', 'own-accounts');
-    successUrl.searchParams.set('oauth_success', 'true');
-    successUrl.searchParams.set('access_token', tokenResponse.access_token);
-    
-    return NextResponse.redirect(successUrl.toString());
-
-  } catch (error) {
-    console.error('OAuth Callback Error:', error);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const errorMessage = encodeURIComponent('حدث خطأ غير متوقع أثناء معالجة OAuth' );
+  } catch (error: any) {
+    console.error('❌ Error in OAuth callback:', error);
+    const errorMessage = encodeURIComponent('حدث خطأ غير متوقع أثناء عملية OAuth: ' + error.message);
     const redirectUrl = new URL('/dashboard', baseUrl);
     redirectUrl.searchParams.set('error', errorMessage);
     return NextResponse.redirect(redirectUrl.toString());
   }
 }
 
-// دالة لتبادل authorization code مع access token
 async function exchangeCodeForToken(code: string, redirectUri: string) {
   try {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
-    console.log('🔍 Debugging Token Exchange:');
-    console.log('  Client ID:', clientId);
-    console.log('  Client Secret (first 10 chars):', clientSecret ? clientSecret.substring(0, 10) + '...' : 'Not set');
-    console.log('  Redirect URI:', redirectUri);
-    console.log('  Authorization Code (first 10 chars):', code ? code.substring(0, 10) + '...' : 'Not set');
+    // DEBUGGING LOGS
+    console.log("DEBUG: Loaded GOOGLE_CLIENT_ID:", clientId);
+    console.log("DEBUG: Loaded GOOGLE_CLIENT_SECRET:", clientSecret ? clientSecret.substring(0, 5) + '...' : 'Not loaded');
 
     if (!clientId || !clientSecret) {
-      console.error('❌ Missing OAuth credentials:', { clientId: !!clientId, clientSecret: !!clientSecret });
-      throw new Error('Missing Google OAuth credentials');
+      console.error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables.');
+      return { success: false, error: 'Missing client credentials' };
     }
 
     const tokenEndpoint = 'https://oauth2.googleapis.com/token';
-    
+
     const params = new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
       code: code,
       grant_type: 'authorization_code',
-      redirect_uri: redirectUri,
-    } );
+      redirect_uri: redirectUri, // استخدام الـ redirectUri المحدد
+    });
 
     console.log('📤 Sending token exchange request to:', tokenEndpoint);
     console.log('📤 Request params:', {
@@ -151,3 +146,4 @@ async function exchangeCodeForToken(code: string, redirectUri: string) {
     };
   }
 }
+
