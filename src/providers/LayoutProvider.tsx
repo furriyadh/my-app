@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import SidebarMenu from "@/components/Layout/SidebarMenu";
 import Header from "@/components/Layout/Header/index";
 import Footer from "@/components/Layout/Footer";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 interface LayoutProviderProps {
   children: ReactNode;
@@ -39,6 +39,9 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   ].includes(pathname);
 
   useEffect(() => {
+    // إنشاء Supabase client مرة واحدة في بداية useEffect
+    const supabase = createClient();
+
     // التحقق من حالة المصادقة عند تحميل المكون
     const checkAuth = async () => {
       try {

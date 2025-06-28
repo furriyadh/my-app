@@ -56,16 +56,19 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
       if (option === 'own-accounts') {
         // الكرت الثاني فقط - ربط حساب موجود - يوجه لـ Google OAuth
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'your-google-client-id';
-        const redirectUri = window.location.origin + '/api/oauth/callback';
+        // تحديد redirectUri بناءً على البيئة
+        const redirectUri = process.env.NODE_ENV === 'production'
+          ? 'https://furriyadh.com/api/oauth/callback'
+          : 'http://localhost:3000/api/oauth/callback';
         const scope = 'https://www.googleapis.com/auth/adwords';
-        const state = Math.random().toString(36).substring(7);
+        const state = Math.random( ).toString(36).substring(7);
         
         // حفظ state للتحقق لاحقاً
         localStorage.setItem('oauthState', state);
         
         const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' +
           'client_id=' + clientId + '&' +
-          'redirect_uri=' + encodeURIComponent(redirectUri) + '&' +
+          'redirect_uri=' + encodeURIComponent(redirectUri ) + '&' +
           'scope=' + encodeURIComponent(scope) + '&' +
           'response_type=code&' +
           'access_type=offline&' +
@@ -75,34 +78,58 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
         window.location.href = authUrl;
         
       } else {
-        // الكرت الأول والثالث - إنشاء حساب جديد - يوجهوا لـ new-campaign مباشرة
-        // محاكاة إنشاء حساب ناجح
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // الكرت الأول والثالث - إنشاء حساب حقيقي في Google Ads
+        console.log('🚀 Creating real Google Ads account for:', card.title);
         
-        // إنشاء customer ID وهمي
-        const customerId = Date.now().toString() + Math.floor(Math.random() * 1000).toString();
-        
-        // حفظ البيانات
-        localStorage.setItem('customerId', customerId);
-        localStorage.setItem('accountData', JSON.stringify({
-          accountType: option,
-          customerId: customerId,
-          accountName: card.title,
-          createdAt: new Date().toISOString(),
-          status: 'active'
-        }));
+        // استدعاء API إنشاء الحساب الحقيقي
+        const response = await fetch('/api/accounts/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            accountType: option,
+            customerName: `${card.title} - ${new Date().toLocaleDateString()}`,
+            currency: 'USD',
+            timezone: 'America/New_York',
+            countryCode: 'US',
+            userEmail: 'user@example.com' // يمكن الحصول عليه من المستخدم المسجل
+          })
+        });
 
-        // إغلاق النافذة المنبثقة
-        onClose();
+        const result = await response.json();
         
-        // استدعاء callback function
-        if (onSelect) {
-          onSelect(option);
+        if (result.success) {
+          console.log('✅ Real Google Ads account created:', result.customerId);
+          
+          // حفظ البيانات الحقيقية
+          localStorage.setItem('customerId', result.customerId);
+          localStorage.setItem('accountData', JSON.stringify({
+            accountType: option,
+            customerId: result.customerId,
+            customerName: result.customerName,
+            resourceName: result.resourceName,
+            createdAt: new Date().toISOString(),
+            status: 'active',
+            isRealAccount: true
+          }));
+
+          // إغلاق النافذة المنبثقة
+          onClose();
+          
+          // استدعاء callback function
+          if (onSelect) {
+            onSelect(option);
+          }
+          
+          // التوجيه إلى صفحة الحملة الجديدة مع الحساب الحقيقي
+          const campaignUrl = '/new-campaign?account_type=' + option + '&customer_id=' + result.customerId + '&currency=USD&country=US&real_account=true';
+          router.push(campaignUrl);
+          
+        } else {
+          console.error('❌ Failed to create real Google Ads account:', result.error);
+          throw new Error(result.error || 'Failed to create Google Ads account');
         }
-        
-        // التوجيه إلى صفحة الحملة الجديدة
-        const campaignUrl = '/new-campaign?account_type=' + option + '&customer_id=' + customerId + '&currency=USD&country=US';
-        router.push(campaignUrl);
       }
 
     } catch (error) {
@@ -233,4 +260,3 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
 };
 
 export default AccountSelectionModal;
-
