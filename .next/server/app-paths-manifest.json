@@ -1,4 +1,5 @@
 {
-  "/api/google-ads/route": "app/api/google-ads/route.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/new-campaign/page": "app/new-campaign/page.js",
+  "/onboarding/page": "app/onboarding/page.js"
 }
