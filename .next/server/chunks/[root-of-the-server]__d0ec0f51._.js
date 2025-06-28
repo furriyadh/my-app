@@ -66,6 +66,8 @@ __turbopack_context__.s({
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
 ;
 async function GET(req) {
+    // تعريف baseUrl في بداية الدالة ليكون متاحاً في جميع أنحاء الدالة
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     try {
         const { searchParams } = new URL(req.url);
         const code = searchParams.get('code');
@@ -76,7 +78,6 @@ async function GET(req) {
             state,
             error
         });
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
         // التحقق من وجود خطأ في OAuth
         if (error) {
             console.error('OAuth Error:', error);
@@ -93,52 +94,49 @@ async function GET(req) {
             redirectUrl.searchParams.set('error', errorMessage);
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].redirect(redirectUrl.toString());
         }
-        // التحقق من state للأمان (اختياري)
-        // يمكنك إضافة التحقق من state هنا إذا كنت تحفظه في localStorage
         // تحديد redirectUri بناءً على البيئة
         const currentRedirectUri = ("TURBOPACK compile-time falsy", 0) ? ("TURBOPACK unreachable", undefined) : 'http://localhost:3000/api/oauth/callback';
-        // تبادل authorization code مع access token
+        console.log('DEBUG: currentRedirectUri:', currentRedirectUri);
         const tokenResponse = await exchangeCodeForToken(code, currentRedirectUri);
-        if (!tokenResponse.success) {
-            console.error('Failed to exchange code for token:', tokenResponse.error);
-            const errorMessage = encodeURIComponent('فشل في الحصول على رمز الوصول من Google');
+        if (tokenResponse.success) {
+            console.log('✅ Token exchange successful, redirecting to dashboard...');
+            // هنا يمكنك حفظ الـ access_token والـ refresh_token في قاعدة البيانات أو في جلسة المستخدم
+            // ثم إعادة توجيه المستخدم إلى لوحة التحكم
+            const redirectUrl = new URL('/dashboard', baseUrl);
+            redirectUrl.searchParams.set('success', 'true');
+            redirectUrl.searchParams.set('access_token', tokenResponse.access_token);
+            if (tokenResponse.refresh_token) {
+                redirectUrl.searchParams.set('refresh_token', tokenResponse.refresh_token);
+            }
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].redirect(redirectUrl.toString());
+        } else {
+            console.error('❌ Token exchange failed:', tokenResponse.error);
+            const errorMessage = encodeURIComponent('فشل في الحصول على رمز الوصول من Google: ' + tokenResponse.error);
             const redirectUrl = new URL('/dashboard', baseUrl);
             redirectUrl.searchParams.set('error', errorMessage);
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].redirect(redirectUrl.toString());
         }
-        // حفظ access token (يمكنك حفظه في قاعدة البيانات أو localStorage)
-        console.log('✅ OAuth successful, access token received');
-        // إعادة توجيه إلى صفحة إنشاء الحملة مع معلومات الحساب المربوط
-        const successUrl = new URL('/new-campaign', baseUrl);
-        successUrl.searchParams.set('account_type', 'own-accounts');
-        successUrl.searchParams.set('oauth_success', 'true');
-        successUrl.searchParams.set('access_token', tokenResponse.access_token);
-        return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].redirect(successUrl.toString());
     } catch (error) {
-        console.error('OAuth Callback Error:', error);
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-        const errorMessage = encodeURIComponent('حدث خطأ غير متوقع أثناء معالجة OAuth');
+        console.error('❌ Error in OAuth callback:', error);
+        const errorMessage = encodeURIComponent('حدث خطأ غير متوقع أثناء عملية OAuth: ' + error.message);
         const redirectUrl = new URL('/dashboard', baseUrl);
         redirectUrl.searchParams.set('error', errorMessage);
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].redirect(redirectUrl.toString());
     }
 }
-// دالة لتبادل authorization code مع access token
 async function exchangeCodeForToken(code, redirectUri) {
     try {
-        const clientId = ("TURBOPACK compile-time value", "366144291902-u75bec3sviur9nrutbslt14ob14hrgud.apps.googleusercontent.com");
+        const clientId = process.env.GOOGLE_CLIENT_ID;
         const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-        console.log('🔍 Debugging Token Exchange:');
-        console.log('  Client ID:', clientId);
-        console.log('  Client Secret (first 10 chars):', clientSecret ? clientSecret.substring(0, 10) + '...' : 'Not set');
-        console.log('  Redirect URI:', redirectUri);
-        console.log('  Authorization Code (first 10 chars):', code ? code.substring(0, 10) + '...' : 'Not set');
+        // DEBUGGING LOGS
+        console.log("DEBUG: Loaded GOOGLE_CLIENT_ID:", clientId);
+        console.log("DEBUG: Loaded GOOGLE_CLIENT_SECRET:", clientSecret ? clientSecret.substring(0, 5) + '...' : 'Not loaded');
         if (!clientId || !clientSecret) {
-            console.error('❌ Missing OAuth credentials:', {
-                clientId: !!clientId,
-                clientSecret: !!clientSecret
-            });
-            throw new Error('Missing Google OAuth credentials');
+            console.error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables.');
+            return {
+                success: false,
+                error: 'Missing client credentials'
+            };
         }
         const tokenEndpoint = 'https://oauth2.googleapis.com/token';
         const params = new URLSearchParams({
