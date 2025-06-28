@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -84,6 +85,13 @@ interface Errors {
 }
 
 const NewCampaign: React.FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // إضافة حالات جديدة لنوع الحساب (بدون تعديل الحالات الأصلية)
+  const [accountType, setAccountType] = useState<string>('');
+  const [customerId, setCustomerId] = useState<string>('');
+
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [campaignData, setCampaignData] = useState<CampaignData>({
     // Basic Info
@@ -142,7 +150,41 @@ const NewCampaign: React.FC = () => {
   const [errors, setErrors] = useState<Errors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Campaign objectives
+  // إضافة useEffect لاستقبال البيانات من AccountSelectionModal
+  useEffect(() => {
+    const accountTypeFromUrl = searchParams.get('account_type');
+    const customerIdFromUrl = searchParams.get('customer_id');
+    
+    if (accountTypeFromUrl) {
+      setAccountType(accountTypeFromUrl);
+      localStorage.setItem('furriyadh_account_type', accountTypeFromUrl);
+    } else {
+      const savedAccountType = localStorage.getItem('furriyadh_account_type');
+      if (savedAccountType) {
+        setAccountType(savedAccountType);
+      }
+    }
+
+    if (customerIdFromUrl) {
+      setCustomerId(customerIdFromUrl);
+      localStorage.setItem('furriyadh_customer_id', customerIdFromUrl);
+    } else {
+      const savedCustomerId = localStorage.getItem('furriyadh_customer_id');
+      if (savedCustomerId) {
+        setCustomerId(savedCustomerId);
+      }
+    }
+
+    // تعيين تاريخ البداية الافتراضي
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setCampaignData(prev => ({
+      ...prev,
+      startDate: tomorrow.toISOString().split('T')[0]
+    }));
+  }, [searchParams]);
+
+  // Campaign objectives (بدون تغيير)
   const objectives = [
     {
       id: "sales",
@@ -188,7 +230,7 @@ const NewCampaign: React.FC = () => {
     }
   ];
 
-  // Bid strategies
+  // Bid strategies (بدون تغيير)
   const bidStrategies = [
     {
       id: "maximize_clicks",
@@ -217,27 +259,27 @@ const NewCampaign: React.FC = () => {
     }
   ];
 
-  // Popular locations
+  // Popular locations (بدون تغيير)
   const popularLocations = [
     "United States", "United Kingdom", "Canada", "Australia", "Germany",
     "France", "Spain", "Italy", "Netherlands", "Sweden", "Norway",
     "Saudi Arabia", "UAE", "Egypt", "Jordan", "Lebanon", "Kuwait"
   ];
 
-  // Popular languages
+  // Popular languages (بدون تغيير)
   const popularLanguages = [
     "English", "Arabic", "Spanish", "French", "German", "Italian",
     "Portuguese", "Dutch", "Swedish", "Norwegian", "Danish"
   ];
 
-  // Interest categories
+  // Interest categories (بدون تغيير)
   const interestCategories = [
     "Technology", "Fashion", "Travel", "Food & Dining", "Sports",
     "Entertainment", "Health & Fitness", "Education", "Finance",
     "Real Estate", "Automotive", "Home & Garden", "Beauty"
   ];
 
-  // Steps configuration
+  // Steps configuration (بدون تغيير)
   const steps = [
     { id: 1, title: "Basic Info", icon: Info },
     { id: 2, title: "Budget & Bidding", icon: DollarSign },
@@ -248,7 +290,7 @@ const NewCampaign: React.FC = () => {
     { id: 7, title: "Review", icon: CheckCircle }
   ];
 
-  // Handle input changes
+  // Handle input changes (بدون تغيير)
   const handleInputChange = (field: keyof CampaignData, value: any) => {
     setCampaignData(prev => ({
       ...prev,
@@ -264,7 +306,7 @@ const NewCampaign: React.FC = () => {
     }
   };
 
-  // Handle nested input changes
+  // Handle nested input changes (بدون تغيير)
   const handleNestedInputChange = (parent: keyof CampaignData, field: string, value: any) => {
     setCampaignData(prev => ({
       ...prev,
@@ -275,7 +317,7 @@ const NewCampaign: React.FC = () => {
     }));
   };
 
-  // Handle array input changes
+  // Handle array input changes (بدون تغيير)
   const handleArrayInputChange = (field: keyof CampaignData, value: string, action: "add" | "remove" = "add") => {
     setCampaignData(prev => {
       const currentArray = (prev[field] as string[]) || [];
@@ -296,7 +338,7 @@ const NewCampaign: React.FC = () => {
     });
   };
 
-  // Validate current step
+  // Validate current step (بدون تغيير)
   const validateStep = (step: number): boolean => {
     const newErrors: Errors = {};
     
@@ -332,19 +374,19 @@ const NewCampaign: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Navigate to next step
+  // Navigate to next step (بدون تغيير)
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, steps.length));
     }
   };
 
-  // Navigate to previous step
+  // Navigate to previous step (بدون تغيير)
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  // Save campaign as draft
+  // Save campaign as draft (بدون تغيير)
   const saveDraft = async () => {
     setIsLoading(true);
     try {
@@ -358,23 +400,91 @@ const NewCampaign: React.FC = () => {
     }
   };
 
-  // Launch campaign
+  // Launch campaign - محسن مع ربط APIs الحقيقية
   const launchCampaign = async () => {
     if (!validateStep(currentStep)) return;
     
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert("Campaign launched successfully!");
+      // التحقق من البيانات المطلوبة
+      if (!campaignData.name || !campaignData.objective || !campaignData.budget) {
+        alert('Please fill in all required fields');
+        setIsLoading(false);
+        return;
+      }
+
+      // إعداد بيانات الحملة للإرسال إلى API
+      const apiCampaignData = {
+        customerId: customerId || 'default_customer',
+        accountType: accountType as 'mcc_sub_account' | 'oauth_linked' | 'hybrid' || 'mcc_sub_account',
+        name: campaignData.name,
+        objective: campaignData.objective,
+        description: campaignData.description,
+        budgetType: campaignData.budgetType as 'daily' | 'total',
+        budget: parseFloat(campaignData.budget),
+        bidStrategy: campaignData.bidStrategy,
+        maxCpc: campaignData.maxCpc ? parseFloat(campaignData.maxCpc) : undefined,
+        locations: campaignData.locations,
+        languages: campaignData.languages,
+        demographics: campaignData.demographics,
+        interests: campaignData.interests,
+        keywords: campaignData.keywords,
+        startDate: campaignData.startDate,
+        endDate: campaignData.endDate || undefined,
+        schedule: campaignData.schedule,
+        headlines: campaignData.headlines.filter(h => h.trim() !== ''),
+        descriptions: campaignData.descriptions.filter(d => d.trim() !== ''),
+        images: campaignData.images,
+        videos: campaignData.videos,
+        sitelinks: campaignData.sitelinks,
+        deviceTargeting: campaignData.deviceTargeting,
+        networkSettings: campaignData.networkSettings,
+        adRotation: campaignData.adRotation,
+        frequencyCapping: campaignData.frequencyCapping
+      };
+
+      console.log('🚀 Launching campaign with real API...', apiCampaignData);
+
+      // استدعاء API إنشاء الحملة الحقيقي
+      const response = await fetch('/api/campaigns/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiCampaignData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`Campaign launched successfully! Campaign ID: ${result.campaignId}`);
+        
+        // حفظ معلومات الحملة المنشأة
+        localStorage.setItem('furriyadh_last_campaign', JSON.stringify({
+          campaignId: result.campaignId,
+          campaignName: result.campaignName,
+          customerId: result.customerId,
+          createdAt: new Date().toISOString(),
+          details: result.details
+        }));
+
+        console.log('✅ Campaign created successfully:', result);
+
+        // إعادة توجيه إلى لوحة التحكم
+        router.push(`/dashboard?campaign_created=${result.campaignId}`);
+      } else {
+        throw new Error(result.error || 'Failed to create campaign');
+      }
+
     } catch (error) {
-      alert("Error launching campaign. Please try again.");
+      console.error('❌ Campaign launch failed:', error);
+      alert(error instanceof Error ? error.message : 'Error launching campaign. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Render step content
+  // Render step content (بدون تغيير)
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -538,38 +648,47 @@ const NewCampaign: React.FC = () => {
           <button
             onClick={prevStep}
             disabled={currentStep === 1}
-            className="flex items-center space-x-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Previous</span>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Previous
           </button>
 
           <div className="flex items-center space-x-4">
             <button
               onClick={saveDraft}
               disabled={isLoading}
-              className="flex items-center space-x-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+              className="flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <Save className="w-5 h-5" />
-              <span>Save Draft</span>
+              <Save className="w-4 h-4 mr-2" />
+              Save Draft
             </button>
 
-            {currentStep < steps.length ? (
-              <button
-                onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                <span>Next</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            ) : (
+            {currentStep === steps.length ? (
               <button
                 onClick={launchCampaign}
                 disabled={isLoading}
-                className="flex items-center space-x-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <Play className="w-5 h-5" />
-                <span>{isLoading ? "Launching..." : "Launch Campaign"}</span>
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Launching...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Launch Campaign
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={nextStep}
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Next
+                <ArrowRight className="w-4 h-4 ml-2" />
               </button>
             )}
           </div>

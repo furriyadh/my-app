@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import AccountSelectionModal from "@/components/Modals/AccountSelectionModal";
+import { AccountOption } from "@/types/modal";
 import Dashboard from "@/components/Dashboard";
 import OverviewCards from "@/components/Dashboard/OverviewCards";
 import PerformanceChart from "@/components/Dashboard/PerformanceChart";
@@ -12,6 +14,49 @@ import GoogleAds from "@/components/Dashboard/GoogleAds";
 const DashboardPage: React.FC = () => {
   const searchParams = useSearchParams();
   const section = searchParams.get("section") || "overview";
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+
+  // Check if user is first time visitor
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('furriyadh_user_visited');
+    const accountType = localStorage.getItem('furriyadh_account_type');
+    
+    if (!hasVisited || !accountType) {
+      setIsFirstTimeUser(true);
+      setShowModal(true);
+    }
+  }, []);
+
+  const handleModalSelect = (option: AccountOption) => {
+    // Save user choice
+    localStorage.setItem('furriyadh_account_type', option);
+    localStorage.setItem('furriyadh_user_visited', 'true');
+    
+    setShowModal(false);
+    setIsFirstTimeUser(false);
+    
+    // Handle routing based on selection
+    switch (option) {
+      case 'own-accounts':
+        window.location.href = '/new-campaign?type=connect';
+        break;
+      case 'furriyadh-managed':
+        window.location.href = '/new-campaign?type=managed';
+        break;
+      case 'new-account':
+        window.location.href = '/new-campaign?type=new';
+        break;
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    // Mark as visited even if closed without selection
+    localStorage.setItem('furriyadh_user_visited', 'true');
+  };
 
   const renderSection = () => {
     switch (section) {
@@ -326,6 +371,13 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {renderSection()}
+      
+      {/* Account Selection Modal for First Time Users */}
+      <AccountSelectionModal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        onSelect={handleModalSelect}
+      />
     </div>
   );
 };
