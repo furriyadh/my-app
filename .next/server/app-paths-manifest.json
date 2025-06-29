@@ -1,5 +1,1 @@
-{
-  "/api/oauth/callback/route": "app/api/oauth/callback/route.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/onboarding/page": "app/onboarding/page.js"
-}
+{}

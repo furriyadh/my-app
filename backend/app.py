@@ -145,10 +145,22 @@ def create_app():
     # تسجيل Google Ads Blueprints
     try:
         from routes.google_ads.oauth import google_ads_oauth_bp
-        app.register_blueprint(google_ads_oauth_bp, url_prefix='/api/google-ads/oauth')
-        app.logger.info("✅ تم تحميل Google Ads OAuth Blueprint بنجاح")
+        if 'google_ads_oauth_bp' not in app.blueprints:
+            app.register_blueprint(google_ads_oauth_bp, url_prefix='/api/google-ads/oauth')
+            app.logger.info("✅ تم تحميل Google Ads OAuth Blueprint بنجاح على /api/google-ads/oauth")
+            
+            # التحقق من المسارات المسجلة
+            oauth_routes = [rule.rule for rule in app.url_map.iter_rules() if rule.rule.startswith('/api/google-ads/oauth')]
+            app.logger.info(f"📋 مسارات OAuth المسجلة: {oauth_routes}")
+        else:
+            app.logger.info("ℹ️ Google Ads OAuth Blueprint مسجل بالفعل.")
+        
     except ImportError as e:
-        app.logger.warning(f"⚠️ خطأ في تحميل Google Ads OAuth Blueprint: {e}")
+        app.logger.error(f"❌ خطأ في استيراد Google Ads OAuth Blueprint: {e}")
+        app.logger.error("تأكد من وجود ملف routes/google_ads/oauth.py ووجود google_ads_oauth_bp")
+    except Exception as e:
+        app.logger.error(f"❌ خطأ في تسجيل Google Ads OAuth Blueprint: {e}")
+        app.logger.error(traceback.format_exc())
     
     # تسجيل Blueprints القديمة (للتوافق مع الإصدارات السابقة)
     try:
@@ -213,15 +225,15 @@ def create_app():
     
     # تسجيل AI Blueprints الجديدة
     try:
-        from routes.ai.keyword_research import ai_keyword_research_bp
-        from routes.ai.optimization import ai_optimization_bp
-        from routes.ai.analysis import ai_analysis_bp
-        from routes.ai.recommendations import ai_recommendations_bp
+        from routes.ai.keyword_research import keyword_research_bp
+        from routes.ai.optimization import optimization_bp
+        from routes.ai.analysis import analysis_bp
+        from routes.ai.recommendations import recommendations_bp
         
-        app.register_blueprint(ai_keyword_research_bp, url_prefix='/api/ai/keyword-research')
-        app.register_blueprint(ai_optimization_bp, url_prefix='/api/ai/optimization')
-        app.register_blueprint(ai_analysis_bp, url_prefix='/api/ai/analysis')
-        app.register_blueprint(ai_recommendations_bp, url_prefix='/api/ai/recommendations')
+        app.register_blueprint(keyword_research_bp, url_prefix='/api/ai/keyword-research')
+        app.register_blueprint(optimization_bp, url_prefix='/api/ai/optimization')
+        app.register_blueprint(analysis_bp, url_prefix='/api/ai/analysis')
+        app.register_blueprint(recommendations_bp, url_prefix='/api/ai/recommendations')
         
         app.logger.info("✅ تم تحميل AI Blueprints الجديدة بنجاح")
     except ImportError as e:
@@ -335,26 +347,7 @@ def create_app():
                 'error': str(e)
             }, 401)
     
-    return app
-
-# إنشاء التطبيق
-app = create_app()
-
-if __name__ == '__main__':
-    print("🚀 بدء تشغيل Google Ads AI Platform...")
-    print(f"🌍 البيئة: {os.getenv('FLASK_ENV', 'development')}")
-    print(f"🔑 JWT مكون: {'نعم' if os.getenv('FLASK_SECRET_KEY') else 'لا'}")
-    print(f"📊 Google Ads مكون: {'نعم' if os.getenv('GOOGLE_DEVELOPER_TOKEN') else 'لا'}")
-    print("=" * 50)
-    
-    app.run(
-        host='0.0.0.0',
-        port=int(os.getenv('PORT', 5000)),
-        debug=os.getenv('FLASK_ENV') == 'development'
-    )
-
-
-    
+    # نقل system_status إلى داخل create_app
     @app.route('/api/status', methods=['GET'])
     def system_status():
         """حالة النظام المفصلة"""
@@ -407,232 +400,34 @@ if __name__ == '__main__':
                 'overall_health': 'صحي' if overall_health else 'يحتاج إعداد',
                 'services': services_status,
                 'system': system_stats,
-                'timestamp': datetime.utcnow().isoformat(),
-                'recommendations': _get_setup_recommendations(services_status)
+                'timestamp': datetime.utcnow().isoformat()
             })
-            
         except Exception as e:
             app.logger.error(f"خطأ في فحص حالة النظام: {str(e)}")
             return arabic_jsonify({
                 'success': False,
+                'status': 'unhealthy',
                 'error': str(e)
             }, 500)
+
+    return app
+
+# إنشاء التطبيق
+app = create_app()
+
+if __name__ == '__main__':
+    print("🚀 بدء تشغيل Google Ads AI Platform...")
+    print(f"🌍 البيئة: {os.getenv('FLASK_ENV', 'development')}")
+    print(f"🔑 JWT مكون: {'نعم' if os.getenv('FLASK_SECRET_KEY') else 'لا'}")
+    print(f"📊 Google Ads مكون: {'نعم' if os.getenv('GOOGLE_DEVELOPER_TOKEN') else 'لا'}")
+    print("=" * 50)
     
-    def _get_setup_recommendations(services_status):
-        """الحصول على توصيات الإعداد"""
-        recommendations = []
-        
-        for service, status in services_status.items():
-            if not status['configured']:
-                if service == 'google_ads':
-                    recommendations.append({
-                        'service': 'Google Ads API',
-                        'priority': 'عالي',
-                        'action': 'قم بإعداد متغيرات البيئة المطلوبة',
-                        'missing_vars': status['missing_vars']
-                    })
-                elif service == 'google_ai':
-                    recommendations.append({
-                        'service': 'Google AI API',
-                        'priority': 'متوسط',
-                        'action': 'قم بإعداد GOOGLE_AI_API_KEY',
-                        'missing_vars': status['missing_vars']
-                    })
-                elif service == 'supabase':
-                    recommendations.append({
-                        'service': 'Supabase Database',
-                        'priority': 'منخفض',
-                        'action': 'قم بإعداد متغيرات Supabase',
-                        'missing_vars': status['missing_vars']
-                    })
-        
-        return recommendations
-    
-    @app.route('/api/routes', methods=['GET'])
-    def list_routes():
-        """قائمة جميع المسارات المتاحة"""
-        try:
-            routes = []
-            for rule in app.url_map.iter_rules():
-                routes.append({
-                    'endpoint': rule.endpoint,
-                    'methods': list(rule.methods - {'HEAD', 'OPTIONS'}),
-                    'path': str(rule),
-                    'description': _get_route_description(rule.endpoint)
-                })
-            
-            # تجميع المسارات حسب الفئة
-            categorized_routes = {
-                'system': [],
-                'auth': [],
-                'mcc': [],
-                'google_ads': [],
-                'ai': [],
-                'campaigns': [],
-                'accounts': [],
-                'other': []
-            }
-            
-            for route in routes:
-                path = route['path']
-                if '/api/health' in path or '/api/status' in path or path == '/':
-                    categorized_routes['system'].append(route)
-                elif '/api/auth' in path:
-                    categorized_routes['auth'].append(route)
-                elif '/api/mcc' in path:
-                    categorized_routes['mcc'].append(route)
-                elif '/api/google-ads' in path:
-                    categorized_routes['google_ads'].append(route)
-                elif '/api/ai' in path:
-                    categorized_routes['ai'].append(route)
-                elif '/api/campaigns' in path:
-                    categorized_routes['campaigns'].append(route)
-                elif '/api/accounts' in path:
-                    categorized_routes['accounts'].append(route)
-                else:
-                    categorized_routes['other'].append(route)
-            
-            return arabic_jsonify({
-                'success': True,
-                'total_routes': len(routes),
-                'categories': categorized_routes,
-                'message': 'قائمة جميع المسارات المتاحة'
-            })
-            
-        except Exception as e:
-            app.logger.error(f"خطأ في جلب قائمة المسارات: {str(e)}")
-            return arabic_jsonify({
-                'success': False,
-                'error': str(e)
-            }, 500)
-    
-    def _get_route_description(endpoint):
-        """الحصول على وصف المسار"""
-        descriptions = {
-            'health_check': 'فحص صحة الخادم الأساسي',
-            'api_health': 'فحص صحة API مع تفاصيل الخدمات',
-            'system_status': 'حالة النظام المفصلة مع التوصيات',
-            'list_routes': 'قائمة جميع المسارات المتاحة',
-            'create_test_token': 'إنشاء token تجريبي للاختبار',
-            'verify_token': 'التحقق من صحة JWT token',
-            
-            # MCC Routes
-            'mcc_accounts_bp.health': 'فحص صحة خدمة حسابات MCC',
-            'mcc_clients_bp.health': 'فحص صحة خدمة عملاء MCC',
-            'mcc_permissions_bp.health': 'فحص صحة خدمة صلاحيات MCC',
-            'mcc_sync_bp.health': 'فحص صحة خدمة مزامنة MCC',
-            'mcc_analytics_bp.health': 'فحص صحة خدمة تحليلات MCC',
-            
-            # Google Ads Routes
-            'google_ads_oauth_bp.health': 'فحص صحة خدمة OAuth لـ Google Ads',
-            
-            # Legacy Routes
-            'mcc_api.get_mcc_accounts': 'الحصول على حسابات MCC (إصدار قديم)',
-            'google_ads_bp.get_accounts': 'الحصول على حسابات Google Ads',
-            'auth_bp.login': 'تسجيل الدخول',
-            'campaigns_bp.get_campaigns': 'الحصول على الحملات',
-            'accounts_bp.get_accounts': 'الحصول على الحسابات',
-            'ai_bp.analyze': 'تحليل بالذكاء الاصطناعي'
-        }
-        
-        return descriptions.get(endpoint, 'لا يوجد وصف متاح')
-    
-    @app.route('/api/config', methods=['GET'])
-    @jwt_required()
-    def get_config():
-        """الحصول على إعدادات التطبيق (للمطورين فقط)"""
-        try:
-            current_user = get_jwt_identity()
-            
-            # فقط للمطورين أو المدراء
-            if current_user not in ['admin', 'developer', 'test_user']:
-                return arabic_jsonify({
-                    'success': False,
-                    'error': 'Unauthorized',
-                    'message': 'غير مصرح لك بالوصول لهذه المعلومات'
-                }, 403)
-            
-            # إعدادات آمنة (بدون كلمات مرور)
-            safe_config = {
-                'environment': os.getenv('FLASK_ENV', 'development'),
-                'debug': app.config.get('DEBUG', False),
-                'google_ads': {
-                    'developer_token_set': bool(os.getenv('GOOGLE_DEVELOPER_TOKEN')),
-                    'client_id_set': bool(os.getenv('GOOGLE_CLIENT_ID')),
-                    'client_secret_set': bool(os.getenv('GOOGLE_CLIENT_SECRET')),
-                    'refresh_token_set': bool(os.getenv('GOOGLE_REFRESH_TOKEN')),
-                    'mcc_customer_id': os.getenv('MCC_LOGIN_CUSTOMER_ID', 'غير محدد')
-                },
-                'google_ai': {
-                    'api_key_set': bool(os.getenv('GOOGLE_AI_API_KEY'))
-                },
-                'supabase': {
-                    'url_set': bool(os.getenv('SUPABASE_URL')),
-                    'key_set': bool(os.getenv('SUPABASE_KEY'))
-                },
-                'jwt': {
-                    'secret_key_set': bool(app.config.get('JWT_SECRET_KEY')),
-                    'expires_hours': 24
-                }
-            }
-            
-            return arabic_jsonify({
-                'success': True,
-                'config': safe_config,
-                'user': current_user,
-                'message': 'إعدادات التطبيق'
-            })
-            
-        except Exception as e:
-            app.logger.error(f"خطأ في جلب الإعدادات: {str(e)}")
-            return arabic_jsonify({
-                'success': False,
-                'error': str(e)
-            }, 500)
-    
-    @app.route('/api/logs', methods=['GET'])
-    @jwt_required()
-    def get_logs():
-        """الحصول على سجلات التطبيق (للمطورين فقط)"""
-        try:
-            current_user = get_jwt_identity()
-            
-            # فقط للمطورين أو المدراء
-            if current_user not in ['admin', 'developer', 'test_user']:
-                return arabic_jsonify({
-                    'success': False,
-                    'error': 'Unauthorized',
-                    'message': 'غير مصرح لك بالوصول للسجلات'
-                }, 403)
-            
-            # قراءة آخر 100 سطر من ملف السجل
-            log_file = 'app.log'
-            lines = request.args.get('lines', 100, type=int)
-            
-            if os.path.exists(log_file):
-                with open(log_file, 'r', encoding='utf-8') as f:
-                    all_lines = f.readlines()
-                    recent_lines = all_lines[-lines:] if len(all_lines) > lines else all_lines
-                
-                return arabic_jsonify({
-                    'success': True,
-                    'logs': [line.strip() for line in recent_lines],
-                    'total_lines': len(all_lines),
-                    'showing_lines': len(recent_lines),
-                    'log_file': log_file,
-                    'message': f'آخر {len(recent_lines)} سطر من السجلات'
-                })
-            else:
-                return arabic_jsonify({
-                    'success': False,
-                    'error': 'Log file not found',
-                    'message': 'ملف السجلات غير موجود'
-                }, 404)
-                
-        except Exception as e:
-            app.logger.error(f"خطأ في جلب السجلات: {str(e)}")
-            return arabic_jsonify({
-                'success': False,
-                'error': str(e)
-            }, 500)
+    app.run(
+        host='0.0.0.0',
+        port=int(os.getenv('PORT', 5000)),
+        debug=os.getenv('FLASK_ENV') == 'development'
+    )
+
+
+
 

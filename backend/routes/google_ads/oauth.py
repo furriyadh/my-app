@@ -11,9 +11,11 @@ Google Ads OAuth 2.0 API
 - نظام أمان متقدم ومراقبة شاملة
 - دعم العمليات غير المتزامنة
 - تشفير متقدم للبيانات الحساسة
+- إدارة الحسابات الإعلانية وربطها بـ MCC
+- تحليل جودة الحسابات واختيار الأفضل
 
 Author: Google Ads AI Platform Team
-Version: 2.1.0
+Version: 3.1.0
 Security Level: Enterprise
 Performance: Optimized
 """
@@ -73,7 +75,9 @@ SERVICES_STATUS = {
     'helpers': False,
     'database': False,
     'redis': False,
-    'supabase': False
+    'supabase': False,
+    'google_ads_helpers': False,
+    'google_ads_database': False
 }
 
 try:
@@ -121,9 +125,30 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Supabase غير متاح: {e}")
 
+try:
+    from utils.google_ads_api import GoogleAdsApiManager
+    SERVICES_STATUS['google_ads_api'] = True
+except ImportError as e:
+    logger.warning(f"⚠️ GoogleAdsApiManager غير متاح: {e}")
+
+try:
+    from utils.google_ads_helpers import (
+        GoogleAdsAccountAnalyzer, GoogleAdsMCCManager, 
+        GoogleAdsDataFormatter, GoogleAdsAccountSelector
+    )
+    SERVICES_STATUS['google_ads_helpers'] = True
+except ImportError as e:
+    logger.warning(f"⚠️ Google Ads Helpers غير متاح: {e}")
+
+try:
+    from utils.google_ads_database import GoogleAdsDatabaseManager, google_ads_db
+    SERVICES_STATUS['google_ads_database'] = True
+except ImportError as e:
+    logger.warning(f"⚠️ Google Ads Database غير متاح: {e}")
+
 # تحديد حالة الخدمات
 GOOGLE_ADS_OAUTH_SERVICES_AVAILABLE = any(SERVICES_STATUS.values())
-logger.info(f"✅ تم تحميل خدمات Google Ads OAuth - الخدمات المتاحة: {sum(SERVICES_STATUS.values())}/7")
+logger.info(f"✅ تم تحميل خدمات Google Ads OAuth - الخدمات المتاحة: {sum(SERVICES_STATUS.values())}/9")
 
 # إعداد Thread Pool للعمليات المتوازية
 executor = ThreadPoolExecutor(max_workers=20, thread_name_prefix="oauth_worker")
@@ -165,7 +190,7 @@ class OAuthConfig:
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile"
     ])
-    redirect_uri: str = "http://localhost:5000/api/google-ads/oauth/callback"
+    redirect_uri: str = "http://localhost:3000/api/auth/callback/google"
     security_level: SecurityLevel = SecurityLevel.ENHANCED
     use_pkce: bool = True
     use_state: bool = True
@@ -376,6 +401,9 @@ class MetricsCollector:
             'security_violations': 0,
             'rate_limit_hits': 0,
             'average_flow_duration': 0.0,
+            'accounts_linked': 0,
+            'mcc_links_attempted': 0,
+            'mcc_links_successful': 0,
             'last_reset': datetime.now(timezone.utc)
         }
         self.flow_durations: List[float] = []
@@ -394,21 +422,17 @@ class MetricsCollector:
         """تسجيل فشل OAuth"""
         self.metrics['oauth_flows_failed'] += 1
     
-    def record_token_issued(self):
-        """تسجيل إصدار رمز"""
-        self.metrics['tokens_issued'] += 1
+    def record_account_linked(self):
+        """تسجيل ربط حساب"""
+        self.metrics['accounts_linked'] += 1
     
-    def record_token_refreshed(self):
-        """تسجيل تجديد رمز"""
-        self.metrics['tokens_refreshed'] += 1
+    def record_mcc_link_attempt(self):
+        """تسجيل محاولة ربط MCC"""
+        self.metrics['mcc_links_attempted'] += 1
     
-    def record_token_revoked(self):
-        """تسجيل إلغاء رمز"""
-        self.metrics['tokens_revoked'] += 1
-    
-    def record_security_violation(self):
-        """تسجيل انتهاك أمني"""
-        self.metrics['security_violations'] += 1
+    def record_mcc_link_success(self):
+        """تسجيل نجاح ربط MCC"""
+        self.metrics['mcc_links_successful'] += 1
     
     def record_rate_limit_hit(self):
         """تسجيل ضرب حد المعدل"""
@@ -425,9 +449,14 @@ class MetricsCollector:
         if self.metrics['oauth_flows_initiated'] > 0:
             success_rate = (self.metrics['oauth_flows_completed'] / self.metrics['oauth_flows_initiated']) * 100
         
+        mcc_success_rate = 0
+        if self.metrics['mcc_links_attempted'] > 0:
+            mcc_success_rate = (self.metrics['mcc_links_successful'] / self.metrics['mcc_links_attempted']) * 100
+        
         return {
             **self.metrics,
             'success_rate': success_rate,
+            'mcc_success_rate': mcc_success_rate,
             'total_flows': self.metrics['oauth_flows_initiated'],
             'active_tokens': self.metrics['tokens_issued'] - self.metrics['tokens_revoked']
         }
@@ -448,108 +477,96 @@ class GoogleAdsOAuthManager:
         self.metrics_collector = MetricsCollector()
         
         # تهيئة الخدمات
-        self.google_ads_client = GoogleAdsClient() if SERVICES_STATUS['google_ads_client'] else None
-        self.oauth_handler = OAuthHandler() if SERVICES_STATUS['oauth_handler'] else None
-        self.db_manager = DatabaseManager() if SERVICES_STATUS['database'] else None
+        self.google_ads_client = GoogleAdsClient() if SERVICES_STATUS.get('google_ads_client') else None
+        self.oauth_handler = OAuthHandler() if SERVICES_STATUS.get('oauth_handler') else None
+        self.db_manager = DatabaseManager() if SERVICES_STATUS.get('database') else None
+        self.google_ads_api_manager = GoogleAdsApiManager() if SERVICES_STATUS.get('google_ads_api') else None
+        self.google_ads_db = google_ads_db if SERVICES_STATUS.get('google_ads_database') else None
         
         # تخزين مؤقت للجلسات والرموز
         self.oauth_sessions: Dict[str, OAuthSession] = {}
         self.access_tokens: Dict[str, AccessToken] = {}
         
         # إعدادات التنظيف التلقائي
-        self.cleanup_interval = 300  # 5 دقائق
-        self.last_cleanup = datetime.now(timezone.utc)
+        self.cleanup_thread = threading.Thread(target=self._cleanup_sessions_and_tokens, daemon=True)
+        self.cleanup_thread.start()
         
-        # بدء مهام الخلفية
-        self._start_background_tasks()
-        
-        logger.info("🚀 تم تهيئة مدير Google Ads OAuth المتطور")
-    
+        logger.info("✅ تم تهيئة GoogleAdsOAuthManager")
+
     def _load_default_config(self) -> OAuthConfig:
-        """تحميل الإعدادات الافتراضية"""
+        """تحميل الإعدادات الافتراضية من متغيرات البيئة"""
         return OAuthConfig(
-            client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
-            client_secret=os.getenv('GOOGLE_CLIENT_SECRET', ''),
-            redirect_uri=os.getenv('OAUTH_REDIRECT_URI', 'http://localhost:5000/api/google-ads/oauth/callback'),
-            security_level=SecurityLevel(os.getenv('OAUTH_SECURITY_LEVEL', 'enhanced'))
+            client_id=os.getenv("GOOGLE_CLIENT_ID", ""),
+            client_secret=os.getenv("GOOGLE_CLIENT_SECRET", ""),
+            redirect_uri=os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/api/auth/callback/google"),
+            security_level=SecurityLevel(os.getenv("OAUTH_SECURITY_LEVEL", "enhanced"))
         )
     
-    def _start_background_tasks(self):
-        """بدء مهام الخلفية"""
-        def cleanup_worker():
-            while True:
-                try:
-                    asyncio.run(self._cleanup_expired_sessions())
-                    time.sleep(self.cleanup_interval)
-                except Exception as e:
-                    logger.error(f"خطأ في مهمة التنظيف: {e}")
-                    time.sleep(60)  # انتظار دقيقة قبل المحاولة مرة أخرى
-        
-        cleanup_thread = threading.Thread(target=cleanup_worker, daemon=True, name="oauth_cleanup")
-        cleanup_thread.start()
-    
-    async def _cleanup_expired_sessions(self):
-        """تنظيف الجلسات المنتهية الصلاحية"""
-        now = datetime.now(timezone.utc)
-        
-        # تنظيف الجلسات المنتهية
-        expired_sessions = [
-            session_id for session_id, session in self.oauth_sessions.items()
-            if session.is_expired()
-        ]
-        
-        for session_id in expired_sessions:
-            del self.oauth_sessions[session_id]
-            logger.debug(f"🧹 تم حذف الجلسة المنتهية: {session_id}")
-        
-        # تنظيف الرموز المنتهية
-        expired_tokens = [
-            token_id for token_id, token in self.access_tokens.items()
-            if token.is_expired() and not token.refresh_token
-        ]
-        
-        for token_id in expired_tokens:
-            del self.access_tokens[token_id]
-            logger.debug(f"🧹 تم حذف الرمز المنتهي: {token_id}")
-        
-        self.last_cleanup = now
-        
-        if expired_sessions or expired_tokens:
-            logger.info(f"🧹 تنظيف تلقائي: {len(expired_sessions)} جلسة، {len(expired_tokens)} رمز")
-    
-    async def initiate_oauth_flow(self, user_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
-        """بدء تدفق OAuth المتطور"""
-        start_time = time.time()
-        
+    def _cleanup_sessions_and_tokens(self):
+        """تنظيف الجلسات والرموز المنتهية الصلاحية"""
+        while True:
+            try:
+                current_time = datetime.now(timezone.utc)
+                
+                # تنظيف الجلسات المنتهية الصلاحية
+                expired_sessions = [
+                    session_id for session_id, session in self.oauth_sessions.items()
+                    if session.is_expired()
+                ]
+                
+                for session_id in expired_sessions:
+                    del self.oauth_sessions[session_id]
+                    logger.debug(f"تم حذف جلسة منتهية الصلاحية: {session_id}")
+                
+                # تنظيف الرموز المنتهية الصلاحية
+                expired_tokens = [
+                    token_id for token_id, token in self.access_tokens.items()
+                    if token.is_expired()
+                ]
+                
+                for token_id in expired_tokens:
+                    del self.access_tokens[token_id]
+                    logger.debug(f"تم حذف رمز منتهي الصلاحية: {token_id}")
+                
+                # النوم لمدة 5 دقائق قبل التنظيف التالي
+                time.sleep(300)
+                
+            except Exception as e:
+                logger.error(f"خطأ في تنظيف الجلسات والرموز: {e}")
+                time.sleep(60)  # النوم لمدة دقيقة في حالة الخطأ
+
+    async def create_authorization_url_async(
+        self, 
+        user_id: str, 
+        ip_address: str = None, 
+        user_agent: str = None
+    ) -> Dict[str, Any]:
+        """إنشاء رابط التفويض بشكل غير متزامن"""
         try:
-            # تسجيل بدء التدفق
-            self.metrics_collector.record_oauth_initiated()
-            
-            # فحص الأمان الأولي
-            ip_address = request_data.get('ip_address', 'unknown')
-            user_agent = request_data.get('user_agent', 'unknown')
-            
-            if self.security_manager.is_ip_blocked(ip_address):
-                self.metrics_collector.record_security_violation()
-                return {'success': False, 'error': 'IP محظور بسبب النشاط المشبوه'}
-            
-            if not self.security_manager.check_rate_limit(ip_address, self.config.rate_limit_per_minute):
+            # فحص حد المعدل
+            if not self.security_manager.check_rate_limit(ip_address or user_id):
                 self.metrics_collector.record_rate_limit_hit()
-                return {'success': False, 'error': 'تم تجاوز حد المعدل المسموح'}
+                return {
+                    "success": False,
+                    "error": "RATE_LIMIT_EXCEEDED",
+                    "message": "تم تجاوز حد المعدل المسموح"
+                }
             
-            # التحقق من صحة البيانات
-            if SERVICES_STATUS['validators']:
-                validation_result = validate_oauth_config(self.config.__dict__)
-                if not validation_result.get('valid', True):
-                    return {'success': False, 'error': 'إعدادات OAuth غير صحيحة', 'details': validation_result.get('errors')}
+            # فحص حظر IP
+            if ip_address and self.security_manager.is_ip_blocked(ip_address):
+                return {
+                    "success": False,
+                    "error": "IP_BLOCKED",
+                    "message": "عنوان IP محظور"
+                }
             
-            # إنشاء معرف جلسة فريد
-            session_id = generate_unique_id('oauth_session') if SERVICES_STATUS['helpers'] else f"session_{int(time.time())}"
+            # توليد معرف جلسة فريد
+            session_id = generate_unique_id() if SERVICES_STATUS.get('helpers') else secrets.token_urlsafe(32)
             
-            # إنشاء state للأمان
+            # توليد state آمن
             state = self.security_manager.generate_secure_state()
             
-            # إنشاء PKCE إذا كان مفعلاً
+            # توليد PKCE إذا كان مفعلاً
             code_verifier, code_challenge = None, None
             if self.config.use_pkce:
                 code_verifier, code_challenge = self.security_manager.generate_pkce_pair()
@@ -565,815 +582,1481 @@ class GoogleAdsOAuthManager:
                 scopes=self.config.scope,
                 ip_address=ip_address,
                 user_agent=user_agent,
-                security_level=self.config.security_level,
-                metadata=request_data.get('metadata', {})
+                security_level=self.config.security_level
             )
             
             # حفظ الجلسة
             self.oauth_sessions[session_id] = oauth_session
             
-            # حفظ في Redis إذا كان متاحاً
-            if SERVICES_STATUS['redis']:
-                cache_set(f"oauth_session:{session_id}", oauth_session.to_dict(), 600)
-            
-            # حفظ في قاعدة البيانات إذا كانت متاحة
-            if self.db_manager:
-                await self._save_oauth_session_to_database(oauth_session)
-            
-            # بناء URL التفويض
+            # بناء معاملات URL
             auth_params = {
-                'client_id': self.config.client_id,
-                'redirect_uri': self.config.redirect_uri,
-                'scope': ' '.join(self.config.scope),
-                'response_type': 'code',
-                'access_type': 'offline',
-                'prompt': 'consent'
+                "client_id": self.config.client_id,
+                "redirect_uri": self.config.redirect_uri,
+                "scope": " ".join(self.config.scope),
+                "response_type": "code",
+                "state": state,
+                "access_type": "offline",
+                "prompt": "consent",
+                "include_granted_scopes": "true"
             }
             
-            if self.config.use_state:
-                auth_params['state'] = state
-            
+            # إضافة PKCE إذا كان مفعلاً
             if self.config.use_pkce and code_challenge:
-                auth_params['code_challenge'] = code_challenge
-                auth_params['code_challenge_method'] = 'S256'
+                auth_params.update({
+                    "code_challenge": code_challenge,
+                    "code_challenge_method": "S256"
+                })
             
+            # بناء URL
             authorization_url = f"{self.config.authorization_base_url}?{urlencode(auth_params)}"
             
-            # تسجيل النشاط
-            await self._log_oauth_activity(user_id, 'oauth_initiated', {
-                'session_id': session_id,
-                'scopes': self.config.scope,
-                'security_level': self.config.security_level.value,
-                'ip_address': ip_address
-            })
+            # تسجيل المقاييس
+            self.metrics_collector.record_oauth_initiated()
+            
+            logger.info(f"تم إنشاء رابط تفويض للمستخدم {user_id}")
             
             return {
-                'success': True,
-                'oauth_session': {
-                    'session_id': session_id,
-                    'authorization_url': authorization_url,
-                    'state': state,
-                    'expires_at': oauth_session.expires_at.isoformat(),
-                    'security_level': self.config.security_level.value
-                },
-                'message': 'تم بدء تدفق OAuth بنجاح',
-                'timestamp': datetime.now(timezone.utc).isoformat()
+                "success": True,
+                "authorization_url": authorization_url,
+                "session_id": session_id,
+                "state": state,
+                "expires_at": oauth_session.expires_at.isoformat()
             }
             
         except Exception as e:
+            logger.error(f"خطأ في إنشاء رابط التفويض: {e}")
             self.metrics_collector.record_oauth_failed()
-            logger.error(f"خطأ في بدء تدفق OAuth: {e}")
-            return {'success': False, 'error': f'خطأ في بدء تدفق OAuth: {str(e)}'}
-    
-    async def handle_oauth_callback(self, callback_data: Dict[str, Any]) -> Dict[str, Any]:
-        """معالجة callback من Google المتطورة"""
-        try:
-            # التحقق من صحة بيانات callback
-            if SERVICES_STATUS['validators']:
-                validation_result = validate_callback_data(callback_data)
-                if not validation_result.get('valid', True):
-                    self.metrics_collector.record_oauth_failed()
-                    return {'success': False, 'error': 'بيانات callback غير صحيحة', 'details': validation_result.get('errors')}
-            
-            # استخراج البيانات
-            code = callback_data.get('code')
-            state = callback_data.get('state')
-            error = callback_data.get('error')
-            
-            # التحقق من وجود خطأ
-            if error:
-                self.metrics_collector.record_oauth_failed()
-                return {'success': False, 'error': f'خطأ في التفويض: {error}'}
-            
-            # البحث عن الجلسة
-            oauth_session = await self._find_session_by_state(state)
-            if not oauth_session:
-                self.metrics_collector.record_oauth_failed()
-                return {'success': False, 'error': 'جلسة OAuth غير صحيحة أو منتهية الصلاحية'}
-            
-            # التحقق من صحة state
-            if self.config.use_state and not self.security_manager.validate_state(state, oauth_session.state):
-                self.metrics_collector.record_security_violation()
-                return {'success': False, 'error': 'state غير صحيح - محاولة أمنية مشبوهة'}
-            
-            # تبديل الكود برمز الوصول
-            token_result = await self._exchange_code_for_tokens(code, oauth_session)
-            if not token_result['success']:
-                self.metrics_collector.record_oauth_failed()
-                return token_result
-            
-            # إنشاء رمز الوصول
-            access_token = AccessToken(
-                token_id=generate_unique_id('access_token') if SERVICES_STATUS['helpers'] else f"token_{int(time.time())}",
-                user_id=oauth_session.user_id,
-                access_token=self.security_manager.encrypt_sensitive_data(token_result['access_token']),
-                refresh_token=self.security_manager.encrypt_sensitive_data(token_result.get('refresh_token', '')),
-                id_token=self.security_manager.encrypt_sensitive_data(token_result.get('id_token', '')),
-                token_type=token_result.get('token_type', 'Bearer'),
-                expires_in=token_result.get('expires_in', 3600),
-                scope=token_result.get('scope', ''),
-                security_level=oauth_session.security_level,
-                metadata={
-                    'ip_address': oauth_session.ip_address,
-                    'user_agent': oauth_session.user_agent,
-                    'session_id': oauth_session.session_id
-                }
-            )
-            
-            # حفظ رمز الوصول
-            self.access_tokens[access_token.token_id] = access_token
-            self.metrics_collector.record_token_issued()
-            
-            # حفظ في Redis إذا كان متاحاً
-            if SERVICES_STATUS['redis']:
-                cache_set(f"access_token:{access_token.token_id}", access_token.to_dict(), access_token.expires_in)
-            
-            # حفظ في قاعدة البيانات
-            if self.db_manager:
-                await self._save_access_token_to_database(access_token)
-            
-            # تنظيف الجلسة
-            oauth_session.status = OAuthState.COMPLETED
-            if oauth_session.session_id in self.oauth_sessions:
-                del self.oauth_sessions[oauth_session.session_id]
-            
-            # إنشاء JWT token للمستخدم
-            jwt_token = create_access_token(
-                identity=oauth_session.user_id,
-                additional_claims={
-                    'google_ads_token_id': access_token.token_id,
-                    'scopes': oauth_session.scopes,
-                    'security_level': oauth_session.security_level.value
-                }
-            )
-            
-            # تسجيل النشاط
-            await self._log_oauth_activity(oauth_session.user_id, 'oauth_completed', {
-                'token_id': access_token.token_id,
-                'scopes': oauth_session.scopes,
-                'security_level': oauth_session.security_level.value
-            })
-            
-            # تسجيل إكمال التدفق
-            flow_duration = (datetime.now(timezone.utc) - oauth_session.created_at).total_seconds()
-            self.metrics_collector.record_oauth_completed(flow_duration)
-            
             return {
-                'success': True,
-                'authentication': {
-                    'token_id': access_token.token_id,
-                    'jwt_token': jwt_token,
-                    'expires_at': access_token.expires_at.isoformat(),
-                    'scopes': oauth_session.scopes,
-                    'security_level': oauth_session.security_level.value
-                },
-                'message': 'تم إكمال المصادقة بنجاح',
-                'timestamp': datetime.now(timezone.utc).isoformat()
+                "success": False,
+                "error": "AUTHORIZATION_URL_CREATION_FAILED",
+                "message": str(e)
             }
-            
-        except Exception as e:
-            self.metrics_collector.record_oauth_failed()
-            logger.error(f"خطأ في معالجة OAuth callback: {e}")
-            return {'success': False, 'error': f'خطأ في معالجة OAuth callback: {str(e)}'}
-    
-    async def _find_session_by_state(self, state: str) -> Optional[OAuthSession]:
-        """البحث عن الجلسة بواسطة state"""
-        # البحث في الذاكرة
-        for session in self.oauth_sessions.values():
-            if session.state == state and session.is_active():
-                return session
-        
-        # البحث في Redis إذا كان متاحاً
-        if SERVICES_STATUS['redis']:
-            # يمكن تحسين هذا بحفظ mapping من state إلى session_id
-            pass
-        
-        return None
-    
-    async def _exchange_code_for_tokens(self, code: str, oauth_session: OAuthSession) -> Dict[str, Any]:
-        """تبديل الكود برموز الوصول"""
+
+    async def exchange_code_for_token_async(
+        self, 
+        session_id: str, 
+        authorization_code: str, 
+        state: str
+    ) -> Dict[str, Any]:
+        """تبديل كود التفويض برمز الوصول بشكل غير متزامن"""
         try:
+            # التحقق من وجود الجلسة
+            if session_id not in self.oauth_sessions:
+                return {
+                    "success": False,
+                    "error": "SESSION_NOT_FOUND",
+                    "message": "جلسة OAuth غير موجودة"
+                }
+            
+            oauth_session = self.oauth_sessions[session_id]
+            
+            # التحقق من صلاحية الجلسة
+            if not oauth_session.is_active():
+                return {
+                    "success": False,
+                    "error": "SESSION_EXPIRED",
+                    "message": "جلسة OAuth منتهية الصلاحية"
+                }
+            
+            # التحقق من state
+            if not self.security_manager.validate_state(state, oauth_session.state):
+                return {
+                    "success": False,
+                    "error": "INVALID_STATE",
+                    "message": "معامل state غير صحيح"
+                }
+            
+            # إعداد بيانات الطلب
             token_data = {
-                'client_id': self.config.client_id,
-                'client_secret': self.config.client_secret,
-                'code': code,
-                'grant_type': 'authorization_code',
-                'redirect_uri': oauth_session.redirect_uri
+                "client_id": self.config.client_id,
+                "client_secret": self.config.client_secret,
+                "code": authorization_code,
+                "grant_type": "authorization_code",
+                "redirect_uri": oauth_session.redirect_uri
             }
             
             # إضافة PKCE إذا كان متاحاً
             if oauth_session.code_verifier:
-                token_data['code_verifier'] = oauth_session.code_verifier
+                token_data["code_verifier"] = oauth_session.code_verifier
             
-            # إرسال الطلب
+            # إرسال طلب تبديل الرمز
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.config.token_url, data=token_data) as response:
-                    if response.status == 200:
-                        result = await response.json()
-                        return {'success': True, **result}
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"خطأ في تبديل الكود: {response.status} - {error_text}")
-                        return {'success': False, 'error': f'فشل تبديل الكود: {response.status}'}
-        
+                async with session.post(
+                    self.config.token_url,
+                    data=token_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                ) as response:
+                    
+                    if response.status != 200:
+                        error_data = await response.json()
+                        return {
+                            "success": False,
+                            "error": "TOKEN_EXCHANGE_FAILED",
+                            "message": error_data.get("error_description", "فشل في تبديل الرمز")
+                        }
+                    
+                    token_response = await response.json()
+            
+            # استخراج معلومات الرمز
+            access_token = token_response.get("access_token")
+            refresh_token = token_response.get("refresh_token")
+            expires_in = token_response.get("expires_in", 3600)
+            token_type = token_response.get("token_type", "Bearer")
+            scope = token_response.get("scope", "")
+            
+            # جلب معلومات المستخدم
+            user_info = await self._fetch_user_info_async(access_token)
+            
+            # إنشاء كائن رمز الوصول
+            token_id = generate_unique_id() if SERVICES_STATUS.get('helpers') else secrets.token_urlsafe(32)
+            access_token_obj = AccessToken(
+                token_id=token_id,
+                user_id=oauth_session.user_id,
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type=token_type,
+                expires_in=expires_in,
+                scope=scope,
+                expires_at=datetime.now(timezone.utc) + timedelta(seconds=expires_in),
+                security_level=oauth_session.security_level,
+                metadata={
+                    "session_id": session_id,
+                    "user_info": user_info,
+                    "oauth_flow_completed_at": datetime.now(timezone.utc).isoformat()
+                }
+            )
+            
+            # حفظ الرمز
+            self.access_tokens[token_id] = access_token_obj
+            
+            # تحديث حالة الجلسة
+            oauth_session.status = OAuthState.COMPLETED
+            oauth_session.update_activity()
+            
+            # تسجيل المقاييس
+            flow_duration = (datetime.now(timezone.utc) - oauth_session.created_at).total_seconds()
+            self.metrics_collector.record_oauth_completed(flow_duration)
+            
+            logger.info(f"تم تبديل الرمز بنجاح للمستخدم {oauth_session.user_id}")
+            
+            return {
+                "success": True,
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "token_type": token_type,
+                "expires_in": expires_in,
+                "scope": scope,
+                "user_info": user_info,
+                "token_id": token_id
+            }
+            
         except Exception as e:
-            logger.error(f"خطأ في تبديل الكود: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    async def refresh_access_token(self, token_id: str, user_id: str) -> Dict[str, Any]:
-        """تجديد رمز الوصول المتطور"""
+            logger.error(f"خطأ في تبديل الرمز: {e}")
+            self.metrics_collector.record_oauth_failed()
+            return {
+                "success": False,
+                "error": "TOKEN_EXCHANGE_ERROR",
+                "message": str(e)
+            }
+
+    async def _fetch_user_info_async(self, access_token: str) -> Dict[str, Any]:
+        """جلب معلومات المستخدم بشكل غير متزامن"""
         try:
-            # البحث عن رمز الوصول
-            access_token = await self._get_access_token(token_id)
-            if not access_token:
-                return {'success': False, 'error': 'رمز الوصول غير موجود'}
+            headers = {"Authorization": f"Bearer {access_token}"}
             
-            # التحقق من الصلاحيات
-            if access_token.user_id != user_id:
-                self.metrics_collector.record_security_violation()
-                return {'success': False, 'error': 'ليس لديك صلاحية لتجديد هذا الرمز'}
-            
-            # التحقق من الحاجة للتجديد
-            if not access_token.needs_refresh(self.config.token_refresh_threshold):
-                time_until_expiry = (access_token.expires_at - datetime.now(timezone.utc)).total_seconds()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self.config.userinfo_url, headers=headers) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    else:
+                        logger.warning(f"فشل في جلب معلومات المستخدم: {response.status}")
+                        return {}
+                        
+        except Exception as e:
+            logger.error(f"خطأ في جلب معلومات المستخدم: {e}")
+            return {}
+
+    async def refresh_token_async(self, token_id: str) -> Dict[str, Any]:
+        """تجديد رمز الوصول بشكل غير متزامن"""
+        try:
+            if token_id not in self.access_tokens:
                 return {
-                    'success': True,
-                    'message': 'الرمز لا يحتاج تجديد حالياً',
-                    'expires_in': int(time_until_expiry)
+                    "success": False,
+                    "error": "TOKEN_NOT_FOUND",
+                    "message": "رمز الوصول غير موجود"
                 }
             
-            # تجديد الرمز
-            refresh_result = await self._refresh_token_with_google(access_token)
-            if not refresh_result['success']:
-                return refresh_result
+            token_obj = self.access_tokens[token_id]
             
-            # تحديث بيانات الرمز
-            access_token.access_token = self.security_manager.encrypt_sensitive_data(refresh_result['access_token'])
-            access_token.expires_in = refresh_result.get('expires_in', 3600)
-            access_token.expires_at = datetime.now(timezone.utc) + timedelta(seconds=access_token.expires_in)
-            access_token.last_refreshed = datetime.now(timezone.utc)
-            access_token.refresh_count += 1
+            if not token_obj.refresh_token:
+                return {
+                    "success": False,
+                    "error": "NO_REFRESH_TOKEN",
+                    "message": "رمز التجديد غير متاح"
+                }
             
-            # تحديث refresh token إذا تم إرساله
-            if refresh_result.get('refresh_token'):
-                access_token.refresh_token = self.security_manager.encrypt_sensitive_data(refresh_result['refresh_token'])
-            
-            # حفظ التحديثات
-            self.access_tokens[token_id] = access_token
-            self.metrics_collector.record_token_refreshed()
-            
-            # تحديث في Redis
-            if SERVICES_STATUS['redis']:
-                cache_set(f"access_token:{token_id}", access_token.to_dict(), access_token.expires_in)
-            
-            # تحديث في قاعدة البيانات
-            if self.db_manager:
-                await self._update_access_token_in_database(access_token)
-            
-            # تسجيل النشاط
-            await self._log_oauth_activity(user_id, 'token_refreshed', {
-                'token_id': token_id,
-                'refresh_count': access_token.refresh_count,
-                'new_expires_at': access_token.expires_at.isoformat()
-            })
-            
-            return {
-                'success': True,
-                'token': {
-                    'token_id': token_id,
-                    'expires_at': access_token.expires_at.isoformat(),
-                    'expires_in': access_token.expires_in,
-                    'refresh_count': access_token.refresh_count
-                },
-                'message': 'تم تجديد رمز الوصول بنجاح',
-                'timestamp': datetime.now(timezone.utc).isoformat()
+            # إعداد بيانات طلب التجديد
+            refresh_data = {
+                "client_id": self.config.client_id,
+                "client_secret": self.config.client_secret,
+                "refresh_token": token_obj.refresh_token,
+                "grant_type": "refresh_token"
             }
             
-        except Exception as e:
-            logger.error(f"خطأ في تجديد رمز الوصول: {e}")
-            return {'success': False, 'error': f'خطأ في تجديد رمز الوصول: {str(e)}'}
-    
-    async def _get_access_token(self, token_id: str) -> Optional[AccessToken]:
-        """جلب رمز الوصول من مصادر متعددة"""
-        # البحث في الذاكرة
-        if token_id in self.access_tokens:
-            return self.access_tokens[token_id]
-        
-        # البحث في Redis
-        if SERVICES_STATUS['redis']:
-            cached_token = cache_get(f"access_token:{token_id}")
-            if cached_token:
-                # تحويل من dict إلى AccessToken
-                return self._dict_to_access_token(cached_token)
-        
-        # البحث في قاعدة البيانات
-        if self.db_manager:
-            return await self._get_access_token_from_database(token_id)
-        
-        return None
-    
-    def _dict_to_access_token(self, data: Dict[str, Any]) -> AccessToken:
-        """تحويل dict إلى AccessToken"""
-        # تحويل التواريخ من string إلى datetime
-        for date_field in ['created_at', 'expires_at', 'last_refreshed', 'last_used']:
-            if data.get(date_field):
-                data[date_field] = datetime.fromisoformat(data[date_field].replace('Z', '+00:00'))
-        
-        # تحويل security_level من string إلى enum
-        if 'security_level' in data:
-            data['security_level'] = SecurityLevel(data['security_level'])
-        
-        return AccessToken(**data)
-    
-    async def _refresh_token_with_google(self, access_token: AccessToken) -> Dict[str, Any]:
-        """تجديد الرمز مع Google"""
-        try:
-            refresh_token = self.security_manager.decrypt_sensitive_data(access_token.refresh_token)
-            
-            token_data = {
-                'client_id': self.config.client_id,
-                'client_secret': self.config.client_secret,
-                'refresh_token': refresh_token,
-                'grant_type': 'refresh_token'
-            }
-            
+            # إرسال طلب التجديد
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.config.token_url, data=token_data) as response:
-                    if response.status == 200:
-                        result = await response.json()
-                        return {'success': True, **result}
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"خطأ في تجديد الرمز: {response.status} - {error_text}")
-                        return {'success': False, 'error': f'فشل تجديد الرمز: {response.status}'}
-        
-        except Exception as e:
-            logger.error(f"خطأ في تجديد الرمز مع Google: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    async def revoke_access_token(self, token_id: str, user_id: str) -> Dict[str, Any]:
-        """إلغاء رمز الوصول المتطور"""
-        try:
-            # البحث عن رمز الوصول
-            access_token = await self._get_access_token(token_id)
-            if not access_token:
-                return {'success': False, 'error': 'رمز الوصول غير موجود'}
+                async with session.post(
+                    self.config.token_url,
+                    data=refresh_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                ) as response:
+                    
+                    if response.status != 200:
+                        error_data = await response.json()
+                        return {
+                            "success": False,
+                            "error": "TOKEN_REFRESH_FAILED",
+                            "message": error_data.get("error_description", "فشل في تجديد الرمز")
+                        }
+                    
+                    refresh_response = await response.json()
             
-            # التحقق من الصلاحيات
-            if access_token.user_id != user_id:
-                self.metrics_collector.record_security_violation()
-                return {'success': False, 'error': 'ليس لديك صلاحية لإلغاء هذا الرمز'}
+            # تحديث معلومات الرمز
+            new_access_token = refresh_response.get("access_token")
+            new_refresh_token = refresh_response.get("refresh_token", token_obj.refresh_token)
+            expires_in = refresh_response.get("expires_in", 3600)
             
-            # إلغاء الرمز مع Google
-            revoke_result = await self._revoke_token_with_google(access_token)
-            if not revoke_result['success']:
-                logger.warning(f"فشل إلغاء الرمز مع Google: {revoke_result['error']}")
+            token_obj.access_token = new_access_token
+            token_obj.refresh_token = new_refresh_token
+            token_obj.expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+            token_obj.last_refreshed = datetime.now(timezone.utc)
+            token_obj.refresh_count += 1
             
-            # تعطيل الرمز محلياً
-            access_token.is_active = False
-            self.metrics_collector.record_token_revoked()
+            # تسجيل المقاييس
+            self.metrics_collector.metrics['tokens_refreshed'] += 1
             
-            # إزالة من التخزين المؤقت
-            if token_id in self.access_tokens:
-                del self.access_tokens[token_id]
-            
-            # إزالة من Redis
-            if SERVICES_STATUS['redis']:
-                cache_delete(f"access_token:{token_id}")
-            
-            # تحديث في قاعدة البيانات
-            if self.db_manager:
-                await self._update_access_token_in_database(access_token)
-            
-            # تسجيل النشاط
-            await self._log_oauth_activity(user_id, 'token_revoked', {
-                'token_id': token_id,
-                'revoke_reason': 'user_request'
-            })
+            logger.info(f"تم تجديد الرمز بنجاح: {token_id}")
             
             return {
-                'success': True,
-                'message': 'تم إلغاء رمز الوصول بنجاح',
-                'timestamp': datetime.now(timezone.utc).isoformat()
+                "success": True,
+                "access_token": new_access_token,
+                "refresh_token": new_refresh_token,
+                "expires_in": expires_in,
+                "token_type": token_obj.token_type
             }
             
         except Exception as e:
-            logger.error(f"خطأ في إلغاء رمز الوصول: {e}")
-            return {'success': False, 'error': f'خطأ في إلغاء رمز الوصول: {str(e)}'}
-    
-    async def _revoke_token_with_google(self, access_token: AccessToken) -> Dict[str, Any]:
-        """إلغاء الرمز مع Google"""
-        try:
-            token = self.security_manager.decrypt_sensitive_data(access_token.access_token)
-            
-            revoke_data = {'token': token}
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.config.revoke_url, data=revoke_data) as response:
-                    if response.status == 200:
-                        return {'success': True}
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"خطأ في إلغاء الرمز: {response.status} - {error_text}")
-                        return {'success': False, 'error': f'فشل إلغاء الرمز: {response.status}'}
-        
-        except Exception as e:
-            logger.error(f"خطأ في إلغاء الرمز مع Google: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    async def get_user_tokens(self, user_id: str) -> Dict[str, Any]:
-        """جلب رموز المستخدم المتطور"""
-        try:
-            user_tokens = []
-            
-            # البحث في الذاكرة
-            for token in self.access_tokens.values():
-                if token.user_id == user_id and token.is_active:
-                    user_tokens.append({
-                        'token_id': token.token_id,
-                        'created_at': token.created_at.isoformat(),
-                        'expires_at': token.expires_at.isoformat(),
-                        'last_used': token.last_used.isoformat() if token.last_used else None,
-                        'usage_count': token.usage_count,
-                        'refresh_count': token.refresh_count,
-                        'scope': token.scope,
-                        'security_level': token.security_level.value,
-                        'is_expired': token.is_expired(),
-                        'needs_refresh': token.needs_refresh(self.config.token_refresh_threshold)
-                    })
-            
-            # البحث في قاعدة البيانات للرموز الإضافية
-            if self.db_manager:
-                db_tokens = await self._get_user_tokens_from_database(user_id)
-                # دمج النتائج وإزالة المكررات
-                existing_ids = {token['token_id'] for token in user_tokens}
-                for db_token in db_tokens:
-                    if db_token['token_id'] not in existing_ids:
-                        user_tokens.append(db_token)
-            
+            logger.error(f"خطأ في تجديد الرمز: {e}")
             return {
-                'success': True,
-                'user_id': user_id,
-                'tokens': user_tokens,
-                'total_tokens': len(user_tokens),
-                'active_tokens': len([t for t in user_tokens if not t['is_expired']]),
-                'expired_tokens': len([t for t in user_tokens if t['is_expired']]),
-                'timestamp': datetime.now(timezone.utc).isoformat()
+                "success": False,
+                "error": "TOKEN_REFRESH_ERROR",
+                "message": str(e)
             }
-            
-        except Exception as e:
-            logger.error(f"خطأ في جلب رموز المستخدم: {e}")
-            return {'success': False, 'error': f'خطأ في جلب رموز المستخدم: {str(e)}'}
-    
-    async def get_oauth_sessions(self, user_id: str) -> Dict[str, Any]:
-        """جلب جلسات OAuth للمستخدم"""
-        try:
-            user_sessions = []
-            
-            for session in self.oauth_sessions.values():
-                if session.user_id == user_id:
-                    user_sessions.append({
-                        'session_id': session.session_id,
-                        'created_at': session.created_at.isoformat(),
-                        'expires_at': session.expires_at.isoformat(),
-                        'last_activity': session.last_activity.isoformat(),
-                        'status': session.status.name,
-                        'scopes': session.scopes,
-                        'security_level': session.security_level.value,
-                        'ip_address': session.ip_address,
-                        'is_expired': session.is_expired(),
-                        'is_active': session.is_active()
-                    })
-            
-            return {
-                'success': True,
-                'user_id': user_id,
-                'sessions': user_sessions,
-                'total_sessions': len(user_sessions),
-                'active_sessions': len([s for s in user_sessions if s['is_active']]),
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-        except Exception as e:
-            logger.error(f"خطأ في جلب جلسات OAuth: {e}")
-            return {'success': False, 'error': f'خطأ في جلب جلسات OAuth: {str(e)}'}
-    
-    def get_metrics(self) -> Dict[str, Any]:
-        """جلب مقاييس الأداء"""
-        return {
-            'oauth_metrics': self.metrics_collector.get_metrics(),
-            'security_metrics': {
-                'blocked_ips': len(self.security_manager.blocked_ips),
-                'suspicious_activities': len(self.security_manager.suspicious_activities),
-                'rate_limits_active': len(self.security_manager.rate_limits)
-            },
-            'system_metrics': {
-                'active_sessions': len(self.oauth_sessions),
-                'active_tokens': len(self.access_tokens),
-                'last_cleanup': self.last_cleanup.isoformat(),
-                'services_status': SERVICES_STATUS
-            },
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        }
-    
-    async def _log_oauth_activity(self, user_id: str, activity_type: str, details: Dict[str, Any]):
-        """تسجيل نشاط OAuth"""
-        try:
-            activity_log = {
-                'user_id': user_id,
-                'activity_type': activity_type,
-                'details': details,
-                'timestamp': datetime.now(timezone.utc).isoformat(),
-                'ip_address': details.get('ip_address', 'unknown')
-            }
-            
-            # تسجيل في الـ logger
-            logger.info(f"OAuth Activity: {activity_type} for user {user_id}")
-            
-            # حفظ في قاعدة البيانات إذا كانت متاحة
-            if SERVICES_STATUS['supabase']:
-                db_insert('oauth_activity_logs', activity_log)
-            
-        except Exception as e:
-            logger.error(f"خطأ في تسجيل نشاط OAuth: {e}")
-    
-    # دوال قاعدة البيانات (يمكن تنفيذها حسب نوع قاعدة البيانات المستخدمة)
-    async def _save_oauth_session_to_database(self, oauth_session: OAuthSession):
-        """حفظ جلسة OAuth في قاعدة البيانات"""
-        if SERVICES_STATUS['supabase']:
-            try:
-                db_insert('oauth_sessions', oauth_session.to_dict())
-            except Exception as e:
-                logger.error(f"خطأ في حفظ جلسة OAuth: {e}")
-    
-    async def _save_access_token_to_database(self, access_token: AccessToken):
-        """حفظ رمز الوصول في قاعدة البيانات"""
-        if SERVICES_STATUS['supabase']:
-            try:
-                db_insert('access_tokens', access_token.to_dict())
-            except Exception as e:
-                logger.error(f"خطأ في حفظ رمز الوصول: {e}")
-    
-    async def _update_access_token_in_database(self, access_token: AccessToken):
-        """تحديث رمز الوصول في قاعدة البيانات"""
-        if SERVICES_STATUS['supabase']:
-            try:
-                db_update('access_tokens', access_token.to_dict(), {'token_id': access_token.token_id})
-            except Exception as e:
-                logger.error(f"خطأ في تحديث رمز الوصول: {e}")
-    
-    async def _get_access_token_from_database(self, token_id: str) -> Optional[AccessToken]:
-        """جلب رمز الوصول من قاعدة البيانات"""
-        if SERVICES_STATUS['supabase']:
-            try:
-                result = db_select('access_tokens', filters={'token_id': token_id}, limit=1)
-                if result['success'] and result['data']:
-                    return self._dict_to_access_token(result['data'][0])
-            except Exception as e:
-                logger.error(f"خطأ في جلب رمز الوصول من قاعدة البيانات: {e}")
-        return None
-    
-    async def _get_user_tokens_from_database(self, user_id: str) -> List[Dict[str, Any]]:
-        """جلب رموز المستخدم من قاعدة البيانات"""
-        if SERVICES_STATUS['supabase']:
-            try:
-                result = db_select('access_tokens', filters={'user_id': user_id, 'is_active': True})
-                if result['success']:
-                    return result['data']
-            except Exception as e:
-                logger.error(f"خطأ في جلب رموز المستخدم من قاعدة البيانات: {e}")
-        return []
 
-# إنشاء مثيل مدير OAuth
+    async def revoke_token_async(self, token_id: str) -> Dict[str, Any]:
+        """إلغاء رمز الوصول بشكل غير متزامن"""
+        try:
+            if token_id not in self.access_tokens:
+                return {
+                    "success": False,
+                    "error": "TOKEN_NOT_FOUND",
+                    "message": "رمز الوصول غير موجود"
+                }
+            
+            token_obj = self.access_tokens[token_id]
+            
+            # إلغاء الرمز من Google
+            revoke_data = {"token": token_obj.access_token}
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.config.revoke_url,
+                    data=revoke_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                ) as response:
+                    
+                    # Google يرجع 200 حتى لو كان الرمز غير صالح
+                    if response.status not in [200, 400]:
+                        logger.warning(f"استجابة غير متوقعة من Google عند إلغاء الرمز: {response.status}")
+            
+            # إزالة الرمز من التخزين المحلي
+            token_obj.is_active = False
+            del self.access_tokens[token_id]
+            
+            # تسجيل المقاييس
+            self.metrics_collector.metrics['tokens_revoked'] += 1
+            
+            logger.info(f"تم إلغاء الرمز بنجاح: {token_id}")
+            
+            return {
+                "success": True,
+                "message": "تم إلغاء الرمز بنجاح"
+            }
+            
+        except Exception as e:
+            logger.error(f"خطأ في إلغاء الرمز: {e}")
+            return {
+                "success": False,
+                "error": "TOKEN_REVOCATION_ERROR",
+                "message": str(e)
+            }
+
+# إنشاء مثيل مشترك من مدير OAuth
 oauth_manager = GoogleAdsOAuthManager()
 
-# ===========================================
-# API Routes - المسارات المتطورة
-# ===========================================
+# ==================== ديكوريترز ====================
 
-@google_ads_oauth_bp.route('/initiate', methods=['POST'])
-@jwt_required()
-def initiate_oauth():
-    """بدء تدفق OAuth"""
-    try:
-        user_id = get_jwt_identity()
-        request_data = request.get_json() or {}
-        
-        # إضافة معلومات الطلب
-        request_data.update({
-            'ip_address': request.remote_addr,
-            'user_agent': request.headers.get('User-Agent', 'unknown')
-        })
-        
-        # تشغيل العملية غير المتزامنة
-        result = asyncio.run(oauth_manager.initiate_oauth_flow(user_id, request_data))
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API بدء OAuth: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في بدء تدفق OAuth',
-            'message': str(e)
-        }), 500
-
-@google_ads_oauth_bp.route('/callback', methods=['GET'])
-def oauth_callback():
-    """معالجة callback من Google"""
-    try:
-        # استخراج بيانات callback
-        callback_data = {
-            'code': request.args.get('code'),
-            'state': request.args.get('state'),
-            'error': request.args.get('error'),
-            'error_description': request.args.get('error_description')
-        }
-        
-        # معالجة callback
-        result = asyncio.run(oauth_manager.handle_oauth_callback(callback_data))
-        
-        if result['success']:
-            # إعادة توجيه للصفحة الرئيسية مع الرمز
-            return redirect(f"/?token={result['authentication']['jwt_token']}")
-        else:
-            return jsonify(result), 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API callback: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في معالجة OAuth callback',
-            'message': str(e)
-        }), 500
-
-@google_ads_oauth_bp.route('/refresh', methods=['POST'])
-@jwt_required()
-def refresh_token():
-    """تجديد رمز الوصول"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        token_id = data.get('token_id')
-        
-        if not token_id:
+def login_required(f):
+    """ديكوريتر للتحقق من تسجيل الدخول"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
             return jsonify({
-                'success': False,
-                'error': 'معرف الرمز مطلوب'
-            }), 400
-        
-        result = asyncio.run(oauth_manager.refresh_access_token(token_id, user_id))
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API تجديد الرمز: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في تجديد رمز الوصول',
-            'message': str(e)
-        }), 500
+                "success": False,
+                "message": "يجب تسجيل الدخول أولاً",
+                "error_code": "AUTHENTICATION_REQUIRED"
+            }), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
-@google_ads_oauth_bp.route('/revoke', methods=['POST'])
-@jwt_required()
-def revoke_token():
-    """إلغاء رمز الوصول"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        token_id = data.get('token_id')
-        
-        if not token_id:
+def admin_required(f):
+    """ديكوريتر للتحقق من صلاحيات الإدارة"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
             return jsonify({
-                'success': False,
-                'error': 'معرف الرمز مطلوب'
-            }), 400
+                "success": False,
+                "message": "يجب تسجيل الدخول أولاً",
+                "error_code": "AUTHENTICATION_REQUIRED"
+            }), 401
         
-        result = asyncio.run(oauth_manager.revoke_access_token(token_id, user_id))
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API إلغاء الرمز: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في إلغاء رمز الوصول',
-            'message': str(e)
-        }), 500
-
-@google_ads_oauth_bp.route('/tokens', methods=['GET'])
-@jwt_required()
-def get_user_tokens():
-    """الحصول على رموز المستخدم"""
-    try:
-        user_id = get_jwt_identity()
-        
-        result = asyncio.run(oauth_manager.get_user_tokens(user_id))
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API جلب الرموز: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في الحصول على رموز المستخدم',
-            'message': str(e)
-        }), 500
-
-@google_ads_oauth_bp.route('/sessions', methods=['GET'])
-@jwt_required()
-def get_oauth_sessions():
-    """الحصول على جلسات OAuth النشطة"""
-    try:
-        user_id = get_jwt_identity()
-        
-        result = asyncio.run(oauth_manager.get_oauth_sessions(user_id))
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API جلب الجلسات: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في الحصول على جلسات OAuth',
-            'message': str(e)
-        }), 500
-
-@google_ads_oauth_bp.route('/metrics', methods=['GET'])
-@jwt_required()
-def get_oauth_metrics():
-    """الحصول على مقاييس OAuth"""
-    try:
-        # التحقق من صلاحيات الإدارة (يمكن تخصيصها)
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        user_role = session.get("user_role", "user")
+        if user_role != "admin":
             return jsonify({
-                'success': False,
-                'error': 'صلاحيات إدارية مطلوبة'
+                "success": False,
+                "message": "غير مصرح لك بالوصول لهذا المورد",
+                "error_code": "INSUFFICIENT_PERMISSIONS"
             }), 403
         
-        metrics = oauth_manager.get_metrics()
-        
-        return jsonify({
-            'success': True,
-            'metrics': metrics,
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"خطأ في API المقاييس: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في الحصول على المقاييس',
-            'message': str(e)
-        }), 500
+        return f(*args, **kwargs)
+    return decorated_function
 
-@google_ads_oauth_bp.route('/health', methods=['GET'])
+def rate_limit_check(f):
+    """ديكوريتر لفحص حد المعدل"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        ip_address = request.remote_addr
+        
+        if not oauth_manager.security_manager.check_rate_limit(ip_address):
+            oauth_manager.metrics_collector.record_rate_limit_hit()
+            return jsonify({
+                "success": False,
+                "message": "تم تجاوز حد المعدل المسموح",
+                "error_code": "RATE_LIMIT_EXCEEDED"
+            }), 429
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+# ==================== مسارات API ====================
+
+@google_ads_oauth_bp.route("/health", methods=["GET"])
 def health_check():
-    """فحص صحة خدمة OAuth"""
+    """فحص صحة خدمة Google Ads OAuth"""
     try:
-        health_status = {
-            'service': 'Google Ads OAuth',
-            'status': 'healthy',
-            'version': '2.1.0',
-            'timestamp': datetime.now(timezone.utc).isoformat(),
-            'services_status': SERVICES_STATUS,
-            'active_sessions': len(oauth_manager.oauth_sessions),
-            'active_tokens': len(oauth_manager.access_tokens),
-            'last_cleanup': oauth_manager.last_cleanup.isoformat()
-        }
-        
-        # فحص الخدمات الأساسية
-        if not any(SERVICES_STATUS.values()):
-            health_status['status'] = 'degraded'
-            health_status['warning'] = 'بعض الخدمات غير متاحة'
-        
-        return jsonify(health_status)
-        
-    except Exception as e:
-        logger.error(f"خطأ في فحص الصحة: {e}")
         return jsonify({
-            'service': 'Google Ads OAuth',
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            "success": True,
+            "service": "Google Ads OAuth API",
+            "status": "healthy",
+            "timestamp": datetime.utcnow().isoformat(),
+            "version": "3.1.0",
+            "components": SERVICES_STATUS,
+            "metrics": oauth_manager.metrics_collector.get_metrics(),
+            "message": "خدمة Google Ads OAuth تعمل بنجاح"
+        })
+    except Exception as e:
+        logger.error(f"خطأ في فحص صحة Google Ads OAuth API: {str(e)}")
+        return jsonify({
+            "success": False,
+            "service": "Google Ads OAuth API",
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
         }), 500
 
-# تسجيل معلومات Blueprint
-logger.info(f"✅ تم تحميل Google Ads OAuth Blueprint - الخدمات متاحة: {GOOGLE_ADS_OAUTH_SERVICES_AVAILABLE}")
-logger.info(f"📊 حالة الخدمات: {sum(SERVICES_STATUS.values())}/7 متاحة")
+@google_ads_oauth_bp.route("/initiate", methods=["POST"])
+@login_required
+@rate_limit_check
+def initiate_oauth():
+    """بدء تدفق OAuth لـ Google Ads"""
+    try:
+        user_id = session.get("user_id")
+        ip_address = request.remote_addr
+        user_agent = request.headers.get("User-Agent", "")
 
-# تصدير Blueprint والكلاسات
+        # استخدام الطريقة غير المتزامنة
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            auth_result = loop.run_until_complete(
+                oauth_manager.create_authorization_url_async(user_id, ip_address, user_agent)
+            )
+        finally:
+            loop.close()
+
+        if auth_result.get("success"):
+            # حفظ معرف الجلسة في session
+            session["oauth_session_id"] = auth_result["session_id"]
+            
+            logger.info(f"تم بدء OAuth للمستخدم {user_id}")
+            
+            return jsonify({
+                "success": True,
+                "authorization_url": auth_result["authorization_url"],
+                "session_id": auth_result["session_id"],
+                "expires_at": auth_result["expires_at"],
+                "message": "تم إنشاء رابط التفويض بنجاح"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": auth_result.get("message", "فشل في إنشاء رابط التفويض"),
+                "error_code": auth_result.get("error", "AUTHORIZATION_URL_FAILED")
+            }), 500
+
+    except Exception as e:
+        logger.error(f"خطأ في بدء OAuth: {str(e)}")
+        oauth_manager.metrics_collector.record_oauth_failed()
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في بدء عملية المصادقة",
+            "error_code": "OAUTH_INITIATION_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/callback", methods=["GET"])
+def oauth_callback():
+    """معالجة رد الاتصال من Google OAuth"""
+    try:
+        # الحصول على المعاملات من URL
+        code = request.args.get("code")
+        state = request.args.get("state")
+        error = request.args.get("error")
+
+        # التحقق من وجود خطأ
+        if error:
+            logger.error(f"خطأ في OAuth callback: {error}")
+            oauth_manager.metrics_collector.record_oauth_failed()
+            return redirect(f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}?oauth_error={error}")
+
+        # التحقق من وجود الكود والحالة
+        if not code or not state:
+            oauth_manager.metrics_collector.record_oauth_failed()
+            return jsonify({
+                "success": False,
+                "message": "كود التفويض أو الحالة مفقودة",
+                "error_code": "MISSING_CALLBACK_PARAMS"
+            }), 400
+
+        # التحقق من معرف الجلسة
+        session_id = session.get("oauth_session_id")
+        if not session_id:
+            oauth_manager.metrics_collector.record_oauth_failed()
+            return jsonify({
+                "success": False,
+                "message": "معرف جلسة OAuth مفقود",
+                "error_code": "OAUTH_SESSION_MISSING"
+            }), 400
+
+        # تبديل الكود برمز الوصول
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            exchange_result = loop.run_until_complete(
+                oauth_manager.exchange_code_for_token_async(session_id, code, state)
+            )
+        finally:
+            loop.close()
+
+        if not exchange_result.get("success"):
+            oauth_manager.metrics_collector.record_oauth_failed()
+            return jsonify({
+                "success": False,
+                "message": exchange_result.get("message", "فشل في تبديل الكود"),
+                "error_code": "TOKEN_EXCHANGE_FAILED"
+            }), 400
+
+        # الحصول على معلومات الرمز والمستخدم
+        user_id = session.get("user_id")
+        access_token = exchange_result.get("access_token")
+        refresh_token = exchange_result.get("refresh_token")
+        user_info = exchange_result.get("user_info", {})
+
+        # ==================================================================
+        # الخطوة 1: جلب حسابات Google Ads المتاحة
+        # ==================================================================
+        ads_accounts_result = get_google_ads_accounts(access_token, refresh_token, user_id)
+        
+        if not ads_accounts_result.get("success"):
+            logger.warning(f"فشل في جلب حسابات Google Ads للمستخدم {user_id}: {ads_accounts_result.get('message')}")
+            return redirect(f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}?oauth_success=true&no_ads_accounts=true")
+
+        customer_accounts = ads_accounts_result.get("accounts", [])
+        
+        if not customer_accounts:
+            logger.info(f"المستخدم {user_id} ليس لديه حسابات Google Ads")
+            return redirect(f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}?oauth_success=true&no_ads_accounts=true")
+
+        # ==================================================================
+        # الخطوة 2: اختيار وربط الحساب الإعلاني الرئيسي
+        # ==================================================================
+        primary_account_result = select_primary_ads_account(customer_accounts, user_id)
+        
+        if not primary_account_result.get("success"):
+            logger.error(f"فشل في اختيار الحساب الإعلاني الرئيسي: {primary_account_result.get('message')}")
+            return redirect(f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}?oauth_error=account_selection_failed")
+
+        primary_account = primary_account_result.get("account")
+
+        # ==================================================================
+        # الخطوة 3: ربط الحساب بـ MCC (إذا كان مطلوباً)
+        # ==================================================================
+        mcc_link_result = link_account_to_mcc(primary_account, user_id)
+        
+        if mcc_link_result.get("success") and mcc_link_result.get("linked"):
+            oauth_manager.metrics_collector.record_mcc_link_success()
+        elif mcc_link_result.get("linked") is not None:
+            oauth_manager.metrics_collector.record_mcc_link_attempt()
+
+        # ==================================================================
+        # الخطوة 4: حفظ معلومات الحساب في قاعدة البيانات
+        # ==================================================================
+        save_result = save_ads_account_to_database(
+            user_id=user_id,
+            account_info=primary_account,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user_info=user_info,
+            all_accounts=customer_accounts
+        )
+
+        if not save_result.get("success"):
+            logger.error(f"فشل في حفظ معلومات الحساب: {save_result.get('message')}")
+            return redirect(f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}?oauth_error=database_save_failed")
+
+        # تسجيل نجاح ربط الحساب
+        oauth_manager.metrics_collector.record_account_linked()
+
+        # ==================================================================
+        # الخطوة 5: إعادة التوجيه إلى لوحة التحكم مع رسالة نجاح
+        # ==================================================================
+        logger.info(f"تم ربط حساب Google Ads بنجاح للمستخدم {user_id}")
+        
+        # تنظيف معرف جلسة OAuth
+        session.pop("oauth_session_id", None)
+        
+        # إعادة التوجيه مع معلومات النجاح
+        redirect_url = (
+            f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}"
+            f"?oauth_success=true"
+            f"&account_id={primary_account.get('customer_id', '')}"
+            f"&account_name={primary_account.get('descriptive_name', '')}"
+        )
+        
+        return redirect(redirect_url)
+
+    except Exception as e:
+        logger.error(f"خطأ في معالجة OAuth callback: {str(e)}")
+        oauth_manager.metrics_collector.record_oauth_failed()
+        return redirect(f"{os.getenv('FRONTEND_DASHBOARD_URL', '/dashboard')}?oauth_error=callback_processing_failed")
+
+def get_google_ads_accounts(access_token: str, refresh_token: str, user_id: str) -> Dict[str, Any]:
+    """جلب حسابات Google Ads المتاحة للمستخدم"""
+    try:
+        if not oauth_manager.google_ads_api_manager:
+            return {
+                "success": False,
+                "message": "Google Ads API Manager غير متاح",
+                "accounts": []
+            }
+
+        # إنشاء عميل Google Ads API
+        google_ads_client = oauth_manager.google_ads_api_manager.get_client(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user_id=user_id
+        )
+
+        if not google_ads_client:
+            return {
+                "success": False,
+                "message": "فشل في إنشاء عميل Google Ads API",
+                "accounts": []
+            }
+
+        # جلب قائمة الحسابات المتاحة
+        customer_accounts = oauth_manager.google_ads_api_manager.list_accessible_customers(google_ads_client)
+
+        if not customer_accounts:
+            return {
+                "success": True,
+                "message": "لا توجد حسابات Google Ads متاحة",
+                "accounts": []
+            }
+
+        # تحسين معلومات الحسابات
+        enhanced_accounts = []
+        for account in customer_accounts:
+            try:
+                # جلب معلومات إضافية عن الحساب
+                account_details = oauth_manager.google_ads_api_manager.get_customer_details(
+                    google_ads_client, 
+                    account.get('customer_id', '')
+                )
+                
+                enhanced_account = {
+                    "customer_id": account.get('customer_id', ''),
+                    "descriptive_name": account.get('descriptive_name', ''),
+                    "currency_code": account_details.get('currency_code', 'USD'),
+                    "time_zone": account_details.get('time_zone', 'UTC'),
+                    "manager": account.get('manager', False),
+                    "test_account": account.get('test_account', False),
+                    "auto_tagging_enabled": account_details.get('auto_tagging_enabled', False),
+                    "conversion_tracking_id": account_details.get('conversion_tracking_id', ''),
+                    "remarketing_setting": account_details.get('remarketing_setting', {}),
+                    "status": account_details.get('status', 'UNKNOWN'),
+                    "account_type": "MCC" if account.get('manager', False) else "STANDARD"
+                }
+                
+                enhanced_accounts.append(enhanced_account)
+                
+            except Exception as e:
+                logger.warning(f"فشل في جلب تفاصيل الحساب {account.get('customer_id', '')}: {str(e)}")
+                # إضافة الحساب بالمعلومات الأساسية فقط
+                enhanced_accounts.append({
+                    "customer_id": account.get('customer_id', ''),
+                    "descriptive_name": account.get('descriptive_name', ''),
+                    "manager": account.get('manager', False),
+                    "test_account": account.get('test_account', False),
+                    "account_type": "MCC" if account.get('manager', False) else "STANDARD",
+                    "status": "UNKNOWN"
+                })
+
+        logger.info(f"تم جلب {len(enhanced_accounts)} حساب Google Ads للمستخدم {user_id}")
+        
+        return {
+            "success": True,
+            "message": f"تم جلب {len(enhanced_accounts)} حساب بنجاح",
+            "accounts": enhanced_accounts
+        }
+
+    except Exception as e:
+        logger.error(f"خطأ في جلب حسابات Google Ads: {str(e)}")
+        return {
+            "success": False,
+            "message": f"خطأ في جلب الحسابات: {str(e)}",
+            "accounts": []
+        }
+
+def select_primary_ads_account(customer_accounts: List[Dict], user_id: str) -> Dict[str, Any]:
+    """اختيار الحساب الإعلاني الرئيسي باستخدام منطق متقدم"""
+    try:
+        if not customer_accounts:
+            return {
+                "success": False,
+                "message": "لا توجد حسابات متاحة للاختيار",
+                "account": None
+            }
+
+        # استخدام Google Ads Account Selector إذا كان متاحاً
+        if SERVICES_STATUS.get('google_ads_helpers'):
+            try:
+                best_account = GoogleAdsAccountSelector.select_best_primary_account(customer_accounts)
+                if best_account:
+                    best_account['selected_at'] = datetime.utcnow().isoformat()
+                    best_account['selected_by'] = user_id
+                    best_account['is_primary'] = True
+                    
+                    logger.info(f"تم اختيار الحساب الرئيسي {best_account.get('customer_id')} للمستخدم {user_id} باستخدام المحلل المتقدم")
+                    
+                    return {
+                        "success": True,
+                        "message": "تم اختيار الحساب الرئيسي بنجاح باستخدام التحليل المتقدم",
+                        "account": best_account
+                    }
+            except Exception as e:
+                logger.warning(f"فشل في استخدام المحلل المتقدم، التبديل للمنطق الأساسي: {str(e)}")
+
+        # منطق اختيار الحساب الرئيسي الأساسي
+        # 1. البحث عن حساب غير إداري (MCC) وغير تجريبي
+        standard_accounts = [
+            account for account in customer_accounts 
+            if not account.get('manager', False) and not account.get('test_account', False)
+        ]
+
+        # 2. إذا لم توجد حسابات عادية، البحث عن حسابات غير تجريبية
+        if not standard_accounts:
+            standard_accounts = [
+                account for account in customer_accounts 
+                if not account.get('test_account', False)
+            ]
+
+        # 3. إذا لم توجد، استخدام أي حساب متاح
+        if not standard_accounts:
+            standard_accounts = customer_accounts
+
+        # 4. اختيار الحساب الأول (يمكن تحسين هذا المنطق لاحقاً)
+        primary_account = standard_accounts[0]
+
+        # 5. إضافة معلومات إضافية
+        primary_account['selected_at'] = datetime.utcnow().isoformat()
+        primary_account['selected_by'] = user_id
+        primary_account['is_primary'] = True
+
+        logger.info(f"تم اختيار الحساب الرئيسي {primary_account.get('customer_id')} للمستخدم {user_id}")
+
+        return {
+            "success": True,
+            "message": "تم اختيار الحساب الرئيسي بنجاح",
+            "account": primary_account
+        }
+
+    except Exception as e:
+        logger.error(f"خطأ في اختيار الحساب الرئيسي: {str(e)}")
+        return {
+            "success": False,
+            "message": f"خطأ في اختيار الحساب: {str(e)}",
+            "account": None
+        }
+
+def link_account_to_mcc(account_info: Dict, user_id: str) -> Dict[str, Any]:
+    """ربط الحساب الإعلاني بـ MCC (إذا كان مطلوباً)"""
+    try:
+        # تسجيل محاولة ربط MCC
+        oauth_manager.metrics_collector.record_mcc_link_attempt()
+        
+        # التحقق من إعدادات MCC باستخدام المساعد المتقدم
+        if SERVICES_STATUS.get('google_ads_helpers'):
+            try:
+                mcc_validation = GoogleAdsMCCManager.validate_mcc_configuration()
+                if not mcc_validation.get("valid"):
+                    logger.info(f"إعدادات MCC غير صحيحة: {mcc_validation.get('issues')}")
+                    return {
+                        "success": True,
+                        "message": "إعدادات MCC غير مكونة أو غير صحيحة",
+                        "linked": False,
+                        "issues": mcc_validation.get('issues', [])
+                    }
+                
+                # التحقق من إمكانية ربط الحساب
+                can_link_result = GoogleAdsMCCManager.can_link_to_mcc(account_info)
+                if not can_link_result.get("can_link"):
+                    logger.info(f"لا يمكن ربط الحساب بـ MCC: {can_link_result.get('reasons')}")
+                    return {
+                        "success": True,
+                        "message": "لا يمكن ربط الحساب بـ MCC",
+                        "linked": False,
+                        "reasons": can_link_result.get('reasons', [])
+                    }
+                
+                mcc_customer_id = mcc_validation.get("mcc_customer_id")
+                
+            except Exception as e:
+                logger.warning(f"فشل في استخدام مساعد MCC المتقدم: {str(e)}")
+                # التبديل للمنطق الأساسي
+                mcc_customer_id = os.getenv('GOOGLE_ADS_MCC_CUSTOMER_ID')
+                
+                if not mcc_customer_id:
+                    logger.info("لا يوجد MCC مكون، تخطي عملية الربط")
+                    return {
+                        "success": True,
+                        "message": "لا يوجد MCC مكون",
+                        "linked": False
+                    }
+        else:
+            # المنطق الأساسي للتحقق من MCC
+            mcc_customer_id = os.getenv('GOOGLE_ADS_MCC_CUSTOMER_ID')
+            
+            if not mcc_customer_id:
+                logger.info("لا يوجد MCC مكون، تخطي عملية الربط")
+                return {
+                    "success": True,
+                    "message": "لا يوجد MCC مكون",
+                    "linked": False
+                }
+
+            # التحقق من أن الحساب ليس MCC بالفعل
+            if account_info.get('manager', False):
+                logger.info(f"الحساب {account_info.get('customer_id')} هو MCC بالفعل")
+                return {
+                    "success": True,
+                    "message": "الحساب هو MCC بالفعل",
+                    "linked": False
+                }
+
+        # التحقق من توفر Google Ads API Manager
+        if not oauth_manager.google_ads_api_manager:
+            logger.warning("Google Ads API Manager غير متاح لربط MCC")
+            return {
+                "success": False,
+                "message": "خدمة Google Ads API غير متاحة",
+                "linked": False
+            }
+
+        # محاولة ربط الحساب بـ MCC
+        try:
+            link_result = oauth_manager.google_ads_api_manager.link_customer_to_mcc(
+                mcc_customer_id=mcc_customer_id,
+                customer_id=account_info.get('customer_id'),
+                user_id=user_id
+            )
+
+            if link_result.get('success'):
+                logger.info(f"تم ربط الحساب {account_info.get('customer_id')} بـ MCC {mcc_customer_id}")
+                return {
+                    "success": True,
+                    "message": "تم ربط الحساب بـ MCC بنجاح",
+                    "linked": True,
+                    "mcc_customer_id": mcc_customer_id
+                }
+            else:
+                logger.warning(f"فشل في ربط الحساب بـ MCC: {link_result.get('message')}")
+                return {
+                    "success": False,
+                    "message": link_result.get('message', 'فشل في ربط MCC'),
+                    "linked": False
+                }
+
+        except Exception as link_error:
+            logger.warning(f"خطأ في ربط MCC: {str(link_error)}")
+            return {
+                "success": False,
+                "message": f"خطأ في ربط MCC: {str(link_error)}",
+                "linked": False
+            }
+
+    except Exception as e:
+        logger.error(f"خطأ في عملية ربط MCC: {str(e)}")
+        return {
+            "success": False,
+            "message": f"خطأ في ربط MCC: {str(e)}",
+            "linked": False
+        }
+
+def save_ads_account_to_database(
+    user_id: str,
+    account_info: Dict,
+    access_token: str,
+    refresh_token: str,
+    user_info: Dict,
+    all_accounts: List[Dict]
+) -> Dict[str, Any]:
+    """حفظ معلومات حساب Google Ads في قاعدة البيانات"""
+    try:
+        # استخدام قاعدة بيانات Google Ads المتخصصة إذا كانت متاحة
+        db_to_use = oauth_manager.google_ads_db if oauth_manager.google_ads_db else oauth_manager.db_manager
+        
+        if not db_to_use:
+            logger.error("لا توجد خدمة قاعدة بيانات متاحة")
+            return {
+                "success": False,
+                "message": "خدمة قاعدة البيانات غير متاحة"
+            }
+
+        # إعداد بيانات الحساب الرئيسي
+        account_data = {
+            "id": generate_unique_id() if SERVICES_STATUS.get('helpers') else secrets.token_urlsafe(32),
+            "user_id": user_id,
+            "customer_id": account_info.get('customer_id', ''),
+            "descriptive_name": sanitize_text(account_info.get('descriptive_name', '')) if SERVICES_STATUS.get('helpers') else account_info.get('descriptive_name', ''),
+            "currency_code": account_info.get('currency_code', 'USD'),
+            "time_zone": account_info.get('time_zone', 'UTC'),
+            "manager": account_info.get('manager', False),
+            "test_account": account_info.get('test_account', False),
+            "auto_tagging_enabled": account_info.get('auto_tagging_enabled', False),
+            "conversion_tracking_id": account_info.get('conversion_tracking_id', ''),
+            "status": account_info.get('status', 'ACTIVE'),
+            "account_type": account_info.get('account_type', 'STANDARD'),
+            "is_primary": True,
+            "linked_at": datetime.utcnow().isoformat(),
+            "last_sync": datetime.utcnow().isoformat(),
+            "metadata": {
+                "remarketing_setting": account_info.get('remarketing_setting', {}),
+                "selected_at": account_info.get('selected_at'),
+                "oauth_completed_at": datetime.utcnow().isoformat(),
+                "selection_reason": account_info.get('selection_reason', ''),
+                "quality_analysis": account_info.get('quality_analysis', {})
+            }
+        }
+
+        # حفظ الحساب الرئيسي
+        save_account_result = db_to_use.save_google_ads_account(account_data)
+        
+        if not save_account_result:
+            return {
+                "success": False,
+                "message": "فشل في حفظ معلومات الحساب الرئيسي"
+            }
+
+        # إعداد بيانات رمز الوصول
+        token_data = {
+            "id": generate_unique_id() if SERVICES_STATUS.get('helpers') else secrets.token_urlsafe(32),
+            "user_id": user_id,
+            "customer_id": account_info.get('customer_id', ''),
+            "access_token": oauth_manager.security_manager.encrypt_sensitive_data(access_token),
+            "refresh_token": oauth_manager.security_manager.encrypt_sensitive_data(refresh_token) if refresh_token else None,
+            "token_type": "Bearer",
+            "scope": "https://www.googleapis.com/auth/adwords",
+            "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
+            "created_at": datetime.utcnow().isoformat(),
+            "last_refreshed": datetime.utcnow().isoformat(),
+            "is_active": True,
+            "metadata": {
+                "user_info": user_info,
+                "oauth_flow_completed": True,
+                "security_level": oauth_manager.config.security_level.value
+            }
+        }
+
+        # حفظ رمز الوصول
+        save_token_result = db_to_use.save_oauth_token(token_data)
+        
+        if not save_token_result:
+            logger.warning("فشل في حفظ رمز الوصول، لكن تم حفظ الحساب")
+
+        # حفظ جميع الحسابات المتاحة (للمرجع) مع تحليل الجودة
+        try:
+            for account in all_accounts:
+                if account.get('customer_id') != account_info.get('customer_id'):
+                    # تحليل جودة الحساب إذا كان المساعد متاحاً
+                    quality_analysis = {}
+                    if SERVICES_STATUS.get('google_ads_helpers'):
+                        try:
+                            quality_analysis = GoogleAdsAccountAnalyzer.analyze_account_quality(account)
+                        except Exception as e:
+                            logger.warning(f"فشل في تحليل جودة الحساب {account.get('customer_id')}: {str(e)}")
+                    
+                    additional_account_data = {
+                        "id": generate_unique_id() if SERVICES_STATUS.get('helpers') else secrets.token_urlsafe(32),
+                        "user_id": user_id,
+                        "customer_id": account.get('customer_id', ''),
+                        "descriptive_name": sanitize_text(account.get('descriptive_name', '')) if SERVICES_STATUS.get('helpers') else account.get('descriptive_name', ''),
+                        "currency_code": account.get('currency_code', 'USD'),
+                        "time_zone": account.get('time_zone', 'UTC'),
+                        "manager": account.get('manager', False),
+                        "test_account": account.get('test_account', False),
+                        "status": account.get('status', 'AVAILABLE'),
+                        "account_type": account.get('account_type', 'STANDARD'),
+                        "is_primary": False,
+                        "linked_at": datetime.utcnow().isoformat(),
+                        "last_sync": datetime.utcnow().isoformat(),
+                        "metadata": {
+                            "available_for_selection": True,
+                            "discovered_at": datetime.utcnow().isoformat(),
+                            "quality_analysis": quality_analysis
+                        }
+                    }
+                    
+                    db_to_use.save_google_ads_account(additional_account_data)
+                    
+        except Exception as e:
+            logger.warning(f"فشل في حفظ الحسابات الإضافية: {str(e)}")
+
+        # تحديث ملف المستخدم
+        try:
+            user_update_data = {
+                "google_ads_connected": True,
+                "google_ads_customer_id": account_info.get('customer_id', ''),
+                "google_ads_connected_at": datetime.utcnow().isoformat(),
+                "last_oauth_completion": datetime.utcnow().isoformat()
+            }
+            
+            if hasattr(db_to_use, 'update_user'):
+                db_to_use.update_user(user_id, user_update_data)
+            elif oauth_manager.db_manager and hasattr(oauth_manager.db_manager, 'update_user'):
+                oauth_manager.db_manager.update_user(user_id, user_update_data)
+            
+        except Exception as e:
+            logger.warning(f"فشل في تحديث ملف المستخدم: {str(e)}")
+
+        logger.info(f"تم حفظ معلومات حساب Google Ads بنجاح للمستخدم {user_id}")
+
+        return {
+            "success": True,
+            "message": "تم حفظ معلومات الحساب بنجاح",
+            "account_id": account_data["id"],
+            "customer_id": account_info.get('customer_id', ''),
+            "token_saved": save_token_result
+        }
+
+    except Exception as e:
+        logger.error(f"خطأ في حفظ معلومات الحساب: {str(e)}")
+        return {
+            "success": False,
+            "message": f"خطأ في حفظ البيانات: {str(e)}"
+        }
+
+@google_ads_oauth_bp.route("/accounts", methods=["GET"])
+@login_required
+def get_user_ads_accounts():
+    """جلب حسابات Google Ads للمستخدم من قاعدة البيانات"""
+    try:
+        user_id = session.get("user_id")
+        
+        # استخدام قاعدة بيانات Google Ads المتخصصة إذا كانت متاحة
+        db_to_use = oauth_manager.google_ads_db if oauth_manager.google_ads_db else oauth_manager.db_manager
+        
+        if not db_to_use:
+            return jsonify({
+                "success": False,
+                "message": "خدمة قاعدة البيانات غير متاحة",
+                "error_code": "DATABASE_UNAVAILABLE"
+            }), 503
+
+        # جلب حسابات المستخدم
+        accounts = db_to_use.get_user_google_ads_accounts(user_id)
+        
+        if not accounts:
+            return jsonify({
+                "success": True,
+                "message": "لا توجد حسابات Google Ads مربوطة",
+                "accounts": [],
+                "total": 0
+            })
+
+        # تنسيق البيانات للعرض باستخدام المنسق المتقدم إذا كان متاحاً
+        if SERVICES_STATUS.get('google_ads_helpers'):
+            try:
+                formatted_accounts = GoogleAdsDataFormatter.format_accounts_list(accounts)
+            except Exception as e:
+                logger.warning(f"فشل في استخدام المنسق المتقدم: {str(e)}")
+                formatted_accounts = accounts
+        else:
+            # تنسيق أساسي
+            formatted_accounts = []
+            for account in accounts:
+                formatted_account = {
+                    "id": account.get("id"),
+                    "customer_id": account.get("customer_id"),
+                    "descriptive_name": account.get("descriptive_name"),
+                    "currency_code": account.get("currency_code"),
+                    "time_zone": account.get("time_zone"),
+                    "account_type": account.get("account_type"),
+                    "is_primary": account.get("is_primary", False),
+                    "status": account.get("status"),
+                    "linked_at": account.get("linked_at"),
+                    "last_sync": account.get("last_sync")
+                }
+                formatted_accounts.append(formatted_account)
+
+        return jsonify({
+            "success": True,
+            "message": f"تم جلب {len(formatted_accounts)} حساب",
+            "accounts": formatted_accounts,
+            "total": len(formatted_accounts)
+        })
+
+    except Exception as e:
+        logger.error(f"خطأ في جلب حسابات المستخدم: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في جلب الحسابات",
+            "error_code": "ACCOUNTS_FETCH_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/accounts/<customer_id>/set-primary", methods=["POST"])
+@login_required
+def set_primary_account(customer_id: str):
+    """تعيين حساب كحساب رئيسي"""
+    try:
+        user_id = session.get("user_id")
+        
+        # استخدام قاعدة بيانات Google Ads المتخصصة إذا كانت متاحة
+        db_to_use = oauth_manager.google_ads_db if oauth_manager.google_ads_db else oauth_manager.db_manager
+        
+        if not db_to_use:
+            return jsonify({
+                "success": False,
+                "message": "خدمة قاعدة البيانات غير متاحة",
+                "error_code": "DATABASE_UNAVAILABLE"
+            }), 503
+
+        # التحقق من ملكية الحساب
+        if hasattr(db_to_use, 'get_google_ads_account_by_customer_id'):
+            account = db_to_use.get_google_ads_account_by_customer_id(user_id, customer_id)
+        else:
+            # طريقة بديلة للتحقق
+            accounts = db_to_use.get_user_google_ads_accounts(user_id)
+            account = next((acc for acc in accounts if acc.get('customer_id') == customer_id), None)
+        
+        if not account:
+            return jsonify({
+                "success": False,
+                "message": "الحساب غير موجود أو غير مملوك لك",
+                "error_code": "ACCOUNT_NOT_FOUND"
+            }), 404
+
+        # تعيين الحساب الجديد كرئيسي
+        result = db_to_use.set_primary_google_ads_account(user_id, customer_id)
+        
+        if result:
+            logger.info(f"تم تعيين الحساب {customer_id} كحساب رئيسي للمستخدم {user_id}")
+            
+            return jsonify({
+                "success": True,
+                "message": "تم تعيين الحساب كحساب رئيسي بنجاح",
+                "customer_id": customer_id
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "فشل في تعيين الحساب الرئيسي",
+                "error_code": "SET_PRIMARY_FAILED"
+            }), 500
+
+    except Exception as e:
+        logger.error(f"خطأ في تعيين الحساب الرئيسي: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في تعيين الحساب الرئيسي",
+            "error_code": "SET_PRIMARY_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/revoke", methods=["POST"])
+@login_required
+def revoke_oauth():
+    """إلغاء تفويض Google Ads OAuth"""
+    try:
+        user_id = session.get("user_id")
+        
+        # استخدام قاعدة بيانات Google Ads المتخصصة إذا كانت متاحة
+        db_to_use = oauth_manager.google_ads_db if oauth_manager.google_ads_db else oauth_manager.db_manager
+        
+        if not db_to_use:
+            return jsonify({
+                "success": False,
+                "message": "خدمة قاعدة البيانات غير متاحة",
+                "error_code": "DATABASE_UNAVAILABLE"
+            }), 503
+
+        # جلب رموز الوصول للمستخدم
+        tokens = db_to_use.get_user_oauth_tokens(user_id)
+        
+        # إلغاء الرموز من Google باستخدام الطريقة غير المتزامنة
+        revoked_count = 0
+        for token in tokens:
+            try:
+                # فك تشفير الرمز
+                decrypted_token = oauth_manager.security_manager.decrypt_sensitive_data(
+                    token.get("access_token", "")
+                )
+                
+                # إنشاء معرف رمز مؤقت للإلغاء
+                temp_token_id = generate_unique_id() if SERVICES_STATUS.get('helpers') else secrets.token_urlsafe(32)
+                oauth_manager.access_tokens[temp_token_id] = AccessToken(
+                    token_id=temp_token_id,
+                    user_id=user_id,
+                    access_token=decrypted_token
+                )
+                
+                # إلغاء الرمز
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+                try:
+                    revoke_result = loop.run_until_complete(
+                        oauth_manager.revoke_token_async(temp_token_id)
+                    )
+                    if revoke_result.get("success"):
+                        revoked_count += 1
+                finally:
+                    loop.close()
+                    
+            except Exception as e:
+                logger.warning(f"فشل في إلغاء رمز من Google: {str(e)}")
+
+        # حذف الرموز من قاعدة البيانات
+        db_to_use.delete_user_oauth_tokens(user_id)
+        
+        # تحديث حالة الحسابات
+        db_to_use.deactivate_user_google_ads_accounts(user_id)
+        
+        # تحديث ملف المستخدم
+        try:
+            user_update_data = {
+                "google_ads_connected": False,
+                "google_ads_customer_id": None,
+                "google_ads_disconnected_at": datetime.utcnow().isoformat()
+            }
+            
+            if hasattr(db_to_use, 'update_user'):
+                db_to_use.update_user(user_id, user_update_data)
+            elif oauth_manager.db_manager and hasattr(oauth_manager.db_manager, 'update_user'):
+                oauth_manager.db_manager.update_user(user_id, user_update_data)
+                
+        except Exception as e:
+            logger.warning(f"فشل في تحديث ملف المستخدم: {str(e)}")
+
+        logger.info(f"تم إلغاء تفويض Google Ads للمستخدم {user_id}")
+
+        return jsonify({
+            "success": True,
+            "message": "تم إلغاء التفويض بنجاح",
+            "revoked_tokens": revoked_count,
+            "total_tokens": len(tokens)
+        })
+
+    except Exception as e:
+        logger.error(f"خطأ في إلغاء التفويض: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في إلغاء التفويض",
+            "error_code": "REVOKE_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/status", methods=["GET"])
+@login_required
+def get_oauth_status():
+    """جلب حالة OAuth للمستخدم"""
+    try:
+        user_id = session.get("user_id")
+        
+        # استخدام قاعدة بيانات Google Ads المتخصصة إذا كانت متاحة
+        db_to_use = oauth_manager.google_ads_db if oauth_manager.google_ads_db else oauth_manager.db_manager
+        
+        if not db_to_use:
+            return jsonify({
+                "success": False,
+                "message": "خدمة قاعدة البيانات غير متاحة",
+                "error_code": "DATABASE_UNAVAILABLE"
+            }), 503
+
+        # جلب معلومات المستخدم
+        user_info = {}
+        try:
+            if hasattr(db_to_use, 'get_user_by_id'):
+                user_info = db_to_use.get_user_by_id(user_id) or {}
+            elif oauth_manager.db_manager and hasattr(oauth_manager.db_manager, 'get_user_by_id'):
+                user_info = oauth_manager.db_manager.get_user_by_id(user_id) or {}
+        except Exception as e:
+            logger.warning(f"فشل في جلب معلومات المستخدم: {str(e)}")
+        
+        # جلب الحساب الرئيسي
+        primary_account = db_to_use.get_primary_google_ads_account(user_id)
+        
+        # جلب رموز الوصول النشطة
+        active_tokens = db_to_use.get_active_oauth_tokens(user_id)
+        
+        # جلب جميع الحسابات
+        all_accounts = db_to_use.get_user_google_ads_accounts(user_id)
+        
+        # تحديد حالة الاتصال
+        is_connected = (
+            user_info.get("google_ads_connected", False) and 
+            primary_account is not None and 
+            len(active_tokens) > 0
+        )
+
+        status_data = {
+            "connected": is_connected,
+            "user_id": user_id,
+            "primary_account": {
+                "customer_id": primary_account.get("customer_id") if primary_account else None,
+                "descriptive_name": primary_account.get("descriptive_name") if primary_account else None,
+                "currency_code": primary_account.get("currency_code") if primary_account else None,
+                "linked_at": primary_account.get("linked_at") if primary_account else None,
+                "account_type": primary_account.get("account_type") if primary_account else None,
+                "status": primary_account.get("status") if primary_account else None
+            } if primary_account else None,
+            "tokens_count": len(active_tokens),
+            "last_oauth_completion": user_info.get("last_oauth_completion"),
+            "connected_at": user_info.get("google_ads_connected_at"),
+            "total_accounts": len(all_accounts),
+            "service_status": {
+                "oauth_manager": True,
+                "google_ads_api": SERVICES_STATUS.get('google_ads_api', False),
+                "google_ads_helpers": SERVICES_STATUS.get('google_ads_helpers', False),
+                "google_ads_database": SERVICES_STATUS.get('google_ads_database', False)
+            },
+            "metrics": oauth_manager.metrics_collector.get_metrics()
+        }
+
+        return jsonify({
+            "success": True,
+            "message": "تم جلب حالة OAuth بنجاح",
+            "status": status_data
+        })
+
+    except Exception as e:
+        logger.error(f"خطأ في جلب حالة OAuth: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في جلب حالة OAuth",
+            "error_code": "STATUS_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/refresh-token", methods=["POST"])
+@login_required
+def refresh_user_token():
+    """تجديد رمز الوصول للمستخدم"""
+    try:
+        user_id = session.get("user_id")
+        
+        # جلب رموز المستخدم النشطة
+        db_to_use = oauth_manager.google_ads_db if oauth_manager.google_ads_db else oauth_manager.db_manager
+        
+        if not db_to_use:
+            return jsonify({
+                "success": False,
+                "message": "خدمة قاعدة البيانات غير متاحة",
+                "error_code": "DATABASE_UNAVAILABLE"
+            }), 503
+
+        active_tokens = db_to_use.get_active_oauth_tokens(user_id)
+        
+        if not active_tokens:
+            return jsonify({
+                "success": False,
+                "message": "لا توجد رموز نشطة للتجديد",
+                "error_code": "NO_ACTIVE_TOKENS"
+            }), 404
+
+        # تجديد أول رمز نشط
+        token = active_tokens[0]
+        token_id = token.get('id')
+        
+        # إنشاء كائن رمز مؤقت للتجديد
+        temp_token_obj = AccessToken(
+            token_id=token_id,
+            user_id=user_id,
+            access_token=oauth_manager.security_manager.decrypt_sensitive_data(token.get('access_token', '')),
+            refresh_token=oauth_manager.security_manager.decrypt_sensitive_data(token.get('refresh_token', '')) if token.get('refresh_token') else None
+        )
+        
+        oauth_manager.access_tokens[token_id] = temp_token_obj
+        
+        # تجديد الرمز
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            refresh_result = loop.run_until_complete(
+                oauth_manager.refresh_token_async(token_id)
+            )
+        finally:
+            loop.close()
+
+        if refresh_result.get("success"):
+            # تحديث الرمز في قاعدة البيانات
+            updated_token_data = {
+                **token,
+                "access_token": oauth_manager.security_manager.encrypt_sensitive_data(refresh_result.get("access_token")),
+                "refresh_token": oauth_manager.security_manager.encrypt_sensitive_data(refresh_result.get("refresh_token")) if refresh_result.get("refresh_token") else token.get("refresh_token"),
+                "last_refreshed": datetime.utcnow().isoformat(),
+                "refresh_count": token.get("refresh_count", 0) + 1
+            }
+            
+            db_to_use.save_oauth_token(updated_token_data)
+            
+            return jsonify({
+                "success": True,
+                "message": "تم تجديد الرمز بنجاح",
+                "expires_in": refresh_result.get("expires_in", 3600)
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": refresh_result.get("message", "فشل في تجديد الرمز"),
+                "error_code": "TOKEN_REFRESH_FAILED"
+            }), 400
+
+    except Exception as e:
+        logger.error(f"خطأ في تجديد الرمز: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في تجديد الرمز",
+            "error_code": "TOKEN_REFRESH_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/metrics", methods=["GET"])
+@admin_required
+def get_oauth_metrics():
+    """جلب مقاييس OAuth (للمديرين فقط)"""
+    try:
+        metrics = oauth_manager.metrics_collector.get_metrics()
+        
+        return jsonify({
+            "success": True,
+            "message": "تم جلب المقاييس بنجاح",
+            "metrics": metrics,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+
+    except Exception as e:
+        logger.error(f"خطأ في جلب المقاييس: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في جلب المقاييس",
+            "error_code": "METRICS_ERROR"
+        }), 500
+
+@google_ads_oauth_bp.route("/metrics/reset", methods=["POST"])
+@admin_required
+def reset_oauth_metrics():
+    """إعادة تعيين مقاييس OAuth (للمديرين فقط)"""
+    try:
+        oauth_manager.metrics_collector.reset_metrics()
+        
+        return jsonify({
+            "success": True,
+            "message": "تم إعادة تعيين المقاييس بنجاح",
+            "timestamp": datetime.utcnow().isoformat()
+        })
+
+    except Exception as e:
+        logger.error(f"خطأ في إعادة تعيين المقاييس: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "حدث خطأ في إعادة تعيين المقاييس",
+            "error_code": "METRICS_RESET_ERROR"
+        }), 500
+
+# ==================== وظائف التسجيل والتصدير ====================
+
+def register_google_ads_oauth_routes(app):
+    """تسجيل مسارات Google Ads OAuth"""
+    app.register_blueprint(google_ads_oauth_bp)
+    logger.info("✅ تم تسجيل مسارات Google Ads OAuth")
+
+def cleanup_oauth_manager():
+    """تنظيف مدير OAuth عند إغلاق التطبيق"""
+    try:
+        # إيقاف thread التنظيف
+        if hasattr(oauth_manager, 'cleanup_thread') and oauth_manager.cleanup_thread.is_alive():
+            # لا يمكن إيقاف daemon thread بشكل مباشر، سيتم إيقافه تلقائياً
+            pass
+        
+        # إغلاق اتصالات قاعدة البيانات
+        if oauth_manager.google_ads_db and hasattr(oauth_manager.google_ads_db, 'close_connection'):
+            oauth_manager.google_ads_db.close_connection()
+        
+        logger.info("✅ تم تنظيف مدير OAuth")
+        
+    except Exception as e:
+        logger.error(f"خطأ في تنظيف مدير OAuth: {str(e)}")
+
+# تصدير الكلاسات والوظائف
 __all__ = [
-    'google_ads_oauth_bp',
+    'google_ads_oauth_bp', 
+    'register_google_ads_oauth_routes',
+    'oauth_manager',
     'GoogleAdsOAuthManager',
     'OAuthConfig',
     'OAuthSession',
     'AccessToken',
     'SecurityManager',
     'MetricsCollector',
-    'OAuthState',
-    'TokenType',
-    'SecurityLevel'
+    'cleanup_oauth_manager'
 ]
 
