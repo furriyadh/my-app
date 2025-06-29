@@ -23,7 +23,7 @@ class GoogleAuthService {
     this.state = null
     
     // Event listeners
-    this.listeners = new Map()
+    this.listeners = new Map( )
     
     // Initialize
     this.init()
@@ -367,7 +367,7 @@ class GoogleAuthService {
       return {
         success: true,
         permissions: {
-          canManageCampaigns: userInfo.scopes?.includes('https://www.googleapis.com/auth/adwords'),
+          canManageCampaigns: userInfo.scopes?.includes('https://www.googleapis.com/auth/adwords' ),
           canViewReports: true,
           canEditAccount: userInfo.role === 'admin',
           scopes: userInfo.scopes || []
@@ -424,7 +424,7 @@ class GoogleAuthService {
       include_granted_scopes: 'true'
     })
 
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString( )}`
   }
 
   /**
@@ -500,4 +500,3 @@ class GoogleAuthService {
 // Create and export singleton instance
 export const googleAuthService = new GoogleAuthService()
 export default googleAuthService
-
