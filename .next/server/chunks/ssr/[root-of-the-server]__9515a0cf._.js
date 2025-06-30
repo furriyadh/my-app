@@ -2683,11 +2683,11 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@supabase/supabase-js/dist/module/index.js [app-ssr] (ecmascript) <locals>");
 ;
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = ("TURBOPACK compile-time value", "https://mkzwqbgcfdzcqmkgzwgy.supabase.co");
+const supabaseAnonKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rendxYmdjZmR6Y3Fta2d6d2d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzM5ODUsImV4cCI6MjA2NTUwOTk4NX0.ogCjUhrI44uomebST2S8VzGE6Rxsu2QfqnSZcQKLz1I");
 // تأكد من أن هذه الشروط موجودة لمعالجة الأخطاء إذا كانت المتغيرات مفقودة
-if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.');
+if ("TURBOPACK compile-time falsy", 0) {
+    "TURBOPACK unreachable";
 }
 const createClient = ()=>{
     return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(supabaseUrl, supabaseAnonKey, {

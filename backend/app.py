@@ -16,10 +16,13 @@ load_dotenv()
 
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
+
+# استيراد نظام المصادقة الجديد
+from backend.auth.jwt_manager import jwt_manager
+from backend.auth.auth_middleware import auth_middleware
 
 # إضافة مجلد backend للمسار
-current_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '/home/ubuntu/backend'
+current_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '/home/ubuntu/my-app/backend'
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
@@ -39,8 +42,11 @@ def create_app():
     
     # إعدادات أساسية من ملف .env
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'google-ads-ai-platform-secret-key-2025')
-    app.config['JWT_SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'google-ads-ai-platform-secret-key-2025')
+    app.config['JWT_SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'google-ads-ai-platform-secret-key-2025') # يستخدمه JWTManager الجديد
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+    app.config['JWT_VERIFICATION_TOKEN_EXPIRES'] = timedelta(hours=1)
+    app.config['JWT_RESET_TOKEN_EXPIRES'] = timedelta(minutes=15)
     
     # إعدادات البيئة
     app.config['ENV'] = os.getenv('FLASK_ENV', 'development')
@@ -49,8 +55,11 @@ def create_app():
     # إعداد CORS
     CORS(app, origins=['*'], supports_credentials=True)
     
-    # إعداد JWT
-    jwt = JWTManager(app)
+    # تهيئة JWT Manager الجديد
+    jwt_manager.init_app(app)
+    
+    # تهيئة Auth Middleware
+    auth_middleware.init_app(app)
     
     # إعداد التسجيل
     logging.basicConfig(
@@ -83,6 +92,8 @@ def create_app():
         """معالج ما قبل الطلب"""
         g.start_time = datetime.utcnow()
         app.logger.info(f"طلب جديد: {request.method} {request.path} من {request.remote_addr}")
+        # تطبيق Auth Middleware
+        auth_middleware.before_request()
     
     @app.after_request
     def after_request(response):
@@ -177,12 +188,13 @@ def create_app():
     except ImportError as e:
         app.logger.warning(f"❌ لم يتم تسجيل Google Ads Blueprint: {e}")
     
+    # استيراد وتسجيل Auth Blueprint الجديد
     try:
-        from routes.auth import auth_bp
-        app.register_blueprint(auth_bp)
-        app.logger.info("✅ تم تسجيل Auth Blueprint بنجاح على /api/auth")
+        from routes.google_ads.auth_jwt import auth_bp as new_auth_bp
+        app.register_blueprint(new_auth_bp, url_prefix='/api/auth')
+        app.logger.info("✅ تم تسجيل Auth Blueprint الجديد بنجاح على /api/auth")
     except ImportError as e:
-        app.logger.warning(f"❌ لم يتم تسجيل Auth Blueprint: {e}")
+        app.logger.warning(f"❌ لم يتم تسجيل Auth Blueprint الجديد: {e}")
     
     try:
         from routes.campaigns import campaigns_bp
@@ -301,52 +313,6 @@ def create_app():
                 'error': str(e)
             }, 500)
     
-    @app.route('/api/auth/test-token', methods=['POST'])
-    def create_test_token():
-        """إنشاء token تجريبي للاختبار"""
-        try:
-            data = request.get_json() or {}
-            user_id = data.get('user_id', 'test_user')
-            
-            # إنشاء token
-            access_token = create_access_token(
-                identity=user_id,
-                expires_delta=timedelta(hours=24)
-            )
-            
-            return arabic_jsonify({
-                'success': True,
-                'access_token': access_token,
-                'user_id': user_id,
-                'expires_in': 86400,  # 24 ساعة
-                'token_type': 'Bearer',
-                'usage': 'استخدم هذا التوكن في header: Authorization: Bearer <token>'
-            })
-        except Exception as e:
-            app.logger.error(f"خطأ في إنشاء token: {str(e)}")
-            return arabic_jsonify({
-                'success': False,
-                'error': str(e)
-            }, 500)
-    
-    @app.route('/api/auth/verify-token', methods=['GET'])
-    @jwt_required()
-    def verify_token():
-        """التحقق من صحة Token"""
-        try:
-            current_user = get_jwt_identity()
-            return arabic_jsonify({
-                'success': True,
-                'user_id': current_user,
-                'message': 'Token صالح',
-                'timestamp': datetime.utcnow().isoformat()
-            })
-        except Exception as e:
-            return arabic_jsonify({
-                'success': False,
-                'error': str(e)
-            }, 401)
-    
     # نقل system_status إلى داخل create_app
     @app.route('/api/status', methods=['GET'])
     def system_status():
@@ -397,37 +363,20 @@ def create_app():
             
             return arabic_jsonify({
                 'success': True,
-                'overall_health': 'صحي' if overall_health else 'يحتاج إعداد',
-                'services': services_status,
-                'system': system_stats,
+                'overall_health': 'صحي' if overall_health else 'غير صحي',
+                'services_status': services_status,
+                'system_stats': system_stats,
                 'timestamp': datetime.utcnow().isoformat()
             })
         except Exception as e:
-            app.logger.error(f"خطأ في فحص حالة النظام: {str(e)}")
+            app.logger.error(f"خطأ في فحص الحالة: {str(e)}")
             return arabic_jsonify({
                 'success': False,
-                'status': 'unhealthy',
                 'error': str(e)
             }, 500)
-
+            
     return app
 
-# إنشاء التطبيق
-app = create_app()
-
 if __name__ == '__main__':
-    print("🚀 بدء تشغيل Google Ads AI Platform...")
-    print(f"🌍 البيئة: {os.getenv('FLASK_ENV', 'development')}")
-    print(f"🔑 JWT مكون: {'نعم' if os.getenv('FLASK_SECRET_KEY') else 'لا'}")
-    print(f"📊 Google Ads مكون: {'نعم' if os.getenv('GOOGLE_DEVELOPER_TOKEN') else 'لا'}")
-    print("=" * 50)
-    
-    app.run(
-        host='0.0.0.0',
-        port=int(os.getenv('PORT', 5000)),
-        debug=os.getenv('FLASK_ENV') == 'development'
-    )
-
-
-
-
+    app = create_app()
+    app.run(debug=True, host='0.0.0.0', port=5000)
