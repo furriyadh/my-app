@@ -1,6 +1,0 @@
-{
-  "/api/oauth/callback/route": "app/api/oauth/callback/route.js",
-  "/authentication/sign-in/page": "app/authentication/sign-in/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
-}
