@@ -1,15 +1,3 @@
-"""
-OAuth Handler Service
-خدمة معالجة OAuth
-
-يوفر وظائف OAuth 2.0 لـ Google Ads API بما في ذلك:
-- إنشاء روابط التفويض
-- تبديل الرموز
-- تجديد الرموز
-- إدارة الجلسات
-- التحقق من الصلاحيات
-"""
-
 import os
 import logging
 import secrets
@@ -19,8 +7,7 @@ import json
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 import requests
-from urllib.parse import urlencode, parse_qs, urlparse
-import jwt
+from urllib.parse import urlencode
 
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
@@ -33,16 +20,16 @@ class OAuthHandler:
         self.logger = logging.getLogger(__name__)
         
         # إعدادات OAuth من متغيرات البيئة
-        self.client_id = os.getenv("GOOGLE_CLIENT_ID")
-        self.client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-        self.redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/api/auth/callback/google"  )
+        self.client_id = os.getenv("GOOGLE_ADS_CLIENT_ID") # تم التعديل لاستخدام GOOGLE_ADS_CLIENT_ID
+        self.client_secret = os.getenv("GOOGLE_ADS_CLIENT_SECRET") # تم التعديل لاستخدام GOOGLE_ADS_CLIENT_SECRET
+        self.redirect_uri = os.getenv("GOOGLE_ADS_REDIRECT_URI", "http://localhost:3000/auth/callback" ) # تم التعديل لاستخدام GOOGLE_ADS_REDIRECT_URI
         self.developer_token = os.getenv("GOOGLE_DEVELOPER_TOKEN")
         
         # نطاقات Google Ads
         self.scopes = [
             "https://www.googleapis.com/auth/adwords",
             "https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/com/auth/userinfo.profile"
+            "https://www.googleapis.com/auth/userinfo.profile"
         ]
         
         # URLs للـ OAuth
@@ -51,10 +38,9 @@ class OAuthHandler:
         self.userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
         self.revoke_url = "https://oauth2.googleapis.com/revoke"
         
-        # تخزين الجلسات النشطة (للتطوير، يفضل استخدام قاعدة بيانات أو Redis في الإنتاج  )
+        # تخزين الجلسات النشطة (للتطوير، يفضل استخدام قاعدة بيانات أو Redis في الإنتاج )
         self.active_sessions = {}
         self.token_cache = {}
-        self.state_storage = {}
         
         self.logger.info("تم تهيئة معالج OAuth")
     
@@ -109,7 +95,7 @@ class OAuthHandler:
             }
             
         except Exception as e:
-            self.logger.error(f"خطأ في إنشاء رابط التفويض: {str(e)}")
+            self.logger.error(f"خطأ في إنشاء رابط التفويض: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -178,26 +164,25 @@ class OAuthHandler:
                 }
             else:
                 error_data = response.json() if response.content else {}
-                raise ValueError(f"فشل في الحصول على رمز الوصول: {error_data.get("error_description", response.text)}")
-                
+                error_message = error_data.get("error_description", response.text)
+                raise ValueError(f"فشل في الحصول على رمز الوصول: {error_message}")
         except Exception as e:
-            self.logger.error(f"خطأ في تبديل الكود: {str(e)}")
+            self.logger.error(f"خطأ في تبديل الكود برمز الوصول: {e}")
             return {
                 "success": False,
                 "error": str(e),
-                "message": "فشل في تبديل الكود"
+                "message": "فشل في تبديل الكود برمز الوصول"
             }
-    
+
     def refresh_access_token(self, user_id: str) -> Dict[str, Any]:
-        """تجديد رمز الوصول"""
+        """تجديد رمز الوصول باستخدام رمز التحديث - الدالة المطلوبة في MCC"""
         try:
-            token_info = self.token_cache.get(user_id)
-            if not token_info or not token_info.get("refresh_token"):
-                raise ValueError("No refresh token available for this user.")
+            if user_id not in self.token_cache or not self.token_cache[user_id].get("refresh_token"):
+                raise ValueError("No refresh token found for this user.")
             
-            refresh_token = token_info["refresh_token"]
+            refresh_token = self.token_cache[user_id]["refresh_token"]
             
-            refresh_params = {
+            token_params = {
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
                 "refresh_token": refresh_token,
@@ -206,46 +191,47 @@ class OAuthHandler:
             
             response = requests.post(
                 self.token_url,
-                data=refresh_params,
+                data=token_params,
                 headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
             
             if response.status_code == 200:
                 token_data = response.json()
                 
-                # تحديث الرموز في الذاكرة المؤقتة
+                # تحديث رمز الوصول وتاريخ الانتهاء
                 self.token_cache[user_id]["access_token"] = token_data["access_token"]
                 self.token_cache[user_id]["expires_at"] = (datetime.now() + timedelta(seconds=token_data.get("expires_in", 3600))).isoformat()
-                if "refresh_token" in token_data: # قد يتم إرجاع refresh token جديد
-                    self.token_cache[user_id]["refresh_token"] = token_data["refresh_token"]
                 
                 return {
                     "success": True,
                     "access_token": token_data["access_token"],
+                    "expires_in": token_data.get("expires_in", 3600),
                     "message": "تم تجديد رمز الوصول بنجاح"
                 }
             else:
                 error_data = response.json() if response.content else {}
-                raise ValueError(f"فشل في تجديد الرمز: {error_data.get("error_description", response.text)}")
-                
+                error_message = error_data.get("error_description", response.text)
+                raise ValueError(f"فشل في تجديد الرمز: {error_message}")
         except Exception as e:
-            self.logger.error(f"خطأ في تجديد الرمز: {str(e)}")
+            self.logger.error(f"خطأ في تجديد رمز الوصول: {e}")
             return {
                 "success": False,
                 "error": str(e),
                 "message": "فشل في تجديد رمز الوصول"
             }
-    
+
     def revoke_token(self, user_id: str) -> Dict[str, Any]:
-        """إلغاء رمز الوصول والتجديد"""
+        """إلغاء رمز الوصول ورمز التحديث - الدالة المطلوبة في MCC"""
         try:
-            token_info = self.token_cache.get(user_id)
-            if not token_info or not token_info.get("access_token"):
-                raise ValueError("No token available for this user.")
+            if user_id not in self.token_cache or not self.token_cache[user_id].get("access_token"):
+                raise ValueError("No access token found for this user.")
             
-            token = token_info["access_token"]
+            access_token = self.token_cache[user_id]["access_token"]
             
-            revoke_params = {"token": token}
+            revoke_params = {
+                "token": access_token
+            }
+            
             response = requests.post(
                 self.revoke_url,
                 data=revoke_params,
@@ -254,108 +240,133 @@ class OAuthHandler:
             
             if response.status_code == 200:
                 del self.token_cache[user_id]
-                return {"success": True, "message": "تم إلغاء الرمز بنجاح"}
+                return {
+                    "success": True,
+                    "message": "تم إلغاء الرمز بنجاح"
+                }
             else:
                 error_data = response.json() if response.content else {}
-                raise ValueError(f"فشل في إلغاء الرمز: {error_data.get("error_description", response.text)}")
-                
+                error_message = error_data.get("error_description", response.text)
+                raise ValueError(f"فشل في إلغاء الرمز: {error_message}")
         except Exception as e:
-            self.logger.error(f"خطأ في إلغاء الرمز: {str(e)}")
-            return {"success": False, "error": str(e), "message": "فشل في إلغاء الرمز"}
-    
-    def get_user_tokens(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """الحصول على رموز المستخدم"""
-        return self.token_cache.get(user_id)
+            self.logger.error(f"خطأ في إلغاء الرمز: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": "فشل في إلغاء الرمز"
+            }
 
     def _generate_state(self) -> str:
-        """توليد state آمن"""
+        """توليد قيمة state عشوائية"""
         return secrets.token_urlsafe(32)
-    
+
     def _generate_code_verifier(self) -> str:
-        """توليد PKCE code verifier"""
-        return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("utf-8").rstrip("=")
-    
+        """توليد code verifier لـ PKCE"""
+        return secrets.token_urlsafe(96)
+
     def _generate_code_challenge(self, code_verifier: str) -> str:
-        """توليد PKCE code challenge"""
-        return base64.urlsafe_b64encode(
-            hashlib.sha256(code_verifier.encode("utf-8")).digest()
-        ).decode("utf-8").rstrip("=")
-    
+        """توليد code challenge من code verifier لـ PKCE"""
+        s256 = hashlib.sha256()
+        s256.update(code_verifier.encode("utf-8"))
+        return base64.urlsafe_b64encode(s256.digest()).decode("utf-8").replace("=", "")
+
     def _get_user_info(self, access_token: str) -> Dict[str, Any]:
         """الحصول على معلومات المستخدم من Google"""
         try:
-            headers = {"Authorization": f"Bearer {access_token}"}
+            headers = {
+                "Authorization": f"Bearer {access_token}"
+            }
             response = requests.get(self.userinfo_url, headers=headers)
-            response.raise_for_status()
+            response.raise_for_status() # يرفع استثناء لأخطاء HTTP
             return {"success": True, "user_info": response.json()}
         except requests.exceptions.RequestException as e:
             self.logger.error(f"خطأ في الحصول على معلومات المستخدم: {e}")
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": str(e), "user_info": {}}
 
-# مثال على الاستخدام (للتطوير والاختبار)
+    def is_token_valid(self, user_id: str) -> bool:
+        """التحقق مما إذا كان رمز الوصول لا يزال صالحًا"""
+        if user_id not in self.token_cache:
+            return False
+        
+        expires_at_str = self.token_cache[user_id].get("expires_at")
+        if not expires_at_str:
+            return False
+        
+        expires_at = datetime.fromisoformat(expires_at_str)
+        return datetime.now() < expires_at
+
+    def get_access_token(self, user_id: str) -> Optional[str]:
+        """الحصول على رمز الوصول للمستخدم"""
+        if self.is_token_valid(user_id):
+            return self.token_cache[user_id]["access_token"]
+        
+        # حاول تجديد الرمز إذا انتهت صلاحيته
+        try:
+            refresh_result = self.refresh_access_token(user_id)
+            if refresh_result["success"]:
+                return refresh_result["access_token"]
+        except Exception as e:
+            self.logger.warning(f"فشل في تجديد رمز الوصول للمستخدم {user_id}: {e}")
+        
+        return None
+
+    def get_user_info(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """الحصول على معلومات المستخدم المخزنة"""
+        if user_id in self.token_cache:
+            return self.token_cache[user_id].get("user_info")
+        return None
+
+    def get_user_scopes(self, user_id: str) -> List[str]:
+        """الحصول على نطاقات المستخدم المخزنة"""
+        if user_id in self.token_cache:
+            return self.token_cache[user_id].get("scopes", [])
+        return []
+
+    def get_all_active_users(self) -> List[str]:
+        """الحصول على قائمة بجميع معرفات المستخدمين النشطين"""
+        return list(self.token_cache.keys())
+
+    def get_session_data(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """الحصول على بيانات الجلسة النشطة"""
+        return self.active_sessions.get(session_id)
+
+    def delete_session(self, session_id: str):
+        """حذف جلسة OAuth"""
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
+
+
+# مثال على الاستخدام (للتجربة فقط)
 if __name__ == "__main__":
-    # يجب تعيين هذه المتغيرات البيئية قبل التشغيل
-    os.environ["GOOGLE_CLIENT_ID"] = "YOUR_CLIENT_ID"
-    os.environ["GOOGLE_CLIENT_SECRET"] = "YOUR_CLIENT_SECRET"
-    os.environ["GOOGLE_REDIRECT_URI"] = "http://localhost:3000/api/auth/callback/google"
-
-    handler = OAuthHandler(  )
-    print("OAuthHandler initialized.")
-
-    # مثال على إنشاء رابط التفويض
-    auth_result = handler.create_authorization_url("test_user_123", "127.0.0.1", "TestUserAgent")
-    if auth_result["success"]:
-        print(f"Authorization URL: {auth_result["authorization_url"]}")
-        print(f"Session ID: {auth_result["session_id"]}")
-    else:
-        print(f"Error: {auth_result["error"]}")
-
-    # مثال على تبديل الكود (يتطلب كود حقيقي من Google)
-    print("\n--- مثال على تبديل الكود ---")
-    # في سيناريو حقيقي، ستحصل على `code` و `state` من رد الاتصال من Google
-    code_from_google = "YOUR_ACTUAL_AUTHORIZATION_CODE" # استبدل هذا بالكود الفعلي
-    state_from_google = auth_result["state"] # استخدم الـ state الذي تم إنشاؤه في create_authorization_url
+    # قم بتعيين متغيرات البيئة قبل التشغيل
+    # os.environ["GOOGLE_ADS_CLIENT_ID"] = "YOUR_CLIENT_ID"
+    # os.environ["GOOGLE_ADS_CLIENT_SECRET"] = "YOUR_CLIENT_SECRET"
+    # os.environ["GOOGLE_ADS_REDIRECT_URI"] = "http://localhost:3000/auth/callback"
+    # os.environ["GOOGLE_DEVELOPER_TOKEN"] = "YOUR_DEVELOPER_TOKEN"
     
-    if code_from_google != "YOUR_ACTUAL_AUTHORIZATION_CODE":
-        exchange_result = handler.exchange_code_for_token(auth_result["session_id"], code_from_google, state_from_google)
-        if exchange_result["success"]:
-            print("Token exchange successful!")
-            print(f"Access Token: {exchange_result["access_token"]}")
-            print(f"User Info: {exchange_result["user_info"]}")
-        else:
-            print(f"Error: {exchange_result["error"]}")
-    else:
-        print("يرجى توفير كود تفويض حقيقي لاختبار تبديل الكود.")
-
-    # مثال على تجديد الرمز (يتطلب refresh token حقيقي)
-    print("\n--- مثال على تجديد الرمز ---")
-    # في سيناريو حقيقي، ستحتاج إلى refresh token تم تخزينه مسبقًا للمستخدم
-    user_id_for_refresh = "test_user_123" # المستخدم الذي تم الحصول على refresh token له
+    oauth_handler = OAuthHandler( )
     
-    # تأكد من أن لديك refresh token مخزن لهذا المستخدم في self.token_cache
-    if handler.get_user_tokens(user_id_for_refresh) and handler.get_user_tokens(user_id_for_refresh).get("refresh_token"):
-        refresh_result = handler.refresh_access_token(user_id_for_refresh)
-        if refresh_result["success"]:
-            print("Token refresh successful!")
-            print(f"New Access Token: {refresh_result["access_token"]}")
-        else:
-            print(f"Error: {refresh_result["error"]}")
+    # مثال: إنشاء رابط تفويض
+    auth_url_result = oauth_handler.create_authorization_url("test_user_123", "192.168.1.1", "TestBrowser")
+    if auth_url_result["success"]:
+        print(f"رابط التفويض: {auth_url_result["authorization_url"]}") # تم تصحيح f-string
+        print(f"معرف الجلسة: {auth_url_result["session_id"]}") # تم تصحيح f-string
     else:
-        print("لا يوجد refresh token متاح للمستخدم test_user_123. يرجى إكمال تدفق OAuth أولاً.")
+        print(f"خطأ: {auth_url_result["message"]}")
 
-    # مثال على إلغاء الرمز
-    print("\n--- مثال على إلغاء الرمز ---")
-    user_id_for_revoke = "test_user_123" # المستخدم الذي سيتم إلغاء رمزه
+    # مثال: تجديد رمز الوصول (يتطلب refresh token صالح)
+    # user_id_to_refresh = "some_user_id"
+    # refresh_result = oauth_handler.refresh_access_token(user_id_to_refresh)
+    # if refresh_result["success"]:
+    #     print(f"تم تجديد رمز الوصول بنجاح: {refresh_result["access_token"]}")
+    # else:
+    #     print(f"فشل تجديد رمز الوصول: {refresh_result["message"]}")
+
+    # مثال: إلغاء الرمز (يتطلب access token صالح)
+    # user_id_to_revoke = "some_user_id"
+    # revoke_result = oauth_handler.revoke_token(user_id_to_revoke)
+    # if revoke_result["success"]:
+    #     print(f"تم إلغاء الرمز بنجاح: {revoke_result["message"]}")
+    # else:
+    #     print(f"فشل إلغاء الرمز: {revoke_result["message"]}")
     
-    if handler.get_user_tokens(user_id_for_revoke):
-        revoke_result = handler.revoke_token(user_id_for_revoke)
-        if revoke_result["success"]:
-            print("Token revoked successfully!")
-        else:
-            print(f"Error: {revoke_result["error"]}")
-    else:
-        print("لا يوجد رمز متاح للمستخدم test_user_123 لإلغائه.")
-
-
-
-
