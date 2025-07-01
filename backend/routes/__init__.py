@@ -4,7 +4,8 @@ Google Ads AI Platform - API Routes
 """
 
 from flask import Blueprint
-from .auth import auth_bp
+# استيراد auth_middleware_bp بدلاً من auth_bp
+from backend.auth.auth_middleware import auth_middleware_bp
 from .campaigns import campaigns_bp
 from .accounts import accounts_bp
 from .ai import ai_bp
@@ -13,25 +14,26 @@ def register_routes(app):
     """تسجيل جميع مسارات API"""
     
     # تسجيل المسارات
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(campaigns_bp, url_prefix='/api/campaigns')
-    app.register_blueprint(accounts_bp, url_prefix='/api/accounts')
-    app.register_blueprint(ai_bp, url_prefix='/api/ai')
+    # استخدام auth_middleware_bp بدلاً من auth_bp
+    app.register_blueprint(auth_middleware_bp, url_prefix="/api/auth")
+    app.register_blueprint(campaigns_bp, url_prefix="/api/campaigns")
+    app.register_blueprint(accounts_bp, url_prefix="/api/accounts")
+    app.register_blueprint(ai_bp, url_prefix="/api/ai")
     
     # مسار الصفحة الرئيسية
-    @app.route('/')
+    @app.route("/")
     def home():
         return {
             "message": "منصة ذكية لإدارة إعلانات جوجل",
             "version": "1.0.0",
             "status": "active",
-            "environment": app.config.get('ENV', 'development'),
-            "port": app.config.get('PORT', 5000),
+            "environment": app.config.get("ENV", "development"),
+            "port": app.config.get("PORT", 5000),
             "success": True
         }
     
     # مسار فحص صحة النظام
-    @app.route('/api/health')
+    @app.route("/api/health")
     def health_check():
         return {
             "status": "healthy",
@@ -45,4 +47,5 @@ def register_routes(app):
             "success": True
         }
 
-__all__ = ['register_routes', 'auth_bp', 'campaigns_bp', 'accounts_bp', 'ai_bp']
+# تحديث __all__ ليعكس التغيير
+__all__ = ["register_routes", "auth_middleware_bp", "campaigns_bp", "accounts_bp", "ai_bp"]

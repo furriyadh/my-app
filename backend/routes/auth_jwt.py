@@ -4,12 +4,12 @@ import logging
 from datetime import datetime
 
 # استيرادات مطلقة بدلاً من النسبية
-from utils.validators import validate_email, validate_user_data
-from utils.helpers import generate_unique_id, sanitize_text
-from utils.database import DatabaseManager # افتراض وجود DatabaseManager
+from backend.utils.validators import validate_email, validate_user_data
+from backend.utils.helpers import generate_unique_id, sanitize_text
+from backend.utils.database import DatabaseManager # افتراض وجود DatabaseManager
 
-# إنشاء Blueprint
-auth_bp = Blueprint("auth_jwt", __name__)
+# إنشاء Blueprint جديد للمسارات المتعلقة بالمصادقة
+auth_routes_bp = Blueprint("auth_routes", __name__)
 
 # إعداد الخدمات
 try:
@@ -20,7 +20,7 @@ except Exception as e:
 
 logger = logging.getLogger(__name__)
 
-@auth_bp.route("/login", methods=["POST"])
+@auth_routes_bp.route("/login", methods=["POST"])
 def login():
     """تسجيل الدخول باستخدام JWT"""
     try:
@@ -104,7 +104,7 @@ def login():
             "error_code": "LOGIN_ERROR"
         }), 500
 
-@auth_bp.route("/register", methods=["POST"])
+@auth_routes_bp.route("/register", methods=["POST"])
 def register():
     """تسجيل مستخدم جديد"""
     try:
@@ -155,7 +155,7 @@ def register():
         logger.error(f"خطأ في تسجيل المستخدم: {str(e)}")
         return jsonify({"success": False, "message": "حدث خطأ في تسجيل المستخدم", "error_code": "REGISTRATION_ERROR"}), 500
 
-@auth_bp.route("/profile", methods=["GET"])
+@auth_routes_bp.route("/profile", methods=["GET"])
 @jwt_required()
 def get_profile():
     """الحصول على ملف المستخدم الشخصي"""
@@ -187,5 +187,3 @@ def get_profile():
             "message": "حدث خطأ في الحصول على البيانات",
             "error_code": "PROFILE_ERROR"
         }), 500
-
-
