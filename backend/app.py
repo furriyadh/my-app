@@ -27,6 +27,8 @@ except ImportError as e:
     print(f"تحذير: لم يتم استيراد DatabaseManager - {e}")
     DatabaseManager = None
 
+from backend.utils.email_sender import EmailSender
+
 def create_app():
     """إنشاء تطبيق Flask - محدث ومطور بالكامل"""
     app = Flask(__name__)
@@ -144,7 +146,7 @@ def create_app():
     
     # تسجيل Google Ads Blueprints
     try:
-        from backend.routes.google_ads.oauth import google_ads_oauth_bp
+        from backend.routes.google_ads.auth_jwt import auth_jwt_bp as google_ads_oauth_bp
         if "google_ads_oauth_bp" not in app.blueprints:
             app.register_blueprint(google_ads_oauth_bp, url_prefix="/api/google-ads/oauth")
             app.logger.info("✅ تم تحميل Google Ads OAuth Blueprint بنجاح على /api/google-ads/oauth")
@@ -179,8 +181,8 @@ def create_app():
     
     # استيراد وتسجيل Auth Blueprint الجديد
     try:
-        from backend.routes.auth import auth_bp
-        app.register_blueprint(auth_bp, url_prefix="/api/auth")
+        from backend.routes.google_ads.auth_jwt import auth_jwt_bp
+        app.register_blueprint(auth_jwt_bp, url_prefix="/api/auth")
         app.logger.info("✅ تم تسجيل Auth Blueprint الجديد بنجاح على /api/auth")
     except ImportError as e:
         app.logger.warning(f"❌ لم يتم تسجيل Auth Blueprint الجديد: {e}")
