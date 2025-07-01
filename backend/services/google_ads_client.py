@@ -36,11 +36,11 @@ except ImportError:
 
 # استيراد المكتبات المحلية
 try:
-    from ..utils.helpers import (
+    from backend.utils.helpers import (
         generate_unique_id, validate_email, format_currency,
         calculate_performance_score, safe_divide
     )
-    from ..utils.redis_config import redis_manager
+    from backend.utils.redis_config import redis_manager
 except ImportError:
     # Fallback imports
     def generate_unique_id(): return str(int(time.time()))
@@ -423,8 +423,6 @@ class GoogleAdsClientService:
                     start_date=campaign.start_date,
                     end_date=campaign.end_date if campaign.end_date else None
                 )
-                
-                # إضافة معلومات العروض
                 if hasattr(campaign, 'target_cpa') and campaign.target_cpa:
                     campaign_data.target_cpa = campaign.target_cpa.target_cpa_micros / 1000000
                 
@@ -548,46 +546,6 @@ class GoogleAdsClientService:
     @google_ads_operation(retry_count=3, cache_ttl=1800)
     def get_campaign_budgets(self, customer_id: str) -> List[Dict[str, Any]]:
         """الحصول على ميزانيات الحملات"""
-        if not self.is_authenticated:
-            raise Exception("العميل غير مصادق")
-        
-        try:
-            ga_service = self.client.get_service("GoogleAdsService")
-            
-            query = self._build_query(
-                resource="campaign_budget",
-                fields=[
-                    "campaign_budget.id",
-                    "campaign_budget.name",
-                    "campaign_budget.amount_micros",
-                    "campaign_budget.delivery_method",
-                    "campaign_budget.status"
-                ]
-            )
-            
-            response = ga_service.search(customer_id=customer_id, query=query)
-            
-            budgets = []
-            for row in response:
-                budget = row.campaign_budget
-                budgets.append({
-                    'id': budget.id,
-                    'name': budget.name,
-                    'amount': budget.amount_micros / 1000000,
-                    'delivery_method': budget.delivery_method.name,
-                    'status': budget.status.name
-                })
-            
-            return budgets
-            
-        except Exception as e:
-            logger.error(f"خطأ في جلب الميزانيات للعميل {customer_id}: {str(e)}")
-            raise
-    
-    @google_ads_operation(retry_count=3)
-    def create_campaign_budget(self, customer_id: str, 
-                              budget_data: Dict[str, Any]) -> str:
-        """إنشاء ميزانية حملة"""
         if not self.is_authenticated:
             raise Exception("العميل غير مصادق")
         
@@ -789,118 +747,396 @@ class GoogleAdsClientService:
                     'text': criterion.keyword.text,
                     'match_type': criterion.keyword.match_type.name,
                     'status': criterion.status.name,
-                    'quality_score': criterion.quality_info.quality_score if criterion.quality_info else None,
+                    'quality_score': criterion.quality_info.quality_score,
                     'ad_group_id': ad_group.id,
                     'ad_group_name': ad_group.name,
                     'campaign_id': campaign.id,
                     'campaign_name': campaign.name
                 }
-                
                 keywords.append(keyword_data)
             
             return keywords
             
         except Exception as e:
-            logger.error(f"خطأ في جلب الكلمات المفتاحية: {str(e)}")
+            logger.error(f"خطأ في جلب الكلمات المفتاحية للعميل {customer_id}: {str(e)}")
+            raise
+    
+    @google_ads_operation(retry_count=3)
+    def create_keyword(self, customer_id: str, ad_group_id: str, 
+                       keyword_text: str, match_type: str) -> str:
+        """إنشاء كلمة مفتاحية جديدة"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            ad_group_criterion_service = self.client.get_service("AdGroupCriterionService")
+            ad_group_criterion_operation = self.client.get_type("AdGroupCriterionOperation")
+            
+            # إنشاء الكلمة المفتاحية
+            ad_group_criterion = ad_group_criterion_operation.create
+            ad_group_criterion.ad_group = f"customers/{customer_id}/adGroups/{ad_group_id}"
+            ad_group_criterion.status = self.client.enums.AdGroupCriterionStatusEnum.ENABLED
+            
+            ad_group_criterion.keyword.text = keyword_text
+            ad_group_criterion.keyword.match_type = getattr(
+                self.client.enums.KeywordMatchTypeEnum,
+                match_type
+            )
+            
+            # تنفيذ العملية
+            response = ad_group_criterion_service.mutate_ad_group_criteria(
+                customer_id=customer_id,
+                operations=[ad_group_criterion_operation]
+            )
+            
+            keyword_id = response.results[0].resource_name.split('/')[-1]
+            logger.info(f"تم إنشاء الكلمة المفتاحية بنجاح: {keyword_id}")
+            
+            return keyword_id
+            
+        except Exception as e:
+            logger.error(f"خطأ في إنشاء الكلمة المفتاحية: {str(e)}")
             raise
     
     # ===========================================
-    # المراقبة والإحصائيات
+    # إدارة الإعلانات
     # ===========================================
     
-    def get_metrics(self) -> Dict[str, Any]:
-        """الحصول على إحصائيات الأداء"""
-        metrics = self.metrics.copy()
+    @google_ads_operation(retry_count=3, cache_ttl=1800)
+    def get_ads(self, customer_id: str, ad_group_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """الحصول على الإعلانات"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
         
-        # إضافة معلومات إضافية
-        metrics.update({
-            'is_authenticated': self.is_authenticated,
-            'success_rate': (
-                self.metrics['successful_operations'] / 
-                max(self.metrics['total_operations'], 1)
-            ) * 100,
-            'config': asdict(self.config),
-            'timestamp': datetime.utcnow().isoformat()
-        })
-        
-        return metrics
-    
-    def health_check(self) -> Dict[str, Any]:
-        """فحص صحة النظام"""
         try:
-            if not self.is_authenticated:
-                return {
-                    'status': 'unhealthy',
-                    'authenticated': False,
-                    'message': 'العميل غير مصادق',
-                    'timestamp': datetime.utcnow().isoformat()
+            ga_service = self.client.get_service("GoogleAdsService")
+            
+            fields = [
+                "ad_group_ad.ad.id",
+                "ad_group_ad.ad.name",
+                "ad_group_ad.status",
+                "ad_group_ad.ad.final_urls",
+                "ad_group_ad.ad.display_url",
+                "ad_group_ad.ad.expanded_text_ad.headline_part1",
+                "ad_group_ad.ad.expanded_text_ad.headline_part2",
+                "ad_group_ad.ad.expanded_text_ad.headline_part3",
+                "ad_group_ad.ad.expanded_text_ad.description",
+                "ad_group_ad.ad.expanded_text_ad.description2",
+                "ad_group.id",
+                "ad_group.name",
+                "campaign.id",
+                "campaign.name"
+            ]
+            
+            conditions = []
+            if ad_group_id:
+                conditions.append(f"ad_group.id = {ad_group_id}")
+            
+            query = self._build_query(
+                resource="ad_group_ad",
+                fields=fields,
+                conditions=conditions
+            )
+            
+            response = ga_service.search(customer_id=customer_id, query=query)
+            
+            ads = []
+            for row in response:
+                ad_group_ad = row.ad_group_ad
+                ad_group = row.ad_group
+                campaign = row.campaign
+                
+                ad_data = {
+                    'id': ad_group_ad.ad.id,
+                    'name': ad_group_ad.ad.name,
+                    'status': ad_group_ad.status.name,
+                    'final_urls': list(ad_group_ad.ad.final_urls),
+                    'display_url': ad_group_ad.ad.display_url,
+                    'headline1': ad_group_ad.ad.expanded_text_ad.headline_part1,
+                    'headline2': ad_group_ad.ad.expanded_text_ad.headline_part2,
+                    'headline3': ad_group_ad.ad.expanded_text_ad.headline_part3,
+                    'description1': ad_group_ad.ad.expanded_text_ad.description,
+                    'description2': ad_group_ad.ad.expanded_text_ad.description2,
+                    'ad_group_id': ad_group.id,
+                    'ad_group_name': ad_group.name,
+                    'campaign_id': campaign.id,
+                    'campaign_name': campaign.name
                 }
+                ads.append(ad_data)
             
-            # اختبار عملية بسيطة
-            start_time = time.time()
-            customer_service = self.client.get_service("CustomerService")
-            accessible_customers = customer_service.list_accessible_customers()
-            response_time = time.time() - start_time
-            
-            return {
-                'status': 'healthy',
-                'authenticated': True,
-                'api_response_time': response_time,
-                'accessible_customers_count': len(accessible_customers.resource_names),
-                'timestamp': datetime.utcnow().isoformat()
-            }
+            return ads
             
         except Exception as e:
-            return {
-                'status': 'unhealthy',
-                'authenticated': self.is_authenticated,
-                'error': str(e),
-                'timestamp': datetime.utcnow().isoformat()
-            }
+            logger.error(f"خطأ في جلب الإعلانات للعميل {customer_id}: {str(e)}")
+            raise
     
-    def reset_metrics(self):
-        """إعادة تعيين الإحصائيات"""
+    @google_ads_operation(retry_count=3)
+    def create_expanded_text_ad(self, customer_id: str, ad_group_id: str,
+                                headline1: str, headline2: str, description: str,
+                                final_url: str, headline3: Optional[str] = None,
+                                description2: Optional[str] = None) -> str:
+        """إنشاء إعلان نصي موسع"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            ad_group_ad_service = self.client.get_service("AdGroupAdService")
+            ad_group_ad_operation = self.client.get_type("AdGroupAdOperation")
+            
+            # إنشاء الإعلان
+            ad_group_ad = ad_group_ad_operation.create
+            ad_group_ad.ad_group = f"customers/{customer_id}/adGroups/{ad_group_id}"
+            ad_group_ad.status = self.client.enums.AdGroupAdStatusEnum.ENABLED
+            
+            ad_group_ad.ad.final_urls.append(final_url)
+            
+            ad_group_ad.ad.expanded_text_ad.headline_part1 = headline1
+            ad_group_ad.ad.expanded_text_ad.headline_part2 = headline2
+            ad_group_ad.ad.expanded_text_ad.description = description
+            
+            if headline3:
+                ad_group_ad.ad.expanded_text_ad.headline_part3 = headline3
+            if description2:
+                ad_group_ad.ad.expanded_text_ad.description2 = description2
+            
+            # تنفيذ العملية
+            response = ad_group_ad_service.mutate_ad_group_ads(
+                customer_id=customer_id,
+                operations=[ad_group_ad_operation]
+            )
+            
+            ad_id = response.results[0].resource_name.split('/')[-1]
+            logger.info(f"تم إنشاء الإعلان بنجاح: {ad_id}")
+            
+            return ad_id
+            
+        except Exception as e:
+            logger.error(f"خطأ في إنشاء الإعلان: {str(e)}")
+            raise
+    
+    # ===========================================
+    # إدارة المجموعات الإعلانية
+    # ===========================================
+    
+    @google_ads_operation(retry_count=3, cache_ttl=1800)
+    def get_ad_groups(self, customer_id: str, campaign_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """الحصول على المجموعات الإعلانية"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            ga_service = self.client.get_service("GoogleAdsService")
+            
+            fields = [
+                "ad_group.id",
+                "ad_group.name",
+                "ad_group.status",
+                "ad_group.type",
+                "ad_group.cpc_bid_micros",
+                "campaign.id",
+                "campaign.name"
+            ]
+            
+            conditions = []
+            if campaign_id:
+                conditions.append(f"campaign.id = {campaign_id}")
+            
+            query = self._build_query(
+                resource="ad_group",
+                fields=fields,
+                conditions=conditions
+            )
+            
+            response = ga_service.search(customer_id=customer_id, query=query)
+            
+            ad_groups = []
+            for row in response:
+                ad_group = row.ad_group
+                campaign = row.campaign
+                
+                ad_group_data = {
+                    'id': ad_group.id,
+                    'name': ad_group.name,
+                    'status': ad_group.status.name,
+                    'type': ad_group.type.name,
+                    'cpc_bid': ad_group.cpc_bid_micros / 1000000 if ad_group.cpc_bid_micros else 0,
+                    'campaign_id': campaign.id,
+                    'campaign_name': campaign.name
+                }
+                ad_groups.append(ad_group_data)
+            
+            return ad_groups
+            
+        except Exception as e:
+            logger.error(f"خطأ في جلب المجموعات الإعلانية للعميل {customer_id}: {str(e)}")
+            raise
+    
+    @google_ads_operation(retry_count=3)
+    def create_ad_group(self, customer_id: str, campaign_id: str, 
+                        ad_group_name: str, ad_group_type: str = 'STANDARD',
+                        cpc_bid: float = 1.0) -> str:
+        """إنشاء مجموعة إعلانية جديدة"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            ad_group_service = self.client.get_service("AdGroupService")
+            ad_group_operation = self.client.get_type("AdGroupOperation")
+            
+            # إنشاء المجموعة الإعلانية
+            ad_group = ad_group_operation.create
+            ad_group.name = ad_group_name
+            ad_group.campaign = f"customers/{customer_id}/campaigns/{campaign_id}"
+            ad_group.status = self.client.enums.AdGroupStatusEnum.ENABLED
+            ad_group.type = getattr(
+                self.client.enums.AdGroupTypeEnum,
+                ad_group_type
+            )
+            ad_group.cpc_bid_micros = int(cpc_bid * 1000000)
+            
+            # تنفيذ العملية
+            response = ad_group_service.mutate_ad_groups(
+                customer_id=customer_id,
+                operations=[ad_group_operation]
+            )
+            
+            ad_group_id = response.results[0].resource_name.split('/')[-1]
+            logger.info(f"تم إنشاء المجموعة الإعلانية بنجاح: {ad_group_id}")
+            
+            return ad_group_id
+            
+        except Exception as e:
+            logger.error(f"خطأ في إنشاء المجموعة الإعلانية: {str(e)}")
+            raise
+    
+    # ===========================================
+    # إدارة العملاء (MCC)
+    # ===========================================
+    
+    @google_ads_operation(retry_count=3, cache_ttl=3600)
+    def get_customer_client_links(self, customer_id: str) -> List[Dict[str, Any]]:
+        """الحصول على روابط عملاء MCC"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            ga_service = self.client.get_service("GoogleAdsService")
+            
+            query = self._build_query(
+                resource="customer_client_link",
+                fields=[
+                    "customer_client_link.client_customer",
+                    "customer_client_link.status",
+                    "customer_client_link.manager_customer",
+                    "customer_client_link.hidden"
+                ]
+            )
+            
+            response = ga_service.search(customer_id=customer_id, query=query)
+            
+            links = []
+            for row in response:
+                link = row.customer_client_link
+                links.append({
+                    'client_customer_id': link.client_customer.split('/')[-1],
+                    'status': link.status.name,
+                    'is_manager': link.manager_customer,
+                    'is_hidden': link.hidden
+                })
+            
+            return links
+            
+        except Exception as e:
+            logger.error(f"خطأ في جلب روابط عملاء MCC للعميل {customer_id}: {str(e)}")
+            raise
+    
+    @google_ads_operation(retry_count=3)
+    def create_customer_client_link(self, manager_customer_id: str, 
+                                    client_customer_id: str) -> str:
+        """إنشاء رابط عميل جديد"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            customer_client_link_service = self.client.get_service("CustomerClientLinkService")
+            customer_client_link_operation = self.client.get_type("CustomerClientLinkOperation")
+            
+            # إنشاء الرابط
+            customer_client_link = customer_client_link_operation.create
+            customer_client_link.client_customer = f"customers/{client_customer_id}"
+            customer_client_link.manager_link_id = manager_customer_id # هذا ليس هو customer_id
+            customer_client_link.status = self.client.enums.CustomerClientLinkStatusEnum.PENDING
+            
+            # تنفيذ العملية
+            response = customer_client_link_service.mutate_customer_client_links(
+                customer_id=manager_customer_id,
+                operations=[customer_client_link_operation]
+            )
+            
+            link_id = response.results[0].resource_name.split('/')[-1]
+            logger.info(f"تم إنشاء رابط العميل بنجاح: {link_id}")
+            
+            return link_id
+            
+        except Exception as e:
+            logger.error(f"خطأ في إنشاء رابط العميل: {str(e)}")
+            raise
+    
+    # ===========================================
+    # إدارة OAuth2
+    # ===========================================
+    
+    @google_ads_operation(retry_count=3)
+    def generate_oauth_url(self, redirect_uri: str, scopes: List[str]) -> str:
+        """إنشاء عنوان URL للمصادقة OAuth2"""
+        if not GOOGLE_ADS_AVAILABLE:
+            raise Exception("Google Ads library غير متاح")
+        
+        try:
+            oauth2_client = self.client.oauth2
+            oauth2_client.client_id = self.config.client_id
+            oauth2_client.client_secret = self.config.client_secret
+            oauth2_client.redirect_uri = redirect_uri
+            
+            authorization_url = oauth2_client.get_authorization_url(scopes)
+            return authorization_url
+            
+        except Exception as e:
+            logger.error(f"خطأ في إنشاء عنوان URL للمصادقة OAuth2: {str(e)}")
+            raise
+    
+    @google_ads_operation(retry_count=3)
+    def exchange_authorization_code(self, authorization_code: str, redirect_uri: str) -> str:
+        """تبادل رمز المصادقة برمز التحديث"""
+        if not GOOGLE_ADS_AVAILABLE:
+            raise Exception("Google Ads library غير متاح")
+        
+        try:
+            oauth2_client = self.client.oauth2
+            oauth2_client.client_id = self.config.client_id
+            oauth2_client.client_secret = self.config.client_secret
+            oauth2_client.redirect_uri = redirect_uri
+            
+            refresh_token = oauth2_client.fetch_access_token(authorization_code)
+            self.config.refresh_token = refresh_token # تحديث الرمز في الإعدادات
+            
+            logger.info("تم تبادل رمز المصادقة بنجاح")
+            return refresh_token
+            
+        except Exception as e:
+            logger.error(f"خطأ في تبادل رمز المصادقة: {str(e)}")
+            raise
+    
+    # ===========================================
+    # أدوات مساعدة
+    # ===========================================
+    
+    def get_api_usage_metrics(self) -> Dict[str, Any]:
+        """الحصول على مقاييس استخدام API"""
         with self._lock:
-            self.metrics = {
-                'total_operations': 0,
-                'successful_operations': 0,
-                'failed_operations': 0,
-                'average_response_time': 0.0,
-                'last_operation_time': None,
-                'operations_by_type': {},
-                'api_quota_usage': 0,
-                'rate_limit_hits': 0
-            }
-
-# إنشاء مثيل عام
-google_ads_client = GoogleAdsClientService()
-
-# دوال مساعدة للاستخدام السريع
-def get_client_instance(config: Optional[GoogleAdsConfig] = None) -> GoogleAdsClientService:
-    """الحصول على مثيل العميل"""
-    if config:
-        return GoogleAdsClientService(config)
-    return google_ads_client
-
-def validate_customer_id(customer_id: str) -> bool:
-    """التحقق من صحة معرف العميل"""
-    return customer_id.isdigit() and len(customer_id) >= 10
-
-def format_campaign_budget(amount_micros: int) -> float:
-    """تحويل الميزانية من micros إلى عملة"""
-    return amount_micros / 1000000
-
-def format_date_range(days_back: int = 30) -> Tuple[str, str]:
-    """تنسيق نطاق التاريخ"""
-    end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=days_back)
-    return start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')
-
-# تصدير الكلاسات والدوال المهمة
-__all__ = [
-    'GoogleAdsConfig', 'CampaignMetrics', 'CampaignData', 
-    'GoogleAdsClientService', 'google_ads_client',
-    'get_client_instance', 'validate_customer_id', 
-    'format_campaign_budget', 'format_date_range'
-]
+            return self.metrics
+    
+    def get_enum(self, enum_name: str):
+        """الحصول على كائن Enum"""
+        return getattr(self.client.enums, enum_name, None)
 

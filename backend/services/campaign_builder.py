@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 import json
 import re
 
-from .ai_processor import AIProcessor
-from .google_ads_client import GoogleAdsClientService
-from .website_analyzer import WebsiteAnalyzer
+from backend.services.ai_processor import AIProcessor
+from backend.services.google_ads_client import GoogleAdsClientService
+from backend.services.website_analyzer import WebsiteAnalyzer
 
 class CampaignBuilder:
     """بناء الحملات الإعلانية الذكي"""

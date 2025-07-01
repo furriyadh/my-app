@@ -70,16 +70,15 @@ except ImportError:
 
 # Local imports
 try:
-    from utils.helpers import (
+    from backend.utils.helpers import (
         generate_unique_id, sanitize_text, calculate_hash,
         format_timestamp, compress_data, decompress_data
     )
-    HELPERS_AVAILABLE = True
 except ImportError:
     HELPERS_AVAILABLE = False
 
 try:
-    from utils.redis_config import cache_set, cache_get, cache_delete
+    from backend.utils.redis_config import cache_set, cache_get, cache_delete
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
