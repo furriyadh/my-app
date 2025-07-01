@@ -12,7 +12,7 @@ import { OAUTH_SCOPES, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../utils/constan
 class GoogleAuthService {
   constructor() {
     this.clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID
-    this.redirectUri = process.env.REACT_APP_GOOGLE_REDIRECT_URI || `${window.location.origin}/auth/callback`
+    this.redirectUri = process.env.REACT_APP_GOOGLE_REDIRECT_URI || `${window.location.origin}/api/auth/callback/google`
     this.scopes = OAUTH_SCOPES.REQUIRED_SCOPES || [
       'https://www.googleapis.com/auth/adwords',
       'https://www.googleapis.com/auth/userinfo.email',
