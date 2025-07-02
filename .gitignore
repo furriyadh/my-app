@@ -2,3 +2,23 @@ node_modules
 .env
 .env.local
 .next/
+/generated/prisma
+
+# Backend Environment Variables
+backend/.env
+backend/.env.local
+backend/.env.production
+backend/.env.development
+
+# Python Environment
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.Python
+backend/env/
+backend/venv/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+

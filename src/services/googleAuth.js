@@ -1,5 +1,5 @@
 // Google Ads AI Platform - Google Authentication Service
-// =====================================================
+// ===================================================
 
 import { apiService } from './api'
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/helpers'
@@ -11,20 +11,23 @@ import { OAUTH_SCOPES, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../utils/constan
  */
 class GoogleAuthService {
   constructor() {
-    this.clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID
-    this.redirectUri = process.env.REACT_APP_GOOGLE_REDIRECT_URI || `${window.location.origin}/api/auth/callback/google`
-    this.scopes = OAUTH_SCOPES.REQUIRED_SCOPES || [
+    // ===================================================
+    // OAuth Configuration - محدث بالقيم الجديدة الصحيحة
+    // ===================================================
+    this.clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '366144291902-u75bec3sviur9nrutbslt14ob14hrgud.apps.googleusercontent.com'
+    this.redirectUri = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/oauth/callback'
+    this.scopes = [
       'https://www.googleapis.com/auth/adwords',
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile'
     ]
-    
+
     // OAuth state for security
     this.state = null
-    
+
     // Event listeners
-    this.listeners = new Map( )
-    
+    this.listeners = new Map()
+
     // Initialize
     this.init()
   }
@@ -36,10 +39,9 @@ class GoogleAuthService {
     try {
       // Check if we're handling OAuth callback
       await this.handleOAuthCallback()
-      
+
       // Check existing authentication
       await this.checkAuthStatus()
-      
     } catch (error) {
       console.error('GoogleAuth initialization error:', error)
     }
@@ -52,7 +54,6 @@ class GoogleAuthService {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, [])
     }
-    this.listeners.get(event).push(callback)
   }
 
   /**
@@ -88,169 +89,259 @@ class GoogleAuthService {
    */
   async checkAuthStatus() {
     try {
-      const token = getStorageItem('auth_token')
-      if (!token) {
-        this.emit('auth:status', { isAuthenticated: false })
-        return { isAuthenticated: false }
+      const accessToken = getStorageItem('google_access_token')
+      const refreshToken = getStorageItem('google_refresh_token')
+      const expiresAt = getStorageItem('google_token_expires_at')
+
+      if (!accessToken) {
+        this.emit('auth_status_changed', { authenticated: false })
+        return false
       }
 
-      // Verify token with backend
-      const response = await apiService.checkGoogleAuthStatus()
-      
-      if (response.success && response.isAuthenticated) {
-        const userInfo = response.userInfo || getStorageItem('user_info')
-        
-        this.emit('auth:status', {
-          isAuthenticated: true,
-          userInfo
-        })
-        
-        return {
-          isAuthenticated: true,
-          userInfo
+      // Check if token is expired
+      if (expiresAt && Date.now() > parseInt(expiresAt)) {
+        if (refreshToken) {
+          // Try to refresh token
+          const refreshed = await this.refreshAccessToken(refreshToken)
+          if (refreshed) {
+            this.emit('auth_status_changed', { authenticated: true })
+            return true
+          }
         }
-      } else {
-        // Token is invalid, clear storage
-        this.clearAuthData()
-        this.emit('auth:status', { isAuthenticated: false })
-        return { isAuthenticated: false }
+        
+        // Token expired and couldn't refresh
+        this.clearTokens()
+        this.emit('auth_status_changed', { authenticated: false })
+        return false
       }
-      
+
+      // Token is valid
+      this.emit('auth_status_changed', { authenticated: true })
+      return true
     } catch (error) {
-      console.error('Auth status check failed:', error)
-      this.clearAuthData()
-      this.emit('auth:status', { isAuthenticated: false, error: error.message })
-      return { isAuthenticated: false, error: error.message }
+      console.error('Error checking auth status:', error)
+      this.emit('auth_status_changed', { authenticated: false })
+      return false
     }
   }
 
   /**
-   * Initiate Google OAuth flow
+   * Start OAuth flow
    */
-  async initiateAuth() {
+  async startOAuthFlow() {
     try {
-      if (!this.clientId) {
-        throw new Error('Google Client ID not configured')
-      }
-
       // Generate state for security
       this.state = this.generateState()
       setStorageItem('oauth_state', this.state)
 
-      // Get auth URL from backend
-      const response = await apiService.initiateGoogleAuth()
-      
-      if (response.success && response.authUrl) {
-        // Redirect to Google OAuth
-        window.location.href = response.authUrl
-        return { success: true }
-      } else {
-        throw new Error(response.error || 'Failed to initiate authentication')
-      }
-      
-    } catch (error) {
-      console.error('Auth initiation failed:', error)
-      this.emit('auth:error', {
-        type: 'INITIATION_FAILED',
-        message: error.message || ERROR_MESSAGES.AUTH_INVALID
+      // Build OAuth URL
+      const params = new URLSearchParams({
+        client_id: this.clientId,
+        redirect_uri: this.redirectUri,
+        response_type: 'code',
+        scope: this.scopes.join(' '),
+        state: this.state,
+        access_type: 'offline',
+        prompt: 'consent'
       })
-      return {
-        success: false,
-        error: error.message || ERROR_MESSAGES.AUTH_INVALID
-      }
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+      
+      // Redirect to Google OAuth
+      window.location.href = authUrl
+    } catch (error) {
+      console.error('Error starting OAuth flow:', error)
+      this.emit('auth_error', { error: 'Failed to start OAuth flow' })
+      throw error
     }
   }
 
   /**
-   * Handle OAuth callback from Google
+   * Handle OAuth callback
    */
   async handleOAuthCallback() {
-    const urlParams = new URLSearchParams(window.location.search)
-    const code = urlParams.get('code')
-    const state = urlParams.get('state')
-    const error = urlParams.get('error')
-
-    // Check if this is an OAuth callback
-    if (!code && !error) {
-      return
-    }
-
-    // Clear URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname)
-
-    if (error) {
-      const errorDescription = urlParams.get('error_description') || 'Authentication failed'
-      this.emit('auth:error', {
-        type: 'OAUTH_ERROR',
-        message: errorDescription
-      })
-      return {
-        success: false,
-        error: errorDescription
-      }
-    }
-
-    if (!code) {
-      this.emit('auth:error', {
-        type: 'NO_AUTH_CODE',
-        message: 'No authorization code received'
-      })
-      return {
-        success: false,
-        error: 'No authorization code received'
-      }
-    }
-
     try {
-      // Verify state parameter
+      const urlParams = new URLSearchParams(window.location.search)
+      const code = urlParams.get('code')
+      const state = urlParams.get('state')
+      const error = urlParams.get('error')
+
+      if (error) {
+        console.error('OAuth error:', error)
+        this.emit('auth_error', { error })
+        return false
+      }
+
+      if (!code || !state) {
+        return false
+      }
+
+      // Verify state
       const storedState = getStorageItem('oauth_state')
       if (state !== storedState) {
-        throw new Error('Invalid state parameter')
+        console.error('OAuth state mismatch')
+        this.emit('auth_error', { error: 'State mismatch' })
+        return false
       }
 
       // Exchange code for tokens
-      const response = await apiService.handleGoogleCallback(code, state)
-      
-      if (response.success) {
-        // Store authentication data
-        if (response.accessToken) {
-          setStorageItem('auth_token', response.accessToken)
-        }
-        if (response.refreshToken) {
-          setStorageItem('refresh_token', response.refreshToken)
-        }
-        if (response.userInfo) {
-          setStorageItem('user_info', response.userInfo)
-        }
-
-        // Clean up OAuth state
-        removeStorageItem('oauth_state')
-
-        this.emit('auth:success', {
-          userInfo: response.userInfo,
-          message: SUCCESS_MESSAGES.AUTH_SUCCESS
-        })
-
-        return {
-          success: true,
-          userInfo: response.userInfo
-        }
-      } else {
-        throw new Error(response.error || 'Authentication failed')
+      const tokens = await this.exchangeCodeForTokens(code)
+      if (tokens) {
+        this.storeTokens(tokens)
+        this.emit('auth_success', { tokens })
+        
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+        return true
       }
-      
+
+      return false
     } catch (error) {
-      console.error('OAuth callback handling failed:', error)
-      this.clearAuthData()
-      this.emit('auth:error', {
-        type: 'CALLBACK_FAILED',
-        message: error.message || ERROR_MESSAGES.AUTH_INVALID
-      })
-      return {
-        success: false,
-        error: error.message || ERROR_MESSAGES.AUTH_INVALID
-      }
+      console.error('Error handling OAuth callback:', error)
+      this.emit('auth_error', { error: 'Failed to handle OAuth callback' })
+      return false
     }
+  }
+
+  /**
+   * Exchange authorization code for tokens
+   */
+  async exchangeCodeForTokens(code) {
+    try {
+      const response = await fetch('/api/oauth/callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          redirect_uri: this.redirectUri,
+          client_id: this.clientId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      if (data.success && data.tokens) {
+        return data.tokens
+      } else {
+        throw new Error(data.error || 'Failed to exchange code for tokens')
+      }
+    } catch (error) {
+      console.error('Error exchanging code for tokens:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Refresh access token
+   */
+  async refreshAccessToken(refreshToken) {
+    try {
+      const response = await fetch('/api/oauth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          refresh_token: refreshToken,
+          client_id: this.clientId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      if (data.success && data.tokens) {
+        this.storeTokens(data.tokens)
+        return true
+      } else {
+        throw new Error(data.error || 'Failed to refresh token')
+      }
+    } catch (error) {
+      console.error('Error refreshing access token:', error)
+      return false
+    }
+  }
+
+  /**
+   * Store tokens in localStorage
+   */
+  storeTokens(tokens) {
+    try {
+      if (tokens.access_token) {
+        setStorageItem('google_access_token', tokens.access_token)
+      }
+      
+      if (tokens.refresh_token) {
+        setStorageItem('google_refresh_token', tokens.refresh_token)
+      }
+      
+      if (tokens.expires_in) {
+        const expiresAt = Date.now() + (tokens.expires_in * 1000)
+        setStorageItem('google_token_expires_at', expiresAt.toString())
+      }
+
+      if (tokens.scope) {
+        setStorageItem('google_token_scope', tokens.scope)
+      }
+    } catch (error) {
+      console.error('Error storing tokens:', error)
+    }
+  }
+
+  /**
+   * Clear stored tokens
+   */
+  clearTokens() {
+    try {
+      removeStorageItem('google_access_token')
+      removeStorageItem('google_refresh_token')
+      removeStorageItem('google_token_expires_at')
+      removeStorageItem('google_token_scope')
+      removeStorageItem('oauth_state')
+    } catch (error) {
+      console.error('Error clearing tokens:', error)
+    }
+  }
+
+  /**
+   * Get current access token
+   */
+  getAccessToken() {
+    return getStorageItem('google_access_token')
+  }
+
+  /**
+   * Get current refresh token
+   */
+  getRefreshToken() {
+    return getStorageItem('google_refresh_token')
+  }
+
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated() {
+    const accessToken = this.getAccessToken()
+    const expiresAt = getStorageItem('google_token_expires_at')
+    
+    if (!accessToken) {
+      return false
+    }
+
+    if (expiresAt && Date.now() > parseInt(expiresAt)) {
+      return false
+    }
+
+    return true
   }
 
   /**
@@ -258,245 +349,115 @@ class GoogleAuthService {
    */
   async signOut() {
     try {
-      // Call backend logout endpoint
-      await apiService.logout()
+      const accessToken = this.getAccessToken()
       
-      this.emit('auth:logout', {
-        message: SUCCESS_MESSAGES.LOGOUT_SUCCESS
-      })
-      
-      return { success: true }
-      
-    } catch (error) {
-      console.error('Sign out error:', error)
-      
-      // Clear local data even if backend call fails
-      this.clearAuthData()
-      this.emit('auth:logout', {
-        message: SUCCESS_MESSAGES.LOGOUT_SUCCESS
-      })
-      
-      return { success: true }
-    }
-  }
-
-  /**
-   * Refresh authentication token
-   */
-  async refreshToken() {
-    try {
-      const refreshToken = getStorageItem('refresh_token')
-      if (!refreshToken) {
-        throw new Error('No refresh token available')
+      if (accessToken) {
+        // Revoke token with Google
+        await fetch(`https://oauth2.googleapis.com/revoke?token=${accessToken}`, {
+          method: 'POST'
+        })
       }
 
-      const newToken = await apiService.refreshToken()
+      // Clear local tokens
+      this.clearTokens()
       
-      if (newToken) {
-        setStorageItem('auth_token', newToken)
-        this.emit('auth:token_refreshed', { token: newToken })
-        return { success: true, token: newToken }
-      } else {
-        throw new Error('Failed to refresh token')
-      }
+      // Emit sign out event
+      this.emit('auth_status_changed', { authenticated: false })
+      this.emit('sign_out')
       
+      return true
     } catch (error) {
-      console.error('Token refresh failed:', error)
-      this.clearAuthData()
-      this.emit('auth:error', {
-        type: 'TOKEN_REFRESH_FAILED',
-        message: error.message || ERROR_MESSAGES.AUTH_EXPIRED
-      })
-      return { success: false, error: error.message }
-    }
-  }
-
-  /**
-   * Get current user info
-   */
-  getUserInfo() {
-    return getStorageItem('user_info')
-  }
-
-  /**
-   * Get current auth token
-   */
-  getAuthToken() {
-    return getStorageItem('auth_token')
-  }
-
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated() {
-    const token = getStorageItem('auth_token')
-    const userInfo = getStorageItem('user_info')
-    return !!(token && userInfo)
-  }
-
-  /**
-   * Check if user has required scopes
-   */
-  hasRequiredScopes(requiredScopes = this.scopes) {
-    const userInfo = this.getUserInfo()
-    if (!userInfo || !userInfo.scopes) {
+      console.error('Error signing out:', error)
+      // Clear tokens anyway
+      this.clearTokens()
+      this.emit('auth_status_changed', { authenticated: false })
       return false
     }
-
-    return requiredScopes.every(scope => 
-      userInfo.scopes.includes(scope)
-    )
-  }
-
-  /**
-   * Get user permissions
-   */
-  async getUserPermissions() {
-    try {
-      if (!this.isAuthenticated()) {
-        return {
-          success: false,
-          error: 'User not authenticated'
-        }
-      }
-
-      // This would typically call a backend endpoint
-      // For now, return stored user info
-      const userInfo = this.getUserInfo()
-      
-      return {
-        success: true,
-        permissions: {
-          canManageCampaigns: userInfo.scopes?.includes('https://www.googleapis.com/auth/adwords' ),
-          canViewReports: true,
-          canEditAccount: userInfo.role === 'admin',
-          scopes: userInfo.scopes || []
-        }
-      }
-      
-    } catch (error) {
-      console.error('Get user permissions failed:', error)
-      return {
-        success: false,
-        error: error.message
-      }
-    }
-  }
-
-  /**
-   * Clear authentication data
-   */
-  clearAuthData() {
-    removeStorageItem('auth_token')
-    removeStorageItem('refresh_token')
-    removeStorageItem('user_info')
-    removeStorageItem('oauth_state')
   }
 
   /**
    * Generate random state for OAuth security
    */
   generateState() {
-    const array = new Uint32Array(4)
+    const array = new Uint32Array(1)
     crypto.getRandomValues(array)
-    return Array.from(array, dec => ('0' + dec.toString(16)).substr(-2)).join('')
+    return array[0].toString(36)
   }
 
   /**
-   * Build Google OAuth URL (client-side method)
+   * Get user info from Google
    */
-  buildAuthUrl() {
-    if (!this.clientId) {
-      throw new Error('Google Client ID not configured')
+  async getUserInfo() {
+    try {
+      const accessToken = this.getAccessToken()
+      if (!accessToken) {
+        throw new Error('No access token available')
+      }
+
+      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const userInfo = await response.json()
+      return userInfo
+    } catch (error) {
+      console.error('Error getting user info:', error)
+      throw error
     }
-
-    const state = this.generateState()
-    setStorageItem('oauth_state', state)
-
-    const params = new URLSearchParams({
-      client_id: this.clientId,
-      redirect_uri: this.redirectUri,
-      scope: this.scopes.join(' '),
-      response_type: 'code',
-      state: state,
-      access_type: 'offline',
-      prompt: 'consent',
-      include_granted_scopes: 'true'
-    })
-
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString( )}`
   }
 
   /**
-   * Handle authentication errors
+   * Get Google Ads accounts
    */
-  handleAuthError(error) {
-    console.error('Authentication error:', error)
-    
-    // Clear auth data on certain errors
-    const clearAuthErrors = [
-      'TOKEN_EXPIRED',
-      'INVALID_TOKEN',
-      'TOKEN_REFRESH_FAILED'
-    ]
-    
-    if (clearAuthErrors.includes(error.type)) {
-      this.clearAuthData()
-    }
-    
-    this.emit('auth:error', error)
-  }
+  async getGoogleAdsAccounts() {
+    try {
+      const accessToken = this.getAccessToken()
+      if (!accessToken) {
+        throw new Error('No access token available')
+      }
 
-  /**
-   * Auto-refresh token before expiration
-   */
-  startTokenRefreshTimer() {
-    // Get token expiration time
-    const userInfo = this.getUserInfo()
-    if (!userInfo || !userInfo.tokenExpiry) {
-      return
-    }
+      const response = await fetch('/api/google-ads/accounts', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      })
 
-    const now = Date.now()
-    const expiry = new Date(userInfo.tokenExpiry).getTime()
-    const timeUntilExpiry = expiry - now
-    
-    // Refresh 5 minutes before expiration
-    const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000)
-    
-    setTimeout(() => {
-      this.refreshToken()
-    }, refreshTime)
-  }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-  /**
-   * Validate Google Client ID format
-   */
-  validateClientId(clientId) {
-    const pattern = /^\d+-[a-zA-Z0-9_]+\.apps\.googleusercontent\.com$/
-    return pattern.test(clientId)
-  }
-
-  /**
-   * Get authentication status for display
-   */
-  getAuthStatus() {
-    const isAuth = this.isAuthenticated()
-    const userInfo = this.getUserInfo()
-    
-    return {
-      isAuthenticated: isAuth,
-      user: isAuth ? {
-        name: userInfo?.name,
-        email: userInfo?.email,
-        picture: userInfo?.picture,
-        scopes: userInfo?.scopes || []
-      } : null,
-      hasRequiredScopes: isAuth ? this.hasRequiredScopes() : false
+      const data = await response.json()
+      return data.accounts || []
+    } catch (error) {
+      console.error('Error getting Google Ads accounts:', error)
+      throw error
     }
   }
 }
 
 // Create and export singleton instance
-export const googleAuthService = new GoogleAuthService()
+const googleAuthService = new GoogleAuthService()
 export default googleAuthService
+
+// Named exports for convenience
+export { GoogleAuthService }
+export const {
+  startOAuthFlow,
+  handleOAuthCallback,
+  checkAuthStatus,
+  isAuthenticated,
+  getAccessToken,
+  getRefreshToken,
+  getUserInfo,
+  getGoogleAdsAccounts,
+  signOut,
+  on,
+  off
+} = googleAuthService
+
