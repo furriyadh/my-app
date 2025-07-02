@@ -1,3 +1,8 @@
+// Google Ads AI Platform - useGoogleAuth Hook
+// ================================================
+// React Hook للتعامل مع Google OAuth Authentication
+// محدث بالـ OAuth client ID الجديد
+
 import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
 
@@ -48,7 +53,7 @@ export const useGoogleAuth = () => {
       
       if (response.success && response.authUrl) {
         setAuthUrl(response.authUrl);
-        // Redirect to Google OAuth
+        // Redirect to Google OAuth - استخدام OAuth client ID الجديد
         window.location.href = response.authUrl;
       } else {
         setError(response.error || 'فشل في بدء عملية المصادقة');
@@ -62,104 +67,127 @@ export const useGoogleAuth = () => {
   }, []);
 
   // Handle OAuth callback
-  const handleAuthCallback = useCallback(async (code) => {
+  const handleCallback = useCallback(async (code, state) => {
     try {
       setIsLoading(true);
       setError(null);
       
-      const response = await apiService.handleGoogleCallback(code);
+      const response = await apiService.handleGoogleAuthCallback(code, state);
       
       if (response.success) {
         setIsAuthenticated(true);
         setUserInfo(response.userInfo);
-        return { success: true, userInfo: response.userInfo };
+        
+        // Store tokens securely
+        if (response.tokens) {
+          localStorage.setItem('google_ads_auth_token', response.tokens.access_token);
+          localStorage.setItem('google_ads_refresh_token', response.tokens.refresh_token);
+          localStorage.setItem('google_ads_user_info', JSON.stringify(response.userInfo));
+        }
+        
+        return { success: true };
       } else {
-        setError(response.error || 'فشل في إكمال عملية المصادقة');
+        setError(response.error || 'فشل في معالجة رد المصادقة');
         return { success: false, error: response.error };
       }
     } catch (error) {
-      console.error('Error handling auth callback:', error);
-      const errorMessage = 'فشل في إكمال عملية المصادقة';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      console.error('Error handling callback:', error);
+      setError('فشل في معالجة رد المصادقة');
+      return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Sign out
-  const signOut = useCallback(async () => {
+  // Logout function
+  const logout = useCallback(async () => {
     try {
       setIsLoading(true);
-      setError(null);
       
-      // Call API to revoke tokens if needed
-      await apiService.signOut?.();
+      // Clear local storage
+      localStorage.removeItem('google_ads_auth_token');
+      localStorage.removeItem('google_ads_refresh_token');
+      localStorage.removeItem('google_ads_user_info');
+      localStorage.removeItem('google_ads_selected_account');
       
-      // Clear local state
+      // Call logout API
+      await apiService.logoutGoogleAuth();
+      
       setIsAuthenticated(false);
       setUserInfo(null);
       setAuthUrl(null);
+      setError(null);
       
-      return { success: true };
     } catch (error) {
-      console.error('Error signing out:', error);
-      const errorMessage = 'فشل في تسجيل الخروج';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      console.error('Error during logout:', error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Refresh authentication
+  // Refresh authentication token
   const refreshAuth = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      const refreshToken = localStorage.getItem('google_ads_refresh_token');
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
       
-      const response = await apiService.refreshAuth?.();
+      const response = await apiService.refreshGoogleAuthToken(refreshToken);
       
-      if (response?.success) {
-        setUserInfo(response.userInfo);
+      if (response.success && response.tokens) {
+        localStorage.setItem('google_ads_auth_token', response.tokens.access_token);
+        if (response.tokens.refresh_token) {
+          localStorage.setItem('google_ads_refresh_token', response.tokens.refresh_token);
+        }
         return { success: true };
       } else {
-        // If refresh fails, check auth status
-        await checkAuthStatus();
-        return { success: false };
+        throw new Error(response.error || 'Failed to refresh token');
       }
     } catch (error) {
       console.error('Error refreshing auth:', error);
-      await checkAuthStatus();
-      return { success: false };
-    } finally {
-      setIsLoading(false);
+      // If refresh fails, logout user
+      logout();
+      return { success: false, error: error.message };
     }
-  }, [checkAuthStatus]);
+  }, [logout]);
 
-  // Get user permissions
-  const getUserPermissions = useCallback(async () => {
-    try {
-      if (!isAuthenticated) {
-        return { success: false, error: 'المستخدم غير مصادق عليه' };
-      }
-      
-      const response = await apiService.getUserPermissions?.();
-      return response || { success: false, error: 'فشل في جلب الصلاحيات' };
-    } catch (error) {
-      console.error('Error getting user permissions:', error);
-      return { success: false, error: 'فشل في جلب الصلاحيات' };
+  // Get current access token
+  const getAccessToken = useCallback(() => {
+    return localStorage.getItem('google_ads_auth_token');
+  }, []);
+
+  // Check if token is expired and refresh if needed
+  const ensureValidToken = useCallback(async () => {
+    const token = getAccessToken();
+    if (!token) {
+      return { success: false, error: 'No access token' };
     }
-  }, [isAuthenticated]);
-
-  // Check if user has required scopes
-  const hasRequiredScopes = useCallback((requiredScopes = []) => {
-    if (!userInfo?.scopes) return false;
     
-    return requiredScopes.every(scope => 
-      userInfo.scopes.includes(scope)
-    );
-  }, [userInfo]);
+    // Try to use the token, if it fails, try to refresh
+    try {
+      const response = await apiService.validateToken(token);
+      if (response.valid) {
+        return { success: true, token };
+      } else {
+        // Token is invalid, try to refresh
+        const refreshResult = await refreshAuth();
+        if (refreshResult.success) {
+          return { success: true, token: getAccessToken() };
+        } else {
+          return { success: false, error: 'Token refresh failed' };
+        }
+      }
+    } catch (error) {
+      // Try to refresh on any error
+      const refreshResult = await refreshAuth();
+      if (refreshResult.success) {
+        return { success: true, token: getAccessToken() };
+      } else {
+        return { success: false, error: 'Token validation and refresh failed' };
+      }
+    }
+  }, [getAccessToken, refreshAuth]);
 
   return {
     // State
@@ -171,21 +199,12 @@ export const useGoogleAuth = () => {
     
     // Actions
     initiateAuth,
-    handleAuthCallback,
-    signOut,
+    handleCallback,
+    logout,
     refreshAuth,
     checkAuthStatus,
-    getUserPermissions,
-    
-    // Utilities
-    hasRequiredScopes,
-    
-    // Computed values
-    isReady: !isLoading,
-    hasError: !!error,
-    userName: userInfo?.name || userInfo?.email || null,
-    userEmail: userInfo?.email || null,
-    userPicture: userInfo?.picture || null
+    getAccessToken,
+    ensureValidToken
   };
 };
 
