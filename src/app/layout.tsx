@@ -8,6 +8,7 @@ import "swiper/css/bundle";
 import "./globals.css";
 
 import LayoutProvider from "@/providers/LayoutProvider";
+import { CampaignProvider } from "../lib/context/CampaignContext";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased`}
       >
-        <LayoutProvider>{children}</LayoutProvider>
+        <CampaignProvider>
+          <LayoutProvider>{children}</LayoutProvider>
+        </CampaignProvider>
       </body>
     </html>
   );

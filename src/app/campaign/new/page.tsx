@@ -2,22 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCampaignData } from '@/lib/hooks/useBudgetEstimates';
-import { CampaignBasicInfo } from '@/components/campaign/CampaignBasicInfo';
-import { AdTypeSelector } from '@/components/campaign/AdTypeSelector';
-import { Button } from '@/components/ui/Button';
-import { ProgressIndicator } from '@/components/common/ProgressIndicator';
+import { useCampaignContext } from '../../../lib/context/CampaignContext';
+import { CampaignBasicInfo } from '../../../components/campaign/CampaignBasicInfo';
+import { AdTypeSelector } from '../../../components/campaign/AdTypeSelector';
+import { Button } from '../../../components/ui/Button';
+import { ProgressIndicator } from '../../../components/common/ProgressIndicator';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { AdType, CampaignFormData } from '@/lib/types/campaign';
+import { AdType, CampaignFormData } from '../../../lib/types/campaign';
 
 const CampaignNewPage: React.FC = () => {
   const router = useRouter();
-  const { campaignData, updateBasicInfo, validateStep } = useCampaignData();
+  const { state, updateCampaignData } = useCampaignContext();
   
   const [formData, setFormData] = useState<CampaignFormData>({
-    name: campaignData?.name || '',
-    type: campaignData?.type || null,
-    websiteUrl: campaignData?.websiteUrl || ''
+    name: state.campaignData?.name || '',
+    type: state.campaignData?.type || null,
+    websiteUrl: state.campaignData?.websiteUrl || ''
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -68,7 +68,7 @@ const CampaignNewPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       // حفظ البيانات في Context
-      await updateBasicInfo(formData);
+      updateCampaignData(formData);
 
       // انتقال لصفحة الاستهداف الجغرافي
       router.push('/campaign/location-targeting');

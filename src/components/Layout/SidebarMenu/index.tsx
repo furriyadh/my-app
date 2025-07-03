@@ -220,9 +220,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
             {/* New Campaign - مميز بلون أخضر */}
             <Link
-              href="/new-campaign"
+              href="/campaign/new"
               className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                pathname === '/new-campaign'
+                pathname === '/campaign/new'
                   ? 'bg-gradient-to-r from-green-100 to-green-50 dark:from-green-900/40 dark:to-green-800/30 text-green-700 dark:text-green-300 shadow-md border-l-4 border-green-500 transform scale-[1.02]'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-green-50/70 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:shadow-sm'
               }`}
@@ -234,7 +234,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               <span className="ml-auto bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-[10px] px-2 py-0.5 rounded-full font-medium">
                 Create
               </span>
-              {pathname === '/new-campaign' && (
+              {pathname === '/campaign/new' && (
                 <div className="absolute right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               )}
             </Link>
@@ -469,4 +469,3 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 };
 
 export default SidebarMenu;
-
