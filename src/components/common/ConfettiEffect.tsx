@@ -15,14 +15,14 @@ interface ConfettiPiece {
 }
 
 interface ConfettiEffectProps {
-  isActive: boolean;
+  isActive?: boolean;
   duration?: number;
   particleCount?: number;
   colors?: string[];
 }
 
 export const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
-  isActive,
+  isActive = true,
   duration = 3000,
   particleCount = 50,
   colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff']
@@ -39,7 +39,7 @@ export const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
       for (let i = 0; i < particleCount; i++) {
         pieces.push({
           id: i,
-          x: Math.random() * window.innerWidth,
+          x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
           y: -10,
           rotation: Math.random() * 360,
           color: colors[Math.floor(Math.random() * colors.length)],
@@ -72,7 +72,7 @@ export const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
           y: piece.y + piece.velocityY,
           rotation: piece.rotation + piece.rotationSpeed,
           velocityY: piece.velocityY + 0.1 // الجاذبية
-        })).filter(piece => piece.y < window.innerHeight + 50) // إزالة القطع التي خرجت من الشاشة
+        })).filter(piece => piece.y < (typeof window !== 'undefined' ? window.innerHeight : 800) + 50) // إزالة القطع التي خرجت من الشاشة
       );
 
       if (isVisible) {
@@ -107,4 +107,7 @@ export const ConfettiEffect: React.FC<ConfettiEffectProps> = ({
     </div>
   );
 };
+
+// Default export للتوافق
+export default ConfettiEffect;
 

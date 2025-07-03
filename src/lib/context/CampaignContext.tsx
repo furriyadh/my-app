@@ -108,6 +108,7 @@ interface CampaignContextType {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   resetCampaign: () => void;
+  clearCampaignData: () => void;
   saveCampaignData: () => void;
   loadCampaignData: () => void;
 }
@@ -152,6 +153,10 @@ export const CampaignProvider: React.FC<CampaignProviderProps> = ({ children }) 
       localStorage.removeItem('campaignData');
       localStorage.removeItem('currentStep');
     }
+  };
+
+  const clearCampaignData = () => {
+    resetCampaign();
   };
 
   const saveCampaignData = () => {
@@ -209,6 +214,7 @@ export const CampaignProvider: React.FC<CampaignProviderProps> = ({ children }) 
     setLoading,
     setError,
     resetCampaign,
+    clearCampaignData,
     saveCampaignData,
     loadCampaignData
   };

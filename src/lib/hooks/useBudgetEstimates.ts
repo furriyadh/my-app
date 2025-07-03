@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 export interface BudgetEstimate {
   dailyBudget: number;
@@ -12,7 +12,6 @@ export interface BudgetEstimate {
 }
 
 export interface AccountBudget {
-  accountId: string;
   totalBudget: number;
   availableBudget: number;
   currency: string;
@@ -20,104 +19,130 @@ export interface AccountBudget {
 }
 
 export const useBudgetEstimates = () => {
-  const [estimates, setEstimates] = useState<BudgetEstimate | null>(null);
-  const [accountBudget, setAccountBudget] = useState<AccountBudget | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getBudgetEstimates = async (
+  // حساب تقديرات الميزانية
+  const getBudgetEstimates = useCallback(async (
     dailyBudget: number,
     targetLocation?: string,
-    adType?: string
+    campaignType?: string
   ): Promise<BudgetEstimate> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // محاكاة استدعاء API
+      // محاكاة API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // حسابات تقديرية بناءً على الميزانية
-      const baseReach = Math.floor(dailyBudget * 100);
-      const baseCpc = Math.max(0.5, Math.min(5, dailyBudget / 100));
+      const baseReach = dailyBudget * 20; // 20 شخص لكل ريال
+      const baseCpc = Math.max(0.5, dailyBudget / 100); // تكلفة النقرة
       const estimatedClicks = Math.floor(dailyBudget / baseCpc);
-      const estimatedImpressions = Math.floor(estimatedClicks * 20);
+      const estimatedImpressions = estimatedClicks * 10; // 10 ظهور لكل نقرة
       const estimatedCtr = (estimatedClicks / estimatedImpressions) * 100;
 
-      const estimate: BudgetEstimate = {
-        dailyBudget,
-        estimatedReach: baseReach + Math.floor(Math.random() * baseReach * 0.2),
-        estimatedClicks: estimatedClicks + Math.floor(Math.random() * estimatedClicks * 0.1),
-        averageCpc: baseCpc + (Math.random() - 0.5) * 0.5,
-        estimatedImpressions: estimatedImpressions + Math.floor(Math.random() * estimatedImpressions * 0.1),
-        estimatedCtr: estimatedCtr + (Math.random() - 0.5) * 0.5
-      };
+      // تعديل بناءً على الموقع
+      let locationMultiplier = 1;
+      if (targetLocation?.includes('الرياض') || targetLocation?.includes('جدة')) {
+        locationMultiplier = 1.2; // مدن كبيرة = تكلفة أعلى
+      } else if (targetLocation?.includes('السعودية')) {
+        locationMultiplier = 1.1;
+      }
 
-      setEstimates(estimate);
-      return estimate;
+      // تعديل بناءً على نوع الحملة
+      let campaignMultiplier = 1;
+      if (campaignType === 'search') {
+        campaignMultiplier = 1.3; // إعلانات البحث أغلى
+      } else if (campaignType === 'youtube') {
+        campaignMultiplier = 0.8; // فيديو أرخص
+      }
+
+      const finalCpc = baseCpc * locationMultiplier * campaignMultiplier;
+      const finalClicks = Math.floor(dailyBudget / finalCpc);
+      const finalReach = Math.floor(baseReach * locationMultiplier);
+
+      return {
+        dailyBudget,
+        estimatedReach: finalReach,
+        estimatedClicks: finalClicks,
+        averageCpc: finalCpc,
+        estimatedImpressions: finalClicks * 10,
+        estimatedCtr: (finalClicks / (finalClicks * 10)) * 100
+      };
     } catch (err) {
-      const errorMessage = 'فشل في الحصول على تقديرات الميزانية';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      setError('فشل في الحصول على تقديرات الميزانية');
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const getAccountBudget = async (accountId?: string): Promise<AccountBudget> => {
+  // الحصول على ميزانية الحساب
+  const getAccountBudget = useCallback(async (): Promise<AccountBudget> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // محاكاة استدعاء API
+      // محاكاة API call
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      const budget: AccountBudget = {
-        accountId: accountId || 'default-account',
+      // بيانات تجريبية
+      return {
         totalBudget: 10000,
         availableBudget: 7500,
         currency: 'SAR',
         lastUpdated: new Date()
       };
-
-      setAccountBudget(budget);
-      return budget;
     } catch (err) {
-      const errorMessage = 'فشل في الحصول على ميزانية الحساب';
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      setError('فشل في الحصول على ميزانية الحساب');
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const formatCurrency = (amount: number, currency: string = 'SAR'): string => {
-    return new Intl.NumberFormat('ar-SA', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+  // تنسيق العملة
+  const formatCurrency = useCallback((amount: number, currency: string = 'SAR'): string => {
+    const currencySymbols: Record<string, string> = {
+      'SAR': 'ر.س',
+      'USD': '$',
+      'AED': 'د.إ',
+      'EUR': '€'
+    };
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  };
+    const symbol = currencySymbols[currency] || currency;
+    const formattedAmount = new Intl.NumberFormat('ar-SA').format(amount);
+    
+    return `${formattedAmount} ${symbol}`;
+  }, []);
+
+  // حساب التكلفة الشهرية
+  const getMonthlyBudget = useCallback((dailyBudget: number): number => {
+    return dailyBudget * 30;
+  }, []);
+
+  // حساب ROI المتوقع
+  const getEstimatedROI = useCallback((
+    dailyBudget: number,
+    averageOrderValue: number = 100,
+    conversionRate: number = 0.02
+  ): number => {
+    const monthlyBudget = dailyBudget * 30;
+    const estimatedConversions = (dailyBudget / 2) * 30 * conversionRate; // تقدير النقرات * معدل التحويل
+    const estimatedRevenue = estimatedConversions * averageOrderValue;
+    
+    return ((estimatedRevenue - monthlyBudget) / monthlyBudget) * 100;
+  }, []);
 
   return {
-    estimates,
-    accountBudget,
-    isLoading,
-    error,
     getBudgetEstimates,
     getAccountBudget,
     formatCurrency,
-    formatNumber
+    getMonthlyBudget,
+    getEstimatedROI,
+    isLoading,
+    error
   };
 };
 

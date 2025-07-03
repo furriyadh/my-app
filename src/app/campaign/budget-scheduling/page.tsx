@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCampaignContext } from '@/lib/context/CampaignContext';
-import { useBudgetEstimates } from '@/lib/hooks/useBudgetEstimates';
-import { BudgetSlider } from '@/components/campaign/BudgetScheduling/BudgetSlider';
-import { StatsDisplay } from '@/components/campaign/BudgetScheduling/StatsDisplay';
-import { PresetSchedules } from '@/components/campaign/BudgetScheduling/PresetSchedules';
-import { CustomSchedule } from '@/components/campaign/BudgetScheduling/CustomSchedule';
-import { Button } from '@/components/ui/Button';
-import { ProgressIndicator } from '@/components/common/ProgressIndicator';
+import { useCampaignContext } from '../../../lib/context/CampaignContext';
+import { useBudgetEstimates } from '../../../lib/hooks/useBudgetEstimates';
+import { BudgetSlider } from '../../../components/campaign/BudgetScheduling/BudgetSlider';
+import { StatsDisplay } from '../../../components/campaign/BudgetScheduling/StatsDisplay';
+import { PresetSchedules } from '../../../components/campaign/BudgetScheduling/PresetSchedules';
+import { CustomSchedule } from '../../../components/campaign/BudgetScheduling/CustomSchedule';
+import { Button } from '../../../components/ui/Button';
+import { ProgressIndicator } from '../../../components/common/ProgressIndicator';
+import { BudgetData, ScheduleData } from '../../../lib/types/campaign';
 import { ArrowLeft, ArrowRight, DollarSign, Calendar } from 'lucide-react';
-import { BudgetData, ScheduleData } from '@/lib/types/campaign';
 
 const BudgetSchedulingPage: React.FC = () => {
   const router = useRouter();
@@ -189,9 +189,7 @@ const BudgetSchedulingPage: React.FC = () => {
               </h3>
               
               <StatsDisplay
-                budget={budgetData.dailyAmount}
-                estimates={estimates}
-                currency={budgetData.currency}
+                budget={budgetData}
                 isLoading={isLoading}
               />
             </div>
@@ -207,8 +205,8 @@ const BudgetSchedulingPage: React.FC = () => {
               </h2>
               
               <PresetSchedules
-                selectedPreset={scheduleData.preset}
-                onPresetSelect={(preset) => handleScheduleChange({ type: 'preset', preset })}
+                selectedPreset={scheduleData.preset as 'peak' | 'business' | 'night' || 'peak'}
+                onSelect={(preset: 'peak' | 'business' | 'night') => handleScheduleChange({ type: 'preset', preset, timezone: scheduleData.timezone })}
                 timezone={scheduleData.timezone}
               />
             </div>
@@ -221,8 +219,9 @@ const BudgetSchedulingPage: React.FC = () => {
                 </h3>
                 
                 <CustomSchedule
-                  schedule={scheduleData.custom}
-                  onChange={(custom) => handleScheduleChange({ custom })}
+                  isActive={true}
+                  data={scheduleData.custom || { days: [], timeSlots: [] }}
+                  onChange={(custom: any) => handleScheduleChange({ custom, timezone: scheduleData.timezone })}
                   timezone={scheduleData.timezone}
                 />
               </div>
@@ -232,9 +231,14 @@ const BudgetSchedulingPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-lg p-6">
               <Button
                 variant={scheduleData.type === 'custom' ? 'default' : 'outline'}
-                onClick={() => handleScheduleChange({ 
-                  type: scheduleData.type === 'custom' ? 'preset' : 'custom' 
-                })}
+                onClick={() => {
+                  const newType = scheduleData.type === 'custom' ? 'preset' : 'custom';
+                  handleScheduleChange({ 
+                    type: newType,
+                    timezone: scheduleData.timezone,
+                    ...(newType === 'preset' ? { preset: 'peak' } : { custom: { days: [], timeSlots: [] } })
+                  });
+                }}
                 className="w-full"
               >
                 {scheduleData.type === 'custom' ? 'العودة للجدولة المسبقة' : 'جدولة مخصصة'}

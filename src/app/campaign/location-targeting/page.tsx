@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCampaignContext } from '@/lib/context/CampaignContext';
-import { useLocation } from '@/lib/hooks/useLocation';
-import { InteractiveMap } from '@/components/campaign/LocationTargeting/InteractiveMap';
-import { LocationSearch } from '@/components/campaign/LocationTargeting/LocationSearch';
-import { TimezoneDisplay } from '@/components/campaign/LocationTargeting/TimezoneDisplay';
-import { Button } from '@/components/ui/Button';
-import { ProgressIndicator } from '@/components/common/ProgressIndicator';
+import { useCampaignContext } from '../../../lib/context/CampaignContext';
+import { useLocation } from '../../../lib/hooks/useLocation';
+import { InteractiveMap } from '../../../components/campaign/LocationTargeting/InteractiveMap';
+import { LocationSearch } from '../../../components/campaign/LocationTargeting/LocationSearch';
+import { TimezoneDisplay } from '../../../components/campaign/LocationTargeting/TimezoneDisplay';
+import { Button } from '../../../components/ui/Button';
+import { ProgressIndicator } from '../../../components/common/ProgressIndicator';
+import { LocationData } from '../../../lib/types/campaign';
 import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react';
-import { LocationData } from '@/lib/types/campaign';
 
 const LocationTargetingPage: React.FC = () => {
   const router = useRouter();
@@ -116,8 +116,6 @@ const LocationTargetingPage: React.FC = () => {
                 results={searchResults}
                 onSelect={handleLocationSelect}
                 isLoading={isLoading}
-                value={searchQuery}
-                onChange={setSearchQuery}
               />
               
               {error && (
@@ -173,7 +171,22 @@ const LocationTargetingPage: React.FC = () => {
 
             {/* عرض التوقيت */}
             {selectedLocations.length > 0 && (
-              <TimezoneDisplay locations={selectedLocations} />
+              <div className="space-y-2">
+                {selectedLocations.map((location, index) => {
+                  // تحويل SelectedLocation إلى LocationData
+                  const locationData: LocationData = {
+                    name: location.name,
+                    coordinates: [location.coordinates.lat, location.coordinates.lng],
+                    timezone: location.timezone,
+                    utcOffset: 3, // افتراضي للسعودية
+                    country: location.countryCode === 'SA' ? 'السعودية' : 'دولة أخرى',
+                    region: location.type === 'city' ? 'مدينة' : 'منطقة'
+                  };
+                  return (
+                    <TimezoneDisplay key={index} location={locationData} />
+                  );
+                })}
+              </div>
             )}
           </div>
 
@@ -184,9 +197,18 @@ const LocationTargetingPage: React.FC = () => {
             </h2>
             
             <InteractiveMap
-              selectedLocations={selectedLocations}
-              onLocationSelect={handleLocationSelect}
-              onLocationRemove={handleLocationRemove}
+              selectedLocation={selectedLocations.length > 0 ? {
+                name: selectedLocations[0].name,
+                coordinates: [selectedLocations[0].coordinates.lat, selectedLocations[0].coordinates.lng],
+                timezone: selectedLocations[0].timezone,
+                utcOffset: 3,
+                country: selectedLocations[0].countryCode === 'SA' ? 'السعودية' : 'دولة أخرى',
+                region: selectedLocations[0].type === 'city' ? 'مدينة' : 'منطقة'
+              } : null}
+              onLocationSelect={(coordinates: [number, number]) => {
+                console.log('Selected coordinates:', coordinates);
+              }}
+              apiKey="YOUR_GOOGLE_MAPS_API_KEY"
             />
           </div>
         </div>

@@ -2,27 +2,24 @@
 
 import React, { useEffect } from 'react';
 import { CheckCircle, X, ExternalLink, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
+import { CampaignData } from '../../lib/types/campaign';
 
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignName: string;
-  campaignId?: string;
-  accountName?: string;
-  onViewDashboard?: () => void;
-  onCreateAnother?: () => void;
+  campaignData: CampaignData;
+  onCreateNew: () => void;
+  onGoToDashboard: () => void;
 }
 
 export const SuccessModal: React.FC<SuccessModalProps> = ({
   isOpen,
   onClose,
-  campaignName,
-  campaignId,
-  accountName,
-  onViewDashboard,
-  onCreateAnother
+  campaignData,
+  onCreateNew,
+  onGoToDashboard
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -70,22 +67,20 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-green-800">اسم الحملة:</span>
-                <span className="text-sm text-green-700 font-medium">{campaignName}</span>
+                <span className="text-sm text-green-700 font-medium">{campaignData.name || 'حملة جديدة'}</span>
               </div>
               
-              {campaignId && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-800">معرف الحملة:</span>
-                  <span className="text-sm text-green-700 font-mono">{campaignId}</span>
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-green-800">نوع الحملة:</span>
+                <span className="text-sm text-green-700">{campaignData.type || 'غير محدد'}</span>
+              </div>
               
-              {accountName && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-800">الحساب الإعلاني:</span>
-                  <span className="text-sm text-green-700">{accountName}</span>
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-green-800">الميزانية اليومية:</span>
+                <span className="text-sm text-green-700">
+                  {campaignData.budget?.dailyAmount || 0} {campaignData.budget?.currency || 'SAR'}
+                </span>
+              </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-green-800">الحالة:</span>
@@ -133,7 +128,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         {/* Actions */}
         <div className="flex flex-col gap-3 p-6 border-t border-gray-200 bg-gray-50">
           <Button
-            onClick={onViewDashboard}
+            onClick={onGoToDashboard}
             className="w-full flex items-center justify-center gap-2"
           >
             <BarChart3 className="w-4 h-4" />
@@ -143,7 +138,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
-              onClick={onCreateAnother}
+              onClick={onCreateNew}
               className="flex items-center justify-center gap-2"
             >
               إنشاء حملة أخرى
