@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCampaignData } from '@/lib/hooks/useCampaignData';
+import { useCampaignData } from '@/lib/hooks/useBudgetEstimates';
 import { AccountSelectionModal } from '@/components/campaign/AccountSelection/AccountSelectionModal';
 import { SuccessModal } from '@/components/common/SuccessModal';
 import { ConfettiEffect } from '@/components/common/ConfettiEffect';

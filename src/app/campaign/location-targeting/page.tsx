@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCampaignData } from '@/lib/hooks/useCampaignData';
+import { useCampaignContext } from '@/lib/context/CampaignContext';
 import { useLocation } from '@/lib/hooks/useLocation';
 import { InteractiveMap } from '@/components/campaign/LocationTargeting/InteractiveMap';
 import { LocationSearch } from '@/components/campaign/LocationTargeting/LocationSearch';
@@ -14,15 +14,13 @@ import { LocationData } from '@/lib/types/campaign';
 
 const LocationTargetingPage: React.FC = () => {
   const router = useRouter();
-  const { campaignData, updateLocationData } = useCampaignData();
-  const { searchLocations, getTimezone } = useLocation();
+  const { state, updateCampaignData } = useCampaignContext();
+  const { searchLocations, selectedLocations, addLocation, removeLocation, getLocalTime } = useLocation();
   
-  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
-    campaignData?.targetLocation || null
-  );
-  const [searchResults, setSearchResults] = useState<LocationData[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // البحث عن المواقع
   const handleLocationSearch = async (query: string) => {
@@ -32,195 +30,204 @@ const LocationTargetingPage: React.FC = () => {
     }
 
     setIsLoading(true);
+    setError('');
+    
     try {
       const results = await searchLocations(query);
       setSearchResults(results);
-    } catch (error) {
-      console.error('Error searching locations:', error);
+    } catch (err) {
       setError('فشل في البحث عن المواقع');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // اختيار موقع من نتائج البحث
-  const handleLocationSelect = async (location: LocationData) => {
-    try {
-      // الحصول على المنطقة الزمنية
-      const timezone = await getTimezone(location.coordinates);
-      
-      const locationWithTimezone = {
-        ...location,
-        timezone: timezone.timeZoneId,
-        utcOffset: timezone.rawOffset / 3600
-      };
+  // اختيار موقع من النتائج
+  const handleLocationSelect = (location: any) => {
+    addLocation(location);
+    
+    // تحديث بيانات الحملة
+    const locationData: LocationData = {
+      name: location.name,
+      coordinates: [location.coordinates.lat, location.coordinates.lng],
+      timezone: location.timezone,
+      utcOffset: 3, // يمكن حسابه بناءً على التوقيت
+      country: location.countryCode === 'SA' ? 'السعودية' : location.name
+    };
 
-      setSelectedLocation(locationWithTimezone);
-      setSearchResults([]);
-      setError('');
-    } catch (error) {
-      console.error('Error getting timezone:', error);
-      setError('فشل في تحديد المنطقة الزمنية');
-    }
+    updateCampaignData({
+      targetLocation: locationData
+    });
+
+    setSearchResults([]);
+    setSearchQuery('');
   };
 
-  // اختيار موقع من الخريطة
-  const handleMapClick = async (coordinates: [number, number]) => {
-    setIsLoading(true);
-    try {
-      // الحصول على معلومات الموقع من الإحداثيات
-      const response = await fetch(`/api/location/reverse-geocode?lat=${coordinates[0]}&lng=${coordinates[1]}`);
-      const locationData = await response.json();
-
-      if (locationData.error) {
-        throw new Error(locationData.error);
-      }
-
-      await handleLocationSelect(locationData);
-    } catch (error) {
-      console.error('Error getting location from coordinates:', error);
-      setError('فشل في تحديد الموقع');
-    } finally {
-      setIsLoading(false);
-    }
+  // إزالة موقع مختار
+  const handleLocationRemove = (locationId: string) => {
+    removeLocation(locationId);
   };
 
-  // الانتقال للخطوة التالية
-  const handleNext = async () => {
-    if (!selectedLocation) {
-      setError('يجب تحديد الموقع المستهدف');
+  // التنقل للخطوة التالية
+  const handleNext = () => {
+    if (selectedLocations.length === 0) {
+      setError('يرجى اختيار موقع واحد على الأقل');
       return;
     }
 
-    setIsLoading(true);
-    try {
-      await updateLocationData(selectedLocation);
-      router.push('/campaign/budget-scheduling');
-    } catch (error) {
-      console.error('Error saving location data:', error);
-      setError('فشل في حفظ بيانات الموقع');
-    } finally {
-      setIsLoading(false);
-    }
+    router.push('/campaign/budget-scheduling');
+  };
+
+  // التنقل للخطوة السابقة
+  const handlePrevious = () => {
+    router.push('/campaign/new');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-6xl mx-auto p-6">
-        
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => router.back()}
-            className="p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">الاستهداف الجغرافي</h1>
-            <p className="text-gray-600 mt-1">الخطوة 2 من 4: تحديد المنطقة المستهدفة</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* مؤشر التقدم */}
+        <div className="mb-8">
+          <ProgressIndicator currentStep={2} totalSteps={4} />
         </div>
 
-        {/* Progress Indicator */}
-        <ProgressIndicator currentStep={2} totalSteps={4} className="mb-8" />
+        {/* العنوان الرئيسي */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            الاستهداف الجغرافي
+          </h1>
+          <p className="text-gray-600">
+            حدد المناطق التي تريد عرض إعلانك فيها
+          </p>
+        </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          
-          {/* قسم البحث والاختيار */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* قسم البحث والنتائج */}
           <div className="space-y-6">
-            
-            {/* البحث عن المواقع */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <MapPin className="w-5 h-5 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">البحث عن الموقع</h2>
-              </div>
+            {/* البحث */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                البحث عن المواقع
+              </h2>
               
               <LocationSearch
                 onSearch={handleLocationSearch}
                 results={searchResults}
                 onSelect={handleLocationSelect}
                 isLoading={isLoading}
+                value={searchQuery}
+                onChange={setSearchQuery}
               />
+              
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
             </div>
 
-            {/* عرض الموقع المختار */}
-            {selectedLocation && (
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">الموقع المختار</h3>
+            {/* المواقع المختارة */}
+            {selectedLocations.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  المواقع المختارة ({selectedLocations.length})
+                </h3>
+                
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <MapPin className="w-5 h-5 text-green-600" />
-                    <div>
-                      <div className="font-medium text-green-800">{selectedLocation.name}</div>
-                      <div className="text-sm text-green-600">{selectedLocation.country}</div>
+                  {selectedLocations.map((location) => (
+                    <div
+                      key={location.id}
+                      className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-800">
+                          {location.name}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {location.type === 'country' ? 'دولة' : 
+                           location.type === 'city' ? 'مدينة' : 'منطقة'}
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="text-sm text-gray-600">
+                          التوقيت المحلي
+                        </div>
+                        <div className="font-medium text-blue-600">
+                          {getLocalTime(location)}
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleLocationRemove(location.id)}
+                        className="ml-3 p-1 text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        ×
+                      </button>
                     </div>
-                  </div>
-                  
-                  <TimezoneDisplay location={selectedLocation} />
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* رسالة الخطأ */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="text-red-800 text-sm">{error}</div>
-              </div>
+            {/* عرض التوقيت */}
+            {selectedLocations.length > 0 && (
+              <TimezoneDisplay locations={selectedLocations} />
             )}
-
           </div>
 
           {/* الخريطة التفاعلية */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">الخريطة التفاعلية</h2>
-            <div className="h-96 rounded-lg overflow-hidden">
-              <InteractiveMap
-                selectedLocation={selectedLocation}
-                onLocationSelect={handleMapClick}
-                apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
-              />
-            </div>
-            <div className="mt-4 text-sm text-gray-600">
-              💡 انقر على الخريطة لتحديد الموقع المستهدف
-            </div>
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              الخريطة التفاعلية
+            </h2>
+            
+            <InteractiveMap
+              selectedLocations={selectedLocations}
+              onLocationSelect={handleLocationSelect}
+              onLocationRemove={handleLocationRemove}
+            />
           </div>
-
         </div>
 
-        {/* Navigation Buttons */}
+        {/* أزرار التنقل */}
         <div className="flex justify-between items-center mt-8">
           <Button
             variant="outline"
-            onClick={() => router.back()}
+            onClick={handlePrevious}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             السابق
           </Button>
-          
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              الخطوة 2 من 4
+            </p>
+          </div>
+
           <Button
             onClick={handleNext}
-            disabled={!selectedLocation || isLoading}
+            disabled={selectedLocations.length === 0}
             className="flex items-center gap-2"
           >
-            {isLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                جاري الحفظ...
-              </>
-            ) : (
-              <>
-                التالي
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
+            التالي
+            <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
 
+        {/* نصائح مفيدة */}
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <h3 className="font-semibold text-blue-800 mb-3">💡 نصائح للاستهداف الجغرافي:</h3>
+          <ul className="text-blue-700 space-y-2 text-sm">
+            <li>• ابدأ بمناطق صغيرة لاختبار الأداء</li>
+            <li>• راعي التوقيت المحلي عند جدولة الإعلانات</li>
+            <li>• استهدف المناطق التي يتواجد فيها عملاؤك المحتملون</li>
+            <li>• يمكنك إضافة أو إزالة مناطق لاحقاً حسب الأداء</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

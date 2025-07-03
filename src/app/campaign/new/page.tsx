@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCampaignData } from '@/lib/hooks/useCampaignData';
+import { useCampaignData } from '@/lib/hooks/useBudgetEstimates';
 import { CampaignBasicInfo } from '@/components/campaign/CampaignBasicInfo';
 import { AdTypeSelector } from '@/components/campaign/AdTypeSelector';
 import { Button } from '@/components/ui/Button';
