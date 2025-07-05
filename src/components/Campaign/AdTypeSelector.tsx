@@ -1,160 +1,114 @@
-'use client';
+// المسار: src/components/Campaign/AdTypeSelector.tsx
 
 import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { Card } from '../ui/Card';
 import { Target, AlertCircle, CheckCircle, Phone, Search, FileText, Youtube, Mail } from 'lucide-react';
-import { AdType } from '@/lib/types/campaign';
+import { AdType } from '../../lib/types/campaign';
 
 interface AdTypeSelectorProps {
   selectedType: AdType | null;
   onSelect: (type: AdType) => void;
-  error?: string;
-  className?: string;
 }
 
-// أنواع الإعلانات المتاحة
-const AD_TYPES = [
-  {
-    id: 'call' as AdType,
-    name: 'إعلانات الاتصال',
-    description: 'إعلانات تهدف لجذب المكالمات الهاتفية المباشرة',
-    icon: Phone,
-    color: 'from-green-500 to-emerald-600',
-    features: ['رقم هاتف مرئي', 'زر اتصال مباشر', 'تتبع المكالمات'],
-    backendValue: 'عملاء محتملون'
-  },
-  {
-    id: 'search' as AdType,
-    name: 'إعلانات البحث',
-    description: 'إعلانات تظهر في نتائج البحث على Google',
-    icon: Search,
-    color: 'from-blue-500 to-blue-600',
-    features: ['ظهور في البحث', 'كلمات مفتاحية', 'نقرات عالية الجودة'],
-    backendValue: 'إعلانات البحث'
-  },
-  {
-    id: 'text' as AdType,
-    name: 'إعلانات نصية',
-    description: 'إعلانات نصية بسيطة وفعالة للشبكة الإعلانية',
-    icon: FileText,
-    color: 'from-purple-500 to-purple-600',
-    features: ['نصوص جذابة', 'انتشار واسع', 'تكلفة منخفضة'],
-    backendValue: 'إعلانات نصية'
-  },
-  {
-    id: 'youtube' as AdType,
-    name: 'إعلانات YouTube',
-    description: 'إعلانات فيديو تفاعلية على منصة YouTube',
-    icon: Youtube,
-    color: 'from-red-500 to-red-600',
-    features: ['فيديوهات جذابة', 'استهداف دقيق', 'تفاعل عالي'],
-    backendValue: 'إعلانات يوتيوب'
-  },
-  {
-    id: 'gmail' as AdType,
-    name: 'إعلانات Gmail',
-    description: 'إعلانات تفاعلية تظهر في صندوق البريد',
-    icon: Mail,
-    color: 'from-orange-500 to-orange-600',
-    features: ['وصول مباشر', 'تصميم تفاعلي', 'معدل فتح عالي'],
-    backendValue: 'إعلانات جيميل'
-  }
-];
-
-export const AdTypeSelector: React.FC<AdTypeSelectorProps> = ({
-  selectedType,
-  onSelect,
-  error,
-  className = ''
-}) => {
+const AdTypeSelector: React.FC<AdTypeSelectorProps> = ({ selectedType, onSelect }) => {
+  const adTypes: { type: AdType; icon: React.ReactNode; title: string; description: string; features: string[] }[] = [
+    {
+      type: 'search',
+      icon: <Search className="w-8 h-8 text-blue-600" />,
+      title: 'إعلانات البحث',
+      description: 'إعلانات نصية تظهر في نتائج البحث',
+      features: ['استهداف الكلمات المفتاحية', 'تكلفة منخفضة', 'نتائج سريعة']
+    },
+    {
+      type: 'call',
+      icon: <Phone className="w-8 h-8 text-green-600" />,
+      title: 'إعلانات المكالمات',
+      description: 'إعلانات تشجع على الاتصال المباشر',
+      features: ['زيادة المكالمات', 'تفاعل مباشر', 'عملاء محتملون']
+    },
+    {
+      type: 'youtube',
+      icon: <Youtube className="w-8 h-8 text-red-600" />,
+      title: 'إعلانات الفيديو',
+      description: 'إعلانات فيديو على يوتيوب والشبكة',
+      features: ['تفاعل عالي', 'محتوى مرئي', 'انتشار واسع']
+    },
+    {
+      type: 'text',
+      icon: <FileText className="w-8 h-8 text-purple-600" />,
+      title: 'إعلانات نصية',
+      description: 'إعلانات نصية بسيطة وفعالة',
+      features: ['سهولة الإنشاء', 'تكلفة منخفضة', 'مرونة عالية']
+    },
+    {
+      type: 'gmail',
+      icon: <Mail className="w-8 h-8 text-orange-600" />,
+      title: 'إعلانات جيميل',
+      description: 'إعلانات تفاعلية في صندوق الوارد',
+      features: ['وصول مباشر', 'تفاعل شخصي', 'معدل فتح عالي']
+    }
+  ];
 
   return (
-    <Card className={`p-8 ${className}`}>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-purple-100 rounded-lg">
-          <Target className="w-6 h-6 text-purple-600" />
-        </div>
-        <h2 className="text-2xl font-semibold text-gray-800">نوع الإعلان</h2>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">اختر نوع الإعلان</h2>
+        <p className="text-gray-600">حدد نوع الإعلان الذي يناسب أهدافك التسويقية</p>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 mb-6 text-red-600 text-sm bg-red-50 p-3 rounded-lg">
-          <AlertCircle className="w-4 h-4" />
-          {error}
-        </div>
-      )}
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {AD_TYPES.map((adType) => {
-          const IconComponent = adType.icon;
-          const isSelected = selectedType === adType.id;
-          
-          return (
-            <div
-              key={adType.id}
-              onClick={() => onSelect(adType.id)}
-              className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
-                isSelected 
-                  ? 'border-blue-500 bg-blue-50 shadow-lg ring-2 ring-blue-200' 
-                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-              }`}
-            >
-              {/* أيقونة الاختيار */}
-              {isSelected && (
-                <div className="absolute top-3 right-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600" />
-                </div>
-              )}
-
-              {/* محتوى الكرت */}
-              <div className="text-center">
-                {/* الأيقونة الرئيسية */}
-                <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${adType.color} mb-4`}>
-                  <IconComponent className="w-6 h-6 text-white" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {adTypes.map((adType) => (
+          <div
+            key={adType.type}
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+              selectedType === adType.type
+                ? 'ring-2 ring-blue-500 bg-blue-50'
+                : 'hover:bg-gray-50'
+            }`}
+            onClick={() => onSelect(adType.type)}
+          >
+            <Card>
+              <div className="p-6">
+                <div className="flex items-center space-x-3 space-x-reverse mb-4">
+                  {adType.icon}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800">{adType.title}</h3>
+                    {selectedType === adType.type && (
+                      <CheckCircle className="w-5 h-5 text-green-500 float-left" />
+                    )}
+                  </div>
                 </div>
                 
-                {/* العنوان والوصف */}
-                <h3 className="font-semibold text-gray-800 mb-2">{adType.name}</h3>
-                <p className="text-sm text-gray-600 mb-4">{adType.description}</p>
+                <p className="text-gray-600 text-sm mb-4">{adType.description}</p>
                 
-                {/* المميزات */}
-                <div className="space-y-1">
-                  {adType.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 text-xs text-gray-500">
-                      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                      <span>{feature}</span>
-                    </div>
-                  ))}
+                <div className="space-y-2">
+                  <h4 className="font-medium text-gray-700 text-sm">المميزات:</h4>
+                  <ul className="space-y-1">
+                    {adType.features.map((feature, index) => (
+                      <li key={index} className="text-xs text-gray-600 flex items-center space-x-2 space-x-reverse">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-
-              {/* تأثير الانتقاء */}
-              {isSelected && (
-                <div className="absolute inset-0 bg-blue-500 bg-opacity-5 rounded-xl pointer-events-none"></div>
-              )}
-            </div>
-          );
-        })}
+            </Card>
+          </div>
+        ))}
       </div>
 
-      {/* معلومات إضافية */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex items-start gap-3">
-          <div className="p-1 bg-gray-300 rounded-full mt-0.5">
-            <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-800 mb-1">كيف تختار النوع المناسب؟</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• <strong>إعلانات الاتصال:</strong> مثالية للخدمات التي تتطلب تواصل مباشر</li>
-              <li>• <strong>إعلانات البحث:</strong> الأفضل لزيادة زيارات الموقع</li>
-              <li>• <strong>إعلانات YouTube:</strong> مناسبة للعلامات التجارية والمنتجات المرئية</li>
-            </ul>
+      {selectedType && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="text-green-800 font-medium">
+              تم اختيار: {adTypes.find(type => type.type === selectedType)?.title}
+            </span>
           </div>
         </div>
-      </div>
-
-    </Card>
+      )}
+    </div>
   );
 };
 

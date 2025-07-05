@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import AccountSelectionModal from "@/components/Modals/AccountSelectionModal";
-import { AccountOption } from "@/types/modal";
+// تم إزالة استيراد AccountSelectionModal
+// import AccountSelectionModal from "@/components/Modals/AccountSelectionModal";
+// import { AccountOption } from "@/types/modal";
 import Dashboard from "@/components/Dashboard";
 import OverviewCards from "@/components/Dashboard/OverviewCards";
 import PerformanceChart from "@/components/Dashboard/PerformanceChart";
@@ -15,48 +16,18 @@ const DashboardPage: React.FC = () => {
   const searchParams = useSearchParams();
   const section = searchParams.get("section") || "overview";
   
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  // تم إزالة Modal state
+  // const [showModal, setShowModal] = useState(false);
+  // const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
-  // Check if user is first time visitor
+  // تم تبسيط useEffect - فقط تعيين أن المستخدم زار الموقع
   useEffect(() => {
-    const hasVisited = localStorage.getItem('furriyadh_user_visited');
-    const accountType = localStorage.getItem('furriyadh_account_type');
-    
-    if (!hasVisited || !accountType) {
-      setIsFirstTimeUser(true);
-      setShowModal(true);
-    }
+    localStorage.setItem('furriyadh_user_visited', 'true');
   }, []);
 
-  const handleModalSelect = (option: AccountOption) => {
-    // Save user choice
-    localStorage.setItem('furriyadh_account_type', option);
-    localStorage.setItem('furriyadh_user_visited', 'true');
-    
-    setShowModal(false);
-    setIsFirstTimeUser(false);
-    
-    // Handle routing based on selection
-    switch (option) {
-      case 'own-accounts':
-        window.location.href = '/new-campaign?type=connect';
-        break;
-      case 'furriyadh-managed':
-        window.location.href = '/new-campaign?type=managed';
-        break;
-      case 'new-account':
-        window.location.href = '/new-campaign?type=new';
-        break;
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    // Mark as visited even if closed without selection
-    localStorage.setItem('furriyadh_user_visited', 'true');
-  };
+  // تم إزالة دوال التعامل مع النافذة المنبثقة
+  // const handleModalSelect = (option: AccountOption) => { ... }
+  // const handleCloseModal = () => { ... }
 
   const renderSection = () => {
     switch (section) {
@@ -352,32 +323,58 @@ const DashboardPage: React.FC = () => {
                   Application Settings
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Customize your dashboard experience and notification preferences
+                  Customize your experience and configure application preferences
                 </p>
                 <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
-                  Configure Settings
+                  Open Settings
                 </button>
               </div>
             </div>
           </div>
         );
 
-      case "overview":
+      // Default Overview Section
       default:
-        return <Dashboard />;
+        return (
+          <div className="p-6 space-y-6">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Dashboard Overview
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Welcome to your advertising dashboard. Monitor your campaigns and performance metrics.
+              </p>
+            </div>
+            
+            <OverviewCards />
+            
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2 space-y-6">
+                <PerformanceChart />
+                <RecentCampaigns />
+              </div>
+              <div className="space-y-6">
+                <QuickActions />
+              </div>
+            </div>
+          </div>
+        );
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* تم إزالة النافذة المنبثقة نهائياً */}
+      {/* 
+      {showModal && (
+        <AccountSelectionModal
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          onSelect={handleModalSelect}
+        />
+      )}
+      */}
       {renderSection()}
-      
-      {/* Account Selection Modal for First Time Users */}
-      <AccountSelectionModal
-        isOpen={showModal}
-        onClose={handleCloseModal}
-        onSelect={handleModalSelect}
-      />
     </div>
   );
 };

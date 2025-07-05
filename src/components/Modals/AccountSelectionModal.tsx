@@ -227,4 +227,3 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
 };
 
 export default AccountSelectionModal;
-

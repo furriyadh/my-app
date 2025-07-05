@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
 import { CampaignData, AdType, BudgetData, ScheduleData, LocationData, AdCreativeData } from '@/lib/types/campaign';
 
 interface CampaignState {
@@ -15,7 +15,8 @@ type CampaignAction =
   | { type: 'SET_CURRENT_STEP'; payload: number }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'RESET_CAMPAIGN' };
+  | { type: 'RESET_CAMPAIGN' }
+  | { type: 'LOAD_CAMPAIGN_DATA'; payload: { campaignData: CampaignData; currentStep: number } };
 
 const initialState: CampaignState = {
   campaignData: {
@@ -96,6 +97,13 @@ const campaignReducer = (state: CampaignState, action: CampaignAction): Campaign
         }
       };
     
+    case 'LOAD_CAMPAIGN_DATA':
+      return {
+        ...state,
+        campaignData: action.payload.campaignData,
+        currentStep: action.payload.currentStep
+      };
+    
     default:
       return state;
   }
@@ -129,6 +137,8 @@ interface CampaignProviderProps {
 
 export const CampaignProvider: React.FC<CampaignProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(campaignReducer, initialState);
+  const isInitialized = useRef(false);
+  const isLoading = useRef(false);
 
   const updateCampaignData = (data: Partial<CampaignData>) => {
     dispatch({ type: 'SET_CAMPAIGN_DATA', payload: data });
@@ -160,7 +170,7 @@ export const CampaignProvider: React.FC<CampaignProviderProps> = ({ children }) 
   };
 
   const saveCampaignData = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && isInitialized.current && !isLoading.current) {
       try {
         localStorage.setItem('campaignData', JSON.stringify(state.campaignData));
         localStorage.setItem('currentStep', state.currentStep.toString());
@@ -171,8 +181,9 @@ export const CampaignProvider: React.FC<CampaignProviderProps> = ({ children }) 
   };
 
   const loadCampaignData = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isInitialized.current) {
       try {
+        isLoading.current = true;
         const savedCampaignData = localStorage.getItem('campaignData');
         const savedCurrentStep = localStorage.getItem('currentStep');
 
@@ -185,27 +196,43 @@ export const CampaignProvider: React.FC<CampaignProviderProps> = ({ children }) 
           if (parsedData.updatedAt) {
             parsedData.updatedAt = new Date(parsedData.updatedAt);
           }
-          dispatch({ type: 'SET_CAMPAIGN_DATA', payload: parsedData });
+          
+          const currentStep = savedCurrentStep ? parseInt(savedCurrentStep) : 1;
+          
+          dispatch({ 
+            type: 'LOAD_CAMPAIGN_DATA', 
+            payload: { 
+              campaignData: parsedData, 
+              currentStep 
+            } 
+          });
         }
-
-        if (savedCurrentStep) {
-          dispatch({ type: 'SET_CURRENT_STEP', payload: parseInt(savedCurrentStep) });
-        }
+        
+        isInitialized.current = true;
+        isLoading.current = false;
       } catch (error) {
         console.error('Failed to load campaign data:', error);
+        isInitialized.current = true;
+        isLoading.current = false;
       }
     }
   };
 
-  // حفظ تلقائي عند تغيير البيانات
-  useEffect(() => {
-    saveCampaignData();
-  }, [state.campaignData, state.currentStep]);
-
-  // تحميل البيانات عند بدء التطبيق
+  // تحميل البيانات عند بدء التطبيق (مرة واحدة فقط)
   useEffect(() => {
     loadCampaignData();
   }, []);
+
+  // حفظ تلقائي عند تغيير البيانات (فقط بعد التحميل الأولي)
+  useEffect(() => {
+    if (isInitialized.current && !isLoading.current) {
+      const timeoutId = setTimeout(() => {
+        saveCampaignData();
+      }, 500); // تأخير بسيط لتجنب الحفظ المتكرر
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [state.campaignData, state.currentStep]);
 
   const value: CampaignContextType = {
     state,

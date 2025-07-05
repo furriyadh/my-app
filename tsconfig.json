@@ -1,3 +1,5 @@
+// المسار: tsconfig.json
+
 {
   "compilerOptions": {
     "baseUrl": ".",
@@ -23,7 +25,7 @@
         "name": "next"
       }
     ],
-    "paths": { // <<== أضف هذا القسم
+    "paths": {
       "@/*": ["./src/*"]
     }
   },
@@ -38,3 +40,4 @@
     "supabase"
   ]
 }
+

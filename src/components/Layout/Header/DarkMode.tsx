@@ -11,6 +11,10 @@ const DarkMode: React.FC = () => {
     const storedPreference = localStorage.getItem("theme");
     if (storedPreference === "dark") {
       setIsDarkMode(true);
+    } else if (storedPreference === null) {
+      // Check system preference if no stored preference
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(systemPrefersDark);
     }
   }, []);
 
@@ -38,11 +42,12 @@ const DarkMode: React.FC = () => {
       <div className="relative mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
         <button
           type="button"
-          className="light-dark-toggle leading-none inline-block transition-all relative top-[2px] text-[#fe7a36]"
+          className="light-dark-toggle leading-none inline-block transition-all relative top-[2px] text-[#fe7a36] hover:text-primary-500"
           onClick={handleToggle}
+          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           <i className="material-symbols-outlined !text-[20px] md:!text-[22px]">
-            light_mode
+            {isDarkMode ? "dark_mode" : "light_mode"}
           </i>
         </button>
       </div>
@@ -51,3 +56,4 @@ const DarkMode: React.FC = () => {
 };
 
 export default DarkMode;
+
