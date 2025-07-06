@@ -1180,7 +1180,7 @@ const LocationTargetingPage: React.FC = () => {
               {selectedLocations.length} location{selectedLocations.length !== 1 ? 's' : ''} selected
             </span>
             <button 
-              onClick={() => router.push('/campaign/budget-bidding')}
+              onClick={() => router.push('/campaign/budget-scheduling')}
               className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={selectedLocations.length === 0}
             >
