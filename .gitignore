@@ -1,55 +1,428 @@
-# Dependencies
-node_modules
+# ===================================================
+# Google Ads AI Platform - .gitignore Configuration
+# ملف الحماية المحدث والمنظم
+# ===================================================
+
+# ===================================================
+# Dependencies - التبعيات
+# ===================================================
+node_modules/
 .pnp
 .pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
 
-# Testing
-coverage
+# ===================================================
+# Testing - الاختبارات
+# ===================================================
+coverage/
+.nyc_output
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+test-results/
+test-reports/
+*.lcov
 
-# Next.js
+# ===================================================
+# Next.js - إعدادات Next.js
+# ===================================================
 .next/
 out/
+.swc/
 
-# Production
-build
-dist
+# ===================================================
+# Production - الإنتاج
+# ===================================================
+build/
+dist/
+.vercel/
+.netlify/
 
-# Environment variables
+# ===================================================
+# Environment Variables - متغيرات البيئة (محدث)
+# ===================================================
 .env
+.env.*
+*.env
 .env.local
 .env.development
 .env.production
 .env.test
+.env.staging
+.env.google.ads
+.env.backup
 
 # Backend Environment Variables
 backend/.env
-backend/.env.local
-backend/.env.production
-backend/.env.development
+backend/.env.*
+python/.env
+python/.env.*
 
-# Secrets and sensitive files
-*.secret
+# ===================================================
+# Google Ads API & AI Credentials - بيانات الاعتماد (جديد)
+# ===================================================
+credentials/
+*.json
 *.key
 *.pem
-config/secrets.json
+*.p12
+*.pfx
+config/secrets/
+secrets/
+keys/
+certs/
 
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Specific Google Ads files
+google_ads_credentials.json
+service-account-key.json
+oauth-credentials.json
+api-keys.json
+google-oauth-token.json
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
+# ===================================================
+# Logs & Monitoring - السجلات والمراقبة (جديد)
+# ===================================================
+logs/
+*.log
+*.log.*
+log-*.txt
+debug.log
+error.log
+access.log
+google_ads.log
+ai_processing.log
+performance.log
+scraping.log
+gemini.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# ===================================================
+# AI Cache & Temporary Files - الملفات المؤقتة للذكاء الاصطناعي (جديد)
+# ===================================================
+.cache/
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+.redis/
+redis-data/
+ai-cache/
+scraping-cache/
 
-# Python Environment
+# ===================================================
+# Python Environment - بيئة Python (محدث)
+# ===================================================
 backend/__pycache__/
 backend/*.pyc
 backend/env/
 backend/venv/
+python/__pycache__/
+python/*.pyc
+python/*.pyo
+python/*.pyd
+python/.Python
+python/build/
+python/develop-eggs/
+python/dist/
+python/downloads/
+python/eggs/
+python/.eggs/
+python/lib/
+python/lib64/
+python/parts/
+python/sdist/
+python/var/
+python/wheels/
+python/*.egg-info/
+python/.installed.cfg
+python/*.egg
+python/ai_env/
+python/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ===================================================
+# AI Models & Data - نماذج الذكاء الاصطناعي والبيانات (جديد)
+# ===================================================
+models/
+*.model
+*.pkl
+*.pickle
+*.h5
+*.pb
+*.onnx
+ai_models/
+trained_models/
+datasets/
+data/
+scraped_data/
+training_data/
+
+# ===================================================
+# Debug & Development - التطوير والتصحيح
+# ===================================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ===================================================
+# IDE & Editor Files - ملفات المحررات
+# ===================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+*.code-workspace
+
+# ===================================================
+# OS Generated Files - ملفات النظام
+# ===================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ===================================================
+# Secrets & Sensitive Files - الملفات الحساسة (محدث)
+# ===================================================
+*.secret
+*.private
+*.confidential
+security/
+private/
+sensitive/
+.secrets/
+.private/
+config/secrets.json
+sensitive-config/
+
+# ===================================================
+# Backup Files - ملفات النسخ الاحتياطية (جديد)
+# ===================================================
+backup/
+*.backup
+*.bak
+*.old
+*.orig
+*.save
+.backup/
+
+# ===================================================
+# Large Files & Archives - الملفات الكبيرة (جديد)
+# ===================================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.iso
+*.dmg
+large_files/
+archives/
+
+# ===================================================
+# Database Files - ملفات قواعد البيانات (جديد)
+# ===================================================
+*.db
+*.sqlite
+*.sqlite3
+database.json
+db_backup/
+migrations/backup/
+*.mdb
+*.accdb
+
+# ===================================================
+# Configuration Overrides - تجاوزات الإعداد (جديد)
+# ===================================================
+config.local.js
+config.local.json
+settings.local.json
+local-config/
+override-config/
+.local/
+
+# ===================================================
+# Development Tools - أدوات التطوير (جديد)
+# ===================================================
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.sass-cache/
+.grunt/
+.bower_components/
+
+# ===================================================
+# Docker & Containers - Docker والحاويات (جديد)
+# ===================================================
+docker-compose.override.yml
+.dockerignore
+Dockerfile.local
+.docker/
+docker-data/
+
+# ===================================================
+# Monitoring & Analytics - المراقبة والتحليلات (جديد)
+# ===================================================
+analytics/
+metrics/
+monitoring/
+performance-reports/
+usage-stats/
+telemetry/
+
+# ===================================================
+# User Uploads & Generated Content - المحتوى المُحمل والمُولد (جديد)
+# ===================================================
+uploads/
+user-content/
+generated/
+output/
+exports/
+downloads/
+media/uploads/
+
+# ===================================================
+# Third-party Integrations - التكاملات الخارجية (جديد)
+# ===================================================
+integrations/config/
+third-party/secrets/
+external-apis/keys/
+webhooks/config/
+
+# ===================================================
+# AI Processing Files - ملفات معالجة الذكاء الاصطناعي (جديد)
+# ===================================================
+processing/
+queue/
+jobs/
+tasks/
+workers/
+ai-processing/
+batch-jobs/
+
+# ===================================================
+# Security & Compliance - الأمان والامتثال (جديد)
+# ===================================================
+security-reports/
+compliance/
+audit-logs/
+security-scans/
+vulnerability-reports/
+
+# ===================================================
+# Custom Application Files - ملفات التطبيق المخصصة
+# ===================================================
+# Add your custom files here - أضف ملفاتك المخصصة هنا
+
+# Google Ads specific
+google-ads-cache/
+ads-reports/
+campaign-exports/
+
+# ScrapeGraphAI specific
+scraping-results/
+website-analysis/
+extracted-content/
+
+# Gemini AI specific
+gemini-responses/
+ai-generated-content/
+content-cache/
+
+# ===================================================
+# Temporary Development Files - ملفات التطوير المؤقتة
+# ===================================================
+.temp/
+.tmp/
+scratch/
+playground/
+experiments/
+prototypes/
+
+# ===================================================
+# Package Manager Files - ملفات مدير الحزم
+# ===================================================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+
+# ===================================================
+# Runtime Files - ملفات وقت التشغيل
+# ===================================================
+*.pid
+*.seed
+*.pid.lock
+.lock-wscript
+
+# ===================================================
+# Optional npm cache directory
+# ===================================================
+.npm
+
+# ===================================================
+# Optional eslint cache
+# ===================================================
+.eslintcache
+
+# ===================================================
+# Microbundle cache
+# ===================================================
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# ===================================================
+# Optional REPL history
+# ===================================================
+.node_repl_history
+
+# ===================================================
+# Output of 'npm pack'
+# ===================================================
+*.tgz
+
+# ===================================================
+# Yarn Integrity file
+# ===================================================
+.yarn-integrity
+
+# ===================================================
+# dotenv environment variables file
+# ===================================================
+.env.test.local
+
+# ===================================================
+# Stores VSCode versions used for testing VSCode extensions
+# ===================================================
+.vscode-test
+
+# ===================================================
+# yarn v2
+# ===================================================
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+

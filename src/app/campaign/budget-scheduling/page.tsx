@@ -196,10 +196,10 @@ const BudgetSlider: React.FC<{
           </div>
           <p className="text-xs text-green-600 dark:text-green-400">
             {budgetLevel === 'beginner' 
-              ? "مناسب للاختبار والتعلم - ركز على الكلمات المفتاحية منخفضة التكلفة"
+              ? "Suitable for testing and learning - focus on low-cost keywords"
               : budgetLevel === 'intermediate'
-              ? "ميزانية متوازنة - يمكنك استهداف كلمات متوسطة المنافسة"
-              : "ميزانية قوية - يمكنك المنافسة على الكلمات عالية القيمة والمنافسة"
+              ? "Balanced budget - you can target medium-competition keywords"
+              : "Strong budget - you can compete for high value and competitive keywords"
             }
           </p>
           <div className="mt-2 text-xs text-green-500 dark:text-green-400">
