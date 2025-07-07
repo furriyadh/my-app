@@ -24,8 +24,27 @@ import time
 
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v15.services.types.customer_service import ListAccessibleCustomersRequest
-from google.ads.googleads.v15.services.types.google_ads_service import SearchGoogleAdsRequest
+
+# استخدام أحدث إصدار متاح (v18)
+try:
+    from google.ads.googleads.v18.services.types.customer_service import ListAccessibleCustomersRequest
+    from google.ads.googleads.v18.services.types.google_ads_service import SearchGoogleAdsRequest
+    API_VERSION = "v18"
+except ImportError:
+    try:
+        from google.ads.googleads.v19.services.types.customer_service import ListAccessibleCustomersRequest
+        from google.ads.googleads.v19.services.types.google_ads_service import SearchGoogleAdsRequest
+        API_VERSION = "v19"
+    except ImportError:
+        try:
+            from google.ads.googleads.v20.services.types.customer_service import ListAccessibleCustomersRequest
+            from google.ads.googleads.v20.services.types.google_ads_service import SearchGoogleAdsRequest
+            API_VERSION = "v20"
+        except ImportError:
+            # استخدام الاستيراد العام إذا فشلت الإصدارات المحددة
+            ListAccessibleCustomersRequest = None
+            SearchGoogleAdsRequest = None
+            API_VERSION = "generic"
 
 from ..config.google_ads_config import GoogleAdsConfig
 from ..utils.logger import setup_logger
