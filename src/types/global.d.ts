@@ -1,47 +1,5 @@
 // Global type definitions
 
-declare module 'long' {
-  interface Long {
-    high: number;
-    low: number;
-    unsigned: boolean;
-    add(addend: Long | number | string): Long;
-    subtract(subtrahend: Long | number | string): Long;
-    multiply(multiplier: Long | number | string): Long;
-    divide(divisor: Long | number | string): Long;
-    modulo(divisor: Long | number | string): Long;
-    equals(other: Long | number | string): boolean;
-    compare(other: Long | number | string): number;
-    toString(radix?: number): string;
-    toNumber(): number;
-    toBytes(le?: boolean): number[];
-    toBytesLE(): number[];
-    toBytesBE(): number[];
-  }
-
-  interface LongConstructor {
-    new(low: number, high?: number, unsigned?: boolean): Long;
-    (low: number, high?: number, unsigned?: boolean): Long;
-    fromBits(lowBits: number, highBits: number, unsigned?: boolean): Long;
-    fromInt(value: number, unsigned?: boolean): Long;
-    fromNumber(value: number, unsigned?: boolean): Long;
-    fromString(str: string, unsigned?: boolean | number, radix?: number): Long;
-    fromValue(val: Long | number | string | {low: number, high: number, unsigned: boolean}): Long;
-    isLong(obj: any): obj is Long;
-    MAX_VALUE: Long;
-    MIN_VALUE: Long;
-    NEG_ONE: Long;
-    ONE: Long;
-    UMAX_VALUE: Long;
-    UONE: Long;
-    UZERO: Long;
-    ZERO: Long;
-  }
-
-  const Long: LongConstructor;
-  export = Long;
-}
-
 declare module 'shimmer' {
   export function shimmer(element: HTMLElement): void;
   export function shimmer(selector: string): void;
