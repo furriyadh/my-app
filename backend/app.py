@@ -244,6 +244,16 @@ def create_app():
     except Exception as e:
         app.logger.error(f"❌ خطأ في تسجيل AI Blueprints: {e}")
     
+        # تسجيل Merchant Center Blueprint
+    try:
+        from backend.routes.merchant_center_routes import merchant_center_bp
+        app.register_blueprint(merchant_center_bp, url_prefix="/api/merchant-center")
+        app.logger.info("✅ تم تحميل Merchant Center Blueprint بنجاح")
+    except ImportError as e:
+        app.logger.warning(f"⚠️ خطأ في تحميل Merchant Center Blueprint: {e}")
+    except Exception as e:
+        app.logger.error(f"❌ خطأ في تسجيل Merchant Center Blueprint: {e}")
+        
     # ===========================================
     # المسارات الأساسية
     # ===========================================

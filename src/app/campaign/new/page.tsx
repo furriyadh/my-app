@@ -2,105 +2,126 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor } from 'lucide-react';
+
+// Import specialized campaign components
+import SearchCampaignForm from '@/components/campaign/AdCreative/SearchCampaignForm';
+import PerformanceMaxForm from '@/components/campaign/AdCreative/PerformanceMaxForm';
+import ShoppingCampaignForm from '@/components/campaign/AdCreative/ShoppingCampaignForm';
+import VideoCampaignForm from '@/components/campaign/AdCreative/VideoCampaignForm';
+import AppCampaignForm from '@/components/campaign/AdCreative/AppCampaignForm';
+import DisplayCampaignForm from '@/components/campaign/AdCreative/DisplayCampaignForm';
+import DemandGenForm from '@/components/campaign/AdCreative/DemandGenForm';
+import BasicInformationForm from '@/components/campaign/AdCreative/BasicInformationForm';
 
 // Types
-interface AdType {
+interface CampaignType {
   id: string;
   name: string;
   description: string;
   icon: React.ReactNode;
-  features: string[];
-  bestFor: string;
+  badge?: string;
   color: string;
 }
 
 interface CampaignFormData {
-  name: string;
-  websiteUrl: string;
-  type: string | null;
+  campaignType: string | null;
+  searchOptions?: {
+    websiteVisits: boolean;
+    phoneCalls: boolean;
+  };
+  performanceMaxOptions?: {
+    addProducts: boolean;
+    merchantCenterAccount?: string;
+  };
+  shoppingOptions?: {
+    campaignSubtype: 'performance-max' | 'standard' | null;
+    merchantCenterAccount?: string;
+  };
+  videoOptions?: {
+    campaignSubtype: 'video-views' | 'video-reach' | 'drive-conversions' | 'ad-sequence' | 'audio-reach' | null;
+    videoReachType?: 'efficient-reach' | 'non-skippable-reach' | 'target-frequency' | null;
+  };
+  appOptions?: {
+    campaignSubtype: 'app-installs' | 'app-engagement' | 'app-pre-registration' | null;
+    appPlatform?: 'android' | 'ios' | null;
+    appSearchQuery?: string;
+    appStoreUrl?: string;
+  };
+  displayOptions?: {
+    displayType: 'standard' | 'gmail' | 'mobile-app' | null;
+  };
+  demandGenOptions?: {
+    campaignFormat: 'standard' | 'carousel' | null;
+  };
+  basicInfo: {
+    campaignName: string;
+    finalUrl?: string;
+    phoneNumber?: string;
+    videoUrl?: string;
+  };
 }
 
 // Campaign Steps for Progress Indicator
 const campaignSteps = [
-  { id: 1, name: 'Basic Info & Ad Type', description: 'Campaign details and advertisement type' },
+  { id: 1, name: 'Campaign Setup', description: 'Choose campaign type and configure options' },
   { id: 2, name: 'Location Targeting', description: 'Geographic and demographic targeting' },
   { id: 3, name: 'Budget & Bidding', description: 'Budget settings and bidding strategy' },
   { id: 4, name: 'Review & Launch', description: 'Final review and campaign launch' }
 ];
 
-// Ad Types Data (8 types)
-const adTypes: AdType[] = [
+// Campaign Types Data (Google Ads exact types)
+const campaignTypes: CampaignType[] = [
   {
     id: 'search',
-    name: 'Search Ads',
-    description: 'Appear in Google search results when users search for relevant keywords',
+    name: 'Search',
+    description: 'Show text ads when people search for your products or services on Google',
     icon: <Search className="w-8 h-8" />,
-    features: ['Text-based ads', 'Keyword targeting', 'High intent traffic', 'Call Ads'],
-    bestFor: 'Capturing users actively searching for your products/services, Call Ads',
+    badge: 'Most Popular',
     color: 'blue'
-  },
-  {
-    id: 'display',
-    name: 'Display Network Ads',
-    description: 'Visual ads that appear on websites and apps across Google\'s network',
-    icon: <Globe className="w-8 h-8" />,
-    features: ['Image and banner ads', 'Wide reach', 'Brand awareness'],
-    bestFor: 'Building brand awareness and reaching new audiences',
-    color: 'green'
-  },
-  {
-    id: 'youtube',
-    name: 'YouTube Ads',
-    description: 'Comprehensive video advertising on YouTube platform with multiple formats',
-    icon: <Youtube className="w-8 h-8" />,
-    features: ['Skippable/non-skippable videos', 'YouTube-specific targeting', 'Creator partnerships', 'Multiple video formats'],
-    bestFor: 'Video content creators, brand storytelling, and engaging visual campaigns',
-    color: 'red'
-  },
-  {
-    id: 'app',
-    name: 'App Promotion Ads',
-    description: 'Promote your mobile apps across Google Play and other platforms',
-    icon: <Smartphone className="w-8 h-8" />,
-    features: ['App install campaigns', 'Cross-platform reach', 'App engagement'],
-    bestFor: 'Increasing app downloads and user engagement',
-    color: 'purple'
-  },
-  {
-    id: 'shopping',
-    name: 'Shopping Ads',
-    description: 'Product listings with images, prices, and merchant information',
-    icon: <ShoppingBag className="w-8 h-8" />,
-    features: ['Product images', 'Price display', 'Direct to product'],
-    bestFor: 'E-commerce businesses selling physical products',
-    color: 'orange'
-  },
-  {
-    id: 'smart',
-    name: 'Smart Campaigns',
-    description: 'AI-powered campaigns that automatically optimize performance',
-    icon: <Zap className="w-8 h-8" />,
-    features: ['AI optimization', 'Automated bidding', 'Multi-channel reach'],
-    bestFor: 'Small businesses wanting automated campaign management',
-    color: 'yellow'
   },
   {
     id: 'performance-max',
     name: 'Performance Max',
-    description: 'Goal-based campaigns across all Google channels for maximum performance',
+    description: 'Get the best of Google\'s automation to reach customers across all channels',
     icon: <TrendingUp className="w-8 h-8" />,
-    features: ['All Google channels', 'Goal optimization', 'Asset-based'],
-    bestFor: 'Maximizing conversions across all Google properties',
+    badge: 'Recommended',
     color: 'indigo'
   },
   {
-    id: 'local',
-    name: 'Local Service Ads',
-    description: 'Promote local businesses on Google Maps and local search results',
-    icon: <MapPin className="w-8 h-8" />,
-    features: ['Google Maps placement', 'Local targeting', 'Business verification'],
-    bestFor: 'Local businesses and service providers',
+    id: 'display',
+    name: 'Display',
+    description: 'Show image ads on websites and apps that partner with Google',
+    icon: <Monitor className="w-8 h-8" />,
+    color: 'green'
+  },
+  {
+    id: 'shopping',
+    name: 'Shopping',
+    description: 'Promote your products with rich product information and images',
+    icon: <ShoppingBag className="w-8 h-8" />,
+    color: 'orange'
+  },
+  {
+    id: 'video',
+    name: 'Video',
+    description: 'Show video ads on YouTube and across the web',
+    icon: <Play className="w-8 h-8" />,
+    color: 'red'
+  },
+  {
+    id: 'app',
+    name: 'App',
+    description: 'Promote your mobile app across Google\'s network',
+    icon: <Smartphone className="w-8 h-8" />,
+    color: 'purple'
+  },
+  {
+    id: 'demand-gen',
+    name: 'Demand Gen',
+    description: 'Drive demand for your products across Google\'s most visual and engaging surfaces',
+    icon: <Globe className="w-8 h-8" />,
+    badge: 'New',
     color: 'teal'
   }
 ];
@@ -112,7 +133,6 @@ const colorVariants = {
   red: 'border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 bg-red-50 dark:bg-red-900/20',
   purple: 'border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700 bg-purple-50 dark:bg-purple-900/20',
   orange: 'border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 bg-orange-50 dark:bg-orange-900/20',
-  yellow: 'border-yellow-200 dark:border-yellow-800 hover:border-yellow-300 dark:hover:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20',
   indigo: 'border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20',
   teal: 'border-teal-200 dark:border-teal-800 hover:border-teal-300 dark:hover:border-teal-700 bg-teal-50 dark:bg-teal-900/20'
 };
@@ -123,7 +143,6 @@ const iconColorVariants = {
   red: 'text-red-600 dark:text-red-400',
   purple: 'text-purple-600 dark:text-purple-400',
   orange: 'text-orange-600 dark:text-orange-400',
-  yellow: 'text-yellow-600 dark:text-yellow-400',
   indigo: 'text-indigo-600 dark:text-indigo-400',
   teal: 'text-teal-600 dark:text-teal-400'
 };
@@ -132,49 +151,152 @@ const CampaignNewPage: React.FC = () => {
   const router = useRouter();
   
   const [formData, setFormData] = useState<CampaignFormData>({
-    name: '',
-    websiteUrl: '',
-    type: null
+    campaignType: null,
+    searchOptions: {
+      websiteVisits: false,
+      phoneCalls: false
+    },
+    performanceMaxOptions: {
+      addProducts: false
+    },
+    shoppingOptions: {
+      campaignSubtype: null
+    },
+    videoOptions: {
+      campaignSubtype: null
+    },
+    appOptions: {
+      campaignSubtype: null,
+      appPlatform: null,
+      appSearchQuery: '',
+      appStoreUrl: ''
+    },
+    displayOptions: {
+      displayType: null
+    },
+    demandGenOptions: {
+      campaignFormat: null
+    },
+    basicInfo: {
+      campaignName: '',
+      finalUrl: '',
+      phoneNumber: '',
+      videoUrl: ''
+    }
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form validation
+  // Enhanced form validation for all campaign types
   const validateForm = (): boolean => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Campaign name is required';
+    // Campaign type validation
+    if (!formData.campaignType) {
+      newErrors.campaignType = 'Please select a campaign type';
     }
 
-    if (!formData.websiteUrl.trim()) {
-      newErrors.websiteUrl = 'Website URL is required';
-    } else if (!formData.websiteUrl.startsWith('https://')) {
-      newErrors.websiteUrl = 'URL must start with https://';
+    // Campaign name validation
+    if (!formData.basicInfo?.campaignName?.trim()) {
+      newErrors.campaignName = 'Campaign name is required';
     }
 
-    if (!formData.type) {
-      newErrors.type = 'Please select an ad type';
+    // Campaign-specific validations
+    if (formData.campaignType === 'search') {
+      if (!formData.searchOptions?.websiteVisits && !formData.searchOptions?.phoneCalls) {
+        newErrors.searchOptions = 'Please select at least one option (Website visits or Phone calls)';
+      }
+      if (formData.searchOptions?.phoneCalls && !formData.basicInfo?.phoneNumber?.trim()) {
+        newErrors.phoneNumber = 'Phone number is required for call ads';
+      }
+    }
+
+    if (formData.campaignType === 'performance-max') {
+      if (!formData.basicInfo?.finalUrl?.trim()) {
+        newErrors.finalUrl = 'Final URL is required for Performance Max campaigns';
+      }
+      if (formData.performanceMaxOptions?.addProducts && !formData.performanceMaxOptions?.merchantCenterAccount) {
+        newErrors.merchantCenter = 'Please select a Merchant Center account';
+      }
+    }
+
+    if (formData.campaignType === 'shopping') {
+      if (!formData.shoppingOptions?.campaignSubtype) {
+        newErrors.campaignSubtype = 'Please select a campaign subtype';
+      }
+      if (!formData.shoppingOptions?.merchantCenterAccount) {
+        newErrors.merchantCenter = 'Please select a Merchant Center account';
+      }
+    }
+
+    if (formData.campaignType === 'video') {
+      if (!formData.videoOptions?.campaignSubtype) {
+        newErrors.campaignSubtype = 'Please select a campaign subtype';
+      }
+      if (!formData.basicInfo?.videoUrl?.trim()) {
+        newErrors.videoUrl = 'Video URL is required for Video campaigns';
+      }
+      if (formData.videoOptions?.campaignSubtype === 'video-reach' && !formData.videoOptions?.videoReachType) {
+        newErrors.videoReachType = 'Please select a reach strategy';
+      }
+    }
+
+    if (formData.campaignType === 'app') {
+      if (!formData.appOptions?.campaignSubtype) {
+        newErrors.campaignSubtype = 'Please select a campaign subtype';
+      }
+      if (!formData.appOptions?.appSearchQuery?.trim() && !formData.appOptions?.appStoreUrl?.trim()) {
+        newErrors.appSearch = 'Please search for your app or enter app store URL';
+      }
+    }
+
+    if (formData.campaignType === 'display') {
+      if (!formData.displayOptions?.displayType) {
+        newErrors.displayType = 'Please select a display campaign type';
+      }
+      if (!formData.basicInfo?.finalUrl?.trim()) {
+        newErrors.finalUrl = 'Final URL is required for Display campaigns';
+      }
+    }
+
+    if (formData.campaignType === 'demand-gen') {
+      if (!formData.demandGenOptions?.campaignFormat) {
+        newErrors.campaignFormat = 'Please select a campaign format';
+      }
+      if (!formData.basicInfo?.finalUrl?.trim()) {
+        newErrors.finalUrl = 'Final URL is required for Demand Gen campaigns';
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle input changes
-  const handleInputChange = (field: keyof CampaignFormData, value: any) => {
+  // Handle campaign type selection
+  const handleCampaignTypeSelect = (typeId: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      campaignType: typeId,
+      // Reset all options when changing type
+      searchOptions: { websiteVisits: false, phoneCalls: false },
+      performanceMaxOptions: { addProducts: false },
+      shoppingOptions: { campaignSubtype: null },
+      videoOptions: { campaignSubtype: null },
+      appOptions: { campaignSubtype: null, appPlatform: null, appSearchQuery: '', appStoreUrl: '' },
+      displayOptions: { displayType: null },
+      demandGenOptions: { campaignFormat: null },
+      // Keep basicInfo but ensure it has default values
+      basicInfo: {
+        campaignName: prev.basicInfo?.campaignName || '',
+        finalUrl: prev.basicInfo?.finalUrl || '',
+        phoneNumber: prev.basicInfo?.phoneNumber || '',
+        videoUrl: prev.basicInfo?.videoUrl || ''
+      }
     }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+    
+    if (errors.campaignType) {
+      setErrors(prev => ({ ...prev, campaignType: '' }));
     }
   };
 
@@ -196,6 +318,108 @@ const CampaignNewPage: React.FC = () => {
     }
   };
 
+  // Render campaign-specific options using specialized components
+  const renderCampaignOptions = () => {
+    if (!formData.campaignType) return null;
+
+    switch (formData.campaignType) {
+      case 'search':
+        return (
+          <SearchCampaignForm
+            formData={formData.searchOptions || { websiteVisits: false, phoneCalls: false }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, searchOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      case 'performance-max':
+        return (
+          <PerformanceMaxForm
+            formData={formData.performanceMaxOptions || { addProducts: false }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, performanceMaxOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      case 'shopping':
+        return (
+          <ShoppingCampaignForm
+            formData={formData.shoppingOptions || { campaignSubtype: null }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, shoppingOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      case 'video':
+        return (
+          <VideoCampaignForm
+            formData={formData.videoOptions || { campaignSubtype: null }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, videoOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      case 'app':
+        return (
+          <AppCampaignForm
+            formData={formData.appOptions || { campaignSubtype: null, appPlatform: null, appSearchQuery: '' }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, appOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      case 'display':
+        return (
+          <DisplayCampaignForm
+            formData={formData.displayOptions || { displayType: null }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, displayOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      case 'demand-gen':
+        return (
+          <DemandGenForm
+            formData={formData.demandGenOptions || { campaignFormat: null }}
+            onUpdate={(data) => setFormData(prev => ({ ...prev, demandGenOptions: data }))}
+            errors={errors}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Render Basic Information using the specialized component
+  const renderBasicInformation = () => {
+    if (!formData.campaignType) return null;
+
+    // Ensure basicInfo is always defined with default values
+    const basicInfo = formData.basicInfo || {
+      campaignName: '',
+      finalUrl: '',
+      phoneNumber: '',
+      videoUrl: ''
+    };
+
+    return (
+      <BasicInformationForm
+        campaignType={formData.campaignType}
+        formData={basicInfo}
+        searchOptions={formData.searchOptions}
+        onUpdate={(data) => setFormData(prev => ({ 
+          ...prev, 
+          basicInfo: { 
+            ...prev.basicInfo, 
+            ...data 
+          } 
+        }))}
+        errors={errors}
+      />
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="p-6 space-y-6">
@@ -210,11 +434,11 @@ const CampaignNewPage: React.FC = () => {
           </button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Campaign</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Build your advertising campaign step by step</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Choose your campaign type and configure settings</p>
           </div>
         </div>
 
-        {/* Enhanced Progress Indicator */}
+        {/* Campaign Setup Progress */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Campaign Setup Progress</h3>
@@ -262,78 +486,46 @@ const CampaignNewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Basic Information */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Basic Information</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Campaign Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Campaign Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                  errors.name ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
-                }`}
-                placeholder="Enter campaign name"
-              />
-              {errors.name && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
-              )}
-            </div>
-
-            {/* Website URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Website URL
-              </label>
-              <input
-                type="url"
-                value={formData.websiteUrl}
-                onChange={(e) => handleInputChange('websiteUrl', e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                  errors.websiteUrl ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
-                }`}
-                placeholder="https://example.com"
-              />
-              {errors.websiteUrl && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.websiteUrl}</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Ad Type Selection */}
+        {/* Campaign Type Selection */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Choose Ad Type</h2>
-            <p className="text-gray-600 dark:text-gray-400">Select the type of advertisement that best fits your campaign goals</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Select a campaign type</h2>
+            <p className="text-gray-600 dark:text-gray-400">Choose the campaign type that best fits your advertising goals</p>
           </div>
 
-          {errors.type && (
+          {errors.campaignType && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-700 dark:text-red-400 text-sm">{errors.type}</p>
+              <p className="text-red-700 dark:text-red-400 text-sm">{errors.campaignType}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {adTypes.map((adType) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {campaignTypes.map((campaignType) => (
               <div
-                key={adType.id}
-                onClick={() => handleInputChange('type', adType.id)}
+                key={campaignType.id}
+                onClick={() => handleCampaignTypeSelect(campaignType.id)}
                 className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 hover:shadow-lg ${
-                  formData.type === adType.id 
-                    ? `${colorVariants[adType.color as keyof typeof colorVariants]} border-opacity-100` 
+                  formData.campaignType === campaignType.id 
+                    ? `${colorVariants[campaignType.color as keyof typeof colorVariants]} border-opacity-100` 
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
                 }`}
               >
-                {/* Selection indicator */}
-                {formData.type === adType.id && (
+                {/* Badge */}
+                {campaignType.badge && (
                   <div className="absolute top-4 right-4">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      campaignType.badge === 'Recommended' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                      campaignType.badge === 'Most Popular' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                    }`}>
+                      {campaignType.badge}
+                    </span>
+                  </div>
+                )}
+
+                {/* Selection indicator */}
+                {formData.campaignType === campaignType.id && (
+                  <div className="absolute top-4 left-4">
                     <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -343,43 +535,29 @@ const CampaignNewPage: React.FC = () => {
                 )}
 
                 {/* Icon */}
-                <div className={`mb-4 ${iconColorVariants[adType.color as keyof typeof iconColorVariants]}`}>
-                  {adType.icon}
+                <div className={`mb-4 ${iconColorVariants[campaignType.color as keyof typeof iconColorVariants]}`}>
+                  {campaignType.icon}
                 </div>
 
                 {/* Title */}
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {adType.name}
+                  {campaignType.name}
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  {adType.description}
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  {campaignType.description}
                 </p>
-
-                {/* Best For */}
-                <div className="mb-4">
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    Best For:
-                  </span>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                    {adType.bestFor}
-                  </p>
-                </div>
-
-                {/* Features */}
-                <div className="space-y-2">
-                  {adType.features.map((feature, index) => (
-                    <div key={index} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"></div>
-                      {feature}
-                    </div>
-                  ))}
-                </div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Campaign-specific Options */}
+        {renderCampaignOptions()}
+
+        {/* Basic Information */}
+        {renderBasicInformation()}
 
         {/* Navigation Buttons */}
         <div className="flex justify-between items-center">
@@ -393,7 +571,7 @@ const CampaignNewPage: React.FC = () => {
           
           <button
             onClick={handleNext}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !formData.campaignType}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
           >
             {isSubmitting ? (
