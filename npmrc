@@ -25,3 +25,15 @@ fund=false
 # Update notifier
 update-notifier=false
 
+# Force resolution
+force=true
+
+# Prefer offline
+prefer-offline=false
+
+# Engine strict
+engine-strict=false
+
+# Save exact
+save-exact=false
+
