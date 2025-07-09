@@ -1,14 +1,15 @@
-import React from 'react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
-// Utility function for combining classes
-const cn = (...classes) => {
-  return classes.filter(Boolean).join(' ');
-};
+interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
+  value?: number;
+  max?: number;
+}
 
 /**
  * Progress Component - متوافق مع المشروع
  */
-const Progress = React.forwardRef(({ 
+const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(({ 
   className = '',
   value = 0,
   max = 100,
@@ -17,20 +18,20 @@ const Progress = React.forwardRef(({
   // Calculate percentage
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
   
-  return (
-    <div
-      ref={ref}
-      className={cn(
+  return React.createElement(
+    'div',
+    {
+      ref,
+      className: cn(
         'relative h-4 w-full overflow-hidden rounded-full bg-secondary',
         className
-      )}
-      {...props}
-    >
-      <div
-        className="h-full w-full flex-1 bg-primary transition-all"
-        style={{ transform: `translateX(-${100 - percentage}%)` }}
-      />
-    </div>
+      ),
+      ...props
+    },
+    React.createElement('div', {
+      className: "h-full w-full flex-1 bg-primary transition-all",
+      style: { transform: `translateX(-${100 - percentage}%)` }
+    })
   );
 });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,18 +31,18 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base'
   };
 
-  return (
-    <button
-      className={cn(
+  return React.createElement(
+    'button',
+    {
+      className: cn(
         baseClasses,
         variants[variant],
         sizes[size],
         className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
+      ),
+      ...props
+    },
+    children
   );
 };
 
