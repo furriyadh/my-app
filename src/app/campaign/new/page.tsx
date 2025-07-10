@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor } from 'lucide-react';
 
 // Import specialized campaign components
-import SearchCampaignForm from '@/components/campaign/AdCreative/SearchCampaignForm';
-import PerformanceMaxForm from '@/components/campaign/AdCreative/PerformanceMaxForm';
-import ShoppingCampaignForm from '@/components/campaign/AdCreative/ShoppingCampaignForm';
-import VideoCampaignForm from '@/components/campaign/AdCreative/VideoCampaignForm';
-import AppCampaignForm from '@/components/campaign/AdCreative/AppCampaignForm';
-import DisplayCampaignForm from '@/components/campaign/AdCreative/DisplayCampaignForm';
-import DemandGenForm from '@/components/campaign/AdCreative/DemandGenForm';
-import BasicInformationForm from '@/components/campaign/AdCreative/BasicInformationForm';
+import SearchCampaignForm from '@/components/Campaign/AdCreative/SearchCampaignForm';
+import PerformanceMaxForm from '@/components/Campaign/AdCreative/PerformanceMaxForm';
+import ShoppingCampaignForm from '@/components/Campaign/AdCreative/ShoppingCampaignForm';
+import VideoCampaignForm from '@/components/Campaign/AdCreative/VideoCampaignForm';
+import AppCampaignForm from '@/components/Campaign/AdCreative/AppCampaignForm';
+import DisplayCampaignForm from '@/components/Campaign/AdCreative/DisplayCampaignForm';
+import DemandGenForm from '@/components/Campaign/AdCreative/DemandGenForm';
+import BasicInformationForm from '@/components/Campaign/AdCreative/BasicInformationForm';
 
 
 // Types
