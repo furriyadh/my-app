@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([class=dark], [class=dark] *));
+
 @theme {
   --font-body: "Inter", serif;
   --text-xs: 12px;

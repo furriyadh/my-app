@@ -358,3 +358,10 @@ export default function CampaignWizard() {
   );
 }
 
+interface BasicInformationFormProps {
+  campaignType: string;
+  campaignSubtype?: string; // تأكيد إضافة هذه الخاصية
+  onSubmit: (basicInfo: CampaignBasicInfo) => void;
+  initialData: CampaignBasicInfo;
+}
+
