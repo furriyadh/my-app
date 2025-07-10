@@ -1,0 +1,58 @@
+# تجاهل ملفات التطوير
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# تجاهل ملفات النظام
+.DS_Store
+Thumbs.db
+
+# تجاهل ملفات IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# تجاهل ملفات الاختبار
+__tests__/
+*.test.js
+*.test.ts
+*.test.tsx
+*.spec.js
+*.spec.ts
+*.spec.tsx
+
+# تجاهل ملفات التوثيق
+README.md
+CHANGELOG.md
+LICENSE
+
+# تجاهل ملفات Git
+.git/
+.gitignore
+
+# تجاهل ملفات البناء المحلي
+.next/
+out/
+dist/
+build/
+
+# تجاهل ملفات Node
+node_modules/
+.npm/
+.yarn/
+
+# تجاهل ملفات البيئة المحلية
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# تجاهل ملفات TypeScript المؤقتة
+*.tsbuildinfo
+
+# تجاهل ملفات Supabase المحلية
+supabase/.temp/
+supabase/functions/_shared/
+
