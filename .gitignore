@@ -1,6 +1,6 @@
 # ===================================================
-# Google Ads AI Platform - .gitignore Configuration
-# ملف الحماية المحدث والمنظم
+# Google Ads AI Platform - .gitignore Configuration (محدث ومنظف)
+# ملف الحماية المحدث والمنظم - تم إزالة المشاكل
 # ===================================================
 
 # ===================================================
@@ -44,11 +44,10 @@ dist/
 .netlify/
 
 # ===================================================
-# Environment Variables - متغيرات البيئة (محدث)
+# Environment Variables - متغيرات البيئة (محافظة على الأمان)
 # ===================================================
 .env
 .env.*
-*.env
 .env.local
 .env.development
 .env.production
@@ -64,10 +63,9 @@ python/.env
 python/.env.*
 
 # ===================================================
-# Google Ads API & AI Credentials - بيانات الاعتماد (جديد)
+# Google Ads API & AI Credentials - بيانات الاعتماد الحساسة فقط
 # ===================================================
 credentials/
-*.json
 *.key
 *.pem
 *.p12
@@ -77,7 +75,7 @@ secrets/
 keys/
 certs/
 
-# Specific Google Ads files
+# Specific Google Ads credential files (حساسة فقط)
 google_ads_credentials.json
 service-account-key.json
 oauth-credentials.json
@@ -85,7 +83,7 @@ api-keys.json
 google-oauth-token.json
 
 # ===================================================
-# Logs & Monitoring - السجلات والمراقبة (جديد)
+# Logs & Monitoring - السجلات والمراقبة
 # ===================================================
 logs/
 *.log
@@ -101,7 +99,7 @@ scraping.log
 gemini.log
 
 # ===================================================
-# AI Cache & Temporary Files - الملفات المؤقتة للذكاء الاصطناعي (جديد)
+# AI Cache & Temporary Files - الملفات المؤقتة للذكاء الاصطناعي
 # ===================================================
 .cache/
 cache/
@@ -116,7 +114,7 @@ ai-cache/
 scraping-cache/
 
 # ===================================================
-# Python Environment - بيئة Python (محدث)
+# Python Environment - بيئة Python
 # ===================================================
 backend/__pycache__/
 backend/*.pyc
@@ -152,7 +150,7 @@ __pycache__/
 *.so
 
 # ===================================================
-# AI Models & Data - نماذج الذكاء الاصطناعي والبيانات (جديد)
+# AI Models & Data - نماذج الذكاء الاصطناعي والبيانات الكبيرة
 # ===================================================
 models/
 *.model
@@ -202,7 +200,7 @@ Thumbs.db
 desktop.ini
 
 # ===================================================
-# Secrets & Sensitive Files - الملفات الحساسة (محدث)
+# Secrets & Sensitive Files - الملفات الحساسة فقط
 # ===================================================
 *.secret
 *.private
@@ -216,7 +214,7 @@ config/secrets.json
 sensitive-config/
 
 # ===================================================
-# Backup Files - ملفات النسخ الاحتياطية (جديد)
+# Backup Files - ملفات النسخ الاحتياطية
 # ===================================================
 backup/
 *.backup
@@ -227,7 +225,7 @@ backup/
 .backup/
 
 # ===================================================
-# Large Files & Archives - الملفات الكبيرة (جديد)
+# Large Files & Archives - الملفات الكبيرة
 # ===================================================
 *.zip
 *.tar.gz
@@ -239,7 +237,7 @@ large_files/
 archives/
 
 # ===================================================
-# Database Files - ملفات قواعد البيانات (جديد)
+# Database Files - ملفات قواعد البيانات
 # ===================================================
 *.db
 *.sqlite
@@ -251,17 +249,7 @@ migrations/backup/
 *.accdb
 
 # ===================================================
-# Configuration Overrides - تجاوزات الإعداد (جديد)
-# ===================================================
-config.local.js
-config.local.json
-settings.local.json
-local-config/
-override-config/
-.local/
-
-# ===================================================
-# Development Tools - أدوات التطوير (جديد)
+# Development Tools - أدوات التطوير
 # ===================================================
 .eslintcache
 .stylelintcache
@@ -271,7 +259,7 @@ override-config/
 .bower_components/
 
 # ===================================================
-# Docker & Containers - Docker والحاويات (جديد)
+# Docker & Containers - Docker والحاويات
 # ===================================================
 docker-compose.override.yml
 .dockerignore
@@ -280,17 +268,7 @@ Dockerfile.local
 docker-data/
 
 # ===================================================
-# Monitoring & Analytics - المراقبة والتحليلات (جديد)
-# ===================================================
-analytics/
-metrics/
-monitoring/
-performance-reports/
-usage-stats/
-telemetry/
-
-# ===================================================
-# User Uploads & Generated Content - المحتوى المُحمل والمُولد (جديد)
+# User Uploads & Generated Content - المحتوى المُحمل والمُولد
 # ===================================================
 uploads/
 user-content/
@@ -301,15 +279,7 @@ downloads/
 media/uploads/
 
 # ===================================================
-# Third-party Integrations - التكاملات الخارجية (جديد)
-# ===================================================
-integrations/config/
-third-party/secrets/
-external-apis/keys/
-webhooks/config/
-
-# ===================================================
-# AI Processing Files - ملفات معالجة الذكاء الاصطناعي (جديد)
+# AI Processing Files - ملفات معالجة الذكاء الاصطناعي
 # ===================================================
 processing/
 queue/
@@ -320,7 +290,7 @@ ai-processing/
 batch-jobs/
 
 # ===================================================
-# Security & Compliance - الأمان والامتثال (جديد)
+# Security & Compliance - الأمان والامتثال
 # ===================================================
 security-reports/
 compliance/
@@ -331,8 +301,6 @@ vulnerability-reports/
 # ===================================================
 # Custom Application Files - ملفات التطبيق المخصصة
 # ===================================================
-# Add your custom files here - أضف ملفاتك المخصصة هنا
-
 # Google Ads specific
 google-ads-cache/
 ads-reports/
@@ -357,14 +325,6 @@ scratch/
 playground/
 experiments/
 prototypes/
-
-# ===================================================
-# Package Manager Files - ملفات مدير الحزم
-# ===================================================
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-.pnpm-store/
 
 # ===================================================
 # Runtime Files - ملفات وقت التشغيل
