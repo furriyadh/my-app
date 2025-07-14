@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
-import path from 'path';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// إصلاح مشكلة __dirname في ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   // Removed static export to enable middleware and server-side features
