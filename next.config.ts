@@ -14,9 +14,9 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   
-  // تجاهل أخطاء TypeScript أثناء البناء
+  // تجاهل أخطاء TypeScript أثناء البناء (مؤقتاً حتى يتم حل مشاكل الاستيراد)
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // تم تغييرها لـ false لرؤية أخطاء الاستيراد
   },
   
   // تجاهل أخطاء ESLint أثناء البناء
@@ -30,6 +30,20 @@ const nextConfig: NextConfig = {
   },
 
   webpack: (config, { isServer }) => {
+    // إضافة webpack aliases لحل مشاكل الاستيراد
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+      '@/components': path.resolve(__dirname, 'src/components'),
+      '@/utils': path.resolve(__dirname, 'src/utils'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
+      '@/hooks': path.resolve(__dirname, 'src/hooks'),
+      '@/types': path.resolve(__dirname, 'src/types'),
+      '@/services': path.resolve(__dirname, 'src/services'),
+      '@/contexts': path.resolve(__dirname, 'src/contexts'),
+      '@/providers': path.resolve(__dirname, 'src/providers'),
+    };
+
     // إضافة قاعدة لتجاهل ملفات TypeScript داخل مجلد supabase/functions
     config.module.rules.push({
       test: /\.ts$/,
@@ -45,11 +59,10 @@ const nextConfig: NextConfig = {
       tls: false,
     };
 
-    // تجاهل تحذيرات الوحدات
+    // تقليل تحذيرات الوحدات (لكن الاحتفاظ بأخطاء الاستيراد المهمة)
     config.ignoreWarnings = [
-      /Module not found/,
-      /Can't resolve/,
       /Critical dependency/,
+      // إزالة "Module not found" و "Can't resolve" لرؤية مشاكل الاستيراد
     ];
 
     if (isServer) {
