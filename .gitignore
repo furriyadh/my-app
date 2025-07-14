@@ -1,9 +1,17 @@
-# Environment Variables - متغيرات البيئة الحساسة فقط
+# Environment Variables - متغيرات البيئة الحساسة
 .env
 .env.local
 .env.development
 .env.production
 .env.test
+
+# Google Credentials - بيانات اعتماد Google الحساسة
+credentials/google_ads_credentials.json
+credentials/
+*.key
+*.pem
+api-keys.json
+secrets.json
 
 # Node modules
 node_modules/
