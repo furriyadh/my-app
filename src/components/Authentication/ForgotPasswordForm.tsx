@@ -1,17 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { supabase } from "@/utils/supabase/client"; // Import supabase client
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+  
+  useEffect(() => {
+    // تحميل supabase client فقط في المتصفح
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+  
+  return supabase;
+};
 
 const ForgotPasswordForm: React.FC = () => {
+  const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // التأكد من تحميل supabase قبل المتابعة
+    if (!supabase) {
+      setMessage("جاري تحميل النظام...");
+      return;
+    }
+    
     setMessage("");
     setIsLoading(true);
 
@@ -26,6 +49,22 @@ const ForgotPasswordForm: React.FC = () => {
     }
     setIsLoading(false);
   };
+
+  // عرض حالة التحميل إذا لم يتم تحميل supabase بعد
+  if (!supabase) {
+    return (
+      <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]">
+        <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">جاري تحميل النظام...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -63,7 +102,7 @@ const ForgotPasswordForm: React.FC = () => {
                   Forgot your password?
                 </h1>
                 <p className="font-medium leading-[1.5] lg:text-md text-[#445164] dark:text-gray-400">
-                  Enter the email address you used when you joined and we’ll
+                  Enter the email address you used when you joined and we'll
                   send you instructions to reset your password.
                 </p>
               </div>
@@ -115,3 +154,4 @@ const ForgotPasswordForm: React.FC = () => {
 };
 
 export default ForgotPasswordForm;
+

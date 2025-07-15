@@ -1,6 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+// هذا ملف server-side utility لا يحتاج Dynamic Import
+// لأنه يعمل على الخادم وليس في المتصفح
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -34,3 +36,4 @@ export async function createClient() {
     }
   )
 }
+

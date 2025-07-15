@@ -4,7 +4,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/utils/supabase/client";
 import { 
   Eye, 
   EyeOff, 
@@ -24,6 +23,22 @@ import {
   Award,
   Zap
 } from "lucide-react";
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+  
+  useEffect(() => {
+    // تحميل supabase client فقط في المتصفح
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+  
+  return supabase;
+};
 
 // Types
 interface PasswordStrength {
@@ -307,6 +322,7 @@ const SuccessAnimation: React.FC = () => {
 };
 
 const ResetPasswordForm: React.FC = () => {
+  const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
   const router = useRouter();
   const searchParams = useSearchParams();
   const isResetMode = searchParams?.get('mode') === 'reset';
@@ -358,6 +374,15 @@ const ResetPasswordForm: React.FC = () => {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // التأكد من تحميل supabase قبل المتابعة
+    if (!supabase) {
+      setState(prev => ({ 
+        ...prev, 
+        errors: { general: "جاري تحميل النظام..." } 
+      }));
+      return;
+    }
+    
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setState(prev => ({ ...prev, errors }));
@@ -408,7 +433,7 @@ const ResetPasswordForm: React.FC = () => {
         } 
       }));
     }
-  }, [formData, validateForm, isResetMode, router]);
+  }, [formData, validateForm, isResetMode, router, supabase]);
 
   // Handle input changes
   const handleInputChange = useCallback((field: keyof FormData, value: string) => {
@@ -437,7 +462,7 @@ const ResetPasswordForm: React.FC = () => {
   // Check for reset token on mount
   useEffect(() => {
     const checkResetToken = async () => {
-      if (isResetMode) {
+      if (isResetMode && supabase) {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error || !session) {
           router.push("/authentication/forgot-password");
@@ -446,7 +471,19 @@ const ResetPasswordForm: React.FC = () => {
     };
 
     checkResetToken();
-  }, [isResetMode, router]);
+  }, [isResetMode, router, supabase]);
+
+  // عرض حالة التحميل إذا لم يتم تحميل supabase بعد
+  if (!supabase) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">جاري تحميل النظام...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (state.isSuccess) {
     return (

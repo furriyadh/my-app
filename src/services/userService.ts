@@ -1,14 +1,25 @@
 // خدمات المستخدم (User Services)
 // مسار: src/services/userService.ts
 
-import { supabase } from '@/utils/supabase/client';
 import { UserProfile, UserProfileResponse } from '@/types/user';
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const getSupabaseClient = async () => {
+  if (typeof window !== 'undefined') {
+    const { supabase } = await import('@/utils/supabase/client');
+    return supabase;
+  }
+  throw new Error('Supabase client can only be used in browser environment');
+};
 
 export class UserService {
   // جلب بيانات المستخدم الحالي
   static async getCurrentUserProfile(): Promise<UserProfileResponse> {
     console.log("UserService: Attempting to fetch current user profile...");
     try {
+      // تحميل supabase client بشكل ديناميكي
+      const supabase = await getSupabaseClient();
+      
       // الحصول على الجلسة الحالية أولاً
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
@@ -100,6 +111,9 @@ export class UserService {
   static async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfileResponse> {
     console.log("UserService: Attempting to update user profile with data:", profileData);
     try {
+      // تحميل supabase client بشكل ديناميكي
+      const supabase = await getSupabaseClient();
+      
       // الحصول على الجلسة الحالية أولاً
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
@@ -151,6 +165,9 @@ export class UserService {
   static async uploadProfileImage(file: File): Promise<{ url: string | null; error: string | null }> {
     console.log("UserService: Attempting to upload profile image...");
     try {
+      // تحميل supabase client بشكل ديناميكي
+      const supabase = await getSupabaseClient();
+      
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
@@ -204,6 +221,9 @@ export class UserService {
   static async deleteUserProfile(): Promise<{ success: boolean; error: string | null }> {
     console.log("UserService: Attempting to delete user profile...");
     try {
+      // تحميل supabase client بشكل ديناميكي
+      const supabase = await getSupabaseClient();
+      
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
@@ -241,3 +261,4 @@ export class UserService {
     }
   }
 }
+

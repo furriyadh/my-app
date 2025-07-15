@@ -3,7 +3,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface GoogleAdsAccount {
@@ -15,7 +15,8 @@ interface GoogleAdsAccount {
   manager: boolean;
 }
 
-const SelectAdsAccountPage: React.FC = () => {
+// Component منفصل يستخدم useSearchParams
+const SelectAdsAccountContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
@@ -230,6 +231,26 @@ const SelectAdsAccountPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Loading component
+const LoadingFallback: React.FC = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">جاري تحميل الصفحة...</h2>
+      <p className="text-gray-600">يرجى الانتظار</p>
+    </div>
+  </div>
+);
+
+// Main page component مع Suspense boundary
+const SelectAdsAccountPage: React.FC = () => {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SelectAdsAccountContent />
+    </Suspense>
   );
 };
 

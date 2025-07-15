@@ -1,15 +1,34 @@
-// AccountSettingsForm محدث مع Supabase
+// AccountSettingsForm محدث مع Supabase - معدل لـ Dynamic Import
 // مسار: src/components/Settings/AccountSettingsForm.tsx
 
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { UserService } from "@/services/userService";
 import { UserProfile } from "@/types/user";
-import { supabase } from "@/utils/supabase/client"; // استيراد supabase
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+  
+  useEffect(() => {
+    // تحميل supabase client فقط في المتصفح
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+  
+  return supabase;
+};
 
 const AccountSettingsForm: React.FC = () => {
+  const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
+  
   // حالة لتخزين بيانات المستخدم
   const [userData, setUserData] = useState<UserProfile>({
     first_name: "",
@@ -43,6 +62,9 @@ const AccountSettingsForm: React.FC = () => {
 
   // جلب بيانات المستخدم عند تحميل المكون أو تغيير حالة المصادقة
   useEffect(() => {
+    // التأكد من تحميل supabase قبل المتابعة
+    if (!supabase) return;
+    
     const fetchUserData = async () => {
       try {
         setLoading(true);
@@ -68,9 +90,9 @@ const AccountSettingsForm: React.FC = () => {
     // جلب البيانات عند تحميل المكون لأول مرة
     fetchUserData();
 
-    // الاستماع لتغييرات حالة المصادقة
+    // الاستماع لتغييرات حالة المصادقة مع تحديد أنواع البيانات
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event: AuthChangeEvent, session: Session | null) => {
         if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
           console.log("Auth state changed:", event, session); // سجل تصحيح
           fetchUserData(); // إعادة جلب البيانات عند تسجيل الدخول أو الخروج
@@ -82,7 +104,7 @@ const AccountSettingsForm: React.FC = () => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []); // لا توجد تبعيات هنا لأن المستمع يتعامل مع التغييرات
+  }, [supabase]); // إضافة supabase كتبعية
 
   // دالة لتحديث البيانات
   const handleInputChange = (field: keyof UserProfile, value: string) => {
@@ -175,7 +197,7 @@ const AccountSettingsForm: React.FC = () => {
   };
 
   // عرض حالة التحميل
-  if (loading) {
+  if (loading || !supabase) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -510,3 +532,4 @@ const AccountSettingsForm: React.FC = () => {
 };
 
 export default AccountSettingsForm;
+

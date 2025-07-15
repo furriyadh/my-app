@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { supabase } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { 
   CheckCircle, 
@@ -19,6 +18,23 @@ import {
   RefreshCw,
   Home
 } from "lucide-react";
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+  
+  useEffect(() => {
+    // تحميل supabase client فقط في المتصفح
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+  
+  return supabase;
+};
 
 // Types
 interface ConfirmEmailState {
@@ -144,12 +160,13 @@ const FeaturesGrid: React.FC = () => {
 };
 
 const ConfirmEmailContent: React.FC = () => {
+  const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
   const router = useRouter();
   const [state, setState] = useState<ConfirmEmailState>({
     isProcessing: true,
     isSuccess: false,
     isError: false,
-    message: "جاري معالجة تأكيد البريد الإلكتروني...",
+    message: "جاري تحميل النظام...",
     countdown: 5
   });
 
@@ -176,6 +193,15 @@ const ConfirmEmailContent: React.FC = () => {
 
   // Handle email confirmation
   const handleEmailConfirmation = useCallback(async () => {
+    // التأكد من تحميل supabase قبل المتابعة
+    if (!supabase) {
+      setState(prev => ({
+        ...prev,
+        message: "جاري تحميل النظام..."
+      }));
+      return;
+    }
+
     try {
       setState(prev => ({
         ...prev,
@@ -289,20 +315,22 @@ const ConfirmEmailContent: React.FC = () => {
         countdown: 0
       });
     }
-  }, []);
+  }, [supabase]);
 
   // Handle retry
   const handleRetry = useCallback(() => {
     handleEmailConfirmation();
   }, [handleEmailConfirmation]);
 
-  // Run email confirmation on mount
+  // Run email confirmation when supabase is loaded
   useEffect(() => {
+    if (!supabase) return;
+
     handleEmailConfirmation();
 
-    // Listen for auth state changes
+    // Listen for auth state changes مع تحديد أنواع البيانات
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: AuthChangeEvent, session: Session | null) => {
         if (event === 'SIGNED_IN' && session && !state.isSuccess) {
           setState({
             isProcessing: false,
@@ -318,7 +346,19 @@ const ConfirmEmailContent: React.FC = () => {
     return () => {
       authListener?.subscription?.unsubscribe();
     };
-  }, [handleEmailConfirmation, state.isSuccess]);
+  }, [supabase, handleEmailConfirmation, state.isSuccess]);
+
+  // عرض حالة التحميل إذا لم يتم تحميل supabase بعد
+  if (!supabase) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">جاري تحميل النظام...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">

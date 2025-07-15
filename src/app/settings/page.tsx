@@ -1,14 +1,31 @@
-// AccountSettingsForm محدث مع Supabase
+// AccountSettingsForm محدث مع Supabase وDynamic Import
 // مسار: src/components/Settings/AccountSettingsForm.tsx
 
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { UserService } from "@/services/userService";
 import { UserProfile } from "@/types/user";
 
+// Dynamic import للـ UserService لتجنب مشاكل prerendering
+const useUserService = () => {
+  const [userService, setUserService] = useState<any>(null);
+  
+  useEffect(() => {
+    // تحميل UserService فقط في المتصفح
+    if (typeof window !== 'undefined') {
+      import('@/services/userService').then((module) => {
+        setUserService(module.UserService);
+      });
+    }
+  }, []);
+  
+  return userService;
+};
+
 const AccountSettingsForm: React.FC = () => {
+  const UserService = useUserService(); // استخدام hook للـ dynamic import
+  
   // حالة لتخزين بيانات المستخدم
   const [userData, setUserData] = useState<UserProfile>({
     first_name: "",
@@ -40,8 +57,10 @@ const AccountSettingsForm: React.FC = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // جلب بيانات المستخدم عند تحميل المكون
+  // جلب بيانات المستخدم عند تحميل المكون وتحميل UserService
   useEffect(() => {
+    if (!UserService) return; // انتظار تحميل UserService
+
     const fetchUserData = async () => {
       try {
         setLoading(true);
@@ -62,7 +81,7 @@ const AccountSettingsForm: React.FC = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [UserService]);
 
   // دالة لتحديث البيانات
   const handleInputChange = (field: keyof UserProfile, value: string) => {
@@ -78,6 +97,12 @@ const AccountSettingsForm: React.FC = () => {
 
   // دالة لحفظ التغييرات
   const handleSaveChanges = async () => {
+    // التأكد من تحميل UserService قبل المتابعة
+    if (!UserService) {
+      setError("جاري تحميل النظام...");
+      return;
+    }
+
     try {
       setSaving(true);
       setError(null);
@@ -110,6 +135,12 @@ const AccountSettingsForm: React.FC = () => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    // التأكد من تحميل UserService قبل المتابعة
+    if (!UserService) {
+      setError("جاري تحميل النظام...");
+      return;
+    }
+
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
 
@@ -147,6 +178,18 @@ const AccountSettingsForm: React.FC = () => {
   const handleCancel = () => {
     window.location.reload();
   };
+
+  // عرض حالة التحميل إذا لم يتم تحميل UserService بعد
+  if (!UserService) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">جاري تحميل النظام...</p>
+        </div>
+      </div>
+    );
+  }
 
   // عرض حالة التحميل
   if (loading) {
@@ -485,3 +528,4 @@ const AccountSettingsForm: React.FC = () => {
 };
 
 export default AccountSettingsForm;
+

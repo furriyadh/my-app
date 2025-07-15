@@ -1,26 +1,33 @@
-import { createClient } from '@supabase/supabase-js';
+// Dynamic import للـ Supabase client لتجنب مشاكل prerendering
+const getSupabaseClient = async () => {
+  if (typeof window !== 'undefined') {
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    // إعداد Supabase - يجب إضافة القيم في ملف .env
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// إعداد Supabase - يجب إضافة القيم في ملف .env
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // التحقق من وجود متغيرات البيئة المطلوبة
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('متغيرات البيئة Supabase مطلوبة: NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY');
+    }
 
-// التحقق من وجود متغيرات البيئة المطلوبة
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('متغيرات البيئة Supabase مطلوبة: NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+    return createClient(supabaseUrl, supabaseKey);
+  }
+  throw new Error('Supabase client can only be used in browser environment');
+};
 
 // إعداد Google Maps API - يجب إضافة القيمة في ملف .env
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 // التحقق من وجود Google Maps API Key
-if (!GOOGLE_MAPS_API_KEY) {
-  throw new Error('متغير البيئة GOOGLE_MAPS_API_KEY مطلوب');
+if (typeof window !== 'undefined' && !GOOGLE_MAPS_API_KEY) {
+  console.warn('متغير البيئة GOOGLE_MAPS_API_KEY مطلوب');
 }
 
 class WorldDataImporter {
   constructor() {
+    this.supabase = null; // سيتم تحميله ديناميكياً
     this.importStats = {
       countries: 0,
       regions: 0,
@@ -39,8 +46,18 @@ class WorldDataImporter {
     this.lastRequestTime = Date.now();
   }
 
+  // تحميل Supabase client ديناميكياً
+  async initializeSupabase() {
+    if (!this.supabase) {
+      this.supabase = await getSupabaseClient();
+    }
+    return this.supabase;
+  }
+
   // تسجيل بداية عملية الاستيراد
   async logImportStart(importType, source = 'google_maps') {
+    const supabase = await this.initializeSupabase();
+    
     const { data, error } = await supabase
       .from('geo_data_import_logs')
       .insert({
@@ -64,7 +81,9 @@ class WorldDataImporter {
   async logImportEnd(logId, recordsProcessed, recordsSuccess, recordsFailed, errorDetails = null) {
     if (!logId) return;
 
+    const supabase = await this.initializeSupabase();
     const startTime = new Date();
+    
     const { error } = await supabase
       .from('geo_data_import_logs')
       .update({
@@ -113,6 +132,7 @@ class WorldDataImporter {
 
   // حفظ نتائج API في التخزين المؤقت
   async cacheApiResponse(apiType, queryParams, responseData) {
+    const supabase = await this.initializeSupabase();
     const queryHash = this.generateQueryHash(queryParams);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + (parseInt(process.env.GOOGLE_MAPS_CACHE_DURATION_DAYS) || 30));
@@ -135,6 +155,7 @@ class WorldDataImporter {
 
   // البحث في التخزين المؤقت
   async getCachedResponse(apiType, queryParams) {
+    const supabase = await this.initializeSupabase();
     const queryHash = this.generateQueryHash(queryParams);
     
     const { data, error } = await supabase
@@ -164,12 +185,24 @@ class WorldDataImporter {
 
   // توليد hash للاستعلام
   generateQueryHash(queryParams) {
-    const crypto = require('crypto');
-    return crypto.createHash('md5').update(JSON.stringify(queryParams)).digest('hex');
+    // استخدام Web Crypto API في المتصفح
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(JSON.stringify(queryParams));
+      return window.crypto.subtle.digest('SHA-256', data).then(hashBuffer => {
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      });
+    } else {
+      // Fallback للـ Node.js environment
+      const crypto = require('crypto');
+      return crypto.createHash('md5').update(JSON.stringify(queryParams)).digest('hex');
+    }
   }
 
   // تسجيل استخدام API
   async logApiUsage(apiType, endpoint, cacheHit = false) {
+    const supabase = await this.initializeSupabase();
     const now = new Date();
     const date = now.toISOString().split('T')[0];
     const hour = now.getHours();
@@ -208,6 +241,12 @@ class WorldDataImporter {
 
   // البحث في Google Places مع التخزين المؤقت
   async searchGooglePlaces(query, type = 'establishment', countryCode = null) {
+    // التحقق من وجود API key
+    if (!GOOGLE_MAPS_API_KEY) {
+      console.error('Google Maps API Key غير متوفر');
+      return null;
+    }
+
     const queryParams = { query, type, countryCode };
     
     // البحث في التخزين المؤقت أولاً
@@ -276,6 +315,7 @@ class WorldDataImporter {
   async importAllCountries() {
     console.log('🌍 بدء استيراد بلدان العالم...');
     
+    const supabase = await this.initializeSupabase();
     const logId = await this.logImportStart('world_countries', 'google_places');
     let processed = 0, success = 0, failed = 0;
 
@@ -428,6 +468,7 @@ class WorldDataImporter {
   async importMajorCitiesForCountry(countryCode, countryName) {
     console.log(`🏙️ بدء استيراد المدن الرئيسية لـ ${countryName}...`);
 
+    const supabase = await this.initializeSupabase();
     const logId = await this.logImportStart('world_cities', 'google_places');
     let processed = 0, success = 0, failed = 0;
 
@@ -496,6 +537,9 @@ class WorldDataImporter {
     const startTime = Date.now();
     
     try {
+      // التأكد من تحميل Supabase
+      await this.initializeSupabase();
+      
       // 1. استيراد البلدان
       await this.importAllCountries();
       
@@ -549,6 +593,7 @@ class WorldDataImporter {
   async cleanupExpiredCache() {
     console.log('🧹 تنظيف التخزين المؤقت المنتهي الصلاحية...');
     
+    const supabase = await this.initializeSupabase();
     const { data, error } = await supabase
       .rpc('cleanup_expired_maps_cache');
 
@@ -561,6 +606,7 @@ class WorldDataImporter {
 
   // الحصول على إحصائيات الاستخدام
   async getUsageStats() {
+    const supabase = await this.initializeSupabase();
     const { data, error } = await supabase
       .from('google_maps_api_usage')
       .select('*')
