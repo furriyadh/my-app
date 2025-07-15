@@ -7,30 +7,36 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
-  // Removed static export to enable middleware and server-side features
-  // output: 'export',
+  // ✅ تم إزالة output: 'export' لحل مشكلة prerender error
+  // ❌ output: 'export', // هذا السطر كان يسبب:
+  // - Error occurred prerendering page '/_not-found'
+  // - Cannot find module '@/utils/supabase/client'
+  // - مشاكل مع dynamic imports والـ Supabase client
+  // 💡 الحل: إزالة static export لتمكين server-side features
+  
   trailingSlash: true,
   images: {
     unoptimized: true,
   },
   
-  // تجاهل أخطاء TypeScript أثناء البناء (مؤقتاً حتى يتم حل مشاكل الاستيراد)
+  // إعدادات TypeScript
   typescript: {
-    ignoreBuildErrors: false, // تم تغييرها لـ false لرؤية أخطاء الاستيراد
+    ignoreBuildErrors: false, // إظهار أخطاء TypeScript للتشخيص
   },
   
-  // تجاهل أخطاء ESLint أثناء البناء
+  // إعدادات ESLint
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // تجاهل أخطاء ESLint أثناء البناء
   },
   
+  // إعدادات Sass
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')],
-    // Additional Sass options can go here
   },
 
+  // إعدادات Webpack لحل مشاكل الاستيراد
   webpack: (config, { isServer }) => {
-    // إضافة webpack aliases لحل مشاكل الاستيراد
+    // ✅ إضافة webpack aliases لحل مشكلة '@/utils/supabase/client'
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname, 'src'),
@@ -44,14 +50,14 @@ const nextConfig: NextConfig = {
       '@/providers': path.resolve(__dirname, 'src/providers'),
     };
 
-    // إضافة قاعدة لتجاهل ملفات TypeScript داخل مجلد supabase/functions
+    // تجاهل ملفات Supabase functions
     config.module.rules.push({
       test: /\.ts$/,
       include: path.resolve(__dirname, 'supabase', 'functions'),
       loader: 'null-loader',
     });
 
-    // تجاهل أخطاء الوحدات المفقودة
+    // إعدادات fallback للوحدات المفقودة
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
@@ -59,40 +65,39 @@ const nextConfig: NextConfig = {
       tls: false,
     };
 
-    // تقليل تحذيرات الوحدات (لكن الاحتفاظ بأخطاء الاستيراد المهمة)
+    // تقليل التحذيرات غير المهمة
     config.ignoreWarnings = [
       /Critical dependency/,
-      // إزالة "Module not found" و "Can't resolve" لرؤية مشاكل الاستيراد
     ];
 
+    // إعدادات خاصة بالخادم
     if (isServer) {
-      // لا يزال من الجيد الاحتفاظ بـ externals لأي استيرادات Deno أخرى أو مراجع عامة لـ Supabase
       config.externals = [...(config.externals || []), /^https?:\/\//, /supabase\/.*/];
     }
+    
     return config;
   },
   
-  // تجاهل تحذيرات البناء
+  // إعدادات الأداء
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
   
-  // إعدادات متوافقة مع Turbopack
+  // إعدادات تجريبية
   experimental: {
-    // تم إزالة forceSwcTransforms لأنه غير متوافق مع Turbopack
-    // Turbopack سيعمل بالإعدادات الافتراضية
+    // إعدادات متوافقة مع Turbopack
   },
   
-  // تحسين الأداء
+  // تحسين الأداء في الإنتاج
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  // إعدادات إضافية لتجاهل الأخطاء
+  // إعدادات إضافية
   productionBrowserSourceMaps: false,
   
-  // تجاهل أخطاء البناء
+  // إعدادات إعادة التوجيه
   async rewrites() {
     return [];
   },
