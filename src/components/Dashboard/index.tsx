@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Toggle section visibility
-  const toggleSection = (sectionKey) => {
+  const toggleSection = (sectionKey: keyof typeof visibleSections) => {
     setVisibleSections(prev => ({
       ...prev,
       [sectionKey]: !prev[sectionKey]
@@ -63,7 +63,14 @@ const Dashboard: React.FC = () => {
   };
 
   // Dashboard sections configuration
-  const dashboardSections = [
+  const dashboardSections: Array<{
+    key: keyof typeof visibleSections;
+    title: string;
+    description: string;
+    icon: any;
+    component: any;
+    visible: boolean;
+  }> = [
     {
       key: "overview",
       title: "Performance Overview",

@@ -332,9 +332,13 @@ const LocationTargetingPage: React.FC = () => {
       placesService.current.getDetails(
         { placeId: searchResult.place_id },
         async (place, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-            const lat = place.geometry?.location?.lat() || 0;
-            const lng = place.geometry?.location?.lng() || 0;
+          if (status === google.maps.places.PlacesServiceStatus.OK && place && place.geometry?.location) {
+            const location = place.geometry.location;
+            
+            // استخدام toJSON() للحصول على القيم الرقمية مباشرة
+            const latLng = location.toJSON ? location.toJSON() : { lat: 0, lng: 0 };
+            const lat: number = latLng.lat || 0;
+            const lng: number = latLng.lng || 0;
             
             // Get actual timezone for the location
             const actualTimezone = await getLocationTimezone(lat, lng);
@@ -446,8 +450,10 @@ const LocationTargetingPage: React.FC = () => {
 
             // Adjust map view
             if (selectedLocations.length === 0) {
-              map.setCenter(place.geometry.location);
-              map.setZoom(8);
+              if (place.geometry?.location) {
+                map.setCenter(place.geometry.location);
+                map.setZoom(8);
+              }
             }
           }
 

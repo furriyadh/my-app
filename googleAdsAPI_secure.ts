@@ -67,7 +67,8 @@ export class GoogleAdsAPIClient {
       return response.results?.[0]?.customer || null;
     } catch (error) {
       console.error('Error getting account info:', error);
-      throw new Error(`Failed to get account info: ${error.message}`);
+      throw new Error(`Failed to get account info: ${error instanceof Error ? error.message : String(error)}`);
+
     }
   }
 
@@ -101,7 +102,7 @@ export class GoogleAdsAPIClient {
       })) || [];
     } catch (error) {
       console.error('Error getting campaigns:', error);
-      throw new Error(`Failed to get campaigns: ${error.message}`);
+      throw new Error(`Failed to get campaigns: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -151,7 +152,7 @@ export class GoogleAdsAPIClient {
       };
     } catch (error) {
       console.error('Error creating campaign:', error);
-      throw new Error(`Failed to create campaign: ${error.message}`);
+      throw new Error(`Failed to create campaign: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -179,7 +180,7 @@ export class GoogleAdsAPIClient {
       return this.processStatsData(response.results || []);
     } catch (error) {
       console.error('Error getting campaign stats:', error);
-      throw new Error(`Failed to get campaign stats: ${error.message}`);
+      throw new Error(`Failed to get campaign stats: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -372,7 +373,7 @@ export class GoogleAdsAPIClient {
       })) || [];
     } catch (error) {
       console.error('Error getting keyword suggestions:', error);
-      throw new Error(`Failed to get keyword suggestions: ${error.message}`);
+      throw new Error(`Failed to get keyword suggestions: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -401,7 +402,7 @@ export class GoogleAdsAPIClient {
       })) || [];
     } catch (error) {
       console.error('Error getting accessible accounts:', error);
-      throw new Error(`Failed to get accessible accounts: ${error.message}`);
+      throw new Error(`Failed to get accessible accounts: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

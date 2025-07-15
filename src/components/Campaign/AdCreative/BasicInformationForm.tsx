@@ -5,17 +5,20 @@ import { Info, Globe, Phone, Video, AlertTriangle } from 'lucide-react';
 
 interface BasicInformationFormProps {
   campaignType: string;
-  formData: {
+  campaignSubtype?: string;
+  formData?: {
     campaignName: string;
     finalUrl?: string;
     phoneNumber?: string;
     videoUrl?: string;
   };
+  initialData?: any;
   searchOptions?: {
     websiteVisits: boolean;
     phoneCalls: boolean;
   };
-  onUpdate: (data: any) => void;
+  onUpdate?: (data: any) => void;
+  onSubmit?: (data: any) => void;
   errors?: { [key: string]: string };
 }
 
@@ -153,11 +156,21 @@ const countryCodes = [
 
 const BasicInformationForm: React.FC<BasicInformationFormProps> = ({
   campaignType,
+  campaignSubtype,
   formData,
+  initialData,
   searchOptions,
   onUpdate,
+  onSubmit,
   errors = {}
 }) => {
+  // Use formData if available, otherwise use initialData
+  const data = formData || initialData || {
+    campaignName: '',
+    finalUrl: '',
+    phoneNumber: '',
+    videoUrl: ''
+  };
   const [selectedCountryCode, setSelectedCountryCode] = React.useState('+966');
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [urlError, setUrlError] = React.useState('');
@@ -207,10 +220,12 @@ const BasicInformationForm: React.FC<BasicInformationFormProps> = ({
   const handleUrlChange = (url: string) => {
     const error = validateUrl(url);
     setUrlError(error);
-    onUpdate({
-      ...formData,
+    const updatedData = {
+      ...data,
       finalUrl: url
-    });
+    };
+    onUpdate?.(updatedData);
+    onSubmit?.(updatedData);
   };
 
   const handleVideoUrlChange = (url: string) => {
@@ -219,26 +234,32 @@ const BasicInformationForm: React.FC<BasicInformationFormProps> = ({
       error = 'Video URL must start with https://';
     }
     setVideoUrlError(error);
-    onUpdate({
-      ...formData,
+    const updatedData = {
+      ...data,
       videoUrl: url
-    });
+    };
+    onUpdate?.(updatedData);
+    onSubmit?.(updatedData);
   };
 
   const handlePhoneNumberChange = (value: string) => {
     setPhoneNumber(value);
-    onUpdate({
-      ...formData,
+    const updatedData = {
+      ...data,
       phoneNumber: selectedCountryCode + value
-    });
+    };
+    onUpdate?.(updatedData);
+    onSubmit?.(updatedData);
   };
 
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
-    onUpdate({
-      ...formData,
+    const updatedData = {
+      ...data,
       phoneNumber: code + phoneNumber
-    });
+    };
+    onUpdate?.(updatedData);
+    onSubmit?.(updatedData);
   };
 
   return (
@@ -258,11 +279,15 @@ const BasicInformationForm: React.FC<BasicInformationFormProps> = ({
           </label>
           <input
             type="text"
-            value={formData.campaignName}
-            onChange={(e) => onUpdate({
-              ...formData,
-              campaignName: e.target.value
-            })}
+            value={data.campaignName}
+            onChange={(e) => {
+              const updatedData = {
+                ...data,
+                campaignName: e.target.value
+              };
+              onUpdate?.(updatedData);
+              onSubmit?.(updatedData);
+            }}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
               errors.campaignName ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
             }`}
@@ -284,7 +309,7 @@ const BasicInformationForm: React.FC<BasicInformationFormProps> = ({
             </div>
             <input
               type="url"
-              value={formData.finalUrl || ''}
+              value={data.finalUrl || ''}
               onChange={(e) => handleUrlChange(e.target.value)}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                 urlError || errors.finalUrl ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
@@ -358,7 +383,7 @@ const BasicInformationForm: React.FC<BasicInformationFormProps> = ({
             </div>
             <input
               type="url"
-              value={formData.videoUrl || ''}
+              value={data.videoUrl || ''}
               onChange={(e) => handleVideoUrlChange(e.target.value)}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                 videoUrlError || errors.videoUrl ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'

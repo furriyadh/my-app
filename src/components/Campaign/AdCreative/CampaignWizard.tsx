@@ -5,16 +5,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
   ArrowRight, 
-  CheckCircle, 
+  CheckCircle,
   Target,
-  Settings,
+  Users,
+  ShoppingCart,
+  Play,
+  Smartphone,
   Eye,
-  Rocket
+  Rocket,
+  Settings
 } from 'lucide-react';
 
-import CampaignTypeSelector from ;
-import CampaignSubtypeSelector from '@/components/campaign/AdCreative/CampaignSubtypeSelector';
-import BasicInformationForm from '@/components/campaign/AdCreative/BasicInformationForm';
+import CampaignTypeSelector from '@/components/Campaign/AdCreative/CampaignTypeSelector';
+import CampaignSubtypeSelector from '@/components/Campaign/AdCreative/CampaignSubtypeSelector';
+import BasicInformationForm from '@/components/Campaign/AdCreative/BasicInformationForm';
 // import PreviewAndLaunch from '@/components/campaign/AdCreative/PreviewAndLaunch'; // سيتم إنشاؤه لاحقاً
 
 interface CampaignType {

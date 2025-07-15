@@ -17,16 +17,17 @@ export default function OnboardingPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleOptionSelect = (option: AccountOption) => {
-    setSelectedOption(option);
+  const handleOptionSelect = (option: string) => {
+    const accountOption = option as AccountOption;
+    setSelectedOption(accountOption);
     setIsModalOpen(false);
     
     // Handle routing based on selection
-    console.log('Selected option:', option);
+    console.log('Selected option:', accountOption);
     
     // All options now redirect to New Campaign page
     // Backend will handle different logic based on the selected option
-    switch (option) {
+    switch (accountOption) {
       case 'own-accounts':
         // Connect existing Google Ads account -> New Campaign
         window.location.href = '/new-campaign?type=connect';
@@ -40,7 +41,7 @@ export default function OnboardingPage() {
         window.location.href = '/new-campaign?type=new';
         break;
       default:
-        console.error('Unknown option selected:', option);
+        console.error('Unknown option selected:', accountOption);
     }
   };
 

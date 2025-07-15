@@ -1,22 +1,13 @@
-export type AccountOption = 'furriyadh-managed' | 'own-accounts' | 'new-account';
+// Modal types for the application
 
-export interface AccountCard {
-  id: AccountOption;
-  title: string;
-  description: string;
-  commission: string;
-  buttonText: string;
-}
+export type AccountOption = 'own-accounts' | 'furriyadh-managed' | 'new-account';
 
-export interface AccountSelectionModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+export interface AccountSelectionModalProps extends ModalProps {
   onSelect: (option: AccountOption) => void;
-}
-
-export interface ModalBackdropProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
 }
 
