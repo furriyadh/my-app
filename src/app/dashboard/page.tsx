@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-// تم إزالة استيراد AccountSelectionModal
-// import AccountSelectionModal from "@/components/Modals/AccountSelectionModal";
-// import { AccountOption } from "@/types/modal";
 import Dashboard from "@/components/Dashboard";
 import OverviewCards from "@/components/Dashboard/OverviewCards";
 import PerformanceChart from "@/components/Dashboard/PerformanceChart";
@@ -12,26 +9,17 @@ import RecentCampaigns from "@/components/Dashboard/RecentCampaigns";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import GoogleAds from "@/components/Dashboard/GoogleAds";
 
-const DashboardPage: React.FC = () => {
+// مكون فرعي يحتوي على useSearchParams
+const DashboardContent: React.FC = () => {
   const searchParams = useSearchParams();
   const section = searchParams.get("section") || "overview";
-  
-  // تم إزالة Modal state
-  // const [showModal, setShowModal] = useState(false);
-  // const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
-  // تم تبسيط useEffect - فقط تعيين أن المستخدم زار الموقع
   useEffect(() => {
     localStorage.setItem('furriyadh_user_visited', 'true');
   }, []);
 
-  // تم إزالة دوال التعامل مع النافذة المنبثقة
-  // const handleModalSelect = (option: AccountOption) => { ... }
-  // const handleCloseModal = () => { ... }
-
   const renderSection = () => {
     switch (section) {
-      // Main Dashboard Sections
       case "analytics":
         return (
           <div className="p-6 space-y-6">
@@ -44,7 +32,6 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
             
-            {/* Analytics Content */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <PerformanceChart />
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -88,7 +75,6 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
             
-            {/* Reports Content */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-2">
                 <PerformanceChart />
@@ -131,7 +117,6 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
             
-            {/* Campaigns Content */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
               <div className="xl:col-span-3">
                 <RecentCampaigns />
@@ -178,7 +163,6 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
             
-            {/* Performance Content */}
             <OverviewCards />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <PerformanceChart />
@@ -220,7 +204,6 @@ const DashboardPage: React.FC = () => {
           </div>
         );
 
-      // Google Ads Sections
       case "google-dashboard":
       case "google-campaigns":
       case "campaign-wizard":
@@ -232,7 +215,6 @@ const DashboardPage: React.FC = () => {
       case "campaign-preview":
         return <GoogleAds />;
 
-      // Account Management Sections
       case "billing":
         return (
           <div className="p-6">
@@ -333,7 +315,6 @@ const DashboardPage: React.FC = () => {
           </div>
         );
 
-      // Default Overview Section
       default:
         return (
           <div className="p-6 space-y-6">
@@ -364,20 +345,25 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* تم إزالة النافذة المنبثقة نهائياً */}
-      {/* 
-      {showModal && (
-        <AccountSelectionModal
-          isOpen={showModal}
-          onClose={handleCloseModal}
-          onSelect={handleModalSelect}
-        />
-      )}
-      */}
       {renderSection()}
     </div>
   );
 };
 
-export default DashboardPage;
+// المكون الرئيسي مع Suspense
+const DashboardPage: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
+  );
+};
 
+export default DashboardPage;
