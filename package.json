@@ -27,7 +27,7 @@
     "@react-three/fiber": "^9.1.2",
     "@remixicon/react": "^4.6.0",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.51.0",
+    "@supabase/supabase-js": "^2.45.4",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/pg": "^8.15.4",
     "apexcharts": "^4.7.0",
