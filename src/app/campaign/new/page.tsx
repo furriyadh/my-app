@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor, Users, BarChart3, Building2 } from 'lucide-react';
-
-// Import the new service selection modal
-import ServiceSelectionModal, { ServiceType } from '@/components/ServiceSelectionModal';
 
 // Import the new account selection modal
 import AccountSelectionModal from '@/components/AccountSelectionModal';
@@ -184,13 +181,10 @@ const iconColorVariants = {
   teal: 'text-teal-600 dark:text-teal-400'
 };
 
-const CampaignNewPage: React.FC = () => {
+// المكون الذي يحتوي على useSearchParams - يجب أن يكون منفصل
+function CampaignNewContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // Service selection state
-  const [showServiceModal, setShowServiceModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+  const searchParams = useSearchParams(); // الآن آمن داخل Suspense
   
   // Account selection state
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -246,21 +240,11 @@ const CampaignNewPage: React.FC = () => {
     const businessLocations = searchParams.get('business_locations');
 
     if (connected === 'true') {
-      // User just completed OAuth, show account selection modal
-      setSelectedService('client');
+      // User just completed OAuth, fetch accounts
       fetchUserAccounts();
     } else {
-      // Check for existing service selection
-      const savedService = localStorage.getItem('furriyadh_service_type') as ServiceType;
-      if (savedService) {
-        setSelectedService(savedService);
-        if (savedService === 'client') {
-          fetchUserAccounts();
-        }
-      } else {
-        // Show service selection modal if no service is selected
-        setShowServiceModal(true);
-      }
+      // Check for existing accounts
+      fetchUserAccounts();
     }
   }, [searchParams]);
 
@@ -295,21 +279,6 @@ const CampaignNewPage: React.FC = () => {
     return Object.values(accounts).some(accountList => accountList.length > 0);
   };
 
-  // Handle service selection
-  const handleServiceSelect = (serviceType: ServiceType) => {
-    setSelectedService(serviceType);
-    
-    // If client account is selected, redirect to OAuth flow
-    if (serviceType === 'client') {
-      // Redirect to Google OAuth
-      window.location.href = '/api/oauth/google';
-      return;
-    }
-    
-    // For furriyadh accounts, continue normally
-    setShowServiceModal(false);
-  };
-
   // Handle account selection
   const handleAccountSelect = (accounts: {[key: string]: string}) => {
     setFormData(prev => ({
@@ -333,17 +302,15 @@ const CampaignNewPage: React.FC = () => {
       newErrors.campaignName = 'Campaign name is required';
     }
 
-    // Account selection validation for client service
-    if (selectedService === 'client') {
-      if (formData.campaignType === 'shopping' && !formData.selectedAccounts?.merchant_center) {
-        newErrors.merchantCenter = 'Please select a Merchant Center account';
-      }
-      if (formData.campaignType === 'video' && !formData.selectedAccounts?.youtube) {
-        newErrors.youtubeChannel = 'Please select a YouTube channel';
-      }
-      if (!formData.selectedAccounts?.google_ads) {
-        newErrors.googleAds = 'Please select a Google Ads account';
-      }
+    // Account selection validation
+    if (formData.campaignType === 'shopping' && !formData.selectedAccounts?.merchant_center) {
+      newErrors.merchantCenter = 'Please select a Merchant Center account';
+    }
+    if (formData.campaignType === 'video' && !formData.selectedAccounts?.youtube) {
+      newErrors.youtubeChannel = 'Please select a YouTube channel';
+    }
+    if (!formData.selectedAccounts?.google_ads) {
+      newErrors.googleAds = 'Please select a Google Ads account';
     }
 
     // Campaign-specific validations
@@ -360,7 +327,7 @@ const CampaignNewPage: React.FC = () => {
       if (!formData.basicInfo?.finalUrl?.trim()) {
         newErrors.finalUrl = 'Final URL is required for Performance Max campaigns';
       }
-      if (formData.performanceMaxOptions?.addProducts && selectedService === 'client' && !formData.selectedAccounts?.merchant_center) {
+      if (formData.performanceMaxOptions?.addProducts && !formData.selectedAccounts?.merchant_center) {
         newErrors.merchantCenter = 'Please select a Merchant Center account';
       }
     }
@@ -448,11 +415,7 @@ const CampaignNewPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Save data to localStorage or context
-      const campaignDataWithService = {
-        ...formData,
-        serviceType: selectedService
-      };
-      localStorage.setItem('campaignData', JSON.stringify(campaignDataWithService));
+      localStorage.setItem('campaignData', JSON.stringify(formData));
       
       // Navigate to next step
       router.push('/campaign/location-targeting');
@@ -565,47 +528,9 @@ const CampaignNewPage: React.FC = () => {
     );
   };
 
-  // Render service type indicator
-  const renderServiceIndicator = () => {
-    if (!selectedService) return null;
-
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${
-              selectedService === 'furriyadh' ? 'bg-blue-500' : 'bg-green-500'
-            }`}></div>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {selectedService === 'furriyadh' 
-                ? 'Using Furriyadh Advertising Accounts (20% commission)' 
-                : 'Using Your Own Advertising Accounts (0% commission)'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {selectedService === 'client' && userAccounts && (
-              <button
-                onClick={() => setShowAccountModal(true)}
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                Select Accounts
-              </button>
-            )}
-            <button
-              onClick={() => setShowServiceModal(true)}
-              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Change
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   // Render selected accounts summary
   const renderSelectedAccountsSummary = () => {
-    if (selectedService !== 'client' || !formData.selectedAccounts || !userAccounts) return null;
+    if (!formData.selectedAccounts || !userAccounts) return null;
 
     const selectedAccountsCount = Object.keys(formData.selectedAccounts).length;
     if (selectedAccountsCount === 0) return null;
@@ -676,13 +601,6 @@ const CampaignNewPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="p-6 space-y-6">
         
-        {/* Service Selection Modal */}
-        <ServiceSelectionModal
-          isOpen={showServiceModal}
-          onClose={() => setShowServiceModal(false)}
-          onSelect={handleServiceSelect}
-        />
-        
         {/* Account Selection Modal */}
         {userAccounts && (
           <AccountSelectionModal
@@ -708,9 +626,6 @@ const CampaignNewPage: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400 mt-1">Choose your campaign type and configure settings</p>
           </div>
         </div>
-
-        {/* Service Type Indicator */}
-        {renderServiceIndicator()}
 
         {/* Selected Accounts Summary */}
         {renderSelectedAccountsSummary()}
@@ -858,7 +773,7 @@ const CampaignNewPage: React.FC = () => {
           
           <button
             onClick={handleNext}
-            disabled={isSubmitting || !formData.campaignType || !selectedService || isLoadingAccounts}
+            disabled={isSubmitting || !formData.campaignType || isLoadingAccounts}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
           >
             {isSubmitting ? (
@@ -878,7 +793,24 @@ const CampaignNewPage: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
-export default CampaignNewPage;
+// المكون الرئيسي مع Suspense
+export default function CampaignNewPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading campaign setup...</p>
+        </div>
+      </div>
+    }>
+      <CampaignNewContent />
+    </Suspense>
+  );
+}
+
+// إضافة export const dynamic لضمان dynamic rendering
+export const dynamic = 'force-dynamic';
 
