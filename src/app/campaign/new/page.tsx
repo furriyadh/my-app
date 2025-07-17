@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor, Users, BarChart3, Building2 } from 'lucide-react';
-
-// Import the new account selection modal
-import AccountSelectionModal from '@/components/AccountSelectionModal';
 
 // Import specialized campaign components
 import SearchCampaignForm from '@/components/Campaign/AdCreative/SearchCampaignForm';
@@ -16,29 +13,6 @@ import AppCampaignForm from '@/components/Campaign/AdCreative/AppCampaignForm';
 import DisplayCampaignForm from '@/components/Campaign/AdCreative/DisplayCampaignForm';
 import DemandGenForm from '@/components/Campaign/AdCreative/DemandGenForm';
 import BasicInformationForm from '@/components/Campaign/AdCreative/BasicInformationForm';
-
-// Types for Google Accounts
-interface GoogleAccount {
-  id: string;
-  name: string;
-  type: 'google_ads' | 'merchant_center' | 'youtube' | 'analytics' | 'business';
-  details?: {
-    currency_code?: string;
-    website_url?: string;
-    subscriber_count?: number;
-    view_count?: number;
-    property_count?: number;
-    location_count?: number;
-  };
-}
-
-interface UserAccounts {
-  google_ads: GoogleAccount[];
-  merchant_center: GoogleAccount[];
-  youtube: GoogleAccount[];
-  analytics: GoogleAccount[];
-  business: GoogleAccount[];
-}
 
 // Types
 interface CampaignType {
@@ -52,13 +26,6 @@ interface CampaignType {
 
 interface CampaignFormData {
   campaignType: string | null;
-  selectedAccounts?: {
-    google_ads?: string;
-    merchant_center?: string;
-    youtube?: string;
-    analytics?: string;
-    business?: string;
-  };
   searchOptions?: {
     websiteVisits: boolean;
     phoneCalls: boolean;
@@ -74,7 +41,6 @@ interface CampaignFormData {
   videoOptions?: {
     campaignSubtype: 'video-views' | 'video-reach' | 'drive-conversions' | 'ad-sequence' | 'audio-reach' | null;
     videoReachType?: 'efficient-reach' | 'non-skippable-reach' | 'target-frequency' | null;
-    youtubeChannel?: string;
   };
   appOptions?: {
     campaignSubtype: 'app-installs' | 'app-engagement' | 'app-pre-registration' | null;
@@ -181,19 +147,13 @@ const iconColorVariants = {
   teal: 'text-teal-600 dark:text-teal-400'
 };
 
-// المكون الذي يحتوي على useSearchParams - يجب أن يكون منفصل
+// Component that uses useSearchParams - wrapped in Suspense
 function CampaignNewContent() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // الآن آمن داخل Suspense
+  const searchParams = useSearchParams();
   
-  // Account selection state
-  const [showAccountModal, setShowAccountModal] = useState(false);
-  const [userAccounts, setUserAccounts] = useState<UserAccounts | null>(null);
-  const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
-  
-  const [formData, setFormData] = useState<CampaignFormData>({
+  const [formData, setFormData] = React.useState<CampaignFormData>({
     campaignType: null,
-    selectedAccounts: {},
     searchOptions: {
       websiteVisits: false,
       phoneCalls: false
@@ -227,66 +187,8 @@ function CampaignNewContent() {
     }
   });
 
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Check for OAuth callback and connected accounts
-  useEffect(() => {
-    const connected = searchParams.get('connected');
-    const adsAccounts = searchParams.get('ads_accounts');
-    const merchantAccounts = searchParams.get('merchant_accounts');
-    const youtubeChannels = searchParams.get('youtube_channels');
-    const analyticsAccounts = searchParams.get('analytics_accounts');
-    const businessLocations = searchParams.get('business_locations');
-
-    if (connected === 'true') {
-      // User just completed OAuth, fetch accounts
-      fetchUserAccounts();
-    } else {
-      // Check for existing accounts
-      fetchUserAccounts();
-    }
-  }, [searchParams]);
-
-  // Fetch user accounts from API
-  const fetchUserAccounts = async () => {
-    setIsLoadingAccounts(true);
-    try {
-      const response = await fetch('/api/user/accounts', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const accounts = await response.json();
-        setUserAccounts(accounts);
-        
-        // Show account selection modal if user has accounts
-        if (hasAnyAccounts(accounts)) {
-          setShowAccountModal(true);
-        }
-      } else {
-        console.error('Failed to fetch user accounts');
-      }
-    } catch (error) {
-      console.error('Error fetching user accounts:', error);
-    } finally {
-      setIsLoadingAccounts(false);
-    }
-  };
-
-  // Check if user has any accounts
-  const hasAnyAccounts = (accounts: UserAccounts): boolean => {
-    return Object.values(accounts).some(accountList => accountList.length > 0);
-  };
-
-  // Handle account selection
-  const handleAccountSelect = (accounts: {[key: string]: string}) => {
-    setFormData(prev => ({
-      ...prev,
-      selectedAccounts: accounts
-    }));
-    setShowAccountModal(false);
-  };
+  const [errors, setErrors] = React.useState<{[key: string]: string}>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Enhanced form validation for all campaign types
   const validateForm = (): boolean => {
@@ -300,17 +202,6 @@ function CampaignNewContent() {
     // Campaign name validation
     if (!formData.basicInfo?.campaignName?.trim()) {
       newErrors.campaignName = 'Campaign name is required';
-    }
-
-    // Account selection validation
-    if (formData.campaignType === 'shopping' && !formData.selectedAccounts?.merchant_center) {
-      newErrors.merchantCenter = 'Please select a Merchant Center account';
-    }
-    if (formData.campaignType === 'video' && !formData.selectedAccounts?.youtube) {
-      newErrors.youtubeChannel = 'Please select a YouTube channel';
-    }
-    if (!formData.selectedAccounts?.google_ads) {
-      newErrors.googleAds = 'Please select a Google Ads account';
     }
 
     // Campaign-specific validations
@@ -327,7 +218,7 @@ function CampaignNewContent() {
       if (!formData.basicInfo?.finalUrl?.trim()) {
         newErrors.finalUrl = 'Final URL is required for Performance Max campaigns';
       }
-      if (formData.performanceMaxOptions?.addProducts && !formData.selectedAccounts?.merchant_center) {
+      if (formData.performanceMaxOptions?.addProducts && !formData.performanceMaxOptions?.merchantCenterAccount) {
         newErrors.merchantCenter = 'Please select a Merchant Center account';
       }
     }
@@ -335,6 +226,9 @@ function CampaignNewContent() {
     if (formData.campaignType === 'shopping') {
       if (!formData.shoppingOptions?.campaignSubtype) {
         newErrors.campaignSubtype = 'Please select a campaign subtype';
+      }
+      if (!formData.shoppingOptions?.merchantCenterAccount) {
+        newErrors.merchantCenter = 'Please select a Merchant Center account';
       }
     }
 
@@ -528,90 +422,9 @@ function CampaignNewContent() {
     );
   };
 
-  // Render selected accounts summary
-  const renderSelectedAccountsSummary = () => {
-    if (!formData.selectedAccounts || !userAccounts) return null;
-
-    const selectedAccountsCount = Object.keys(formData.selectedAccounts).length;
-    if (selectedAccountsCount === 0) return null;
-
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white">Selected Accounts</h3>
-          <button
-            onClick={() => setShowAccountModal(true)}
-            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Change Selection
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {formData.selectedAccounts.google_ads && (
-            <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <TrendingUp className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-gray-900 dark:text-white">
-                {userAccounts.google_ads.find(acc => acc.id === formData.selectedAccounts?.google_ads)?.name || 'Google Ads Account'}
-              </span>
-            </div>
-          )}
-          
-          {formData.selectedAccounts.merchant_center && (
-            <div className="flex items-center gap-2 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-              <ShoppingBag className="w-4 h-4 text-orange-600" />
-              <span className="text-sm text-gray-900 dark:text-white">
-                {userAccounts.merchant_center.find(acc => acc.id === formData.selectedAccounts?.merchant_center)?.name || 'Merchant Center'}
-              </span>
-            </div>
-          )}
-          
-          {formData.selectedAccounts.youtube && (
-            <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-              <Youtube className="w-4 h-4 text-red-600" />
-              <span className="text-sm text-gray-900 dark:text-white">
-                {userAccounts.youtube.find(acc => acc.id === formData.selectedAccounts?.youtube)?.name || 'YouTube Channel'}
-              </span>
-            </div>
-          )}
-          
-          {formData.selectedAccounts.analytics && (
-            <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <BarChart3 className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-gray-900 dark:text-white">
-                {userAccounts.analytics.find(acc => acc.id === formData.selectedAccounts?.analytics)?.name || 'Analytics Account'}
-              </span>
-            </div>
-          )}
-          
-          {formData.selectedAccounts.business && (
-            <div className="flex items-center gap-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <Building2 className="w-4 h-4 text-purple-600" />
-              <span className="text-sm text-gray-900 dark:text-white">
-                {userAccounts.business.find(acc => acc.id === formData.selectedAccounts?.business)?.name || 'Business Location'}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="p-6 space-y-6">
-        
-        {/* Account Selection Modal */}
-        {userAccounts && (
-          <AccountSelectionModal
-            isOpen={showAccountModal}
-            onClose={() => setShowAccountModal(false)}
-            onSelect={handleAccountSelect}
-            accounts={userAccounts}
-            selectedAccounts={formData.selectedAccounts || {}}
-            campaignType={formData.campaignType}
-          />
-        )}
         
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -626,19 +439,6 @@ function CampaignNewContent() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">Choose your campaign type and configure settings</p>
           </div>
         </div>
-
-        {/* Selected Accounts Summary */}
-        {renderSelectedAccountsSummary()}
-
-        {/* Loading Accounts Indicator */}
-        {isLoadingAccounts && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Loading your Google accounts...</span>
-            </div>
-          </div>
-        )}
 
         {/* Campaign Setup Progress */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -773,7 +573,7 @@ function CampaignNewContent() {
           
           <button
             onClick={handleNext}
-            disabled={isSubmitting || !formData.campaignType || isLoadingAccounts}
+            disabled={isSubmitting || !formData.campaignType}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
           >
             {isSubmitting ? (
@@ -795,7 +595,7 @@ function CampaignNewContent() {
   );
 }
 
-// المكون الرئيسي مع Suspense
+// Main page component with Suspense boundary
 export default function CampaignNewPage() {
   return (
     <Suspense fallback={
@@ -811,6 +611,5 @@ export default function CampaignNewPage() {
   );
 }
 
-// إضافة export const dynamic لضمان dynamic rendering
 export const dynamic = 'force-dynamic';
 
