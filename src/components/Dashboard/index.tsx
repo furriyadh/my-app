@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import OverviewCards from "./OverviewCards";
 import PerformanceChart from "./PerformanceChart";
@@ -24,8 +24,7 @@ import {
   EyeOff
 } from "lucide-react";
 
-// مكون فرعي يحتوي على useSearchParams
-const DashboardContent: React.FC = () => {
+const Dashboard: React.FC = () => {
   const searchParams = useSearchParams();
   const section = searchParams.get("section");
   
@@ -320,20 +319,5 @@ const DashboardContent: React.FC = () => {
   );
 };
 
-// المكون الرئيسي مع Suspense
-const Dashboard: React.FC = () => {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
-        </div>
-      </div>
-    }>
-      <DashboardContent />
-    </Suspense>
-  );
-};
-
 export default Dashboard;
+

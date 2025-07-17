@@ -1,8 +1,8 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor, Users, BarChart3, Building2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor } from 'lucide-react';
 
 // Import specialized campaign components
 import SearchCampaignForm from '@/components/Campaign/AdCreative/SearchCampaignForm';
@@ -13,6 +13,11 @@ import AppCampaignForm from '@/components/Campaign/AdCreative/AppCampaignForm';
 import DisplayCampaignForm from '@/components/Campaign/AdCreative/DisplayCampaignForm';
 import DemandGenForm from '@/components/Campaign/AdCreative/DemandGenForm';
 import BasicInformationForm from '@/components/Campaign/AdCreative/BasicInformationForm';
+
+// Import modals
+import ServiceSelectionModal, { ServiceType } from '@/components/ServiceSelectionModal';
+import AccountSelectionModal from '@/components/AccountSelectionModal';
+
 
 // Types
 interface CampaignType {
@@ -147,12 +152,23 @@ const iconColorVariants = {
   teal: 'text-teal-600 dark:text-teal-400'
 };
 
-// Component that uses useSearchParams - wrapped in Suspense
-function CampaignNewContent() {
+const CampaignNewPage: React.FC = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   
-  const [formData, setFormData] = React.useState<CampaignFormData>({
+  // Service and Account Selection State
+  const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [userAccounts, setUserAccounts] = useState<any>({
+    google_ads: [],
+    merchant_center: [],
+    youtube: [],
+    analytics: [],
+    business: []
+  });
+  const [selectedAccounts, setSelectedAccounts] = useState<{[key: string]: string}>({});
+  
+  const [formData, setFormData] = useState<CampaignFormData>({
     campaignType: null,
     searchOptions: {
       websiteVisits: false,
@@ -187,8 +203,52 @@ function CampaignNewContent() {
     }
   });
 
-  const [errors, setErrors] = React.useState<{[key: string]: string}>({});
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check for service selection on mount
+  React.useEffect(() => {
+    const savedService = localStorage.getItem('furriyadh_service_type') as ServiceType | null;
+    if (savedService) {
+      setSelectedService(savedService);
+      // Load user accounts after service selection
+      loadUserAccounts();
+    } else {
+      setShowServiceModal(true);
+    }
+  }, []);
+
+  // Load user accounts from API
+  const loadUserAccounts = async () => {
+    try {
+      const response = await fetch('/api/user/accounts/');
+      if (response.ok) {
+        const accounts = await response.json();
+        setUserAccounts(accounts);
+      }
+    } catch (error) {
+      console.error('Error loading accounts:', error);
+    }
+  };
+
+  // Handle service selection
+  const handleServiceSelect = (serviceType: ServiceType) => {
+    setSelectedService(serviceType);
+    setShowServiceModal(false);
+    // Load accounts after service selection
+    loadUserAccounts();
+  };
+
+  // Handle account selection
+  const handleAccountSelect = (accounts: {[key: string]: string}) => {
+    setSelectedAccounts(accounts);
+    setShowAccountModal(false);
+  };
+
+  // Show account selection modal
+  const showAccountSelection = () => {
+    setShowAccountModal(true);
+  };
 
   // Enhanced form validation for all campaign types
   const validateForm = (): boolean => {
@@ -424,6 +484,23 @@ function CampaignNewContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Service Selection Modal */}
+      <ServiceSelectionModal
+        isOpen={showServiceModal}
+        onClose={() => setShowServiceModal(false)}
+        onSelect={handleServiceSelect}
+      />
+
+      {/* Account Selection Modal */}
+      <AccountSelectionModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        onSelect={handleAccountSelect}
+        accounts={userAccounts}
+        selectedAccounts={selectedAccounts}
+        campaignType={formData.campaignType}
+      />
+
       <div className="p-6 space-y-6">
         
         {/* Header */}
@@ -434,10 +511,35 @@ function CampaignNewContent() {
           >
             <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Campaign</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">Choose your campaign type and configure settings</p>
           </div>
+          
+          {/* Service Type Display */}
+          {selectedService && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg">
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  {selectedService === 'furriyadh' ? 'Furriyadh Accounts' : 'Client Accounts'}
+                </span>
+                <button
+                  onClick={() => setShowServiceModal(true)}
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm"
+                >
+                  Change
+                </button>
+              </div>
+              
+              {/* Account Selection Button */}
+              <button
+                onClick={showAccountSelection}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
+              >
+                Select Accounts
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Campaign Setup Progress */}
@@ -593,23 +695,7 @@ function CampaignNewContent() {
       </div>
     </div>
   );
-}
+};
 
-// Main page component with Suspense boundary
-export default function CampaignNewPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading campaign setup...</p>
-        </div>
-      </div>
-    }>
-      <CampaignNewContent />
-    </Suspense>
-  );
-}
-
-export const dynamic = 'force-dynamic';
+export default CampaignNewPage;
 
