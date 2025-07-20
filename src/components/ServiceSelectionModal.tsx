@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -23,16 +24,20 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
   const handleSelect = (serviceType: ServiceType) => {
     setSelectedService(serviceType);
     
-    // Save selection to localStorage
-    localStorage.setItem('furriyadh_service_type', serviceType);
-    
-    // Call parent callback after short delay for visual feedback
-    setTimeout(() => {
-      onSelect(serviceType);
-      onClose();
-    }, 300);
+    if (serviceType === 'client') {
+      console.log('Attempting to redirect to Google OAuth...');
+      window.location.href = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/oauth/google`;
+    } else {
+      // Save selection to localStorage
+      localStorage.setItem('furriyadh_service_type', serviceType);
+      
+      // Call parent callback after short delay for visual feedback
+      setTimeout(() => {
+        onSelect(serviceType);
+        onClose();
+      }, 300);
+    }
   };
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl max-w-2xl w-full mx-4 p-6 relative border border-white/20">
@@ -154,4 +159,6 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
 };
 
 export default ServiceSelectionModal;
+
+
 

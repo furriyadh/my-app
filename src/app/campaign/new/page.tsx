@@ -208,10 +208,24 @@ const CampaignNewPage: React.FC = () => {
 
   // Check for service selection on mount
   React.useEffect(() => {
-    const savedService = localStorage.getItem('furriyadh_service_type') as ServiceType | null;
-    if (savedService) {
+    const savedService = localStorage.getItem("furriyadh_service_type") as ServiceType | null;
+    setShowServiceModal(true);
+
+    // Check for Google OAuth redirect parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const connected = urlParams.get("connected");
+    const adsAccounts = urlParams.get("ads_accounts");
+    const merchantAccounts = urlParams.get("merchant_accounts");
+    const youtubeChannels = urlParams.get("youtube_channels");
+    const analyticsAccounts = urlParams.get("analytics_accounts");
+    const businessLocations = urlParams.get("business_locations");
+
+    if (connected === "true") {
+      loadUserAccounts();
+      setShowAccountModal(true);
+      router.replace("/campaign/new");
+    } else if (savedService) {
       setSelectedService(savedService);
-      // Load user accounts after service selection
       loadUserAccounts();
     } else {
       setShowServiceModal(true);
