@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -24,20 +23,16 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
   const handleSelect = (serviceType: ServiceType) => {
     setSelectedService(serviceType);
     
-    if (serviceType === 'client') {
-      console.log('Attempting to redirect to Google OAuth...');
-      window.location.href = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/oauth/google`;
-    } else {
-      // Save selection to localStorage
-      localStorage.setItem('furriyadh_service_type', serviceType);
-      
-      // Call parent callback after short delay for visual feedback
-      setTimeout(() => {
-        onSelect(serviceType);
-        onClose();
-      }, 300);
-    }
+    // Save selection to localStorage
+    localStorage.setItem('furriyadh_service_type', serviceType);
+    
+    // Call parent callback after short delay for visual feedback
+    setTimeout(() => {
+      onSelect(serviceType);
+      onClose();
+    }, 300);
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl max-w-2xl w-full mx-4 p-6 relative border border-white/20">
@@ -113,7 +108,7 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
             {/* Free Trial Badge */}
             <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
               7 Days Free
-            </div>
+            </div>v>
 
             {/* Selection Indicator */}
             {selectedService === 'client' && (
@@ -141,7 +136,28 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
             </div>
 
             {/* Button */}
-            <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-lg font-medium text-sm hover:shadow-md transition-all duration-200">
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  const popup = window.open('/api/oauth/google', '_blank', 'width=600,height=700');
+                  
+                  // مراقبة إغلاق النافذة المنبثقة
+                  const checkClosed = setInterval(() => {
+                    if (popup?.closed) {
+                      clearInterval(checkClosed);
+                      // لا نقوم بإعادة التوجيه، نبقى في نفس الصفحة
+                      // يمكن إضافة منطق لتحديث حالة الاتصال هنا
+                      console.log("OAuth popup closed");
+                      // هنا يمكننا استدعاء دالة لتحديث حالة الحسابات في الصفحة الرئيسية
+                      // على سبيل المثال: onSelect("client");
+                    }
+                  }, 1000);
+                }
+                // لا نغلق النافذة الرئيسية فوراً
+                // onClose();
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-lg font-medium text-sm hover:shadow-md transition-all duration-200"
+            >
               Connect Account
             </button>
           </div>
@@ -159,6 +175,4 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
 };
 
 export default ServiceSelectionModal;
-
-
 

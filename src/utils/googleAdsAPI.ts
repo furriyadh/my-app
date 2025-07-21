@@ -1,23 +1,20 @@
 // Google Ads AI Platform - Google Ads API Client (Secure Version)
 // ================================================
 // TypeScript client للتعامل مع Google Ads API
-// مُصحح بالكامل - تم إزالة جميع الـ secrets المكشوفة
 
-// تكوين Google Ads API - آمن ومحدث
-const config = {
-  clientId: process.env.GOOGLE_CLIENT_ID || '',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '', // تم إزالة الـ hardcoded secret
-  developerToken: process.env.GOOGLE_DEVELOPER_TOKEN || '',
-  mccCustomerId: process.env.MCC_LOGIN_CUSTOMER_ID || ''
-};
+import googleAuthService from "../services/googleAuth";
+
+// تكوين Google Ads API
+const GOOGLE_ADS_API_VERSION = "v16";
+const GOOGLE_ADS_API_BASE_URL = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}`;
 
 // التحقق من وجود المتغيرات المطلوبة
 const validateConfig = () => {
-  const requiredVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_DEVELOPER_TOKEN'];
-  const missing = requiredVars.filter(varName => !process.env[varName]);
-  
+  const requiredVars = ["GOOGLE_ADS_DEVELOPER_TOKEN", "MCC_LOGIN_CUSTOMER_ID"];
+  const missing = requiredVars.filter((varName) => !process.env[varName]);
+
   if (missing.length > 0) {
-    console.warn(`Missing environment variables: ${missing.join(', ')}`);
+    console.warn(`Missing environment variables: ${missing.join(", ")}`);
   }
 };
 
@@ -26,27 +23,23 @@ validateConfig();
 
 export class GoogleAdsAPIClient {
   private customerId: string;
-  private refreshToken: string;
 
-  constructor(customerId: string, refreshToken: string) {
+  constructor(customerId: string) {
     this.customerId = customerId;
-    this.refreshToken = refreshToken;
   }
 
   // إعداد headers للطلبات
-  private getHeaders(): Record<string, string> {
+  private async getHeaders(): Promise<Record<string, string>> {
+    const accessToken = await googleAuthService.refreshAccessToken();
+    if (!accessToken) {
+      throw new Error("Failed to get access token for Google Ads API");
+    }
     return {
-      'Authorization': `Bearer ${this.getAccessToken()}`,
-      'developer-token': config.developerToken,
-      'login-customer-id': config.mccCustomerId,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${accessToken}`,
+      "developer-token": process.env.GOOGLE_ADS_DEVELOPER_TOKEN!,
+      "login-customer-id": process.env.MCC_LOGIN_CUSTOMER_ID!,
+      "Content-Type": "application/json",
     };
-  }
-
-  // الحصول على access token (يجب تنفيذه حسب نظام المصادقة)
-  private getAccessToken(): string {
-    // هذا يجب أن يتم تنفيذه للحصول على access token من refresh token
-    return this.refreshToken; // مؤقت - يجب استبداله بـ access token حقيقي
   }
 
   // الحصول على معلومات الحساب
@@ -66,8 +59,12 @@ export class GoogleAdsAPIClient {
       const response = await this.executeQuery(query);
       return response.results?.[0]?.customer || null;
     } catch (error) {
-      console.error('Error getting account info:', error);
-      throw new Error(`Failed to get account info: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error)}`);
+      console.error("Error getting account info:", error);
+      throw new Error(
+        `Failed to get account info: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
@@ -89,19 +86,24 @@ export class GoogleAdsAPIClient {
       `;
 
       const response = await this.executeQuery(query);
-      return response.results?.map((row: any) => ({
-        id: row.campaign.id.toString(),
-        name: row.campaign.name,
-        status: row.campaign.status,
-        type: row.campaign.advertising_channel_type,
-        startDate: row.campaign.start_date,
-        endDate: row.campaign.end_date,
-        budget: row.campaign_budget?.amount_micros ? 
-          parseInt(row.campaign_budget.amount_micros.toString()) / 1000000 : 0
-      })) || [];
+      return (
+        response.results?.map((row: any) => ({
+          id: row.campaign.id.toString(),
+          name: row.campaign.name,
+          status: row.campaign.status,
+          type: row.campaign.advertising_channel_type,
+          startDate: row.campaign.start_date,
+          endDate: row.campaign.end_date,
+          budget: row.campaign_budget?.amount_micros
+            ? parseInt(row.campaign_budget.amount_micros.toString()) / 1000000
+            : 0,
+        })) || []
+      );
     } catch (error) {
-      console.error('Error getting campaigns:', error);
-      throw new Error(`Failed to get campaigns: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error getting campaigns:", error);
+      throw new Error(
+        `Failed to get campaigns: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -113,45 +115,53 @@ export class GoogleAdsAPIClient {
         create: {
           name: `Budget for ${campaignData.name}`,
           amount_micros: (campaignData.budget * 1000000).toString(), // تحويل إلى string
-          delivery_method: 'STANDARD'
-        }
+          delivery_method: "STANDARD",
+        },
       };
 
-      const budgetResponse = await this.executeMutation('campaignBudgets', [budgetOperation]);
+      const budgetResponse = await this.executeMutation(
+        "campaignBudgets",
+        [budgetOperation]
+      );
       const budgetResourceName = budgetResponse.results?.[0]?.resource_name;
 
       if (!budgetResourceName) {
-        throw new Error('Failed to create campaign budget');
+        throw new Error("Failed to create campaign budget");
       }
 
       // إنشاء الحملة
       const campaignOperation = {
         create: {
           name: campaignData.name,
-          advertising_channel_type: campaignData.type || 'SEARCH',
-          status: 'PAUSED', // تبدأ متوقفة
+          advertising_channel_type: campaignData.type || "SEARCH",
+          status: "PAUSED", // تبدأ متوقفة
           campaign_budget: budgetResourceName,
           network_settings: {
             target_google_search: true,
             target_search_network: true,
             target_content_network: false,
-            target_partner_search_network: false
+            target_partner_search_network: false,
           },
           start_date: campaignData.startDate,
-          end_date: campaignData.endDate
-        }
+          end_date: campaignData.endDate,
+        },
       };
 
-      const campaignResponse = await this.executeMutation('campaigns', [campaignOperation]);
-      
+      const campaignResponse = await this.executeMutation(
+        "campaigns",
+        [campaignOperation]
+      );
+
       return {
         success: true,
         campaignId: campaignResponse.results?.[0]?.resource_name,
-        budgetId: budgetResourceName
+        budgetId: budgetResourceName,
       };
     } catch (error) {
-      console.error('Error creating campaign:', error);
-      throw new Error(`Failed to create campaign: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error creating campaign:", error);
+      throw new Error(
+        `Failed to create campaign: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -178,8 +188,10 @@ export class GoogleAdsAPIClient {
       const response = await this.executeQuery(query);
       return this.processStatsData(response.results || []);
     } catch (error) {
-      console.error('Error getting campaign stats:', error);
-      throw new Error(`Failed to get campaign stats: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error getting campaign stats:", error);
+      throw new Error(
+        `Failed to get campaign stats: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -202,20 +214,20 @@ export class GoogleAdsAPIClient {
       const response = await this.executeQuery(query);
       return this.processAuctionData(response.results || []);
     } catch (error) {
-      console.error('Error fetching auction insights:', error);
-      throw new Error('Failed to fetch auction insights data');
+      console.error("Error fetching auction insights:", error);
+      throw new Error("Failed to fetch auction insights data");
     }
   }
 
   // تنفيذ استعلام
   private async executeQuery(query: string): Promise<any> {
     try {
-      const url = `https://googleads.googleapis.com/v16/customers/${this.customerId}/googleAds:search`;
-      
+      const url = `${GOOGLE_ADS_API_BASE_URL}/customers/${this.customerId}/googleAds:search`;
+
       const response = await fetch(url, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ query })
+        method: "POST",
+        headers: await this.getHeaders(),
+        body: JSON.stringify({ query }),
       });
 
       if (!response.ok) {
@@ -224,7 +236,7 @@ export class GoogleAdsAPIClient {
 
       return await response.json();
     } catch (error) {
-      console.error('Error executing query:', error);
+      console.error("Error executing query:", error);
       throw error;
     }
   }
@@ -232,12 +244,12 @@ export class GoogleAdsAPIClient {
   // تنفيذ mutation
   private async executeMutation(resource: string, operations: any[]): Promise<any> {
     try {
-      const url = `https://googleads.googleapis.com/v16/customers/${this.customerId}/${resource}:mutate`;
-      
+      const url = `${GOOGLE_ADS_API_BASE_URL}/customers/${this.customerId}/${resource}:mutate`;
+
       const response = await fetch(url, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ operations })
+        method: "POST",
+        headers: await this.getHeaders(),
+        body: JSON.stringify({ operations }),
       });
 
       if (!response.ok) {
@@ -246,51 +258,62 @@ export class GoogleAdsAPIClient {
 
       return await response.json();
     } catch (error) {
-      console.error('Error executing mutation:', error);
+      console.error("Error executing mutation:", error);
       throw error;
     }
   }
 
   // معالجة بيانات الإحصائيات
   private processStatsData(results: any[]): StatsData {
-    const processedData = results.map(row => ({
-      date: row.segments?.date || '',
-      impressions: parseInt(row.metrics?.impressions?.toString() || '0'),
-      clicks: parseInt(row.metrics?.clicks?.toString() || '0'),
-      cost: parseInt(row.metrics?.cost_micros?.toString() || '0') / 1000000,
-      conversions: parseFloat(row.metrics?.conversions?.toString() || '0'),
-      ctr: parseFloat(row.metrics?.ctr?.toString() || '0'),
-      averageCpc: parseInt(row.metrics?.average_cpc?.toString() || '0') / 1000000
+    const processedData = results.map((row) => ({
+      date: row.segments?.date || "",
+      impressions: parseInt(row.metrics?.impressions?.toString() || "0"),
+      clicks: parseInt(row.metrics?.clicks?.toString() || "0"),
+      cost: parseInt(row.metrics?.cost_micros?.toString() || "0") / 1000000,
+      conversions: parseFloat(row.metrics?.conversions?.toString() || "0"),
+      ctr: parseFloat(row.metrics?.ctr?.toString() || "0"),
+      averageCpc: parseInt(row.metrics?.average_cpc?.toString() || "0") / 1000000,
     }));
 
     // حساب الإجماليات
-    const totals = processedData.reduce((acc, day) => ({
-      impressions: acc.impressions + day.impressions,
-      clicks: acc.clicks + day.clicks,
-      cost: acc.cost + day.cost,
-      conversions: acc.conversions + day.conversions
-    }), { impressions: 0, clicks: 0, cost: 0, conversions: 0 });
+    const totals = processedData.reduce(
+      (acc, day) => ({
+        impressions: acc.impressions + day.impressions,
+        clicks: acc.clicks + day.clicks,
+        cost: acc.cost + day.cost,
+        conversions: acc.conversions + day.conversions,
+      }),
+      { impressions: 0, clicks: 0, cost: 0, conversions: 0 }
+    );
 
     return {
       dailyData: processedData,
       totals: {
         ...totals,
-        ctr: totals.clicks / totals.impressions * 100 || 0,
+        ctr: (totals.clicks / totals.impressions) * 100 || 0,
         averageCpc: totals.cost / totals.clicks || 0,
-        costPerConversion: totals.cost / totals.conversions || 0
-      }
+        costPerConversion: totals.cost / totals.conversions || 0,
+      },
     };
   }
 
   // معالجة بيانات المزاد
   private processAuctionData(results: any[]): AuctionInsightsData[] {
-    return results.map(row => ({
-      domain: row.auction_insight_domain?.domain || '',
-      impressionShare: parseFloat(row.auction_insight_domain?.impression_share?.toString() || '0'),
-      averagePosition: parseFloat(row.auction_insight_domain?.average_position?.toString() || '0'),
-      overlapRate: parseFloat(row.auction_insight_domain?.overlap_rate?.toString() || '0'),
-      topOfPageRate: parseFloat(row.auction_insight_domain?.top_of_page_rate?.toString() || '0'),
-      date: row.segments?.date || ''
+    return results.map((row) => ({
+      domain: row.auction_insight_domain?.domain || "",
+      impressionShare: parseFloat(
+        row.auction_insight_domain?.impression_share?.toString() || "0"
+      ),
+      averagePosition: parseFloat(
+        row.auction_insight_domain?.average_position?.toString() || "0"
+      ),
+      overlapRate: parseFloat(
+        row.auction_insight_domain?.overlap_rate?.toString() || "0"
+      ),
+      topOfPageRate: parseFloat(
+        row.auction_insight_domain?.top_of_page_rate?.toString() || "0"
+      ),
+      date: row.segments?.date || "",
     }));
   }
 
@@ -300,20 +323,20 @@ export class GoogleAdsAPIClient {
     const startDate = new Date();
 
     switch (period) {
-      case 'last_7_days':
+      case "last_7_days":
         startDate.setDate(today.getDate() - 7);
         break;
-      case 'last_30_days':
+      case "last_30_days":
         startDate.setDate(today.getDate() - 30);
         break;
-      case 'last_90_days':
+      case "last_90_days":
         startDate.setDate(today.getDate() - 90);
         break;
       default:
         startDate.setDate(today.getDate() - 30);
     }
 
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
     return `${formatDate(startDate)} AND ${formatDate(today)}`;
   }
 
@@ -330,7 +353,7 @@ export class GoogleAdsAPIClient {
       await this.executeQuery(query);
       return true;
     } catch (error) {
-      console.error('Connection validation failed:', error);
+      console.error("Connection validation failed:", error);
       return false;
     }
   }
@@ -338,21 +361,21 @@ export class GoogleAdsAPIClient {
   // الحصول على الكلمات المفتاحية المقترحة
   async getKeywordSuggestions(seedKeywords: string[]): Promise<KeywordSuggestion[]> {
     try {
-      const url = `https://googleads.googleapis.com/v16/customers/${this.customerId}/keywordPlanIdeas:generateKeywordIdeas`;
-      
+      const url = `${GOOGLE_ADS_API_BASE_URL}/customers/${this.customerId}/keywordPlanIdeas:generateKeywordIdeas`;
+
       const requestBody = {
         customerId: this.customerId,
-        language: { languageCode: 'ar' }, // العربية
-        geoTargetConstants: [{ geoTargetConstant: 'geoTargetConstants/2818' }], // مصر
+        language: { languageCode: "ar" }, // العربية
+        geoTargetConstants: [{ geoTargetConstant: "geoTargetConstants/2818" }], // مصر
         keywordSeed: {
-          keywords: seedKeywords
-        }
+          keywords: seedKeywords,
+        },
       };
 
       const response = await fetch(url, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify(requestBody)
+        method: "POST",
+        headers: await this.getHeaders(),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -360,19 +383,31 @@ export class GoogleAdsAPIClient {
       }
 
       const data = await response.json();
-      
-      return data.results?.map((idea: any) => ({
-        keyword: idea.text || '',
-        avgMonthlySearches: parseInt(idea.keywordIdeaMetrics?.avgMonthlySearches?.toString() || '0'),
-        competition: idea.keywordIdeaMetrics?.competition || 'UNKNOWN',
-        lowTopOfPageBid: idea.keywordIdeaMetrics?.lowTopOfPageBidMicros ? 
-          parseInt(idea.keywordIdeaMetrics.lowTopOfPageBidMicros.toString()) / 1000000 : 0,
-        highTopOfPageBid: idea.keywordIdeaMetrics?.highTopOfPageBidMicros ? 
-          parseInt(idea.keywordIdeaMetrics.highTopOfPageBidMicros.toString()) / 1000000 : 0
-      })) || [];
+
+      return (
+        data.results?.map((idea: any) => ({
+          keyword: idea.text || "",
+          avgMonthlySearches: parseInt(
+            idea.keywordIdeaMetrics?.avgMonthlySearches?.toString() || "0"
+          ),
+          competition: idea.keywordIdeaMetrics?.competition || "UNKNOWN",
+          lowTopOfPageBid: idea.keywordIdeaMetrics?.lowTopOfPageBidMicros
+            ? parseInt(
+                idea.keywordIdeaMetrics.lowTopOfPageBidMicros.toString()
+              ) / 1000000
+            : 0,
+          highTopOfPageBid: idea.keywordIdeaMetrics?.highTopOfPageBidMicros
+            ? parseInt(
+                idea.keywordIdeaMetrics.highTopOfPageBidMicros.toString()
+              ) / 1000000
+            : 0,
+        })) || []
+      );
     } catch (error) {
-      console.error('Error getting keyword suggestions:', error);
-      throw new Error(`Failed to get keyword suggestions: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error getting keyword suggestions:", error);
+      throw new Error(
+        `Failed to get keyword suggestions: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -392,16 +427,20 @@ export class GoogleAdsAPIClient {
       `;
 
       const response = await this.executeQuery(query);
-      return response.results?.map((row: any) => ({
-        id: row.customer_client?.id?.toString() || '',
-        name: row.customer_client?.descriptive_name || '',
-        currencyCode: row.customer_client?.currency_code || '',
-        timeZone: row.customer_client?.time_zone || '',
-        status: row.customer_client?.status || ''
-      })) || [];
+      return (
+        response.results?.map((row: any) => ({
+          id: row.customer_client?.id?.toString() || "",
+          name: row.customer_client?.descriptive_name || "",
+          currencyCode: row.customer_client?.currency_code || "",
+          timeZone: row.customer_client?.time_zone || "",
+          status: row.customer_client?.status || "",
+        })) || []
+      );
     } catch (error) {
-      console.error('Error getting accessible accounts:', error);
-      throw new Error(`Failed to get accessible accounts: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error getting accessible accounts:", error);
+      throw new Error(
+        `Failed to get accessible accounts: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 }
@@ -462,4 +501,5 @@ export interface AccountInfo {
 }
 
 export default GoogleAdsAPIClient;
+
 

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Force dynamic rendering for OAuth operations
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // TypeScript interfaces
 interface TokenRefreshResponse {
   access_token: string;
@@ -276,4 +280,3 @@ async function refreshGoogleToken(refreshToken: string): Promise<TokenRefreshRes
     token_type: data.token_type || 'Bearer'
   };
 }
-

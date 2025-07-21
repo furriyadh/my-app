@@ -17,9 +17,9 @@ class GoogleAuthService {
     this.clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '366144291902-u75bec3sviur9nrutbslt14ob14hrgud.apps.googleusercontent.com'
     this.redirectUri = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/oauth/callback'
     this.scopes = [
-      'https://www.googleapis.com/auth/adwords',
       'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/userinfo.profile'
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/adwords'
     ]
 
     // OAuth state for security
@@ -54,6 +54,7 @@ class GoogleAuthService {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, [])
     }
+    this.listeners.get(event).push(callback)
   }
 
   /**
@@ -89,35 +90,21 @@ class GoogleAuthService {
    */
   async checkAuthStatus() {
     try {
-      const accessToken = getStorageItem('google_access_token')
-      const refreshToken = getStorageItem('google_refresh_token')
-      const expiresAt = getStorageItem('google_token_expires_at')
+      // Check if user has session cookie
+      const response = await fetch('/api/oauth/refresh?provider=google', {
+        method: 'GET',
+        credentials: 'include'
+      })
 
-      if (!accessToken) {
+      if (response.ok) {
+        const data = await response.json()
+        const isAuthenticated = !data.is_expired
+        this.emit('auth_status_changed', { authenticated: isAuthenticated })
+        return isAuthenticated
+      } else {
         this.emit('auth_status_changed', { authenticated: false })
         return false
       }
-
-      // Check if token is expired
-      if (expiresAt && Date.now() > parseInt(expiresAt)) {
-        if (refreshToken) {
-          // Try to refresh token
-          const refreshed = await this.refreshAccessToken(refreshToken)
-          if (refreshed) {
-            this.emit('auth_status_changed', { authenticated: true })
-            return true
-          }
-        }
-        
-        // Token expired and couldn't refresh
-        this.clearTokens()
-        this.emit('auth_status_changed', { authenticated: false })
-        return false
-      }
-
-      // Token is valid
-      this.emit('auth_status_changed', { authenticated: true })
-      return true
     } catch (error) {
       console.error('Error checking auth status:', error)
       this.emit('auth_status_changed', { authenticated: false })
@@ -130,25 +117,8 @@ class GoogleAuthService {
    */
   async startOAuthFlow() {
     try {
-      // Generate state for security
-      this.state = this.generateState()
-      setStorageItem('oauth_state', this.state)
-
-      // Build OAuth URL
-      const params = new URLSearchParams({
-        client_id: this.clientId,
-        redirect_uri: this.redirectUri,
-        response_type: 'code',
-        scope: this.scopes.join(' '),
-        state: this.state,
-        access_type: 'offline',
-        prompt: 'consent'
-      })
-
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-      
-      // Redirect to Google OAuth
-      window.location.href = authUrl
+      // Redirect to our OAuth endpoint which will handle the Google OAuth flow
+      window.location.href = '/api/oauth/google'
     } catch (error) {
       console.error('Error starting OAuth flow:', error)
       this.emit('auth_error', { error: 'Failed to start OAuth flow' })
@@ -162,9 +132,9 @@ class GoogleAuthService {
   async handleOAuthCallback() {
     try {
       const urlParams = new URLSearchParams(window.location.search)
-      const code = urlParams.get('code')
-      const state = urlParams.get('state')
+      const connected = urlParams.get('connected')
       const error = urlParams.get('error')
+      const adsAccounts = urlParams.get('ads_accounts')
 
       if (error) {
         console.error('OAuth error:', error)
@@ -172,23 +142,11 @@ class GoogleAuthService {
         return false
       }
 
-      if (!code || !state) {
-        return false
-      }
-
-      // Verify state
-      const storedState = getStorageItem('oauth_state')
-      if (state !== storedState) {
-        console.error('OAuth state mismatch')
-        this.emit('auth_error', { error: 'State mismatch' })
-        return false
-      }
-
-      // Exchange code for tokens
-      const tokens = await this.exchangeCodeForTokens(code)
-      if (tokens) {
-        this.storeTokens(tokens)
-        this.emit('auth_success', { tokens })
+      if (connected === 'true') {
+        this.emit('auth_success', { 
+          connected: true,
+          ads_accounts: parseInt(adsAccounts) || 0
+        })
         
         // Clean up URL
         window.history.replaceState({}, document.title, window.location.pathname)
@@ -204,52 +162,19 @@ class GoogleAuthService {
   }
 
   /**
-   * Exchange authorization code for tokens
-   */
-  async exchangeCodeForTokens(code) {
-    try {
-      const response = await fetch('/api/oauth/callback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          redirect_uri: this.redirectUri,
-          client_id: this.clientId
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data.success && data.tokens) {
-        return data.tokens
-      } else {
-        throw new Error(data.error || 'Failed to exchange code for tokens')
-      }
-    } catch (error) {
-      console.error('Error exchanging code for tokens:', error)
-      throw error
-    }
-  }
-
-  /**
    * Refresh access token
    */
-  async refreshAccessToken(refreshToken) {
+  async refreshAccessToken() {
     try {
       const response = await fetch('/api/oauth/refresh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          refresh_token: refreshToken,
-          client_id: this.clientId
+          provider: 'google',
+          force_refresh: false
         })
       })
 
@@ -259,9 +184,13 @@ class GoogleAuthService {
 
       const data = await response.json()
       
-      if (data.success && data.tokens) {
-        this.storeTokens(data.tokens)
+      if (data.success) {
+        this.emit('token_refreshed', data)
         return true
+      } else if (data.reauthenticate) {
+        // User needs to re-authenticate
+        this.emit('auth_status_changed', { authenticated: false, reauthenticate: true })
+        return false
       } else {
         throw new Error(data.error || 'Failed to refresh token')
       }
@@ -272,33 +201,51 @@ class GoogleAuthService {
   }
 
   /**
-   * Store tokens in localStorage
+   * Check if user is authenticated
    */
-  storeTokens(tokens) {
+  async isAuthenticated() {
     try {
-      if (tokens.access_token) {
-        setStorageItem('google_access_token', tokens.access_token)
-      }
-      
-      if (tokens.refresh_token) {
-        setStorageItem('google_refresh_token', tokens.refresh_token)
-      }
-      
-      if (tokens.expires_in) {
-        const expiresAt = Date.now() + (tokens.expires_in * 1000)
-        setStorageItem('google_token_expires_at', expiresAt.toString())
-      }
+      const response = await fetch('/api/oauth/refresh?provider=google', {
+        method: 'GET',
+        credentials: 'include'
+      })
 
-      if (tokens.scope) {
-        setStorageItem('google_token_scope', tokens.scope)
+      if (response.ok) {
+        const data = await response.json()
+        return !data.is_expired
       }
+      
+      return false
     } catch (error) {
-      console.error('Error storing tokens:', error)
+      console.error('Error checking authentication:', error)
+      return false
     }
   }
 
   /**
-   * Clear stored tokens
+   * Sign out user
+   */
+  async signOut() {
+    try {
+      // Clear any local storage (if used)
+      this.clearTokens()
+      
+      // Emit sign out event
+      this.emit('auth_status_changed', { authenticated: false })
+      this.emit('sign_out')
+      
+      // Redirect to home page
+      window.location.href = '/'
+      
+      return true
+    } catch (error) {
+      console.error('Error signing out:', error)
+      return false
+    }
+  }
+
+  /**
+   * Clear stored tokens (for backward compatibility)
    */
   clearTokens() {
     try {
@@ -313,99 +260,21 @@ class GoogleAuthService {
   }
 
   /**
-   * Get current access token
-   */
-  getAccessToken() {
-    return getStorageItem('google_access_token')
-  }
-
-  /**
-   * Get current refresh token
-   */
-  getRefreshToken() {
-    return getStorageItem('google_refresh_token')
-  }
-
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated() {
-    const accessToken = this.getAccessToken()
-    const expiresAt = getStorageItem('google_token_expires_at')
-    
-    if (!accessToken) {
-      return false
-    }
-
-    if (expiresAt && Date.now() > parseInt(expiresAt)) {
-      return false
-    }
-
-    return true
-  }
-
-  /**
-   * Sign out user
-   */
-  async signOut() {
-    try {
-      const accessToken = this.getAccessToken()
-      
-      if (accessToken) {
-        // Revoke token with Google
-        await fetch(`https://oauth2.googleapis.com/revoke?token=${accessToken}`, {
-          method: 'POST'
-        })
-      }
-
-      // Clear local tokens
-      this.clearTokens()
-      
-      // Emit sign out event
-      this.emit('auth_status_changed', { authenticated: false })
-      this.emit('sign_out')
-      
-      return true
-    } catch (error) {
-      console.error('Error signing out:', error)
-      // Clear tokens anyway
-      this.clearTokens()
-      this.emit('auth_status_changed', { authenticated: false })
-      return false
-    }
-  }
-
-  /**
-   * Generate random state for OAuth security
-   */
-  generateState() {
-    const array = new Uint32Array(1)
-    crypto.getRandomValues(array)
-    return array[0].toString(36)
-  }
-
-  /**
-   * Get user info from Google
+   * Get user info from cookies
    */
   async getUserInfo() {
     try {
-      const accessToken = this.getAccessToken()
-      if (!accessToken) {
-        throw new Error('No access token available')
+      // Get user info from cookie
+      const userCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('user_info='))
+      
+      if (userCookie) {
+        const userInfo = JSON.parse(decodeURIComponent(userCookie.split('=')[1]))
+        return userInfo
       }
-
-      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const userInfo = await response.json()
-      return userInfo
+      
+      throw new Error('No user info available')
     } catch (error) {
       console.error('Error getting user info:', error)
       throw error
@@ -417,18 +286,17 @@ class GoogleAuthService {
    */
   async getGoogleAdsAccounts() {
     try {
-      const accessToken = this.getAccessToken()
-      if (!accessToken) {
-        throw new Error('No access token available')
-      }
-
       const response = await fetch('/api/google-ads/accounts', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+        method: 'GET',
+        credentials: 'include' // Include cookies for session_token
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // Unauthorized - user needs to re-authenticate
+          this.emit('auth_status_changed', { authenticated: false, reauthenticate: true })
+          throw new Error('Authentication required')
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
@@ -436,6 +304,66 @@ class GoogleAuthService {
       return data.accounts || []
     } catch (error) {
       console.error('Error getting Google Ads accounts:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Update Google Ads account settings
+   */
+  async updateGoogleAdsAccount(accountId, action, additionalData = {}) {
+    try {
+      const response = await fetch('/api/google-ads/accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          account_id: accountId,
+          action: action,
+          ...additionalData
+        })
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          this.emit('auth_status_changed', { authenticated: false, reauthenticate: true })
+          throw new Error('Authentication required')
+        }
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error updating Google Ads account:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Remove Google Ads account
+   */
+  async removeGoogleAdsAccount(accountId) {
+    try {
+      const response = await fetch(`/api/google-ads/accounts?account_id=${accountId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          this.emit('auth_status_changed', { authenticated: false, reauthenticate: true })
+          throw new Error('Authentication required')
+        }
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error removing Google Ads account:', error)
       throw error
     }
   }
@@ -452,10 +380,11 @@ export const {
   handleOAuthCallback,
   checkAuthStatus,
   isAuthenticated,
-  getAccessToken,
-  getRefreshToken,
   getUserInfo,
   getGoogleAdsAccounts,
+  updateGoogleAdsAccount,
+  removeGoogleAdsAccount,
+  refreshAccessToken,
   signOut,
   on,
   off
