@@ -9,7 +9,7 @@ from typing import Dict, Any
 from pathlib import Path
 
 # تحميل متغيرات البيئة مع تحديد المسار الصحيح
-env_path = Path(__file__).parent / '.env'
+env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
 class Config:
@@ -38,8 +38,8 @@ class Config:
     # ===================================================
     GOOGLE_ADS_CONFIG = {
         'developer_token': os.getenv('GOOGLE_DEVELOPER_TOKEN'),
-        'client_id': os.getenv('GOOGLE_CLIENT_ID_NEW'),          # ⭐ استخدام Client ID الجديد
-        'client_secret': os.getenv('GOOGLE_CLIENT_SECRET_NEW'),   # ⭐ استخدام Client Secret الجديد
+        'client_id': os.getenv('GOOGLE_CLIENT_ID'),          # ⭐ استخدام Client ID الصحيح
+        'client_secret': os.getenv('GOOGLE_CLIENT_SECRET'),   # ⭐ استخدام Client Secret الصحيح
         'refresh_token': os.getenv('GOOGLE_REFRESH_TOKEN'),
         'login_customer_id': os.getenv('MCC_LOGIN_CUSTOMER_ID'),
         'use_proto_plus': True
@@ -49,8 +49,8 @@ class Config:
     # OAuth Configuration - للتوافق مع Frontend
     # ===================================================
     OAUTH_CONFIG = {
-        'google_client_id': os.getenv('GOOGLE_CLIENT_ID_NEW'),
-        'google_client_secret': os.getenv('GOOGLE_CLIENT_SECRET_NEW'),
+        'google_client_id': os.getenv('GOOGLE_CLIENT_ID'),
+        'google_client_secret': os.getenv('GOOGLE_CLIENT_SECRET'),
         'redirect_uri': os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:3000/api/oauth/callback'),
         'scopes': [
             'https://www.googleapis.com/auth/adwords',
@@ -102,8 +102,8 @@ class Config:
     def validate_config(cls) -> bool:
         """التحقق من صحة الإعدادات المطلوبة"""
         required_vars = [
-            'GOOGLE_CLIENT_ID_NEW',
-            'GOOGLE_CLIENT_SECRET_NEW',
+            'GOOGLE_CLIENT_ID',
+            'GOOGLE_CLIENT_SECRET',
             'GOOGLE_DEVELOPER_TOKEN',
             'SUPABASE_URL',
             'SUPABASE_ANON_KEY'

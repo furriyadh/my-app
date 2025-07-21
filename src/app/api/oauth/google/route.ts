@@ -12,8 +12,6 @@ interface GoogleAdsAccount {
   is_manager_account: boolean;
 }
 
-
-
 interface GoogleUserInfo {
   id: string;
   email: string;
@@ -39,14 +37,13 @@ const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/adwords'
-].join(' ');
+].join(' ' );
 
 // Google APIs configuration
 const GOOGLE_ADS_API_VERSION = 'v16';
 const GOOGLE_ADS_API_BASE_URL = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}`;
 
-
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest ) {
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
@@ -66,10 +63,35 @@ export async function GET(request: NextRequest) {
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    return NextResponse.redirect(
-      `${baseUrl}/campaign/new?error=oauth_error&message=${encodeURIComponent(errorMessage)}`
-    );
+    return new NextResponse(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>OAuth Error</title>
+        <style>
+          body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f5f5f5; }
+          .error-message { text-align: center; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1 ); color: #d32f2f; }
+        </style>
+      </head>
+      <body>
+        <div class="error-message">
+          <h2>Authentication Failed</h2>
+          <p>${errorMessage}</p>
+          <p>This window will close automatically.</p>
+        </div>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'oauthError', payload: { message: '${errorMessage}' } }, '*');
+          }
+          setTimeout(function() {
+            window.close();
+          }, 3000);
+        </script>
+      </body>
+      </html>
+    `, {
+      headers: { 'Content-Type': 'text/html' }
+    });
   }
 }
 
@@ -91,9 +113,9 @@ async function handleOAuthInitiation(request: NextRequest) {
   const state = randomBytes(32).toString('hex');
   
   // بناء Google OAuth authorization URL
-  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth' );
   authUrl.searchParams.set('client_id', process.env.GOOGLE_CLIENT_ID);
-  authUrl.searchParams.set("redirect_uri", process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/oauth/callback");
+  authUrl.searchParams.set("redirect_uri", process.env.GOOGLE_REDIRECT_URI);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', GOOGLE_OAUTH_SCOPES);
   authUrl.searchParams.set('state', state);
@@ -111,7 +133,7 @@ async function handleOAuthInitiation(request: NextRequest) {
     sameSite: 'lax',
     maxAge: 600, // 10 دقائق
     path: '/'
-  });
+  } );
 
   return response;
 }
@@ -119,28 +141,61 @@ async function handleOAuthInitiation(request: NextRequest) {
 // معالجة OAuth callback
 async function handleOAuthCallback(request: NextRequest, code: string | null, error: string | null, state: string | null) {
   // التحقق من state parameter للحماية من CSRF
-  const storedState = request.cookies.get('oauth_state')?.value;
+  const storedState = request.cookies.get("oauth_state")?.value;
   if (!state || state !== storedState) {
-    console.error('Invalid state parameter');
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/?error=invalid_state`
-    );
+    console.error("Invalid state parameter");
+    return new NextResponse(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>OAuth Error</title></head>
+      <body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'oauthError', payload: { message: 'Invalid state parameter' } }, '*');
+          }
+          window.close();
+        </script>
+      </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   }
 
   // التحقق من وجود خطأ في OAuth
   if (error) {
-    console.error('OAuth Error:', error);
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/?error=oauth_error&message=${encodeURIComponent(error)}`
-    );
+    console.error("OAuth Error:", error);
+    return new NextResponse(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>OAuth Error</title></head>
+      <body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'oauthError', payload: { message: '${encodeURIComponent(error)}' } }, '*');
+          }
+          window.close();
+        </script>
+      </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   }
 
   // التحقق من وجود authorization code
   if (!code) {
-    console.error('No authorization code received');
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/?error=no_code`
-    );
+    console.error("No authorization code received");
+    return new NextResponse(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>OAuth Error</title></head>
+      <body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'oauthError', payload: { message: 'No authorization code received' } }, '*');
+          }
+          window.close();
+        </script>
+      </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   }
 
   // تبديل authorization code بـ access token
@@ -155,7 +210,7 @@ async function handleOAuthCallback(request: NextRequest, code: string | null, er
   
   const userInfoResponse = await fetch(
     `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokens.access_token}`
-  );
+   );
   
   if (!userInfoResponse.ok) {
     throw new Error('Failed to get user info from Google');
@@ -296,10 +351,79 @@ async function handleOAuthCallback(request: NextRequest, code: string | null, er
   // توجيه المستخدم إلى صفحة إنشاء الحملة مع معلومات جميع الحسابات المربوطة
   // إغلاق النافذة المنبثقة بعد إتمام الأذونات بنجاح
   return new NextResponse(`
-    <script>
-      window.opener.postMessage({ type: 'oauthSuccess', payload: { ads_accounts: ${googleAdsAccounts.length} } }, '*');
-      window.close();
-    </script>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>OAuth Success</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          background-color: #f5f5f5;
+        }
+        .success-message {
+          text-align: center;
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1 );
+        }
+        .spinner {
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #3498db;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 20px;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="success-message">
+        <div class="spinner"></div>
+        <h2>Authentication Successful!</h2>
+        <p>Your account has been connected successfully. This window will close automatically.</p>
+      </div>
+      <script>
+        try {
+          // إرسال رسالة للنافذة الأصلية
+          if (window.opener) {
+            window.opener.postMessage({ 
+              type: 'oauthSuccess', 
+              payload: { 
+                ads_accounts: ${googleAdsAccounts.length},
+                success: true 
+              } 
+            }, '*');
+          }
+          
+          // إغلاق النافذة بعد ثانيتين
+          setTimeout(function() {
+            window.close();
+          }, 2000);
+          
+          // محاولة إغلاق فوري كنسخة احتياطية
+          window.close();
+          
+        } catch (error) {
+          console.error('Error closing popup:', error);
+          // في حالة فشل الإغلاق، إعادة توجيه للصفحة الرئيسية
+          setTimeout(function() {
+            window.location.href = '${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}';
+          }, 3000 );
+        }
+      </script>
+    </body>
+    </html>
   `, {
     headers: { 'Content-Type': 'text/html' }
   });
@@ -411,6 +535,3 @@ function generateSessionToken(): string {
   }
   return result;
 }
-
-
-

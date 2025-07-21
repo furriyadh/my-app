@@ -1087,3 +1087,42 @@ def admin_delete_user(user_id):
             "error_code": "ADMIN_DELETE_USER_ERROR"
         }), 500
 
+
+
+@auth_bp.route("/oauth/callback", methods=["GET"])
+def oauth_callback():
+    """معالجة رد الاتصال من Google OAuth"""
+    try:
+        code = request.args.get("code")
+        state = request.args.get("state")
+        error = request.args.get("error")
+
+        if error:
+            logger.error(f"خطأ في رد الاتصال من Google OAuth: {error}")
+            return "<script>window.close();</script>", 400
+
+        if not code:
+            logger.error("رمز المصادقة مفقود في رد الاتصال.")
+            return "<script>window.close();</script>", 400
+
+        # تهيئة معالج OAuth
+        from backend.oauth_handler import create_oauth_handler
+        from backend.config import Config
+        oauth_config = Config.get_oauth_config()
+        oauth_handler = create_oauth_handler(oauth_config)
+
+        # تبديل الرمز بالتوكنات
+        token_data = oauth_handler.exchange_code_for_tokens(code)
+
+        # هنا يمكنك حفظ token_data (access_token, refresh_token) في قاعدة البيانات
+        # أو إرسالها إلى الواجهة الأمامية
+        logger.info(f"تم الحصول على التوكنات بنجاح. Refresh Token: {token_data.get("refresh_token")}")
+
+        # إغلاق النافذة المنبثقة بعد النجاح
+        return "<script>window.close();</script>", 200
+
+    except Exception as e:
+        logger.error(f"خطأ في معالجة رد الاتصال من Google OAuth: {str(e)}")
+        return "<script>window.close();</script>", 500
+
+

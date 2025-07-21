@@ -108,7 +108,7 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
             {/* Free Trial Badge */}
             <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
               7 Days Free
-            </div>v>
+            </div>
 
             {/* Selection Indicator */}
             {selectedService === 'client' && (
@@ -139,22 +139,47 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
             <button
               onClick={() => {
                 if (typeof window !== 'undefined') {
-                  const popup = window.open('/api/oauth/google', '_blank', 'width=600,height=700');
+                  const popup = window.open("/api/oauth/google", 
+                  "_blank", 
+                  "width=600,height=700,scrollbars=yes,resizable=yes");
+                  const messageListener = (event: MessageEvent) => {
+                    if (event.source === popup && event.data.type === 'oauthSuccess') {
+                      // إزالة مستمع الرسائل
+                      window.removeEventListener('message', messageListener);
+                      
+                      // إغلاق النافذة المنبثقة إذا لم تُغلق تلقائياً
+                      if (popup && !popup.closed) {
+                        popup.close();
+                      }
+                      
+                      // تحديث حالة الاتصال وإغلاق Modal
+                      console.log("OAuth completed successfully");
+                      onSelect("client");
+                      onClose();
+                    }
+                  };
                   
-                  // مراقبة إغلاق النافذة المنبثقة
+                  // إضافة مستمع الرسائل
+                  window.addEventListener('message', messageListener);
+                  
+                  // مراقبة إغلاق النافذة المنبثقة (كنسخة احتياطية)
                   const checkClosed = setInterval(() => {
                     if (popup?.closed) {
                       clearInterval(checkClosed);
-                      // لا نقوم بإعادة التوجيه، نبقى في نفس الصفحة
-                      // يمكن إضافة منطق لتحديث حالة الاتصال هنا
+                      window.removeEventListener('message', messageListener);
                       console.log("OAuth popup closed");
-                      // هنا يمكننا استدعاء دالة لتحديث حالة الحسابات في الصفحة الرئيسية
-                      // على سبيل المثال: onSelect("client");
                     }
                   }, 1000);
+                  
+                  // تنظيف المستمعات بعد 5 دقائق (timeout)
+                  setTimeout(() => {
+                    clearInterval(checkClosed);
+                    window.removeEventListener('message', messageListener);
+                    if (popup && !popup.closed) {
+                      popup.close();
+                    }
+                  }, 300000); // 5 دقائق
                 }
-                // لا نغلق النافذة الرئيسية فوراً
-                // onClose();
               }}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-lg font-medium text-sm hover:shadow-md transition-all duration-200"
             >
@@ -175,4 +200,3 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
 };
 
 export default ServiceSelectionModal;
-
