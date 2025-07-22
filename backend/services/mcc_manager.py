@@ -398,106 +398,6 @@ class MCCManager:
                     aggregate_data['total_keywords'] += data['keywords_count']
                     
                     # إضافة أداء الحساب الفردي
-                self.client_invitations.append(invitation)
-                
-                return {
-                    'success': True,
-                    'invitation_id': invitation['invitation_id'],
-                    'message': 'تم إرسال الدعوة بنجاح',
-                    'expires_at': invitation['expires_at'],
-                    'tracking_info': {
-                        'email_sent': True,
-                        'delivery_status': 'DELIVERED',
-                        'tracking_id': f"track_{invitation['invitation_id'][:8]}"
-                    }
-                }
-            else:
-                return {
-                    'success': False,
-                    'error': 'فشل في إرسال الدعوة عبر البريد الإلكتروني'
-                }
-            
-        except Exception as e:
-            self.logger.error(f"خطأ في إرسال دعوة العميل: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    def resend_invitation(self, invitation_id: str) -> Dict[str, Any]:
-        """إعادة إرسال دعوة"""
-        try:
-            # البحث عن الدعوة
-            invitation = next((inv for inv in self.client_invitations if inv['invitation_id'] == invitation_id), None)
-            
-            if not invitation:
-                return {'success': False, 'error': 'الدعوة غير موجودة'}
-            
-            if invitation['status'] != 'PENDING':
-                return {'success': False, 'error': 'لا يمكن إعادة إرسال دعوة غير معلقة'}
-            
-            # تحديث معلومات الدعوة
-            invitation['reminder_count'] += 1
-            invitation['last_reminder'] = datetime.now().isoformat()
-            
-            # إعادة إرسال الدعوة
-            email_sent = self._send_invitation_email(invitation, is_reminder=True)
-            
-            if email_sent:
-                return {
-                    'success': True,
-                    'message': 'تم إعادة إرسال الدعوة بنجاح',
-                    'reminder_count': invitation['reminder_count']
-                }
-            else:
-                return {
-                    'success': False,
-                    'error': 'فشل في إعادة إرسال الدعوة'
-                }
-            
-        except Exception as e:
-            self.logger.error(f"خطأ في إعادة إرسال الدعوة: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    # ===========================================
-    # الأداء والتحليلات
-    # ===========================================
-    
-    def get_aggregate_performance(self, date_range: Dict[str, str], 
-                                include_accounts: List[str] = None) -> Dict[str, Any]:
-        """الحصول على الأداء الإجمالي"""
-        try:
-            if not self.is_initialized:
-                return {'success': False, 'error': 'MCC غير مهيأ'}
-            
-            # تحديد الحسابات المراد تضمينها
-            target_accounts = include_accounts or [acc['customer_id'] for acc in self.linked_accounts]
-            
-            # جمع بيانات الأداء من جميع الحسابات
-            aggregate_data = {
-                'total_impressions': 0,
-                'total_clicks': 0,
-                'total_cost': 0.0,
-                'total_conversions': 0,
-                'total_campaigns': 0,
-                'total_ad_groups': 0,
-                'total_keywords': 0,
-                'account_performance': []
-            }
-            
-            for customer_id in target_accounts:
-                account_performance = self._get_account_performance(customer_id, date_range)
-                
-                if account_performance['success']:
-                    data = account_performance['data']
-                    
-                    # تجميع البيانات
-                    aggregate_data['total_impressions'] += data['impressions']
-                    aggregate_data['total_clicks'] += data['clicks']
-                    aggregate_data['total_cost'] += data['cost']
-                    aggregate_data['total_conversions'] += data['conversions']
-                    aggregate_data['total_campaigns'] += data['campaigns_count']
-                    aggregate_data['total_ad_groups'] += data['ad_groups_count']
-                    aggregate_data['total_keywords'] += data['keywords_count']
-                    
-                    # إضافة أداء الحساب الفردي
                     aggregate_data["account_performance"].append({
                         "customer_id": customer_id,
                         "account_name": self._get_account_name(customer_id),
@@ -604,9 +504,10 @@ class MCCManager:
                 return {"success": False, "error": "MCC غير مهيأ"}
             
             # إنشاء وظيفة مزامنة جديدة
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
             sync_job = {
                 "job_id": str(uuid.uuid4()),
-                "job_name": sync_config.get("name", f"مزامنة {datetime.now().strftime("%Y-%m-%d %H:%M")}"),
+                "job_name": sync_config.get("name", f"مزامنة {current_time}"),
                 "sync_type": sync_config.get("sync_type", "full"),  # full, incremental, campaigns_only
                 "target_accounts": sync_config.get("target_accounts", [acc["customer_id"] for acc in self.linked_accounts]),
                 "priority": sync_config.get("priority", "normal"),  # low, normal, high, urgent
@@ -699,7 +600,8 @@ class MCCManager:
         """إرسال دعوة ربط (محاكاة)"""
         try:
             # محاكاة إرسال دعوة
-            self.logger.info(f"إرسال دعوة ربط للحساب: {link_request["customer_id"]}")
+            customer_id = link_request["customer_id"]
+            self.logger.info(f"إرسال دعوة ربط للحساب: {customer_id}")
             return True
         except Exception:
             return False
@@ -708,7 +610,8 @@ class MCCManager:
         """إرسال دعوة عبر البريد الإلكتروني (محاكاة)"""
         try:
             email_type = "تذكير" if is_reminder else "دعوة جديدة"
-            self.logger.info(f"إرسال {email_type} للعميل: {invitation["client_email"]}")
+            client_email = invitation["client_email"]
+            self.logger.info(f"إرسال {email_type} للعميل: {client_email}")
             return True
         except Exception:
             return False
@@ -870,47 +773,14 @@ class MCCManager:
             "steps_total": 5
         }
     
-    def initialize(self, mcc_id: str) -> Dict[str, Any]:
-        """تهيئة MCC - الدالة المطلوبة في MCC accounts"""
-        try:
-            if not mcc_id:
-                return {
-                    "success": False,
-                    "error": "MCC ID required",
-                    "message": "معرف MCC مطلوب"
-                }
-            
-            # تحديث معرف MCC
-            self.mcc_customer_id = mcc_id
-            
-            # التحقق من صحة معرف MCC
-            if not self._validate_mcc_id(mcc_id):
-                return {
-                    "success": False,
-                    "error": "Invalid MCC ID format",
-                    "message": "تنسيق معرف MCC غير صالح"
-                }
-            
-            # تسجيل التهيئة
-            self.logger.info(f"تم تهيئة MCC Manager مع المعرف: {mcc_id}")
-            
-            return {
-                "success": True,
-                "mcc_id": mcc_id,
-                "initialized_at": datetime.now().isoformat(),
-                "message": "تم تهيئة MCC بنجاح"
-            }
-            
-        except Exception as e:
-            self.logger.error(f"خطأ في تهيئة MCC: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e),
-                "message": "فشل في تهيئة MCC"
-            }
+    def _validate_mcc_id(self, mcc_id: str) -> bool:
+        """التحقق من صحة معرف MCC"""
+        return mcc_id.isdigit() and len(mcc_id) == 10 # مثال بسيط للتحقق
 
 # إنشاء مثيل عام
 mcc_manager = MCCManager()
 
 # تصدير الكلاس والمثيل
 __all__ = ["MCCManager", "mcc_manager"]
+
+
