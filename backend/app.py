@@ -242,15 +242,6 @@ def create_app():
         else:
             return arabic_jsonify({"success": False, "message": "فشل في إرسال البريد الإلكتروني"}, 500)
 
-    return app
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, host="0.0.0.0", port=5000)
-
-
-
-
     # تسجيل AI Blueprint
     try:
         from backend.routes.ai.ai_routes import ai_bp as ai_blueprint
@@ -261,4 +252,8 @@ if __name__ == "__main__":
     except Exception as e:
         app.logger.error(f"❌ خطأ في تسجيل AI Blueprint: {e}")
 
+    return app
 
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True, host="0.0.0.0", port=5000)
