@@ -11,7 +11,7 @@ from pathlib import Path
 env_path_local = Path(__file__).parent.parent / ".env.local"
 env_path = Path(__file__).parent.parent / ".env"
 
-load_dotenv(dotenv_path=env_path)
+load_dotenv(dotenv_path=env_path, override=True)
 load_dotenv(dotenv_path=env_path_local, override=True)
 
 from flask import Flask, request, jsonify, g
