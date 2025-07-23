@@ -1,41 +1,111 @@
+"""
+Auth Decorators - مزخرفات المصادقة
+"""
+
+import logging
 from functools import wraps
-from flask import jsonify, g
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, get_jwt
+from flask import request, jsonify, g
+from .jwt_manager import jwt_manager, TokenType, UserRole
 
+logger = logging.getLogger(__name__)
 
-def jwt_required_with_identity():
-    """
-    A decorator that ensures a valid JWT is present in the request
-    and loads the user identity into Flask\'s global \'g\' object.
-    """
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
+def jwt_required(token_type: TokenType = TokenType.ACCESS):
+    """مزخرف للتحقق من JWT"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            token = None
+            auth_header = request.headers.get('Authorization')
+            
+            if auth_header:
+                try:
+                    token = auth_header.split(' ')[1]
+                except IndexError:
+                    return jsonify({'success': False, 'message': 'تنسيق رأس التفويض غير صحيح'}), 401
+            
+            if not token:
+                return jsonify({'success': False, 'message': 'الرمز المميز مطلوب'}), 401
+            
             try:
-                verify_jwt_in_request()
-                g.user_id = get_jwt_identity()
-                g.jwt_claims = get_jwt()
+                payload = jwt_manager.decode_token(token)
+                if payload.get('type') != token_type.value:
+                    return jsonify({'success': False, 'message': 'نوع رمز غير صحيح'}), 401
+                
+                g.current_user_id = payload.get('user_id')
+                g.current_user_email = payload.get('email')
+                g.current_user_role = payload.get('role')
+                
             except Exception as e:
-                return jsonify({"msg": str(e)}), 401
-            return fn(*args, **kwargs)
-        return decorator
-    return wrapper
-
-
-def role_required(roles):
-    """A decorator that checks if the current user has one of the required roles."""
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            verify_jwt_in_request()
-            claims = get_jwt()
-            user_roles = claims.get("roles", [])
+                return jsonify({'success': False, 'message': str(e)}), 401
             
-            if not any(role in user_roles for role in roles):
-                return jsonify({"msg": "Insufficient permissions"}), 403
-            
-            return fn(*args, **kwargs)
-        return decorator
-    return wrapper
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
-# يمكنك إضافة المزيد من الـ decorators هنا حسب الحاجة
+def admin_required():
+    """مزخرف للتحقق من صلاحيات المسؤول"""
+    def decorator(f):
+        @wraps(f)
+        @jwt_required()
+        def decorated_function(*args, **kwargs):
+            if g.current_user_role != UserRole.ADMIN.value:
+                return jsonify({'success': False, 'message': 'صلاحيات مسؤول مطلوبة'}), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def role_required(required_role: UserRole):
+    """مزخرف للتحقق من دور معين"""
+    def decorator(f):
+        @wraps(f)
+        @jwt_required()
+        def decorated_function(*args, **kwargs):
+            if g.current_user_role != required_role.value:
+                return jsonify({'success': False, 'message': f'دور {required_role.value} مطلوب'}), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def get_current_user():
+    """الحصول على المستخدم الحالي"""
+    return {
+        'id': g.get('current_user_id'),
+        'email': g.get('current_user_email'),
+        'role': g.get('current_user_role')
+    }
+
+def jwt_required_with_identity(token_type: TokenType = TokenType.ACCESS):
+    """مزخرف للتحقق من JWT مع إرجاع هوية المستخدم"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            token = None
+            auth_header = request.headers.get('Authorization')
+            
+            if auth_header:
+                try:
+                    token = auth_header.split(' ')[1]
+                except IndexError:
+                    return jsonify({'success': False, 'message': 'تنسيق رأس التفويض غير صحيح'}), 401
+            
+            if not token:
+                return jsonify({'success': False, 'message': 'الرمز المميز مطلوب'}), 401
+            
+            try:
+                payload = jwt_manager.decode_token(token)
+                if payload.get('type') != token_type.value:
+                    return jsonify({'success': False, 'message': 'نوع رمز غير صحيح'}), 401
+                
+                g.current_user_id = payload.get('user_id')
+                g.current_user_email = payload.get('email')
+                g.current_user_role = payload.get('role')
+                
+                # إرجاع هوية المستخدم كمعامل إضافي
+                return f(get_current_user(), *args, **kwargs)
+                
+            except Exception as e:
+                return jsonify({'success': False, 'message': str(e)}), 401
+            
+        return decorated_function
+    return decorator
+

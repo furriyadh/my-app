@@ -176,7 +176,7 @@ class GoogleAdsClientService:
         if config:
             self.config = config
         else:
-            config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "google_ads.yaml"))
+            config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "google_ads.yaml"))
             if os.path.exists(config_path):
                 try:
                     with open(config_path, 'r') as f:
