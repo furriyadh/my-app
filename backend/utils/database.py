@@ -11,21 +11,33 @@ class DatabaseManager:
         self.service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
         
         if not self.supabase_url or not self.supabase_key:
-            raise ValueError("لم يتم تقديم قيم Supabase صالحة")
+            print("تحذير: لم يتم تقديم قيم Supabase صالحة")
+            self.client = None
+            self.admin_client = None
+            return
         
-        self.client: Client = create_client(self.supabase_url, self.supabase_key)
-        
-        # إنشاء عميل منفصل للعمليات الإدارية
-        if self.service_role_key:
-            self.admin_client: Client = create_client(self.supabase_url, self.service_role_key)
-        else:
-            self.admin_client = self.client
+        try:
+            self.client: Client = create_client(self.supabase_url, self.supabase_key)
+            
+            # إنشاء عميل منفصل للعمليات الإدارية
+            if self.service_role_key:
+                self.admin_client: Client = create_client(self.supabase_url, self.service_role_key)
+            else:
+                self.admin_client = self.client
+        except Exception as e:
+            print(f"تحذير: فشل في تهيئة Supabase: {e}")
+            self.client = None
+            self.admin_client = None
     
-    def get_client(self) -> Client:
+    def get_client(self) -> Optional[Client]:
         """الحصول على عميل Supabase"""
         return self.client
     
-    def get_admin_client(self) -> Client:
+    def get_admin_client(self) -> Optional[Client]:
         """الحصول على عميل Supabase الإداري"""
         return self.admin_client
+    
+    def is_connected(self) -> bool:
+        """فحص حالة الاتصال"""
+        return self.client is not None
 

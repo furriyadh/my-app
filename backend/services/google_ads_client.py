@@ -1,3 +1,4 @@
+
 """
 Google Ads Client Service
 خدمة عميل Google Ads المتطورة
@@ -22,6 +23,7 @@ from dataclasses import dataclass, asdict
 from functools import wraps
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import yaml # إضافة استيراد مكتبة yaml
 
 # استيراد Google Ads مع معالجة أخطاء متقدمة
 try:
@@ -76,59 +78,37 @@ class GoogleAdsConfig:
     cache_enabled: bool = True
     cache_ttl: int = 3600
     
-    def __post_init__(self):
-        # تحميل من متغيرات البيئة
-        self.developer_token = os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN', self.developer_token)
-        self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID', self.client_id)
-        self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET', self.client_secret)
-        self.refresh_token = os.getenv('GOOGLE_ADS_REFRESH_TOKEN', self.refresh_token)
-        self.customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID', self.customer_id)
-        self.login_customer_id = os.getenv('GOOGLE_ADS_LOGIN_CUSTOMER_ID', self.login_customer_id)
+    # لا نحتاج لـ __post_init__ هنا لأننا سنقوم بتحميل الإعدادات من ملف YAML
+
+@dataclass
+class CampaignData:
+    """نموذج بيانات الحملة"""
+    id: str
+    name: str
+    status: str
+    budget: float
+    bid_strategy: str
+    start_date: str
+    end_date: Optional[str]
+    target_cpa: Optional[float] = None
+    target_roas: Optional[float] = None
 
 @dataclass
 class CampaignMetrics:
     """مقاييس أداء الحملة"""
     impressions: int = 0
     clicks: int = 0
-    cost: float = 0.0
-    conversions: int = 0
+    cost: float = 0.0 # بالدولار
+    conversions: float = 0.0
     conversion_value: float = 0.0
     ctr: float = 0.0
-    cpc: float = 0.0
-    cpm: float = 0.0
-    roas: float = 0.0
-    quality_score: float = 0.0
-    
-    def calculate_derived_metrics(self):
-        """حساب المقاييس المشتقة"""
-        self.ctr = safe_divide(self.clicks, self.impressions) * 100
-        self.cpc = safe_divide(self.cost, self.clicks)
-        self.cpm = safe_divide(self.cost, self.impressions) * 1000
-        self.roas = safe_divide(self.conversion_value, self.cost)
+    average_cpc: float = 0.0
+    average_cpm: float = 0.0
 
-@dataclass
-class CampaignData:
-    """بيانات الحملة"""
-    id: str
-    name: str
-    status: str
-    budget: float
-    bid_strategy: str
-    target_cpa: Optional[float] = None
-    target_roas: Optional[float] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    metrics: Optional[CampaignMetrics] = None
-    keywords: List[str] = None
-    ad_groups: List[Dict] = None
-    
-    def __post_init__(self):
-        if self.metrics is None:
-            self.metrics = CampaignMetrics()
-        if self.keywords is None:
-            self.keywords = []
-        if self.ad_groups is None:
-            self.ad_groups = []
+    def calculate_derived_metrics(self):
+        self.ctr = safe_divide(self.clicks, self.impressions) * 100
+        self.average_cpc = safe_divide(self.cost, self.clicks)
+        self.average_cpm = safe_divide(self.cost * 1000, self.impressions)
 
 def google_ads_operation(retry_count: int = 3, cache_ttl: Optional[int] = None):
     """Decorator لعمليات Google Ads مع إعادة المحاولة والتخزين المؤقت"""
@@ -193,13 +173,44 @@ class GoogleAdsClientService:
     
     def __init__(self, config: Optional[GoogleAdsConfig] = None):
         """تهيئة خدمة Google Ads"""
-        self.config = config or GoogleAdsConfig(
-            developer_token=os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN', ''),
-            client_id=os.getenv('GOOGLE_ADS_CLIENT_ID', ''),
-            client_secret=os.getenv('GOOGLE_ADS_CLIENT_SECRET', '')
-        )
+        if config:
+            self.config = config
+        else:
+            config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "google_ads.yaml"))
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, 'r') as f:
+                        yaml_config = yaml.safe_load(f)
+                    
+                    # استخراج الإعدادات من ملف YAML
+                    self.config = GoogleAdsConfig(
+                        developer_token=yaml_config.get('developer_token', ''),
+                        client_id=yaml_config.get('client_id', ''),
+                        client_secret=yaml_config.get('client_secret', ''),
+                        refresh_token=yaml_config.get('refresh_token'),
+                        login_customer_id=yaml_config.get('login_customer_id')
+                    )
+                    logger.info(f"تم تحميل إعدادات Google Ads من {config_path}")
+                except Exception as e:
+                    logger.error(f"فشل تحميل إعدادات Google Ads من {config_path}: {str(e)}")
+                    # Fallback to environment variables if YAML fails
+                    self.config = GoogleAdsConfig(
+                        developer_token=os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN', ''),
+                        client_id=os.getenv('GOOGLE_ADS_CLIENT_ID', ''),
+                        client_secret=os.getenv('GOOGLE_ADS_CLIENT_SECRET', ''),
+                        refresh_token=os.getenv('GOOGLE_ADS_REFRESH_TOKEN', ''),
+                        login_customer_id=os.getenv('MCC_LOGIN_CUSTOMER_ID', '')
+                    )
+            else:
+                logger.warning(f"ملف google_ads.yaml غير موجود في {config_path}. استخدام متغيرات البيئة.")
+                self.config = GoogleAdsConfig(
+                    developer_token=os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN', ''),
+                    client_id=os.getenv('GOOGLE_ADS_CLIENT_ID', ''),
+                    client_secret=os.getenv('GOOGLE_ADS_CLIENT_SECRET', ''),
+                    refresh_token=os.getenv('GOOGLE_ADS_REFRESH_TOKEN', ''),
+                    login_customer_id=os.getenv('MCC_LOGIN_CUSTOMER_ID', '')
+                )
         
-        self.client = None
         self.is_authenticated = False
         self._lock = threading.RLock()
         
@@ -217,6 +228,7 @@ class GoogleAdsClientService:
         
         # تهيئة العميل
         self._initialize_client()
+
     
     def _initialize_client(self):
         """تهيئة عميل Google Ads"""
@@ -255,9 +267,13 @@ class GoogleAdsClientService:
     def _refresh_credentials(self):
         """تجديد الاعتمادات"""
         try:
-            if self.client and hasattr(self.client, 'oauth2'):
-                self.client.oauth2.refresh()
-                logger.info("تم تجديد الاعتمادات بنجاح")
+            # استخدام get_oauth2_client لضمان التوافق
+            oauth2_client = GoogleAdsClient.get_oauth2_client(self.config.version)
+            oauth2_client.client_id = self.config.client_id
+            oauth2_client.client_secret = self.config.client_secret
+            oauth2_client.refresh_token = self.config.refresh_token
+            oauth2_client.refresh()
+            logger.info("تم تجديد الاعتمادات بنجاح")
         except Exception as e:
             logger.error(f"فشل في تجديد الاعتمادات: {str(e)}")
     
@@ -546,6 +562,45 @@ class GoogleAdsClientService:
     @google_ads_operation(retry_count=3, cache_ttl=1800)
     def get_campaign_budgets(self, customer_id: str) -> List[Dict[str, Any]]:
         """الحصول على ميزانيات الحملات"""
+        if not self.is_authenticated:
+            raise Exception("العميل غير مصادق")
+        
+        try:
+            ga_service = self.client.get_service("GoogleAdsService")
+            
+            query = self._build_query(
+                resource="campaign_budget",
+                fields=[
+                    "campaign_budget.id",
+                    "campaign_budget.name",
+                    "campaign_budget.amount_micros",
+                    "campaign_budget.delivery_method",
+                    "campaign_budget.status"
+                ]
+            )
+            
+            response = ga_service.search(customer_id=customer_id, query=query)
+            
+            budgets = []
+            for row in response:
+                budget = row.campaign_budget
+                budgets.append({
+                    'id': budget.id,
+                    'name': budget.name,
+                    'amount': budget.amount_micros / 1000000,
+                    'delivery_method': budget.delivery_method.name,
+                    'status': budget.status.name
+                })
+            
+            return budgets
+            
+        except Exception as e:
+            logger.error(f"خطأ في جلب ميزانيات الحملات للعميل {customer_id}: {str(e)}")
+            raise
+    
+    @google_ads_operation(retry_count=3)
+    def create_campaign_budget(self, customer_id: str, budget_data: Dict[str, Any]) -> str:
+        """إنشاء ميزانية حملة جديدة"""
         if not self.is_authenticated:
             raise Exception("العميل غير مصادق")
         
@@ -1093,7 +1148,7 @@ class GoogleAdsClientService:
             raise Exception("Google Ads library غير متاح")
         
         try:
-            oauth2_client = self.client.oauth2
+            oauth2_client = GoogleAdsClient.get_oauth2_client(self.config.version)
             oauth2_client.client_id = self.config.client_id
             oauth2_client.client_secret = self.config.client_secret
             oauth2_client.redirect_uri = redirect_uri
@@ -1112,7 +1167,7 @@ class GoogleAdsClientService:
             raise Exception("Google Ads library غير متاح")
         
         try:
-            oauth2_client = self.client.oauth2
+            oauth2_client = GoogleAdsClient.get_oauth2_client(self.config.version)
             oauth2_client.client_id = self.config.client_id
             oauth2_client.client_secret = self.config.client_secret
             oauth2_client.redirect_uri = redirect_uri
@@ -1139,4 +1194,8 @@ class GoogleAdsClientService:
     def get_enum(self, enum_name: str):
         """الحصول على كائن Enum"""
         return getattr(self.client.enums, enum_name, None)
+
+
+
+
 

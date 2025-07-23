@@ -74,7 +74,6 @@ if DatabaseManager:
 auth_bp = Blueprint(
     'auth_jwt',
     __name__,
-    url_prefix='/api/auth'
 )
 
 # ===========================================
@@ -1099,30 +1098,121 @@ def oauth_callback():
 
         if error:
             logger.error(f"خطأ في رد الاتصال من Google OAuth: {error}")
-            return "<script>window.close();</script>", 400
+            return arabic_jsonify({"success": False, "message": f"خطأ في رد الاتصال: {error}"}), 400
 
         if not code:
             logger.error("رمز المصادقة مفقود في رد الاتصال.")
-            return "<script>window.close();</script>", 400
+            return arabic_jsonify({"success": False, "message": "رمز المصادقة مفقود"}), 400
 
-        # تهيئة معالج OAuth
         from backend.oauth_handler import create_oauth_handler
         from backend.config import Config
         oauth_config = Config.get_oauth_config()
         oauth_handler = create_oauth_handler(oauth_config)
 
-        # تبديل الرمز بالتوكنات
         token_data = oauth_handler.exchange_code_for_tokens(code)
 
-        # هنا يمكنك حفظ token_data (access_token, refresh_token) في قاعدة البيانات
-        # أو إرسالها إلى الواجهة الأمامية
-        logger.info(f"تم الحصول على التوكنات بنجاح. Refresh Token: {token_data.get("refresh_token")}")
-
-        # إغلاق النافذة المنبثقة بعد النجاح
-        return "<script>window.close();</script>", 200
+        # هنا يجب حفظ refresh_token بشكل آمن في قاعدة البيانات
+        refresh_token = token_data.get("refresh_token")
+        if refresh_token:
+            # افتراضياً، حفظ الـ refresh_token للمستخدم الحالي (يجب ربطه بمعرف المستخدم الحقيقي)
+            # هذا مثال توضيحي، يجب استبداله بمنطق حفظ حقيقي في قاعدة البيانات
+            logger.info(f"تم الحصول على Refresh Token بنجاح: {refresh_token}")
+            # هنا يمكنك استدعاء دالة لحفظ الـ refresh_token في قاعدة البيانات
+            # مثال: save_refresh_token_to_db(user_id, refresh_token)
+        
+        return arabic_jsonify({"success": True, "message": "تمت المصادقة بنجاح، يمكنك إغلاق هذه النافذة.", "refresh_token_received": bool(refresh_token)}), 200
 
     except Exception as e:
         logger.error(f"خطأ في معالجة رد الاتصال من Google OAuth: {str(e)}")
-        return "<script>window.close();</script>", 500
+        return arabic_jsonify({"success": False, "message": f"خطأ داخلي: {str(e)}"}), 500
+
+
+
+
+@auth_bp.route("/authorize", methods=["GET"])
+def oauth_authorize():
+    """بدء تدفق Google OAuth"""
+    try:
+        from backend.services.oauth_handler import OAuthHandler
+        
+        oauth_handler = OAuthHandler()
+        
+        # إنشاء رابط التفويض
+        result = oauth_handler.create_authorization_url(
+            user_id="anonymous",
+            ip_address=request.remote_addr or "unknown",
+            user_agent=request.headers.get('User-Agent', 'unknown')
+        )
+        
+        if result.get("success"):
+            return arabic_jsonify({
+                "success": True,
+                "oauth_url": result["authorization_url"],
+                "session_id": result["session_id"]
+            })
+        else:
+            return arabic_jsonify({
+                "success": False,
+                "message": result.get("message", "فشل في إنشاء رابط التفويض")
+            }), 500
+        
+    except Exception as e:
+        logger.error(f"خطأ في بدء تدفق Google OAuth: {str(e)}")
+        return arabic_jsonify({
+            "success": False,
+            "message": "فشل في بدء تدفق OAuth",
+            "error": str(e)
+        }), 500
+
+
+
+
+@auth_bp.route("/mcc/accounts", methods=["GET"])
+def mcc_accounts():
+    """جلب جميع الحسابات الفرعية المرتبطة بحساب المدير (MCC)"""
+    try:
+        from google.ads.googleads.client import GoogleAdsClient
+        from backend.config import Config
+
+        # تهيئة عميل Google Ads
+        config_data = Config.get_google_ads_config()
+        client = GoogleAdsClient.load_from_dict(config_data)
+
+        # استخدام MCC_LOGIN_CUSTOMER_ID من متغيرات البيئة
+        mcc_login_customer_id = config_data.get("login_customer_id")
+        if not mcc_login_customer_id:
+            return arabic_jsonify({"success": False, "message": "MCC_LOGIN_CUSTOMER_ID غير موجود في الإعدادات"}), 400
+
+        customer_service = client.get_service("CustomerService")
+        query = "SELECT customer_client.client_customer, customer_client.level, customer_client.manager, customer_client.descriptive_name, customer_client.currency_code, customer_client.time_zone, customer_client.id FROM customer_client WHERE customer_client.level <= 1"
+
+        ga_service = client.get_service("GoogleAdsService")
+        response = ga_service.search(customer_id=str(mcc_login_customer_id), query=query)
+
+        accounts = []
+        for row in response:
+            customer_client = row.customer_client
+            accounts.append({
+                "id": customer_client.id,
+                "descriptive_name": customer_client.descriptive_name,
+                "currency_code": customer_client.currency_code,
+                "time_zone": customer_client.time_zone,
+                "manager": customer_client.manager,
+                "level": customer_client.level
+            })
+        
+        return arabic_jsonify({
+            "success": True,
+            "mcc_login_customer_id": mcc_login_customer_id,
+            "accounts": accounts
+        })
+
+    except Exception as e:
+        logger.error(f"خطأ في جلب حسابات MCC: {str(e)}")
+        return arabic_jsonify({
+            "success": False,
+            "message": "فشل في جلب حسابات MCC",
+            "error": str(e)
+        }), 500
 
 

@@ -133,13 +133,23 @@ def create_app():
     
     # تسجيل Google Ads OAuth Blueprint
     try:
-        from backend.routes.google_ads.auth_jwt import auth_jwt_bp as google_ads_oauth_bp
-        app.register_blueprint(google_ads_oauth_bp, url_prefix="/api/google-ads/oauth")
+        from backend.routes.google_ads.oauth_routes import oauth_bp as google_ads_oauth_bp
+        app.register_blueprint(google_ads_oauth_bp)
         app.logger.info("✅ تم تحميل Google Ads OAuth Blueprint بنجاح على /api/google-ads/oauth")
     except ImportError as e:
         app.logger.error(f"❌ خطأ في استيراد Google Ads OAuth Blueprint: {e}")
     except Exception as e:
         app.logger.error(f"❌ خطأ في تسجيل Google Ads OAuth Blueprint: {e}")
+    
+    # تسجيل JWT Auth Blueprint (الاحتفاظ بالنظام الموجود)
+    try:
+        from backend.routes.google_ads.auth_jwt import auth_bp as jwt_auth_bp
+        app.register_blueprint(jwt_auth_bp)
+        app.logger.info("✅ تم تحميل JWT Auth Blueprint بنجاح على /api/auth")
+    except ImportError as e:
+        app.logger.error(f"❌ خطأ في استيراد JWT Auth Blueprint: {e}")
+    except Exception as e:
+        app.logger.error(f"❌ خطأ في تسجيل JWT Auth Blueprint: {e}")
     
     # تسجيل Campaigns Blueprint
     try:

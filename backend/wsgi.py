@@ -29,7 +29,7 @@ try:
     if __name__ == "__main__":
         # للاختبار المحلي
         application.run(
-            host='0.0.0.0',
+            host='localhost',
             port=int(os.environ.get('PORT', 5000)),
             debug=False
         )

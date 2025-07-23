@@ -20,10 +20,10 @@ class OAuthHandler:
         self.logger = logging.getLogger(__name__)
         
         # إعدادات OAuth من متغيرات البيئة
-        self.client_id = os.getenv("GOOGLE_ADS_CLIENT_ID") # تم التعديل لاستخدام GOOGLE_ADS_CLIENT_ID
-        self.client_secret = os.getenv("GOOGLE_ADS_CLIENT_SECRET") # تم التعديل لاستخدام GOOGLE_ADS_CLIENT_SECRET
-        self.redirect_uri = os.getenv("GOOGLE_ADS_REDIRECT_URI", "http://localhost:3000/auth/callback" ) # تم التعديل لاستخدام GOOGLE_ADS_REDIRECT_URI
-        self.developer_token = os.getenv("GOOGLE_DEVELOPER_TOKEN")
+        self.client_id = os.getenv("GOOGLE_ADS_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")
+        self.client_secret = os.getenv("GOOGLE_ADS_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")
+        self.redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or os.getenv("REACT_APP_GOOGLE_REDIRECT_URI") or os.getenv("NEXT_PUBLIC_OAUTH_REDIRECT_URI") or "http://localhost:3000/auth/callback"
+        self.developer_token = os.getenv("GOOGLE_DEVELOPER_TOKEN") or os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN")
         
         # نطاقات Google Ads
         self.scopes = [
