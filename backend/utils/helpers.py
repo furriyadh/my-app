@@ -25,10 +25,10 @@ from typing import Dict, Any, Optional, List, Union, Tuple
 from decimal import Decimal
 from functools import wraps
 import time
+
 def generate_analysis_id() -> str:
     """توليد معرف فريد للتحليلات."""
     return str(uuid.uuid4())
-
 
 # استيراد دوال التحقق من validators مع معالجة أخطاء متقدمة
 try:
@@ -978,9 +978,9 @@ def send_notification(user_id: str, message: str, notification_type: str = 'info
 def get_system_info() -> Dict[str, Any]:
     """الحصول على معلومات النظام"""
     import platform
-    import psutil
     
     try:
+        import psutil
         return {
             'platform': platform.platform(),
             'python_version': platform.python_version(),
@@ -1020,425 +1020,6 @@ def generate_slug(text: str, max_length: int = 50) -> str:
     
     return slug
 
-# تصدير جميع الدوال المهمة
-__all__ = [
-    # دوال التنسيق
-    'format_currency', 'format_percentage', 'format_number', 'format_phone_number',
-    'format_date_arabic',
-    
-    # دوال الحساب
-    'calculate_performance_score', 'calculate_growth_rate', 'calculate_budget_recommendation',
-    
-    # دوال النصوص
-    'sanitize_text', 'extract_keywords_from_text', 'generate_slug',
-    
-    # دوال الأمان
-    'generate_unique_id', 'generate_hash', 'generate_short_id', 'encrypt_token',
-    'decrypt_token', 'hash_password', 'verify_password',
-    
-    # دوال التواريخ
-    'parse_date_range', 'convert_timezone',
-    
-    # دوال التحقق
-    'validate_email', 'validate_phone', 'validate_url', 'validate_and_clean_data',
-    
-    # دوال الاستجابة
-    'create_response', 'paginate_data',
-    
-    # دوال الإشعارات
-    'send_notification',
-    
-    # دوال متنوعة
-    'get_system_info',
-    
-    # Decorators
-    'performance_monitor', 'safe_execute'
-]
-
-
-
-# ===========================================
-# دوال إدارة الحملات والمعرفات
-# ===========================================
-
-@safe_execute(default_return="")
-def generate_campaign_id(prefix: str = "camp", length: int = 12) -> str:
-    """إنشاء معرف فريد للحملة مع بادئة مخصصة"""
-    timestamp = str(int(time.time()))[-6:]  # آخر 6 أرقام من timestamp
-    random_part = secrets.token_hex(3)  # 6 أحرف عشوائية
-    unique_part = str(uuid.uuid4()).replace('-', '')[:6]  # 6 أحرف من UUID
-    
-    campaign_id = f"{prefix}_{timestamp}_{random_part}_{unique_part}"
-    
-    # التأكد من الطول المطلوب
-    if len(campaign_id) > length + len(prefix) + 3:  # +3 للشرطات السفلية
-        campaign_id = f"{prefix}_{timestamp}_{random_part}"
-    
-    return campaign_id.lower()
-
-@safe_execute(default_return="")
-def generate_ad_group_id(campaign_id: str = "", prefix: str = "adg") -> str:
-    """إنشاء معرف فريد لمجموعة الإعلانات"""
-    timestamp = str(int(time.time()))[-4:]
-    random_part = secrets.token_hex(2)
-    
-    if campaign_id:
-        # استخراج جزء من معرف الحملة للربط
-        camp_part = campaign_id.split('_')[-1][:4] if '_' in campaign_id else campaign_id[:4]
-        return f"{prefix}_{camp_part}_{timestamp}_{random_part}".lower()
-    
-    return f"{prefix}_{timestamp}_{random_part}".lower()
-
-@safe_execute(default_return="")
-def generate_keyword_id(ad_group_id: str = "", prefix: str = "kw") -> str:
-    """إنشاء معرف فريد للكلمة المفتاحية"""
-    timestamp = str(int(time.time()))[-4:]
-    random_part = secrets.token_hex(2)
-    
-    if ad_group_id:
-        # استخراج جزء من معرف مجموعة الإعلانات
-        adg_part = ad_group_id.split('_')[-1][:3] if '_' in ad_group_id else ad_group_id[:3]
-        return f"{prefix}_{adg_part}_{timestamp}_{random_part}".lower()
-    
-    return f"{prefix}_{timestamp}_{random_part}".lower()
-
-@safe_execute(default_return={})
-def validate_campaign_data(campaign_data: Dict[str, Any]) -> Dict[str, Any]:
-    """التحقق من صحة بيانات الحملة وتنظيفها"""
-    errors = []
-    warnings = []
-    cleaned_data = {}
-    
-    # الحقول المطلوبة
-    required_fields = ['name', 'budget', 'target_locations']
-    
-    # التحقق من الحقول المطلوبة
-    for field in required_fields:
-        if field not in campaign_data or not campaign_data[field]:
-            errors.append(f"الحقل '{field}' مطلوب")
-        else:
-            cleaned_data[field] = campaign_data[field]
-    
-    # التحقق من اسم الحملة
-    if 'name' in campaign_data:
-        name = str(campaign_data['name']).strip()
-        if len(name) < 3:
-            errors.append("اسم الحملة يجب أن يكون 3 أحرف على الأقل")
-        elif len(name) > 100:
-            errors.append("اسم الحملة يجب أن يكون أقل من 100 حرف")
-        else:
-            # تنظيف اسم الحملة
-            cleaned_data['name'] = sanitize_text(name)
-    
-    # التحقق من الميزانية
-    if 'budget' in campaign_data:
-        try:
-            budget = float(campaign_data['budget'])
-            if budget <= 0:
-                errors.append("الميزانية يجب أن تكون أكبر من صفر")
-            elif budget < 10:
-                warnings.append("الميزانية منخفضة جداً، قد لا تحقق نتائج جيدة")
-            elif budget > 100000:
-                warnings.append("الميزانية عالية جداً، تأكد من صحة المبلغ")
-            else:
-                cleaned_data['budget'] = round(budget, 2)
-        except (ValueError, TypeError):
-            errors.append("الميزانية يجب أن تكون رقماً صحيحاً")
-    
-    # التحقق من المواقع المستهدفة
-    if 'target_locations' in campaign_data:
-        locations = campaign_data['target_locations']
-        if isinstance(locations, list):
-            if len(locations) == 0:
-                errors.append("يجب تحديد موقع واحد على الأقل")
-            else:
-                cleaned_locations = []
-                for location in locations:
-                    if isinstance(location, str) and location.strip():
-                        cleaned_locations.append(location.strip())
-                cleaned_data['target_locations'] = cleaned_locations
-        else:
-            errors.append("المواقع المستهدفة يجب أن تكون قائمة")
-    
-    # التحقق من الحقول الاختيارية
-    optional_fields = {
-        'start_date': 'تاريخ البداية',
-        'end_date': 'تاريخ النهاية',
-        'bid_strategy': 'استراتيجية المزايدة',
-        'target_audience': 'الجمهور المستهدف',
-        'keywords': 'الكلمات المفتاحية'
-    }
-    
-    for field, field_name in optional_fields.items():
-        if field in campaign_data and campaign_data[field]:
-            if field in ['start_date', 'end_date']:
-                # التحقق من التواريخ
-                try:
-                    if isinstance(campaign_data[field], str):
-                        datetime.fromisoformat(campaign_data[field].replace('Z', '+00:00'))
-                    cleaned_data[field] = campaign_data[field]
-                except ValueError:
-                    warnings.append(f"تنسيق {field_name} غير صحيح")
-            elif field == 'keywords':
-                # التحقق من الكلمات المفتاحية
-                keywords = campaign_data[field]
-                if isinstance(keywords, list):
-                    cleaned_keywords = []
-                    for keyword in keywords:
-                        if isinstance(keyword, str) and len(keyword.strip()) >= 2:
-                            cleaned_keywords.append(keyword.strip().lower())
-                    if cleaned_keywords:
-                        cleaned_data[field] = cleaned_keywords
-                    else:
-                        warnings.append("لا توجد كلمات مفتاحية صالحة")
-                else:
-                    warnings.append("الكلمات المفتاحية يجب أن تكون قائمة")
-            else:
-                cleaned_data[field] = campaign_data[field]
-    
-    # إضافة معرف فريد إذا لم يكن موجوداً
-    if 'campaign_id' not in cleaned_data:
-        cleaned_data['campaign_id'] = generate_campaign_id()
-    
-    # إضافة timestamp
-    cleaned_data['created_at'] = datetime.utcnow().isoformat()
-    cleaned_data['updated_at'] = datetime.utcnow().isoformat()
-    
-    return {
-        'is_valid': len(errors) == 0,
-        'errors': errors,
-        'warnings': warnings,
-        'cleaned_data': cleaned_data,
-        'validation_summary': {
-            'total_errors': len(errors),
-            'total_warnings': len(warnings),
-            'fields_validated': len(cleaned_data),
-            'validation_date': datetime.utcnow().isoformat()
-        }
-    }
-
-@safe_execute(default_return="")
-def format_campaign_name(name: str, prefix: str = "", suffix: str = "", 
-                        max_length: int = 100, auto_date: bool = False) -> str:
-    """تنسيق اسم الحملة مع خيارات متقدمة"""
-    if not name:
-        return ""
-    
-    # تنظيف الاسم الأساسي
-    clean_name = sanitize_text(name).strip()
-    
-    # إضافة البادئة
-    if prefix:
-        clean_name = f"{prefix} {clean_name}"
-    
-    # إضافة التاريخ التلقائي
-    if auto_date:
-        current_date = datetime.now().strftime("%Y%m")
-        clean_name = f"{clean_name} {current_date}"
-    
-    # إضافة اللاحقة
-    if suffix:
-        clean_name = f"{clean_name} {suffix}"
-    
-    # تحديد الطول
-    if len(clean_name) > max_length:
-        # قطع النص مع الحفاظ على الكلمات
-        words = clean_name.split()
-        truncated = ""
-        for word in words:
-            if len(truncated + " " + word) <= max_length:
-                truncated += (" " + word) if truncated else word
-            else:
-                break
-        clean_name = truncated
-    
-    return clean_name
-
-@safe_execute(default_return={})
-def validate_ad_group_data(ad_group_data: Dict[str, Any]) -> Dict[str, Any]:
-    """التحقق من صحة بيانات مجموعة الإعلانات"""
-    errors = []
-    warnings = []
-    cleaned_data = {}
-    
-    # الحقول المطلوبة
-    required_fields = ['name', 'campaign_id', 'default_cpc']
-    
-    for field in required_fields:
-        if field not in ad_group_data or not ad_group_data[field]:
-            errors.append(f"الحقل '{field}' مطلوب")
-        else:
-            cleaned_data[field] = ad_group_data[field]
-    
-    # التحقق من اسم مجموعة الإعلانات
-    if 'name' in ad_group_data:
-        name = str(ad_group_data['name']).strip()
-        if len(name) < 2:
-            errors.append("اسم مجموعة الإعلانات يجب أن يكون حرفين على الأقل")
-        elif len(name) > 80:
-            errors.append("اسم مجموعة الإعلانات يجب أن يكون أقل من 80 حرف")
-        else:
-            cleaned_data['name'] = sanitize_text(name)
-    
-    # التحقق من تكلفة النقرة الافتراضية
-    if 'default_cpc' in ad_group_data:
-        try:
-            cpc = float(ad_group_data['default_cpc'])
-            if cpc <= 0:
-                errors.append("تكلفة النقرة يجب أن تكون أكبر من صفر")
-            elif cpc < 0.1:
-                warnings.append("تكلفة النقرة منخفضة جداً")
-            elif cpc > 50:
-                warnings.append("تكلفة النقرة عالية جداً")
-            else:
-                cleaned_data['default_cpc'] = round(cpc, 2)
-        except (ValueError, TypeError):
-            errors.append("تكلفة النقرة يجب أن تكون رقماً")
-    
-    # إضافة معرف فريد
-    if 'ad_group_id' not in cleaned_data:
-        campaign_id = cleaned_data.get('campaign_id', '')
-        cleaned_data['ad_group_id'] = generate_ad_group_id(campaign_id)
-    
-    # إضافة timestamps
-    cleaned_data['created_at'] = datetime.utcnow().isoformat()
-    cleaned_data['updated_at'] = datetime.utcnow().isoformat()
-    
-    return {
-        'is_valid': len(errors) == 0,
-        'errors': errors,
-        'warnings': warnings,
-        'cleaned_data': cleaned_data
-    }
-
-@safe_execute(default_return={})
-def validate_keyword_data(keyword_data: Dict[str, Any]) -> Dict[str, Any]:
-    """التحقق من صحة بيانات الكلمة المفتاحية"""
-    errors = []
-    warnings = []
-    cleaned_data = {}
-    
-    # الحقول المطلوبة
-    required_fields = ['keyword', 'ad_group_id', 'match_type']
-    
-    for field in required_fields:
-        if field not in keyword_data or not keyword_data[field]:
-            errors.append(f"الحقل '{field}' مطلوب")
-        else:
-            cleaned_data[field] = keyword_data[field]
-    
-    # التحقق من الكلمة المفتاحية
-    if 'keyword' in keyword_data:
-        keyword = str(keyword_data['keyword']).strip().lower()
-        if len(keyword) < 2:
-            errors.append("الكلمة المفتاحية يجب أن تكون حرفين على الأقل")
-        elif len(keyword) > 80:
-            errors.append("الكلمة المفتاحية يجب أن تكون أقل من 80 حرف")
-        else:
-            cleaned_data['keyword'] = keyword
-    
-    # التحقق من نوع المطابقة
-    if 'match_type' in keyword_data:
-        valid_match_types = ['EXACT', 'PHRASE', 'BROAD']
-        match_type = str(keyword_data['match_type']).upper()
-        if match_type not in valid_match_types:
-            errors.append(f"نوع المطابقة يجب أن يكون أحد: {', '.join(valid_match_types)}")
-        else:
-            cleaned_data['match_type'] = match_type
-    
-    # التحقق من تكلفة النقرة المخصصة
-    if 'cpc_bid' in keyword_data and keyword_data['cpc_bid']:
-        try:
-            cpc = float(keyword_data['cpc_bid'])
-            if cpc <= 0:
-                errors.append("تكلفة النقرة يجب أن تكون أكبر من صفر")
-            else:
-                cleaned_data['cpc_bid'] = round(cpc, 2)
-        except (ValueError, TypeError):
-            errors.append("تكلفة النقرة يجب أن تكون رقماً")
-    
-    # إضافة معرف فريد
-    if 'keyword_id' not in cleaned_data:
-        ad_group_id = cleaned_data.get('ad_group_id', '')
-        cleaned_data['keyword_id'] = generate_keyword_id(ad_group_id)
-    
-    # إضافة timestamps
-    cleaned_data['created_at'] = datetime.utcnow().isoformat()
-    cleaned_data['updated_at'] = datetime.utcnow().isoformat()
-    
-    return {
-        'is_valid': len(errors) == 0,
-        'errors': errors,
-        'warnings': warnings,
-        'cleaned_data': cleaned_data
-    }
-
-@safe_execute(default_return="")
-def generate_account_id(prefix: str = "acc", customer_id: str = "") -> str:
-    """إنشاء معرف فريد للحساب"""
-    timestamp = str(int(time.time()))[-6:]
-    random_part = secrets.token_hex(3)
-    
-    if customer_id:
-        # استخدام جزء من customer_id
-        cust_part = customer_id.replace('-', '')[-4:] if customer_id else ""
-        return f"{prefix}_{cust_part}_{timestamp}_{random_part}".lower()
-    
-    return f"{prefix}_{timestamp}_{random_part}".lower()
-
-@safe_execute(default_return={})
-def validate_budget_data(budget_data: Dict[str, Any]) -> Dict[str, Any]:
-    """التحقق من صحة بيانات الميزانية"""
-    errors = []
-    warnings = []
-    cleaned_data = {}
-    
-    # التحقق من المبلغ
-    if 'amount' in budget_data:
-        try:
-            amount = float(budget_data['amount'])
-            if amount <= 0:
-                errors.append("مبلغ الميزانية يجب أن يكون أكبر من صفر")
-            elif amount < 10:
-                warnings.append("الميزانية منخفضة جداً")
-            elif amount > 100000:
-                warnings.append("الميزانية عالية جداً، تأكد من صحة المبلغ")
-            else:
-                cleaned_data['amount'] = round(amount, 2)
-        except (ValueError, TypeError):
-            errors.append("مبلغ الميزانية يجب أن يكون رقماً")
-    
-    # التحقق من نوع الميزانية
-    if 'delivery_method' in budget_data:
-        valid_methods = ['STANDARD', 'ACCELERATED']
-        method = str(budget_data['delivery_method']).upper()
-        if method not in valid_methods:
-            errors.append(f"طريقة التسليم يجب أن تكون أحد: {', '.join(valid_methods)}")
-        else:
-            cleaned_data['delivery_method'] = method
-    
-    return {
-        'is_valid': len(errors) == 0,
-        'errors': errors,
-        'warnings': warnings,
-        'cleaned_data': cleaned_data
-    }
-
-# تحديث قائمة التصدير
-__all__.extend([
-    'generate_campaign_id',
-    'generate_ad_group_id', 
-    'generate_keyword_id',
-    'generate_account_id',
-    'validate_campaign_data',
-    'validate_ad_group_data',
-    'validate_keyword_data',
-    'validate_budget_data',
-    'format_campaign_name'
-])
-
-
-
 # ===========================================
 # دوال إدارة الحملات والمعرفات (الدوال المفقودة)
 # ===========================================
@@ -1446,9 +1027,6 @@ __all__.extend([
 def generate_campaign_id(prefix: str = "camp", length: int = 12) -> str:
     """إنشاء معرف فريد للحملة مع بادئة مخصصة"""
     try:
-        import time
-        import uuid
-        
         timestamp = str(int(time.time()))[-6:]  # آخر 6 أرقام من timestamp
         random_part = secrets.token_hex(3)  # 6 أحرف عشوائية
         unique_part = str(uuid.uuid4()).replace('-', '')[:6]  # 6 أحرف من UUID
@@ -1468,8 +1046,6 @@ def generate_campaign_id(prefix: str = "camp", length: int = 12) -> str:
 def generate_ad_group_id(campaign_id: str = "", prefix: str = "adg") -> str:
     """إنشاء معرف فريد لمجموعة الإعلانات"""
     try:
-        import time
-        
         timestamp = str(int(time.time()))[-4:]
         random_part = secrets.token_hex(2)
         
@@ -1487,8 +1063,6 @@ def generate_ad_group_id(campaign_id: str = "", prefix: str = "adg") -> str:
 def generate_keyword_id(ad_group_id: str = "", prefix: str = "kw") -> str:
     """إنشاء معرف فريد للكلمة المفتاحية"""
     try:
-        import time
-        
         timestamp = str(int(time.time()))[-4:]
         random_part = secrets.token_hex(2)
         
@@ -1502,6 +1076,131 @@ def generate_keyword_id(ad_group_id: str = "", prefix: str = "kw") -> str:
     except Exception as e:
         logger.error(f"خطأ في إنشاء معرف الكلمة المفتاحية: {str(e)}")
         return f"{prefix}_{generate_short_id()}"
+
+def generate_account_id(prefix: str = "acc", customer_id: str = "") -> str:
+    """إنشاء معرف فريد للحساب"""
+    try:
+        timestamp = str(int(time.time()))[-6:]
+        random_part = secrets.token_hex(3)
+        
+        if customer_id:
+            # استخدام جزء من customer_id
+            cust_part = customer_id.replace('-', '')[-4:] if customer_id else ""
+            return f"{prefix}_{cust_part}_{timestamp}_{random_part}".lower()
+        
+        return f"{prefix}_{timestamp}_{random_part}".lower()
+        
+    except Exception as e:
+        logger.error(f"خطأ في إنشاء معرف الحساب: {str(e)}")
+        return f"{prefix}_{generate_short_id()}"
+
+def generate_invitation_id(prefix: str = "inv", length: int = 16) -> str:
+    """إنشاء معرف فريد للدعوة (مطلوب لـ MCC)"""
+    try:
+        timestamp = str(int(time.time()))[-8:]
+        random_part = secrets.token_hex(4)
+        unique_part = str(uuid.uuid4()).replace('-', '')[:8]
+        
+        invitation_id = f"{prefix}_{timestamp}_{random_part}_{unique_part}"
+        
+        # التأكد من الطول المطلوب
+        if len(invitation_id) > length + len(prefix) + 3:
+            invitation_id = f"{prefix}_{timestamp}_{random_part}"
+        
+        return invitation_id.upper()  # MCC IDs عادة ما تكون بأحرف كبيرة
+        
+    except Exception as e:
+        logger.error(f"خطأ في إنشاء معرف الدعوة: {str(e)}")
+        return f"{prefix}_{generate_short_id(length=12).upper()}"
+
+def validate_sync_params(params: Dict[str, Any]) -> Dict[str, Any]:
+    """التحقق من معاملات المزامنة (مطلوب لـ Google Ads Sync)"""
+    try:
+        errors = []
+        warnings = []
+        cleaned_params = {}
+        
+        # معاملات المزامنة المطلوبة
+        required_params = ['customer_id', 'sync_type']
+        
+        for param in required_params:
+            if param not in params or not params[param]:
+                errors.append(f"المعامل '{param}' مطلوب للمزامنة")
+            else:
+                cleaned_params[param] = params[param]
+        
+        # التحقق من customer_id
+        if 'customer_id' in params:
+            customer_id = str(params['customer_id']).strip()
+            if not re.match(r'^\d{10}$', customer_id.replace('-', '')):
+                errors.append("معرف العميل يجب أن يكون 10 أرقام")
+            else:
+                cleaned_params['customer_id'] = customer_id
+        
+        # التحقق من نوع المزامنة
+        if 'sync_type' in params:
+            valid_sync_types = ['campaigns', 'ad_groups', 'keywords', 'ads', 'full']
+            sync_type = str(params['sync_type']).lower()
+            if sync_type not in valid_sync_types:
+                errors.append(f"نوع المزامنة يجب أن يكون أحد: {', '.join(valid_sync_types)}")
+            else:
+                cleaned_params['sync_type'] = sync_type
+        
+        # معاملات اختيارية
+        optional_params = {
+            'date_range': 'نطاق التاريخ',
+            'include_removed': 'تضمين المحذوفة',
+            'batch_size': 'حجم الدفعة'
+        }
+        
+        for param, param_name in optional_params.items():
+            if param in params and params[param] is not None:
+                if param == 'include_removed':
+                    cleaned_params[param] = bool(params[param])
+                elif param == 'batch_size':
+                    try:
+                        batch_size = int(params[param])
+                        if batch_size < 1 or batch_size > 1000:
+                            warnings.append("حجم الدفعة يجب أن يكون بين 1 و 1000")
+                            cleaned_params[param] = min(max(batch_size, 1), 1000)
+                        else:
+                            cleaned_params[param] = batch_size
+                    except (ValueError, TypeError):
+                        warnings.append("حجم الدفعة يجب أن يكون رقماً")
+                else:
+                    cleaned_params[param] = params[param]
+        
+        # إضافة معرف المزامنة
+        cleaned_params['sync_id'] = generate_unique_id('sync')
+        cleaned_params['sync_timestamp'] = datetime.utcnow().isoformat()
+        
+        return {
+            'is_valid': len(errors) == 0,
+            'errors': errors,
+            'warnings': warnings,
+            'cleaned_params': cleaned_params,
+            'validation_summary': {
+                'total_errors': len(errors),
+                'total_warnings': len(warnings),
+                'params_validated': len(cleaned_params),
+                'validation_date': datetime.utcnow().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"خطأ في التحقق من معاملات المزامنة: {str(e)}")
+        return {
+            'is_valid': False,
+            'errors': [f"خطأ في التحقق: {str(e)}"],
+            'warnings': [],
+            'cleaned_params': {},
+            'validation_summary': {
+                'total_errors': 1,
+                'total_warnings': 0,
+                'params_validated': 0,
+                'validation_date': datetime.utcnow().isoformat()
+            }
+        }
 
 def validate_campaign_data(campaign_data: Dict[str, Any]) -> Dict[str, Any]:
     """التحقق من صحة بيانات الحملة وتنظيفها"""
@@ -1764,25 +1463,6 @@ def validate_keyword_data(keyword_data: Dict[str, Any]) -> Dict[str, Any]:
             'cleaned_data': {}
         }
 
-def generate_account_id(prefix: str = "acc", customer_id: str = "") -> str:
-    """إنشاء معرف فريد للحساب"""
-    try:
-        import time
-        
-        timestamp = str(int(time.time()))[-6:]
-        random_part = secrets.token_hex(3)
-        
-        if customer_id:
-            # استخدام جزء من customer_id
-            cust_part = customer_id.replace('-', '')[-4:] if customer_id else ""
-            return f"{prefix}_{cust_part}_{timestamp}_{random_part}".lower()
-        
-        return f"{prefix}_{timestamp}_{random_part}".lower()
-        
-    except Exception as e:
-        logger.error(f"خطأ في إنشاء معرف الحساب: {str(e)}")
-        return f"{prefix}_{generate_short_id()}"
-
 def validate_budget_data(budget_data: Dict[str, Any]) -> Dict[str, Any]:
     """التحقق من صحة بيانات الميزانية"""
     try:
@@ -1829,4 +1509,48 @@ def validate_budget_data(budget_data: Dict[str, Any]) -> Dict[str, Any]:
             'warnings': [],
             'cleaned_data': {}
         }
+
+# تصدير جميع الدوال المهمة
+__all__ = [
+    # دوال التنسيق
+    'format_currency', 'format_percentage', 'format_number', 'format_phone_number',
+    'format_date_arabic',
+    
+    # دوال الحساب
+    'calculate_performance_score', 'calculate_growth_rate', 'calculate_budget_recommendation',
+    
+    # دوال النصوص
+    'sanitize_text', 'extract_keywords_from_text', 'generate_slug',
+    
+    # دوال الأمان
+    'generate_unique_id', 'generate_hash', 'generate_short_id', 'encrypt_token',
+    'decrypt_token', 'hash_password', 'verify_password',
+    
+    # دوال التواريخ
+    'parse_date_range', 'convert_timezone',
+    
+    # دوال التحقق
+    'validate_email', 'validate_phone', 'validate_url', 'validate_and_clean_data',
+    
+    # دوال الاستجابة
+    'create_response', 'paginate_data',
+    
+    # دوال الإشعارات
+    'send_notification',
+    
+    # دوال متنوعة
+    'get_system_info',
+    
+    # Decorators
+    'performance_monitor', 'safe_execute',
+    
+    # دوال إدارة الحملات والمعرفات
+    'generate_campaign_id', 'generate_ad_group_id', 'generate_keyword_id',
+    'generate_account_id', 'generate_invitation_id',
+    'validate_campaign_data', 'validate_ad_group_data', 'validate_keyword_data',
+    'validate_budget_data', 'validate_sync_params', 'format_campaign_name',
+    
+    # دوال التحليل
+    'generate_analysis_id'
+]
 

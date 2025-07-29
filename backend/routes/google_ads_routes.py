@@ -2,7 +2,6 @@
 Google Ads API Blueprint
 مسارات Google Ads API
 """
-from routes.google_ads_routes import google_ads_bp
 from flask import Blueprint, request, jsonify
 import logging
 from datetime import datetime
@@ -14,14 +13,55 @@ logger = logging.getLogger(__name__)
 # إنشاء Blueprint
 google_ads_bp = Blueprint('google_ads', __name__)
 
-# محاولة استيراد Google Ads Manager
+# محاولة استيراد Google Ads Manager مع إصلاح مشكلة circular import
 try:
-    from utils.google_ads_api import get_google_ads_manager, check_google_ads_configuration, get_google_ads_status
-    GOOGLE_ADS_AVAILABLE = True
-    logger.info("✅ تم تحميل Google Ads API بنجاح")
-except ImportError as e:
+    # تأخير الاستيراد لتجنب circular import
+    def get_google_ads_utilities():
+        try:
+            from utils.google_ads_api import get_google_ads_manager, check_google_ads_configuration, get_google_ads_status
+            return get_google_ads_manager, check_google_ads_configuration, get_google_ads_status, True
+        except ImportError:
+            try:
+                from ..utils.google_ads_api import get_google_ads_manager, check_google_ads_configuration, get_google_ads_status
+                return get_google_ads_manager, check_google_ads_configuration, get_google_ads_status, True
+            except ImportError:
+                return None, None, None, False
+    
+    # دوال بديلة للاختبار
+    def get_google_ads_manager_fallback():
+        return None
+    
+    def check_google_ads_configuration_fallback():
+        return {
+            'configured': False,
+            'missing_variables': ['جميع المتغيرات'],
+            'configuration_status': {},
+            'total_required': 5,
+            'total_configured': 0
+        }
+    
+    def get_google_ads_status_fallback():
+        return {
+            'manager_initialized': False,
+            'manager_configured': False,
+            'error': 'Google Ads API غير متاح',
+            'timestamp': datetime.utcnow().isoformat()
+        }
+    
+    # محاولة الحصول على الدوال الحقيقية
+    get_google_ads_manager, check_google_ads_configuration, get_google_ads_status, GOOGLE_ADS_AVAILABLE = get_google_ads_utilities()
+    
+    if not GOOGLE_ADS_AVAILABLE:
+        get_google_ads_manager = get_google_ads_manager_fallback
+        check_google_ads_configuration = check_google_ads_configuration_fallback
+        get_google_ads_status = get_google_ads_status_fallback
+        logger.warning("⚠️ لم يتم تحميل Google Ads API - استخدام الدوال البديلة")
+    else:
+        logger.info("✅ تم تحميل Google Ads API بنجاح")
+
+except Exception as e:
     GOOGLE_ADS_AVAILABLE = False
-    logger.warning(f"⚠️ لم يتم تحميل Google Ads API: {e}")
+    logger.warning(f"⚠️ خطأ في تحميل Google Ads API: {e}")
     
     # دوال بديلة للاختبار
     def get_google_ads_manager():
