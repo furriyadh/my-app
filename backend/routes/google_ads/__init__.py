@@ -236,20 +236,34 @@ class GoogleAdsRoutesManager:
             future = self.executor.submit(self._safe_import_blueprint, blueprint_info)
             futures[future] = (name, blueprint_info)
         
-        # معالجة النتائج
-        for future in as_completed(futures):
-            name, blueprint_info = futures[future]
-            success, blueprint, error = future.result()
-            
-            if success and blueprint:
-                self.blueprints[name] = blueprint
-                self.blueprint_info[name] = blueprint_info
-                self.metrics.loaded_blueprints += 1
-                self.metrics.total_endpoints += blueprint_info.endpoints_count
-            else:
-                self.import_errors[name] = error or "خطأ غير محدد"
-                self.blueprint_info[name] = blueprint_info
-                self.metrics.failed_blueprints += 1
+        # معالجة النتائج مع timeout لتجنب التعليق
+        try:
+            for future in as_completed(futures, timeout=30):  # timeout 30 ثانية
+                name, blueprint_info = futures[future]
+                try:
+                    success, blueprint, error = future.result(timeout=5)  # timeout للنتيجة
+                    
+                    if success and blueprint:
+                        self.blueprints[name] = blueprint
+                        self.blueprint_info[name] = blueprint_info
+                        self.metrics.loaded_blueprints += 1
+                        self.metrics.total_endpoints += blueprint_info.endpoints_count
+                    else:
+                        self.import_errors[name] = error or "خطأ غير محدد"
+                        self.blueprint_info[name] = blueprint_info
+                        self.metrics.failed_blueprints += 1
+                except Exception as e:
+                    logger.error(f"❌ خطأ في معالجة {name}: {str(e)}")
+                    self.import_errors[name] = f"خطأ في المعالجة: {str(e)}"
+                    self.metrics.failed_blueprints += 1
+        except Exception as timeout_error:
+            logger.error(f"⏰ انتهت مهلة تحميل Blueprints: {str(timeout_error)}")
+            # معالجة الـ futures المتبقية
+            for future, (name, blueprint_info) in futures.items():
+                if not future.done():
+                    future.cancel()
+                    self.import_errors[name] = "انتهت مهلة التحميل"
+                    self.metrics.failed_blueprints += 1
         
         # تحديث المقاييس
         self.metrics.total_blueprints = len(self.expected_blueprints)

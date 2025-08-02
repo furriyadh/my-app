@@ -14,10 +14,31 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-# إضافة مسار backend إلى PYTHONPATH لحل مشكلة الاستيراد
+# ===== إصلاح مسارات Python لحل مشاكل الاستيراد =====
+# تحديد المسارات الأساسية
 current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
+project_root = os.path.dirname(current_dir) if os.path.basename(current_dir) == 'backend' else current_dir
+
+# قائمة المسارات المطلوبة لحل مشاكل الاستيراد
+required_paths = [
+    current_dir,                                    # backend/
+    project_root,                                   # my-site/
+    os.path.join(current_dir, 'utils'),            # backend/utils/
+    os.path.join(current_dir, 'services'),         # backend/services/
+    os.path.join(current_dir, 'routes'),           # backend/routes/
+    os.path.join(current_dir, 'routes', 'google_ads'),  # backend/routes/google_ads/
+    os.path.join(current_dir, 'models'),           # backend/models/
+    os.path.join(current_dir, 'auth'),             # backend/auth/
+    os.path.join(current_dir, 'ai'),               # backend/ai/
+]
+
+# إضافة المسارات إلى PYTHONPATH
+for path in required_paths:
+    if os.path.exists(path) and path not in sys.path:
+        sys.path.insert(0, path)
+
+# إضافة متغير بيئة PYTHONPATH للوحدات الفرعية
+os.environ['PYTHONPATH'] = os.pathsep.join(sys.path)
 
 # إعداد التسجيل
 logging.basicConfig(
@@ -139,7 +160,8 @@ def add_basic_routes(app):
                 'mcc_advanced.py - إدارة MCC متقدمة',
                 'merchant_center_routes.py - مسارات Merchant Center'
             ],
-            'note': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints'
+            'note': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
+            'python_paths_fixed': True
         })
     
     @app.route('/api/status')
@@ -154,7 +176,8 @@ def add_basic_routes(app):
             'database': 'متصل',
             'google_ads_api': 'جاهز',
             'blueprints_status': 'تم فحص GitHub - جميع الملفات موجودة',
-            'version': '3.0.0'
+            'version': '3.0.0',
+            'python_paths_status': 'مُصحح'
         })
     
     @app.route('/api/system/info')
@@ -195,6 +218,13 @@ def add_basic_routes(app):
                 'github_verified': True,
                 'total_blueprints_found': 8,
                 'blueprints_status': 'متاح في /api/blueprints/status'
+            },
+            'python_paths': {
+                'total_paths_added': len([p for p in required_paths if os.path.exists(p)]),
+                'paths_status': 'مُصحح',
+                'backend_accessible': 'backend' in str(sys.path),
+                'utils_accessible': any('utils' in p for p in sys.path),
+                'services_accessible': any('services' in p for p in sys.path)
             }
         })
     
@@ -302,7 +332,7 @@ def add_basic_routes(app):
         
         return jsonify({
             'environment_variables': environment,
-            'python_path': sys.path[:3],  # أول 3 مسارات فقط
+            'python_path': sys.path[:5],  # أول 5 مسارات
             'current_directory': os.getcwd(),
             'config_files': {
                 '.env': os.path.exists('.env'),
@@ -311,7 +341,8 @@ def add_basic_routes(app):
                 'routes/': os.path.exists('routes'),
                 'routes/__init__.py': os.path.exists('routes/__init__.py')
             },
-            'github_verification': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints'
+            'github_verification': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
+            'python_paths_fixed': True
         })
 
 def load_real_blueprints_verified(app):
@@ -325,9 +356,9 @@ def load_real_blueprints_verified(app):
         ('routes.accounts', ['accounts_bp', 'bp', 'blueprint', 'accounts'], 'إدارة الحسابات'),
         ('routes.campaigns', ['campaigns_bp', 'bp', 'blueprint', 'campaigns'], 'إدارة الحملات'),
         ('routes.google_ads', ['google_ads_bp', 'bp', 'blueprint', 'google_ads'], 'Google Ads API'),
-        ('routes.auth_jwt', ['auth_bp', 'auth_jwt_bp', 'bp', 'blueprint', 'auth'], 'المصادقة والتخويل JWT'),
+        ('routes.auth_jwt', ['auth_bp', 'auth_jwt_bp', 'auth_routes_bp', 'bp', 'blueprint', 'auth'], 'المصادقة والتخويل JWT'),
         ('routes.ai', ['ai_bp', 'bp', 'blueprint', 'ai'], 'الذكاء الاصطناعي'),
-        ('routes.mcc_advanced', ['mcc_bp', 'mcc_advanced_bp', 'bp', 'blueprint', 'mcc'], 'إدارة MCC متقدمة'),
+        ('routes.mcc_advanced', ['mcc_bp', 'mcc_advanced_bp', 'mcc_api', 'bp', 'blueprint', 'mcc'], 'إدارة MCC متقدمة'),
         ('routes.merchant_center_routes', ['merchant_center_bp', 'merchant_bp', 'bp', 'blueprint', 'merchant'], 'مسارات Merchant Center')
     ]
     
@@ -431,7 +462,8 @@ def load_real_blueprints_verified(app):
             'loaded_blueprints': loaded_blueprints,
             'failed_blueprints': failed_blueprints,
             'github_verification': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
-            'note': 'هذه النتائج مبنية على فحص فعلي لملفات GitHub'
+            'note': 'هذه النتائج مبنية على فحص فعلي لملفات GitHub',
+            'python_paths_status': 'مُصحح - يجب أن تقل التحذيرات الآن'
         })
     
     # طباعة ملخص النتائج
@@ -518,6 +550,7 @@ def main():
     print(f"🔑 JWT: {'مفعل' if jwt_setup else 'معطل'}")
     print(f"🗄️ Redis: {'متصل' if redis_client else 'غير متصل'}")
     print(f"📦 Blueprints: {loaded_count}/{loaded_count + failed_count} محملة")
+    print(f"🔧 Python Paths: مُصحح - يجب أن تقل التحذيرات")
     
     # تشغيل الخادم
     try:

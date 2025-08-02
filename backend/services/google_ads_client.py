@@ -335,3 +335,232 @@ __all__ = [
 # تسجيل حالة التحميل
 logger.info(f"🎯 تم تحميل Google Ads Client Manager - مُهيأ: {google_ads_client_manager.is_initialized}")
 
+
+
+# ===== إضافة GoogleAdsClientService المفقود =====
+
+class GoogleAdsClientService:
+    """خدمة Google Ads Client المتطورة - الفئة المفقودة"""
+    
+    def __init__(self, client_manager: GoogleAdsClientManager = None):
+        """تهيئة خدمة Google Ads Client"""
+        self.client_manager = client_manager or GoogleAdsClientManager()
+        self.client = self.client_manager.client if self.client_manager.is_initialized else None
+        self.is_ready = self.client_manager.is_initialized
+        
+        logger.info(f"🎯 تم تحميل Google Ads Client Service - جاهز: {self.is_ready}")
+    
+    def get_client(self):
+        """الحصول على عميل Google Ads"""
+        if not self.is_ready:
+            logger.warning("⚠️ Google Ads Client غير جاهز")
+            return None
+        return self.client
+    
+    def is_client_ready(self) -> bool:
+        """فحص جاهزية العميل"""
+        return self.is_ready and self.client is not None
+    
+    def get_customer_service(self):
+        """الحصول على خدمة العملاء"""
+        if not self.is_client_ready():
+            return None
+        try:
+            return self.client.get_service("CustomerService")
+        except Exception as e:
+            logger.error(f"❌ فشل في الحصول على CustomerService: {e}")
+            return None
+    
+    def get_campaign_service(self):
+        """الحصول على خدمة الحملات"""
+        if not self.is_client_ready():
+            return None
+        try:
+            return self.client.get_service("CampaignService")
+        except Exception as e:
+            logger.error(f"❌ فشل في الحصول على CampaignService: {e}")
+            return None
+    
+    def get_ad_group_service(self):
+        """الحصول على خدمة مجموعات الإعلانات"""
+        if not self.is_client_ready():
+            return None
+        try:
+            return self.client.get_service("AdGroupService")
+        except Exception as e:
+            logger.error(f"❌ فشل في الحصول على AdGroupService: {e}")
+            return None
+    
+    def get_keyword_view_service(self):
+        """الحصول على خدمة عرض الكلمات المفتاحية"""
+        if not self.is_client_ready():
+            return None
+        try:
+            return self.client.get_service("KeywordViewService")
+        except Exception as e:
+            logger.error(f"❌ فشل في الحصول على KeywordViewService: {e}")
+            return None
+    
+    def get_google_ads_service(self):
+        """الحصول على خدمة Google Ads الرئيسية"""
+        if not self.is_client_ready():
+            return None
+        try:
+            return self.client.get_service("GoogleAdsService")
+        except Exception as e:
+            logger.error(f"❌ فشل في الحصول على GoogleAdsService: {e}")
+            return None
+    
+    def search(self, customer_id: str, query: str):
+        """تنفيذ استعلام بحث"""
+        if not self.is_client_ready():
+            logger.error("❌ Google Ads Client غير جاهز للبحث")
+            return []
+        
+        try:
+            ga_service = self.get_google_ads_service()
+            if not ga_service:
+                return []
+            
+            response = ga_service.search(customer_id=customer_id, query=query)
+            return list(response)
+        except Exception as e:
+            logger.error(f"❌ فشل في تنفيذ البحث: {e}")
+            return []
+    
+    def get_campaigns(self, customer_id: str):
+        """الحصول على قائمة الحملات"""
+        query = """
+            SELECT 
+                campaign.id,
+                campaign.name,
+                campaign.status,
+                campaign.advertising_channel_type,
+                metrics.impressions,
+                metrics.clicks,
+                metrics.cost_micros
+            FROM campaign 
+            WHERE segments.date DURING LAST_30_DAYS
+        """
+        return self.search(customer_id, query)
+    
+    def get_ad_groups(self, customer_id: str, campaign_id: str = None):
+        """الحصول على مجموعات الإعلانات"""
+        query = """
+            SELECT 
+                ad_group.id,
+                ad_group.name,
+                ad_group.status,
+                ad_group.campaign,
+                metrics.impressions,
+                metrics.clicks,
+                metrics.cost_micros
+            FROM ad_group 
+            WHERE segments.date DURING LAST_30_DAYS
+        """
+        if campaign_id:
+            query += f" AND ad_group.campaign = 'customers/{customer_id}/campaigns/{campaign_id}'"
+        
+        return self.search(customer_id, query)
+    
+    def get_keywords(self, customer_id: str, ad_group_id: str = None):
+        """الحصول على الكلمات المفتاحية"""
+        query = """
+            SELECT 
+                ad_group_criterion.keyword.text,
+                ad_group_criterion.keyword.match_type,
+                ad_group_criterion.status,
+                ad_group_criterion.ad_group,
+                metrics.impressions,
+                metrics.clicks,
+                metrics.cost_micros,
+                metrics.ctr,
+                metrics.average_cpc
+            FROM keyword_view 
+            WHERE segments.date DURING LAST_30_DAYS
+        """
+        if ad_group_id:
+            query += f" AND ad_group_criterion.ad_group = 'customers/{customer_id}/adGroups/{ad_group_id}'"
+        
+        return self.search(customer_id, query)
+    
+    def get_performance_metrics(self, customer_id: str, date_range: str = "LAST_30_DAYS"):
+        """الحصول على مقاييس الأداء"""
+        query = f"""
+            SELECT 
+                metrics.impressions,
+                metrics.clicks,
+                metrics.cost_micros,
+                metrics.ctr,
+                metrics.average_cpc,
+                metrics.conversions,
+                metrics.conversion_rate,
+                metrics.cost_per_conversion,
+                segments.date
+            FROM campaign 
+            WHERE segments.date DURING {date_range}
+        """
+        return self.search(customer_id, query)
+
+class GoogleAdsConfig:
+    """إعدادات Google Ads API"""
+    
+    def __init__(self):
+        self.name = "GoogleAdsConfig"
+        self.version = "2.0.0"
+        self.config = {}
+        self.load_config()
+    
+    def load_config(self):
+        """تحميل إعدادات Google Ads"""
+        try:
+            # تحميل من متغيرات البيئة
+            self.config = {
+                'developer_token': os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN', ''),
+                'client_id': os.getenv('GOOGLE_ADS_CLIENT_ID', ''),
+                'client_secret': os.getenv('GOOGLE_ADS_CLIENT_SECRET', ''),
+                'refresh_token': os.getenv('GOOGLE_ADS_REFRESH_TOKEN', ''),
+                'customer_id': os.getenv('GOOGLE_ADS_CUSTOMER_ID', ''),
+                'login_customer_id': os.getenv('GOOGLE_ADS_LOGIN_CUSTOMER_ID', ''),
+                'use_proto_plus': True,
+                'api_version': 'v15'
+            }
+            
+            logger.info(f"✅ تم تحميل {self.name} v{self.version}")
+            
+        except Exception as e:
+            logger.error(f"❌ خطأ في تحميل إعدادات Google Ads: {e}")
+    
+    def get_config(self) -> Dict[str, Any]:
+        """الحصول على الإعدادات"""
+        return self.config.copy()
+    
+    def validate_config(self) -> bool:
+        """التحقق من صحة الإعدادات"""
+        required_fields = ['developer_token', 'client_id', 'client_secret', 'refresh_token']
+        
+        for field in required_fields:
+            if not self.config.get(field):
+                logger.warning(f"⚠️ حقل مطلوب مفقود: {field}")
+                return False
+        
+        return True
+    
+    def update_config(self, updates: Dict[str, Any]):
+        """تحديث الإعدادات"""
+        self.config.update(updates)
+        logger.info("✅ تم تحديث إعدادات Google Ads")
+
+# إنشاء instance عام للاستخدام
+google_ads_client_service = GoogleAdsClientService()
+google_ads_config = GoogleAdsConfig()
+
+# تصدير الفئات والوظائف
+__all__ = [
+    'GoogleAdsClientManager',
+    'GoogleAdsClientService', 
+    'GoogleAdsConfig',
+    'google_ads_client_service',
+    'google_ads_config'
+]
+

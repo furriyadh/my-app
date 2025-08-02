@@ -1554,3 +1554,311 @@ __all__ = [
     'generate_analysis_id'
 ]
 
+
+
+# ===== إضافة الوظائف المفقودة =====
+
+def validate_budget_amount(amount: Union[str, int, float, Decimal]) -> bool:
+    """
+    التحقق من صحة مبلغ الميزانية
+    
+    Args:
+        amount: المبلغ المراد التحقق منه
+        
+    Returns:
+        bool: True إذا كان المبلغ صحيح، False إذا لم يكن كذلك
+    """
+    try:
+        # تحويل إلى Decimal للدقة
+        if isinstance(amount, str):
+            # إزالة المسافات والرموز غير المرغوب فيها
+            amount = amount.strip().replace(',', '').replace('$', '')
+            if not amount:
+                return False
+        
+        decimal_amount = Decimal(str(amount))
+        
+        # التحقق من أن المبلغ موجب
+        if decimal_amount <= 0:
+            return False
+        
+        # التحقق من أن المبلغ ليس كبيراً جداً (حد أقصى 1 مليون)
+        if decimal_amount > Decimal('1000000'):
+            return False
+        
+        # التحقق من عدد الخانات العشرية (حد أقصى خانتين)
+        if decimal_amount.as_tuple().exponent < -2:
+            return False
+        
+        return True
+        
+    except (ValueError, TypeError, decimal.InvalidOperation):
+        return False
+
+def calculate_hash(data: Union[str, Dict, List], algorithm: str = 'sha256') -> str:
+    """
+    حساب hash للبيانات
+    
+    Args:
+        data: البيانات المراد حساب hash لها
+        algorithm: خوارزمية التشفير (sha256, md5, sha1, sha512)
+        
+    Returns:
+        str: قيمة hash بصيغة hexadecimal
+    """
+    try:
+        # تحويل البيانات إلى string
+        if isinstance(data, (dict, list)):
+            data_str = json.dumps(data, sort_keys=True, ensure_ascii=False)
+        else:
+            data_str = str(data)
+        
+        # تحويل إلى bytes
+        data_bytes = data_str.encode('utf-8')
+        
+        # اختيار خوارزمية التشفير
+        if algorithm.lower() == 'md5':
+            hash_obj = hashlib.md5(data_bytes)
+        elif algorithm.lower() == 'sha1':
+            hash_obj = hashlib.sha1(data_bytes)
+        elif algorithm.lower() == 'sha512':
+            hash_obj = hashlib.sha512(data_bytes)
+        else:  # default sha256
+            hash_obj = hashlib.sha256(data_bytes)
+        
+        return hash_obj.hexdigest()
+        
+    except Exception as e:
+        logging.error(f"خطأ في حساب hash: {e}")
+        return ""
+
+def validate_campaign_budget(budget_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    التحقق من بيانات ميزانية الحملة
+    
+    Args:
+        budget_data: بيانات الميزانية
+        
+    Returns:
+        Dict: نتيجة التحقق مع التفاصيل
+    """
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من وجود المبلغ
+        if 'amount' not in budget_data:
+            result['valid'] = False
+            result['errors'].append('مبلغ الميزانية مطلوب')
+            return result
+        
+        amount = budget_data['amount']
+        
+        # التحقق من صحة المبلغ
+        if not validate_budget_amount(amount):
+            result['valid'] = False
+            result['errors'].append('مبلغ الميزانية غير صحيح')
+            return result
+        
+        # تحويل إلى Decimal
+        decimal_amount = Decimal(str(amount))
+        result['processed_data']['amount'] = decimal_amount
+        
+        # التحقق من نوع الميزانية
+        budget_type = budget_data.get('type', 'DAILY')
+        if budget_type not in ['DAILY', 'TOTAL']:
+            result['warnings'].append('نوع الميزانية غير محدد، سيتم استخدام DAILY')
+            budget_type = 'DAILY'
+        
+        result['processed_data']['type'] = budget_type
+        
+        # التحقق من العملة
+        currency = budget_data.get('currency', 'USD')
+        if len(currency) != 3:
+            result['warnings'].append('رمز العملة غير صحيح، سيتم استخدام USD')
+            currency = 'USD'
+        
+        result['processed_data']['currency'] = currency.upper()
+        
+        # تحذيرات إضافية
+        if decimal_amount < Decimal('10'):
+            result['warnings'].append('الميزانية منخفضة جداً، قد لا تحقق نتائج جيدة')
+        
+        if decimal_amount > Decimal('10000'):
+            result['warnings'].append('الميزانية عالية، تأكد من مراقبة الأداء')
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة بيانات الميزانية: {str(e)}')
+        return result
+
+def generate_campaign_hash(campaign_data: Dict[str, Any]) -> str:
+    """
+    توليد hash فريد للحملة
+    
+    Args:
+        campaign_data: بيانات الحملة
+        
+    Returns:
+        str: hash الحملة
+    """
+    # استخراج البيانات المهمة للـ hash
+    hash_data = {
+        'name': campaign_data.get('name', ''),
+        'type': campaign_data.get('type', ''),
+        'budget': campaign_data.get('budget', {}),
+        'targeting': campaign_data.get('targeting', {}),
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    
+    return calculate_hash(hash_data)
+
+def format_budget_display(amount: Union[str, int, float, Decimal], currency: str = 'USD') -> str:
+    """
+    تنسيق عرض الميزانية
+    
+    Args:
+        amount: المبلغ
+        currency: العملة
+        
+    Returns:
+        str: المبلغ منسق للعرض
+    """
+    try:
+        decimal_amount = Decimal(str(amount))
+        
+        # تنسيق حسب العملة
+        if currency.upper() == 'USD':
+            return f"${decimal_amount:,.2f}"
+        elif currency.upper() == 'EUR':
+            return f"€{decimal_amount:,.2f}"
+        elif currency.upper() == 'GBP':
+            return f"£{decimal_amount:,.2f}"
+        else:
+            return f"{decimal_amount:,.2f} {currency.upper()}"
+            
+    except Exception:
+        return str(amount)
+
+def calculate_budget_recommendations(current_performance: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    حساب توصيات الميزانية بناءً على الأداء الحالي
+    
+    Args:
+        current_performance: بيانات الأداء الحالي
+        
+    Returns:
+        Dict: توصيات الميزانية
+    """
+    recommendations = {
+        'current_budget': current_performance.get('budget', 0),
+        'recommended_budget': 0,
+        'reason': '',
+        'confidence': 0,
+        'expected_improvement': {}
+    }
+    
+    try:
+        current_budget = Decimal(str(current_performance.get('budget', 0)))
+        clicks = int(current_performance.get('clicks', 0))
+        impressions = int(current_performance.get('impressions', 0))
+        conversions = int(current_performance.get('conversions', 0))
+        cost = Decimal(str(current_performance.get('cost', 0)))
+        
+        if current_budget <= 0 or clicks == 0:
+            recommendations['recommended_budget'] = current_budget
+            recommendations['reason'] = 'بيانات غير كافية للتوصية'
+            return recommendations
+        
+        # حساب المقاييس
+        ctr = (clicks / impressions * 100) if impressions > 0 else 0
+        cpc = (cost / clicks) if clicks > 0 else 0
+        conversion_rate = (conversions / clicks * 100) if clicks > 0 else 0
+        
+        # منطق التوصية
+        if ctr > 5 and conversion_rate > 3:
+            # أداء ممتاز - زيادة الميزانية
+            recommended_budget = current_budget * Decimal('1.3')
+            recommendations['reason'] = 'أداء ممتاز - يُنصح بزيادة الميزانية'
+            recommendations['confidence'] = 85
+        elif ctr > 2 and conversion_rate > 1:
+            # أداء جيد - زيادة طفيفة
+            recommended_budget = current_budget * Decimal('1.1')
+            recommendations['reason'] = 'أداء جيد - زيادة طفيفة مُقترحة'
+            recommendations['confidence'] = 70
+        elif ctr < 1 or conversion_rate < 0.5:
+            # أداء ضعيف - تقليل الميزانية
+            recommended_budget = current_budget * Decimal('0.8')
+            recommendations['reason'] = 'أداء ضعيف - يُنصح بتقليل الميزانية وتحسين الحملة'
+            recommendations['confidence'] = 75
+        else:
+            # أداء متوسط - الحفاظ على الميزانية
+            recommended_budget = current_budget
+            recommendations['reason'] = 'أداء متوسط - الحفاظ على الميزانية الحالية'
+            recommendations['confidence'] = 60
+        
+        recommendations['recommended_budget'] = float(recommended_budget)
+        
+        # حساب التحسن المتوقع
+        budget_change = (recommended_budget - current_budget) / current_budget * 100
+        recommendations['expected_improvement'] = {
+            'budget_change_percent': float(budget_change),
+            'expected_clicks_increase': float(budget_change * 0.8),
+            'expected_conversions_increase': float(budget_change * 0.6)
+        }
+        
+        return recommendations
+        
+    except Exception as e:
+        logging.error(f"خطأ في حساب توصيات الميزانية: {e}")
+        recommendations['reason'] = f'خطأ في الحساب: {str(e)}'
+        return recommendations
+
+def format_timestamp(timestamp: Union[str, datetime]) -> str:
+    """تنسيق الطابع الزمني"""
+    try:
+        if isinstance(timestamp, str):
+            # محاولة تحليل التاريخ من النص
+            if 'T' in timestamp:
+                dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            else:
+                dt = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+        elif isinstance(timestamp, datetime):
+            dt = timestamp
+        else:
+            return str(timestamp)
+        
+        # تنسيق التاريخ
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+        
+    except Exception:
+        return str(timestamp)
+
+# إضافة الوظائف إلى __all__ للتصدير
+if '__all__' in globals():
+    __all__.extend([
+        'validate_budget_amount',
+        'calculate_hash',
+        'format_timestamp',
+        'validate_campaign_budget',
+        'generate_campaign_hash',
+        'format_budget_display',
+        'calculate_budget_recommendations'
+    ])
+else:
+    __all__ = [
+        'validate_budget_amount',
+        'calculate_hash',
+        'format_timestamp',
+        'validate_campaign_budget',
+        'generate_campaign_hash',
+        'format_budget_display',
+        'calculate_budget_recommendations'
+    ]
+

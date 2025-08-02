@@ -1037,3 +1037,536 @@ class GoogleAdsValidator:
             return False, error_msg
 
         return True, None
+
+# ===== إضافة الوظائف المفقودة =====
+
+def validate_discovery_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    التحقق من معاملات اكتشاف الحسابات
+    
+    Args:
+        data: بيانات طلب الاكتشاف
+        
+    Returns:
+        Dict: نتيجة التحقق مع التفاصيل
+    """
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من معرف العميل
+        customer_id = data.get('customer_id')
+        if not customer_id:
+            result['errors'].append('معرف العميل مطلوب')
+            result['valid'] = False
+        elif not isinstance(customer_id, str) or not customer_id.strip():
+            result['errors'].append('معرف العميل يجب أن يكون نص غير فارغ')
+            result['valid'] = False
+        else:
+            # تنظيف معرف العميل
+            clean_customer_id = customer_id.strip().replace('-', '')
+            if not clean_customer_id.isdigit():
+                result['errors'].append('معرف العميل يجب أن يحتوي على أرقام فقط')
+                result['valid'] = False
+            elif len(clean_customer_id) != 10:
+                result['warnings'].append('معرف العميل عادة ما يكون 10 أرقام')
+            
+            result['processed_data']['customer_id'] = clean_customer_id
+        
+        # التحقق من نوع الاكتشاف
+        discovery_type = data.get('discovery_type', 'accounts')
+        valid_types = ['accounts', 'campaigns', 'ad_groups', 'keywords', 'ads']
+        if discovery_type not in valid_types:
+            result['warnings'].append(f'نوع الاكتشاف غير معروف، سيتم استخدام "accounts"')
+            discovery_type = 'accounts'
+        
+        result['processed_data']['discovery_type'] = discovery_type
+        
+        # التحقق من المرشحات
+        filters = data.get('filters', {})
+        if not isinstance(filters, dict):
+            result['warnings'].append('المرشحات يجب أن تكون كائن، سيتم تجاهلها')
+            filters = {}
+        
+        # التحقق من مرشحات محددة
+        processed_filters = {}
+        
+        # مرشح الحالة
+        if 'status' in filters:
+            status = filters['status']
+            valid_statuses = ['ENABLED', 'PAUSED', 'REMOVED']
+            if status not in valid_statuses:
+                result['warnings'].append(f'حالة غير صحيحة: {status}')
+            else:
+                processed_filters['status'] = status
+        
+        # مرشح التاريخ
+        if 'date_range' in filters:
+            date_range = filters['date_range']
+            valid_ranges = ['TODAY', 'YESTERDAY', 'LAST_7_DAYS', 'LAST_30_DAYS', 'LAST_90_DAYS']
+            if date_range not in valid_ranges:
+                result['warnings'].append(f'نطاق تاريخ غير صحيح: {date_range}')
+            else:
+                processed_filters['date_range'] = date_range
+        
+        # مرشح نوع الحملة
+        if 'campaign_type' in filters:
+            campaign_type = filters['campaign_type']
+            valid_types = ['SEARCH', 'DISPLAY', 'SHOPPING', 'VIDEO', 'DISCOVERY']
+            if campaign_type not in valid_types:
+                result['warnings'].append(f'نوع حملة غير صحيح: {campaign_type}')
+            else:
+                processed_filters['campaign_type'] = campaign_type
+        
+        result['processed_data']['filters'] = processed_filters
+        
+        # التحقق من حد النتائج
+        limit = data.get('limit', 100)
+        try:
+            limit = int(limit)
+            if limit <= 0:
+                result['warnings'].append('حد النتائج يجب أن يكون أكبر من 0، سيتم استخدام 100')
+                limit = 100
+            elif limit > 1000:
+                result['warnings'].append('حد النتائج كبير جداً، سيتم تقليله إلى 1000')
+                limit = 1000
+        except (ValueError, TypeError):
+            result['warnings'].append('حد النتائج غير صحيح، سيتم استخدام 100')
+            limit = 100
+        
+        result['processed_data']['limit'] = limit
+        
+        # التحقق من خيارات الإخراج
+        output_format = data.get('output_format', 'json')
+        valid_formats = ['json', 'csv', 'xml']
+        if output_format not in valid_formats:
+            result['warnings'].append('تنسيق الإخراج غير مدعوم، سيتم استخدام json')
+            output_format = 'json'
+        
+        result['processed_data']['output_format'] = output_format
+        
+        # التحقق من تضمين المقاييس
+        include_metrics = data.get('include_metrics', True)
+        if not isinstance(include_metrics, bool):
+            result['warnings'].append('include_metrics يجب أن يكون true أو false')
+            include_metrics = True
+        
+        result['processed_data']['include_metrics'] = include_metrics
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة معاملات الاكتشاف: {str(e)}')
+        return result
+
+def validate_sync_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    التحقق من معاملات مزامنة البيانات
+    
+    Args:
+        data: بيانات طلب المزامنة
+        
+    Returns:
+        Dict: نتيجة التحقق مع التفاصيل
+    """
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من معرف العميل
+        customer_id = data.get('customer_id')
+        if not customer_id:
+            result['errors'].append('معرف العميل مطلوب للمزامنة')
+            result['valid'] = False
+        elif not isinstance(customer_id, str) or not customer_id.strip():
+            result['errors'].append('معرف العميل يجب أن يكون نص غير فارغ')
+            result['valid'] = False
+        else:
+            clean_customer_id = customer_id.strip().replace('-', '')
+            if not clean_customer_id.isdigit():
+                result['errors'].append('معرف العميل يجب أن يحتوي على أرقام فقط')
+                result['valid'] = False
+            
+            result['processed_data']['customer_id'] = clean_customer_id
+        
+        # التحقق من نوع المزامنة
+        sync_type = data.get('sync_type', 'full')
+        valid_sync_types = ['full', 'incremental', 'selective']
+        if sync_type not in valid_sync_types:
+            result['warnings'].append('نوع المزامنة غير صحيح، سيتم استخدام "full"')
+            sync_type = 'full'
+        
+        result['processed_data']['sync_type'] = sync_type
+        
+        # التحقق من الكيانات المراد مزامنتها
+        entities = data.get('entities', ['campaigns', 'ad_groups', 'keywords'])
+        if not isinstance(entities, list):
+            result['warnings'].append('قائمة الكيانات يجب أن تكون مصفوفة')
+            entities = ['campaigns', 'ad_groups', 'keywords']
+        
+        valid_entities = ['campaigns', 'ad_groups', 'keywords', 'ads', 'extensions', 'audiences']
+        processed_entities = []
+        for entity in entities:
+            if entity in valid_entities:
+                processed_entities.append(entity)
+            else:
+                result['warnings'].append(f'كيان غير مدعوم: {entity}')
+        
+        if not processed_entities:
+            result['warnings'].append('لا توجد كيانات صحيحة، سيتم استخدام الافتراضية')
+            processed_entities = ['campaigns', 'ad_groups', 'keywords']
+        
+        result['processed_data']['entities'] = processed_entities
+        
+        # التحقق من نطاق التاريخ للمزامنة التدريجية
+        if sync_type == 'incremental':
+            last_sync_date = data.get('last_sync_date')
+            if not last_sync_date:
+                result['warnings'].append('تاريخ آخر مزامنة مطلوب للمزامنة التدريجية')
+                sync_type = 'full'
+                result['processed_data']['sync_type'] = sync_type
+            else:
+                try:
+                    # التحقق من تنسيق التاريخ
+                    if isinstance(last_sync_date, str):
+                        datetime.fromisoformat(last_sync_date.replace('Z', '+00:00'))
+                    result['processed_data']['last_sync_date'] = last_sync_date
+                except ValueError:
+                    result['warnings'].append('تنسيق تاريخ آخر مزامنة غير صحيح')
+                    sync_type = 'full'
+                    result['processed_data']['sync_type'] = sync_type
+        
+        # التحقق من خيارات المزامنة
+        sync_options = data.get('sync_options', {})
+        if not isinstance(sync_options, dict):
+            sync_options = {}
+        
+        processed_options = {}
+        
+        # خيار تضمين البيانات المحذوفة
+        include_deleted = sync_options.get('include_deleted', False)
+        if not isinstance(include_deleted, bool):
+            include_deleted = False
+        processed_options['include_deleted'] = include_deleted
+        
+        # خيار المعالجة المتوازية
+        parallel_processing = sync_options.get('parallel_processing', True)
+        if not isinstance(parallel_processing, bool):
+            parallel_processing = True
+        processed_options['parallel_processing'] = parallel_processing
+        
+        # حجم الدفعة
+        batch_size = sync_options.get('batch_size', 1000)
+        try:
+            batch_size = int(batch_size)
+            if batch_size <= 0:
+                batch_size = 1000
+            elif batch_size > 10000:
+                result['warnings'].append('حجم الدفعة كبير جداً، سيتم تقليله')
+                batch_size = 10000
+        except (ValueError, TypeError):
+            batch_size = 1000
+        
+        processed_options['batch_size'] = batch_size
+        
+        # مهلة الانتظار
+        timeout = sync_options.get('timeout', 300)
+        try:
+            timeout = int(timeout)
+            if timeout <= 0:
+                timeout = 300
+            elif timeout > 3600:
+                result['warnings'].append('مهلة الانتظار طويلة جداً')
+                timeout = 3600
+        except (ValueError, TypeError):
+            timeout = 300
+        
+        processed_options['timeout'] = timeout
+        
+        result['processed_data']['sync_options'] = processed_options
+        
+        # التحقق من معرف المهمة
+        task_id = data.get('task_id')
+        if task_id and not isinstance(task_id, str):
+            result['warnings'].append('معرف المهمة يجب أن يكون نص')
+            task_id = None
+        
+        if task_id:
+            result['processed_data']['task_id'] = task_id.strip()
+        
+        # التحقق من الأولوية
+        priority = data.get('priority', 'normal')
+        valid_priorities = ['low', 'normal', 'high', 'urgent']
+        if priority not in valid_priorities:
+            result['warnings'].append('أولوية غير صحيحة، سيتم استخدام "normal"')
+            priority = 'normal'
+        
+        result['processed_data']['priority'] = priority
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة معاملات المزامنة: {str(e)}')
+        return result
+
+def validate_campaign_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    التحقق من معاملات الحملة
+    
+    Args:
+        data: بيانات الحملة
+        
+    Returns:
+        Dict: نتيجة التحقق
+    """
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من اسم الحملة
+        name = data.get('name')
+        if not name:
+            result['errors'].append('اسم الحملة مطلوب')
+            result['valid'] = False
+        elif not isinstance(name, str) or len(name.strip()) < 3:
+            result['errors'].append('اسم الحملة يجب أن يكون نص من 3 أحرف على الأقل')
+            result['valid'] = False
+        elif len(name.strip()) > 255:
+            result['errors'].append('اسم الحملة طويل جداً (الحد الأقصى 255 حرف)')
+            result['valid'] = False
+        else:
+            result['processed_data']['name'] = name.strip()
+        
+        # التحقق من نوع الحملة
+        campaign_type = data.get('type', 'SEARCH')
+        valid_types = ['SEARCH', 'DISPLAY', 'SHOPPING', 'VIDEO', 'DISCOVERY', 'PERFORMANCE_MAX']
+        if campaign_type not in valid_types:
+            result['warnings'].append(f'نوع حملة غير مدعوم: {campaign_type}، سيتم استخدام SEARCH')
+            campaign_type = 'SEARCH'
+        
+        result['processed_data']['type'] = campaign_type
+        
+        # التحقق من الحالة
+        status = data.get('status', 'PAUSED')
+        valid_statuses = ['ENABLED', 'PAUSED', 'REMOVED']
+        if status not in valid_statuses:
+            result['warnings'].append('حالة غير صحيحة، سيتم استخدام PAUSED')
+            status = 'PAUSED'
+        
+        result['processed_data']['status'] = status
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة معاملات الحملة: {str(e)}')
+        return result
+
+def validate_keyword_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    التحقق من معاملات الكلمات المفتاحية
+    
+    Args:
+        data: بيانات الكلمة المفتاحية
+        
+    Returns:
+        Dict: نتيجة التحقق
+    """
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من نص الكلمة المفتاحية
+        keyword_text = data.get('text')
+        if not keyword_text:
+            result['errors'].append('نص الكلمة المفتاحية مطلوب')
+            result['valid'] = False
+        elif not isinstance(keyword_text, str) or len(keyword_text.strip()) < 1:
+            result['errors'].append('نص الكلمة المفتاحية يجب أن يكون نص غير فارغ')
+            result['valid'] = False
+        elif len(keyword_text.strip()) > 80:
+            result['errors'].append('نص الكلمة المفتاحية طويل جداً (الحد الأقصى 80 حرف)')
+            result['valid'] = False
+        else:
+            result['processed_data']['text'] = keyword_text.strip()
+        
+        # التحقق من نوع المطابقة
+        match_type = data.get('match_type', 'BROAD')
+        valid_match_types = ['EXACT', 'PHRASE', 'BROAD']
+        if match_type not in valid_match_types:
+            result['warnings'].append('نوع مطابقة غير صحيح، سيتم استخدام BROAD')
+            match_type = 'BROAD'
+        
+        result['processed_data']['match_type'] = match_type
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة معاملات الكلمة المفتاحية: {str(e)}')
+        return result
+
+def validate_discovery_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """التحقق من معاملات الاكتشاف"""
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من معرف العميل
+        customer_id = data.get('customer_id')
+        if not customer_id:
+            result['errors'].append('معرف العميل مطلوب')
+            result['valid'] = False
+        elif not isinstance(customer_id, str) or not customer_id.strip():
+            result['errors'].append('معرف العميل يجب أن يكون نص غير فارغ')
+            result['valid'] = False
+        else:
+            result['processed_data']['customer_id'] = customer_id.strip()
+        
+        # التحقق من نوع الاكتشاف
+        discovery_type = data.get('discovery_type', 'keywords')
+        valid_types = ['keywords', 'audiences', 'placements', 'topics']
+        if discovery_type not in valid_types:
+            result['warnings'].append('نوع اكتشاف غير صحيح، سيتم استخدام keywords')
+            discovery_type = 'keywords'
+        
+        result['processed_data']['discovery_type'] = discovery_type
+        
+        # التحقق من حد النتائج
+        limit = data.get('limit', 100)
+        try:
+            limit = int(limit)
+            if limit < 1:
+                limit = 1
+            elif limit > 1000:
+                limit = 1000
+                result['warnings'].append('تم تقليل حد النتائج إلى 1000')
+        except (ValueError, TypeError):
+            limit = 100
+            result['warnings'].append('حد النتائج غير صحيح، سيتم استخدام 100')
+        
+        result['processed_data']['limit'] = limit
+        
+        # التحقق من الفلاتر
+        filters = data.get('filters', {})
+        if not isinstance(filters, dict):
+            filters = {}
+            result['warnings'].append('الفلاتر يجب أن تكون كائن، سيتم تجاهلها')
+        
+        result['processed_data']['filters'] = filters
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة معاملات الاكتشاف: {str(e)}')
+        return result
+
+def validate_sync_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """التحقق من معاملات المزامنة"""
+    result = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'processed_data': {}
+    }
+    
+    try:
+        # التحقق من معرف العميل
+        customer_id = data.get('customer_id')
+        if not customer_id:
+            result['errors'].append('معرف العميل مطلوب')
+            result['valid'] = False
+        elif not isinstance(customer_id, str) or not customer_id.strip():
+            result['errors'].append('معرف العميل يجب أن يكون نص غير فارغ')
+            result['valid'] = False
+        else:
+            result['processed_data']['customer_id'] = customer_id.strip()
+        
+        # التحقق من نوع المزامنة
+        sync_type = data.get('sync_type', 'full')
+        valid_types = ['full', 'incremental', 'campaigns_only', 'keywords_only']
+        if sync_type not in valid_types:
+            result['warnings'].append('نوع مزامنة غير صحيح، سيتم استخدام full')
+            sync_type = 'full'
+        
+        result['processed_data']['sync_type'] = sync_type
+        
+        # التحقق من التاريخ الأخير للمزامنة
+        last_sync = data.get('last_sync_date')
+        if last_sync:
+            try:
+                if isinstance(last_sync, str):
+                    last_sync_date = datetime.fromisoformat(last_sync.replace('Z', '+00:00'))
+                else:
+                    last_sync_date = last_sync
+                result['processed_data']['last_sync_date'] = last_sync_date
+            except (ValueError, TypeError):
+                result['warnings'].append('تاريخ المزامنة الأخيرة غير صحيح، سيتم تجاهله')
+        
+        # التحقق من خيارات المزامنة
+        options = data.get('options', {})
+        if not isinstance(options, dict):
+            options = {}
+            result['warnings'].append('خيارات المزامنة يجب أن تكون كائن، سيتم تجاهلها')
+        
+        # خيارات افتراضية
+        default_options = {
+            'include_removed': False,
+            'include_paused': True,
+            'batch_size': 1000,
+            'timeout': 300
+        }
+        
+        for key, default_value in default_options.items():
+            if key not in options:
+                options[key] = default_value
+        
+        result['processed_data']['options'] = options
+        
+        return result
+        
+    except Exception as e:
+        result['valid'] = False
+        result['errors'].append(f'خطأ في معالجة معاملات المزامنة: {str(e)}')
+        return result
+
+# إضافة الوظائف إلى __all__ للتصدير
+if '__all__' in globals():
+    __all__.extend([
+        'validate_discovery_params',
+        'validate_sync_params',
+        'validate_campaign_params',
+        'validate_keyword_params'
+    ])
+else:
+    __all__ = [
+        'RequestValidator',
+        'validate_discovery_params',
+        'validate_sync_params',
+        'validate_campaign_params',
+        'validate_keyword_params'
+    ]
+
