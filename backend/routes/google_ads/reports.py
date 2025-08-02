@@ -83,10 +83,10 @@ REPORTS_SERVICES_STATUS = {
 }
 
 try:
-    from services.google_ads_client import GoogleAdsClient
+    from services.google_ads_client import GoogleAdsClientManager
     REPORTS_SERVICES_STATUS['google_ads_client'] = True
 except ImportError as e:
-    logger.warning(f"⚠️ GoogleAdsClient غير متاح: {e}")
+    logger.warning(f"⚠️ GoogleAdsClientManager غير متاح: {e}")
 
 try:
     from utils.database import DatabaseManager
@@ -916,7 +916,7 @@ class ReportGenerator:
     
     def __init__(self):
         """تهيئة مولد التقارير"""
-        self.google_ads_client = GoogleAdsClient() if REPORTS_SERVICES_STATUS['google_ads_client'] else None
+        self.google_ads_client = GoogleAdsClientManager() if REPORTS_SERVICES_STATUS['google_ads_client'] else None
         self.db_manager = DatabaseManager() if REPORTS_SERVICES_STATUS['database'] else None
         self.data_analyzer = DataAnalyzer()
         self.chart_generator = ChartGenerator()

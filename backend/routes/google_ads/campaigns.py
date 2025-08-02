@@ -73,10 +73,10 @@ CAMPAIGNS_SERVICES_STATUS = {
 }
 
 try:
-    from services.google_ads_client import GoogleAdsClient
+    from services.google_ads_client import GoogleAdsClientManager
     CAMPAIGNS_SERVICES_STATUS['google_ads_client'] = True
 except ImportError as e:
-    logger.warning(f"⚠️ GoogleAdsClient غير متاح: {e}")
+    logger.warning(f"⚠️ GoogleAdsClientManager غير متاح: {e}")
 
 try:
     from backend.routes.google_ads.auth_jwt import oauth_manager
@@ -801,7 +801,7 @@ class CampaignManager:
     
     def __init__(self):
         """تهيئة مدير الحملات"""
-        self.google_ads_client = GoogleAdsClient() if CAMPAIGNS_SERVICES_STATUS['google_ads_client'] else None
+        self.google_ads_client = GoogleAdsClientManager() if CAMPAIGNS_SERVICES_STATUS['google_ads_client'] else None
         self.db_manager = DatabaseManager() if CAMPAIGNS_SERVICES_STATUS['database'] else None
         self.performance_analyzer = PerformanceAnalyzer()
         self.budget_optimizer = BudgetOptimizer()

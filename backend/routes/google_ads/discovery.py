@@ -71,10 +71,10 @@ SERVICES_STATUS = {
 }
 
 try:
-    from services.google_ads_client import GoogleAdsClient
+    from services.google_ads_client import GoogleAdsClientManager
     SERVICES_STATUS['google_ads_client'] = True
 except ImportError as e:
-    logger.warning(f"⚠️ GoogleAdsClient غير متاح: {e}")
+    logger.warning(f"⚠️ GoogleAdsClientManager غير متاح: {e}")
 
 try:
     from backend.routes.google_ads.auth_jwt import oauth_manager
@@ -720,7 +720,7 @@ class GoogleAdsDiscoveryService:
     
     def __init__(self):
         """تهيئة خدمة الاكتشاف"""
-        self.google_ads_client = GoogleAdsClient() if SERVICES_STATUS['google_ads_client'] else None
+        self.google_ads_client = GoogleAdsClientManager() if SERVICES_STATUS['google_ads_client'] else None
         self.db_manager = DatabaseManager() if SERVICES_STATUS['database'] else None
         self.ai_insights_engine = AIInsightsEngine()
         self.opportunity_detector = OpportunityDetector()

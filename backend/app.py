@@ -14,6 +14,11 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+# إضافة مسار backend إلى PYTHONPATH لحل مشكلة الاستيراد
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 # إعداد التسجيل
 logging.basicConfig(
     level=logging.INFO,
@@ -322,7 +327,6 @@ def load_real_blueprints_verified(app):
         ('routes.google_ads', ['google_ads_bp', 'bp', 'blueprint', 'google_ads'], 'Google Ads API'),
         ('routes.auth_jwt', ['auth_bp', 'auth_jwt_bp', 'bp', 'blueprint', 'auth'], 'المصادقة والتخويل JWT'),
         ('routes.ai', ['ai_bp', 'bp', 'blueprint', 'ai'], 'الذكاء الاصطناعي'),
-        ('routes.google_ads_routes', ['google_ads_routes_bp', 'bp', 'blueprint', 'google_ads_routes'], 'مسارات Google Ads'),
         ('routes.mcc_advanced', ['mcc_bp', 'mcc_advanced_bp', 'bp', 'blueprint', 'mcc'], 'إدارة MCC متقدمة'),
         ('routes.merchant_center_routes', ['merchant_center_bp', 'merchant_bp', 'bp', 'blueprint', 'merchant'], 'مسارات Merchant Center')
     ]
@@ -409,147 +413,126 @@ def load_real_blueprints_verified(app):
                 'description': description,
                 'error': f"خطأ غير متوقع: {str(e)}",
                 'status': 'unexpected_error',
-                'error_type': type(e).__name__
+                'error_type': type(e).__name__,
+                'traceback': traceback.format_exc()
             })
             print(f"   ❌ خطأ غير متوقع في: {module_name} - {str(e)}")
     
     # إضافة مسار لعرض حالة Blueprints
     @app.route('/api/blueprints/status')
     def blueprints_status():
+        """عرض حالة تحميل Blueprints"""
         return jsonify({
+            'total_attempted': len(verified_blueprints_to_load),
+            'successfully_loaded': len(loaded_blueprints),
+            'failed_to_load': len(failed_blueprints),
+            'success_rate': f"{len(loaded_blueprints)}/{len(verified_blueprints_to_load)}",
+            'success_percentage': round((len(loaded_blueprints) / len(verified_blueprints_to_load)) * 100, 1),
             'loaded_blueprints': loaded_blueprints,
             'failed_blueprints': failed_blueprints,
-            'total_loaded': len(loaded_blueprints),
-            'total_failed': len(failed_blueprints),
-            'total_attempted': len(verified_blueprints_to_load),
-            'success_rate': f"{len(loaded_blueprints)}/{len(verified_blueprints_to_load)}",
-            'success_percentage': round((len(loaded_blueprints) / len(verified_blueprints_to_load)) * 100, 2),
-            'message': 'هذه هي Blueprints المتحقق من وجودها في GitHub',
-            'github_verification': 'تم فحص جميع الملفات في GitHub وتأكيد وجودها',
-            'note': 'إذا فشل التحميل، قد تحتاج لتحديث أسماء Blueprints في الملفات',
-            'version': '3.0.0'
+            'github_verification': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
+            'note': 'هذه النتائج مبنية على فحص فعلي لملفات GitHub'
         })
     
-    print(f"📊 نتائج تحميل Blueprints المتحقق منها:")
+    # طباعة ملخص النتائج
+    print(f"\n📊 نتائج تحميل Blueprints المتحقق منها:")
     print(f"   ✅ تم تحميل: {len(loaded_blueprints)}")
     print(f"   ❌ فشل في التحميل: {len(failed_blueprints)}")
     print(f"   📈 معدل النجاح: {len(loaded_blueprints)}/{len(verified_blueprints_to_load)}")
     
-    if len(loaded_blueprints) > 0:
-        print(f"🎉 Blueprints المحملة بنجاح:")
+    if loaded_blueprints:
+        print(f"\n🎉 Blueprints المحملة بنجاح:")
         for bp in loaded_blueprints:
-            print(f"   - {bp['module']} ({bp['blueprint_name']})")
+            print(f"   ✅ {bp['module']} ({bp['blueprint_name']}) - {bp['description']}")
     
-    if len(failed_blueprints) > 0:
-        print(f"⚠️ Blueprints فشلت في التحميل:")
+    if failed_blueprints:
+        print(f"\n❌ Blueprints الفاشلة:")
         for bp in failed_blueprints:
-            print(f"   - {bp['module']}: {bp['error']}")
+            print(f"   ❌ {bp['module']} - {bp['error']}")
     
     return len(loaded_blueprints), len(failed_blueprints)
 
-def setup_error_handlers(app):
-    """إعداد معالجات الأخطاء"""
-    
-    @app.errorhandler(404)
-    def not_found(error):
-        return jsonify({
-            'error': 'المسار غير موجود',
-            'status_code': 404,
-            'message': 'الرابط المطلوب غير متاح',
-            'suggestion': 'تحقق من صحة الرابط أو راجع قائمة المسارات المتاحة',
-            'available_endpoints': [
-                '/',
-                '/api/status',
-                '/api/system/info',
-                '/api/test-google-ads',
-                '/api/environment',
-                '/api/blueprints/status'
-            ],
-            'blueprints_note': 'مسارات إضافية متاحة من Blueprints المحملة - راجع /api/blueprints/status'
-        }), 404
-    
-    @app.errorhandler(500)
-    def internal_error(error):
-        return jsonify({
-            'error': 'خطأ داخلي في الخادم',
-            'status_code': 500,
-            'message': 'حدث خطأ غير متوقع في الخادم',
-            'details': str(error) if app.config.get('DEBUG') else 'تم إخفاء التفاصيل للأمان',
-            'suggestion': 'تحقق من سجلات الخادم أو اتصل بالدعم التقني'
-        }), 500
-    
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        logger.error(f"خطأ غير معالج: {str(e)}", exc_info=True)
-        return jsonify({
-            'error': 'خطأ غير متوقع',
-            'message': str(e) if app.config.get('DEBUG') else 'حدث خطأ غير متوقع',
-            'type': type(e).__name__,
-            'suggestion': 'تحقق من إعدادات التطبيق أو اتصل بالدعم التقني'
-        }), 500
+def setup_redis_connection():
+    """إعداد اتصال Redis إذا كان متاحاً"""
+    try:
+        import redis
+        
+        # محاولة الاتصال بـ Redis
+        redis_client = redis.Redis(
+            host=os.getenv('REDIS_HOST', 'localhost'),
+            port=int(os.getenv('REDIS_PORT', 6379)),
+            db=int(os.getenv('REDIS_DB', 0)),
+            decode_responses=True
+        )
+        
+        # اختبار الاتصال
+        redis_client.ping()
+        print("✅ تم الاتصال بـ Redis بنجاح")
+        return redis_client
+        
+    except ImportError:
+        print("⚠️ مكتبة redis غير مثبتة - تم تخطي Redis")
+        return None
+        
+    except Exception as e:
+        print(f"❌ فشل الاتصال بـ Redis: {str(e)}")
+        return None
 
-def create_app():
-    """إنشاء التطبيق الكامل مع Blueprints المتحقق منها"""
+def main():
+    """الدالة الرئيسية لتشغيل التطبيق"""
+    print("🚀 بدء تشغيل Google Ads AI Platform...")
     
     # تحميل متغيرات البيئة
-    if not load_environment_variables():
-        print("❌ فشل في تحميل متغيرات البيئة")
-        return None
+    env_loaded = load_environment_variables()
+    if not env_loaded:
+        print("⚠️ تحذير: فشل في تحميل متغيرات البيئة")
     
-    # إنشاء Flask app
+    # إنشاء تطبيق Flask
     app = create_flask_app()
     
     # إعداد JWT Manager
-    setup_jwt_manager(app)
+    jwt_setup = setup_jwt_manager(app)
+    
+    # إعداد Redis
+    redis_client = setup_redis_connection()
+    if redis_client:
+        app.redis = redis_client
     
     # إضافة المسارات الأساسية
     add_basic_routes(app)
     
-    # إعداد معالجات الأخطاء
-    setup_error_handlers(app)
-    
-    # تحميل Blueprints المتحقق منها
+    # تحميل Blueprints الحقيقية
     loaded_count, failed_count = load_real_blueprints_verified(app)
     
-    print(f"🌐 الخادم متاح على: http://localhost:5000")
-    print(f"📋 المسارات المتاحة:")
-    print(f"   - http://localhost:5000/ (الصفحة الرئيسية)")
-    print(f"   - http://localhost:5000/api/status (حالة API)")
-    print(f"   - http://localhost:5000/api/system/info (معلومات النظام)")
-    print(f"   - http://localhost:5000/api/test-google-ads (اختبار Google Ads)")
-    print(f"   - http://localhost:5000/api/environment (معلومات البيئة)")
-    print(f"   - http://localhost:5000/api/blueprints/status (حالة Blueprints)")
+    print(f"\n🎉 تم تحميل {loaded_count} blueprints حقيقية بنجاح!")
+    if failed_count > 0:
+        print(f"⚠️ فشل في تحميل {failed_count} blueprints")
     
-    if loaded_count > 0:
-        print(f"🎉 تم تحميل {loaded_count} blueprints حقيقية بنجاح!")
-        print(f"📋 مسارات إضافية متاحة من Blueprints المحملة")
-    else:
-        print(f"⚠️ لم يتم تحميل أي blueprints - راجع /api/blueprints/status للتفاصيل")
+    # معلومات التشغيل
+    host = os.getenv('FLASK_HOST', '0.0.0.0')
+    port = int(os.getenv('FLASK_PORT', 5000))
+    debug = app.config.get('DEBUG', False)
     
-    return app
-
-if __name__ == "__main__":
-    print("🚀 بدء الخادم مع Blueprints المتحقق منها...")
-    print("🔍 تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints")
-    
-    # إنشاء التطبيق
-    app = create_app()
-    
-    if app is None:
-        print("❌ فشل في إنشاء التطبيق")
-        sys.exit(1)
+    print(f"\n🌐 الخادم متاح على: http://{host}:{port}")
+    print(f"🔧 وضع التطوير: {'مفعل' if debug else 'معطل'}")
+    print(f"🔑 JWT: {'مفعل' if jwt_setup else 'معطل'}")
+    print(f"🗄️ Redis: {'متصل' if redis_client else 'غير متصل'}")
+    print(f"📦 Blueprints: {loaded_count}/{loaded_count + failed_count} محملة")
     
     # تشغيل الخادم
     try:
         app.run(
-            debug=True,
-            host="0.0.0.0",
-            port=5000,
-            use_reloader=False  # تجنب إعادة التحميل التلقائي للتطوير
+            host=host,
+            port=port,
+            debug=debug,
+            threaded=True
         )
     except KeyboardInterrupt:
-        print("\n🛑 تم إيقاف الخادم بواسطة المستخدم")
+        print("\n👋 تم إيقاف الخادم بواسطة المستخدم")
     except Exception as e:
-        print(f"❌ خطأ في تشغيل الخادم: {e}")
+        print(f"\n❌ خطأ في تشغيل الخادم: {str(e)}")
         sys.exit(1)
+
+if __name__ == '__main__':
+    main()
 

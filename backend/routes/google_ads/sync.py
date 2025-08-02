@@ -71,10 +71,10 @@ SYNC_SERVICES_STATUS = {
 }
 
 try:
-    from services.google_ads_client import GoogleAdsClient
+    from services.google_ads_client import GoogleAdsClientManager
     SYNC_SERVICES_STATUS['google_ads_client'] = True
 except ImportError as e:
-    logger.warning(f"⚠️ GoogleAdsClient غير متاح: {e}")
+    logger.warning(f"⚠️ GoogleAdsClientManager غير متاح: {e}")
 
 try:
     from backend.routes.google_ads.auth_jwt import oauth_manager
@@ -501,7 +501,7 @@ class SyncEngine:
     
     def __init__(self):
         """تهيئة محرك المزامنة"""
-        self.google_ads_client = GoogleAdsClient() if SYNC_SERVICES_STATUS['google_ads_client'] else None
+        self.google_ads_client = GoogleAdsClientManager() if SYNC_SERVICES_STATUS['google_ads_client'] else None
         self.db_manager = DatabaseManager() if SYNC_SERVICES_STATUS['database'] else None
         self.rate_limit_manager = RateLimitManager()
         self.conflict_resolver = ConflictResolver()
