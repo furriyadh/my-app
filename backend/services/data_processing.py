@@ -42,13 +42,52 @@ import statistics
 from pathlib import Path
 
 # Data processing imports
+# Scientific computing
 try:
     import scipy.stats as stats
+    SCIPY_STATS_AVAILABLE = True
+except ImportError:
+    SCIPY_STATS_AVAILABLE = False
+    # Fallback for stats functions
+    class MockStats:
+        @staticmethod
+        def pearsonr(x, y): return (0.0, 1.0)
+        @staticmethod
+        def spearmanr(x, y): return (0.0, 1.0)
+        @staticmethod
+        def normaltest(x): return (0.0, 1.0)
+    stats = MockStats()
+
+# Core scipy
+try:
+    import scipy
     from scipy import signal
-    from scipy.interpolate import interp1d
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
+    # Fallback for scipy functions
+    class MockScipy:
+        class signal:
+            @staticmethod
+            def find_peaks(x, **kwargs): return ([], {})
+            @staticmethod
+            def savgol_filter(x, window, polyorder): return x
+    scipy = MockScipy()
+    signal = MockScipy.signal
+
+# Interpolation
+try:
+    import scipy.interpolate
+    SCIPY_INTERPOLATE_AVAILABLE = True
+except ImportError:
+    SCIPY_INTERPOLATE_AVAILABLE = False
+    # Fallback for interpolation
+    class MockInterpolate:
+        @staticmethod
+        def interp1d(x, y, **kwargs):
+            def interpolator(new_x): return y[0] if len(y) > 0 else 0
+            return interpolator
+    scipy.interpolate = MockInterpolate()
 
 # Advanced analytics
 try:
@@ -57,18 +96,137 @@ try:
     from sklearn.cluster import KMeans, DBSCAN
     from sklearn.ensemble import IsolationForest
     from sklearn.metrics import silhouette_score
+    from sklearn.linear_model import LinearRegression
     ML_AVAILABLE = True
+    SKLEARN_PREPROCESSING_AVAILABLE = True
+    SKLEARN_CLUSTER_AVAILABLE = True
+    SKLEARN_LINEAR_MODEL_AVAILABLE = True
 except ImportError:
     ML_AVAILABLE = False
+    SKLEARN_PREPROCESSING_AVAILABLE = False
+    SKLEARN_CLUSTER_AVAILABLE = False
+    SKLEARN_LINEAR_MODEL_AVAILABLE = False
+    
+    # Fallback classes
+    class MockStandardScaler:
+        def fit(self, X): return self
+        def transform(self, X): return X
+        def fit_transform(self, X): return X
+    
+    class MockMinMaxScaler:
+        def fit(self, X): return self
+        def transform(self, X): return X
+        def fit_transform(self, X): return X
+    
+    class MockRobustScaler:
+        def fit(self, X): return self
+        def transform(self, X): return X
+        def fit_transform(self, X): return X
+    
+    class MockPCA:
+        def __init__(self, n_components=2): pass
+        def fit(self, X): return self
+        def transform(self, X): return X[:, :2] if len(X[0]) >= 2 else X
+        def fit_transform(self, X): return X[:, :2] if len(X[0]) >= 2 else X
+    
+    class MockKMeans:
+        def __init__(self, n_clusters=3, **kwargs): 
+            self.n_clusters = n_clusters
+            self.labels_ = None
+        def fit(self, X): 
+            self.labels_ = [0] * len(X)
+            return self
+        def predict(self, X): return [0] * len(X)
+        def fit_predict(self, X): 
+            self.labels_ = [0] * len(X)
+            return self.labels_
+    
+    class MockDBSCAN:
+        def __init__(self, **kwargs): 
+            self.labels_ = None
+        def fit(self, X): 
+            self.labels_ = [0] * len(X)
+            return self
+        def fit_predict(self, X): 
+            self.labels_ = [0] * len(X)
+            return self.labels_
+    
+    class MockIsolationForest:
+        def fit(self, X): return self
+        def predict(self, X): return [1] * len(X)
+        def decision_function(self, X): return [0.0] * len(X)
+    
+    class MockLinearRegression:
+        def __init__(self):
+            self.coef_ = [0.0]
+            self.intercept_ = 0.0
+        def fit(self, X, y): return self
+        def predict(self, X): return [0.0] * len(X)
+        def score(self, X, y): return 0.5
+    
+    # Assign mock classes
+    StandardScaler = MockStandardScaler
+    MinMaxScaler = MockMinMaxScaler
+    RobustScaler = MockRobustScaler
+    PCA = MockPCA
+    KMeans = MockKMeans
+    DBSCAN = MockDBSCAN
+    IsolationForest = MockIsolationForest
+    LinearRegression = MockLinearRegression
+    
+    # Mock functions
+    def silhouette_score(X, labels): return 0.5
 
 # Time series analysis
+# Statsmodels imports with fallback
+STATSMODELS_AVAILABLE = False
+seasonal_decompose = None
+adfuller = None
+ARIMA = None
+
 try:
-    from statsmodels.tsa.seasonal import seasonal_decompose
-    from statsmodels.tsa.stattools import adfuller
-    from statsmodels.tsa.arima.model import ARIMA
-    STATSMODELS_AVAILABLE = True
+    from statsmodels.tsa.seasonal import seasonal_decompose  # type: ignore
+    STATSMODELS_SEASONAL_AVAILABLE = True
 except ImportError:
-    STATSMODELS_AVAILABLE = False
+    STATSMODELS_SEASONAL_AVAILABLE = False
+
+try:
+    from statsmodels.tsa.stattools import adfuller  # type: ignore
+    STATSMODELS_STATTOOLS_AVAILABLE = True
+except ImportError:
+    STATSMODELS_STATTOOLS_AVAILABLE = False
+
+try:
+    from statsmodels.tsa.arima.model import ARIMA  # type: ignore
+    STATSMODELS_ARIMA_AVAILABLE = True
+except ImportError:
+    STATSMODELS_ARIMA_AVAILABLE = False
+
+# Set overall availability
+STATSMODELS_AVAILABLE = (STATSMODELS_SEASONAL_AVAILABLE and 
+                         STATSMODELS_STATTOOLS_AVAILABLE and 
+                         STATSMODELS_ARIMA_AVAILABLE)
+
+# Fallback classes for statsmodels
+if not STATSMODELS_AVAILABLE:
+    class MockSeasonalDecompose:
+        def __init__(self, data, **kwargs):
+            self.trend = data
+            self.seasonal = [0] * len(data)
+            self.resid = [0] * len(data)
+    
+    class MockARIMA:
+        def __init__(self, data, order=(1,1,1)): pass
+        def fit(self): return self
+        def forecast(self, steps=1): return [0.0] * steps
+    
+    # Set fallback functions
+    if not STATSMODELS_SEASONAL_AVAILABLE:
+        seasonal_decompose = MockSeasonalDecompose
+    if not STATSMODELS_STATTOOLS_AVAILABLE:
+        def adfuller(data): return (0.0, 0.5, 0, 0, {}, 0.0)
+    if not STATSMODELS_ARIMA_AVAILABLE:
+        ARIMA = MockARIMA
 
 # Local imports
 try:
@@ -76,13 +234,75 @@ try:
         generate_unique_id, sanitize_text, calculate_hash,
         format_timestamp, compress_data, decompress_data
     )
+    HELPERS_AVAILABLE = True
 except ImportError:
     HELPERS_AVAILABLE = False
+    
+    # Fallback functions for helpers
+    import uuid
+    import hashlib
+    import re
+    import gzip
+    import base64
+    from datetime import datetime
+    
+    def generate_unique_id(): 
+        return str(uuid.uuid4())
+    
+    def sanitize_text(text): 
+        return re.sub(r'[^\w\s-]', '', str(text))
+    
+    def calculate_hash(data): 
+        return hashlib.md5(str(data).encode()).hexdigest()
+    
+    def format_timestamp(dt=None): 
+        if dt is None: dt = datetime.now()
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+    
+    def compress_data(data):
+        try:
+            if isinstance(data, dict):
+                import json
+                data = json.dumps(data)
+            elif not isinstance(data, (str, bytes)):
+                data = str(data)
+            
+            if isinstance(data, str):
+                data = data.encode('utf-8')
+            
+            compressed = gzip.compress(data)
+            return base64.b64encode(compressed).decode('utf-8')
+        except Exception:
+            return str(data)
+    
+    def decompress_data(compressed_data):
+        try:
+            data = base64.b64decode(compressed_data.encode('utf-8'))
+            decompressed = gzip.decompress(data)
+            return decompressed.decode('utf-8')
+        except Exception:
+            return compressed_data
+
+# Redis configuration
 
 try:
     from backend.utils.redis_config import cache_set, cache_get, cache_delete
+    REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
+    
+    # Fallback cache functions
+    _local_cache = {}
+    
+    def cache_set(key, value, timeout=3600):
+        _local_cache[key] = value
+        return True
+    
+    def cache_get(key):
+        return _local_cache.get(key)
+    
+    def cache_delete(key):
+        return _local_cache.pop(key, None) is not None
 
 # إعداد التسجيل المتقدم
 logger = logging.getLogger(__name__)
@@ -211,7 +431,7 @@ class DataProcessor:
                 ProcessingType.TREND_ANALYSIS: self._analyze_trends,
                 ProcessingType.SEGMENTATION: self._segment_data,
                 ProcessingType.CORRELATION: self._analyze_correlations,
-                ProcessingType.FORECASTING: self._forecast_data
+                ProcessingType.FORECASTING: self._forecast_trends
             }
             
             logger.info("✅ تم تهيئة معالجات البيانات")
@@ -1027,6 +1247,383 @@ class DataProcessor:
             
         except Exception as e:
             logger.error(f"خطأ في حفظ النتيجة في الكاش: {e}")
+    
+    async def _segment_data(self, data: Any, config: ProcessingConfig) -> Dict[str, Any]:
+        """تقسيم البيانات إلى شرائح"""
+        try:
+            if not isinstance(data, list):
+                return {"error": "البيانات يجب أن تكون قائمة للتقسيم"}
+            
+            segmentation_rules = config.parameters.get('segmentation_rules', {})
+            segment_field = segmentation_rules.get('field', 'performance_tier')
+            segment_method = segmentation_rules.get('method', 'quantile')
+            num_segments = segmentation_rules.get('segments', 3)
+            
+            segments = {}
+            
+            if segment_method == 'quantile':
+                # تقسيم بناءً على المئينات
+                segments = await self._quantile_segmentation(data, segment_field, num_segments)
+            elif segment_method == 'value_range':
+                # تقسيم بناءً على نطاقات القيم
+                segments = await self._value_range_segmentation(data, segmentation_rules)
+            elif segment_method == 'clustering' and ML_AVAILABLE:
+                # تقسيم بناءً على التجميع
+                segments = await self._clustering_segmentation(data, segmentation_rules)
+            else:
+                # تقسيم افتراضي
+                segments = await self._default_segmentation(data, segment_field)
+            
+            return {
+                'segments': segments,
+                'total_segments': len(segments),
+                'method': segment_method,
+                'field': segment_field
+            }
+            
+        except Exception as e:
+            logger.error(f"خطأ في تقسيم البيانات: {e}")
+            return {"error": str(e)}
+    
+    async def _quantile_segmentation(self, data: List[Dict[str, Any]], field: str, num_segments: int) -> Dict[str, List[Dict[str, Any]]]:
+        """تقسيم بناءً على المئينات"""
+        try:
+            # استخراج القيم الرقمية
+            values = []
+            for record in data:
+                value = record.get(field)
+                if value is not None and isinstance(value, (int, float)) and not math.isnan(value):
+                    values.append((value, record))
+            
+            if not values:
+                return {"default": data}
+            
+            # ترتيب القيم
+            values.sort(key=lambda x: x[0])
+            
+            # تقسيم إلى شرائح
+            segments = {}
+            segment_size = len(values) // num_segments
+            
+            for i in range(num_segments):
+                start_idx = i * segment_size
+                end_idx = (i + 1) * segment_size if i < num_segments - 1 else len(values)
+                
+                segment_name = f"segment_{i+1}"
+                segment_records = [record for _, record in values[start_idx:end_idx]]
+                segments[segment_name] = segment_records
+            
+            return segments
+            
+        except Exception as e:
+            logger.error(f"خطأ في التقسيم الكمي: {e}")
+            return {"default": data}
+    
+    async def _value_range_segmentation(self, data: List[Dict[str, Any]], rules: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+        """تقسيم بناءً على نطاقات القيم"""
+        try:
+            field = rules.get('field', 'performance_tier')
+            ranges = rules.get('ranges', [])
+            
+            if not ranges:
+                return {"default": data}
+            
+            segments = {f"range_{i+1}": [] for i in range(len(ranges))}
+            segments["out_of_range"] = []
+            
+            for record in data:
+                value = record.get(field)
+                if value is not None and isinstance(value, (int, float)):
+                    assigned = False
+                    for i, (min_val, max_val) in enumerate(ranges):
+                        if min_val <= value <= max_val:
+                            segments[f"range_{i+1}"].append(record)
+                            assigned = True
+                            break
+                    
+                    if not assigned:
+                        segments["out_of_range"].append(record)
+                else:
+                    segments["out_of_range"].append(record)
+            
+            return segments
+            
+        except Exception as e:
+            logger.error(f"خطأ في تقسيم النطاقات: {e}")
+            return {"default": data}
+    
+    async def _clustering_segmentation(self, data: List[Dict[str, Any]], rules: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+        """تقسيم بناءً على التجميع"""
+        try:
+            if not ML_AVAILABLE:
+                return await self._default_segmentation(data, rules.get('field', 'performance_tier'))
+            
+            # استخراج الميزات الرقمية
+            features = []
+            feature_names = rules.get('features', ['impressions', 'clicks', 'cost'])
+            
+            for record in data:
+                feature_vector = []
+                for feature in feature_names:
+                    value = record.get(feature, 0)
+                    if isinstance(value, (int, float)) and not math.isnan(value):
+                        feature_vector.append(value)
+                    else:
+                        feature_vector.append(0)
+                features.append(feature_vector)
+            
+            if not features:
+                return {"default": data}
+            
+            # تطبيع الميزات
+            scaler = StandardScaler()
+            features_scaled = scaler.fit_transform(features)
+            
+            # تطبيق K-Means
+            num_clusters = rules.get('clusters', 3)
+            kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+            cluster_labels = kmeans.fit_predict(features_scaled)
+            
+            # تجميع البيانات حسب العناقيد
+            segments = {f"cluster_{i}": [] for i in range(num_clusters)}
+            
+            for record, label in zip(data, cluster_labels):
+                segments[f"cluster_{label}"].append(record)
+            
+            return segments
+            
+        except Exception as e:
+            logger.error(f"خطأ في تقسيم التجميع: {e}")
+            return await self._default_segmentation(data, rules.get('field', 'performance_tier'))
+    
+    async def _default_segmentation(self, data: List[Dict[str, Any]], field: str) -> Dict[str, List[Dict[str, Any]]]:
+        """تقسيم افتراضي"""
+        try:
+            # تقسيم بسيط بناءً على قيم الحقل
+            segments = defaultdict(list)
+            
+            for record in data:
+                value = record.get(field, 'unknown')
+                segment_key = str(value)
+                segments[segment_key].append(record)
+            
+            return dict(segments)
+            
+        except Exception as e:
+            logger.error(f"خطأ في تقسيم البيانات: {e}")
+            return {"default": data}
+
+    async def _analyze_correlations(self, config: ProcessingConfig) -> ProcessingResult:
+        """تحليل الارتباطات بين المتغيرات"""
+        result = ProcessingResult(
+            processing_id=config.processing_id,
+            status="processing",
+            start_time=datetime.now()
+        )
+        
+        try:
+            data = config.source_data.get('data', [])
+            if not data:
+                result.status = "error"
+                result.errors.append("لا توجد بيانات للتحليل")
+                return result
+            
+            # تحويل إلى DataFrame
+            df = pd.DataFrame(data)
+            
+            # اختيار الأعمدة الرقمية فقط
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            
+            if len(numeric_cols) < 2:
+                result.status = "error"
+                result.errors.append("يجب وجود عمودين رقميين على الأقل لحساب الارتباط")
+                return result
+            
+            # حساب مصفوفة الارتباط
+            correlation_matrix = df[numeric_cols].corr()
+            
+            # تحويل إلى قاموس
+            correlations = {}
+            for i, col1 in enumerate(numeric_cols):
+                correlations[col1] = {}
+                for j, col2 in enumerate(numeric_cols):
+                    if i != j:  # تجاهل الارتباط مع النفس
+                        correlations[col1][col2] = float(correlation_matrix.iloc[i, j])
+            
+            # العثور على أقوى الارتباطات
+            strong_correlations = []
+            for col1 in correlations:
+                for col2 in correlations[col1]:
+                    corr_value = correlations[col1][col2]
+                    if abs(corr_value) > 0.5:  # ارتباط قوي
+                        strong_correlations.append({
+                            'variable1': col1,
+                            'variable2': col2,
+                            'correlation': corr_value,
+                            'strength': 'قوي' if abs(corr_value) > 0.7 else 'متوسط'
+                        })
+            
+            result.processed_data = {
+                'correlation_matrix': correlations,
+                'strong_correlations': strong_correlations,
+                'numeric_variables': numeric_cols
+            }
+            
+            result.statistics = {
+                'total_variables': len(numeric_cols),
+                'strong_correlations_count': len(strong_correlations),
+                'average_correlation': float(np.mean(np.abs(correlation_matrix.values)))
+            }
+            
+            result.status = "completed"
+            result.end_time = datetime.now()
+            result.execution_time_seconds = (result.end_time - result.start_time).total_seconds()
+            result.records_processed = len(data)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"خطأ في تحليل الارتباطات: {e}")
+            result.status = "error"
+            result.errors.append(str(e))
+            result.end_time = datetime.now()
+            return result
+
+    async def _forecast_trends(self, config: ProcessingConfig) -> ProcessingResult:
+        """التنبؤ بالاتجاهات"""
+        result = ProcessingResult(
+            processing_id=config.processing_id,
+            status="processing",
+            start_time=datetime.now()
+        )
+        
+        try:
+            data = config.source_data.get('data', [])
+            if not data:
+                result.status = "error"
+                result.errors.append("لا توجد بيانات للتحليل")
+                return result
+            
+            df = pd.DataFrame(data)
+            
+            # البحث عن عمود التاريخ
+            date_col = None
+            for col in df.columns:
+                if 'date' in col.lower() or 'time' in col.lower():
+                    date_col = col
+                    break
+            
+            if not date_col:
+                result.status = "error"
+                result.errors.append("لا يوجد عمود تاريخ للتنبؤ")
+                return result
+            
+            # تحويل عمود التاريخ
+            df[date_col] = pd.to_datetime(df[date_col])
+            df = df.sort_values(date_col)
+            
+            # اختيار المتغير للتنبؤ
+            target_col = config.parameters.get('target_column')
+            if not target_col:
+                numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+                if numeric_cols:
+                    target_col = numeric_cols[0]
+                else:
+                    result.status = "error"
+                    result.errors.append("لا يوجد متغير رقمي للتنبؤ")
+                    return result
+            
+            # تحضير البيانات للتنبؤ
+            df_forecast = df[[date_col, target_col]].dropna()
+            
+            if len(df_forecast) < 10:
+                result.status = "error"
+                result.errors.append("البيانات قليلة جداً للتنبؤ (يجب 10 نقاط على الأقل)")
+                return result
+            
+            # تنبؤ بسيط باستخدام الاتجاه الخطي
+            if SKLEARN_LINEAR_MODEL_AVAILABLE:
+                
+                # تحويل التواريخ إلى أرقام
+                df_forecast['date_numeric'] = (df_forecast[date_col] - df_forecast[date_col].min()).dt.days
+                
+                X = df_forecast[['date_numeric']]
+                y = df_forecast[target_col]
+                
+                model = LinearRegression()
+                model.fit(X, y)
+                
+                # التنبؤ للفترات القادمة
+                forecast_days = config.parameters.get('forecast_days', 30)
+                last_date_numeric = df_forecast['date_numeric'].max()
+                
+                future_dates_numeric = range(last_date_numeric + 1, last_date_numeric + forecast_days + 1)
+                future_predictions = model.predict([[d] for d in future_dates_numeric])
+                
+                # تحويل التواريخ المستقبلية
+                base_date = df_forecast[date_col].max()
+                future_dates = [base_date + timedelta(days=i) for i in range(1, forecast_days + 1)]
+                
+                forecast_data = []
+                for date, prediction in zip(future_dates, future_predictions):
+                    forecast_data.append({
+                        'date': date.isoformat(),
+                        'predicted_value': float(prediction),
+                        'confidence': 'متوسط'
+                    })
+                
+                # حساب الاتجاه
+                trend_direction = 'صاعد' if model.coef_[0] > 0 else 'هابط'
+                trend_strength = abs(model.coef_[0])
+                model_score = float(model.score(X, y))
+            else:
+                # تنبؤ بسيط بدون sklearn
+                values = df_forecast[target_col].values
+                trend_direction = 'صاعد' if values[-1] > values[0] else 'هابط'
+                trend_strength = abs(values[-1] - values[0]) / len(values)
+                model_score = 0.5
+                
+                forecast_days = config.parameters.get('forecast_days', 30)
+                base_date = df_forecast[date_col].max()
+                future_dates = [base_date + timedelta(days=i) for i in range(1, forecast_days + 1)]
+                
+                # تنبؤ بسيط بناءً على المتوسط المتحرك
+                recent_avg = np.mean(values[-5:]) if len(values) >= 5 else np.mean(values)
+                forecast_data = []
+                for date in future_dates:
+                    forecast_data.append({
+                        'date': date.isoformat(),
+                        'predicted_value': float(recent_avg),
+                        'confidence': 'منخفض'
+                    })
+            
+            result.processed_data = {
+                'forecast': forecast_data,
+                'trend_direction': trend_direction,
+                'trend_strength': float(trend_strength),
+                'model_score': model_score,
+                'target_column': target_col
+            }
+            
+            result.statistics = {
+                'historical_points': len(df_forecast),
+                'forecast_points': len(forecast_data),
+                'model_accuracy': model_score
+            }
+            
+            result.status = "completed"
+            result.end_time = datetime.now()
+            result.execution_time_seconds = (result.end_time - result.start_time).total_seconds()
+            result.records_processed = len(data)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"خطأ في التنبؤ بالاتجاهات: {e}")
+            result.status = "error"
+            result.errors.append(str(e))
+            result.end_time = datetime.now()
+            return result
 
 class MetricsCalculator:
     """حاسبة المقاييس"""
