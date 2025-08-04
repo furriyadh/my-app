@@ -15,7 +15,7 @@ import logging
 import secrets
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
-from flask import Blueprint, request, jsonify, redirect, session, url_for
+from flask import Blueprint, request, jsonify, redirect, session, url_for  # type: ignore
 
 # استيراد الخدمات
 from backend.services.oauth_handler import OAuthHandler

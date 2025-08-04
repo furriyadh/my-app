@@ -92,7 +92,7 @@ class GoogleAdsRoutesManager:
         self.expected_blueprints = {
             'oauth': BlueprintInfo(
                 name='OAuth 2.0 Authentication',
-                module_name='oauth',
+                module_name='oauth_routes',
                 blueprint_name='google_ads_oauth_bp',
                 description='نظام المصادقة المتطور مع OAuth 2.0 و PKCE',
                 version='2.1.0',
@@ -515,7 +515,7 @@ Google Ads API Routes Package
 """
 
 import logging
-from flask import Blueprint
+from flask import Blueprint  # type: ignore
 
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
@@ -600,7 +600,7 @@ for bp, name, url_prefix in sub_blueprints:
 @google_ads_bp.route('/health', methods=['GET'])
 def health():
     """فحص صحة خدمة Google Ads"""
-    from flask import jsonify
+    from flask import jsonify  # type: ignore
     return jsonify({
         'status': 'healthy',
         'service': 'Google Ads API',
@@ -612,7 +612,7 @@ def health():
 @google_ads_bp.route('/status', methods=['GET'])
 def status():
     """حالة جميع خدمات Google Ads"""
-    from flask import jsonify
+    from flask import jsonify  # type: ignore
     
     blueprint_status = {}
     for bp, name, url_prefix in sub_blueprints:
