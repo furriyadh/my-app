@@ -93,7 +93,7 @@ class GoogleAdsRoutesManager:
             'oauth': BlueprintInfo(
                 name='OAuth 2.0 Authentication',
                 module_name='oauth_routes',
-                blueprint_name='google_ads_oauth_bp',
+                blueprint_name='google_ads_oauth',
                 description='نظام المصادقة المتطور مع OAuth 2.0 و PKCE',
                 version='2.1.0',
                 dependencies=['flask_jwt_extended', 'requests'],

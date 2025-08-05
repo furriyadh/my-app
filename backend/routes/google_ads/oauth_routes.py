@@ -33,7 +33,7 @@ oauth_bp = Blueprint(
 )
 
 def arabic_jsonify(data, status_code=200):
-    """دالة مساعدة لإنشاء استجابات JSON مع دعم الترميز العربي"""
+    """دعم التشفير العربي JSON وإضافة معلومات إضافية"""
     response = jsonify(data)
     response.status_code = status_code
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -50,7 +50,7 @@ def authorize():
         # الحصول على معرف المستخدم من الطلب أو الجلسة
         user_id = request.args.get('user_id') or session.get('user_id', 'anonymous')
         
-        # تهيئة معالج OAuth
+        # معالجة OAuth بتهيئة
         oauth_handler = OAuthHandler()
         
         # إنشاء رابط التفويض
@@ -61,378 +61,341 @@ def authorize():
         )
         
         if not auth_result.get('success'):
-            logger.error(f"فشل في إنشاء رابط التفويض: {auth_result.get('message')}")
+            logger.error(f"فشل في إنشاء رابط التفويض: {auth_result.get('message', 'خطأ غير معروف')}")
             return arabic_jsonify({
                 "success": False,
                 "message": auth_result.get('message', 'فشل في إنشاء رابط التفويض'),
                 "error_code": "AUTHORIZATION_URL_FAILED"
             }), 500
-        
-        # حفظ معرف الجلسة في session
-        session['oauth_session_id'] = auth_result['session_id']
-        session['oauth_user_id'] = user_id
-        
-        # إعادة التوجيه إلى Google
-        authorization_url = auth_result['authorization_url']
-        
-        logger.info(f"تم إنشاء رابط التفويض للمستخدم {user_id}: {authorization_url}")
-        
-        # إذا كان الطلب من API، إرجاع JSON
-        if request.headers.get('Accept') == 'application/json':
-            return arabic_jsonify({
-                "success": True,
-                "authorization_url": authorization_url,
-                "session_id": auth_result['session_id']
-            })
-        
-        # إعادة التوجيه المباشر
-        return redirect(authorization_url)
+            
+        return redirect(auth_result.get('authorization_url'))
         
     except Exception as e:
-        logger.error(f"خطأ في بدء تدفق OAuth: {str(e)}")
+        logger.error(f"خطأ في authorize: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء بدء تدفق OAuth",
-            "error_code": "OAUTH_START_ERROR"
+            "message": f"خطأ في بدء عملية التفويض: {str(e)}",
+            "error_code": "AUTHORIZE_ERROR"
         }), 500
 
 @oauth_bp.route("/callback", methods=["GET"])
 def oauth_callback():
-    """معالجة رد الاتصال من Google OAuth"""
+    """معالجة callback من Google OAuth"""
     try:
-        # الحصول على المعاملات من الطلب
-        code = request.args.get("code")
-        state = request.args.get("state")
-        error = request.args.get("error")
+        # الحصول على الكود من الاستعلام
+        code = request.args.get('code')
+        state = request.args.get('state')
+        error = request.args.get('error')
         
-        # معالجة الأخطاء
         if error:
-            logger.error(f"خطأ في رد الاتصال من Google OAuth: {error}")
+            logger.error(f"خطأ OAuth من Google: {error}")
             return arabic_jsonify({
                 "success": False,
-                "message": f"خطأ في المصادقة: {error}",
+                "message": f"خطأ في التفويض: {error}",
                 "error_code": "OAUTH_ERROR"
             }), 400
-        
-        if not code or not state:
-            logger.error("رمز المصادقة أو state مفقود في رد الاتصال")
+            
+        if not code:
+            logger.error("لم يتم استلام كود التفويض")
             return arabic_jsonify({
                 "success": False,
-                "message": "رمز المصادقة أو معرف الجلسة مفقود",
-                "error_code": "MISSING_PARAMETERS"
+                "message": "لم يتم استلام كود التفويض من Google",
+                "error_code": "MISSING_AUTH_CODE"
             }), 400
-        
-        # تهيئة معالج OAuth
+            
+        # معالجة OAuth
         oauth_handler = OAuthHandler()
         
-        # معالجة رد الاتصال
-        callback_result = oauth_handler.handle_oauth_callback(code, state)
+        # تبديل الكود بالرمز المميز
+        token_result = oauth_handler.exchange_code_for_token(
+            code=code,
+            state=state
+        )
         
-        if not callback_result.get('success'):
-            logger.error(f"فشل في معالجة رد الاتصال: {callback_result.get('message')}")
+        if not token_result.get('success'):
+            logger.error(f"فشل في تبديل الكود: {token_result.get('message', 'خطأ غير معروف')}")
             return arabic_jsonify({
                 "success": False,
-                "message": callback_result.get('message', 'فشل في معالجة رد الاتصال'),
-                "error_code": "CALLBACK_PROCESSING_FAILED"
-            }), 400
+                "message": token_result.get('message', 'فشل في الحصول على الرمز المميز'),
+                "error_code": "TOKEN_EXCHANGE_FAILED"
+            }), 500
+            
+        # حفظ الرمز المميز في الجلسة
+        session['access_token'] = token_result.get('access_token')
+        session['refresh_token'] = token_result.get('refresh_token')
+        session['token_expires_at'] = token_result.get('expires_at')
         
-        # الحصول على الرموز المميزة
-        access_token = callback_result.get('access_token')
-        refresh_token = callback_result.get('refresh_token')
-        
-        # الحصول على معلومات المستخدم
-        user_info_result = oauth_handler.get_user_info(access_token)
-        user_info = user_info_result.get('user_info', {}) if user_info_result.get('success') else {}
-        
-        # تهيئة عميل Google Ads للاختبار
+        # اختبار الاتصال بـ Google Ads API
         try:
             google_ads_config = GoogleAdsConfig(
-                developer_token=Config.GOOGLE_DEVELOPER_TOKEN,
                 client_id=Config.GOOGLE_CLIENT_ID,
                 client_secret=Config.GOOGLE_CLIENT_SECRET,
-                refresh_token=refresh_token,
-                login_customer_id=Config.MCC_LOGIN_CUSTOMER_ID
+                refresh_token=token_result.get('refresh_token'),
+                developer_token=Config.GOOGLE_ADS_DEVELOPER_TOKEN,
+                customer_id=Config.GOOGLE_ADS_CUSTOMER_ID
             )
             
             google_ads_client = GoogleAdsClientService(google_ads_config)
-            
-            # اختبار الاتصال بـ Google Ads API
             accessible_customers = google_ads_client.get_accessible_customers()
             
-            logger.info(f"تم الحصول على {len(accessible_customers)} حساب متاح من Google Ads API")
+            logger.info(f"تم الحصول على {len(accessible_customers)} حساب متاح")
             
         except Exception as ads_error:
             logger.warning(f"تحذير: لم يتم اختبار Google Ads API: {str(ads_error)}")
-            accessible_customers = []
-        
-        # تنظيف الجلسة
-        session.pop('oauth_session_id', None)
-        session.pop('oauth_user_id', None)
-        
-        logger.info(f"تم إكمال تدفق OAuth بنجاح للمستخدم: {user_info.get('email', 'غير معروف')}")
-        
-        # إرجاع النتيجة
+            
         return arabic_jsonify({
             "success": True,
-            "message": "تم إكمال المصادقة بنجاح",
+            "message": "تم التفويض بنجاح",
             "data": {
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-                "user_info": user_info,
-                "google_ads_accounts": len(accessible_customers),
-                "timestamp": datetime.utcnow().isoformat()
+                "access_token": token_result.get('access_token')[:20] + "...",  # جزء من الرمز للأمان
+                "expires_in": token_result.get('expires_in'),
+                "scope": token_result.get('scope')
             }
         })
         
     except Exception as e:
-        logger.error(f"خطأ في معالجة رد الاتصال OAuth: {str(e)}")
+        logger.error(f"خطأ في oauth_callback: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء معالجة رد الاتصال",
+            "message": f"خطأ في معالجة callback: {str(e)}",
             "error_code": "CALLBACK_ERROR"
         }), 500
 
 @oauth_bp.route("/refresh", methods=["POST"])
 def refresh_token():
-    """تجديد رمز الوصول"""
+    """تجديد الرمز المميز"""
     try:
-        data = request.get_json()
+        refresh_token = session.get('refresh_token') or request.json.get('refresh_token')
         
-        if not data:
+        if not refresh_token:
             return arabic_jsonify({
                 "success": False,
-                "message": "بيانات غير صحيحة",
-                "error_code": "INVALID_DATA"
+                "message": "لم يتم العثور على refresh token",
+                "error_code": "MISSING_REFRESH_TOKEN"
             }), 400
-        
-        user_id = data.get('user_id')
-        
-        if not user_id:
-            return arabic_jsonify({
-                "success": False,
-                "message": "معرف المستخدم مطلوب",
-                "error_code": "MISSING_USER_ID"
-            }), 400
-        
-        # تهيئة معالج OAuth
+            
         oauth_handler = OAuthHandler()
         
-        # تجديد الرمز
-        refresh_result = oauth_handler.refresh_access_token(user_id)
+        # تجديد الرمز المميز
+        refresh_result = oauth_handler.refresh_access_token(refresh_token)
         
         if not refresh_result.get('success'):
-            logger.error(f"فشل في تجديد الرمز للمستخدم {user_id}: {refresh_result.get('message')}")
             return arabic_jsonify({
                 "success": False,
-                "message": refresh_result.get('message', 'فشل في تجديد الرمز'),
+                "message": refresh_result.get('message', 'فشل في تجديد الرمز المميز'),
                 "error_code": "TOKEN_REFRESH_FAILED"
-            }), 400
-        
-        logger.info(f"تم تجديد الرمز بنجاح للمستخدم: {user_id}")
+            }), 500
+            
+        # تحديث الجلسة
+        session['access_token'] = refresh_result.get('access_token')
+        session['token_expires_at'] = refresh_result.get('expires_at')
         
         return arabic_jsonify({
             "success": True,
-            "message": "تم تجديد الرمز بنجاح",
-            "access_token": refresh_result.get('access_token'),
-            "timestamp": datetime.utcnow().isoformat()
+            "message": "تم تجديد الرمز المميز بنجاح",
+            "data": {
+                "access_token": refresh_result.get('access_token')[:20] + "...",
+                "expires_in": refresh_result.get('expires_in')
+            }
         })
         
     except Exception as e:
-        logger.error(f"خطأ في تجديد الرمز: {str(e)}")
+        logger.error(f"خطأ في refresh_token: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء تجديد الرمز",
+            "message": f"خطأ في تجديد الرمز المميز: {str(e)}",
             "error_code": "REFRESH_ERROR"
         }), 500
 
 @oauth_bp.route("/revoke", methods=["POST"])
 def revoke_token():
-    """إلغاء رمز الوصول"""
+    """إلغاء الرمز المميز"""
     try:
-        data = request.get_json()
+        access_token = session.get('access_token') or request.json.get('access_token')
         
-        if not data:
+        if not access_token:
             return arabic_jsonify({
                 "success": False,
-                "message": "بيانات غير صحيحة",
-                "error_code": "INVALID_DATA"
+                "message": "لم يتم العثور على access token",
+                "error_code": "MISSING_ACCESS_TOKEN"
             }), 400
-        
-        user_id = data.get('user_id')
-        
-        if not user_id:
-            return arabic_jsonify({
-                "success": False,
-                "message": "معرف المستخدم مطلوب",
-                "error_code": "MISSING_USER_ID"
-            }), 400
-        
-        # تهيئة معالج OAuth
+            
         oauth_handler = OAuthHandler()
         
-        # إلغاء الرمز
-        revoke_result = oauth_handler.revoke_token(user_id)
+        # إلغاء الرمز المميز
+        revoke_result = oauth_handler.revoke_token(access_token)
         
-        if not revoke_result.get('success'):
-            logger.error(f"فشل في إلغاء الرمز للمستخدم {user_id}: {revoke_result.get('message')}")
-            return arabic_jsonify({
-                "success": False,
-                "message": revoke_result.get('message', 'فشل في إلغاء الرمز'),
-                "error_code": "TOKEN_REVOKE_FAILED"
-            }), 400
-        
-        logger.info(f"تم إلغاء الرمز بنجاح للمستخدم: {user_id}")
+        # مسح الجلسة
+        session.pop('access_token', None)
+        session.pop('refresh_token', None)
+        session.pop('token_expires_at', None)
         
         return arabic_jsonify({
             "success": True,
-            "message": "تم إلغاء الرمز بنجاح",
-            "timestamp": datetime.utcnow().isoformat()
+            "message": "تم إلغاء الرمز المميز بنجاح"
         })
         
     except Exception as e:
-        logger.error(f"خطأ في إلغاء الرمز: {str(e)}")
+        logger.error(f"خطأ في revoke_token: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء إلغاء الرمز",
+            "message": f"خطأ في إلغاء الرمز المميز: {str(e)}",
             "error_code": "REVOKE_ERROR"
         }), 500
-
-# ===========================================
-# مسارات المعلومات والحالة
-# ===========================================
 
 @oauth_bp.route("/status", methods=["GET"])
 def oauth_status():
     """فحص حالة OAuth"""
     try:
-        user_id = request.args.get('user_id')
+        access_token = session.get('access_token')
+        expires_at = session.get('token_expires_at')
         
-        if not user_id:
-            return arabic_jsonify({
-                "success": False,
-                "message": "معرف المستخدم مطلوب",
-                "error_code": "MISSING_USER_ID"
-            }), 400
-        
-        # تهيئة معالج OAuth
-        oauth_handler = OAuthHandler()
-        
-        # فحص حالة الرمز
-        user_tokens = oauth_handler.token_cache.get(user_id)
-        
-        if not user_tokens:
+        if not access_token:
             return arabic_jsonify({
                 "success": True,
                 "authenticated": False,
-                "message": "المستخدم غير مصادق"
+                "message": "غير مُصرح"
             })
-        
-        # فحص انتهاء صلاحية الرمز
-        expires_at = user_tokens.get('expires_at')
+            
+        # فحص انتهاء الصلاحية
         is_expired = False
-        
         if expires_at:
-            is_expired = datetime.fromisoformat(expires_at.replace('Z', '+00:00')) < datetime.utcnow()
-        
+            try:
+                expires_datetime = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                is_expired = datetime.now() > expires_datetime
+            except:
+                is_expired = True
+                
         return arabic_jsonify({
             "success": True,
             "authenticated": True,
-            "token_expired": is_expired,
-            "has_refresh_token": bool(user_tokens.get('refresh_token')),
-            "scope": user_tokens.get('scope'),
-            "expires_at": expires_at
+            "token_valid": not is_expired,
+            "expires_at": expires_at,
+            "message": "مُصرح" if not is_expired else "انتهت صلاحية الرمز المميز"
         })
         
     except Exception as e:
-        logger.error(f"خطأ في فحص حالة OAuth: {str(e)}")
+        logger.error(f"خطأ في oauth_status: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء فحص الحالة",
+            "message": f"خطأ في فحص حالة OAuth: {str(e)}",
             "error_code": "STATUS_ERROR"
         }), 500
 
 @oauth_bp.route("/config", methods=["GET"])
 def oauth_config():
-    """الحصول على إعدادات OAuth العامة"""
+    """الحصول على إعدادات OAuth"""
     try:
         return arabic_jsonify({
             "success": True,
             "config": {
                 "client_id": Config.GOOGLE_CLIENT_ID,
-                "redirect_uri": Config.GOOGLE_REDIRECT_URI,
                 "scopes": [
-                    "https://www.googleapis.com/auth/adwords",
-                    "https://www.googleapis.com/auth/userinfo.email",
-                    "https://www.googleapis.com/auth/userinfo.profile"
+                    "https://www.googleapis.com/auth/adwords"
                 ],
-                "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
-                "environment": os.getenv("FLASK_ENV", "development")
+                "redirect_uri": url_for('google_ads_oauth.oauth_callback', _external=True),
+                "response_type": "code",
+                "access_type": "offline",
+                "prompt": "consent"
             }
         })
         
     except Exception as e:
-        logger.error(f"خطأ في الحصول على إعدادات OAuth: {str(e)}")
+        logger.error(f"خطأ في oauth_config: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء الحصول على الإعدادات",
+            "message": f"خطأ في الحصول على إعدادات OAuth: {str(e)}",
             "error_code": "CONFIG_ERROR"
         }), 500
 
-# ===========================================
-# مسارات الاختبار
-# ===========================================
-
 @oauth_bp.route("/test", methods=["GET"])
 def test_oauth():
-    """اختبار إعدادات OAuth"""
+    """اختبار شامل لإعدادات OAuth"""
     try:
-        # فحص متغيرات البيئة المطلوبة
-        required_vars = {
-            "GOOGLE_CLIENT_ID": Config.GOOGLE_CLIENT_ID,
-            "GOOGLE_CLIENT_SECRET": Config.GOOGLE_CLIENT_SECRET,
-            "GOOGLE_DEVELOPER_TOKEN": Config.GOOGLE_DEVELOPER_TOKEN,
-            "MCC_LOGIN_CUSTOMER_ID": Config.MCC_LOGIN_CUSTOMER_ID
+        test_results = {
+            "config_check": False,
+            "client_credentials": False,
+            "google_ads_api": False,
+            "errors": []
         }
         
-        missing_vars = []
-        configured_vars = {}
-        
-        for var_name, var_value in required_vars.items():
-            if var_value:
-                configured_vars[var_name] = "مكون"
-            else:
-                missing_vars.append(var_name)
-                configured_vars[var_name] = "مفقود"
-        
-        # اختبار تهيئة معالج OAuth
-        oauth_handler_status = "فشل"
-        oauth_error = None
-        
+        # فحص الإعدادات
         try:
-            oauth_handler = OAuthHandler()
-            if oauth_handler.client_id and oauth_handler.client_secret:
-                oauth_handler_status = "نجح"
+            if Config.GOOGLE_CLIENT_ID and Config.GOOGLE_CLIENT_SECRET:
+                test_results["config_check"] = True
+                test_results["client_credentials"] = True
+            else:
+                test_results["errors"].append("إعدادات OAuth غير مكتملة")
         except Exception as e:
-            oauth_error = str(e)
-        
+            test_results["errors"].append(f"خطأ في فحص الإعدادات: {str(e)}")
+            
+        # اختبار Google Ads API (إذا توفر refresh token)
+        try:
+            refresh_token = session.get('refresh_token')
+            if refresh_token:
+                google_ads_config = GoogleAdsConfig(
+                    client_id=Config.GOOGLE_CLIENT_ID,
+                    client_secret=Config.GOOGLE_CLIENT_SECRET,
+                    refresh_token=refresh_token,
+                    developer_token=Config.GOOGLE_ADS_DEVELOPER_TOKEN,
+                    customer_id=Config.GOOGLE_ADS_CUSTOMER_ID
+                )
+                
+                google_ads_client = GoogleAdsClientService(google_ads_config)
+                accessible_customers = google_ads_client.get_accessible_customers()
+                
+                test_results["google_ads_api"] = True
+                test_results["accessible_customers"] = len(accessible_customers)
+            else:
+                test_results["errors"].append("لا يوجد refresh token للاختبار")
+                
+        except Exception as e:
+            test_results["errors"].append(f"خطأ في اختبار Google Ads API: {str(e)}")
+            
         return arabic_jsonify({
             "success": True,
-            "test_results": {
-                "environment_variables": configured_vars,
-                "missing_variables": missing_vars,
-                "oauth_handler_initialization": oauth_handler_status,
-                "oauth_handler_error": oauth_error,
-                "redirect_uri": Config.GOOGLE_REDIRECT_URI,
-                "environment": os.getenv("FLASK_ENV", "development"),
-                "timestamp": datetime.utcnow().isoformat()
-            }
+            "test_results": test_results,
+            "overall_status": "نجح" if all([
+                test_results["config_check"],
+                test_results["client_credentials"]
+            ]) else "فشل جزئي"
         })
         
     except Exception as e:
-        logger.error(f"خطأ في اختبار OAuth: {str(e)}")
+        logger.error(f"خطأ في test_oauth: {str(e)}")
         return arabic_jsonify({
             "success": False,
-            "message": "حدث خطأ غير متوقع أثناء اختبار OAuth",
+            "message": f"خطأ في اختبار OAuth: {str(e)}",
             "error_code": "TEST_ERROR"
         }), 500
+
+# ===========================================
+# معالجات الأخطاء
+# ===========================================
+
+@oauth_bp.errorhandler(404)
+def not_found(error):
+    """معالج خطأ 404"""
+    return arabic_jsonify({
+        "success": False,
+        "message": "المسار غير موجود",
+        "error_code": "NOT_FOUND"
+    }), 404
+
+@oauth_bp.errorhandler(500)
+def internal_error(error):
+    """معالج خطأ 500"""
+    logger.error(f"خطأ داخلي في OAuth: {str(error)}")
+    return arabic_jsonify({
+        "success": False,
+        "message": "خطأ داخلي في الخادم",
+        "error_code": "INTERNAL_ERROR"
+    }), 500
+
+# ===========================================
+# تسجيل Blueprint
+# ===========================================
+
+logger.info("✅ تم تحميل OAuth Routes بنجاح")
+logger.info(f"📊 عدد المسارات المتاحة: {len(oauth_bp.url_map._rules) if hasattr(oauth_bp, 'url_map') else 'غير محدد'}")
 
