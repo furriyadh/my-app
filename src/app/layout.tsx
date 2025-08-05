@@ -13,6 +13,7 @@ import LayoutProvider from "../providers/LayoutProvider";
 import { CampaignProvider } from "../lib/context/CampaignContext";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { GoogleTagManager } from '@next/third-parties/google';
 
 const inter = Inter({
   variable: "--font-body",
