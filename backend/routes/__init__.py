@@ -1,253 +1,317 @@
-""" 
+"""
 مسارات API - Routes Package
 Google Ads AI Platform - API Routes
-الملف المحدث والمُصحح - يحل مشكلة "No module named 'backend'"
+الملف المُصحح والمحسن - أفضل ممارسات البرمجة
 """
 
-from flask import Blueprint
-import os
+import logging
 import sys
+from typing import Tuple, List, Dict, Any
+from flask import Flask, Blueprint
 
-def register_routes(app):
-    """تسجيل جميع مسارات API مع معالجة أخطاء الاستيراد"""
+# إعداد التسجيل
+logger = logging.getLogger(__name__)
+
+class RouteRegistrar:
+    """مدير تسجيل المسارات مع معالجة أخطاء متقدمة"""
     
-    print("📦 بدء تسجيل Routes من __init__.py...")
+    def __init__(self):
+        self.registered_blueprints: List[Dict[str, Any]] = []
+        self.failed_imports: List[Dict[str, Any]] = []
+        self.registration_stats = {
+            'total_attempted': 0,
+            'successful': 0,
+            'failed': 0
+        }
     
-    # قائمة Blueprints للتسجيل مع معالجة آمنة للأخطاء
-    blueprints_to_register = []
-    
-    # 1. محاولة استيراد auth_middleware
-    try:
-        # جرب مسارات مختلفة للاستيراد
+    def safe_import_blueprint(self, module_path: str, blueprint_name: str, 
+                            display_name: str, url_prefix: str) -> Tuple[Blueprint, bool]:
+        """استيراد آمن للـ Blueprint مع معالجة أخطاء شاملة"""
         try:
-            from ..auth.auth_middleware import auth_middleware_bp
-            blueprints_to_register.append((auth_middleware_bp, "/api/auth", "Auth Middleware"))
-            print("✅ تم استيراد auth_middleware_bp من ..auth.auth_middleware")
-        except ImportError:
+            # محاولة الاستيراد النسبي أولاً
             try:
-                from auth.auth_middleware import auth_middleware_bp
-                blueprints_to_register.append((auth_middleware_bp, "/api/auth", "Auth Middleware"))
-                print("✅ تم استيراد auth_middleware_bp من auth.auth_middleware")
+                module = __import__(f".{module_path}", fromlist=[blueprint_name], level=1)
+                blueprint = getattr(module, blueprint_name)
+                logger.info(f"✅ تم استيراد {display_name} من المسار النسبي")
+                return blueprint, True
             except ImportError:
-                print("⚠️ فشل استيراد auth_middleware_bp - تم تخطيه")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد auth_middleware: {e}")
+                # محاولة الاستيراد المطلق
+                try:
+                    module = __import__(f"routes.{module_path}", fromlist=[blueprint_name])
+                    blueprint = getattr(module, blueprint_name)
+                    logger.info(f"✅ تم استيراد {display_name} من المسار المطلق")
+                    return blueprint, True
+                except ImportError:
+                    # محاولة الاستيراد المباشر
+                    module = __import__(module_path, fromlist=[blueprint_name])
+                    blueprint = getattr(module, blueprint_name)
+                    logger.info(f"✅ تم استيراد {display_name} من المسار المباشر")
+                    return blueprint, True
+                    
+        except ImportError as e:
+            error_info = {
+                'module': module_path,
+                'blueprint': blueprint_name,
+                'display_name': display_name,
+                'error_type': 'ImportError',
+                'error_message': str(e)
+            }
+            self.failed_imports.append(error_info)
+            logger.warning(f"⚠️ فشل استيراد {display_name}: {e}")
+            return None, False
+            
+        except AttributeError as e:
+            error_info = {
+                'module': module_path,
+                'blueprint': blueprint_name,
+                'display_name': display_name,
+                'error_type': 'AttributeError',
+                'error_message': str(e)
+            }
+            self.failed_imports.append(error_info)
+            logger.error(f"❌ {blueprint_name} غير موجود في {module_path}: {e}")
+            return None, False
+            
+        except Exception as e:
+            error_info = {
+                'module': module_path,
+                'blueprint': blueprint_name,
+                'display_name': display_name,
+                'error_type': type(e).__name__,
+                'error_message': str(e)
+            }
+            self.failed_imports.append(error_info)
+            logger.error(f"❌ خطأ غير متوقع في استيراد {display_name}: {e}")
+            return None, False
     
-    # 2. محاولة استيراد campaigns
-    try:
-        from .campaigns import campaigns_bp
-        blueprints_to_register.append((campaigns_bp, "/api/campaigns", "Campaigns"))
-        print("✅ تم استيراد campaigns_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد campaigns_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد campaigns: {e}")
-    
-    # 3. محاولة استيراد accounts
-    try:
-        from .accounts import accounts_bp
-        blueprints_to_register.append((accounts_bp, "/api/accounts", "Accounts"))
-        print("✅ تم استيراد accounts_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد accounts_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد accounts: {e}")
-    
-    # 4. محاولة استيراد ai
-    try:
-        from .ai import ai_bp
-        blueprints_to_register.append((ai_bp, "/api/ai", "AI"))
-        print("✅ تم استيراد ai_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد ai_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد ai: {e}")
-    
-    # 5. محاولة استيراد google_ads
-    try:
-        from .google_ads import google_ads_bp
-        blueprints_to_register.append((google_ads_bp, "/api/google-ads", "Google Ads"))
-        print("✅ تم استيراد google_ads_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد google_ads_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد google_ads: {e}")
-    
-    # 6. محاولة استيراد auth_jwt
-    try:
-        from .auth_jwt import auth_bp
-        blueprints_to_register.append((auth_bp, "/api/auth-jwt", "Auth JWT"))
-        print("✅ تم استيراد auth_bp من auth_jwt")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد auth_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد auth_jwt: {e}")
-    
-    # 7. محاولة استيراد google_ads_routes
-    try:
-        from .google_ads_routes import google_ads_routes_bp
-        blueprints_to_register.append((google_ads_routes_bp, "/api/google-ads-routes", "Google Ads Routes"))
-        print("✅ تم استيراد google_ads_routes_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد google_ads_routes_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد google_ads_routes: {e}")
-    
-    # 8. محاولة استيراد mcc_advanced
-    try:
-        from .mcc_advanced import mcc_bp
-        blueprints_to_register.append((mcc_bp, "/api/mcc", "MCC Advanced"))
-        print("✅ تم استيراد mcc_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد mcc_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد mcc_advanced: {e}")
-    
-    # 9. محاولة استيراد merchant_center_routes
-    try:
-        from .merchant_center_routes import merchant_center_bp
-        blueprints_to_register.append((merchant_center_bp, "/api/merchant-center", "Merchant Center"))
-        print("✅ تم استيراد merchant_center_bp")
-    except ImportError as e:
-        print(f"⚠️ فشل استيراد merchant_center_bp: {e}")
-    except Exception as e:
-        print(f"❌ خطأ في استيراد merchant_center_routes: {e}")
-    
-    # تسجيل جميع Blueprints المستوردة بنجاح
-    registered_count = 0
-    failed_count = 0
-    
-    for blueprint, url_prefix, name in blueprints_to_register:
+    def register_blueprint_safely(self, app: Flask, blueprint: Blueprint, 
+                                url_prefix: str, display_name: str) -> bool:
+        """تسجيل آمن للـ Blueprint"""
         try:
             app.register_blueprint(blueprint, url_prefix=url_prefix)
-            registered_count += 1
-            print(f"🎉 تم تسجيل {name} على {url_prefix}")
+            
+            blueprint_info = {
+                'name': display_name,
+                'blueprint_name': blueprint.name,
+                'url_prefix': url_prefix,
+                'status': 'registered'
+            }
+            self.registered_blueprints.append(blueprint_info)
+            self.registration_stats['successful'] += 1
+            
+            logger.info(f"🎉 تم تسجيل {display_name} على {url_prefix}")
+            return True
+            
         except Exception as e:
-            failed_count += 1
-            print(f"❌ فشل تسجيل {name}: {e}")
+            error_info = {
+                'name': display_name,
+                'url_prefix': url_prefix,
+                'error_type': type(e).__name__,
+                'error_message': str(e),
+                'status': 'registration_failed'
+            }
+            self.failed_imports.append(error_info)
+            self.registration_stats['failed'] += 1
+            
+            logger.error(f"❌ فشل تسجيل {display_name}: {e}")
+            return False
     
-    # إحصائيات التسجيل
-    total_attempted = len(blueprints_to_register)
-    print(f"📊 نتائج تسجيل Routes:")
-    print(f"   ✅ تم تسجيل: {registered_count}")
-    print(f"   ❌ فشل في التسجيل: {failed_count}")
-    print(f"   📈 معدل النجاح: {registered_count}/{total_attempted}")
-    
-    if registered_count > 0:
-        print(f"🎉 تم تسجيل {registered_count} routes بنجاح من __init__.py!")
-    else:
-        print("⚠️ لم يتم تسجيل أي routes من __init__.py")
-    
-    return registered_count, failed_count
+    def get_registration_report(self) -> Dict[str, Any]:
+        """تقرير شامل عن عملية التسجيل"""
+        return {
+            'statistics': self.registration_stats,
+            'registered_blueprints': self.registered_blueprints,
+            'failed_imports': self.failed_imports,
+            'success_rate': (
+                self.registration_stats['successful'] / 
+                max(self.registration_stats['total_attempted'], 1) * 100
+            )
+        }
 
-# إضافة دالة مساعدة لاختبار الاستيرادات
-def test_imports():
-    """اختبار جميع الاستيرادات المحتملة"""
-    print("🧪 اختبار استيرادات Routes...")
+def register_routes(app: Flask) -> Tuple[int, int]:
+    """
+    تسجيل جميع مسارات API مع معالجة أخطاء متقدمة
     
-    imports_status = {}
+    Args:
+        app: تطبيق Flask
+        
+    Returns:
+        Tuple[int, int]: (عدد المسارات المسجلة بنجاح, عدد المسارات الفاشلة)
+    """
+    logger.info("📦 بدء تسجيل Routes من __init__.py...")
     
-    # قائمة الاستيرادات للاختبار
-    test_imports = [
-        ("campaigns", "from .campaigns import campaigns_bp"),
-        ("accounts", "from .accounts import accounts_bp"),
-        ("ai", "from .ai import ai_bp"),
-        ("google_ads", "from .google_ads import google_ads_bp"),
-        ("auth_jwt", "from .auth_jwt import auth_bp"),
-        ("google_ads_routes", "from .google_ads_routes import google_ads_routes_bp"),
-        ("mcc_advanced", "from .mcc_advanced import mcc_bp"),
-        ("merchant_center_routes", "from .merchant_center_routes import merchant_center_bp"),
+    registrar = RouteRegistrar()
+    
+    # تعريف جميع Blueprints المطلوب تسجيلها
+    blueprints_config = [
+        {
+            'module_path': 'auth_jwt',
+            'blueprint_name': 'auth_bp',
+            'display_name': 'Auth JWT',
+            'url_prefix': '/api/auth-jwt'
+        },
+        {
+            'module_path': 'accounts',
+            'blueprint_name': 'accounts_bp',
+            'display_name': 'Accounts',
+            'url_prefix': '/api/accounts'
+        },
+        {
+            'module_path': 'ai',
+            'blueprint_name': 'ai_bp',
+            'display_name': 'AI',
+            'url_prefix': '/api/ai'
+        },
+        {
+            'module_path': 'campaigns',
+            'blueprint_name': 'campaigns_bp',
+            'display_name': 'Campaigns',
+            'url_prefix': '/api/campaigns'
+        },
+        {
+            'module_path': 'google_ads_routes',
+            'blueprint_name': 'google_ads_bp',
+            'display_name': 'Google Ads Routes',
+            'url_prefix': '/api/google-ads'
+        },
+        {
+            'module_path': 'mcc_advanced',
+            'blueprint_name': 'mcc_bp',
+            'display_name': 'MCC Advanced',
+            'url_prefix': '/api/mcc'
+        },
+        {
+            'module_path': 'merchant_center_routes',
+            'blueprint_name': 'merchant_center_bp',
+            'display_name': 'Merchant Center',
+            'url_prefix': '/api/merchant-center'
+        },
+        {
+            'module_path': 'compatibility',
+            'blueprint_name': 'compatibility_bp',
+            'display_name': 'Compatibility',
+            'url_prefix': '/api/compatibility'
+        }
     ]
     
-    for module_name, import_statement in test_imports:
-        try:
-            exec(import_statement)
-            imports_status[module_name] = "✅ نجح"
-            print(f"✅ {module_name}: نجح الاستيراد")
-        except ImportError as e:
-            imports_status[module_name] = f"❌ فشل: {e}"
-            print(f"❌ {module_name}: فشل الاستيراد - {e}")
-        except Exception as e:
-            imports_status[module_name] = f"❌ خطأ: {e}"
-            print(f"❌ {module_name}: خطأ غير متوقع - {e}")
+    # معالجة كل Blueprint
+    for config in blueprints_config:
+        registrar.registration_stats['total_attempted'] += 1
+        
+        # استيراد Blueprint
+        blueprint, import_success = registrar.safe_import_blueprint(
+            config['module_path'],
+            config['blueprint_name'],
+            config['display_name'],
+            config['url_prefix']
+        )
+        
+        # تسجيل Blueprint إذا نجح الاستيراد
+        if import_success and blueprint:
+            registrar.register_blueprint_safely(
+                app,
+                blueprint,
+                config['url_prefix'],
+                config['display_name']
+            )
     
-    return imports_status
+    # طباعة تقرير التسجيل
+    report = registrar.get_registration_report()
+    
+    logger.info("📊 تقرير تسجيل Routes:")
+    logger.info(f"   ✅ تم تسجيل: {report['statistics']['successful']}")
+    logger.info(f"   ❌ فشل في التسجيل: {report['statistics']['failed']}")
+    logger.info(f"   📈 معدل النجاح: {report['success_rate']:.1f}%")
+    
+    # طباعة تفاصيل المسارات المسجلة
+    if report['registered_blueprints']:
+        logger.info("🎉 المسارات المسجلة بنجاح:")
+        for bp in report['registered_blueprints']:
+            logger.info(f"   • {bp['name']} → {bp['url_prefix']}")
+    
+    # طباعة تفاصيل الأخطاء
+    if report['failed_imports']:
+        logger.warning("⚠️ المسارات التي فشلت:")
+        for error in report['failed_imports']:
+            logger.warning(f"   • {error.get('display_name', error.get('name', 'Unknown'))}: {error['error_type']}")
+    
+    return report['statistics']['successful'], report['statistics']['failed']
 
-# إضافة معلومات للتشخيص
-def get_routes_info():
-    """الحصول على معلومات مجلد routes"""
+def create_health_blueprint() -> Blueprint:
+    """إنشاء Blueprint للصحة العامة"""
+    health_bp = Blueprint('health', __name__)
+    
+    @health_bp.route('/health', methods=['GET'])
+    def health_check():
+        """فحص صحة النظام"""
+        from flask import jsonify
+        from datetime import datetime
+        
+        return jsonify({
+            'status': 'healthy',
+            'service': 'Google Ads AI Platform',
+            'timestamp': datetime.utcnow().isoformat(),
+            'version': '1.0.0'
+        })
+    
+    @health_bp.route('/routes-status', methods=['GET'])
+    def routes_status():
+        """حالة المسارات المسجلة"""
+        from flask import jsonify, current_app
+        
+        registered_blueprints = []
+        for blueprint_name, blueprint in current_app.blueprints.items():
+            registered_blueprints.append({
+                'name': blueprint_name,
+                'url_prefix': getattr(blueprint, 'url_prefix', None)
+            })
+        
+        return jsonify({
+            'total_blueprints': len(registered_blueprints),
+            'blueprints': registered_blueprints,
+            'status': 'active'
+        })
+    
+    return health_bp
+
+# تسجيل Blueprint الصحة تلقائياً
+def register_health_routes(app: Flask) -> None:
+    """تسجيل مسارات الصحة"""
+    try:
+        health_bp = create_health_blueprint()
+        app.register_blueprint(health_bp, url_prefix='/api')
+        logger.info("✅ تم تسجيل Health Routes")
+    except Exception as e:
+        logger.error(f"❌ فشل تسجيل Health Routes: {e}")
+
+# دالة مساعدة للتشخيص
+def diagnose_import_issues() -> Dict[str, Any]:
+    """تشخيص مشاكل الاستيراد"""
     import os
     
-    routes_dir = os.path.dirname(__file__)
+    current_dir = os.path.dirname(__file__)
     
-    info = {
-        'routes_directory': routes_dir,
+    diagnosis = {
+        'current_directory': current_dir,
+        'python_path': sys.path[:3],  # أول 3 مسارات
         'files_in_routes': [],
-        'python_files': [],
-        'init_file_exists': os.path.exists(os.path.join(routes_dir, '__init__.py'))
+        'python_files': []
     }
     
     try:
-        files = os.listdir(routes_dir)
-        info['files_in_routes'] = files
-        info['python_files'] = [f for f in files if f.endswith('.py')]
+        files = os.listdir(current_dir)
+        diagnosis['files_in_routes'] = files
+        diagnosis['python_files'] = [f for f in files if f.endswith('.py')]
     except Exception as e:
-        info['error'] = str(e)
+        diagnosis['error'] = str(e)
     
-    return info
+    return diagnosis
 
-# دالة للحصول على معلومات Python Path
-def get_python_path_info():
-    """معلومات Python Path للتشخيص"""
-    import sys
-    
-    return {
-        'python_path': sys.path[:5],  # أول 5 مسارات فقط
-        'current_working_directory': os.getcwd(),
-        'file_location': __file__ if '__file__' in globals() else 'غير معروف'
-    }
-
-# إضافة دالة تشخيص شاملة
-def diagnose_routes():
-    """تشخيص شامل لمشاكل Routes"""
-    print("🔍 بدء التشخيص الشامل لـ Routes...")
-    
-    # معلومات المجلد
-    routes_info = get_routes_info()
-    print(f"📁 مجلد Routes: {routes_info['routes_directory']}")
-    print(f"📄 ملفات Python: {routes_info['python_files']}")
-    
-    # معلومات Python Path
-    path_info = get_python_path_info()
-    print(f"🐍 Python Path: {path_info['python_path']}")
-    print(f"📂 مجلد العمل: {path_info['current_working_directory']}")
-    
-    # اختبار الاستيرادات
-    imports_status = test_imports()
-    
-    # ملخص التشخيص
-    successful_imports = sum(1 for status in imports_status.values() if status.startswith("✅"))
-    total_imports = len(imports_status)
-    
-    print(f"📊 ملخص التشخيص:")
-    print(f"   ✅ استيرادات ناجحة: {successful_imports}/{total_imports}")
-    print(f"   📁 ملفات Python في routes: {len(routes_info['python_files'])}")
-    print(f"   🔧 __init__.py موجود: {routes_info['init_file_exists']}")
-    
-    return {
-        'routes_info': routes_info,
-        'path_info': path_info,
-        'imports_status': imports_status,
-        'summary': {
-            'successful_imports': successful_imports,
-            'total_imports': total_imports,
-            'success_rate': f"{successful_imports}/{total_imports}"
-        }
-    }
-
-# تشغيل التشخيص عند استيراد الملف (للاختبار)
-if __name__ == "__main__":
-    print("🧪 تشغيل اختبار __init__.py...")
-    diagnosis = diagnose_routes()
-    print("✅ انتهى الاختبار")
+# تصدير الدوال الرئيسية
+__all__ = [
+    'register_routes',
+    'register_health_routes',
+    'RouteRegistrar',
+    'diagnose_import_issues'
+]
 

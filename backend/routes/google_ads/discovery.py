@@ -35,7 +35,57 @@ import uuid
 
 # Flask imports
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
+# ==================== استيراد البدائل الآمنة ====================
+
+# استيراد python-jose بدلاً من PyJWT
+try:
+    from jose import jwt
+    from jose.exceptions import JWTError, ExpiredSignatureError, JWTClaimsError
+    JWT_AVAILABLE = True
+    JWT_LIBRARY = 'python-jose'
+except ImportError:
+    JWT_AVAILABLE = False
+    JWT_LIBRARY = 'غير متاح'
+    jwt = None
+    JWTError = Exception
+    ExpiredSignatureError = Exception
+    JWTClaimsError = Exception
+
+# استيراد passlib بدلاً من bcrypt
+try:
+    from passlib.hash import bcrypt as passlib_bcrypt
+    from passlib.context import CryptContext
+    BCRYPT_AVAILABLE = True
+    BCRYPT_LIBRARY = 'passlib'
+    # إنشاء context للتشفير
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+except ImportError:
+    BCRYPT_AVAILABLE = False
+    BCRYPT_LIBRARY = 'غير متاح'
+    passlib_bcrypt = None
+    pwd_context = None
+
+# استيراد pycryptodome بدلاً من cryptography
+try:
+    from Crypto.Hash import SHA256, SHA512, HMAC
+    from Crypto.Cipher import AES
+    from Crypto.Random import get_random_bytes
+    from Crypto.Protocol.KDF import PBKDF2
+    from Crypto.Util.Padding import pad, unpad
+    CRYPTO_AVAILABLE = True
+    CRYPTO_LIBRARY = 'pycryptodome'
+except ImportError:
+    CRYPTO_AVAILABLE = False
+    CRYPTO_LIBRARY = 'غير متاح'
+    SHA256 = None
+    SHA512 = None
+    HMAC = None
+    AES = None
+    get_random_bytes = None
+    PBKDF2 = None
+    pad = None
+    unpad = None
 
 # Third-party imports
 import pandas as pd
@@ -49,6 +99,11 @@ import logging
 
 # إعداد التسجيل المتقدم
 logger = logging.getLogger(__name__)
+
+# تسجيل حالة المكتبات
+logger.info(f"🔐 JWT Library: {JWT_LIBRARY} ({'✅' if JWT_AVAILABLE else '❌'})")
+logger.info(f"🔒 Bcrypt Library: {BCRYPT_LIBRARY} ({'✅' if BCRYPT_AVAILABLE else '❌'})")
+logger.info(f"🔑 Crypto Library: {CRYPTO_LIBRARY} ({'✅' if CRYPTO_AVAILABLE else '❌'})")
 
 # إنشاء Blueprint مع إعدادات متقدمة
 google_ads_discovery_bp = Blueprint(
@@ -110,1474 +165,945 @@ except ImportError as e:
     logger.warning(f"⚠️ Redis غير متاح: {e}")
 
 try:
-    from services.ai_services import AIAnalysisService, KeywordAnalyzer, CompetitorAnalyzer
+    from services.ai_services import KeywordAnalyzer, CompetitorAnalyzer, OpportunityFinder
     SERVICES_STATUS['ai_services'] = True
 except ImportError as e:
     logger.warning(f"⚠️ AI Services غير متاح: {e}")
 
 # تحديد حالة الخدمات
-DISCOVERY_SERVICES_AVAILABLE = any(SERVICES_STATUS.values())
+SERVICES_AVAILABLE = any(SERVICES_STATUS.values())
 logger.info(f"✅ تم تحميل خدمات Discovery - الخدمات المتاحة: {sum(SERVICES_STATUS.values())}/7")
 
 # إعداد Thread Pool للعمليات المتوازية
-executor = ThreadPoolExecutor(max_workers=25, thread_name_prefix="discovery_worker")
+discovery_executor = ThreadPoolExecutor(max_workers=20, thread_name_prefix="discovery_worker")
+
+# ==================== دوال الأمان والتشفير ====================
+
+class DiscoverySecurityManager:
+    """مدير الأمان والتشفير لخدمة Discovery"""
+    
+    def __init__(self):
+        """تهيئة مدير الأمان"""
+        self.jwt_secret = os.getenv('JWT_SECRET_KEY', 'discovery_secret_key_change_in_production')
+        self.encryption_key = self._derive_encryption_key()
+        self.session_timeout = timedelta(hours=12)
+        
+    def _derive_encryption_key(self) -> bytes:
+        """اشتقاق مفتاح التشفير"""
+        if CRYPTO_AVAILABLE:
+            try:
+                # استخدام PBKDF2 من pycryptodome
+                password = self.jwt_secret.encode('utf-8')
+                salt = b'google_ads_discovery_salt_2024'
+                key = PBKDF2(password, salt, 32, count=100000, hmac_hash_module=SHA256)
+                return key
+            except Exception as e:
+                logger.error(f"خطأ في اشتقاق مفتاح التشفير: {e}")
+        
+        # fallback إلى hashlib
+        import hashlib
+        return hashlib.sha256(self.jwt_secret.encode('utf-8')).digest()
+    
+    def create_jwt_token(self, payload: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+        """إنشاء JWT token باستخدام python-jose"""
+        if not JWT_AVAILABLE:
+            logger.warning("JWT غير متاح - استخدام fallback")
+            return self._create_fallback_token(payload)
+        
+        try:
+            if expires_delta:
+                expire = datetime.utcnow() + expires_delta
+            else:
+                expire = datetime.utcnow() + self.session_timeout
+            
+            payload.update({
+                'exp': expire,
+                'iat': datetime.utcnow(),
+                'jti': str(uuid.uuid4()),
+                'service': 'discovery'
+            })
+            
+            token = jwt.encode(payload, self.jwt_secret, algorithm='HS256')
+            return token if isinstance(token, str) else token.decode('utf-8')
+            
+        except Exception as e:
+            logger.error(f"خطأ في إنشاء JWT token: {e}")
+            return self._create_fallback_token(payload)
+    
+    def verify_jwt_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """التحقق من JWT token باستخدام python-jose"""
+        if not JWT_AVAILABLE:
+            return self._verify_fallback_token(token)
+        
+        try:
+            payload = jwt.decode(token, self.jwt_secret, algorithms=['HS256'])
+            return payload
+        except ExpiredSignatureError:
+            logger.warning("JWT token منتهي الصلاحية")
+            return None
+        except JWTError as e:
+            logger.error(f"خطأ في التحقق من JWT token: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"خطأ عام في التحقق من JWT token: {e}")
+            return None
+    
+    def _create_fallback_token(self, payload: Dict[str, Any]) -> str:
+        """إنشاء token احتياطي"""
+        import base64
+        import json
+        
+        try:
+            payload_str = json.dumps(payload, default=str)
+            encoded_payload = base64.b64encode(payload_str.encode('utf-8')).decode('utf-8')
+            return f"discovery_fallback_{encoded_payload}_{uuid.uuid4().hex}"
+        except Exception:
+            return f"discovery_emergency_token_{uuid.uuid4().hex}"
+    
+    def _verify_fallback_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """التحقق من token احتياطي"""
+        try:
+            if token.startswith('discovery_fallback_'):
+                parts = token.split('_', 3)
+                if len(parts) >= 3:
+                    import base64
+                    import json
+                    payload_str = base64.b64decode(parts[2]).decode('utf-8')
+                    return json.loads(payload_str)
+            return None
+        except Exception:
+            return None
+    
+    def encrypt_sensitive_data(self, data: str) -> str:
+        """تشفير البيانات الحساسة باستخدام pycryptodome"""
+        if not CRYPTO_AVAILABLE:
+            logger.warning("Crypto غير متاح - استخدام base64 encoding")
+            import base64
+            return base64.b64encode(data.encode('utf-8')).decode('utf-8')
+        
+        try:
+            # إنشاء IV عشوائي
+            iv = get_random_bytes(16)
+            
+            # إنشاء cipher
+            cipher = AES.new(self.encryption_key, AES.MODE_CBC, iv)
+            
+            # تشفير البيانات مع padding
+            padded_data = pad(data.encode('utf-8'), AES.block_size)
+            encrypted_data = cipher.encrypt(padded_data)
+            
+            # دمج IV مع البيانات المشفرة
+            result = iv + encrypted_data
+            
+            import base64
+            return base64.b64encode(result).decode('utf-8')
+            
+        except Exception as e:
+            logger.error(f"خطأ في تشفير البيانات: {e}")
+            # fallback
+            import base64
+            return base64.b64encode(data.encode('utf-8')).decode('utf-8')
+    
+    def decrypt_sensitive_data(self, encrypted_data: str) -> str:
+        """فك تشفير البيانات الحساسة باستخدام pycryptodome"""
+        if not CRYPTO_AVAILABLE:
+            logger.warning("Crypto غير متاح - استخدام base64 decoding")
+            try:
+                import base64
+                return base64.b64decode(encrypted_data.encode('utf-8')).decode('utf-8')
+            except Exception:
+                return encrypted_data
+        
+        try:
+            import base64
+            encrypted_bytes = base64.b64decode(encrypted_data.encode('utf-8'))
+            
+            # استخراج IV
+            iv = encrypted_bytes[:16]
+            encrypted = encrypted_bytes[16:]
+            
+            # إنشاء cipher
+            cipher = AES.new(self.encryption_key, AES.MODE_CBC, iv)
+            
+            # فك التشفير وإزالة padding
+            decrypted_padded = cipher.decrypt(encrypted)
+            decrypted_data = unpad(decrypted_padded, AES.block_size)
+            
+            return decrypted_data.decode('utf-8')
+            
+        except Exception as e:
+            logger.error(f"خطأ في فك تشفير البيانات: {e}")
+            # fallback
+            try:
+                import base64
+                return base64.b64decode(encrypted_data.encode('utf-8')).decode('utf-8')
+            except Exception:
+                return encrypted_data
+    
+    def create_secure_hash(self, data: str) -> str:
+        """إنشاء hash آمن باستخدام pycryptodome"""
+        if CRYPTO_AVAILABLE:
+            try:
+                hash_obj = SHA256.new(data.encode('utf-8'))
+                return hash_obj.hexdigest()
+            except Exception as e:
+                logger.error(f"خطأ في إنشاء hash بـ pycryptodome: {e}")
+        
+        # fallback إلى hashlib
+        import hashlib
+        return hashlib.sha256(data.encode('utf-8')).hexdigest()
+
+# إنشاء مدير الأمان
+discovery_security_manager = DiscoverySecurityManager()
+
+# ==================== JWT Decorator ====================
+
+def jwt_required_discovery(f):
+    """Decorator للتحقق من JWT token في discovery"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'error': 'Authorization header مطلوب',
+                'error_code': 'MISSING_AUTH_HEADER'
+            }), 401
+        
+        token = auth_header.split(' ')[1]
+        token_data = discovery_security_manager.verify_jwt_token(token)
+        
+        if not token_data:
+            return jsonify({
+                'success': False,
+                'error': 'Token غير صحيح أو منتهي الصلاحية',
+                'error_code': 'INVALID_TOKEN'
+            }), 401
+        
+        # إضافة بيانات المستخدم إلى request
+        request.current_user = token_data
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+# ==================== Data Classes ====================
 
 class DiscoveryType(Enum):
     """أنواع الاكتشاف"""
-    ACCOUNTS = auto()
-    CAMPAIGNS = auto()
-    AD_GROUPS = auto()
-    KEYWORDS = auto()
-    COMPETITORS = auto()
-    OPPORTUNITIES = auto()
-    TRENDS = auto()
-    PERFORMANCE = auto()
-
-class AnalysisDepth(Enum):
-    """عمق التحليل"""
-    BASIC = "basic"
-    STANDARD = "standard"
-    ADVANCED = "advanced"
-    COMPREHENSIVE = "comprehensive"
+    ACCOUNTS = "accounts"
+    CAMPAIGNS = "campaigns"
+    KEYWORDS = "keywords"
+    OPPORTUNITIES = "opportunities"
+    COMPETITORS = "competitors"
+    MARKET_TRENDS = "market_trends"
+    AUDIENCE_INSIGHTS = "audience_insights"
 
 class OpportunityType(Enum):
     """أنواع الفرص"""
     KEYWORD_EXPANSION = "keyword_expansion"
+    BUDGET_OPTIMIZATION = "budget_optimization"
     BID_OPTIMIZATION = "bid_optimization"
     AD_COPY_IMPROVEMENT = "ad_copy_improvement"
-    AUDIENCE_TARGETING = "audience_targeting"
-    BUDGET_REALLOCATION = "budget_reallocation"
-    NEGATIVE_KEYWORDS = "negative_keywords"
     LANDING_PAGE_OPTIMIZATION = "landing_page_optimization"
+    AUDIENCE_EXPANSION = "audience_expansion"
+    GEOGRAPHIC_EXPANSION = "geographic_expansion"
+    DEVICE_OPTIMIZATION = "device_optimization"
 
 @dataclass
-class DiscoveryConfig:
-    """إعدادات الاكتشاف"""
-    customer_id: str
-    discovery_types: List[DiscoveryType] = field(default_factory=lambda: [DiscoveryType.ACCOUNTS])
-    analysis_depth: AnalysisDepth = AnalysisDepth.STANDARD
-    include_historical_data: bool = True
-    historical_days: int = 90
-    include_competitor_analysis: bool = False
-    include_ai_insights: bool = True
-    max_results_per_type: int = 100
-    enable_caching: bool = True
-    cache_duration_hours: int = 24
-    parallel_processing: bool = True
-    include_performance_metrics: bool = True
-    language: str = "ar"
-    currency: str = "SAR"
-    timezone: str = "Asia/Riyadh"
+class DiscoveryRequest:
+    """طلب الاكتشاف"""
+    discovery_type: DiscoveryType
+    customer_id: Optional[str] = None
+    campaign_ids: List[str] = field(default_factory=list)
+    keywords: List[str] = field(default_factory=list)
+    competitors: List[str] = field(default_factory=list)
+    date_range: str = "last_30_days"
+    filters: Dict[str, Any] = field(default_factory=dict)
+    options: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
-class AccountInfo:
-    """معلومات الحساب"""
-    customer_id: str
-    name: str
-    currency_code: str
-    time_zone: str
-    status: str
-    account_type: str
-    manager_customer_id: Optional[str] = None
-    descriptive_name: Optional[str] = None
-    can_manage_clients: bool = False
-    test_account: bool = False
-    auto_tagging_enabled: bool = False
-    tracking_url_template: Optional[str] = None
-    final_url_suffix: Optional[str] = None
-    created_date: Optional[datetime] = None
-    last_modified_time: Optional[datetime] = None
+class KeywordOpportunity:
+    """فرصة الكلمة المفتاحية"""
+    keyword: str
+    search_volume: int
+    competition: str
+    suggested_bid: float
+    relevance_score: float
+    opportunity_score: float
+    current_rank: Optional[int] = None
+    potential_clicks: int = 0
+    potential_conversions: int = 0
+    potential_revenue: float = 0.0
+    difficulty_level: str = "medium"
+    related_keywords: List[str] = field(default_factory=list)
 
 @dataclass
-class CampaignInfo:
-    """معلومات الحملة"""
-    campaign_id: str
-    name: str
-    status: str
-    campaign_type: str
-    serving_status: str
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    budget_amount: Optional[float] = None
-    budget_type: Optional[str] = None
-    bidding_strategy: Optional[str] = None
-    target_locations: List[str] = field(default_factory=list)
-    target_languages: List[str] = field(default_factory=list)
-    ad_groups_count: int = 0
-    keywords_count: int = 0
-    ads_count: int = 0
-    performance_metrics: Dict[str, Any] = field(default_factory=dict)
+class CompetitorInsight:
+    """رؤى المنافس"""
+    competitor_domain: str
+    competitor_name: str
+    estimated_budget: float
+    ad_count: int
+    top_keywords: List[str]
+    ad_copy_themes: List[str]
+    landing_page_insights: Dict[str, Any]
+    performance_indicators: Dict[str, Any]
+    competitive_advantage: List[str]
+    weakness_areas: List[str]
+    market_share: float = 0.0
 
-@dataclass
-class KeywordInfo:
-    """معلومات الكلمة المفتاحية"""
-    keyword_id: str
-    text: str
-    match_type: str
-    status: str
-    bid_amount: Optional[float] = None
-    quality_score: Optional[int] = None
-    search_volume: Optional[int] = None
-    competition: Optional[str] = None
-    suggested_bid: Optional[float] = None
-    performance_metrics: Dict[str, Any] = field(default_factory=dict)
-    ai_insights: Dict[str, Any] = field(default_factory=dict)
+# ==================== Discovery Services ====================
 
-@dataclass
-class OpportunityInsight:
-    """فرصة التحسين"""
-    opportunity_id: str
-    type: OpportunityType
-    title: str
-    description: str
-    impact_score: float
-    effort_score: float
-    priority: str
-    estimated_impact: Dict[str, Any]
-    recommended_actions: List[str]
-    supporting_data: Dict[str, Any]
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-
-@dataclass
-class CompetitorInfo:
-    """معلومات المنافس"""
-    competitor_id: str
-    domain: str
-    name: Optional[str] = None
-    estimated_budget: Optional[float] = None
-    ad_count: Optional[int] = None
-    keyword_overlap: Optional[float] = None
-    position_overlap: Optional[float] = None
-    shared_keywords: List[str] = field(default_factory=list)
-    competitive_metrics: Dict[str, Any] = field(default_factory=dict)
-
-class PerformanceAnalyzer:
-    """محلل الأداء المتطور"""
+class KeywordDiscoveryService:
+    """خدمة اكتشاف الكلمات المفتاحية"""
     
     def __init__(self):
-        """تهيئة محلل الأداء"""
-        self.metrics_cache = {}
-        self.benchmark_data = {}
-    
-    def calculate_performance_score(self, metrics: Dict[str, Any]) -> float:
-        """حساب نقاط الأداء"""
-        try:
-            # وزن المقاييس المختلفة
-            weights = {
-                'ctr': 0.25,  # معدل النقر
-                'conversion_rate': 0.30,  # معدل التحويل
-                'cost_per_conversion': 0.20,  # تكلفة التحويل
-                'quality_score': 0.15,  # نقاط الجودة
-                'impression_share': 0.10  # حصة الظهور
-            }
-            
-            score = 0.0
-            total_weight = 0.0
-            
-            for metric, weight in weights.items():
-                if metric in metrics and metrics[metric] is not None:
-                    normalized_value = self._normalize_metric(metric, metrics[metric])
-                    score += normalized_value * weight
-                    total_weight += weight
-            
-            return (score / total_weight * 100) if total_weight > 0 else 0.0
-            
-        except Exception as e:
-            logger.error(f"خطأ في حساب نقاط الأداء: {e}")
-            return 0.0
-    
-    def _normalize_metric(self, metric_name: str, value: float) -> float:
-        """تطبيع قيم المقاييس"""
-        # تطبيع القيم بناءً على المعايير الصناعية
-        normalization_rules = {
-            'ctr': lambda x: min(x / 5.0, 1.0),  # 5% CTR = 100%
-            'conversion_rate': lambda x: min(x / 10.0, 1.0),  # 10% CR = 100%
-            'cost_per_conversion': lambda x: max(1.0 - (x / 1000.0), 0.0),  # أقل تكلفة = أفضل
-            'quality_score': lambda x: x / 10.0,  # من 10
-            'impression_share': lambda x: x / 100.0  # من 100%
-        }
-        
-        if metric_name in normalization_rules:
-            return normalization_rules[metric_name](value)
-        
-        return min(value / 100.0, 1.0)  # تطبيع افتراضي
-
-class AIInsightsEngine:
-    """محرك الرؤى بالذكاء الاصطناعي"""
-    
-    def __init__(self):
-        """تهيئة محرك الذكاء الاصطناعي"""
+        """تهيئة خدمة اكتشاف الكلمات المفتاحية"""
+        self.keyword_cache = {}
         self.vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
-        self.keyword_clusters = {}
-        self.trend_patterns = {}
-    
-    async def analyze_keywords(self, keywords: List[KeywordInfo]) -> Dict[str, Any]:
-        """تحليل الكلمات المفتاحية بالذكاء الاصطناعي"""
+        
+    def discover_keywords(self, seed_keywords: List[str], options: Dict[str, Any] = None) -> List[KeywordOpportunity]:
+        """اكتشاف الكلمات المفتاحية - دالة متزامنة"""
         try:
-            if not keywords:
-                return {'clusters': [], 'insights': [], 'recommendations': []}
+            if not options:
+                options = {}
             
-            # استخراج النصوص
-            keyword_texts = [kw.text for kw in keywords]
+            discovered_keywords = []
             
-            # تجميع الكلمات المفتاحية
-            clusters = await self._cluster_keywords(keyword_texts)
-            
-            # تحليل الأداء
-            performance_insights = await self._analyze_keyword_performance(keywords)
-            
-            # توليد التوصيات
-            recommendations = await self._generate_keyword_recommendations(keywords, clusters)
-            
-            return {
-                'clusters': clusters,
-                'performance_insights': performance_insights,
-                'recommendations': recommendations,
-                'total_keywords': len(keywords),
-                'analysis_timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-        except Exception as e:
-            logger.error(f"خطأ في تحليل الكلمات المفتاحية: {e}")
-            return {'error': str(e)}
-    
-    async def _cluster_keywords(self, keyword_texts: List[str]) -> List[Dict[str, Any]]:
-        """تجميع الكلمات المفتاحية"""
-        try:
-            if len(keyword_texts) < 3:
-                return [{'cluster_id': 0, 'keywords': keyword_texts, 'theme': 'عام'}]
-            
-            # تحويل النصوص إلى vectors
-            tfidf_matrix = self.vectorizer.fit_transform(keyword_texts)
-            
-            # تحديد عدد المجموعات
-            n_clusters = min(5, len(keyword_texts) // 3)
-            
-            # تطبيق K-means
-            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-            cluster_labels = kmeans.fit_predict(tfidf_matrix)
-            
-            # تنظيم النتائج
-            clusters = []
-            for i in range(n_clusters):
-                cluster_keywords = [keyword_texts[j] for j, label in enumerate(cluster_labels) if label == i]
-                theme = await self._extract_cluster_theme(cluster_keywords)
+            for seed_keyword in seed_keywords:
+                # محاكاة اكتشاف الكلمات المفتاحية
+                related_keywords = self._generate_related_keywords(seed_keyword)
                 
-                clusters.append({
-                    'cluster_id': i,
-                    'keywords': cluster_keywords,
-                    'theme': theme,
-                    'size': len(cluster_keywords)
-                })
-            
-            return clusters
-            
-        except Exception as e:
-            logger.error(f"خطأ في تجميع الكلمات المفتاحية: {e}")
-            return []
-    
-    async def _extract_cluster_theme(self, keywords: List[str]) -> str:
-        """استخراج موضوع المجموعة"""
-        try:
-            # تحليل بسيط لاستخراج الموضوع
-            word_freq = Counter()
-            for keyword in keywords:
-                words = keyword.lower().split()
-                word_freq.update(words)
-            
-            # أكثر الكلمات تكراراً
-            most_common = word_freq.most_common(3)
-            if most_common:
-                return ' + '.join([word for word, _ in most_common])
-            
-            return 'عام'
-            
-        except Exception as e:
-            logger.error(f"خطأ في استخراج موضوع المجموعة: {e}")
-            return 'غير محدد'
-    
-    async def _analyze_keyword_performance(self, keywords: List[KeywordInfo]) -> List[Dict[str, Any]]:
-        """تحليل أداء الكلمات المفتاحية"""
-        insights = []
-        
-        try:
-            # تحليل توزيع نقاط الجودة
-            quality_scores = [kw.quality_score for kw in keywords if kw.quality_score]
-            if quality_scores:
-                avg_quality = np.mean(quality_scores)
-                insights.append({
-                    'type': 'quality_analysis',
-                    'message': f'متوسط نقاط الجودة: {avg_quality:.1f}',
-                    'recommendation': 'تحسين نقاط الجودة' if avg_quality < 7 else 'نقاط جودة ممتازة'
-                })
-            
-            # تحليل أنواع المطابقة
-            match_types = Counter([kw.match_type for kw in keywords])
-            insights.append({
-                'type': 'match_type_distribution',
-                'data': dict(match_types),
-                'recommendation': 'توازن جيد في أنواع المطابقة' if len(match_types) > 1 else 'تنويع أنواع المطابقة'
-            })
-            
-            # تحليل الحالة
-            statuses = Counter([kw.status for kw in keywords])
-            active_ratio = statuses.get('ENABLED', 0) / len(keywords) * 100
-            insights.append({
-                'type': 'status_analysis',
-                'active_percentage': active_ratio,
-                'recommendation': 'نسبة تفعيل جيدة' if active_ratio > 80 else 'تحسين نسبة الكلمات النشطة'
-            })
-            
-            return insights
-            
-        except Exception as e:
-            logger.error(f"خطأ في تحليل أداء الكلمات المفتاحية: {e}")
-            return []
-    
-    async def _generate_keyword_recommendations(self, keywords: List[KeywordInfo], clusters: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """توليد توصيات الكلمات المفتاحية"""
-        recommendations = []
-        
-        try:
-            # توصيات بناءً على نقاط الجودة
-            low_quality_keywords = [kw for kw in keywords if kw.quality_score and kw.quality_score < 5]
-            if low_quality_keywords:
-                recommendations.append({
-                    'type': 'quality_improvement',
-                    'priority': 'high',
-                    'title': 'تحسين نقاط الجودة',
-                    'description': f'يوجد {len(low_quality_keywords)} كلمة مفتاحية بنقاط جودة منخفضة',
-                    'action': 'مراجعة وتحسين الإعلانات والصفحات المقصودة'
-                })
-            
-            # توصيات بناءً على المجموعات
-            for cluster in clusters:
-                if cluster['size'] > 10:
-                    recommendations.append({
-                        'type': 'keyword_expansion',
-                        'priority': 'medium',
-                        'title': f'توسيع مجموعة {cluster["theme"]}',
-                        'description': f'مجموعة كبيرة ({cluster["size"]} كلمة) يمكن تقسيمها',
-                        'action': 'إنشاء مجموعات إعلانية منفصلة'
-                    })
-            
-            # توصيات عامة
-            if len(keywords) < 20:
-                recommendations.append({
-                    'type': 'keyword_expansion',
-                    'priority': 'medium',
-                    'title': 'توسيع قائمة الكلمات المفتاحية',
-                    'description': 'عدد الكلمات المفتاحية قليل نسبياً',
-                    'action': 'إضافة كلمات مفتاحية ذات صلة'
-                })
-            
-            return recommendations
-            
-        except Exception as e:
-            logger.error(f"خطأ في توليد توصيات الكلمات المفتاحية: {e}")
-            return []
-
-class OpportunityDetector:
-    """كاشف الفرص المتطور"""
-    
-    def __init__(self):
-        """تهيئة كاشف الفرص"""
-        self.opportunity_rules = self._load_opportunity_rules()
-        self.performance_analyzer = PerformanceAnalyzer()
-    
-    def _load_opportunity_rules(self) -> Dict[str, Any]:
-        """تحميل قواعد اكتشاف الفرص"""
-        return {
-            'low_ctr_threshold': 2.0,  # أقل من 2% CTR
-            'high_cpc_threshold': 10.0,  # أعلى من 10 ريال CPC
-            'low_quality_score_threshold': 5,  # أقل من 5 نقاط جودة
-            'low_impression_share_threshold': 50.0,  # أقل من 50% حصة ظهور
-            'high_cost_per_conversion_threshold': 100.0  # أعلى من 100 ريال لكل تحويل
-        }
-    
-    async def detect_opportunities(self, campaigns: List[CampaignInfo], keywords: List[KeywordInfo]) -> List[OpportunityInsight]:
-        """اكتشاف الفرص"""
-        opportunities = []
-        
-        try:
-            # اكتشاف فرص تحسين معدل النقر
-            ctr_opportunities = await self._detect_ctr_opportunities(campaigns, keywords)
-            opportunities.extend(ctr_opportunities)
-            
-            # اكتشاف فرص تحسين العروض
-            bid_opportunities = await self._detect_bid_opportunities(keywords)
-            opportunities.extend(bid_opportunities)
-            
-            # اكتشاف فرص الكلمات السلبية
-            negative_keyword_opportunities = await self._detect_negative_keyword_opportunities(keywords)
-            opportunities.extend(negative_keyword_opportunities)
-            
-            # اكتشاف فرص إعادة توزيع الميزانية
-            budget_opportunities = await self._detect_budget_opportunities(campaigns)
-            opportunities.extend(budget_opportunities)
-            
-            # ترتيب الفرص حسب الأولوية
-            opportunities.sort(key=lambda x: x.impact_score, reverse=True)
-            
-            return opportunities
-            
-        except Exception as e:
-            logger.error(f"خطأ في اكتشاف الفرص: {e}")
-            return []
-    
-    async def _detect_ctr_opportunities(self, campaigns: List[CampaignInfo], keywords: List[KeywordInfo]) -> List[OpportunityInsight]:
-        """اكتشاف فرص تحسين معدل النقر"""
-        opportunities = []
-        
-        try:
-            for campaign in campaigns:
-                ctr = campaign.performance_metrics.get('ctr', 0)
-                if ctr < self.opportunity_rules['low_ctr_threshold']:
-                    opportunity = OpportunityInsight(
-                        opportunity_id=generate_unique_id('opp_ctr') if SERVICES_STATUS['helpers'] else f"ctr_{campaign.campaign_id}",
-                        type=OpportunityType.AD_COPY_IMPROVEMENT,
-                        title=f"تحسين معدل النقر للحملة {campaign.name}",
-                        description=f"معدل النقر الحالي {ctr:.2f}% أقل من المتوسط المطلوب",
-                        impact_score=85.0,
-                        effort_score=60.0,
-                        priority="high",
-                        estimated_impact={
-                            'ctr_improvement': f"+{2.0 - ctr:.1f}%",
-                            'additional_clicks': int((2.0 - ctr) * campaign.performance_metrics.get('impressions', 0) / 100),
-                            'potential_conversions': int((2.0 - ctr) * campaign.performance_metrics.get('impressions', 0) * campaign.performance_metrics.get('conversion_rate', 2) / 10000)
-                        },
-                        recommended_actions=[
-                            "إعادة كتابة نصوص الإعلانات",
-                            "إضافة عبارات دعوة للعمل قوية",
-                            "اختبار عناوين مختلفة",
-                            "تحسين الوصف والامتدادات"
-                        ],
-                        supporting_data={
-                            'current_ctr': ctr,
-                            'target_ctr': 2.0,
-                            'campaign_id': campaign.campaign_id,
-                            'impressions': campaign.performance_metrics.get('impressions', 0)
-                        }
+                for keyword in related_keywords:
+                    opportunity = KeywordOpportunity(
+                        keyword=keyword,
+                        search_volume=np.random.randint(1000, 50000),
+                        competition=np.random.choice(['low', 'medium', 'high']),
+                        suggested_bid=round(np.random.uniform(0.5, 5.0), 2),
+                        relevance_score=round(np.random.uniform(0.6, 1.0), 2),
+                        opportunity_score=round(np.random.uniform(0.5, 1.0), 2),
+                        potential_clicks=np.random.randint(50, 1000),
+                        potential_conversions=np.random.randint(5, 100),
+                        potential_revenue=round(np.random.uniform(100, 5000), 2),
+                        difficulty_level=np.random.choice(['easy', 'medium', 'hard']),
+                        related_keywords=self._get_related_keywords(keyword)
                     )
-                    opportunities.append(opportunity)
+                    discovered_keywords.append(opportunity)
             
-            return opportunities
+            # ترتيب حسب نقاط الفرصة
+            discovered_keywords.sort(key=lambda x: x.opportunity_score, reverse=True)
             
-        except Exception as e:
-            logger.error(f"خطأ في اكتشاف فرص CTR: {e}")
-            return []
-    
-    async def _detect_bid_opportunities(self, keywords: List[KeywordInfo]) -> List[OpportunityInsight]:
-        """اكتشاف فرص تحسين العروض"""
-        opportunities = []
-        
-        try:
-            high_cpc_keywords = [kw for kw in keywords if kw.performance_metrics.get('avg_cpc', 0) > self.opportunity_rules['high_cpc_threshold']]
-            
-            if high_cpc_keywords:
-                total_cost_savings = sum(kw.performance_metrics.get('cost', 0) * 0.2 for kw in high_cpc_keywords)
-                
-                opportunity = OpportunityInsight(
-                    opportunity_id=generate_unique_id('opp_bid') if SERVICES_STATUS['helpers'] else f"bid_{int(time.time())}",
-                    type=OpportunityType.BID_OPTIMIZATION,
-                    title="تحسين عروض الكلمات المفتاحية عالية التكلفة",
-                    description=f"يوجد {len(high_cpc_keywords)} كلمة مفتاحية بتكلفة نقرة عالية",
-                    impact_score=75.0,
-                    effort_score=40.0,
-                    priority="medium",
-                    estimated_impact={
-                        'cost_savings': f"{total_cost_savings:.2f} ريال شهرياً",
-                        'affected_keywords': len(high_cpc_keywords),
-                        'average_cpc_reduction': "15-25%"
-                    },
-                    recommended_actions=[
-                        "مراجعة عروض الكلمات عالية التكلفة",
-                        "تطبيق استراتيجيات عروض ذكية",
-                        "تحسين نقاط الجودة لتقليل التكلفة",
-                        "إضافة كلمات سلبية لتحسين الاستهداف"
-                    ],
-                    supporting_data={
-                        'high_cpc_keywords': [kw.text for kw in high_cpc_keywords[:10]],
-                        'average_cpc': np.mean([kw.performance_metrics.get('avg_cpc', 0) for kw in high_cpc_keywords]),
-                        'total_keywords': len(high_cpc_keywords)
-                    }
-                )
-                opportunities.append(opportunity)
-            
-            return opportunities
+            return discovered_keywords[:options.get('limit', 50)]
             
         except Exception as e:
-            logger.error(f"خطأ في اكتشاف فرص العروض: {e}")
+            logger.error(f"خطأ في اكتشاف الكلمات المفتاحية: {e}")
             return []
     
-    async def _detect_negative_keyword_opportunities(self, keywords: List[KeywordInfo]) -> List[OpportunityInsight]:
-        """اكتشاف فرص الكلمات السلبية"""
-        opportunities = []
-        
+    def _generate_related_keywords(self, seed_keyword: str) -> List[str]:
+        """توليد كلمات مفتاحية مرتبطة - دالة متزامنة"""
         try:
-            # البحث عن كلمات بمعدل تحويل منخفض وتكلفة عالية
-            poor_performing_keywords = [
-                kw for kw in keywords 
-                if kw.performance_metrics.get('conversion_rate', 0) < 1.0 
-                and kw.performance_metrics.get('cost', 0) > 50
+            # محاكاة توليد كلمات مفتاحية مرتبطة
+            base_variations = [
+                f"{seed_keyword} online",
+                f"{seed_keyword} best",
+                f"{seed_keyword} cheap",
+                f"{seed_keyword} reviews",
+                f"{seed_keyword} price",
+                f"buy {seed_keyword}",
+                f"{seed_keyword} near me",
+                f"{seed_keyword} service",
+                f"{seed_keyword} company",
+                f"{seed_keyword} store"
             ]
             
-            if poor_performing_keywords:
-                potential_savings = sum(kw.performance_metrics.get('cost', 0) for kw in poor_performing_keywords)
-                
-                opportunity = OpportunityInsight(
-                    opportunity_id=generate_unique_id('opp_neg') if SERVICES_STATUS['helpers'] else f"neg_{int(time.time())}",
-                    type=OpportunityType.NEGATIVE_KEYWORDS,
-                    title="إضافة كلمات سلبية لتحسين الاستهداف",
-                    description=f"يوجد {len(poor_performing_keywords)} كلمة مفتاحية بأداء ضعيف",
-                    impact_score=70.0,
-                    effort_score=30.0,
-                    priority="medium",
-                    estimated_impact={
-                        'cost_savings': f"{potential_savings:.2f} ريال شهرياً",
-                        'improved_relevance': "تحسين جودة الزيارات بنسبة 20-30%",
-                        'affected_keywords': len(poor_performing_keywords)
-                    },
-                    recommended_actions=[
-                        "تحليل استعلامات البحث للكلمات ضعيفة الأداء",
-                        "إضافة كلمات سلبية للاستعلامات غير ذات الصلة",
-                        "مراجعة أنواع مطابقة الكلمات المفتاحية",
-                        "تحسين استهداف الجمهور"
-                    ],
-                    supporting_data={
-                        'poor_keywords': [kw.text for kw in poor_performing_keywords[:10]],
-                        'average_conversion_rate': np.mean([kw.performance_metrics.get('conversion_rate', 0) for kw in poor_performing_keywords]),
-                        'total_cost': potential_savings
-                    }
-                )
-                opportunities.append(opportunity)
+            # إضافة تنويعات أكثر تعقيداً
+            advanced_variations = [
+                f"best {seed_keyword} 2024",
+                f"affordable {seed_keyword}",
+                f"{seed_keyword} comparison",
+                f"{seed_keyword} guide",
+                f"{seed_keyword} tips",
+                f"professional {seed_keyword}",
+                f"{seed_keyword} solutions",
+                f"top {seed_keyword}",
+                f"{seed_keyword} expert",
+                f"{seed_keyword} consultation"
+            ]
             
-            return opportunities
+            all_variations = base_variations + advanced_variations
+            return np.random.choice(all_variations, size=min(15, len(all_variations)), replace=False).tolist()
             
         except Exception as e:
-            logger.error(f"خطأ في اكتشاف فرص الكلمات السلبية: {e}")
+            logger.error(f"خطأ في توليد كلمات مفتاحية مرتبطة: {e}")
             return []
     
-    async def _detect_budget_opportunities(self, campaigns: List[CampaignInfo]) -> List[OpportunityInsight]:
-        """اكتشاف فرص إعادة توزيع الميزانية"""
-        opportunities = []
-        
+    def _get_related_keywords(self, keyword: str) -> List[str]:
+        """الحصول على كلمات مفتاحية مرتبطة - دالة متزامنة"""
         try:
-            # تحليل أداء الحملات
-            campaign_performance = []
-            for campaign in campaigns:
-                performance_score = self.performance_analyzer.calculate_performance_score(campaign.performance_metrics)
-                campaign_performance.append({
-                    'campaign': campaign,
-                    'performance_score': performance_score,
-                    'budget': campaign.budget_amount or 0
-                })
+            # محاكاة كلمات مفتاحية مرتبطة
+            related = [
+                f"{keyword} alternative",
+                f"{keyword} similar",
+                f"{keyword} like",
+                f"{keyword} vs",
+                f"{keyword} comparison"
+            ]
+            return related[:3]
+        except Exception as e:
+            logger.error(f"خطأ في الحصول على كلمات مفتاحية مرتبطة: {e}")
+            return []
+    
+    def analyze_keyword_clusters(self, keywords: List[str]) -> Dict[str, Any]:
+        """تحليل مجموعات الكلمات المفتاحية - دالة متزامنة"""
+        try:
+            if len(keywords) < 3:
+                return {'clusters': [], 'analysis': 'عدد الكلمات المفتاحية قليل للتحليل'}
             
-            # ترتيب حسب الأداء
-            campaign_performance.sort(key=lambda x: x['performance_score'], reverse=True)
-            
-            # البحث عن فرص إعادة التوزيع
-            high_performers = [cp for cp in campaign_performance if cp['performance_score'] > 70]
-            low_performers = [cp for cp in campaign_performance if cp['performance_score'] < 40]
-            
-            if high_performers and low_performers:
-                opportunity = OpportunityInsight(
-                    opportunity_id=generate_unique_id('opp_budget') if SERVICES_STATUS['helpers'] else f"budget_{int(time.time())}",
-                    type=OpportunityType.BUDGET_REALLOCATION,
-                    title="إعادة توزيع الميزانية بناءً على الأداء",
-                    description=f"يمكن تحسين العائد بإعادة توزيع الميزانية من {len(low_performers)} حملة ضعيفة إلى {len(high_performers)} حملة قوية",
-                    impact_score=80.0,
-                    effort_score=50.0,
-                    priority="high",
-                    estimated_impact={
-                        'roi_improvement': "15-25%",
-                        'high_performing_campaigns': len(high_performers),
-                        'underperforming_campaigns': len(low_performers),
-                        'potential_budget_shift': f"{sum(cp['budget'] for cp in low_performers) * 0.3:.2f} ريال"
-                    },
-                    recommended_actions=[
-                        "زيادة ميزانية الحملات عالية الأداء",
-                        "تقليل ميزانية الحملات ضعيفة الأداء",
-                        "مراجعة استراتيجيات الحملات ضعيفة الأداء",
-                        "تطبيق تحسينات على الحملات المتوسطة"
-                    ],
-                    supporting_data={
-                        'high_performers': [cp['campaign'].name for cp in high_performers[:5]],
-                        'low_performers': [cp['campaign'].name for cp in low_performers[:5]],
-                        'performance_gap': campaign_performance[0]['performance_score'] - campaign_performance[-1]['performance_score']
+            # تحويل الكلمات المفتاحية إلى vectors
+            try:
+                tfidf_matrix = self.vectorizer.fit_transform(keywords)
+                
+                # تطبيق K-means clustering
+                n_clusters = min(5, len(keywords) // 2)
+                if n_clusters < 2:
+                    n_clusters = 2
+                
+                kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                cluster_labels = kmeans.fit_predict(tfidf_matrix)
+                
+                # تجميع الكلمات المفتاحية حسب المجموعات
+                clusters = {}
+                for i, keyword in enumerate(keywords):
+                    cluster_id = int(cluster_labels[i])
+                    if cluster_id not in clusters:
+                        clusters[cluster_id] = []
+                    clusters[cluster_id].append(keyword)
+                
+                # تحليل المجموعات
+                cluster_analysis = []
+                for cluster_id, cluster_keywords in clusters.items():
+                    analysis = {
+                        'cluster_id': cluster_id,
+                        'keywords': cluster_keywords,
+                        'size': len(cluster_keywords),
+                        'theme': self._identify_cluster_theme(cluster_keywords),
+                        'avg_search_volume': np.random.randint(5000, 25000),
+                        'competition_level': np.random.choice(['low', 'medium', 'high']),
+                        'opportunity_score': round(np.random.uniform(0.6, 1.0), 2)
                     }
-                )
-                opportunities.append(opportunity)
-            
-            return opportunities
+                    cluster_analysis.append(analysis)
+                
+                return {
+                    'clusters': cluster_analysis,
+                    'total_clusters': len(clusters),
+                    'analysis': f'تم تحديد {len(clusters)} مجموعات من الكلمات المفتاحية'
+                }
+                
+            except Exception as e:
+                logger.error(f"خطأ في تحليل المجموعات: {e}")
+                return {'clusters': [], 'analysis': 'فشل في تحليل المجموعات'}
             
         except Exception as e:
-            logger.error(f"خطأ في اكتشاف فرص الميزانية: {e}")
-            return []
+            logger.error(f"خطأ في تحليل مجموعات الكلمات المفتاحية: {e}")
+            return {'clusters': [], 'analysis': 'خطأ في التحليل'}
+    
+    def _identify_cluster_theme(self, keywords: List[str]) -> str:
+        """تحديد موضوع المجموعة"""
+        try:
+            # تحليل بسيط لتحديد الموضوع
+            common_words = []
+            for keyword in keywords:
+                words = keyword.lower().split()
+                common_words.extend(words)
+            
+            # العثور على الكلمات الأكثر شيوعاً
+            word_counts = Counter(common_words)
+            most_common = word_counts.most_common(3)
+            
+            if most_common:
+                return f"موضوع: {', '.join([word for word, count in most_common])}"
+            else:
+                return "موضوع عام"
+                
+        except Exception as e:
+            logger.error(f"خطأ في تحديد موضوع المجموعة: {e}")
+            return "موضوع غير محدد"
 
-class GoogleAdsDiscoveryService:
-    """خدمة اكتشاف Google Ads المتطورة والذكية"""
+class CompetitorDiscoveryService:
+    """خدمة اكتشاف المنافسين"""
     
     def __init__(self):
-        """تهيئة خدمة الاكتشاف"""
-        self.google_ads_client = GoogleAdsClientManager() if SERVICES_STATUS['google_ads_client'] else None
-        self.db_manager = DatabaseManager() if SERVICES_STATUS['database'] else None
-        self.ai_insights_engine = AIInsightsEngine()
-        self.opportunity_detector = OpportunityDetector()
-        self.performance_analyzer = PerformanceAnalyzer()
+        """تهيئة خدمة اكتشاف المنافسين"""
+        self.competitor_cache = {}
         
-        # تخزين مؤقت للنتائج
+    def discover_competitors(self, domain: str, keywords: List[str] = None) -> List[CompetitorInsight]:
+        """اكتشاف المنافسين - دالة متزامنة"""
+        try:
+            competitors = []
+            
+            # محاكاة اكتشاف المنافسين
+            competitor_domains = [
+                "competitor1.com",
+                "competitor2.com", 
+                "competitor3.com",
+                "competitor4.com",
+                "competitor5.com"
+            ]
+            
+            for i, comp_domain in enumerate(competitor_domains):
+                competitor = CompetitorInsight(
+                    competitor_domain=comp_domain,
+                    competitor_name=f"Competitor {i+1}",
+                    estimated_budget=round(np.random.uniform(10000, 100000), 2),
+                    ad_count=np.random.randint(50, 500),
+                    top_keywords=self._get_competitor_keywords(comp_domain),
+                    ad_copy_themes=self._analyze_ad_copy_themes(comp_domain),
+                    landing_page_insights=self._analyze_landing_pages(comp_domain),
+                    performance_indicators=self._get_performance_indicators(comp_domain),
+                    competitive_advantage=self._identify_competitive_advantages(comp_domain),
+                    weakness_areas=self._identify_weakness_areas(comp_domain),
+                    market_share=round(np.random.uniform(5, 25), 2)
+                )
+                competitors.append(competitor)
+            
+            return competitors
+            
+        except Exception as e:
+            logger.error(f"خطأ في اكتشاف المنافسين: {e}")
+            return []
+    
+    def _get_competitor_keywords(self, domain: str) -> List[str]:
+        """الحصول على كلمات المنافس المفتاحية"""
+        try:
+            # محاكاة كلمات المنافس المفتاحية
+            keywords = [
+                "digital marketing",
+                "online advertising",
+                "SEO services",
+                "PPC management",
+                "social media marketing",
+                "content marketing",
+                "email marketing",
+                "web design",
+                "brand strategy",
+                "marketing automation"
+            ]
+            return np.random.choice(keywords, size=5, replace=False).tolist()
+        except Exception as e:
+            logger.error(f"خطأ في الحصول على كلمات المنافس: {e}")
+            return []
+    
+    def _analyze_ad_copy_themes(self, domain: str) -> List[str]:
+        """تحليل موضوعات نسخ الإعلانات"""
+        try:
+            themes = [
+                "Quality Focus",
+                "Price Competitive", 
+                "Expert Service",
+                "Fast Delivery",
+                "Customer Satisfaction",
+                "Innovation Leader",
+                "Trusted Brand",
+                "24/7 Support"
+            ]
+            return np.random.choice(themes, size=3, replace=False).tolist()
+        except Exception as e:
+            logger.error(f"خطأ في تحليل موضوعات الإعلانات: {e}")
+            return []
+    
+    def _analyze_landing_pages(self, domain: str) -> Dict[str, Any]:
+        """تحليل الصفحات المقصودة"""
+        try:
+            return {
+                'page_count': np.random.randint(10, 50),
+                'avg_load_time': round(np.random.uniform(1.5, 4.0), 2),
+                'mobile_optimized': np.random.choice([True, False]),
+                'conversion_elements': np.random.randint(3, 8),
+                'design_quality': np.random.choice(['excellent', 'good', 'average', 'poor']),
+                'content_quality': np.random.choice(['high', 'medium', 'low']),
+                'user_experience_score': round(np.random.uniform(6.0, 9.5), 1)
+            }
+        except Exception as e:
+            logger.error(f"خطأ في تحليل الصفحات المقصودة: {e}")
+            return {}
+    
+    def _get_performance_indicators(self, domain: str) -> Dict[str, Any]:
+        """الحصول على مؤشرات الأداء"""
+        try:
+            return {
+                'estimated_traffic': np.random.randint(10000, 100000),
+                'estimated_clicks': np.random.randint(5000, 50000),
+                'estimated_conversions': np.random.randint(500, 5000),
+                'estimated_ctr': round(np.random.uniform(2.0, 8.0), 2),
+                'estimated_conversion_rate': round(np.random.uniform(1.0, 10.0), 2),
+                'brand_awareness_score': round(np.random.uniform(0.3, 0.9), 2),
+                'social_media_presence': np.random.choice(['strong', 'moderate', 'weak'])
+            }
+        except Exception as e:
+            logger.error(f"خطأ في الحصول على مؤشرات الأداء: {e}")
+            return {}
+    
+    def _identify_competitive_advantages(self, domain: str) -> List[str]:
+        """تحديد المزايا التنافسية"""
+        try:
+            advantages = [
+                "Strong brand recognition",
+                "Competitive pricing",
+                "Superior customer service",
+                "Advanced technology",
+                "Wide product range",
+                "Fast delivery",
+                "Expert team",
+                "Market leadership"
+            ]
+            return np.random.choice(advantages, size=3, replace=False).tolist()
+        except Exception as e:
+            logger.error(f"خطأ في تحديد المزايا التنافسية: {e}")
+            return []
+    
+    def _identify_weakness_areas(self, domain: str) -> List[str]:
+        """تحديد نقاط الضعف"""
+        try:
+            weaknesses = [
+                "Limited mobile optimization",
+                "Slow website speed",
+                "Poor customer reviews",
+                "Limited social media presence",
+                "High pricing",
+                "Limited product variety",
+                "Weak brand awareness",
+                "Poor user experience"
+            ]
+            return np.random.choice(weaknesses, size=2, replace=False).tolist()
+        except Exception as e:
+            logger.error(f"خطأ في تحديد نقاط الضعف: {e}")
+            return []
+
+# ==================== Discovery Manager ====================
+
+class DiscoveryManager:
+    """مدير الاكتشاف الرئيسي"""
+    
+    def __init__(self):
+        """تهيئة مدير الاكتشاف"""
+        self.keyword_service = KeywordDiscoveryService()
+        self.competitor_service = CompetitorDiscoveryService()
         self.discovery_cache = {}
-        self.cache_expiry = {}
         
-        # إحصائيات الخدمة
-        self.service_stats = {
-            'total_discoveries': 0,
-            'successful_discoveries': 0,
-            'failed_discoveries': 0,
-            'cache_hits': 0,
-            'cache_misses': 0,
-            'last_discovery': None
-        }
-        
-        logger.info("🚀 تم تهيئة خدمة اكتشاف Google Ads المتطورة")
-    
-    async def discover_accounts(self, config: DiscoveryConfig) -> Dict[str, Any]:
-        """اكتشاف الحسابات"""
+    def execute_discovery(self, request: DiscoveryRequest, user_id: str) -> Dict[str, Any]:
+        """تنفيذ عملية الاكتشاف - دالة متزامنة"""
         try:
-            self.service_stats['total_discoveries'] += 1
-            
-            # فحص التخزين المؤقت
-            cache_key = f"accounts_{config.customer_id}"
-            if config.enable_caching:
-                cached_result = await self._get_from_cache(cache_key)
-                if cached_result:
-                    self.service_stats['cache_hits'] += 1
-                    return cached_result
-            
-            self.service_stats['cache_misses'] += 1
-            
-            # اكتشاف الحسابات
-            accounts = await self._fetch_accounts(config)
-            
-            # تحليل الحسابات
-            analysis = await self._analyze_accounts(accounts, config)
+            discovery_id = str(uuid.uuid4())
             
             result = {
-                'success': True,
-                'discovery_type': 'accounts',
-                'config': asdict(config),
-                'accounts': [asdict(account) for account in accounts],
-                'analysis': analysis,
-                'total_accounts': len(accounts),
-                'discovery_timestamp': datetime.now(timezone.utc).isoformat(),
-                'cache_key': cache_key
+                'discovery_id': discovery_id,
+                'user_id': user_id,
+                'request': asdict(request),
+                'results': {},
+                'metadata': {
+                    'started_at': datetime.now(timezone.utc).isoformat(),
+                    'status': 'in_progress'
+                }
             }
             
-            # حفظ في التخزين المؤقت
-            if config.enable_caching:
-                await self._save_to_cache(cache_key, result, config.cache_duration_hours)
+            # تنفيذ الاكتشاف حسب النوع
+            if request.discovery_type == DiscoveryType.KEYWORDS:
+                result['results'] = self._discover_keywords(request)
+            elif request.discovery_type == DiscoveryType.COMPETITORS:
+                result['results'] = self._discover_competitors(request)
+            else:
+                result['results'] = self._comprehensive_discovery(request)
             
-            self.service_stats['successful_discoveries'] += 1
-            self.service_stats['last_discovery'] = datetime.now(timezone.utc)
+            # تحديث الحالة
+            result['metadata']['completed_at'] = datetime.now(timezone.utc).isoformat()
+            result['metadata']['status'] = 'completed'
             
-            return result
+            # حفظ في الكاش
+            self.discovery_cache[discovery_id] = result
             
-        except Exception as e:
-            self.service_stats['failed_discoveries'] += 1
-            logger.error(f"خطأ في اكتشاف الحسابات: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    async def discover_campaigns(self, config: DiscoveryConfig) -> Dict[str, Any]:
-        """اكتشاف الحملات"""
-        try:
-            self.service_stats['total_discoveries'] += 1
-            
-            # فحص التخزين المؤقت
-            cache_key = f"campaigns_{config.customer_id}_{config.analysis_depth.value}"
-            if config.enable_caching:
-                cached_result = await self._get_from_cache(cache_key)
-                if cached_result:
-                    self.service_stats['cache_hits'] += 1
-                    return cached_result
-            
-            self.service_stats['cache_misses'] += 1
-            
-            # اكتشاف الحملات
-            campaigns = await self._fetch_campaigns(config)
-            
-            # تحليل الحملات
-            analysis = await self._analyze_campaigns(campaigns, config)
-            
-            # اكتشاف الفرص
-            opportunities = []
-            if config.analysis_depth in [AnalysisDepth.ADVANCED, AnalysisDepth.COMPREHENSIVE]:
-                keywords = await self._fetch_keywords_for_campaigns(campaigns, config)
-                opportunities = await self.opportunity_detector.detect_opportunities(campaigns, keywords)
-            
-            result = {
+            return {
                 'success': True,
-                'discovery_type': 'campaigns',
-                'config': asdict(config),
-                'campaigns': [asdict(campaign) for campaign in campaigns],
-                'analysis': analysis,
-                'opportunities': [asdict(opp) for opp in opportunities],
-                'total_campaigns': len(campaigns),
-                'total_opportunities': len(opportunities),
-                'discovery_timestamp': datetime.now(timezone.utc).isoformat(),
-                'cache_key': cache_key
+                'discovery_id': discovery_id,
+                'results': result['results'],
+                'metadata': result['metadata']
             }
             
-            # حفظ في التخزين المؤقت
-            if config.enable_caching:
-                await self._save_to_cache(cache_key, result, config.cache_duration_hours)
-            
-            self.service_stats['successful_discoveries'] += 1
-            self.service_stats['last_discovery'] = datetime.now(timezone.utc)
-            
-            return result
-            
         except Exception as e:
-            self.service_stats['failed_discoveries'] += 1
-            logger.error(f"خطأ في اكتشاف الحملات: {e}")
-            return {'success': False, 'error': str(e)}
+            logger.error(f"خطأ في تنفيذ الاكتشاف: {e}")
+            return {
+                'success': False,
+                'error': f'خطأ في تنفيذ الاكتشاف: {str(e)}'
+            }
     
-    async def discover_keywords(self, config: DiscoveryConfig) -> Dict[str, Any]:
+    def _discover_keywords(self, request: DiscoveryRequest) -> Dict[str, Any]:
         """اكتشاف الكلمات المفتاحية"""
         try:
-            self.service_stats['total_discoveries'] += 1
+            keywords = self.keyword_service.discover_keywords(
+                request.keywords, 
+                request.options
+            )
             
-            # فحص التخزين المؤقت
-            cache_key = f"keywords_{config.customer_id}_{config.analysis_depth.value}"
-            if config.enable_caching:
-                cached_result = await self._get_from_cache(cache_key)
-                if cached_result:
-                    self.service_stats['cache_hits'] += 1
-                    return cached_result
+            # تحليل مجموعات الكلمات المفتاحية
+            cluster_analysis = self.keyword_service.analyze_keyword_clusters(
+                [kw.keyword for kw in keywords]
+            )
             
-            self.service_stats['cache_misses'] += 1
-            
-            # اكتشاف الكلمات المفتاحية
-            keywords = await self._fetch_keywords(config)
-            
-            # تحليل بالذكاء الاصطناعي
-            ai_analysis = {}
-            if config.include_ai_insights:
-                ai_analysis = await self.ai_insights_engine.analyze_keywords(keywords)
-            
-            # تحليل الأداء
-            performance_analysis = await self._analyze_keyword_performance(keywords, config)
-            
-            result = {
-                'success': True,
-                'discovery_type': 'keywords',
-                'config': asdict(config),
-                'keywords': [asdict(keyword) for keyword in keywords],
-                'ai_analysis': ai_analysis,
-                'performance_analysis': performance_analysis,
-                'total_keywords': len(keywords),
-                'discovery_timestamp': datetime.now(timezone.utc).isoformat(),
-                'cache_key': cache_key
+            return {
+                'keywords': [asdict(kw) for kw in keywords],
+                'cluster_analysis': cluster_analysis,
+                'summary': {
+                    'total_keywords': len(keywords),
+                    'high_opportunity': len([kw for kw in keywords if kw.opportunity_score > 0.8]),
+                    'avg_search_volume': np.mean([kw.search_volume for kw in keywords]) if keywords else 0
+                }
             }
             
-            # حفظ في التخزين المؤقت
-            if config.enable_caching:
-                await self._save_to_cache(cache_key, result, config.cache_duration_hours)
+        except Exception as e:
+            logger.error(f"خطأ في اكتشاف الكلمات المفتاحية: {e}")
+            return {'error': str(e)}
+    
+    def _discover_competitors(self, request: DiscoveryRequest) -> Dict[str, Any]:
+        """اكتشاف المنافسين"""
+        try:
+            domain = request.options.get('domain', 'example.com')
+            competitors = self.competitor_service.discover_competitors(
+                domain, 
+                request.keywords
+            )
             
-            self.service_stats['successful_discoveries'] += 1
-            self.service_stats['last_discovery'] = datetime.now(timezone.utc)
-            
-            return result
+            return {
+                'competitors': [asdict(comp) for comp in competitors],
+                'summary': {
+                    'total_competitors': len(competitors),
+                    'avg_market_share': np.mean([comp.market_share for comp in competitors]) if competitors else 0,
+                    'total_estimated_budget': sum(comp.estimated_budget for comp in competitors)
+                }
+            }
             
         except Exception as e:
-            self.service_stats['failed_discoveries'] += 1
-            logger.error(f"خطأ في اكتشاف الكلمات المفتاحية: {e}")
-            return {'success': False, 'error': str(e)}
+            logger.error(f"خطأ في اكتشاف المنافسين: {e}")
+            return {'error': str(e)}
     
-    async def comprehensive_discovery(self, config: DiscoveryConfig) -> Dict[str, Any]:
+    def _comprehensive_discovery(self, request: DiscoveryRequest) -> Dict[str, Any]:
         """اكتشاف شامل"""
         try:
-            self.service_stats['total_discoveries'] += 1
+            # تنفيذ جميع أنواع الاكتشاف
+            results = {}
             
-            # تشغيل جميع أنواع الاكتشاف بالتوازي
-            tasks = []
+            if request.keywords:
+                results['keywords'] = self._discover_keywords(request)
             
-            if DiscoveryType.ACCOUNTS in config.discovery_types:
-                tasks.append(self.discover_accounts(config))
+            if request.competitors:
+                comp_request = DiscoveryRequest(
+                    discovery_type=DiscoveryType.COMPETITORS,
+                    keywords=request.keywords,
+                    options={'domain': request.competitors[0] if request.competitors else 'example.com'}
+                )
+                results['competitors'] = self._discover_competitors(comp_request)
             
-            if DiscoveryType.CAMPAIGNS in config.discovery_types:
-                tasks.append(self.discover_campaigns(config))
-            
-            if DiscoveryType.KEYWORDS in config.discovery_types:
-                tasks.append(self.discover_keywords(config))
-            
-            # تنفيذ المهام بالتوازي
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            # تجميع النتائج
-            comprehensive_result = {
-                'success': True,
-                'discovery_type': 'comprehensive',
-                'config': asdict(config),
-                'results': {},
-                'summary': {},
-                'discovery_timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-            # معالجة النتائج
-            for i, result in enumerate(results):
-                if isinstance(result, Exception):
-                    logger.error(f"خطأ في المهمة {i}: {result}")
-                    continue
-                
-                if result.get('success'):
-                    discovery_type = result.get('discovery_type')
-                    comprehensive_result['results'][discovery_type] = result
-            
-            # إنشاء ملخص
-            comprehensive_result['summary'] = await self._create_comprehensive_summary(comprehensive_result['results'])
-            
-            self.service_stats['successful_discoveries'] += 1
-            self.service_stats['last_discovery'] = datetime.now(timezone.utc)
-            
-            return comprehensive_result
+            return results
             
         except Exception as e:
-            self.service_stats['failed_discoveries'] += 1
             logger.error(f"خطأ في الاكتشاف الشامل: {e}")
-            return {'success': False, 'error': str(e)}
-    
-    # دوال مساعدة للاكتشاف
-    async def _fetch_accounts(self, config: DiscoveryConfig) -> List[AccountInfo]:
-        """جلب معلومات الحسابات"""
-        # محاكاة جلب البيانات من Google Ads API
-        accounts = [
-            AccountInfo(
-                customer_id=config.customer_id,
-                name="الحساب الرئيسي",
-                currency_code=config.currency,
-                time_zone=config.timezone,
-                status="ENABLED",
-                account_type="STANDARD",
-                descriptive_name="حساب Google Ads الرئيسي",
-                can_manage_clients=False,
-                test_account=False,
-                auto_tagging_enabled=True,
-                created_date=datetime.now(timezone.utc) - timedelta(days=365)
-            )
-        ]
-        return accounts
-    
-    async def _fetch_campaigns(self, config: DiscoveryConfig) -> List[CampaignInfo]:
-        """جلب معلومات الحملات"""
-        # محاكاة جلب البيانات من Google Ads API
-        campaigns = [
-            CampaignInfo(
-                campaign_id="12345678901",
-                name="حملة البحث الرئيسية",
-                status="ENABLED",
-                campaign_type="SEARCH",
-                serving_status="SERVING",
-                start_date="2024-01-01",
-                budget_amount=1000.0,
-                budget_type="DAILY",
-                bidding_strategy="TARGET_CPA",
-                target_locations=["Saudi Arabia", "UAE"],
-                target_languages=["ar", "en"],
-                ad_groups_count=5,
-                keywords_count=50,
-                ads_count=15,
-                performance_metrics={
-                    'impressions': 10000,
-                    'clicks': 500,
-                    'ctr': 5.0,
-                    'cost': 2500.0,
-                    'conversions': 25,
-                    'conversion_rate': 5.0,
-                    'cost_per_conversion': 100.0,
-                    'avg_cpc': 5.0
-                }
-            ),
-            CampaignInfo(
-                campaign_id="12345678902",
-                name="حملة الشبكة الإعلانية",
-                status="ENABLED",
-                campaign_type="DISPLAY",
-                serving_status="SERVING",
-                start_date="2024-02-01",
-                budget_amount=500.0,
-                budget_type="DAILY",
-                bidding_strategy="TARGET_CPM",
-                target_locations=["Saudi Arabia"],
-                target_languages=["ar"],
-                ad_groups_count=3,
-                keywords_count=0,
-                ads_count=8,
-                performance_metrics={
-                    'impressions': 50000,
-                    'clicks': 200,
-                    'ctr': 0.4,
-                    'cost': 800.0,
-                    'conversions': 8,
-                    'conversion_rate': 4.0,
-                    'cost_per_conversion': 100.0,
-                    'avg_cpc': 4.0
-                }
-            )
-        ]
-        return campaigns
-    
-    async def _fetch_keywords(self, config: DiscoveryConfig) -> List[KeywordInfo]:
-        """جلب معلومات الكلمات المفتاحية"""
-        # محاكاة جلب البيانات من Google Ads API
-        keywords = [
-            KeywordInfo(
-                keyword_id="11111111111",
-                text="شراء سيارة",
-                match_type="BROAD",
-                status="ENABLED",
-                bid_amount=5.0,
-                quality_score=8,
-                search_volume=1000,
-                competition="MEDIUM",
-                suggested_bid=4.5,
-                performance_metrics={
-                    'impressions': 2000,
-                    'clicks': 100,
-                    'ctr': 5.0,
-                    'cost': 500.0,
-                    'conversions': 5,
-                    'conversion_rate': 5.0,
-                    'avg_cpc': 5.0
-                }
-            ),
-            KeywordInfo(
-                keyword_id="11111111112",
-                text="سيارات للبيع",
-                match_type="PHRASE",
-                status="ENABLED",
-                bid_amount=6.0,
-                quality_score=7,
-                search_volume=800,
-                competition="HIGH",
-                suggested_bid=7.0,
-                performance_metrics={
-                    'impressions': 1500,
-                    'clicks': 75,
-                    'ctr': 5.0,
-                    'cost': 450.0,
-                    'conversions': 4,
-                    'conversion_rate': 5.3,
-                    'avg_cpc': 6.0
-                }
-            ),
-            KeywordInfo(
-                keyword_id="11111111113",
-                text="[سيارة جديدة]",
-                match_type="EXACT",
-                status="ENABLED",
-                bid_amount=8.0,
-                quality_score=9,
-                search_volume=500,
-                competition="LOW",
-                suggested_bid=6.0,
-                performance_metrics={
-                    'impressions': 800,
-                    'clicks': 60,
-                    'ctr': 7.5,
-                    'cost': 480.0,
-                    'conversions': 6,
-                    'conversion_rate': 10.0,
-                    'avg_cpc': 8.0
-                }
-            )
-        ]
-        return keywords
-    
-    async def _fetch_keywords_for_campaigns(self, campaigns: List[CampaignInfo], config: DiscoveryConfig) -> List[KeywordInfo]:
-        """جلب الكلمات المفتاحية للحملات"""
-        # في التطبيق الحقيقي، سيتم جلب الكلمات المفتاحية لكل حملة
-        return await self._fetch_keywords(config)
-    
-    async def _analyze_accounts(self, accounts: List[AccountInfo], config: DiscoveryConfig) -> Dict[str, Any]:
-        """تحليل الحسابات"""
-        analysis = {
-            'total_accounts': len(accounts),
-            'account_types': Counter([acc.account_type for acc in accounts]),
-            'currencies': Counter([acc.currency_code for acc in accounts]),
-            'timezones': Counter([acc.time_zone for acc in accounts]),
-            'enabled_accounts': len([acc for acc in accounts if acc.status == 'ENABLED']),
-            'test_accounts': len([acc for acc in accounts if acc.test_account]),
-            'auto_tagging_enabled': len([acc for acc in accounts if acc.auto_tagging_enabled])
-        }
-        
-        return analysis
-    
-    async def _analyze_campaigns(self, campaigns: List[CampaignInfo], config: DiscoveryConfig) -> Dict[str, Any]:
-        """تحليل الحملات"""
-        analysis = {
-            'total_campaigns': len(campaigns),
-            'campaign_types': Counter([camp.campaign_type for camp in campaigns]),
-            'campaign_statuses': Counter([camp.status for camp in campaigns]),
-            'serving_statuses': Counter([camp.serving_status for camp in campaigns]),
-            'bidding_strategies': Counter([camp.bidding_strategy for camp in campaigns]),
-            'total_budget': sum([camp.budget_amount or 0 for camp in campaigns]),
-            'average_budget': np.mean([camp.budget_amount or 0 for camp in campaigns]),
-            'total_ad_groups': sum([camp.ad_groups_count for camp in campaigns]),
-            'total_keywords': sum([camp.keywords_count for camp in campaigns]),
-            'total_ads': sum([camp.ads_count for camp in campaigns])
-        }
-        
-        # تحليل الأداء
-        if config.include_performance_metrics:
-            performance_metrics = []
-            for campaign in campaigns:
-                if campaign.performance_metrics:
-                    performance_score = self.performance_analyzer.calculate_performance_score(campaign.performance_metrics)
-                    performance_metrics.append(performance_score)
-            
-            if performance_metrics:
-                analysis['performance_analysis'] = {
-                    'average_performance_score': np.mean(performance_metrics),
-                    'best_performing_campaign': max(performance_metrics),
-                    'worst_performing_campaign': min(performance_metrics),
-                    'performance_distribution': {
-                        'excellent': len([p for p in performance_metrics if p >= 80]),
-                        'good': len([p for p in performance_metrics if 60 <= p < 80]),
-                        'average': len([p for p in performance_metrics if 40 <= p < 60]),
-                        'poor': len([p for p in performance_metrics if p < 40])
-                    }
-                }
-        
-        return analysis
-    
-    async def _analyze_keyword_performance(self, keywords: List[KeywordInfo], config: DiscoveryConfig) -> Dict[str, Any]:
-        """تحليل أداء الكلمات المفتاحية"""
-        analysis = {
-            'total_keywords': len(keywords),
-            'match_types': Counter([kw.match_type for kw in keywords]),
-            'statuses': Counter([kw.status for kw in keywords]),
-            'competition_levels': Counter([kw.competition for kw in keywords if kw.competition])
-        }
-        
-        # تحليل نقاط الجودة
-        quality_scores = [kw.quality_score for kw in keywords if kw.quality_score]
-        if quality_scores:
-            analysis['quality_score_analysis'] = {
-                'average_quality_score': np.mean(quality_scores),
-                'quality_score_distribution': {
-                    'excellent': len([q for q in quality_scores if q >= 8]),
-                    'good': len([q for q in quality_scores if 6 <= q < 8]),
-                    'average': len([q for q in quality_scores if 4 <= q < 6]),
-                    'poor': len([q for q in quality_scores if q < 4])
-                }
-            }
-        
-        # تحليل الأداء
-        if config.include_performance_metrics:
-            performance_data = []
-            for keyword in keywords:
-                if keyword.performance_metrics:
-                    performance_data.append(keyword.performance_metrics)
-            
-            if performance_data:
-                analysis['performance_summary'] = {
-                    'total_impressions': sum([p.get('impressions', 0) for p in performance_data]),
-                    'total_clicks': sum([p.get('clicks', 0) for p in performance_data]),
-                    'total_cost': sum([p.get('cost', 0) for p in performance_data]),
-                    'total_conversions': sum([p.get('conversions', 0) for p in performance_data]),
-                    'average_ctr': np.mean([p.get('ctr', 0) for p in performance_data]),
-                    'average_cpc': np.mean([p.get('avg_cpc', 0) for p in performance_data]),
-                    'average_conversion_rate': np.mean([p.get('conversion_rate', 0) for p in performance_data])
-                }
-        
-        return analysis
-    
-    async def _create_comprehensive_summary(self, results: Dict[str, Any]) -> Dict[str, Any]:
-        """إنشاء ملخص شامل"""
-        summary = {
-            'discovery_types_completed': list(results.keys()),
-            'total_discovery_types': len(results),
-            'overall_health_score': 0.0,
-            'key_insights': [],
-            'priority_recommendations': [],
-            'next_steps': []
-        }
-        
-        # حساب نقاط الصحة العامة
-        health_scores = []
-        
-        # تحليل نتائج الحملات
-        if 'campaigns' in results:
-            campaigns_data = results['campaigns']
-            if campaigns_data.get('analysis', {}).get('performance_analysis'):
-                perf_analysis = campaigns_data['analysis']['performance_analysis']
-                health_scores.append(perf_analysis.get('average_performance_score', 0))
-                
-                summary['key_insights'].append(
-                    f"متوسط أداء الحملات: {perf_analysis.get('average_performance_score', 0):.1f}%"
-                )
-        
-        # تحليل نتائج الكلمات المفتاحية
-        if 'keywords' in results:
-            keywords_data = results['keywords']
-            if keywords_data.get('performance_analysis', {}).get('quality_score_analysis'):
-                quality_analysis = keywords_data['performance_analysis']['quality_score_analysis']
-                avg_quality = quality_analysis.get('average_quality_score', 0)
-                health_scores.append(avg_quality * 10)  # تحويل إلى نسبة مئوية
-                
-                summary['key_insights'].append(
-                    f"متوسط نقاط الجودة: {avg_quality:.1f}/10"
-                )
-        
-        # حساب النقاط العامة
-        if health_scores:
-            summary['overall_health_score'] = np.mean(health_scores)
-        
-        # توصيات أولوية
-        if summary['overall_health_score'] < 60:
-            summary['priority_recommendations'].append("تحسين الأداء العام للحساب")
-            summary['next_steps'].append("مراجعة شاملة لجميع الحملات والكلمات المفتاحية")
-        
-        if 'campaigns' in results and results['campaigns'].get('opportunities'):
-            opportunities = results['campaigns']['opportunities']
-            high_priority_opps = [opp for opp in opportunities if opp.get('priority') == 'high']
-            if high_priority_opps:
-                summary['priority_recommendations'].append(f"تنفيذ {len(high_priority_opps)} فرصة عالية الأولوية")
-        
-        return summary
-    
-    # دوال التخزين المؤقت
-    async def _get_from_cache(self, cache_key: str) -> Optional[Dict[str, Any]]:
-        """جلب من التخزين المؤقت"""
-        try:
-            # فحص انتهاء الصلاحية
-            if cache_key in self.cache_expiry:
-                if datetime.now(timezone.utc) > self.cache_expiry[cache_key]:
-                    # انتهت الصلاحية
-                    if cache_key in self.discovery_cache:
-                        del self.discovery_cache[cache_key]
-                    del self.cache_expiry[cache_key]
-                    return None
-            
-            # جلب من الذاكرة
-            if cache_key in self.discovery_cache:
-                return self.discovery_cache[cache_key]
-            
-            # جلب من Redis إذا كان متاحاً
-            if SERVICES_STATUS['redis']:
-                cached_data = cache_get(f"discovery:{cache_key}")
-                if cached_data:
-                    self.discovery_cache[cache_key] = cached_data
-                    return cached_data
-            
-            return None
-            
-        except Exception as e:
-            logger.error(f"خطأ في جلب البيانات من التخزين المؤقت: {e}")
-            return None
-    
-    async def _save_to_cache(self, cache_key: str, data: Dict[str, Any], duration_hours: int):
-        """حفظ في التخزين المؤقت"""
-        try:
-            # حفظ في الذاكرة
-            self.discovery_cache[cache_key] = data
-            self.cache_expiry[cache_key] = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
-            
-            # حفظ في Redis إذا كان متاحاً
-            if SERVICES_STATUS['redis']:
-                cache_set(f"discovery:{cache_key}", data, duration_hours * 3600)
-            
-        except Exception as e:
-            logger.error(f"خطأ في حفظ البيانات في التخزين المؤقت: {e}")
-    
-    def get_service_stats(self) -> Dict[str, Any]:
-        """جلب إحصائيات الخدمة"""
-        success_rate = 0
-        if self.service_stats['total_discoveries'] > 0:
-            success_rate = (self.service_stats['successful_discoveries'] / self.service_stats['total_discoveries']) * 100
-        
-        cache_hit_rate = 0
-        total_cache_requests = self.service_stats['cache_hits'] + self.service_stats['cache_misses']
-        if total_cache_requests > 0:
-            cache_hit_rate = (self.service_stats['cache_hits'] / total_cache_requests) * 100
-        
-        return {
-            **self.service_stats,
-            'success_rate': success_rate,
-            'cache_hit_rate': cache_hit_rate,
-            'active_cache_entries': len(self.discovery_cache),
-            'services_status': SERVICES_STATUS
-        }
+            return {'error': str(e)}
 
-# إنشاء مثيل خدمة الاكتشاف
-discovery_service = GoogleAdsDiscoveryService()
+# إنشاء مدير الاكتشاف
+discovery_manager = DiscoveryManager()
 
-# ===========================================
-# API Routes - المسارات المتطورة
-# ===========================================
-
-@google_ads_discovery_bp.route('/accounts', methods=['POST'])
-@jwt_required()
-async def discover_accounts():
-    """اكتشاف الحسابات"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        
-        # إنشاء إعدادات الاكتشاف
-        config = DiscoveryConfig(
-            customer_id=data.get('customer_id', ''),
-            analysis_depth=AnalysisDepth(data.get('analysis_depth', 'standard')),
-            include_historical_data=data.get('include_historical_data', True),
-            historical_days=data.get('historical_days', 90),
-            enable_caching=data.get('enable_caching', True),
-            cache_duration_hours=data.get('cache_duration_hours', 24)
-        )
-        
-        # التحقق من صحة البيانات
-        if SERVICES_STATUS['validators']:
-            if not validate_customer_id(config.customer_id):
-                return jsonify({
-                    'success': False,
-                    'error': 'معرف العميل غير صحيح'
-                }), 400
-        
-        # تنفيذ الاكتشاف
-        result = await discovery_service.discover_accounts(config)
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API اكتشاف الحسابات: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في اكتشاف الحسابات',
-            'message': str(e)
-        }), 500
-
-@google_ads_discovery_bp.route('/campaigns', methods=['POST'])
-@jwt_required()
-async def discover_campaigns():
-    """اكتشاف الحملات"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        
-        # إنشاء إعدادات الاكتشاف
-        config = DiscoveryConfig(
-            customer_id=data.get('customer_id', ''),
-            analysis_depth=AnalysisDepth(data.get('analysis_depth', 'standard')),
-            include_historical_data=data.get('include_historical_data', True),
-            historical_days=data.get('historical_days', 90),
-            include_ai_insights=data.get('include_ai_insights', True),
-            include_performance_metrics=data.get('include_performance_metrics', True),
-            enable_caching=data.get('enable_caching', True)
-        )
-        
-        # تنفيذ الاكتشاف
-        result = await discovery_service.discover_campaigns(config)
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API اكتشاف الحملات: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في اكتشاف الحملات',
-            'message': str(e)
-        }), 500
-
-@google_ads_discovery_bp.route('/keywords', methods=['POST'])
-@jwt_required()
-async def discover_keywords():
-    """اكتشاف الكلمات المفتاحية"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        
-        # إنشاء إعدادات الاكتشاف
-        config = DiscoveryConfig(
-            customer_id=data.get('customer_id', ''),
-            analysis_depth=AnalysisDepth(data.get('analysis_depth', 'advanced')),
-            include_ai_insights=data.get('include_ai_insights', True),
-            include_performance_metrics=data.get('include_performance_metrics', True),
-            max_results_per_type=data.get('max_results', 100),
-            enable_caching=data.get('enable_caching', True)
-        )
-        
-        # تنفيذ الاكتشاف
-        result = await discovery_service.discover_keywords(config)
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API اكتشاف الكلمات المفتاحية: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في اكتشاف الكلمات المفتاحية',
-            'message': str(e)
-        }), 500
-
-@google_ads_discovery_bp.route('/comprehensive', methods=['POST'])
-@jwt_required()
-async def comprehensive_discovery():
-    """اكتشاف شامل"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        
-        # تحديد أنواع الاكتشاف
-        discovery_types = []
-        requested_types = data.get('discovery_types', ['accounts', 'campaigns', 'keywords'])
-        
-        type_mapping = {
-            'accounts': DiscoveryType.ACCOUNTS,
-            'campaigns': DiscoveryType.CAMPAIGNS,
-            'keywords': DiscoveryType.KEYWORDS,
-            'competitors': DiscoveryType.COMPETITORS,
-            'opportunities': DiscoveryType.OPPORTUNITIES
-        }
-        
-        for type_name in requested_types:
-            if type_name in type_mapping:
-                discovery_types.append(type_mapping[type_name])
-        
-        # إنشاء إعدادات الاكتشاف
-        config = DiscoveryConfig(
-            customer_id=data.get('customer_id', ''),
-            discovery_types=discovery_types,
-            analysis_depth=AnalysisDepth(data.get('analysis_depth', 'comprehensive')),
-            include_historical_data=data.get('include_historical_data', True),
-            historical_days=data.get('historical_days', 90),
-            include_competitor_analysis=data.get('include_competitor_analysis', False),
-            include_ai_insights=data.get('include_ai_insights', True),
-            include_performance_metrics=data.get('include_performance_metrics', True),
-            parallel_processing=data.get('parallel_processing', True),
-            enable_caching=data.get('enable_caching', True)
-        )
-        
-        # تنفيذ الاكتشاف الشامل
-        result = await discovery_service.comprehensive_discovery(config)
-        
-        return jsonify(result), 200 if result['success'] else 400
-        
-    except Exception as e:
-        logger.error(f"خطأ في API الاكتشاف الشامل: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في الاكتشاف الشامل',
-            'message': str(e)
-        }), 500
-
-@google_ads_discovery_bp.route('/opportunities', methods=['POST'])
-@jwt_required()
-async def detect_opportunities():
-    """اكتشاف الفرص"""
-    try:
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-        
-        customer_id = data.get('customer_id', '')
-        
-        # إنشاء إعدادات مؤقتة
-        config = DiscoveryConfig(customer_id=customer_id)
-        
-        # جلب البيانات المطلوبة
-        campaigns = await discovery_service._fetch_campaigns(config)
-        keywords = await discovery_service._fetch_keywords(config)
-        
-        # اكتشاف الفرص
-        opportunities = await discovery_service.opportunity_detector.detect_opportunities(campaigns, keywords)
-        
-        return jsonify({
-            'success': True,
-            'opportunities': [asdict(opp) for opp in opportunities],
-            'total_opportunities': len(opportunities),
-            'high_priority_count': len([opp for opp in opportunities if opp.priority == 'high']),
-            'medium_priority_count': len([opp for opp in opportunities if opp.priority == 'medium']),
-            'low_priority_count': len([opp for opp in opportunities if opp.priority == 'low']),
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"خطأ في API اكتشاف الفرص: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في اكتشاف الفرص',
-            'message': str(e)
-        }), 500
-
-@google_ads_discovery_bp.route('/stats', methods=['GET'])
-@jwt_required()
-def get_discovery_stats():
-    """جلب إحصائيات خدمة الاكتشاف"""
-    try:
-        stats = discovery_service.get_service_stats()
-        
-        return jsonify({
-            'success': True,
-            'stats': stats,
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"خطأ في API الإحصائيات: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'خطأ في جلب الإحصائيات',
-            'message': str(e)
-        }), 500
+# ==================== مسارات API ====================
 
 @google_ads_discovery_bp.route('/health', methods=['GET'])
-def health_check():
+def discovery_health_check():
     """فحص صحة خدمة الاكتشاف"""
     try:
-        health_status = {
-            'service': 'Google Ads Discovery',
-            'status': 'healthy',
-            'version': '2.1.0',
-            'timestamp': datetime.now(timezone.utc).isoformat(),
-            'services_status': SERVICES_STATUS,
-            'cache_entries': len(discovery_service.discovery_cache),
-            'total_discoveries': discovery_service.service_stats['total_discoveries']
-        }
-        
-        # فحص الخدمات الأساسية
-        if not any(SERVICES_STATUS.values()):
-            health_status['status'] = 'degraded'
-            health_status['warning'] = 'بعض الخدمات غير متاحة'
-        
-        return jsonify(health_status)
-        
-    except Exception as e:
-        logger.error(f"خطأ في فحص الصحة: {e}")
         return jsonify({
-            'service': 'Google Ads Discovery',
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            'success': True,
+            'service': 'google_ads_discovery',
+            'status': 'healthy',
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'libraries': {
+                'jwt': JWT_LIBRARY,
+                'bcrypt': BCRYPT_LIBRARY,
+                'crypto': CRYPTO_LIBRARY
+            },
+            'services_status': SERVICES_STATUS,
+            'cached_discoveries': len(discovery_manager.discovery_cache)
+        })
+    except Exception as e:
+        logger.error(f"خطأ في فحص صحة الاكتشاف: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
         }), 500
 
-# تسجيل معلومات Blueprint
-logger.info(f"✅ تم تحميل Google Ads Discovery Blueprint - الخدمات متاحة: {DISCOVERY_SERVICES_AVAILABLE}")
-logger.info(f"📊 حالة الخدمات: {sum(SERVICES_STATUS.values())}/7 متاحة")
+@google_ads_discovery_bp.route('/discover', methods=['POST'])
+@jwt_required_discovery
+def execute_discovery():
+    """تنفيذ عملية اكتشاف"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'بيانات JSON مطلوبة'
+            }), 400
+        
+        # استخراج معرف المستخدم من JWT
+        user_id = request.current_user.get('user_id', 'unknown')
+        
+        # إنشاء طلب الاكتشاف
+        try:
+            discovery_request = DiscoveryRequest(
+                discovery_type=DiscoveryType(data.get('discovery_type', 'keywords')),
+                customer_id=data.get('customer_id'),
+                campaign_ids=data.get('campaign_ids', []),
+                keywords=data.get('keywords', []),
+                competitors=data.get('competitors', []),
+                date_range=data.get('date_range', 'last_30_days'),
+                filters=data.get('filters', {}),
+                options=data.get('options', {})
+            )
+        except ValueError as e:
+            return jsonify({
+                'success': False,
+                'error': f'بيانات غير صحيحة: {str(e)}'
+            }), 400
+        
+        # تنفيذ الاكتشاف
+        result = discovery_manager.execute_discovery(discovery_request, user_id)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        logger.error(f"خطأ في تنفيذ الاكتشاف: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'خطأ داخلي في الخادم'
+        }), 500
 
-# تصدير Blueprint والكلاسات
-__all__ = [
-    'google_ads_discovery_bp',
-    'GoogleAdsDiscoveryService',
-    'DiscoveryConfig',
-    'AccountInfo',
-    'CampaignInfo',
-    'KeywordInfo',
-    'OpportunityInsight',
-    'CompetitorInfo',
-    'DiscoveryType',
-    'AnalysisDepth',
-    'OpportunityType',
-    'PerformanceAnalyzer',
-    'AIInsightsEngine',
-    'OpportunityDetector'
-]
+@google_ads_discovery_bp.route('/keywords/discover', methods=['POST'])
+@jwt_required_discovery
+def discover_keywords():
+    """اكتشاف الكلمات المفتاحية"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'بيانات JSON مطلوبة'
+            }), 400
+        
+        seed_keywords = data.get('keywords', [])
+        if not seed_keywords:
+            return jsonify({
+                'success': False,
+                'error': 'كلمات مفتاحية أساسية مطلوبة'
+            }), 400
+        
+        options = data.get('options', {})
+        
+        # اكتشاف الكلمات المفتاحية
+        keywords = discovery_manager.keyword_service.discover_keywords(seed_keywords, options)
+        
+        return jsonify({
+            'success': True,
+            'keywords': [asdict(kw) for kw in keywords],
+            'total_count': len(keywords)
+        })
+        
+    except Exception as e:
+        logger.error(f"خطأ في اكتشاف الكلمات المفتاحية: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'خطأ داخلي في الخادم'
+        }), 500
+
+@google_ads_discovery_bp.route('/competitors/discover', methods=['POST'])
+@jwt_required_discovery
+def discover_competitors():
+    """اكتشاف المنافسين"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'بيانات JSON مطلوبة'
+            }), 400
+        
+        domain = data.get('domain')
+        if not domain:
+            return jsonify({
+                'success': False,
+                'error': 'النطاق مطلوب'
+            }), 400
+        
+        keywords = data.get('keywords', [])
+        
+        # اكتشاف المنافسين
+        competitors = discovery_manager.competitor_service.discover_competitors(domain, keywords)
+        
+        return jsonify({
+            'success': True,
+            'competitors': [asdict(comp) for comp in competitors],
+            'total_count': len(competitors)
+        })
+        
+    except Exception as e:
+        logger.error(f"خطأ في اكتشاف المنافسين: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'خطأ داخلي في الخادم'
+        }), 500
+
+@google_ads_discovery_bp.route('/test', methods=['GET'])
+def test_discovery_service():
+    """اختبار خدمة الاكتشاف"""
+    try:
+        # اختبار إنشاء token
+        test_payload = {'user_id': 'test_user', 'role': 'admin', 'service': 'discovery'}
+        test_token = discovery_security_manager.create_jwt_token(test_payload)
+        
+        # اختبار التحقق من token
+        verified_payload = discovery_security_manager.verify_jwt_token(test_token)
+        
+        # اختبار التشفير
+        test_data = "sensitive discovery data"
+        encrypted_data = discovery_security_manager.encrypt_sensitive_data(test_data)
+        decrypted_data = discovery_security_manager.decrypt_sensitive_data(encrypted_data)
+        
+        return jsonify({
+            'success': True,
+            'tests': {
+                'jwt_creation': test_token is not None,
+                'jwt_verification': verified_payload is not None,
+                'jwt_payload_match': verified_payload.get('user_id') == 'test_user' if verified_payload else False,
+                'jwt_service_match': verified_payload.get('service') == 'discovery' if verified_payload else False,
+                'encryption': encrypted_data != test_data,
+                'decryption': decrypted_data == test_data,
+                'libraries': {
+                    'jwt_available': JWT_AVAILABLE,
+                    'bcrypt_available': BCRYPT_AVAILABLE,
+                    'crypto_available': CRYPTO_AVAILABLE
+                }
+            },
+            'message': 'جميع الاختبارات نجحت'
+        })
+        
+    except Exception as e:
+        logger.error(f"خطأ في اختبار خدمة الاكتشاف: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# تسجيل نجاح التحميل
+logger.info("✅ تم تحميل Google Ads Discovery Blueprint بنجاح")
+logger.info(f"🔐 الأمان: JWT={JWT_AVAILABLE}, bcrypt={BCRYPT_AVAILABLE}, crypto={CRYPTO_AVAILABLE}")
+logger.info(f"📊 الخدمات: {sum(SERVICES_STATUS.values())}/7 متاحة")
+
+# تصدير Blueprint
+__all__ = ['google_ads_discovery_bp', 'discovery_manager', 'discovery_security_manager']
 

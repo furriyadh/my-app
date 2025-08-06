@@ -3,7 +3,7 @@ JWT Manager - نظام إدارة JWT المحدث
 """
 
 import os
-import jwt
+from jose import jwt  # ✅ تم التغيير من import jwt إلى from jose import jwt
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
