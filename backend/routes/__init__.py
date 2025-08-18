@@ -146,7 +146,7 @@ def register_routes(app: Flask) -> Tuple[int, int]:
     blueprints_config = [
         {
             'module_path': 'auth_jwt',
-            'blueprint_name': 'auth_bp',
+            'blueprint_name': 'auth_routes_bp',
             'display_name': 'Auth JWT',
             'url_prefix': '/api/auth-jwt'
         },
@@ -182,16 +182,11 @@ def register_routes(app: Flask) -> Tuple[int, int]:
         },
         {
             'module_path': 'merchant_center_routes',
-            'blueprint_name': 'merchant_center_bp',
+            'blueprint_name': 'merchant_bp',
             'display_name': 'Merchant Center',
             'url_prefix': '/api/merchant-center'
         },
-        {
-            'module_path': 'compatibility',
-            'blueprint_name': 'compatibility_bp',
-            'display_name': 'Compatibility',
-            'url_prefix': '/api/compatibility'
-        }
+
     ]
     
     # معالجة كل Blueprint
