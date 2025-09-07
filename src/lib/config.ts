@@ -1,9 +1,9 @@
 // Configuration file for API URLs and environment variables
 export const config = {
-  // API Configuration
+  // API Configuration - Now using Next.js API Routes
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com/api' : 'http://localhost:5000/api'),
-    backendUrl: process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000'),
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com/api' : 'http://localhost:3000/api'),
+    backendUrl: process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000'),
     frontendUrl: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000'),
   },
   
@@ -51,7 +51,7 @@ export const getApiUrl = (endpoint: string): string => {
   return `${baseUrl}/${cleanEndpoint}`;
 };
 
-// Helper function to get Backend URL
+// Helper function to get Backend URL (now points to Next.js API Routes)
 export const getBackendUrl = (endpoint: string): string => {
   const baseUrl = config.api.backendUrl;
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
@@ -60,13 +60,8 @@ export const getBackendUrl = (endpoint: string): string => {
 
 // Smart function to get the correct API URL based on environment
 export const getSmartApiUrl = (endpoint: string): string => {
-  // In production, Frontend and Backend are on the same domain
-  if (config.isProduction) {
-    return `/api/${endpoint.replace(/^\/+/, '')}`;
-  }
-  
-  // In development, use Backend URL
-  return getBackendUrl(endpoint);
+  // Always use Next.js API Routes (same domain)
+  return `/api/${endpoint.replace(/^\/+/, '')}`;
 };
 
 export default config;

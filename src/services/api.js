@@ -11,7 +11,7 @@ import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/help
  */
 class APIService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com/api' : 'http://localhost:5000/api')
+    this.baseURL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com/api' : 'http://localhost:3000/api')
     this.timeout = 30000 // 30 seconds
     this.retryAttempts = 3
     this.retryDelay = 1000 // 1 second

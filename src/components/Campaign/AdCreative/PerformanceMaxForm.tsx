@@ -60,8 +60,7 @@ const PerformanceMaxForm: React.FC<PerformanceMaxFormProps> = ({
     setAccountsError(null);
     
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
-      const response = await fetch(`${backendUrl}/api/merchant-center/accounts`);
+      const response = await fetch('/api/merchant-center/accounts');
       const data = await response.json();
       
       if (data.success) {

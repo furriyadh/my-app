@@ -1077,9 +1077,7 @@ const GoogleAdsContent: React.FC = () => {
       console.log(`🖱️ User clicked ${account.customerId} - checking status using official API`);
       
       try {
-        const backendUrl = process.env.NODE_ENV === 'production' 
-          ? `https://furriyadh.com/api/check-link-status/${account.customerId}`
-          : `http://localhost:5000/api/check-link-status/${account.customerId}`;
+        const backendUrl = `/api/google-ads/link-status/${account.customerId}`;
         const response = await fetch(backendUrl);
         if (response.ok) {
           const data = await response.json();

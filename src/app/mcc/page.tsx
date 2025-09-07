@@ -38,9 +38,7 @@ export default function MCCPage() {
       setLoading(true);
       
       // استخدام النظام الموجود في الباك اند
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://furriyadh.com/api/mcc/accounts'
-        : 'http://localhost:5000/api/mcc/accounts';
+      const backendUrl = '/api/mcc/accounts';
       const response = await fetch(backendUrl, {
         headers: {
           'Content-Type': 'application/json',
