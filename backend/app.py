@@ -425,6 +425,10 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 5000)))
     debug = os.getenv('FLASK_ENV') == 'development'
     
+    # تأكد من أن التطبيق يعمل على المنفذ الصحيح
+    if not port:
+        port = 5000
+    
     logger.info(f"🚀 تشغيل الخادم على {host}:{port}")
     logger.info(f"🔧 Debug Mode: {debug}")
     
