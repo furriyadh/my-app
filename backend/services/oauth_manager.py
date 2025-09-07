@@ -21,7 +21,11 @@ class OAuthManager:
         # إعدادات OAuth
         self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID')
         self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
+        # تحديد redirect URI حسب البيئة
+        if os.getenv('NODE_ENV') == 'production':
+            self.redirect_uri = os.getenv('GOOGLE_REDIRECT_URI', 'https://furriyadh.com/api/oauth/google/callback')
+        else:
+            self.redirect_uri = os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
         
         # URLs للمصادقة
         self.auth_url = 'https://accounts.google.com/o/oauth2/auth'

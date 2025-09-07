@@ -18,7 +18,7 @@ config({ path: path.resolve(process.cwd(), '.env.development') });
 
 export async function GET(request: NextRequest) {
   // تحديد base URL مرة واحدة في بداية الدالة (خارج try-catch)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000');
   
   try {
     console.log('🔄 معالجة OAuth callback من Google (حسب Google Ads API Documentation)...');

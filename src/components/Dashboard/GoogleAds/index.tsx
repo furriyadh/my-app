@@ -818,7 +818,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
         ...(searchTerm && { search: searchTerm })
       });
 
-      const response = await fetch(`/api/google-ads?${params}`);
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://furriyadh.com/api/google-ads' 
+        : '/api/google-ads';
+      const response = await fetch(`${backendUrl}?${params}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -870,7 +873,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
     try {
       console.log(`🔧 Performing ${action} on campaign ${campaignId}`);
       
-      const response = await fetch('/api/google-ads', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://furriyadh.com/api/google-ads' 
+        : '/api/google-ads';
+      const response = await fetch(backendUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ campaignId, action })

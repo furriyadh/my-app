@@ -276,7 +276,10 @@ class GoogleAdsConfig:
     
     # OAuth settings
     oauth_scope: List[str] = field(default_factory=lambda: ["https://www.googleapis.com/auth/adwords"])
-    oauth_redirect_uri: str = "http://localhost:8080/oauth2callback"
+    oauth_redirect_uri: str = os.getenv('GOOGLE_OAUTH_REDIRECT_URI') or (
+        'https://furriyadh.com/api/oauth/google/callback' if os.getenv('NODE_ENV') == 'production' 
+        else 'http://localhost:3000/api/oauth/google/callback'
+    )
     
     # API settings
     api_version: str = "v20"

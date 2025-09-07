@@ -249,7 +249,10 @@ if __name__ == "__main__":
     test_config = {
         'google_client_id': os.getenv('GOOGLE_ADS_CLIENT_ID_NEW'),
         'google_client_secret': os.getenv('GOOGLE_ADS_CLIENT_SECRET_NEW'),
-                    'redirect_uri': 'http://localhost:3000/api/oauth/google/callback',
+                    'redirect_uri': os.getenv('GOOGLE_OAUTH_REDIRECT_URI') or (
+                        'https://furriyadh.com/api/oauth/google/callback' if os.getenv('NODE_ENV') == 'production' 
+                        else 'http://localhost:3000/api/oauth/google/callback'
+                    ),
         'scopes': [
             'https://www.googleapis.com/auth/adwords',
             'https://www.googleapis.com/auth/userinfo.email',

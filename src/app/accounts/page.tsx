@@ -39,7 +39,10 @@ const AccountsPage: React.FC = () => {
 
   const fetchAccounts = async () => {
     try {
-      const response = await fetch('/api/user/accounts', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://furriyadh.com/api/user/accounts'
+        : '/api/user/accounts';
+      const response = await fetch(backendUrl, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

@@ -44,14 +44,26 @@ def create_app(config_class=None):
     
     app.config.from_object(config_class)
     
-    # إعداد CORS
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"]
-        }
-    })
+    # إعداد CORS حسب البيئة
+    if app.config.get('IS_PRODUCTION', False):
+        # إعدادات الإنتاج - furriyadh.com
+        CORS(app, resources={
+            r"/api/*": {
+                "origins": ["https://furriyadh.com", "https://www.furriyadh.com"],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+                "supports_credentials": True
+            }
+        })
+    else:
+        # إعدادات التطوير - localhost
+        CORS(app, resources={
+            r"/api/*": {
+                "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"]
+            }
+        })
     
     # تسجيل معلومات التطبيق
     logger.info("🚀 بدء تشغيل Google Ads AI Platform")

@@ -134,7 +134,11 @@ class GoogleAdsOAuthManager:
     def __init__(self):
         self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID')
         self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('GOOGLE_ADS_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
+        # تحديد redirect URI حسب البيئة
+        if os.getenv('NODE_ENV') == 'production':
+            self.redirect_uri = os.getenv('GOOGLE_ADS_REDIRECT_URI', 'https://furriyadh.com/api/oauth/google/callback')
+        else:
+            self.redirect_uri = os.getenv('GOOGLE_ADS_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
         self.scope = 'https://www.googleapis.com/auth/adwords'
         self.is_configured = bool(self.client_id and self.client_secret)
         

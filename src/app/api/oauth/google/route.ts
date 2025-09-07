@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     }
     
     // تحديد redirect_uri حسب البيئة (حسب Google Ads API Documentation)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000');
     const redirectUri = `${baseUrl}/api/oauth/google/callback`;
     console.log('🔗 Base URL:', baseUrl);
     console.log('🔗 Redirect URI:', redirectUri);

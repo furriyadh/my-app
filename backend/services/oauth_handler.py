@@ -22,7 +22,11 @@ class OAuthHandler:
         # إعدادات OAuth من متغيرات البيئة
         self.client_id = os.getenv("GOOGLE_ADS_CLIENT_ID") or os.getenv("GOOGLE_ADS_CLIENT_ID")
         self.client_secret = os.getenv("GOOGLE_ADS_CLIENT_SECRET") or os.getenv("GOOGLE_ADS_CLIENT_SECRET")
-        self.redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or os.getenv("REACT_APP_GOOGLE_REDIRECT_URI") or os.getenv("NEXT_PUBLIC_OAUTH_REDIRECT_URI") or "http://localhost:3000/auth/callback"
+        # تحديد redirect URI حسب البيئة
+        if os.getenv('NODE_ENV') == 'production':
+            self.redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or os.getenv("REACT_APP_GOOGLE_REDIRECT_URI") or os.getenv("NEXT_PUBLIC_OAUTH_REDIRECT_URI") or "https://furriyadh.com/api/oauth/google/callback"
+        else:
+            self.redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or os.getenv("REACT_APP_GOOGLE_REDIRECT_URI") or os.getenv("NEXT_PUBLIC_OAUTH_REDIRECT_URI") or "http://localhost:3000/api/oauth/google/callback"
         self.developer_token = os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN")
         
         # نطاقات Google Ads
@@ -233,7 +237,11 @@ if __name__ == "__main__":
         # تأكد من تعيين متغيرات البيئة قبل التشغيل
     os.environ["GOOGLE_ADS_CLIENT_ID"] = "YOUR_CLIENT_ID"
     os.environ["GOOGLE_ADS_CLIENT_SECRET"] = "YOUR_CLIENT_SECRET"
-    os.environ["GOOGLE_ADS_REDIRECT_URI"] = "http://localhost:3000/api/oauth/google/callback"
+    # تحديد redirect URI حسب البيئة
+    if os.getenv('NODE_ENV') == 'production':
+        os.environ["GOOGLE_ADS_REDIRECT_URI"] = "https://furriyadh.com/api/oauth/google/callback"
+    else:
+        os.environ["GOOGLE_ADS_REDIRECT_URI"] = "http://localhost:3000/api/oauth/google/callback"
     os.environ["GOOGLE_ADS_DEVELOPER_TOKEN"] = "YOUR_DEVELOPER_TOKEN"
     
     oauth_handler = OAuthHandler( )

@@ -13,7 +13,11 @@ class OAuthConfig:
         # إعدادات Google OAuth
         self.google_client_id = os.getenv('GOOGLE_ADS_CLIENT_ID') or os.getenv('GOOGLE_ADS_CLIENT_ID')
         self.google_client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET') or os.getenv('GOOGLE_ADS_CLIENT_SECRET')
-        self.google_redirect_uri = os.getenv('GOOGLE_OAUTH_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
+        # تحديد redirect URI حسب البيئة
+        if os.getenv('NODE_ENV') == 'production':
+            self.google_redirect_uri = os.getenv('GOOGLE_OAUTH_REDIRECT_URI', 'https://furriyadh.com/api/oauth/google/callback')
+        else:
+            self.google_redirect_uri = os.getenv('GOOGLE_OAUTH_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
         
         # إعدادات Google Ads API
         self.google_ads_developer_token = os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN')

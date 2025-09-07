@@ -93,7 +93,9 @@ const SignInForm: React.FC = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: process.env.NODE_ENV === 'production' 
+            ? 'https://furriyadh.com/dashboard' 
+            : `${window.location.origin}/dashboard`,
         },
       });
 

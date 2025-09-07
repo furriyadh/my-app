@@ -39,7 +39,9 @@ const ForgotPasswordForm: React.FC = () => {
     setIsLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/authentication/update-password`, // Redirect to a page where user can set new password
+      redirectTo: process.env.NODE_ENV === 'production' 
+        ? 'https://furriyadh.com/authentication/update-password' 
+        : `${window.location.origin}/authentication/update-password`, // Redirect to a page where user can set new password
     });
 
     if (error) {
