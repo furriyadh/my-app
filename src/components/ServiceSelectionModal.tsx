@@ -138,52 +138,14 @@ const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
             {/* Button */}
             <button
               onClick={() => {
-                if (typeof window !== 'undefined') {
-                  const popup = window.open("/api/oauth/google", 
-                  "_blank", 
-                  "width=600,height=700,scrollbars=yes,resizable=yes");
-                  const messageListener = (event: MessageEvent) => {
-                    if (event.source === popup && event.data.type === 'oauthSuccess') {
-                      // إزالة مستمع الرسائل
-                      window.removeEventListener('message', messageListener);
-                      
-                      // إغلاق النافذة المنبثقة إذا لم تُغلق تلقائياً
-                      if (popup && !popup.closed) {
-                        popup.close();
-                      }
-                      
-                      // تحديث حالة الاتصال وإغلاق Modal
-                      console.log("OAuth completed successfully");
-                      onSelect("client");
-                      onClose();
-                    }
-                  };
-                  
-                  // إضافة مستمع الرسائل
-                  window.addEventListener('message', messageListener);
-                  
-                  // مراقبة إغلاق النافذة المنبثقة (كنسخة احتياطية)
-                  const checkClosed = setInterval(() => {
-                    if (popup?.closed) {
-                      clearInterval(checkClosed);
-                      window.removeEventListener('message', messageListener);
-                      console.log("OAuth popup closed");
-                    }
-                  }, 1000);
-                  
-                  // تنظيف المستمعات بعد 5 دقائق (timeout)
-                  setTimeout(() => {
-                    clearInterval(checkClosed);
-                    window.removeEventListener('message', messageListener);
-                    if (popup && !popup.closed) {
-                      popup.close();
-                    }
-                  }, 300000); // 5 دقائق
-                }
+                // Mark that user has seen the modal
+                localStorage.setItem('hasSeenServiceModal', 'true');
+                // التحويل مباشرة إلى صفحة Integrations
+                window.location.href = '/integrations';
               }}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-lg font-medium text-sm hover:shadow-md transition-all duration-200"
             >
-              Connect Account
+              Get Started
             </button>
           </div>
         </div>

@@ -63,20 +63,20 @@ const CreditsComponent: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c1427]">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
-      <div className="bg-white dark:bg-[#0c1427] border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+      <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 px-6 py-4">
+        <div className="flex items-center text-sm text-blue-200 drop-shadow-sm mb-2">
           <span>Settings</span>
           <span className="mx-2">/</span>
           <span>Billing</span>
           <span className="mx-2">/</span>
           <span>Furriyadh Credits</span>
         </div>
-        <h1 className="text-2xl font-bold text-black dark:text-white">
+        <h1 className="text-2xl font-bold text-gray-800 drop-shadow-lg">
           Furriyadh Credits
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-blue-100 drop-shadow-md mt-1">
           Get an overview of your balance and check your eligibility for free credits.{" "}
           <a href="#" className="text-blue-600 hover:text-blue-700">Read more</a>
         </p>
@@ -87,7 +87,7 @@ const CreditsComponent: React.FC = () => {
           {/* Left Side - Balance */}
           <div className="space-y-6">
             {/* Balance Card */}
-            <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-lg p-6">
+            <div className="bg-white/15 backdrop-blur-md border border-purple-300/30 rounded-lg p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -96,17 +96,17 @@ const CreditsComponent: React.FC = () => {
                     <path d="M9 12C9 11.4477 8.55228 11 8 11H6C5.44772 11 5 11.4477 5 12C5 12.5523 5.44772 13 6 13H8C8.55228 13 9 12.5523 9 12Z" fill="#FFFFFF"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-black dark:text-white">Balance</h3>
+                <h3 className="text-xl font-bold text-black dark:text-gray-800">Balance</h3>
               </div>
               
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">SPENT</p>
-                  <p className="text-2xl font-bold text-black dark:text-white">${spentAmount}</p>
+                  <p className="text-2xl font-bold text-black dark:text-gray-800">${spentAmount}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">REMAINING</p>
-                  <p className="text-2xl font-bold text-black dark:text-white">${remainingAmount}</p>
+                  <p className="text-2xl font-bold text-black dark:text-gray-800">${remainingAmount}</p>
                 </div>
               </div>
 
@@ -114,19 +114,19 @@ const CreditsComponent: React.FC = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide">NEXT BILLING DATE</p>
                   <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">?</span>
+                    <span className="text-gray-800 text-xs">?</span>
                   </div>
                 </div>
-                <p className="text-lg font-semibold text-black dark:text-white">{getNextBillingDate( )}</p>
+                <p className="text-lg font-semibold text-black dark:text-gray-800">{getNextBillingDate( )}</p>
               </div>
 
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors">
                 Add credit
               </button>
             </div>
 
             {/* FAQ Section */}
-            <div className="bg-white dark:bg-[#0c1427] rounded-lg p-6">
+            <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-4 uppercase tracking-wide">
                 EVERYTHING YOU NEED TO KNOW
               </h3>
@@ -138,7 +138,7 @@ const CreditsComponent: React.FC = () => {
                       onClick={() => toggleFAQ(index)}
                       className="flex items-center justify-between w-full text-left py-2"
                     >
-                      <span className="text-sm font-medium text-black dark:text-white pr-4">
+                      <span className="text-sm font-medium text-black dark:text-gray-800 pr-4">
                         {item.question}
                       </span>
                       <div className="flex-shrink-0">
@@ -166,19 +166,19 @@ const CreditsComponent: React.FC = () => {
 
           {/* Right Side - Get Free Credits */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#0c1427] rounded-lg p-6">
+            <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clipRule="evenodd"/>
                     <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-black dark:text-white">Get free credit</h3>
+                <h3 className="text-xl font-bold text-black dark:text-gray-800">Get free credit</h3>
               </div>
 
               {/* Google Welcome Credit */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+              <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6">
@@ -189,9 +189,9 @@ const CreditsComponent: React.FC = () => {
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                       </svg>
                     </div>
-                    <span className="font-medium text-black dark:text-white">Google Welcome Credit</span>
+                    <span className="font-medium text-black dark:text-gray-800">Google Welcome Credit</span>
                     <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">?</span>
+                      <span className="text-gray-800 text-xs">?</span>
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">{spentGoogle} of 150</span>
@@ -205,15 +205,15 @@ const CreditsComponent: React.FC = () => {
               </div>
 
               {/* Furriyadh Welcome Credit */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+              <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">F</span>
+                      <span className="text-gray-800 text-xs font-bold">F</span>
                     </div>
-                    <span className="font-medium text-black dark:text-white">Furriyadh Welcome Credit</span>
+                    <span className="font-medium text-black dark:text-gray-800">Furriyadh Welcome Credit</span>
                     <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">?</span>
+                      <span className="text-gray-800 text-xs">?</span>
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">{spentFurriyadhCredit} of 300</span>
@@ -227,7 +227,7 @@ const CreditsComponent: React.FC = () => {
               </div>
 
               {/* Microsoft Welcome Bonus */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+              <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6">
@@ -238,9 +238,9 @@ const CreditsComponent: React.FC = () => {
                         <path fill="#FFB900" d="M13 13h10v10H13z"/>
                       </svg>
                     </div>
-                    <span className="font-medium text-black dark:text-white">Microsoft Welcome Bonus</span>
+                    <span className="font-medium text-black dark:text-gray-800">Microsoft Welcome Bonus</span>
                     <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">?</span>
+                      <span className="text-gray-800 text-xs">?</span>
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">{spentMicrosoft} of 150</span>
@@ -254,16 +254,16 @@ const CreditsComponent: React.FC = () => {
               </div>
 
               {/* Promo Code Section */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/>
                     </svg>
                   </div>
-                  <span className="font-medium text-black dark:text-white">Unlock free credit with code</span>
+                  <span className="font-medium text-black dark:text-gray-800">Unlock free credit with code</span>
                   <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">?</span>
+                    <span className="text-gray-800 text-xs">?</span>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -275,9 +275,9 @@ const CreditsComponent: React.FC = () => {
                     placeholder="Enter your code"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#0c1427] text-black dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-blue-300/30 rounded-lg bg-white/15 backdrop-blur-md text-gray-800 placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors">
                     Unlock free credit
                   </button>
                 </div>
@@ -289,8 +289,8 @@ const CreditsComponent: React.FC = () => {
 
       {/* Contact Support Button */}
       <div className="fixed bottom-6 right-6">
-        <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-colors flex items-center gap-2">
-          <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+        <button className="bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-full p-4 shadow-lg transition-colors flex items-center gap-2">
+          <div className="w-6 h-6 bg-white/20 backdrop-blur-sm border border-blue-200/30 rounded-full flex items-center justify-center">
             <span className="text-blue-600 text-sm font-bold">?</span>
           </div>
           <span className="font-medium">Contact</span>

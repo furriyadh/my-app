@@ -65,7 +65,7 @@ class GoogleAdsDatabaseManager:
     def _detect_database_type(self) -> str:
         """اكتشاف نوع قاعدة البيانات المتاح"""
         # التحقق من Supabase أولاً
-        if SUPABASE_AVAILABLE and os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_KEY'):
+        if SUPABASE_AVAILABLE and os.getenv('SUPABASE_URL') and (os.getenv('SUPABASE_ANON_KEY') or os.getenv('SUPABASE_SERVICE_ROLE_KEY')):
             return "supabase"
         
         # التحقق من PostgreSQL
@@ -98,7 +98,7 @@ class GoogleAdsDatabaseManager:
         """تهيئة Supabase"""
         try:
             url = os.getenv('SUPABASE_URL')
-            key = os.getenv('SUPABASE_KEY')
+            key = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_ANON_KEY')
             
             if not url or not key:
                 raise Exception("متغيرات Supabase غير مكونة")
@@ -300,14 +300,89 @@ class GoogleAdsDatabaseManager:
             logger.error(f"خطأ في حفظ حساب Google Ads: {str(e)}")
             return False
     
+    def remove_google_ads_account(self, customer_id: str) -> bool:
+        """حذف حساب Google Ads من قاعدة البيانات (عند إلغاء الربط)"""
+        try:
+            if self.db_type == "supabase":
+                return self._remove_account_supabase(customer_id)
+            else:
+                return self._remove_account_sql(customer_id)
+                
+        except Exception as e:
+            logger.error(f"خطأ في حذف حساب Google Ads: {str(e)}")
+            return False
+    
+    def _remove_account_supabase(self, customer_id: str) -> bool:
+        """حذف حساب من Supabase"""
+        try:
+            result = self.supabase.table('google_ads_accounts').delete().eq('customer_id', customer_id).execute()
+            
+            if hasattr(result, 'data') and result.data:
+                logger.info(f"✅ تم حذف حساب Google Ads من Supabase: {customer_id}")
+                return True
+            else:
+                logger.warning(f"⚠️ لم يتم العثور على حساب لحذفه: {customer_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"خطأ في حذف حساب من Supabase: {str(e)}")
+            return False
+    
+    def _remove_account_sql(self, customer_id: str) -> bool:
+        """حذف حساب من قاعدة بيانات SQL"""
+        try:
+            cursor = self.connection.cursor()
+            
+            # حذف الحساب
+            cursor.execute("DELETE FROM google_ads_accounts WHERE customer_id = ?", (customer_id,))
+            
+            rows_affected = cursor.rowcount
+            self.connection.commit()
+            
+            if rows_affected > 0:
+                logger.info(f"✅ تم حذف حساب Google Ads من SQL: {customer_id}")
+                return True
+            else:
+                logger.warning(f"⚠️ لم يتم العثور على حساب لحذفه: {customer_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"خطأ في حذف حساب من SQL: {str(e)}")
+            return False
+    
+    def check_account_exists(self, customer_id: str) -> bool:
+        """فحص وجود حساب في قاعدة البيانات"""
+        try:
+            if self.db_type == "supabase":
+                result = self.supabase.table('google_ads_accounts').select('customer_id').eq('customer_id', customer_id).execute()
+                return bool(result.data)
+            else:
+                cursor = self.connection.cursor()
+                cursor.execute("SELECT customer_id FROM google_ads_accounts WHERE customer_id = ?", (customer_id,))
+                return cursor.fetchone() is not None
+                
+        except Exception as e:
+            logger.error(f"خطأ في فحص وجود الحساب: {str(e)}")
+            return False
+    
     def _save_account_supabase(self, account_data: Dict[str, Any]) -> bool:
         """حفظ حساب في Supabase"""
         try:
-            # تحويل metadata إلى JSON
-            if 'metadata' in account_data and isinstance(account_data['metadata'], dict):
-                account_data['metadata'] = json.dumps(account_data['metadata'])
+            # تنسيق البيانات لتتوافق مع هيكل الجدول الموجود
+            formatted_data = {
+                'customer_id': account_data.get('customer_id'),
+                'account_name': account_data.get('account_name') or account_data.get('descriptive_name'),
+                'currency_code': account_data.get('currency_code', 'USD'),
+                'time_zone': account_data.get('time_zone', 'UTC'),
+                'status': account_data.get('status', 'ACTIVE'),
+                'is_manager_account': account_data.get('is_manager_account', False),
+                'is_test_account': account_data.get('is_test_account', False)
+            }
             
-            result = self.supabase_client.table('google_ads_accounts').upsert(account_data).execute()
+            # إزالة القيم الفارغة
+            formatted_data = {k: v for k, v in formatted_data.items() if v is not None}
+            
+            result = self.supabase_client.table('google_ads_accounts').upsert(formatted_data, on_conflict='customer_id').execute()
             return len(result.data) > 0
             
         except Exception as e:
@@ -363,18 +438,30 @@ class GoogleAdsDatabaseManager:
     def _get_accounts_supabase(self, user_id: str) -> List[Dict[str, Any]]:
         """جلب حسابات من Supabase"""
         try:
+            # استخدام الجدول الصحيح من مخطط قاعدة البيانات
             result = self.supabase_client.table('google_ads_accounts').select('*').eq('user_id', user_id).execute()
             
             accounts = []
             for account in result.data:
-                # تحويل metadata من JSON
-                if account.get('metadata'):
-                    try:
-                        account['metadata'] = json.loads(account['metadata'])
-                    except:
-                        account['metadata'] = {}
-                accounts.append(account)
+                # تحويل البيانات إلى التنسيق المطلوب
+                formatted_account = {
+                    'id': account.get('id'),
+                    'user_id': account.get('user_id'),
+                    'account_id': account.get('account_id'),
+                    'account_name': account.get('account_name'),
+                    'currency_code': account.get('currency_code', 'USD'),
+                    'time_zone': account.get('time_zone', 'UTC'),
+                    'is_manager_account': account.get('is_manager_account', False),
+                    'is_default': account.get('is_default', False),
+                    'is_active': account.get('is_active', True),
+                    'last_sync_at': account.get('last_sync_at'),
+                    'sync_status': account.get('sync_status', 'pending'),
+                    'created_at': account.get('created_at'),
+                    'updated_at': account.get('updated_at')
+                }
+                accounts.append(formatted_account)
             
+            logger.info(f"✅ تم جلب {len(accounts)} حساب من Supabase للمستخدم {user_id}")
             return accounts
             
         except Exception as e:
@@ -780,6 +867,49 @@ class GoogleAdsDatabaseManager:
     def __init__(self, db_type: Optional[str] = None):
         self.db_type = db_type or os.getenv("DATABASE_TYPE", "sqlite").lower()
         self.conn = None
+        
+    def check_account_exists(self, customer_id: str) -> bool:
+        """فحص وجود حساب في قاعدة البيانات"""
+        try:
+            if self.db_type == "supabase":
+                result = self.supabase.table('google_ads_accounts').select('customer_id').eq('customer_id', customer_id).execute()
+                return bool(result.data)
+            else:
+                cursor = self.connection.cursor()
+                cursor.execute("SELECT customer_id FROM google_ads_accounts WHERE customer_id = ?", (customer_id,))
+                return cursor.fetchone() is not None
+                
+        except Exception as e:
+            logger.error(f"خطأ في فحص وجود الحساب: {str(e)}")
+            return False
+    
+    def remove_google_ads_account(self, customer_id: str) -> bool:
+        """حذف حساب Google Ads من قاعدة البيانات (عند إلغاء الربط)"""
+        try:
+            if self.db_type == "supabase":
+                result = self.supabase.table('google_ads_accounts').delete().eq('customer_id', customer_id).execute()
+                if hasattr(result, 'data') and result.data:
+                    logger.info(f"✅ تم حذف حساب Google Ads من Supabase: {customer_id}")
+                    return True
+                else:
+                    logger.warning(f"⚠️ لم يتم العثور على حساب لحذفه: {customer_id}")
+                    return False
+            else:
+                cursor = self.connection.cursor()
+                cursor.execute("DELETE FROM google_ads_accounts WHERE customer_id = ?", (customer_id,))
+                rows_affected = cursor.rowcount
+                self.connection.commit()
+                
+                if rows_affected > 0:
+                    logger.info(f"✅ تم حذف حساب Google Ads من SQL: {customer_id}")
+                    return True
+                else:
+                    logger.warning(f"⚠️ لم يتم العثور على حساب لحذفه: {customer_id}")
+                    return False
+                
+        except Exception as e:
+            logger.error(f"خطأ في حذف حساب Google Ads: {str(e)}")
+            return False
         self.supabase_client: Optional[Client] = None
         self._initialize_db_connection()
 
@@ -858,7 +988,7 @@ class GoogleAdsDatabaseManager:
                 is_primary BOOLEAN,
                 linked_at TEXT,
                 last_sync TEXT,
-                metadata TEXT
+                metadata JSONB
             );
         """)
         cursor.execute("""
@@ -874,7 +1004,7 @@ class GoogleAdsDatabaseManager:
                 created_at TEXT,
                 last_refreshed TEXT,
                 is_active BOOLEAN,
-                metadata TEXT
+                metadata JSONB
             );
         """)
         self.conn.commit()

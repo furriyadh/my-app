@@ -59,13 +59,47 @@ const LockScreenContent: React.FC = () => {
     lastActivity: null
   });
 
-  // Mock user data
-  const [userInfo] = useState<UserInfo>({
-    name: "أحمد محمد",
-    email: "ahmed@furriyadh.ai",
-    avatar: "/images/admin.png",
-    role: "مدير النظام",
-    lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000)
+  // Mock user data - تحديث لاستخدام البيانات الفعلية من OAuth2
+  const [userInfo] = useState<UserInfo>(() => {
+    // محاولة الحصول على بيانات المستخدم من localStorage أو cookies
+    try {
+      // التحقق من وجود document (client-side only)
+      if (typeof window === 'undefined') {
+        return {
+          name: "User",
+          email: "user@example.com",
+          avatar: "/images/avatar-placeholder.png",
+          role: "User",
+          lastLogin: new Date()
+        };
+      }
+      
+      const userInfoCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('oauth2_user_info='));
+      
+      if (userInfoCookie) {
+        const userData = JSON.parse(decodeURIComponent(userInfoCookie.split('=')[1]));
+        return {
+          name: userData.name || "مستخدم النظام",
+          email: userData.email || "user@example.com",
+          avatar: userData.picture || "/images/admin.png",
+          role: "مدير النظام",
+          lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000)
+        };
+      }
+    } catch (error) {
+      console.warn('Could not parse user info from cookies:', error);
+    }
+    
+    // البيانات الافتراضية إذا لم يتم العثور على بيانات المستخدم
+    return {
+      name: "مستخدم النظام",
+      email: "user@example.com",
+      avatar: "/images/admin.png",
+      role: "مدير النظام",
+      lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000)
+    };
   });
 
   // Lock timer effect

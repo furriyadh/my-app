@@ -19,12 +19,20 @@ interface MerchantCenterAccount {
 }
 
 // إعداد Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
+
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export async function GET(request: NextRequest) {
   try {
+    // التحقق من إعداد Supabase
+    if (!supabase) {
+      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+    }
+
     // التحقق من session token
     const sessionToken = request.cookies.get('session_token')?.value;
     if (!sessionToken) {
@@ -328,8 +336,8 @@ async function refreshAccessToken(userId: string, refreshToken: string): Promise
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      client_id: process.env.GOOGLE_ADS_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET!,
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
     }),

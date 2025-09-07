@@ -164,7 +164,7 @@ const Layout = React.forwardRef(({
       case "dashboard":
         return "min-h-screen bg-gray-50 flex flex-col"
       case "auth":
-        return "min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center"
+        return "min-h-screen bg-slate-900 flex items-center justify-center"
       default:
         return "min-h-screen bg-gray-50 flex flex-col"
     }
@@ -356,11 +356,11 @@ const AuthLayout = React.forwardRef(({
         {showLogo && (
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                 <span className="text-white text-xl font-bold">AI</span>
               </div>
               <div className="text-left">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-blue-600">
                   Google Ads AI
                 </h1>
                 <p className="text-sm text-gray-500">منصة الإعلانات الذكية</p>

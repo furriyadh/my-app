@@ -20,10 +20,10 @@ class OAuthHandler:
         self.logger = logging.getLogger(__name__)
         
         # إعدادات OAuth من متغيرات البيئة
-        self.client_id = os.getenv("GOOGLE_ADS_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")
-        self.client_secret = os.getenv("GOOGLE_ADS_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")
+        self.client_id = os.getenv("GOOGLE_ADS_CLIENT_ID") or os.getenv("GOOGLE_ADS_CLIENT_ID")
+        self.client_secret = os.getenv("GOOGLE_ADS_CLIENT_SECRET") or os.getenv("GOOGLE_ADS_CLIENT_SECRET")
         self.redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or os.getenv("REACT_APP_GOOGLE_REDIRECT_URI") or os.getenv("NEXT_PUBLIC_OAUTH_REDIRECT_URI") or "http://localhost:3000/auth/callback"
-        self.developer_token = os.getenv("GOOGLE_DEVELOPER_TOKEN") or os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN")
+        self.developer_token = os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN")
         
         # نطاقات Google Ads
         self.scopes = [
@@ -75,7 +75,7 @@ class OAuthHandler:
             "response_type": "code",
             "scope": " ".join(self.scopes),
             "access_type": "offline",
-            "prompt": "consent",
+            # إزالة prompt تماماً
             "code_challenge": code_challenge,
             "code_challenge_method": "S256",
             "state": session_id  # استخدام session_id كـ state
@@ -230,11 +230,11 @@ class OAuthHandler:
 
 # مثال للاستخدام (للتطوير فقط)
 if __name__ == "__main__":
-    # تأكد من تعيين متغيرات البيئة قبل التشغيل
+        # تأكد من تعيين متغيرات البيئة قبل التشغيل
     os.environ["GOOGLE_ADS_CLIENT_ID"] = "YOUR_CLIENT_ID"
     os.environ["GOOGLE_ADS_CLIENT_SECRET"] = "YOUR_CLIENT_SECRET"
-    os.environ["GOOGLE_ADS_REDIRECT_URI"] = "http://localhost:3000/api/oauth/callback"
-    os.environ["GOOGLE_DEVELOPER_TOKEN"] = "YOUR_DEVELOPER_TOKEN"
+    os.environ["GOOGLE_ADS_REDIRECT_URI"] = "http://localhost:3000/api/oauth/google/callback"
+    os.environ["GOOGLE_ADS_DEVELOPER_TOKEN"] = "YOUR_DEVELOPER_TOKEN"
     
     oauth_handler = OAuthHandler( )
     

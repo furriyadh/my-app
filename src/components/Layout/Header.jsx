@@ -88,11 +88,11 @@ const Header = React.forwardRef(({
 
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Zap className="h-5 w-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-blue-600 bg-clip-text text-transparent">
                   Google Ads AI
                 </h1>
                 <p className="text-xs text-gray-500">منصة الإعلانات الذكية</p>
@@ -224,7 +224,7 @@ const Header = React.forwardRef(({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 px-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium">
                         {user?.name?.charAt(0)?.toUpperCase() || "U"}
                       </span>
@@ -339,10 +339,10 @@ const MobileHeader = React.forwardRef(({
           </Button>
           
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
               <Zap className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold text-lg bg-blue-600 bg-clip-text text-transparent">
               Ads AI
             </span>
           </div>
@@ -364,7 +364,7 @@ const MobileHeader = React.forwardRef(({
           </Button>
 
           {/* User Avatar */}
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
             <span className="text-white text-sm font-medium">
               {user?.name?.charAt(0)?.toUpperCase() || "U"}
             </span>

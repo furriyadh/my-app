@@ -54,7 +54,7 @@ const markers = [
 
 const MarkersMap: React.FC = () => {
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyAe57f_PT4dsrCcwK_UPN7nY4SERmnH254", // Replace with your actual API key
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);

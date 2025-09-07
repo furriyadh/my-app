@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ toggleActive }) => {
     <>
       <div
         id="header"
-        className="header-area bg-white dark:bg-[#0c1427] py-[13px] px-[20px] md:px-[25px] fixed top-0 z-[6] rounded-b-md transition-all"
+        className="header-area py-[13px] px-[20px] md:px-[25px] fixed top-0 z-[90] rounded-b-md transition-all"
       >
         <div className="md:flex md:items-center md:justify-between">
           <div className="flex items-center justify-center md:justify-normal">

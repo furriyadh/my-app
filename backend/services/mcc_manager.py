@@ -12,6 +12,7 @@ MCC Manager Service
 """
 
 import logging
+import os
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 import json
@@ -200,44 +201,128 @@ class MCCManager:
             return {"success": False, "error": str(e)}
     
     def unlink_account(self, customer_id: str, reason: str = None) -> Dict[str, Any]:
-        """إلغاء ربط حساب"""
+        """إلغاء ربط حساب من MCC عبر Google Ads API"""
         try:
-            if not self.is_initialized:
-                return {"success": False, "error": "MCC غير مهيأ"}
+            import requests
             
-            # البحث عن الحساب
-            account_index = next((i for i, a in enumerate(self.linked_accounts) if a["customer_id"] == customer_id), None)
+            # تنظيف معرف العميل
+            clean_customer_id = customer_id.replace('-', '').strip()
             
-            if account_index is None:
+            if not clean_customer_id or len(clean_customer_id) != 10:
                 return {
                     "success": False,
-                    "error": "الحساب غير موجود في الحسابات المرتبطة"
+                    "error": "Invalid customer ID format"
                 }
             
-            # حفظ معلومات الحساب قبل الحذف
-            removed_account = self.linked_accounts.pop(account_index)
+            # الحصول على إعدادات OAuth
+            refresh_token = os.getenv('GOOGLE_ADS_REFRESH_TOKEN')
+            client_id = os.getenv('GOOGLE_ADS_CLIENT_ID')
+            client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET')
+            mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', self.mcc_id)
+            developer_token = os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN')
             
-            # تسجيل عملية الإلغاء
-            unlink_record = {
-                "customer_id": customer_id,
-                "account_name": removed_account["name"],
-                "unlinked_at": datetime.now().isoformat(),
-                "reason": reason or "غير محدد",
-                "unlinked_by": self.mcc_id
+            if not all([refresh_token, client_id, client_secret, mcc_customer_id, developer_token]):
+                return {
+                    "success": False,
+                    "error": "Missing OAuth credentials in environment"
+                }
+            
+            # تجديد access token
+            token_response = requests.post('https://oauth2.googleapis.com/token', data={
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'refresh_token': refresh_token,
+                'grant_type': 'refresh_token'
+            }, timeout=10)
+            
+            if token_response.status_code != 200:
+                return {
+                    "success": False,
+                    "error": "Failed to refresh access token"
+                }
+            
+            access_token = token_response.json().get('access_token')
+            
+            # إعداد headers للـ API
+            headers = {
+                'Authorization': f'Bearer {access_token}',
+                'developer-token': developer_token,
+                'login-customer-id': mcc_customer_id,
+                'Content-Type': 'application/json'
             }
             
-            self.logger.info(f"تم إلغاء ربط الحساب: {customer_id}")
+            # الحصول على قائمة الروابط الحالية
+            links_url = f"https://googleads.googleapis.com/v20/customers/{mcc_customer_id}/customerClientLinks"
+            links_response = requests.get(links_url, headers=headers, timeout=10)
             
-            return {
-                "success": True,
-                "unlinked_account": removed_account,
-                "unlink_record": unlink_record,
-                "message": "تم إلغاء ربط الحساب بنجاح",
-                "remaining_accounts": len(self.linked_accounts)
+            if links_response.status_code != 200:
+                return {
+                    "success": False,
+                    "error": "Could not fetch current MCC links"
+                }
+            
+            # البحث عن الرابط المحدد
+            links_data = links_response.json()
+            customer_links = links_data.get('customerClientLinks', [])
+            target_link = None
+            
+            for link in customer_links:
+                if f"customers/{clean_customer_id}" in link.get('clientCustomer', ''):
+                    target_link = link
+                    break
+            
+            if not target_link:
+                return {
+                    "success": False,
+                    "error": "Account not linked to MCC",
+                    "message": "This account is not currently linked to MCC"
+                }
+            
+            # إنشاء عملية إلغاء الربط
+            unlink_payload = {
+                "operation": {
+                    "remove": target_link.get('resourceName')
+                }
             }
+            
+            self.logger.info(f"🗑️ إلغاء ربط الحساب {clean_customer_id} من MCC {mcc_customer_id}")
+            
+            # إرسال طلب إلغاء الربط
+            unlink_url = f"https://googleads.googleapis.com/v20/customers/{mcc_customer_id}/customerClientLinks:mutate"
+            unlink_response = requests.post(unlink_url, headers=headers, json=unlink_payload, timeout=10)
+            
+            if unlink_response.status_code == 200:
+                self.logger.info(f"✅ تم إلغاء ربط الحساب {clean_customer_id} بنجاح")
+                
+                # إزالة من القائمة المحلية
+                account_index = next((i for i, a in enumerate(self.linked_accounts) if a["customer_id"] == customer_id), None)
+                if account_index is not None:
+                    removed_account = self.linked_accounts.pop(account_index)
+                
+                return {
+                    "success": True,
+                    "message": "Account unlinked from MCC successfully",
+                    "data": {
+                        "customer_id": clean_customer_id,
+                        "mcc_customer_id": mcc_customer_id,
+                        "unlinked_at": datetime.now().isoformat(),
+                        "reason": reason or "User request",
+                        "former_resource_name": target_link.get('resourceName')
+                    }
+                }
+            else:
+                error_text = unlink_response.text
+                self.logger.error(f"❌ فشل في إلغاء الربط: {unlink_response.status_code}")
+                
+                return {
+                    "success": False,
+                    "error": f"Google Ads API Error: {unlink_response.status_code}",
+                    "message": "Failed to unlink account from MCC",
+                    "details": error_text
+                }
             
         except Exception as e:
-            self.logger.error(f"خطأ في إلغاء ربط الحساب: {e}")
+            self.logger.error(f"❌ خطأ في إلغاء ربط الحساب: {e}")
             return {"success": False, "error": str(e)}
     
     # ===========================================

@@ -5,12 +5,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // إنشاء عميل Supabase من متغيرات البيئة
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// التحقق من وجود المتغيرات المطلوبة
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('⚠️ Supabase environment variables not found');
+}
+
+// إنشاء عميل Supabase فقط إذا كانت المتغيرات متوفرة
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 export async function POST(request: NextRequest) {
   try {
+    // التحقق من توفر Supabase
+    if (!supabase) {
+      return NextResponse.json(
+        { 
+          error: 'Database not configured',
+          isNewUser: true // في حالة عدم توفر قاعدة البيانات، نعتبره مستخدم جديد
+        },
+        { status: 503 }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {
@@ -116,6 +134,17 @@ async function saveNewUserToDatabase(email: string): Promise<void> {
 // API إضافي لحفظ اختيار المستخدم
 export async function PUT(request: NextRequest) {
   try {
+    // التحقق من توفر Supabase
+    if (!supabase) {
+      return NextResponse.json(
+        { 
+          error: 'Database not configured',
+          isNewUser: true
+        },
+        { status: 503 }
+      );
+    }
+
     const { email, accountType, customerId, onboardingCompleted } = await request.json();
 
     if (!email) {
@@ -167,6 +196,17 @@ export async function PUT(request: NextRequest) {
 // API للحصول على معلومات المستخدم
 export async function GET(request: NextRequest) {
   try {
+    // التحقق من توفر Supabase
+    if (!supabase) {
+      return NextResponse.json(
+        { 
+          error: 'Database not configured',
+          isNewUser: true
+        },
+        { status: 503 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
 

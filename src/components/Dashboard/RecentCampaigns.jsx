@@ -34,117 +34,8 @@ const RecentCampaigns = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
 
-  // Mock campaign data
-  const mockCampaigns = [
-    {
-      id: 1,
-      name: "Summer Sale 2024 - Electronics",
-      status: "active",
-      type: "Search",
-      budget: 1500,
-      spent: 1247.50,
-      impressions: 125000,
-      clicks: 2340,
-      conversions: 89,
-      ctr: 1.87,
-      cpc: 0.53,
-      roas: 4.2,
-      startDate: "2024-06-01",
-      endDate: "2024-08-31",
-      performance: "excellent",
-      lastModified: "2 hours ago"
-    },
-    {
-      id: 2,
-      name: "Brand Awareness Campaign",
-      status: "active",
-      type: "Display",
-      budget: 800,
-      spent: 654.30,
-      impressions: 89000,
-      clicks: 1120,
-      conversions: 34,
-      ctr: 1.26,
-      cpc: 0.58,
-      roas: 2.8,
-      startDate: "2024-06-15",
-      endDate: "2024-07-15",
-      performance: "good",
-      lastModified: "5 hours ago"
-    },
-    {
-      id: 3,
-      name: "Holiday Special Offers",
-      status: "paused",
-      type: "Shopping",
-      budget: 2000,
-      spent: 1890.75,
-      impressions: 156000,
-      clicks: 3200,
-      conversions: 145,
-      ctr: 2.05,
-      cpc: 0.59,
-      roas: 5.1,
-      startDate: "2024-05-20",
-      endDate: "2024-06-20",
-      performance: "excellent",
-      lastModified: "1 day ago"
-    },
-    {
-      id: 4,
-      name: "Mobile App Downloads",
-      status: "active",
-      type: "Video",
-      budget: 1200,
-      spent: 987.20,
-      impressions: 78000,
-      clicks: 890,
-      conversions: 67,
-      ctr: 1.14,
-      cpc: 1.11,
-      roas: 3.4,
-      startDate: "2024-06-10",
-      endDate: "2024-07-10",
-      performance: "good",
-      lastModified: "3 hours ago"
-    },
-    {
-      id: 5,
-      name: "Local Services Promotion",
-      status: "ended",
-      type: "Search",
-      budget: 600,
-      spent: 600,
-      impressions: 45000,
-      clicks: 1200,
-      conversions: 28,
-      ctr: 2.67,
-      cpc: 0.50,
-      roas: 2.1,
-      startDate: "2024-05-01",
-      endDate: "2024-05-31",
-      performance: "average",
-      lastModified: "1 week ago"
-    },
-    {
-      id: 6,
-      name: "New Product Launch",
-      status: "draft",
-      type: "Display",
-      budget: 1800,
-      spent: 0,
-      impressions: 0,
-      clicks: 0,
-      conversions: 0,
-      ctr: 0,
-      cpc: 0,
-      roas: 0,
-      startDate: "2024-07-01",
-      endDate: "2024-08-01",
-      performance: "pending",
-      lastModified: "2 days ago"
-    }
-  ];
+  // إرجاع قائمة فارغة بدلاً من البيانات الوهمية
+  const mockCampaigns = [];
 
   // Load campaigns
   useEffect(() => {
@@ -175,29 +66,29 @@ const RecentCampaigns = () => {
       }
     });
 
-  // Status configurations
+  // Status configurations - Updated for AnimatedWave background
   const statusConfigs = {
     active: {
-      color: "text-green-700 dark:text-green-400",
-      bg: "bg-green-100 dark:bg-green-900/30",
+      color: "text-green-200 drop-shadow-sm",
+      bg: "bg-green-500/20 backdrop-blur-sm border border-green-300/30",
       icon: Play,
       label: "Active"
     },
     paused: {
-      color: "text-yellow-700 dark:text-yellow-400",
-      bg: "bg-yellow-100 dark:bg-yellow-900/30",
+      color: "text-yellow-200 drop-shadow-sm",
+      bg: "bg-yellow-500/20 backdrop-blur-sm border border-yellow-300/30",
       icon: Pause,
       label: "Paused"
     },
     ended: {
-      color: "text-gray-700 dark:text-gray-400",
-      bg: "bg-gray-100 dark:bg-gray-900/30",
+      color: "text-gray-200 drop-shadow-sm",
+      bg: "bg-gray-500/20 backdrop-blur-sm border border-gray-300/30",
       icon: CheckCircle,
       label: "Ended"
     },
     draft: {
-      color: "text-blue-700 dark:text-blue-400",
-      bg: "bg-blue-100 dark:bg-blue-900/30",
+      color: "text-blue-200 drop-shadow-sm",
+      bg: "bg-blue-500/20 backdrop-blur-sm border border-blue-300/30",
       icon: Clock,
       label: "Draft"
     }
@@ -269,22 +160,22 @@ const RecentCampaigns = () => {
   const LoadingSkeleton = () => (
     <div className="space-y-4">
       {Array.from({ length: 5 }).map((_, index) => (
-        <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 animate-pulse">
+        <div key={index} className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-blue-200/30 animate-pulse">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              <div className="w-10 h-10 bg-blue-200/30 rounded-lg"></div>
               <div>
-                <div className="w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="w-48 h-4 bg-blue-200/30 rounded mb-2"></div>
+                <div className="w-24 h-3 bg-blue-200/30 rounded"></div>
               </div>
             </div>
-            <div className="w-20 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="w-20 h-6 bg-blue-200/30 rounded"></div>
           </div>
           <div className="grid grid-cols-6 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="text-center">
-                <div className="w-12 h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1 mx-auto"></div>
-                <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded mx-auto"></div>
+                <div className="w-12 h-4 bg-blue-200/30 rounded mb-1 mx-auto"></div>
+                <div className="w-16 h-3 bg-blue-200/30 rounded mx-auto"></div>
               </div>
             ))}
           </div>
@@ -304,7 +195,7 @@ const RecentCampaigns = () => {
     const budgetUsed = (campaign.spent / campaign.budget) * 100;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 group">
+      <div className="  rounded-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 group">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
@@ -312,7 +203,7 @@ const RecentCampaigns = () => {
               <TypeIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-800 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {campaign.name}
               </h3>
               <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
@@ -331,7 +222,7 @@ const RecentCampaigns = () => {
             </div>
             
             {/* Performance Badge */}
-            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 ${performanceConfig.color}`}>
+            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-md border border-blue-200/30 ${performanceConfig.color}`}>
               <PerformanceIcon className="w-3 h-3" />
               <span>{performanceConfig.label}</span>
             </div>
@@ -349,7 +240,7 @@ const RecentCampaigns = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="text-gray-600 dark:text-gray-400">Budget Usage</span>
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="font-medium text-gray-900 dark:text-gray-800">
               {formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}
             </span>
           </div>
@@ -372,7 +263,7 @@ const RecentCampaigns = () => {
             <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-1">
               <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {formatNumber(campaign.impressions)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Impressions</div>
@@ -382,7 +273,7 @@ const RecentCampaigns = () => {
             <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-1">
               <MousePointer className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {formatNumber(campaign.clicks)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Clicks</div>
@@ -392,28 +283,28 @@ const RecentCampaigns = () => {
             <div className="flex items-center justify-center w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg mx-auto mb-1">
               <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {campaign.conversions}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Conversions</div>
           </div>
           
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {campaign.ctr}%
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">CTR</div>
           </div>
           
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {formatCurrency(campaign.cpc)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">CPC</div>
           </div>
           
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {campaign.roas}x
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">ROAS</div>
@@ -460,7 +351,7 @@ const RecentCampaigns = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-800 mb-2">
             Recent Campaigns
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
@@ -468,7 +359,7 @@ const RecentCampaigns = () => {
           </p>
         </div>
         
-        <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+        <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-gray-800 px-4 py-2 rounded-lg transition-colors">
           <Plus className="w-4 h-4" />
           <span>New Campaign</span>
         </button>
@@ -484,7 +375,7 @@ const RecentCampaigns = () => {
             placeholder="Search campaigns..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-800 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -493,7 +384,7 @@ const RecentCampaigns = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -505,7 +396,7 @@ const RecentCampaigns = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="date">Sort by Date</option>
             <option value="name">Sort by Name</option>
@@ -526,10 +417,10 @@ const RecentCampaigns = () => {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto mb-4">
+          <div className="flex items-center justify-center w-16 h-16 bg-white/15 backdrop-blur-md border border-blue-200/30  rounded-full mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-800 mb-2">
             No campaigns found
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
@@ -538,7 +429,7 @@ const RecentCampaigns = () => {
               : "Get started by creating your first campaign"
             }
           </p>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto">
+          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-gray-800 px-4 py-2 rounded-lg transition-colors mx-auto">
             <Plus className="w-4 h-4" />
             <span>Create Campaign</span>
           </button>
@@ -547,7 +438,7 @@ const RecentCampaigns = () => {
 
       {/* Summary Footer */}
       {!isLoading && filteredCampaigns.length > 0 && (
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600 dark:text-gray-400">
               Showing {filteredCampaigns.length} of {campaigns.length} campaigns

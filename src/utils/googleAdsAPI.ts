@@ -5,7 +5,7 @@
 import googleAuthService from "../services/googleAuth";
 
 // تكوين Google Ads API
-const GOOGLE_ADS_API_VERSION = "v16";
+const GOOGLE_ADS_API_VERSION = "v20";
 const GOOGLE_ADS_API_BASE_URL = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}`;
 
 // التحقق من وجود المتغيرات المطلوبة

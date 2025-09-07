@@ -291,17 +291,11 @@ class GoogleAdsMCCFetcher:
         """جلب قائمة بجميع حسابات العملاء المرتبطة بحساب MCC."""
         query = """
             SELECT
-                customer_client.client_customer, 
-                customer_client.id, 
-                customer_client.descriptive_name, 
-                customer_client.currency_code, 
-                customer_client.time_zone, 
-                customer_client.manager, 
-                customer_client.test_account, 
-                customer_client.status
-            FROM customer_client
-            WHERE customer_client.manager = FALSE
-            AND customer_client.status = \'ENABLED\'
+                customer_manager_link.client_customer,
+                customer_manager_link.manager_customer,
+                customer_manager_link.status
+            FROM customer_manager_link
+            WHERE customer_manager_link.status = 'ACTIVE'
         """
         self.logger.info(f"Fetching client accounts for MCC: {self.mcc_customer_id}")
         try:

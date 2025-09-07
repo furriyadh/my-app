@@ -113,7 +113,30 @@
 /** Body */
 html,
 body {
-  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 bg-gray-50 leading-normal dark:bg-[#0a0e19] dark:text-gray-400;
+  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 leading-normal dark:text-gray-400;
+}
+
+/** Clean Dashboard - AnimatedWave Background Only */
+.main-wrapper-content {
+  background: transparent !important;
+  min-height: 100vh !important;
+  position: relative !important;
+}
+
+/** Force ALL text to white in dashboard */
+.main-wrapper-content h1,
+.main-wrapper-content h2, 
+.main-wrapper-content h3,
+.main-wrapper-content h4,
+.main-wrapper-content h5,
+.main-wrapper-content h6,
+.main-wrapper-content button,
+.main-wrapper-content a,
+.main-wrapper-content span,
+.main-wrapper-content p,
+.main-wrapper-content div {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
 /** Paragraph */
@@ -184,7 +207,7 @@ button {
 
 /* Sidebar */
 .sidebar-area {
-  @apply w-[260px] ltr:-left-full ltr:xl:left-0 rtl:-right-full rtl:xl:right-0;
+  @apply w-[260px] ltr:-left-full ltr:xl:left-0 rtl:-right-full rtl:xl:right-0 z-[100];
 
   .burger-menu {
     @apply opacity-0 invisible;
@@ -395,7 +418,7 @@ button {
 
 /** Header */
 .header-area {
-  @apply left-[15px] right-[15px] md:left-[25px] md:right-[25px] ltr:xl:left-[285px] rtl:xl:right-[285px];
+  @apply left-[15px] right-[15px] md:left-[25px] md:right-[25px] ltr:xl:left-[285px] rtl:xl:right-[285px] z-[90];
 
   .hide-sidebar-toggle {
     &.active {
@@ -487,7 +510,12 @@ button {
 
 /** Card */
 .trezo-card {
-  .trezo-card-dropdown {
+  @apply border-0 shadow-none;
+}
+
+
+
+.trezo-card-dropdown {
     .trezo-card-dropdown-menu {
       @apply opacity-0 invisible;
     }
@@ -762,7 +790,7 @@ button {
   #topSellingProductsSlides {
     .swiper-button-next,
     .swiper-button-prev {
-      @apply ltr:-left-[15px] rtl:-right-[15px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] inline-block rounded-full border-0 text-center leading-[30px] text-md transition-all text-white bg-primary-500 hover:bg-primary-500 hover:bg-primary-400 m-0 rtl:-scale-x-100;
+      @apply ltr:-left-[15px] rtl:-right-[15px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] inline-block rounded-full border-0 text-center leading-[30px] text-md transition-all text-white bg-primary-500 hover:bg-primary-500 m-0 rtl:-scale-x-100;
 
       &::after {
         @apply hidden;
@@ -816,7 +844,6 @@ button {
       }
     }
   }
-}
 
 /** Accordion */
 .toc-accordion {
@@ -1135,6 +1162,7 @@ html[dir="rtl"] {
   input {
     &[type="checkbox"] {
       -webkit-appearance: none;
+      appearance: none;
       @apply border-[2px] border-black dark:border-white relative rounded-[2px] h-[15px] w-[15px] disabled:opacity-[.35];
 
       &::before {

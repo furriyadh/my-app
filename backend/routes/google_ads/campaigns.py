@@ -79,7 +79,7 @@ except ImportError as e:
     logger.warning(f"⚠️ GoogleAdsClientManager غير متاح: {e}")
 
 try:
-    from backend.routes.google_ads.auth_jwt import oauth_manager
+    from .auth_jwt import oauth_manager
     CAMPAIGNS_SERVICES_STATUS['oauth_manager'] = True
 except ImportError as e:
     logger.warning(f"⚠️ OAuth Manager غير متاح: {e}")

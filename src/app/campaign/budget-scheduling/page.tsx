@@ -630,7 +630,7 @@ const BudgetSchedulingPage: React.FC = () => {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="p-6 space-y-6">
         
         {/* Header */}

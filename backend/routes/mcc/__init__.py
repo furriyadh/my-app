@@ -22,12 +22,14 @@ from .clients import mcc_clients_bp
 from .permissions import mcc_permissions_bp
 from .sync import mcc_sync_bp
 from .analytics import mcc_analytics_bp
+from .link_customer import mcc_link_bp
 
 __all__ = [
     'mcc_accounts_bp',
     'mcc_clients_bp', 
     'mcc_permissions_bp',
     'mcc_sync_bp',
-    'mcc_analytics_bp'
+    'mcc_analytics_bp',
+    'mcc_link_bp'
 ]
 

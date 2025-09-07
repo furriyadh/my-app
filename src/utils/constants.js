@@ -7,11 +7,11 @@
 export const API_ENDPOINTS = {
   // Authentication
   AUTH: {
-    GOOGLE_STATUS: '/auth/google/status',
-    GOOGLE_INITIATE: '/auth/google/initiate',
-    GOOGLE_CALLBACK: '/auth/google/callback',
-    REFRESH_TOKEN: '/auth/refresh',
-    LOGOUT: '/auth/logout'
+    GOOGLE_STATUS: '/oauth/status',
+GOOGLE_INITIATE: '/oauth/login',
+GOOGLE_CALLBACK: '/oauth/callback',
+REFRESH_TOKEN: '/oauth/refresh',
+LOGOUT: '/oauth/logout'
   },
 
   // Accounts
@@ -87,12 +87,12 @@ export const REGEX_PATTERNS = {
 // ===== GOOGLE ADS CONFIGURATION ===== (محدث)
 export const GOOGLE_ADS_CONFIG = {
   // OAuth Configuration - محدث بالـ client ID الجديد
-  CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '366144291902-u75bec3sviur9nrutbslt14ob14hrgud.apps.googleusercontent.com',
-  REDIRECT_URI: process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/oauth/callback',
+  CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID,
+  REDIRECT_URI: process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/oauth/google/callback', // تم توحيد المسار مع الباك اند
   
   // API Configuration
-  DEVELOPER_TOKEN: process.env.GOOGLE_DEVELOPER_TOKEN || 'ttkK6FCgnU2EjF43wt3lhQ',
-  MCC_CUSTOMER_ID: process.env.MCC_LOGIN_CUSTOMER_ID || '9252466178',
+  DEVELOPER_TOKEN: process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
+  MCC_CUSTOMER_ID: process.env.MCC_LOGIN_CUSTOMER_ID || '',
   
   // OAuth Scopes
   SCOPES: [
@@ -102,7 +102,7 @@ export const GOOGLE_ADS_CONFIG = {
   ],
   
   // API Version
-  API_VERSION: 'v16',
+  API_VERSION: 'v20',
   BASE_URL: 'https://googleads.googleapis.com'
 };
 

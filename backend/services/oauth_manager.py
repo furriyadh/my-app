@@ -19,9 +19,9 @@ class OAuthManager:
     
     def __init__(self):
         # إعدادات OAuth
-        self.client_id = os.getenv('GOOGLE_CLIENT_ID')
-        self.client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:5000/oauth/callback')
+        self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID')
+        self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET')
+        self.redirect_uri = os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback')
         
         # URLs للمصادقة
         self.auth_url = 'https://accounts.google.com/o/oauth2/auth'
@@ -48,7 +48,7 @@ class OAuthManager:
     
     def _check_configuration(self) -> bool:
         """فحص تكوين OAuth"""
-        required_vars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
+        required_vars = ['GOOGLE_ADS_CLIENT_ID', 'GOOGLE_ADS_CLIENT_SECRET']
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         
         if missing_vars:
@@ -73,7 +73,7 @@ class OAuthManager:
             'scope': ' '.join(self.scopes),
             'response_type': 'code',
             'access_type': 'offline',
-            'prompt': 'consent',
+            # إزالة prompt تماماً
             'state': state
         }
         

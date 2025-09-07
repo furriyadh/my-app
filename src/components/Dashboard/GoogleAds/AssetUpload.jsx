@@ -233,7 +233,7 @@ const AssetUpload = () => {
       {/* Header */}
       <div className="text-center">
         <Upload className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-800 mb-2">
           Assets & Creatives
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -242,8 +242,8 @@ const AssetUpload = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg">
+        <div className="flex border-b border-blue-200/30">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
@@ -271,7 +271,7 @@ const AssetUpload = () => {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800">
                       Headlines ({assets.headlines.length}/{assetRequirements.headlines.max})
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -281,7 +281,7 @@ const AssetUpload = () => {
                   <button
                     onClick={() => generateAISuggestions('headlines')}
                     disabled={isLoading}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-gray-800 rounded-lg disabled:opacity-50 transition-colors"
                   >
                     <Zap className="w-4 h-4" />
                     <span>AI Generate</span>
@@ -295,7 +295,7 @@ const AssetUpload = () => {
                       type="text"
                       placeholder="Enter a compelling headline (max 30 characters)"
                       maxLength={assetRequirements.headlines.maxLength}
-                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/15 backdrop-blur-md text-gray-900 dark:text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           addTextAsset('headlines', e.target.value);
@@ -309,7 +309,7 @@ const AssetUpload = () => {
                         addTextAsset('headlines', input.value);
                         input.value = '';
                       }}
-                      className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -318,9 +318,9 @@ const AssetUpload = () => {
                   {/* Headlines list */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {assets.headlines.map(headline => (
-                      <div key={headline.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div key={headline.id} className="flex items-center justify-between p-3 bg-white/15 backdrop-blur-md rounded-lg">
                         <div className="flex-1">
-                          <span className="text-gray-900 dark:text-white">{headline.text}</span>
+                          <span className="text-gray-900 dark:text-gray-800">{headline.text}</span>
                           <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                             ({headline.length}/{assetRequirements.headlines.maxLength})
                           </span>
@@ -359,7 +359,7 @@ const AssetUpload = () => {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800">
                       Descriptions ({assets.descriptions.length}/{assetRequirements.descriptions.max})
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -369,7 +369,7 @@ const AssetUpload = () => {
                   <button
                     onClick={() => generateAISuggestions('descriptions')}
                     disabled={isLoading}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-gray-800 rounded-lg disabled:opacity-50 transition-colors"
                   >
                     <Zap className="w-4 h-4" />
                     <span>AI Generate</span>
@@ -383,7 +383,7 @@ const AssetUpload = () => {
                       placeholder="Enter a detailed description (max 90 characters)"
                       maxLength={assetRequirements.descriptions.maxLength}
                       rows={2}
-                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/15 backdrop-blur-md text-gray-900 dark:text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -398,7 +398,7 @@ const AssetUpload = () => {
                         addTextAsset('descriptions', textarea.value);
                         textarea.value = '';
                       }}
-                      className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors self-start"
+                      className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors self-start"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -407,9 +407,9 @@ const AssetUpload = () => {
                   {/* Descriptions list */}
                   <div className="space-y-3">
                     {assets.descriptions.map(description => (
-                      <div key={description.id} className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div key={description.id} className="flex items-start justify-between p-3 bg-white/15 backdrop-blur-md rounded-lg">
                         <div className="flex-1">
-                          <span className="text-gray-900 dark:text-white">{description.text}</span>
+                          <span className="text-gray-900 dark:text-gray-800">{description.text}</span>
                           <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                             ({description.length}/{assetRequirements.descriptions.maxLength})
                           </span>
@@ -433,7 +433,7 @@ const AssetUpload = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800">
                     Images ({assets.images.length}/{assetRequirements.images.max})
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -442,7 +442,7 @@ const AssetUpload = () => {
                 </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors"
                 >
                   <Upload className="w-4 h-4" />
                   <span>Upload Images</span>
@@ -475,7 +475,7 @@ const AssetUpload = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {assets.images.map(image => (
                     <div key={image.id} className="relative group">
-                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                      <div className="aspect-square bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg overflow-hidden">
                         <img
                           src={image.url}
                           alt={image.name}
@@ -485,13 +485,13 @@ const AssetUpload = () => {
                       <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center space-x-2">
                         <button
                           onClick={() => setPreviewAsset(image)}
-                          className="p-2 bg-white text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
+                          className="p-2 bg-white/20 text-blue-200 backdrop-blur-sm border border-blue-300/20 rounded-full hover:bg-white/30 transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => removeAsset('images', image.id)}
-                          className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-500 text-gray-800 rounded-full hover:bg-red-600 transition-colors"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -524,7 +524,7 @@ const AssetUpload = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800">
                     Videos ({assets.videos.length}/{assetRequirements.videos.max})
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -533,7 +533,7 @@ const AssetUpload = () => {
                 </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors"
                 >
                   <Upload className="w-4 h-4" />
                   <span>Upload Videos</span>
@@ -555,12 +555,12 @@ const AssetUpload = () => {
               {assets.videos.length > 0 && (
                 <div className="space-y-4">
                   {assets.videos.map(video => (
-                    <div key={video.id} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div key={video.id} className="flex items-center space-x-4 p-4 bg-white/15 backdrop-blur-md rounded-lg">
                       <div className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
                         <Film className="w-6 h-6 text-gray-400" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 dark:text-white">{video.name}</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-gray-800">{video.name}</h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {(video.size / 1024 / 1024).toFixed(2)} MB
                         </p>
@@ -582,7 +582,7 @@ const AssetUpload = () => {
           {activeTab === "sitelinks" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-2">
                   Sitelinks
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -592,7 +592,7 @@ const AssetUpload = () => {
 
               <div className="text-center py-12">
                 <Link className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-800 mb-2">
                   Sitelinks Coming Soon
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -605,7 +605,7 @@ const AssetUpload = () => {
       </div>
 
       {/* Asset Summary */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800">
+      <div className="bg-white/10 backdrop-blur-md border border-green-200/30 rounded-lg p-6">
         <h3 className="font-semibold text-green-900 dark:text-green-400 mb-3 flex items-center">
           <Check className="w-5 h-5 mr-2" />
           Asset Summary
@@ -640,20 +640,20 @@ const AssetUpload = () => {
 
       {/* Action Buttons */}
       <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+        <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
           <Eye className="w-4 h-4" />
           <span>Preview Assets</span>
         </button>
         
         <div className="flex items-center space-x-4">
-          <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             Save as Draft
           </button>
           
           <button
             onClick={handleSave}
             disabled={isLoading}
-            className="flex items-center space-x-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center space-x-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
               <RefreshCw className="w-4 h-4 animate-spin" />

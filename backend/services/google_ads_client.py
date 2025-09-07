@@ -1,18 +1,30 @@
 """
-Google Ads Client - عميل Google Ads مُصحح ومُحسن
-يحل مشاكل credentials والاتصال مع Google Ads API
+Google Ads Client - عميل Google Ads محسن باستخدام المكتبة الرسمية
+يتبع أفضل الممارسات من google-ads-python الرسمية
 """
 import os
 import yaml
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
+from dotenv import load_dotenv
+
+# تحميل متغيرات البيئة
+load_dotenv('../.env.development')
 
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
 
 class GoogleAdsClientManager:
-    """مدير عميل Google Ads مع معالجة أخطاء متقدمة"""
+    """
+    مدير عميل Google Ads محسن - يتبع المكتبة الرسمية
+    
+    Features:
+    - استخدام GoogleAdsClient.load_from_dict() المعياري
+    - معالجة أخطاء GoogleAdsException بطريقة احترافية  
+    - دعم MCC operations بشكل صحيح
+    - إدارة tokens محسنة
+    """
     
     def __init__(self):
         self.client = None
@@ -44,6 +56,8 @@ class GoogleAdsClientManager:
         except Exception as e:
             logger.error(f"❌ فشل في تهيئة Google Ads Client: {e}")
             self.is_initialized = False
+            # إصلاح مشكلة التهيئة - السماح بالاستمرار مع OAuth2 Manager
+            logger.info("ℹ️ سيتم استخدام OAuth2 Manager للربط التلقائي")
     
     def _check_library(self) -> bool:
         """فحص توفر مكتبة Google Ads"""
@@ -103,7 +117,7 @@ class GoogleAdsClientManager:
         
         # متغيرات اختيارية
         optional_vars = {
-            'login_customer_id': 'GOOGLE_ADS_LOGIN_CUSTOMER_ID',
+            'login_customer_id': 'MCC_LOGIN_CUSTOMER_ID',
             'use_proto_plus': 'GOOGLE_ADS_USE_PROTO_PLUS'
         }
         
@@ -116,6 +130,10 @@ class GoogleAdsClientManager:
                     config[key] = value
         
         if missing_vars:
+            # إذا كنا في وضع الاختبار، لا نظهر تحذيراً مزعجاً
+            if os.getenv('FLASK_ENV') == 'testing' or os.getenv('TESTING') == 'True':
+                logger.info("🧪 وضع الاختبار: سيتم تجاهل متغيرات البيئة المفقودة")
+                return None
             logger.warning(f"متغيرات البيئة مفقودة: {missing_vars}")
             return None
         
@@ -162,6 +180,17 @@ class GoogleAdsClientManager:
             if missing_fields:
                 logger.error(f"حقول مطلوبة مفقودة: {missing_fields}")
                 return False
+            
+            # إضافة use_proto_plus إلى الإعدادات
+            if 'use_proto_plus' not in self.config:
+                self.config['use_proto_plus'] = False
+            
+            # إصلاح مشكلة credentials - تحسين المعالجة
+            if 'refresh_token' in self.config:
+                refresh_token = self.config['refresh_token']
+                if refresh_token.startswith('your-') or not refresh_token or refresh_token == '':
+                    logger.warning("⚠️ refresh_token غير صحيح - سيتم استخدام OAuth2 Manager فقط")
+                    return False
             
             # إنشاء العميل
             self.client = GoogleAdsClient.load_from_dict(self.config)
@@ -227,6 +256,123 @@ class GoogleAdsClientManager:
             return self.client.get_service("GoogleAdsService")
         return None
     
+    def create_client_with_token(self, access_token: str, refresh_token: str = None) -> Optional[Any]:
+        """
+        إنشاء عميل Google Ads مع token محدد - طريقة محسنة
+        يتبع أفضل الممارسات من المكتبة الرسمية
+        
+        Args:
+            access_token: Access token للمصادقة
+            refresh_token: Refresh token (اختياري)
+            
+        Returns:
+            GoogleAdsClient instance أو None
+        """
+        try:
+            # بناء الإعدادات الديناميكية
+            config = {
+                "developer_token": os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN"),
+                "client_id": os.getenv("GOOGLE_ADS_CLIENT_ID"),
+                "client_secret": os.getenv("GOOGLE_ADS_CLIENT_SECRET"),
+                "refresh_token": refresh_token or access_token,
+                "login_customer_id": os.getenv("MCC_LOGIN_CUSTOMER_ID"),
+                "use_proto_plus": True
+            }
+            
+            # التحقق من المتغيرات المطلوبة
+            required_fields = ["developer_token", "client_id", "client_secret"]
+            missing_fields = [field for field in required_fields if not config.get(field)]
+            
+            if missing_fields:
+                logger.error(f"❌ متغيرات البيئة المفقودة: {missing_fields}")
+                return None
+            
+            # إنشاء العميل باستخدام الطريقة المعيارية
+            client = GoogleAdsClient.load_from_dict(config_dict=config, version="v20")
+            
+            logger.info("✅ تم إنشاء عميل Google Ads بـ token محدد")
+            return client
+            
+        except Exception as e:
+            logger.error(f"❌ فشل في إنشاء العميل بـ token: {e}")
+            return None
+    
+    def link_customer_to_mcc_standard(self, client, manager_customer_id: str, customer_id: str) -> Dict[str, Any]:
+        """
+        ربط عميل بـ MCC باستخدام الطريقة المعيارية من المكتبة الرسمية
+        
+        Args:
+            client: GoogleAdsClient instance
+            manager_customer_id: معرف حساب MCC
+            customer_id: معرف العميل المراد ربطه
+            
+        Returns:
+            Dict يحتوي على نتيجة العملية
+        """
+        try:
+            # الحصول على خدمة Customer Client Link
+            customer_client_link_service = client.get_service("CustomerClientLinkService")
+            
+            # إنشاء العملية
+            operation = client.get_type("CustomerClientLinkOperation")
+            customer_client_link = operation.create
+            customer_client_link.client_customer = f"customers/{customer_id}"
+            customer_client_link.status = client.enums.ManagerLinkStatusEnum.PENDING
+            
+            # تنفيذ العملية
+            logger.info(f"🔗 بدء ربط العميل {customer_id} بـ MCC {manager_customer_id}")
+            
+            response = customer_client_link_service.mutate_customer_client_link(
+                customer_id=manager_customer_id,
+                operation=operation
+            )
+            
+            logger.info(f"✅ تم إرسال طلب الربط بنجاح: {response.result.resource_name}")
+            
+            return {
+                "success": True,
+                "resource_name": response.result.resource_name,
+                "status": "PENDING_APPROVAL",
+                "message": "تم إرسال طلب الربط بنجاح - ينتظر موافقة العميل",
+                "manager_customer_id": manager_customer_id,
+                "customer_id": customer_id
+            }
+            
+        except GoogleAdsException as ex:
+            logger.error(f"❌ خطأ في Google Ads API: {ex.error.message}")
+            
+            # استخراج تفاصيل الأخطاء
+            error_details = []
+            for error in ex.failure.errors:
+                error_info = {
+                    "message": error.message,
+                    "error_code": error.error_code._name_ if hasattr(error.error_code, '_name_') else str(error.error_code),
+                    "trigger": error.trigger.value if error.trigger else None
+                }
+                
+                if error.location:
+                    error_info["field_path"] = [
+                        field.field_name for field in error.location.field_path_elements
+                    ]
+                
+                error_details.append(error_info)
+            
+            return {
+                "success": False,
+                "error": "Google Ads API Error",
+                "message": ex.error.message,
+                "error_details": error_details,
+                "request_id": ex.request_id
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ خطأ غير متوقع في ربط MCC: {e}")
+            return {
+                "success": False,
+                "error": "Unexpected Error",
+                "message": f"خطأ غير متوقع: {str(e)}"
+            }
+    
     def test_connection(self) -> Dict[str, Any]:
         """اختبار الاتصال مع Google Ads API"""
         try:
@@ -249,7 +395,7 @@ class GoogleAdsClientManager:
             return {
                 'success': True,
                 'message': 'تم اختبار الاتصال بنجاح',
-                'api_version': 'v16',
+                'api_version': 'v20',
                 'timestamp': datetime.utcnow().isoformat()
             }
             
@@ -339,8 +485,9 @@ logger.info(f"🎯 تم تحميل Google Ads Client Manager - مُهيأ: {goog
 
 # ===== إضافة GoogleAdsClientService المفقود =====
 
+
 class GoogleAdsClientService:
-    """خدمة Google Ads Client المتطورة - الفئة المفقودة"""
+    """خدمة Google Ads Client المتطورة"""
     
     def __init__(self, client_manager: GoogleAdsClientManager = None):
         """تهيئة خدمة Google Ads Client"""
@@ -381,26 +528,6 @@ class GoogleAdsClientService:
             logger.error(f"❌ فشل في الحصول على CampaignService: {e}")
             return None
     
-    def get_ad_group_service(self):
-        """الحصول على خدمة مجموعات الإعلانات"""
-        if not self.is_client_ready():
-            return None
-        try:
-            return self.client.get_service("AdGroupService")
-        except Exception as e:
-            logger.error(f"❌ فشل في الحصول على AdGroupService: {e}")
-            return None
-    
-    def get_keyword_view_service(self):
-        """الحصول على خدمة عرض الكلمات المفتاحية"""
-        if not self.is_client_ready():
-            return None
-        try:
-            return self.client.get_service("KeywordViewService")
-        except Exception as e:
-            logger.error(f"❌ فشل في الحصول على KeywordViewService: {e}")
-            return None
-    
     def get_google_ads_service(self):
         """الحصول على خدمة Google Ads الرئيسية"""
         if not self.is_client_ready():
@@ -427,80 +554,6 @@ class GoogleAdsClientService:
         except Exception as e:
             logger.error(f"❌ فشل في تنفيذ البحث: {e}")
             return []
-    
-    def get_campaigns(self, customer_id: str):
-        """الحصول على قائمة الحملات"""
-        query = """
-            SELECT 
-                campaign.id,
-                campaign.name,
-                campaign.status,
-                campaign.advertising_channel_type,
-                metrics.impressions,
-                metrics.clicks,
-                metrics.cost_micros
-            FROM campaign 
-            WHERE segments.date DURING LAST_30_DAYS
-        """
-        return self.search(customer_id, query)
-    
-    def get_ad_groups(self, customer_id: str, campaign_id: str = None):
-        """الحصول على مجموعات الإعلانات"""
-        query = """
-            SELECT 
-                ad_group.id,
-                ad_group.name,
-                ad_group.status,
-                ad_group.campaign,
-                metrics.impressions,
-                metrics.clicks,
-                metrics.cost_micros
-            FROM ad_group 
-            WHERE segments.date DURING LAST_30_DAYS
-        """
-        if campaign_id:
-            query += f" AND ad_group.campaign = 'customers/{customer_id}/campaigns/{campaign_id}'"
-        
-        return self.search(customer_id, query)
-    
-    def get_keywords(self, customer_id: str, ad_group_id: str = None):
-        """الحصول على الكلمات المفتاحية"""
-        query = """
-            SELECT 
-                ad_group_criterion.keyword.text,
-                ad_group_criterion.keyword.match_type,
-                ad_group_criterion.status,
-                ad_group_criterion.ad_group,
-                metrics.impressions,
-                metrics.clicks,
-                metrics.cost_micros,
-                metrics.ctr,
-                metrics.average_cpc
-            FROM keyword_view 
-            WHERE segments.date DURING LAST_30_DAYS
-        """
-        if ad_group_id:
-            query += f" AND ad_group_criterion.ad_group = 'customers/{customer_id}/adGroups/{ad_group_id}'"
-        
-        return self.search(customer_id, query)
-    
-    def get_performance_metrics(self, customer_id: str, date_range: str = "LAST_30_DAYS"):
-        """الحصول على مقاييس الأداء"""
-        query = f"""
-            SELECT 
-                metrics.impressions,
-                metrics.clicks,
-                metrics.cost_micros,
-                metrics.ctr,
-                metrics.average_cpc,
-                metrics.conversions,
-                metrics.conversion_rate,
-                metrics.cost_per_conversion,
-                segments.date
-            FROM campaign 
-            WHERE segments.date DURING {date_range}
-        """
-        return self.search(customer_id, query)
 
 class GoogleAdsConfig:
     """إعدادات Google Ads API"""
@@ -521,9 +574,9 @@ class GoogleAdsConfig:
                 'client_secret': os.getenv('GOOGLE_ADS_CLIENT_SECRET', ''),
                 'refresh_token': os.getenv('GOOGLE_ADS_REFRESH_TOKEN', ''),
                 'customer_id': os.getenv('GOOGLE_ADS_CUSTOMER_ID', ''),
-                'login_customer_id': os.getenv('GOOGLE_ADS_LOGIN_CUSTOMER_ID', ''),
+                'login_customer_id': os.getenv('MCC_LOGIN_CUSTOMER_ID', ''),
                 'use_proto_plus': True,
-                'api_version': 'v15'
+                'api_version': 'v20'
             }
             
             logger.info(f"✅ تم تحميل {self.name} v{self.version}")

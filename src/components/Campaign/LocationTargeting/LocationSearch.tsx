@@ -221,7 +221,12 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     } else {
       // Load Google Maps API
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAe57f_PT4dsrCcwK_UPN7nY4SERmnH254C&libraries=places&language=en`;
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        console.error('Google Maps API key is not configured');
+        return;
+      }
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=en`;
       script.async = true;
       script.onload = initializeGoogleServices;
       script.onerror = () => {

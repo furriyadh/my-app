@@ -22,55 +22,55 @@ const OverviewCards = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [animateCards, setAnimateCards] = useState(false);
 
-  // Mock data - في التطبيق الحقيقي سيأتي من API
+  // البيانات الحقيقية من API
   const [metricsData, setMetricsData] = useState({
     totalSpend: {
-      current: 12450.75,
-      previous: 11230.50,
-      change: 10.87,
-      trend: 'up'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     impressions: {
-      current: 2450000,
-      previous: 2180000,
-      change: 12.39,
-      trend: 'up'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     clicks: {
-      current: 45680,
-      previous: 42150,
-      change: 8.37,
-      trend: 'up'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     conversions: {
-      current: 1250,
-      previous: 1180,
-      change: 5.93,
-      trend: 'up'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     ctr: {
-      current: 1.86,
-      previous: 1.93,
-      change: -3.63,
-      trend: 'down'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     cpc: {
-      current: 0.27,
-      previous: 0.31,
-      change: -12.90,
-      trend: 'down'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     roas: {
-      current: 4.2,
-      previous: 3.8,
-      change: 10.53,
-      trend: 'up'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     },
     qualityScore: {
-      current: 8.5,
-      previous: 8.2,
-      change: 3.66,
-      trend: 'up'
+      current: 0,
+      previous: 0,
+      change: 0,
+      trend: 'neutral'
     }
   });
 
@@ -197,55 +197,55 @@ const OverviewCards = () => {
     }
   ];
 
-  // Color configurations
+  // Color configurations - Updated for animated wave background
   const colorConfigs = {
     blue: {
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
-      border: 'border-blue-200 dark:border-blue-800',
-      icon: 'text-blue-600 dark:text-blue-400',
-      iconBg: 'bg-blue-100 dark:bg-blue-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-blue-300/30',
+      icon: 'text-blue-200 drop-shadow-sm',
+      iconBg: 'bg-blue-500/20 backdrop-blur-sm border border-blue-300/20'
     },
     green: {
-      bg: 'bg-green-50 dark:bg-green-900/20',
-      border: 'border-green-200 dark:border-green-800',
-      icon: 'text-green-600 dark:text-green-400',
-      iconBg: 'bg-green-100 dark:bg-green-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-green-300/30',
+      icon: 'text-green-200 drop-shadow-sm',
+      iconBg: 'bg-green-500/20 backdrop-blur-sm border border-green-300/20'
     },
     purple: {
-      bg: 'bg-purple-50 dark:bg-purple-900/20',
-      border: 'border-purple-200 dark:border-purple-800',
-      icon: 'text-purple-600 dark:text-purple-400',
-      iconBg: 'bg-purple-100 dark:bg-purple-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-purple-300/30',
+      icon: 'text-purple-200 drop-shadow-sm',
+      iconBg: 'bg-purple-500/20 backdrop-blur-sm border border-purple-300/20'
     },
     orange: {
-      bg: 'bg-orange-50 dark:bg-orange-900/20',
-      border: 'border-orange-200 dark:border-orange-800',
-      icon: 'text-orange-600 dark:text-orange-400',
-      iconBg: 'bg-orange-100 dark:bg-orange-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-orange-300/30',
+      icon: 'text-orange-200 drop-shadow-sm',
+      iconBg: 'bg-orange-500/20 backdrop-blur-sm border border-orange-300/20'
     },
     red: {
-      bg: 'bg-red-50 dark:bg-red-900/20',
-      border: 'border-red-200 dark:border-red-800',
-      icon: 'text-red-600 dark:text-red-400',
-      iconBg: 'bg-red-100 dark:bg-red-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-red-300/30',
+      icon: 'text-red-200 drop-shadow-sm',
+      iconBg: 'bg-red-500/20 backdrop-blur-sm border border-red-300/20'
     },
     teal: {
-      bg: 'bg-teal-50 dark:bg-teal-900/20',
-      border: 'border-teal-200 dark:border-teal-800',
-      icon: 'text-teal-600 dark:text-teal-400',
-      iconBg: 'bg-teal-100 dark:bg-teal-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-teal-300/30',
+      icon: 'text-teal-200 drop-shadow-sm',
+      iconBg: 'bg-teal-500/20 backdrop-blur-sm border border-teal-300/20'
     },
     indigo: {
-      bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-      border: 'border-indigo-200 dark:border-indigo-800',
-      icon: 'text-indigo-600 dark:text-indigo-400',
-      iconBg: 'bg-indigo-100 dark:bg-indigo-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-indigo-300/30',
+      icon: 'text-indigo-200 drop-shadow-sm',
+      iconBg: 'bg-indigo-500/20 backdrop-blur-sm border border-indigo-300/20'
     },
     pink: {
-      bg: 'bg-pink-50 dark:bg-pink-900/20',
-      border: 'border-pink-200 dark:border-pink-800',
-      icon: 'text-pink-600 dark:text-pink-400',
-      iconBg: 'bg-pink-100 dark:bg-pink-900/30'
+      bg: 'bg-white/15 backdrop-blur-md',
+      border: 'border-pink-300/30',
+      icon: 'text-pink-200 drop-shadow-sm',
+      iconBg: 'bg-pink-500/20 backdrop-blur-sm border border-pink-300/20'
     }
   };
 
@@ -253,15 +253,15 @@ const OverviewCards = () => {
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {Array.from({ length: 8 }).map((_, index) => (
-        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse">
+        <div key={index} className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-200/30 animate-pulse">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="w-10 h-10 bg-blue-200/30 rounded-lg"></div>
+            <div className="w-16 h-4 bg-blue-200/30 rounded"></div>
           </div>
           <div className="space-y-2">
-            <div className="w-24 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="w-20 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="w-24 h-8 bg-blue-200/30 rounded"></div>
+            <div className="w-32 h-4 bg-blue-200/30 rounded"></div>
+            <div className="w-20 h-3 bg-blue-200/30 rounded"></div>
           </div>
         </div>
       ))}
@@ -278,7 +278,7 @@ const OverviewCards = () => {
     return (
       <div 
         className={`
-          bg-white dark:bg-gray-800 rounded-xl p-6 border transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer
+            rounded-xl p-6 border transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer
           ${colors.border} ${colors.bg}
           ${animateCards ? 'animate-fadeInUp' : 'opacity-0'}
         `}
@@ -291,8 +291,8 @@ const OverviewCards = () => {
           </div>
           <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
             isPositiveTrend 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
-              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+              ? 'bg-green-500/20 text-green-200 backdrop-blur-sm border border-green-300/20 drop-shadow-sm' 
+              : 'bg-red-500/20 text-red-200 backdrop-blur-sm border border-red-300/20 drop-shadow-sm'
           }`}>
             <TrendIcon className="w-3 h-3" />
             <span>{formatPercentage(Math.abs(config.change))}</span>
@@ -301,23 +301,23 @@ const OverviewCards = () => {
 
         {/* Content */}
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <h3 className="text-sm font-medium text-blue-100 drop-shadow-sm">
             {config.title}
           </h3>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-bold text-gray-900 drop-shadow-md">
             {config.value}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-blue-200 drop-shadow-sm">
             {config.description}
           </p>
-          <div className="flex items-center space-x-1 text-xs text-gray-400 dark:text-gray-500">
+          <div className="flex items-center space-x-1 text-xs text-blue-300 drop-shadow-sm">
             <Calendar className="w-3 h-3" />
             <span>{config.period}</span>
           </div>
         </div>
 
         {/* Hover effect overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
+        <div className="absolute inset-0 bg-white/5 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
       </div>
     );
   };
@@ -326,8 +326,8 @@ const OverviewCards = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Performance Overview</h2>
-          <div className="w-32 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <h2 className="text-2xl font-bold text-gray-900 drop-shadow-lg">Performance Overview</h2>
+          <div className="w-32 h-8 bg-blue-200/30 rounded animate-pulse"></div>
         </div>
         <LoadingSkeleton />
       </div>
@@ -339,14 +339,14 @@ const OverviewCards = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 drop-shadow-lg mb-2">
             Performance Overview
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-blue-100 drop-shadow-md">
             Key metrics and performance indicators for your advertising campaigns
           </p>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center space-x-2 text-sm text-blue-200 drop-shadow-sm">
           <Activity className="w-4 h-4" />
           <span>Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
@@ -360,24 +360,24 @@ const OverviewCards = () => {
       </div>
 
       {/* Summary Footer */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+      <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-200/30 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 drop-shadow-md mb-2">
               Overall Performance
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-blue-100 drop-shadow-sm">
               Your campaigns are performing well with strong ROAS and improving quality scores
             </p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">↗</div>
-              <div className="text-xs text-gray-500">Trending Up</div>
+              <div className="text-2xl font-bold text-green-300 drop-shadow-sm">↗</div>
+              <div className="text-xs text-blue-200 drop-shadow-sm">Trending Up</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">4.2x</div>
-              <div className="text-xs text-gray-500">Avg ROAS</div>
+              <div className="text-2xl font-bold text-blue-300 drop-shadow-sm">4.2x</div>
+              <div className="text-xs text-blue-200 drop-shadow-sm">Avg ROAS</div>
             </div>
           </div>
         </div>

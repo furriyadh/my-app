@@ -9,6 +9,14 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      'xs': '475px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         // Colors from your globals.css @theme
@@ -135,6 +143,7 @@ export default {
         'slide-down': 'slideDown 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'bounce-in': 'bounceIn 0.6s ease-out',
+        'tilt': 'tilt 10s infinite linear',
       },
       keyframes: {
         fadeIn: {
@@ -158,6 +167,17 @@ export default {
           '50%': { transform: 'scale(1.05)' },
           '70%': { transform: 'scale(0.9)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        tilt: {
+          '0%, 50%, 100%': {
+            transform: 'rotate(0deg)',
+          },
+          '25%': {
+            transform: 'rotate(1deg)',
+          },
+          '75%': {
+            transform: 'rotate(-1deg)',
+          },
         },
       },
       boxShadow: {

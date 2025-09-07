@@ -63,9 +63,9 @@ class HybridManagementSetup {
 
     if (this.isApiAvailable) {
       this.client = new GoogleAdsApi({
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        developer_token: process.env.GOOGLE_DEVELOPER_TOKEN!,
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID!,
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET!,
+        developer_token: process.env.GOOGLE_ADS_DEVELOPER_TOKEN!,
       });
     }
   }
@@ -144,8 +144,8 @@ class HybridManagementSetup {
     // محاكاة إعداد النهج المختلط للاختبار
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const mockSetupId = `hybrid_mock_${Date.now()}`;
-    const mockCustomerId = setupData.customerId || `mock_customer_${Date.now()}`;
+            const errorSetupId = `error_${Date.now()}`;
+        const errorCustomerId = setupData.customerId || `error_customer_${Date.now()}`;
     
     const collaborationPlan = await this.createCollaborationPlan(setupData);
     const trainingSchedule = setupData.trainingRequirements.needsTraining ? 
@@ -153,8 +153,8 @@ class HybridManagementSetup {
     
     return {
       success: true,
-      setupId: mockSetupId,
-      customerId: mockCustomerId,
+                  setupId: errorSetupId,
+            customerId: errorCustomerId,
       managementLevel: setupData.managementLevel,
       collaborationPlan: collaborationPlan,
       trainingSchedule: trainingSchedule,
@@ -522,9 +522,9 @@ export async function POST(request: NextRequest) {
 
     // التحقق من متغيرات البيئة (اختياري للاختبار)
     const requiredEnvVars = [
-      'GOOGLE_CLIENT_ID',
-      'GOOGLE_CLIENT_SECRET', 
-      'GOOGLE_DEVELOPER_TOKEN',
+      'GOOGLE_ADS_CLIENT_ID',
+      'GOOGLE_ADS_CLIENT_SECRET', 
+              'GOOGLE_ADS_DEVELOPER_TOKEN',
       'MCC_LOGIN_CUSTOMER_ID',
       'GOOGLE_REFRESH_TOKEN'
     ];

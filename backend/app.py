@@ -1,44 +1,24 @@
 #!/usr/bin/env python3
 """
-Google Ads AI Platform - Backend Application
-الملف النهائي المعدل 100% مع Blueprints الحقيقية الموجودة في المشروع
-تم فحص جميع الملفات في GitHub وتعديل مسارات الاستيراد بناءً على الملفات الموجودة فعلاً
+Google Ads AI Platform - Main Flask Application
+التطبيق الرئيسي لمنصة Google Ads AI
 """
 
 import os
 import sys
-import json
 import logging
-import traceback
 from pathlib import Path
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from datetime import datetime
 
-# ===== إصلاح مسارات Python لحل مشاكل الاستيراد =====
-# تحديد المسارات الأساسية
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir) if os.path.basename(current_dir) == 'backend' else current_dir
+# إضافة مجلد backend للمسار
+current_dir = Path(__file__).parent.absolute()
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
 
-# قائمة المسارات المطلوبة لحل مشاكل الاستيراد
-required_paths = [
-    current_dir,                                    # backend/
-    project_root,                                   # my-site/
-    os.path.join(current_dir, 'utils'),            # backend/utils/
-    os.path.join(current_dir, 'services'),         # backend/services/
-    os.path.join(current_dir, 'routes'),           # backend/routes/
-    os.path.join(current_dir, 'routes', 'google_ads'),  # backend/routes/google_ads/
-    os.path.join(current_dir, 'models'),           # backend/models/
-    os.path.join(current_dir, 'auth'),             # backend/auth/
-    os.path.join(current_dir, 'ai'),               # backend/ai/
-]
-
-# إضافة المسارات إلى PYTHONPATH
-for path in required_paths:
-    if os.path.exists(path) and path not in sys.path:
-        sys.path.insert(0, path)
-
-# إضافة متغير بيئة PYTHONPATH للوحدات الفرعية
-os.environ['PYTHONPATH'] = os.pathsep.join(sys.path)
+# استيراد الإعدادات
+from config import Config, DevelopmentConfig
 
 # إعداد التسجيل
 logging.basicConfig(
@@ -47,525 +27,402 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def load_environment_variables():
-    """تحميل متغيرات البيئة من .env و .env.local"""
-    print("🌟 بدء تشغيل Google Ads AI Platform...")
-    print("🔍 الإصدار: 3.0.0 - مع Blueprints الحقيقية")
-    
-    # تحديد مسار جذر المشروع
-    current_dir = Path(__file__).parent
-    project_root = current_dir.parent if current_dir.name == 'backend' else current_dir
-    
-    print(f"📁 مسار جذر المشروع: {project_root}")
-    
-    # تحميل متغيرات البيئة
-    try:
-        from dotenv import load_dotenv
-        
-        # تحميل .env.local أولاً (للتطوير)
-        env_local_path = project_root / ".env.local"
-        if env_local_path.exists():
-            load_dotenv(env_local_path, override=True)
-            print(f"✅ تم تحميل {env_local_path}")
-        else:
-            print(f"⚠️ ملف .env.local غير موجود في {env_local_path}")
-        
-        # تحميل .env (للإنتاج)
-        env_path = project_root / ".env"
-        if env_path.exists():
-            load_dotenv(env_path, override=True)
-            print(f"✅ تم تحميل {env_path}")
-        else:
-            print(f"⚠️ ملف .env غير موجود في {env_path}")
-            
-    except ImportError:
-        print("❌ python-dotenv غير مثبت")
-        return False
-    
-    return True
-
-def create_flask_app():
-    """إنشاء تطبيق Flask مع الإعدادات الأساسية"""
-    print("🔧 بدء إنشاء تطبيق Flask...")
-    
+def create_app(config_class=None):
+    """
+    Flask Application Factory
+    إنشاء تطبيق Flask مع جميع الإعدادات والمسارات
+    """
     app = Flask(__name__)
     
-    # إعدادات Flask الأساسية
-    app.config.update({
-        'SECRET_KEY': os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production'),
-        'DEBUG': os.getenv('FLASK_DEBUG', 'True').lower() == 'true',
-        'TESTING': False,
-        'JSON_AS_ASCII': False,  # دعم الأحرف العربية في JSON
-        'JSONIFY_PRETTYPRINT_REGULAR': True
+    # تحديد الإعدادات
+    if config_class is None:
+        env = os.getenv('FLASK_ENV', 'development')
+        if env == 'development':
+            config_class = DevelopmentConfig
+        else:
+            config_class = Config
+    
+    app.config.from_object(config_class)
+    
+    # إعداد CORS
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
     })
     
-    # تمكين CORS
-    CORS(app, origins="*", supports_credentials=True)
+    # تسجيل معلومات التطبيق
+    logger.info("🚀 بدء تشغيل Google Ads AI Platform")
+    logger.info(f"📊 البيئة: {os.getenv('FLASK_ENV', 'development')}")
+    logger.info(f"🔧 Debug Mode: {app.config.get('DEBUG', False)}")
+    logger.info(f"🏢 MCC Customer ID: {app.config.get('MCC_LOGIN_CUSTOMER_ID', 'غير محدد')}")
     
-    print("✅ تم إعداد Flask app الأساسي")
+    # تسجيل المسارات (Routes)
+    register_routes(app)
+    
+    # تسجيل معالجات الأخطاء
+    register_error_handlers(app)
+    
+    # إضافة مسارات صحة النظام
+    register_health_routes(app)
+    
+    logger.info("✅ تم تهيئة التطبيق بنجاح")
     return app
 
-def setup_jwt_manager(app):
-    """إعداد JWT Manager إذا كان متاحاً"""
+def register_routes(app):
+    """تسجيل جميع مسارات API"""
     try:
-        from flask_jwt_extended import JWTManager
+        logger.info("📦 بدء تسجيل المسارات...")
         
-        app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', app.config['SECRET_KEY'])
-        app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # ساعة واحدة
+        registered_count = 0
+        failed_count = 0
         
-        jwt = JWTManager(app)
-        print("✅ تم تهيئة JWT Manager بنجاح")
-        return True
-        
-    except ImportError:
-        print("⚠️ flask-jwt-extended غير مثبت - تم تخطي JWT")
-        return False
-
-def add_basic_routes(app):
-    """إضافة المسارات الأساسية للاختبار"""
-    
-    @app.route('/')
-    def home():
-        """الصفحة الرئيسية"""
-        return jsonify({
-            'message': 'مرحباً بك في Google Ads AI Platform',
-            'status': 'running',
-            'version': '3.0.0',
-            'description': 'منصة الذكاء الاصطناعي لإدارة حملات Google Ads - مع Blueprints كاملة',
-            'features': [
-                'إدارة الحملات الإعلانية',
-                'تحليل الأداء والإحصائيات',
-                'إدارة الكلمات المفتاحية',
-                'تحسين الميزانيات',
-                'تقارير مفصلة',
-                'مصادقة JWT متقدمة',
-                'إدارة MCC متقدمة',
-                'تكامل Merchant Center',
-                'ذكاء اصطناعي للتحليل'
-            ],
-            'endpoints': {
-                'status': '/api/status',
-                'system_info': '/api/system/info',
-                'test_google_ads': '/api/test-google-ads',
-                'environment': '/api/environment',
-                'blueprints_status': '/api/blueprints/status'
-            },
-            'blueprints_discovered': [
-                'accounts.py - إدارة الحسابات',
-                'campaigns.py - إدارة الحملات',
-                'google_ads.py - Google Ads API',
-                'auth_jwt.py - المصادقة والتخويل',
-                'ai.py - الذكاء الاصطناعي',
-                'google_ads_routes.py - مسارات Google Ads',
-                'mcc_advanced.py - إدارة MCC متقدمة',
-                'merchant_center_routes.py - مسارات Merchant Center'
-            ],
-            'note': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
-            'python_paths_fixed': True
-        })
-    
-    @app.route('/api/status')
-    def api_status():
-        """حالة API"""
-        return jsonify({
-            'status': 'healthy',
-            'message': 'API يعمل بشكل طبيعي مع Blueprints الحقيقية',
-            'timestamp': '2025-07-28',
-            'server': 'Flask Development Server',
-            'uptime': 'متاح',
-            'database': 'متصل',
-            'google_ads_api': 'جاهز',
-            'blueprints_status': 'تم فحص GitHub - جميع الملفات موجودة',
-            'version': '3.0.0',
-            'python_paths_status': 'مُصحح'
-        })
-    
-    @app.route('/api/system/info')
-    def system_info():
-        """معلومات النظام"""
-        return jsonify({
-            'system': {
-                'python_version': sys.version,
-                'platform': sys.platform,
-                'working_directory': os.getcwd(),
-                'flask_version': '3.1.1'
-            },
-            'environment': {
-                'flask_debug': app.config.get('DEBUG'),
-                'flask_testing': app.config.get('TESTING'),
-                'cors_enabled': True,
-                'jwt_enabled': 'JWT_SECRET_KEY' in app.config
-            },
-            'google_ads': {
-                'developer_token_configured': bool(os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN')),
-                'client_id_configured': bool(os.getenv('GOOGLE_ADS_CLIENT_ID')),
-                'client_secret_configured': bool(os.getenv('GOOGLE_ADS_CLIENT_SECRET')),
-                'refresh_token_configured': bool(os.getenv('GOOGLE_ADS_REFRESH_TOKEN')),
-                'mcc_customer_id_configured': bool(os.getenv('MCC_LOGIN_CUSTOMER_ID'))
-            },
-            'features': {
-                'oauth_ready': True,
-                'campaigns_management': True,
-                'analytics_ready': True,
-                'keywords_management': True,
-                'ai_integration': True,
-                'mcc_advanced': True,
-                'merchant_center': True,
-                'jwt_auth': True
-            },
-            'blueprints': {
-                'routes_folder_exists': os.path.exists('routes'),
-                'github_verified': True,
-                'total_blueprints_found': 8,
-                'blueprints_status': 'متاح في /api/blueprints/status'
-            },
-            'python_paths': {
-                'total_paths_added': len([p for p in required_paths if os.path.exists(p)]),
-                'paths_status': 'مُصحح',
-                'backend_accessible': 'backend' in str(sys.path),
-                'utils_accessible': any('utils' in p for p in sys.path),
-                'services_accessible': any('services' in p for p in sys.path)
-            }
-        })
-    
-    @app.route('/api/test-google-ads')
-    def test_google_ads():
-        """اختبار Google Ads Client"""
+        # 1. مسارات MCC وربط الحسابات
         try:
-            # اختبار استيراد Google Ads Client
-            from google.ads.googleads.client import GoogleAdsClient
+            from routes.mcc.link_customer import mcc_link_bp
+            app.register_blueprint(mcc_link_bp)
+            registered_count += 1
+            logger.info("✅ تم تسجيل MCC Link Customer routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد MCC Link routes: {e}")
+        
+        # 2. مسارات ربط الحسابات العامة
+        try:
+            from routes.account_linking import account_linking_bp
+            app.register_blueprint(account_linking_bp, url_prefix='/api')
+            registered_count += 1
+            logger.info("✅ تم تسجيل Account Linking routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد Account Linking routes: {e}")
+        
+        # 3. مسارات MCC المتقدمة
+        try:
+            from routes.mcc_advanced import mcc_api
+            app.register_blueprint(mcc_api)
+            registered_count += 1
+            logger.info("✅ تم تسجيل MCC Advanced routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد MCC Advanced routes: {e}")
+        
+        # 4. مسارات Google Ads العامة
+        try:
+            from routes.google_ads_routes import google_ads_bp
+            app.register_blueprint(google_ads_bp, url_prefix='/api/google-ads')
+            registered_count += 1
+            logger.info("✅ تم تسجيل Google Ads routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد Google Ads routes: {e}")
+        
+        # 5. مسارات الحسابات
+        try:
+            from routes.accounts import accounts_bp
+            app.register_blueprint(accounts_bp, url_prefix='/api/accounts')
+            registered_count += 1
+            logger.info("✅ تم تسجيل Accounts routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد Accounts routes: {e}")
+        
+        # 6. مسارات الحملات
+        try:
+            from routes.campaigns import campaigns_bp
+            app.register_blueprint(campaigns_bp, url_prefix='/api/campaigns')
+            registered_count += 1
+            logger.info("✅ تم تسجيل Campaigns routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد Campaigns routes: {e}")
+        
+        # 7. مسارات المصادقة
+        try:
+            from routes.auth_jwt import auth_bp
+            app.register_blueprint(auth_bp, url_prefix='/api/auth')
+            registered_count += 1
+            logger.info("✅ تم تسجيل Auth JWT routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد Auth routes: {e}")
+        
+        # 8. مسارات الذكاء الاصطناعي
+        try:
+            from routes.ai import ai_bp
+            app.register_blueprint(ai_bp, url_prefix='/api/ai')
+            registered_count += 1
+            logger.info("✅ تم تسجيل AI routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد AI routes: {e}")
+        
+        # 9. مسارات التقارير
+        try:
+            from routes.reports import reports_bp
+            app.register_blueprint(reports_bp, url_prefix='/api/reports')
+            registered_count += 1
+            logger.info("✅ تم تسجيل Reports routes")
+        except ImportError as e:
+            failed_count += 1
+            logger.warning(f"⚠️ فشل استيراد Reports routes: {e}")
+        
+        # إحصائيات التسجيل
+        total_attempted = registered_count + failed_count
+        logger.info(f"📊 نتائج تسجيل المسارات:")
+        logger.info(f"   ✅ تم تسجيل: {registered_count}")
+        logger.info(f"   ❌ فشل في التسجيل: {failed_count}")
+        logger.info(f"   📈 معدل النجاح: {registered_count}/{total_attempted}")
+        
+        if registered_count > 0:
+            logger.info(f"🎉 تم تسجيل {registered_count} مسارات بنجاح!")
+        else:
+            logger.warning("⚠️ لم يتم تسجيل أي مسارات")
             
-            # اختبار وجود ملف google_ads.yaml
-            yaml_path = "services/google_ads.yaml"
-            if not os.path.exists(yaml_path):
-                return jsonify({
-                    'success': False,
-                    'error': f'ملف {yaml_path} غير موجود',
-                    'suggestion': 'تأكد من وجود ملف google_ads.yaml في مجلد services',
-                    'expected_path': os.path.abspath(yaml_path)
-                }), 404
+    except Exception as e:
+        logger.error(f"❌ خطأ في تسجيل المسارات: {e}")
+
+def register_error_handlers(app):
+    """تسجيل معالجات الأخطاء"""
+    
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'success': False,
+            'error': 'Not Found',
+            'message': 'المسار المطلوب غير موجود',
+            'timestamp': datetime.now().isoformat()
+        }), 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        logger.error(f"خطأ داخلي في الخادم: {error}")
+        return jsonify({
+            'success': False,
+            'error': 'Internal Server Error',
+            'message': 'خطأ داخلي في الخادم',
+            'timestamp': datetime.now().isoformat()
+        }), 500
+    
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            'success': False,
+            'error': 'Bad Request',
+            'message': 'طلب غير صحيح',
+            'timestamp': datetime.now().isoformat()
+        }), 400
+    
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({
+            'success': False,
+            'error': 'Unauthorized',
+            'message': 'غير مصرح لك بالوصول',
+            'timestamp': datetime.now().isoformat()
+        }), 401
+    
+    @app.errorhandler(403)
+    def forbidden(error):
+        return jsonify({
+            'success': False,
+            'error': 'Forbidden',
+            'message': 'ممنوع الوصول',
+            'timestamp': datetime.now().isoformat()
+        }), 403
+
+def register_health_routes(app):
+    """تسجيل مسارات فحص صحة النظام"""
+    
+    @app.route('/health')
+    @app.route('/api/health')
+    def health_check():
+        """فحص صحة النظام"""
+        try:
+            # فحص الاتصال بـ Google Ads API
+            google_ads_status = check_google_ads_connection()
             
-            # اختبار قراءة ملف YAML
-            import yaml
-            with open(yaml_path, 'r') as f:
-                yaml_config = yaml.safe_load(f)
+            # فحص متغيرات البيئة المطلوبة
+            env_status = check_environment_variables()
             
-            # التحقق من المفاتيح المطلوبة
-            required_keys = ['developer_token', 'client_id', 'client_secret', 'refresh_token']
-            missing_keys = [key for key in required_keys if not yaml_config.get(key)]
+            # فحص الخدمات
+            services_status = check_services()
             
-            if missing_keys:
-                return jsonify({
-                    'success': False,
-                    'error': 'مفاتيح مطلوبة مفقودة في ملف YAML',
-                    'missing_keys': missing_keys,
-                    'suggestion': 'تأكد من وجود جميع المفاتيح المطلوبة في ملف google_ads.yaml'
-                }), 400
-            
-            # اختبار إنشاء Google Ads Client
-            config_dict = {
-                'developer_token': yaml_config.get('developer_token', ''),
-                'client_id': yaml_config.get('client_id', ''),
-                'client_secret': yaml_config.get('client_secret', ''),
-                'refresh_token': yaml_config.get('refresh_token', ''),
-                'use_proto_plus': True
+            health_data = {
+                'status': 'healthy',
+                'timestamp': datetime.now().isoformat(),
+                'version': '1.0.0',
+                'environment': os.getenv('FLASK_ENV', 'development'),
+                'checks': {
+                    'google_ads_api': google_ads_status,
+                    'environment_variables': env_status,
+                    'services': services_status
+                }
             }
             
-            if yaml_config.get('login_customer_id'):
-                config_dict['login_customer_id'] = yaml_config.get('login_customer_id')
+            # تحديد الحالة العامة
+            if not all([google_ads_status['healthy'], env_status['healthy'], services_status['healthy']]):
+                health_data['status'] = 'unhealthy'
+                return jsonify(health_data), 503
             
-            # محاولة إنشاء العميل
-            client = GoogleAdsClient.load_from_dict(config_dict)
-            
-            return jsonify({
-                'success': True,
-                'message': 'Google Ads Client تم إنشاؤه بنجاح',
-                'config_loaded': True,
-                'yaml_file': yaml_path,
-                'client_created': True,
-                'config_keys': list(yaml_config.keys()),
-                'blueprints_integration': 'جاهز للتكامل مع Blueprints الحقيقية'
-            })
-            
-        except ImportError as e:
-            return jsonify({
-                'success': False,
-                'error': 'فشل في استيراد Google Ads Client',
-                'details': str(e),
-                'suggestion': 'تأكد من تثبيت مكتبة google-ads: pip install google-ads'
-            }), 500
+            return jsonify(health_data), 200
             
         except Exception as e:
+            logger.error(f"خطأ في فحص صحة النظام: {e}")
             return jsonify({
-                'success': False,
-                'error': 'خطأ في إنشاء Google Ads Client',
-                'details': str(e),
-                'error_type': type(e).__name__,
-                'traceback': traceback.format_exc() if app.config.get('DEBUG') else 'مخفي للأمان'
+                'status': 'error',
+                'message': str(e),
+                'timestamp': datetime.now().isoformat()
             }), 500
     
-    @app.route('/api/environment')
-    def environment_info():
-        """معلومات البيئة (مع إخفاء القيم الحساسة)"""
-        env_vars = [
+    @app.route('/')
+    @app.route('/api')
+    def root():
+        """المسار الجذر"""
+        return jsonify({
+            'message': 'Google Ads AI Platform API',
+            'version': '1.0.0',
+            'status': 'running',
+            'timestamp': datetime.now().isoformat(),
+            'endpoints': {
+                'health': '/health',
+                'mcc_link': '/api/mcc/link-customer',
+                'accounts': '/api/accounts',
+                'campaigns': '/api/campaigns',
+                'ai': '/api/ai',
+                'reports': '/api/reports'
+            },
+            'documentation': 'https://developers.google.com/google-ads/api'
+        })
+
+def check_google_ads_connection():
+    """فحص الاتصال بـ Google Ads API"""
+    try:
+        # فحص متغيرات Google Ads
+        required_vars = [
             'GOOGLE_ADS_DEVELOPER_TOKEN',
             'GOOGLE_ADS_CLIENT_ID', 
             'GOOGLE_ADS_CLIENT_SECRET',
-            'GOOGLE_ADS_REFRESH_TOKEN',
-            'MCC_LOGIN_CUSTOMER_ID',
-            'FLASK_SECRET_KEY',
-            'FLASK_DEBUG',
-            'JWT_SECRET_KEY'
+            'MCC_LOGIN_CUSTOMER_ID'
         ]
         
-        environment = {}
-        for var in env_vars:
-            value = os.getenv(var)
-            if value:
-                # إخفاء القيم الحساسة
-                if any(sensitive in var.upper() for sensitive in ['TOKEN', 'SECRET', 'PASSWORD']):
-                    environment[var] = value[:10] + "..." if len(value) > 10 else "***"
-                else:
-                    environment[var] = value
-            else:
-                environment[var] = "غير مضبوط"
+        missing_vars = [var for var in required_vars if not os.getenv(var)]
         
-        return jsonify({
-            'environment_variables': environment,
-            'python_path': sys.path[:5],  # أول 5 مسارات
-            'current_directory': os.getcwd(),
-            'config_files': {
-                '.env': os.path.exists('.env'),
-                '.env.local': os.path.exists('.env.local'),
-                'services/google_ads.yaml': os.path.exists('services/google_ads.yaml'),
-                'routes/': os.path.exists('routes'),
-                'routes/__init__.py': os.path.exists('routes/__init__.py')
-            },
-            'github_verification': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
-            'python_paths_fixed': True
-        })
-
-def load_real_blueprints_verified(app):
-    """تحميل Blueprints الحقيقية المتحقق من وجودها في GitHub"""
-    print("📦 محاولة تحميل Blueprints الحقيقية المتحقق منها...")
-    print("🔍 تم فحص GitHub وتأكيد وجود الملفات التالية:")
-    
-    # قائمة Blueprints المتحقق من وجودها في GitHub
-    verified_blueprints_to_load = [
-        # الملفات الأساسية المتحقق منها
-        ('routes.accounts', ['accounts_bp', 'bp', 'blueprint', 'accounts'], 'إدارة الحسابات'),
-        ('routes.campaigns', ['campaigns_bp', 'bp', 'blueprint', 'campaigns'], 'إدارة الحملات'),
-        ('routes.google_ads', ['google_ads_bp', 'bp', 'blueprint', 'google_ads'], 'Google Ads API'),
-        ('routes.auth_jwt', ['auth_bp', 'auth_jwt_bp', 'auth_routes_bp', 'bp', 'blueprint', 'auth'], 'المصادقة والتخويل JWT'),
-        ('routes.ai', ['ai_bp', 'bp', 'blueprint', 'ai'], 'الذكاء الاصطناعي'),
-        ('routes.mcc_advanced', ['mcc_bp', 'mcc_advanced_bp', 'mcc_api', 'bp', 'blueprint', 'mcc'], 'إدارة MCC متقدمة'),
-        ('routes.merchant_center_routes', ['merchant_center_bp', 'merchant_bp', 'bp', 'blueprint', 'merchant'], 'مسارات Merchant Center')
-    ]
-    
-    loaded_blueprints = []
-    failed_blueprints = []
-    
-    for module_name, possible_blueprint_names, description in verified_blueprints_to_load:
-        print(f"🔍 محاولة تحميل: {module_name} - {description}")
+        if missing_vars:
+            return {
+                'healthy': False,
+                'message': f'متغيرات مفقودة: {", ".join(missing_vars)}'
+            }
         
+        # محاولة استيراد مكتبة Google Ads
         try:
-            # محاولة استيراد الوحدة
-            module = __import__(module_name, fromlist=['*'])
-            print(f"   ✅ تم استيراد الوحدة: {module_name}")
-            
-            # البحث عن Blueprint في الوحدة
-            blueprint = None
-            found_name = None
-            
-            # البحث في جميع الأسماء المحتملة
-            for name in possible_blueprint_names:
-                if hasattr(module, name):
-                    potential_bp = getattr(module, name)
-                    # التحقق من أنه Blueprint فعلاً
-                    if hasattr(potential_bp, 'register') and hasattr(potential_bp, 'name'):
-                        blueprint = potential_bp
-                        found_name = name
-                        print(f"   ✅ تم العثور على Blueprint: {name}")
-                        break
-                    else:
-                        print(f"   ⚠️ {name} موجود لكنه ليس Blueprint")
-            
-            # إذا لم نجد Blueprint، نبحث في جميع attributes
-            if not blueprint:
-                print(f"   🔍 البحث في جميع attributes للوحدة...")
-                for attr_name in dir(module):
-                    if not attr_name.startswith('_'):
-                        attr = getattr(module, attr_name)
-                        if hasattr(attr, 'register') and hasattr(attr, 'name'):
-                            blueprint = attr
-                            found_name = attr_name
-                            print(f"   ✅ تم العثور على Blueprint: {attr_name}")
-                            break
-            
-            if blueprint:
-                # تسجيل Blueprint
-                app.register_blueprint(blueprint)
-                loaded_blueprints.append({
-                    'module': module_name,
-                    'blueprint_name': found_name,
-                    'description': description,
-                    'status': 'loaded',
-                    'blueprint_url_prefix': getattr(blueprint, 'url_prefix', 'غير محدد'),
-                    'blueprint_routes': len(blueprint.deferred_functions) if hasattr(blueprint, 'deferred_functions') else 'غير معروف'
-                })
-                print(f"   🎉 تم تحميل Blueprint بنجاح: {module_name}")
-            else:
-                # قائمة attributes الموجودة للمساعدة في التشخيص
-                available_attrs = [attr for attr in dir(module) if not attr.startswith('_')]
-                failed_blueprints.append({
-                    'module': module_name,
-                    'description': description,
-                    'error': f"Blueprint غير موجود في الوحدة",
-                    'status': 'blueprint_not_found',
-                    'available_attributes': available_attrs[:10],  # أول 10 فقط
-                    'searched_names': possible_blueprint_names
-                })
-                print(f"   ❌ لم يتم العثور على Blueprint في: {module_name}")
-                print(f"      Attributes متاحة: {available_attrs[:5]}...")
-            
+            from google_ads_lib.client import GoogleAdsClient
+            return {
+                'healthy': True,
+                'message': 'Google Ads library available'
+            }
         except ImportError as e:
-            failed_blueprints.append({
-                'module': module_name,
-                'description': description,
-                'error': f"فشل الاستيراد: {str(e)}",
-                'status': 'import_failed',
-                'suggestion': 'تحقق من وجود الملف ومن صحة Python syntax'
-            })
-            print(f"   ❌ فشل استيراد: {module_name} - {str(e)}")
+            return {
+                'healthy': False,
+                'message': f'Google Ads library import failed: {e}'
+            }
             
-        except Exception as e:
-            failed_blueprints.append({
-                'module': module_name,
-                'description': description,
-                'error': f"خطأ غير متوقع: {str(e)}",
-                'status': 'unexpected_error',
-                'error_type': type(e).__name__,
-                'traceback': traceback.format_exc()
-            })
-            print(f"   ❌ خطأ غير متوقع في: {module_name} - {str(e)}")
-    
-    # إضافة مسار لعرض حالة Blueprints
-    @app.route('/api/blueprints/status')
-    def blueprints_status():
-        """عرض حالة تحميل Blueprints"""
-        return jsonify({
-            'total_attempted': len(verified_blueprints_to_load),
-            'successfully_loaded': len(loaded_blueprints),
-            'failed_to_load': len(failed_blueprints),
-            'success_rate': f"{len(loaded_blueprints)}/{len(verified_blueprints_to_load)}",
-            'success_percentage': round((len(loaded_blueprints) / len(verified_blueprints_to_load)) * 100, 1),
-            'loaded_blueprints': loaded_blueprints,
-            'failed_blueprints': failed_blueprints,
-            'github_verification': 'تم فحص GitHub وتأكيد وجود جميع ملفات Blueprints',
-            'note': 'هذه النتائج مبنية على فحص فعلي لملفات GitHub',
-            'python_paths_status': 'مُصحح - يجب أن تقل التحذيرات الآن'
-        })
-    
-    # طباعة ملخص النتائج
-    print(f"\n📊 نتائج تحميل Blueprints المتحقق منها:")
-    print(f"   ✅ تم تحميل: {len(loaded_blueprints)}")
-    print(f"   ❌ فشل في التحميل: {len(failed_blueprints)}")
-    print(f"   📈 معدل النجاح: {len(loaded_blueprints)}/{len(verified_blueprints_to_load)}")
-    
-    if loaded_blueprints:
-        print(f"\n🎉 Blueprints المحملة بنجاح:")
-        for bp in loaded_blueprints:
-            print(f"   ✅ {bp['module']} ({bp['blueprint_name']}) - {bp['description']}")
-    
-    if failed_blueprints:
-        print(f"\n❌ Blueprints الفاشلة:")
-        for bp in failed_blueprints:
-            print(f"   ❌ {bp['module']} - {bp['error']}")
-    
-    return len(loaded_blueprints), len(failed_blueprints)
+    except Exception as e:
+        return {
+            'healthy': False,
+            'message': f'Google Ads check failed: {e}'
+        }
 
-def setup_redis_connection():
-    """إعداد اتصال Redis إذا كان متاحاً"""
+def check_environment_variables():
+    """فحص متغيرات البيئة المطلوبة"""
     try:
-        import redis
+        required_vars = [
+            'FLASK_SECRET_KEY',
+            'GOOGLE_ADS_DEVELOPER_TOKEN',
+            'GOOGLE_ADS_CLIENT_ID',
+            'GOOGLE_ADS_CLIENT_SECRET',
+            'MCC_LOGIN_CUSTOMER_ID'
+        ]
         
-        # محاولة الاتصال بـ Redis
-        redis_client = redis.Redis(
-            host=os.getenv('REDIS_HOST', 'localhost'),
-            port=int(os.getenv('REDIS_PORT', 6379)),
-            db=int(os.getenv('REDIS_DB', 0)),
-            decode_responses=True
-        )
+        missing_vars = []
+        present_vars = []
         
-        # اختبار الاتصال
-        redis_client.ping()
-        print("✅ تم الاتصال بـ Redis بنجاح")
-        return redis_client
+        for var in required_vars:
+            if os.getenv(var):
+                present_vars.append(var)
+            else:
+                missing_vars.append(var)
         
-    except ImportError:
-        print("⚠️ مكتبة redis غير مثبتة - تم تخطي Redis")
-        return None
+        return {
+            'healthy': len(missing_vars) == 0,
+            'message': f'Present: {len(present_vars)}, Missing: {len(missing_vars)}',
+            'missing_variables': missing_vars
+        }
         
     except Exception as e:
-        print(f"❌ فشل الاتصال بـ Redis: {str(e)}")
-        return None
+        return {
+            'healthy': False,
+            'message': f'Environment check failed: {e}'
+        }
 
-def main():
-    """الدالة الرئيسية لتشغيل التطبيق"""
-    print("🚀 بدء تشغيل Google Ads AI Platform...")
+def check_services():
+    """فحص الخدمات المتاحة"""
+    try:
+        services_status = {}
+        
+        # فحص خدمة MCC Manager
+        try:
+            from services.mcc_manager import mcc_manager
+            services_status['mcc_manager'] = True
+        except ImportError:
+            services_status['mcc_manager'] = False
+        
+        # فحص خدمة Google Ads Client
+        try:
+            from services.google_ads_client import GoogleAdsClientService
+            services_status['google_ads_client'] = True
+        except ImportError:
+            services_status['google_ads_client'] = False
+        
+        # فحص خدمة OAuth Manager
+        try:
+            from services.google_oauth2_manager import GoogleOAuth2Manager
+            services_status['oauth_manager'] = True
+        except ImportError:
+            services_status['oauth_manager'] = False
+        
+        healthy_services = sum(1 for status in services_status.values() if status)
+        total_services = len(services_status)
+        
+        return {
+            'healthy': healthy_services > 0,
+            'message': f'{healthy_services}/{total_services} services available',
+            'services': services_status
+        }
+        
+    except Exception as e:
+        return {
+            'healthy': False,
+            'message': f'Services check failed: {e}'
+        }
+
+# إنشاء التطبيق للاستخدام المباشر
+if __name__ == '__main__':
+    app = create_app()
     
-    # تحميل متغيرات البيئة
-    env_loaded = load_environment_variables()
-    if not env_loaded:
-        print("⚠️ تحذير: فشل في تحميل متغيرات البيئة")
-    
-    # إنشاء تطبيق Flask
-    app = create_flask_app()
-    
-    # إعداد JWT Manager
-    jwt_setup = setup_jwt_manager(app)
-    
-    # إعداد Redis
-    redis_client = setup_redis_connection()
-    if redis_client:
-        app.redis = redis_client
-    
-    # إضافة المسارات الأساسية
-    add_basic_routes(app)
-    
-    # تحميل Blueprints الحقيقية
-    loaded_count, failed_count = load_real_blueprints_verified(app)
-    
-    print(f"\n🎉 تم تحميل {loaded_count} blueprints حقيقية بنجاح!")
-    if failed_count > 0:
-        print(f"⚠️ فشل في تحميل {failed_count} blueprints")
-    
-    # معلومات التشغيل
+    # إعدادات التشغيل
     host = os.getenv('FLASK_HOST', '0.0.0.0')
     port = int(os.getenv('FLASK_PORT', 5000))
-    debug = app.config.get('DEBUG', False)
+    debug = os.getenv('FLASK_ENV') == 'development'
     
-    print(f"\n🌐 الخادم متاح على: http://{host}:{port}")
-    print(f"🔧 وضع التطوير: {'مفعل' if debug else 'معطل'}")
-    print(f"🔑 JWT: {'مفعل' if jwt_setup else 'معطل'}")
-    print(f"🗄️ Redis: {'متصل' if redis_client else 'غير متصل'}")
-    print(f"📦 Blueprints: {loaded_count}/{loaded_count + failed_count} محملة")
-    print(f"🔧 Python Paths: مُصحح - يجب أن تقل التحذيرات")
+    logger.info(f"🚀 تشغيل الخادم على {host}:{port}")
+    logger.info(f"🔧 Debug Mode: {debug}")
     
-    # تشغيل الخادم
-    try:
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            threaded=True
-        )
-    except KeyboardInterrupt:
-        print("\n👋 تم إيقاف الخادم بواسطة المستخدم")
-    except Exception as e:
-        print(f"\n❌ خطأ في تشغيل الخادم: {str(e)}")
-        sys.exit(1)
-
-if __name__ == '__main__':
-    main()
-
+    app.run(
+        host=host,
+        port=port,
+        debug=debug,
+        threaded=True
+    )

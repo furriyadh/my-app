@@ -55,14 +55,14 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
 
       if (option === 'own-accounts') {
         // إعداد OAuth للحسابات الخاصة - ربط حساب موجود - يوجه لـ Google OAuth
-        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'your-google-client-id';
+        const clientId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID || 'your-google-client-id';
         
         // بناء على البيئة redirectUri
         const redirectUri = process.env.NODE_ENV === 'production'
-          ? 'https://furriyadh.com/api/oauth/callback'
-          : 'http://localhost:3000/api/oauth/callback';
+          ? 'https://furriyadh.com/api/oauth/google/callback'
+          : 'http://localhost:3000/api/oauth/google/callback';
         
-        const scope = 'https://www.googleapis.com/auth/adwords';
+        const scope = 'openid profile email https://www.googleapis.com/auth/adwords';
         const state = Math.random().toString(36).substring(7);
 
         // للتحقق لاحقاً state حفظ
@@ -78,7 +78,8 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
           'response_type=code&' +
           'access_type=offline&' +
           'prompt=consent&' +
-          'state=' + state;
+          'state=' + state + '&' +
+          'include_granted_scopes=true';
 
         console.log('Redirecting to Google OAuth:', authUrl);
 

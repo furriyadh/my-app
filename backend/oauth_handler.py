@@ -247,9 +247,9 @@ def create_oauth_handler(config: Dict[str, Any]) -> GoogleOAuthHandler:
 if __name__ == "__main__":
     # إعدادات تجريبية
     test_config = {
-        'google_client_id': os.getenv('GOOGLE_CLIENT_ID_NEW'),
-        'google_client_secret': os.getenv('GOOGLE_CLIENT_SECRET_NEW'),
-        'redirect_uri': 'http://localhost:3000/api/oauth/callback',
+        'google_client_id': os.getenv('GOOGLE_ADS_CLIENT_ID_NEW'),
+        'google_client_secret': os.getenv('GOOGLE_ADS_CLIENT_SECRET_NEW'),
+                    'redirect_uri': 'http://localhost:3000/api/oauth/google/callback',
         'scopes': [
             'https://www.googleapis.com/auth/adwords',
             'https://www.googleapis.com/auth/userinfo.email',

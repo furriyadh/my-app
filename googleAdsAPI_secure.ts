@@ -5,15 +5,15 @@
 
 // تكوين Google Ads API - آمن ومحدث
 const config = {
-  clientId: process.env.GOOGLE_CLIENT_ID || '',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '', // تم إزالة الـ hardcoded secret
-  developerToken: process.env.GOOGLE_DEVELOPER_TOKEN || '',
+  clientId: process.env.GOOGLE_ADS_CLIENT_ID || '',
+  clientSecret: process.env.GOOGLE_ADS_CLIENT_SECRET || '', // تم إزالة الـ hardcoded secret
+  developerToken: process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
   mccCustomerId: process.env.MCC_LOGIN_CUSTOMER_ID || ''
 };
 
 // التحقق من وجود المتغيرات المطلوبة
 const validateConfig = () => {
-  const requiredVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_DEVELOPER_TOKEN'];
+  const requiredVars = ['GOOGLE_ADS_CLIENT_ID', 'GOOGLE_ADS_CLIENT_SECRET', 'GOOGLE_ADS_DEVELOPER_TOKEN'];
   const missing = requiredVars.filter(varName => !process.env[varName]);
   
   if (missing.length > 0) {
@@ -211,7 +211,7 @@ export class GoogleAdsAPIClient {
   // تنفيذ استعلام
   private async executeQuery(query: string): Promise<any> {
     try {
-      const url = `https://googleads.googleapis.com/v16/customers/${this.customerId}/googleAds:search`;
+      const url = `https://googleads.googleapis.com/v20/customers/${this.customerId}/googleAds:search`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -233,7 +233,7 @@ export class GoogleAdsAPIClient {
   // تنفيذ mutation
   private async executeMutation(resource: string, operations: any[]): Promise<any> {
     try {
-      const url = `https://googleads.googleapis.com/v16/customers/${this.customerId}/${resource}:mutate`;
+      const url = `https://googleads.googleapis.com/v20/customers/${this.customerId}/${resource}:mutate`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -339,7 +339,7 @@ export class GoogleAdsAPIClient {
   // الحصول على الكلمات المفتاحية المقترحة
   async getKeywordSuggestions(seedKeywords: string[]): Promise<KeywordSuggestion[]> {
     try {
-      const url = `https://googleads.googleapis.com/v16/customers/${this.customerId}/keywordPlanIdeas:generateKeywordIdeas`;
+      const url = `https://googleads.googleapis.com/v20/customers/${this.customerId}/keywordPlanIdeas:generateKeywordIdeas`;
       
       const requestBody = {
         customerId: this.customerId,

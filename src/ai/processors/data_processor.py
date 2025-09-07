@@ -695,18 +695,18 @@ class DataProcessor:
         date_range: Optional[Tuple[datetime, datetime]]
     ) -> Dict[str, float]:
         """الحصول على مقاييس الحساب"""
-        # محاكاة البيانات
-        mock_data = {
-            'impressions': 10000,
-            'clicks': 500,
-            'cost': 1000.0,
-            'conversions': 25.0,
-            'ctr': 5.0,
-            'cpc': 2.0,
-            'conversion_rate': 5.0
+        # إرجاع بيانات فارغة بدلاً من البيانات الوهمية
+        empty_data = {
+            'impressions': 0,
+            'clicks': 0,
+            'cost': 0.0,
+            'conversions': 0.0,
+            'ctr': 0.0,
+            'cpc': 0.0,
+            'conversion_rate': 0.0
         }
         
-        return {metric: mock_data.get(metric, 0) for metric in metrics}
+        return {metric: empty_data.get(metric, 0) for metric in metrics}
     
     def _analyze_account_performance(self, account_data: Dict[str, Any], metrics: List[str]) -> Dict[str, Any]:
         """تحليل أداء الحسابات"""

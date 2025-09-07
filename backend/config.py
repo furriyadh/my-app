@@ -2,12 +2,23 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-# تحميل متغيرات البيئة
-env_path_local = Path(__file__).parent.parent / ".env.local"
-env_path = Path(__file__).parent.parent / ".env"
+# تحديد البيئة أولاً
+NODE_ENV = os.getenv("NODE_ENV", "development")
 
-load_dotenv(dotenv_path=env_path)
-load_dotenv(dotenv_path=env_path_local, override=True)
+# تحميل متغيرات البيئة حسب البيئة
+if NODE_ENV == "production":
+    env_path = Path(__file__).parent.parent / ".env.production"
+else:
+    env_path = Path(__file__).parent.parent / ".env.development"
+
+# تحميل ملف البيئة إذا كان موجوداً
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+    print(f"✅ تم تحميل متغيرات البيئة من: {env_path}")
+else:
+    print(f"⚠️ ملف البيئة غير موجود: {env_path}")
+    # تحميل من متغيرات البيئة الافتراضية
+    load_dotenv()
 
 class Config:
     """إعدادات التطبيق الأساسية"""
@@ -16,45 +27,74 @@ class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "google-ads-ai-platform-secret-key-2025")
     DEBUG = os.getenv("FLASK_ENV") == "development"
     
+    # إعدادات البيئة
+    ENVIRONMENT = os.getenv("NODE_ENV", "development")
+    IS_PRODUCTION = ENVIRONMENT == "production"
+    
+    # URLs حسب البيئة
+    if IS_PRODUCTION:
+        FRONTEND_URL = "https://furriyadh.com"
+        BACKEND_URL = "https://furriyadh.com"
+        API_BASE_URL = "https://furriyadh.com/api"
+    else:
+        FRONTEND_URL = "http://localhost:3000"
+        BACKEND_URL = "http://localhost:5000"
+        API_BASE_URL = "http://localhost:5000/api"
+    
     # إعدادات Google Ads API
-    GOOGLE_DEVELOPER_TOKEN = os.getenv("GOOGLE_DEVELOPER_TOKEN") or os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN")
-    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("GOOGLE_ADS_CLIENT_ID")
-    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET") or os.getenv("GOOGLE_ADS_CLIENT_SECRET")
-    GOOGLE_REFRESH_TOKEN = os.getenv("GOOGLE_REFRESH_TOKEN") or os.getenv("GOOGLE_ADS_REFRESH_TOKEN")
-    GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI") or os.getenv("REACT_APP_GOOGLE_REDIRECT_URI") or os.getenv("NEXT_PUBLIC_OAUTH_REDIRECT_URI")
-    MCC_LOGIN_CUSTOMER_ID = os.getenv("MCC_LOGIN_CUSTOMER_ID") or os.getenv("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
+    GOOGLE_ADS_DEVELOPER_TOKEN = os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN")
+    GOOGLE_ADS_CLIENT_ID = os.getenv("GOOGLE_ADS_CLIENT_ID")
+    GOOGLE_ADS_CLIENT_SECRET = os.getenv("GOOGLE_ADS_CLIENT_SECRET")
+    GOOGLE_ADS_REFRESH_TOKEN = os.getenv("GOOGLE_ADS_REFRESH_TOKEN")
+    
+    # إعدادات MCC
+    MCC_LOGIN_CUSTOMER_ID = os.getenv("MCC_LOGIN_CUSTOMER_ID")
+    
+    # إعدادات قاعدة البيانات
+    DATABASE_URL = os.getenv("DATABASE_URL")
     
     # إعدادات Supabase
-    SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-    SUPABASE_ANON_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
     SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    
+    # إعدادات OAuth
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+    
+    # إعدادات البريد الإلكتروني
+    EMAIL_SENDER_EMAIL = os.getenv("EMAIL_SENDER_EMAIL")
+    EMAIL_SENDER_PASSWORD = os.getenv("EMAIL_SENDER_PASSWORD")
+    EMAIL_SMTP_SERVER = os.getenv("EMAIL_SMTP_SERVER", "smtp.gmail.com")
+    EMAIL_SMTP_PORT = int(os.getenv("EMAIL_SMTP_PORT", "587"))
+    
+    # إعدادات الأمان
+    JWT_SECRET = os.getenv("JWT_SECRET")
+    ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
     
     # إعدادات Google AI
     GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY")
+    GOOGLE_GEMINI_API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 
-def validate_config():
-    """التحقق من صحة الإعدادات المطلوبة"""
-    required_vars = [
-        ("GOOGLE_DEVELOPER_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN"),
-        ("GOOGLE_CLIENT_ID", "GOOGLE_ADS_CLIENT_ID"), 
-        ("GOOGLE_CLIENT_SECRET", "GOOGLE_ADS_CLIENT_SECRET"),
-        ("MCC_LOGIN_CUSTOMER_ID", "GOOGLE_ADS_LOGIN_CUSTOMER_ID")
-    ]
-    
-    missing_vars = []
-    for primary_var, fallback_var in required_vars:
-        if not os.getenv(primary_var) and not os.getenv(fallback_var):
-            missing_vars.append(f"{primary_var} أو {fallback_var}")
-    
-    if missing_vars:
-        raise ValueError(f"متغيرات البيئة المطلوبة مفقودة: {', '.join(missing_vars)}")
-    
-    # التحقق من Supabase
-    supabase_vars = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]
-    supabase_missing = [var for var in supabase_vars if not os.getenv(var)]
-    
-    if supabase_missing:
-        raise ValueError(f"لم يتم تقديم قيم Supabase صالحة: {', '.join(supabase_missing)}")
-    
-    return True
+class DevelopmentConfig(Config):
+    """إعدادات التطوير"""
+    DEBUG = True
+    TESTING = False
 
+class ProductionConfig(Config):
+    """إعدادات الإنتاج"""
+    DEBUG = False
+    TESTING = False
+
+class TestingConfig(Config):
+    """إعدادات الاختبار"""
+    DEBUG = True
+    TESTING = True
+
+# اختيار الإعداد حسب البيئة
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
+}

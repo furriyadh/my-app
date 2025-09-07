@@ -204,7 +204,7 @@ const AILoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 overflow-hidden"
+        className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xl overflow-hidden"
       >
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full" viewBox="0 0 1000 1000">
@@ -238,8 +238,8 @@ const AILoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
               transition={{ duration: 0.5 }}
               className="relative"
             >
-              <div className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl">
-                <CurrentIcon className="w-16 h-16 text-white" />
+              <div className="w-32 h-32 mx-auto bg-blue-600 rounded-full flex items-center justify-center shadow-2xl">
+                <CurrentIcon className="w-16 h-16 text-gray-800" />
               </div>
               <motion.div
                 className="absolute inset-0 rounded-full border-4 border-blue-400"
@@ -249,7 +249,7 @@ const AILoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
             </motion.div>
 
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold text-gray-800">
                 Google Ads AI Dashboard
               </h1>
               <div className="h-8 flex items-center justify-center">
@@ -265,9 +265,9 @@ const AILoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
             </div>
 
             <div className="space-y-4">
-              <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-white/20 backdrop-blur-sm rounded-full h-3 overflow-hidden border border-blue-300/20">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                  className="h-full bg-blue-500 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.1 }}
@@ -285,10 +285,10 @@ const AILoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
 // AI Insights Panel Component
 const AIInsightsPanel: React.FC<{ campaigns: Campaign[]; summary: Summary | null }> = ({ campaigns, summary }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+    <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg">
-          <Brain className="w-6 h-6 text-white" />
+        <div className="p-3 bg-purple-600 rounded-2xl shadow-lg">
+          <Brain className="w-6 h-6 text-gray-800" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">AI Intelligence Center</h2>
@@ -297,10 +297,10 @@ const AIInsightsPanel: React.FC<{ campaigns: Campaign[]; summary: Summary | null
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200/50">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-blue-200/50">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-blue-500 rounded-xl">
-              <Target className="w-5 h-5 text-white" />
+              <Target className="w-5 h-5 text-gray-800" />
             </div>
             <h3 className="font-semibold text-gray-900">Performance Prediction</h3>
           </div>
@@ -313,10 +313,10 @@ const AIInsightsPanel: React.FC<{ campaigns: Campaign[]; summary: Summary | null
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-green-200/50">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-green-500 rounded-xl">
-              <Zap className="w-5 h-5 text-white" />
+              <Zap className="w-5 h-5 text-gray-800" />
             </div>
             <h3 className="font-semibold text-gray-900">Smart Optimization</h3>
           </div>
@@ -329,10 +329,10 @@ const AIInsightsPanel: React.FC<{ campaigns: Campaign[]; summary: Summary | null
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200/50">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-purple-200/50">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-purple-500 rounded-xl">
-              <Users className="w-5 h-5 text-white" />
+              <Users className="w-5 h-5 text-gray-800" />
             </div>
             <h3 className="font-semibold text-gray-900">Audience Intelligence</h3>
           </div>
@@ -352,10 +352,10 @@ const AIInsightsPanel: React.FC<{ campaigns: Campaign[]; summary: Summary | null
 // Advanced Charts Component (Simplified)
 const AdvancedCharts: React.FC<{ campaigns: Campaign[]; summary: Summary | null }> = ({ campaigns, summary }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+    <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
-          <BarChart3 className="w-6 h-6 text-white" />
+        <div className="p-3 bg-green-600 rounded-2xl shadow-lg">
+          <BarChart3 className="w-6 h-6 text-gray-800" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Advanced Analytics</h2>
@@ -364,9 +364,9 @@ const AdvancedCharts: React.FC<{ campaigns: Campaign[]; summary: Summary | null 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200/50">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-blue-200/50">
           <h3 className="font-semibold text-gray-900 mb-4">Performance Trends</h3>
-          <div className="h-64 flex items-center justify-center bg-white rounded-xl">
+          <div className="h-64 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-xl border border-blue-200/30">
             <div className="text-center">
               <BarChart3 className="w-16 h-16 text-blue-400 mx-auto mb-4" />
               <p className="text-gray-600">Interactive Chart Placeholder</p>
@@ -375,9 +375,9 @@ const AdvancedCharts: React.FC<{ campaigns: Campaign[]; summary: Summary | null 
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-green-200/50">
           <h3 className="font-semibold text-gray-900 mb-4">Campaign Distribution</h3>
-          <div className="h-64 flex items-center justify-center bg-white rounded-xl">
+          <div className="h-64 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-xl border border-blue-200/30">
             <div className="text-center">
               <PieChart className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <p className="text-gray-600">Interactive Pie Chart</p>
@@ -458,54 +458,54 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
       'Performance Max': { 
         icon: <Target className="w-5 h-5" />, 
         color: 'text-purple-600', 
-        bgGradient: 'bg-gradient-to-br from-purple-500 to-pink-600' 
+        bgGradient: 'bg-purple-600' 
       },
       'Search': { 
         icon: <Search className="w-5 h-5" />, 
         color: 'text-blue-600', 
-        bgGradient: 'bg-gradient-to-br from-blue-500 to-cyan-600' 
+        bgGradient: 'bg-blue-600' 
       },
       'Shopping': { 
         icon: <ShoppingCart className="w-5 h-5" />, 
         color: 'text-green-600', 
-        bgGradient: 'bg-gradient-to-br from-green-500 to-emerald-600' 
+        bgGradient: 'bg-green-600' 
       },
       'Display': { 
         icon: <Monitor className="w-5 h-5" />, 
         color: 'text-red-600', 
-        bgGradient: 'bg-gradient-to-br from-red-500 to-rose-600' 
+        bgGradient: 'bg-red-600' 
       },
       'Video': { 
         icon: <Video className="w-5 h-5" />, 
         color: 'text-yellow-600', 
-        bgGradient: 'bg-gradient-to-br from-yellow-500 to-orange-600' 
+        bgGradient: 'bg-yellow-600' 
       },
       'Call': { 
         icon: <Phone className="w-5 h-5" />, 
         color: 'text-indigo-600', 
-        bgGradient: 'bg-gradient-to-br from-indigo-500 to-purple-600' 
+        bgGradient: 'bg-indigo-600' 
       },
       'Local': { 
         icon: <MapPin className="w-5 h-5" />, 
         color: 'text-teal-600', 
-        bgGradient: 'bg-gradient-to-br from-teal-500 to-cyan-600' 
+        bgGradient: 'bg-teal-600' 
       },
       'App': { 
         icon: <Smartphone className="w-5 h-5" />, 
         color: 'text-pink-600', 
-        bgGradient: 'bg-gradient-to-br from-pink-500 to-rose-600' 
+        bgGradient: 'bg-pink-600' 
       },
       'Discovery': { 
         icon: <Zap className="w-5 h-5" />, 
         color: 'text-orange-600', 
-        bgGradient: 'bg-gradient-to-br from-orange-500 to-red-600' 
+        bgGradient: 'bg-orange-600' 
       }
     };
     
     return iconMap[type] || { 
       icon: <BarChart3 className="w-5 h-5" />, 
       color: 'text-gray-600', 
-      bgGradient: 'bg-gradient-to-br from-gray-500 to-gray-600' 
+      bgGradient: 'bg-gray-600' 
     };
   };
 
@@ -1004,7 +1004,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
     } else if (change < 0) {
       return { icon: <ArrowDownRight className="w-4 h-4" />, color: 'text-red-600', bgColor: 'bg-red-100' };
     } else {
-      return { icon: <Activity className="w-4 h-4" />, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+      return { icon: <Activity className="w-4 h-4" />, color: 'text-gray-600', bgColor: 'bg-white/10 backdrop-blur-sm border border-gray-300/30' };
     }
   };
 
@@ -1037,25 +1037,18 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-600/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
-      </div>
-
+    <div className="min-h-screen bg-transparent">
       <div className="relative z-10 p-6 space-y-8">
         {/* Header Section */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+        <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-                  <Target className="w-8 h-8 text-white" />
+                <div className="p-3 bg-blue-600 rounded-2xl shadow-lg">
+                  <Target className="w-8 h-8 text-gray-800" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                  <h1 className="text-4xl font-bold text-gray-800 bg-clip-text text-transparent">
                     Google Ads Dashboard
                   </h1>
                   <p className="text-gray-600 font-medium">AI-Powered Campaign Management</p>
@@ -1089,7 +1082,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="px-4 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+                className="px-4 py-3 bg-white/15 backdrop-blur-md border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
               >
                 {timePeriods.map(period => (
                   <option key={period} value={period}>{period}</option>
@@ -1100,7 +1093,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
               <select
                 value={selectedCurrency}
                 onChange={(e) => setSelectedCurrency(e.target.value)}
-                className="px-4 py-3 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+                className="px-4 py-3 bg-white/15 backdrop-blur-md border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
               >
                 {currencies.map(currency => (
                   <option key={currency.code} value={currency.code}>
@@ -1114,8 +1107,8 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                 onClick={() => setAutoRefresh(!autoRefresh)}
                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg ${
                   autoRefresh 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
-                    : 'bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    ? 'bg-green-600 text-gray-800' 
+                    : 'bg-white/15 backdrop-blur-md border border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -1127,7 +1120,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   fetchCampaignsData();
                 }}
                 disabled={loading}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-300 shadow-lg"
+                className="px-6 py-3 bg-blue-600 text-gray-800 rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-300 shadow-lg"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -1138,7 +1131,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+          <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
             <div className="flex items-center justify-center space-x-4">
               <Loader className="w-8 h-8 animate-spin text-blue-600" />
               <span className="text-lg font-medium text-gray-700">Loading campaign data...</span>
@@ -1166,7 +1159,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
             {summary && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Impressions */}
-                <div className="group bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
+                <div className="group bg-white/15 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-gray-600">Total Impressions</p>
@@ -1188,14 +1181,14 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                         })()}
                       </div>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <Eye className="w-8 h-8 text-white" />
+                    <div className="p-4 bg-blue-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Eye className="w-8 h-8 text-gray-800" />
                     </div>
                   </div>
                 </div>
 
                 {/* Total Clicks */}
-                <div className="group bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
+                <div className="group bg-white/15 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-gray-600">Total Clicks</p>
@@ -1217,14 +1210,14 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                         })()}
                       </div>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <MousePointer className="w-8 h-8 text-white" />
+                    <div className="p-4 bg-green-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <MousePointer className="w-8 h-8 text-gray-800" />
                     </div>
                   </div>
                 </div>
 
                 {/* Total Cost */}
-                <div className="group bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
+                <div className="group bg-white/15 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-gray-600">Total Cost</p>
@@ -1246,14 +1239,14 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                         })()}
                       </div>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <DollarSign className="w-8 h-8 text-white" />
+                    <div className="p-4 bg-orange-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <DollarSign className="w-8 h-8 text-gray-800" />
                     </div>
                   </div>
                 </div>
 
                 {/* Total Conversions */}
-                <div className="group bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
+                <div className="group bg-white/15 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105">
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-gray-600">Total Conversions</p>
@@ -1275,8 +1268,8 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                         })()}
                       </div>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <Target className="w-8 h-8 text-white" />
+                    <div className="p-4 bg-purple-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Target className="w-8 h-8 text-gray-800" />
                     </div>
                   </div>
                 </div>
@@ -1290,7 +1283,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
             <AdvancedCharts campaigns={campaigns} summary={summary} />
 
             {/* Campaigns Table/Cards */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+            <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Campaign Management</h2>
@@ -1307,7 +1300,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                       placeholder="Search campaigns..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="pl-10 pr-4 py-2 bg-white/15 backdrop-blur-md border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                     />
                   </div>
 
@@ -1315,7 +1308,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    className="px-4 py-2 bg-white/15 backdrop-blur-md border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                   >
                     <option value="all">All Types</option>
                     <option value="performance max">Performance Max</option>
@@ -1330,7 +1323,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    className="px-4 py-2 bg-white/15 backdrop-blur-md border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                   >
                     <option value="all">All Status</option>
                     <option value="enabled">Enabled</option>
@@ -1394,7 +1387,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                               <td className="py-4 px-4">
                                 <div className="flex items-center gap-3">
                                   <div className={`p-2 rounded-lg ${typeIcon.bgGradient}`}>
-                                    <div className="text-white">
+                                    <div className="text-gray-800">
                                       {typeIcon.icon}
                                     </div>
                                   </div>
@@ -1465,14 +1458,14 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                       return (
                         <div 
                           key={campaign.id}
-                          className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105"
+                          className="group bg-white/15 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/50 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
                           {/* Card Header */}
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
                               <div className={`p-3 rounded-xl shadow-md ${typeIcon.bgGradient}`}>
-                                <div className="text-white">
+                                <div className="text-gray-800">
                                   {typeIcon.icon}
                                 </div>
                               </div>
@@ -1566,7 +1559,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                         setSelectedType('all');
                         setSelectedStatus('all');
                       }}
-                      className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors duration-200"
+                      className="mt-4 px-6 py-3 bg-blue-600 text-gray-800 rounded-xl font-medium hover:bg-blue-700 transition-colors duration-200"
                     >
                       Clear Filters
                     </button>
@@ -1577,10 +1570,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
 
             {/* AI Recommendations */}
             {summary?.recommendations && summary.recommendations.length > 0 && (
-              <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+              <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg">
-                    <Zap className="w-6 h-6 text-white" />
+                  <div className="p-3 bg-purple-600 rounded-2xl shadow-lg">
+                    <Zap className="w-6 h-6 text-gray-800" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">AI Recommendations</h2>
@@ -1592,7 +1585,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   {summary.recommendations.map((rec, index) => (
                     <div 
                       key={index}
-                      className="group bg-gradient-to-br from-white to-blue-50/50 rounded-2xl p-6 border border-blue-200/50 hover:shadow-lg transition-all duration-300"
+                      className="group bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-blue-200/50 hover:shadow-lg transition-all duration-300"
                     >
                       <div className="flex items-start gap-4">
                         <div className={`p-2 rounded-xl ${
@@ -1633,10 +1626,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
             {summary && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Campaign Types Distribution */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+                <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl shadow-lg">
-                      <PieChart className="w-6 h-6 text-white" />
+                    <div className="p-3 bg-blue-600 rounded-2xl shadow-lg">
+                      <PieChart className="w-6 h-6 text-gray-800" />
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">Campaign Types</h2>
@@ -1652,7 +1645,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                       return (
                         <div key={type} className="flex items-center gap-4">
                           <div className={`p-2 rounded-xl ${typeIcon.bgGradient}`}>
-                            <div className="text-white">
+                            <div className="text-gray-800">
                               {typeIcon.icon}
                             </div>
                           </div>
@@ -1675,10 +1668,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                 </div>
 
                 {/* Top Performing Campaigns */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+                <div className="bg-white/15 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
-                      <Award className="w-6 h-6 text-white" />
+                    <div className="p-3 bg-green-600 rounded-2xl shadow-lg">
+                      <Award className="w-6 h-6 text-gray-800" />
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">Top Performers</h2>
@@ -1690,10 +1683,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                     {summary?.topPerformingCampaigns?.slice(0, 3).map((campaign, index) => {
                       const typeIcon = getCampaignTypeIcon(campaign.type);
                       return (
-                        <div key={campaign.id} className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200/50">
+                        <div key={campaign.id} className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-green-200/50">
                           <div className="flex items-center gap-3 flex-1">
                             <div className={`p-2 rounded-lg ${typeIcon.bgGradient}`}>
-                              <div className="text-white">
+                              <div className="text-gray-800">
                                 {typeIcon.icon}
                               </div>
                             </div>

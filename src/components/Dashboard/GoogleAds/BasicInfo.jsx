@@ -225,7 +225,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
           value={data.campaignName || ''}
           onChange={(e) => handleFieldChange('campaignName', e.target.value)}
           placeholder="Enter a descriptive name for your campaign"
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:border-gray-600 dark:text-gray-800 ${
             errors.campaignName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />
@@ -242,7 +242,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                 <button
                   key={index}
                   onClick={() => handleFieldChange('campaignName', suggestion)}
-                  className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="px-2 py-1 text-xs bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   {suggestion}
                 </button>
@@ -271,8 +271,8 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
               <div className="flex items-start space-x-3">
                 <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
                   data.campaignType === typeKey
-                    ? `bg-${type.color}-500 text-white`
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    ? `bg-${type.color}-500 text-gray-800`
+                    : 'bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-600 dark:text-gray-300'
                 }`}>
                   {type.icon}
                 </div>
@@ -280,7 +280,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                   <h3 className={`text-sm font-medium ${
                     data.campaignType === typeKey
                       ? `text-${type.color}-900 dark:text-${type.color}-100`
-                      : 'text-gray-900 dark:text-white'
+                      : 'text-gray-900 dark:text-gray-800'
                   }`}>
                     {type.name}
                   </h3>
@@ -325,8 +325,8 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                 <div className="flex items-start space-x-3">
                   <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                     data.objective === objective.id
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                      ? 'bg-blue-500 text-gray-800'
+                      : 'bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-600 dark:text-gray-300'
                   }`}>
                     {objective.icon}
                   </div>
@@ -334,7 +334,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                     <h3 className={`text-sm font-medium ${
                       data.objective === objective.id
                         ? 'text-blue-900 dark:text-blue-100'
-                        : 'text-gray-900 dark:text-white'
+                        : 'text-gray-900 dark:text-gray-800'
                     }`}>
                       {objective.name}
                     </h3>
@@ -367,7 +367,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
           onChange={(e) => handleFieldChange('description', e.target.value)}
           placeholder="Describe your campaign goals and target audience..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
         />
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           This description is for your reference and won't be shown to customers.
@@ -396,7 +396,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+            className="mt-4 space-y-4 p-4 bg-white/10 backdrop-blur-md border border-blue-200/20 rounded-lg"
           >
             {/* Campaign URL */}
             <div>
@@ -408,7 +408,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                 value={data.finalUrl || ''}
                 onChange={(e) => handleFieldChange('finalUrl', e.target.value)}
                 placeholder="https://example.com"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 The URL where people will land when they click your ad.
@@ -426,7 +426,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                   value={data.startDate || ''}
                   onChange={(e) => handleFieldChange('startDate', e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
                 />
               </div>
 
@@ -440,7 +440,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
                   value={data.endDate || ''}
                   onChange={(e) => handleFieldChange('endDate', e.target.value)}
                   min={data.startDate || new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
                 />
               </div>
             </div>
@@ -453,7 +453,7 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
               <select
                 value={data.priority || 'NORMAL'}
                 onChange={(e) => handleFieldChange('priority', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
               >
                 <option value="LOW">Low</option>
                 <option value="NORMAL">Normal</option>
@@ -503,11 +503,11 @@ const BasicInfo = ({ data, updateData, errors, onValidate }) => {
       )}
 
       {/* Help Section */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <div className="bg-white/10 backdrop-blur-md border border-blue-200/20 rounded-lg p-4">
         <div className="flex items-start space-x-3">
           <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-800">
               Campaign Setup Tips
             </h4>
             <ul className="text-sm text-gray-600 dark:text-gray-400 mt-2 space-y-1">

@@ -4,7 +4,7 @@ class GoogleMapsManager {
   private isLoaded: boolean = false;
   private isLoading: boolean = false;
   private callbacks: (() => void)[] = [];
-  private apiKey: string = 'AIzaSyAe57f_PT4dsrCcwK_UPN7nY4SERmnH254C';
+  private apiKey: string = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
   private constructor() {}
 

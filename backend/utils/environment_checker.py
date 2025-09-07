@@ -117,11 +117,11 @@ class EnvironmentChecker:
                 'GOOGLE_ADS_CLIENT_ID': 'Google Ads Client ID',
                 'GOOGLE_ADS_CLIENT_SECRET': 'Google Ads Client Secret',
                 'GOOGLE_ADS_REFRESH_TOKEN': 'Google Ads Refresh Token',
-                'GOOGLE_ADS_LOGIN_CUSTOMER_ID': 'Google Ads Login Customer ID'
+                'MCC_LOGIN_CUSTOMER_ID': 'MCC Login Customer ID'
             },
             'oauth': {
-                'GOOGLE_CLIENT_ID': 'Google OAuth Client ID',
-                'GOOGLE_CLIENT_SECRET': 'Google OAuth Client Secret',
+                'GOOGLE_ADS_CLIENT_ID': 'Google OAuth Client ID',
+                'GOOGLE_ADS_CLIENT_SECRET': 'Google OAuth Client Secret',
                 'GOOGLE_REDIRECT_URI': 'Google OAuth Redirect URI'
             },
             'redis': {

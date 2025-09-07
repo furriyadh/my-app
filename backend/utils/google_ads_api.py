@@ -85,28 +85,33 @@ DEPENDENCIES_STATUS = {
 
 try:
     from google.ads.googleads.client import GoogleAdsClient
-    from google.ads.googleads.errors import GoogleAdsException, GoogleAdsFailure
-    from google.ads.googleads.v15.services.types.google_ads_service import SearchGoogleAdsRequest
-    from google.ads.googleads.v15.services.types.customer_service import ListAccessibleCustomersRequest
-    from google.ads.googleads.v15.services.types.campaign_service import (
+    from google.ads.googleads.errors import GoogleAdsException
+    # GoogleAdsFailure may not be available in newer versions
+    try:
+        from google.ads.googleads.errors import GoogleAdsFailure
+    except ImportError:
+        GoogleAdsFailure = None
+    from google.ads.googleads.v20.services.types.google_ads_service import SearchGoogleAdsRequest
+    from google.ads.googleads.v20.services.types.customer_service import ListAccessibleCustomersRequest
+    from google.ads.googleads.v20.services.types.campaign_service import (
         GetCampaignRequest, MutateCampaignsRequest, CampaignOperation
     )
-    from google.ads.googleads.v15.services.types.ad_group_service import (
+    from google.ads.googleads.v20.services.types.ad_group_service import (
         GetAdGroupRequest, MutateAdGroupsRequest, AdGroupOperation
     )
-    from google.ads.googleads.v15.services.types.keyword_view_service import GetKeywordViewRequest
-    from google.ads.googleads.v15.services.types.conversion_action_service import (
+    from google.ads.googleads.v20.services.types.keyword_view_service import GetKeywordViewRequest
+    from google.ads.googleads.v20.services.types.conversion_action_service import (
         GetConversionActionRequest, MutateConversionActionsRequest
     )
-    from google.ads.googleads.v15.resources.types.campaign import Campaign
-    from google.ads.googleads.v15.resources.types.ad_group import AdGroup
-    from google.ads.googleads.v15.resources.types.customer import Customer
-    from google.ads.googleads.v15.enums.types.campaign_status import CampaignStatusEnum
-    from google.ads.googleads.v15.enums.types.ad_group_status import AdGroupStatusEnum
-    from google.ads.googleads.v15.enums.types.keyword_match_type import KeywordMatchTypeEnum
-    from google.ads.googleads.v15.enums.types.device import DeviceEnum
-    from google.ads.googleads.v15.enums.types.gender_type import GenderTypeEnum
-    from google.ads.googleads.v15.enums.types.age_range_type import AgeRangeTypeEnum
+    from google.ads.googleads.v20.resources.types.campaign import Campaign
+    from google.ads.googleads.v20.resources.types.ad_group import AdGroup
+    from google.ads.googleads.v20.resources.types.customer import Customer
+    from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
+    from google.ads.googleads.v20.enums.types.ad_group_status import AdGroupStatusEnum
+    from google.ads.googleads.v20.enums.types.keyword_match_type import KeywordMatchTypeEnum
+    from google.ads.googleads.v20.enums.types.device import DeviceEnum
+    from google.ads.googleads.v20.enums.types.gender_type import GenderTypeEnum
+    from google.ads.googleads.v20.enums.types.age_range_type import AgeRangeTypeEnum
     DEPENDENCIES_STATUS['google_ads'] = True
 except ImportError as e:
     logging.warning(f"Google Ads API library not available: {e}")
@@ -274,7 +279,7 @@ class GoogleAdsConfig:
     oauth_redirect_uri: str = "http://localhost:8080/oauth2callback"
     
     # API settings
-    api_version: str = "v15"
+    api_version: str = "v20"
     endpoint: str = "googleads.googleapis.com"
     use_proto_plus: bool = True
     
@@ -318,7 +323,7 @@ class GoogleAdsConfig:
             client_id=os.getenv("GOOGLE_ADS_CLIENT_ID", ""),
             client_secret=os.getenv("GOOGLE_ADS_CLIENT_SECRET", ""),
             developer_token=os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN", ""),
-            login_customer_id=os.getenv("GOOGLE_ADS_LOGIN_CUSTOMER_ID"),
+            login_customer_id=os.getenv("MCC_LOGIN_CUSTOMER_ID"),
             redis_url=os.getenv("REDIS_URL"),
             token_encryption_key=os.getenv("TOKEN_ENCRYPTION_KEY"),
             security_level=SecurityLevel(os.getenv("SECURITY_LEVEL", "enterprise")),

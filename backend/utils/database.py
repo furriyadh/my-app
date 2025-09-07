@@ -1,5 +1,5 @@
 import os
-from supabase import create_client, Client
+from postgrest import SyncPostgrestClient
 from typing import Optional, Dict, Any, List
 
 class DatabaseManager:
@@ -17,11 +17,11 @@ class DatabaseManager:
             return
         
         try:
-            self.client: Client = create_client(self.supabase_url, self.supabase_key)
+            self.client: SyncPostgrestClient = SyncPostgrestClient(self.supabase_url + "/rest/v1", schema="public")
             
             # إنشاء عميل منفصل للعمليات الإدارية
             if self.service_role_key:
-                self.admin_client: Client = create_client(self.supabase_url, self.service_role_key)
+                self.admin_client: SyncPostgrestClient = SyncPostgrestClient(self.supabase_url + "/rest/v1", schema="public")
             else:
                 self.admin_client = self.client
         except Exception as e:
@@ -29,14 +29,15 @@ class DatabaseManager:
             self.client = None
             self.admin_client = None
     
-    def get_client(self) -> Optional[Client]:
+    def get_client(self) -> Optional[SyncPostgrestClient]:
         """الحصول على عميل Supabase"""
         return self.client
     
-    def get_admin_client(self) -> Optional[Client]:
+    def get_admin_client(self) -> Optional[SyncPostgrestClient]:
         """الحصول على عميل Supabase الإداري"""
         return self.admin_client
     
+    @property
     def is_connected(self) -> bool:
         """فحص حالة الاتصال"""
         return self.client is not None

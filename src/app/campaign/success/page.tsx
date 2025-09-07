@@ -44,7 +44,7 @@ export default function CampaignSuccessPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* تأثير الكونفيتي */}
       {showConfetti && <ConfettiEffect />}
 

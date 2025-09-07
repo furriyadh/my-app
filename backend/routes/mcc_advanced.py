@@ -76,7 +76,7 @@ class MCCAdvancedManager:
                 'client_secret': self.config['client_secret'],
                 'refresh_token': self.config['refresh_token'],
                 'use_proto_plus': self.config['use_proto_plus'].lower() == 'true',
-                'login_customer_id': self.config['mcc_customer_id']
+                'login_customer_id': str(self.config['mcc_customer_id']) if self.config['mcc_customer_id'] else None
             }
             return GoogleAdsClient.load_from_dict(config_dict)
         except Exception as e:
@@ -113,33 +113,8 @@ class MCCAdvancedManager:
             return self._get_mock_managed_accounts()
     
     def _get_mock_managed_accounts(self) -> List[Dict[str, Any]]:
-        """Get mock managed account data"""
-        return [
-            {
-                'id': '111-222-3333',
-                'name': 'E-commerce Store Alpha',
-                'currency': 'USD',
-                'status': 'ENABLED',
-                'type': 'STANDARD',
-                'manager': False
-            },
-            {
-                'id': '444-555-6666',
-                'name': 'SaaS Company Beta',
-                'currency': 'EUR',
-                'status': 'ENABLED',
-                'type': 'STANDARD',
-                'manager': False
-            },
-            {
-                'id': '777-888-9999',
-                'name': 'Local Business Gamma',
-                'currency': 'CAD',
-                'status': 'ENABLED',
-                'type': 'STANDARD',
-                'manager': False
-            }
-        ]
+        """Return empty list instead of mock data"""
+        return []
     
     def _fetch_real_managed_accounts(self) -> List[Dict[str, Any]]:
         """Fetch real managed accounts from Google Ads API"""
@@ -148,15 +123,20 @@ class MCCAdvancedManager:
             
             query = """
                 SELECT
-                    customer.id,
-                    customer.descriptive_name,
-                    customer.currency_code,
-                    customer.status,
-                    customer.manager
-                FROM customer
-                WHERE customer.status = 'ENABLED'
+                    customer_client.client_customer,
+                    customer_client.id,
+                    customer_client.descriptive_name,
+                    customer_client.currency_code,
+                    customer_client.time_zone,
+                    customer_client.manager,
+                    customer_client.test_account,
+                    customer_client.status
+                FROM customer_client
+                WHERE customer_client.manager = FALSE
+                AND customer_client.status = 'ENABLED'
             """
             
+            # استخدام login_customer_id لجلب العملاء المرتبطين بـ MCC
             response = ga_service.search(
                 customer_id=self.config['mcc_customer_id'],
                 query=query

@@ -41,7 +41,7 @@ const PerformanceChart = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock data generation
+  // إرجاع بيانات فارغة بدلاً من البيانات الوهمية
   const generateMockData = (days) => {
     const data = [];
     const baseDate = new Date();
@@ -50,21 +50,16 @@ const PerformanceChart = () => {
       const date = new Date(baseDate);
       date.setDate(date.getDate() - i);
       
-      // Generate realistic advertising data with trends
-      const dayOfWeek = date.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const weekendMultiplier = isWeekend ? 0.7 : 1;
-      
       data.push({
         date: date.toISOString().split('T')[0],
         displayDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        impressions: Math.floor((80000 + Math.random() * 40000) * weekendMultiplier),
-        clicks: Math.floor((1500 + Math.random() * 800) * weekendMultiplier),
-        spend: parseFloat(((300 + Math.random() * 200) * weekendMultiplier).toFixed(2)),
-        conversions: Math.floor((25 + Math.random() * 15) * weekendMultiplier),
-        ctr: parseFloat((1.5 + Math.random() * 1).toFixed(2)),
-        cpc: parseFloat((0.20 + Math.random() * 0.15).toFixed(3)),
-        roas: parseFloat((3.5 + Math.random() * 2).toFixed(1))
+        impressions: 0,
+        clicks: 0,
+        spend: 0.0,
+        conversions: 0,
+        ctr: 0.0,
+        cpc: 0.0,
+        roas: 0.0
       });
     }
     return data;
@@ -172,8 +167,8 @@ const PerformanceChart = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
+        <div className="  p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+          <p className="font-semibold text-gray-900 dark:text-gray-800 mb-2">{label}</p>
           {payload.map((entry, index) => (
             <div key={index} className="flex items-center space-x-2 text-sm">
               <div 
@@ -181,7 +176,7 @@ const PerformanceChart = () => {
                 style={{ backgroundColor: entry.color }}
               ></div>
               <span className="text-gray-600 dark:text-gray-400">{entry.name}:</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="font-medium text-gray-900 dark:text-gray-800">
                 {typeof entry.value === 'number' && entry.value > 1000 
                   ? entry.value.toLocaleString() 
                   : entry.value}
@@ -197,11 +192,11 @@ const PerformanceChart = () => {
   // Loading skeleton
   const LoadingSkeleton = () => (
     <div className="animate-pulse">
-      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-      <div className="h-80 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+      <div className="h-8 bg-blue-200/30 rounded w-1/3 mb-4"></div>
+      <div className="h-80 bg-blue-200/30 rounded mb-4"></div>
       <div className="flex space-x-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded flex-1"></div>
+          <div key={i} className="h-16 bg-blue-200/30 rounded flex-1"></div>
         ))}
       </div>
     </div>
@@ -324,11 +319,11 @@ const PerformanceChart = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+    <div className="  rounded-xl p-6 border border-gray-200 dark:border-gray-700">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 space-y-4 lg:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-800 mb-2">
             Performance Analytics
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
@@ -341,7 +336,7 @@ const PerformanceChart = () => {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-blue-300/30 rounded-lg bg-white/15 backdrop-blur-md text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             {timeRanges.map(range => (
               <option key={range.value} value={range.value}>
@@ -354,17 +349,17 @@ const PerformanceChart = () => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors disabled:opacity-50"
             title="Refresh Data"
           >
             <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
           
-          <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Download Report">
+          <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Download Report">
             <Download className="w-5 h-5" />
           </button>
           
-          <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Fullscreen">
+          <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Fullscreen">
             <Maximize2 className="w-5 h-5" />
           </button>
         </div>
@@ -380,8 +375,8 @@ const PerformanceChart = () => {
               onClick={() => setActiveChart(type.id)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeChart === type.id
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-blue-500/30 text-blue-200 backdrop-blur-sm border border-blue-300/30 drop-shadow-sm'
+                  : 'bg-white/10 text-blue-100 backdrop-blur-sm border border-blue-200/20 hover:bg-white/20 drop-shadow-sm'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -402,7 +397,7 @@ const PerformanceChart = () => {
           <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-2">
             <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.totalImpressions}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Impressions</div>
@@ -412,7 +407,7 @@ const PerformanceChart = () => {
           <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-2">
             <MousePointer className="w-4 h-4 text-green-600 dark:text-green-400" />
           </div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.totalClicks}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Clicks</div>
@@ -422,7 +417,7 @@ const PerformanceChart = () => {
           <div className="flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mx-auto mb-2">
             <DollarSign className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
           </div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.totalSpend}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Spend</div>
@@ -432,28 +427,28 @@ const PerformanceChart = () => {
           <div className="flex items-center justify-center w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg mx-auto mb-2">
             <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           </div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.totalConversions}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Conversions</div>
         </div>
         
         <div className="text-center">
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.avgCTR}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Avg CTR</div>
         </div>
         
         <div className="text-center">
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.avgCPC}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Avg CPC</div>
         </div>
         
         <div className="text-center">
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.avgROAS}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Avg ROAS</div>

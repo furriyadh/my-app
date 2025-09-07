@@ -15,7 +15,16 @@ except ImportError:
     try:
         from ..services.google_ads_client import GoogleAdsClientService
     except ImportError:
-        GoogleAdsClientService = None
+        try:
+            import sys
+            import os
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            services_path = os.path.join(os.path.dirname(current_dir), 'services')
+            if services_path not in sys.path:
+                sys.path.insert(0, services_path)
+            from google_ads_client import GoogleAdsClientService
+        except ImportError:
+            GoogleAdsClientService = None
 
 try:
     from services.mcc_manager import MCCManager

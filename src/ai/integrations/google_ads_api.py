@@ -142,7 +142,7 @@ class GoogleAdsAPIIntegration:
             self.config = load_config() if CONFIG_AVAILABLE else None
         
         # إعدادات API
-        self.api_version = "v15"
+        self.api_version = "v20"
         self.base_url = f"https://googleads.googleapis.com/{self.api_version}"
         
         # إدارة معدل الطلبات
@@ -439,32 +439,12 @@ class GoogleAdsAPIIntegration:
         """محاكاة عملية الجلب"""
         await asyncio.sleep(0.1)
         
-        # بيانات وهمية حسب نوع المورد
-        mock_data = {
-            ResourceType.CAMPAIGN: {
-                'id': request.resource_id,
-                'name': f'حملة تجريبية {request.resource_id}',
-                'status': 'ENABLED',
-                'budget': 1000.0,
-                'impressions': 10000,
-                'clicks': 500,
-                'cost': 800.0
-            },
-            ResourceType.AD_GROUP: {
-                'id': request.resource_id,
-                'name': f'مجموعة إعلانية {request.resource_id}',
-                'status': 'ENABLED',
-                'cpc_bid': 2.0
-            },
-            ResourceType.KEYWORD: {
-                'id': request.resource_id,
-                'text': f'كلمة مفتاحية {request.resource_id}',
-                'match_type': 'BROAD',
-                'status': 'ENABLED'
-            }
+        # إرجاع بيانات فارغة بدلاً من البيانات الوهمية
+        return {
+            'id': request.resource_id,
+            'error': 'No data available',
+            'message': 'No real data found for this resource'
         }
-        
-        return mock_data.get(request.resource_type, {'id': request.resource_id})
     
     async def _simulate_list_operation(self, request: APIRequest) -> Dict[str, Any]:
         """محاكاة عملية القائمة"""

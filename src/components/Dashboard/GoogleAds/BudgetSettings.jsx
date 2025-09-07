@@ -189,8 +189,8 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
             <div className="flex items-center space-x-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                 data.budgetType === 'DAILY'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  ? 'bg-blue-500 text-gray-800'
+                  : 'bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-600 dark:text-gray-300'
               }`}>
                 <Clock className="w-5 h-5" />
               </div>
@@ -198,7 +198,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                 <h3 className={`text-sm font-medium ${
                   data.budgetType === 'DAILY'
                     ? 'text-blue-900 dark:text-blue-100'
-                    : 'text-gray-900 dark:text-white'
+                    : 'text-gray-900 dark:text-gray-800'
                 }`}>
                   Daily Budget
                 </h3>
@@ -224,8 +224,8 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
             <div className="flex items-center space-x-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                 data.budgetType === 'CAMPAIGN'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  ? 'bg-blue-500 text-gray-800'
+                  : 'bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-600 dark:text-gray-300'
               }`}>
                 <BarChart3 className="w-5 h-5" />
               </div>
@@ -233,7 +233,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                 <h3 className={`text-sm font-medium ${
                   data.budgetType === 'CAMPAIGN'
                     ? 'text-blue-900 dark:text-blue-100'
-                    : 'text-gray-900 dark:text-white'
+                    : 'text-gray-900 dark:text-gray-800'
                 }`}>
                   Campaign Budget
                 </h3>
@@ -266,7 +266,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
             placeholder="0.00"
             min="0"
             step="0.01"
-            className={`w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+            className={`w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:border-gray-600 dark:text-gray-800 ${
               errors.budgetAmount ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
           />
@@ -296,7 +296,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                   </button>
                   <button
                     onClick={() => applyBudgetRecommendation(budgetRecommendations.recommended)}
-                    className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    className="px-3 py-1 text-xs bg-blue-500 text-gray-800 rounded hover:bg-blue-600 transition-colors"
                   >
                     Recommended: ${budgetRecommendations.recommended}/day
                   </button>
@@ -332,8 +332,8 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
               <div className="flex items-start space-x-3">
                 <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                   data.bidStrategy === strategy.id
-                    ? `bg-${strategy.color}-500 text-white`
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    ? `bg-${strategy.color}-500 text-gray-800`
+                    : 'bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-600 dark:text-gray-300'
                 }`}>
                   {strategy.icon}
                 </div>
@@ -342,7 +342,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                     <h3 className={`text-sm font-medium ${
                       data.bidStrategy === strategy.id
                         ? `text-${strategy.color}-900 dark:text-${strategy.color}-100`
-                        : 'text-gray-900 dark:text-white'
+                        : 'text-gray-900 dark:text-gray-800'
                     }`}>
                       {strategy.name}
                     </h3>
@@ -398,7 +398,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                       placeholder={strategy.targetField === 'targetCpa' ? '0.00' : '0'}
                       min="0"
                       step={strategy.targetField === 'targetCpa' ? '0.01' : '1'}
-                      className={`w-full ${strategy.targetField === 'targetCpa' ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${
+                      className={`w-full ${strategy.targetField === 'targetCpa' ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800 ${
                         errors[strategy.targetField] ? 'border-red-500' : ''
                       }`}
                     />
@@ -451,7 +451,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+            className="mt-4 space-y-4 p-4 bg-white/10 backdrop-blur-md border border-blue-200/20 rounded-lg"
           >
             {/* Budget Delivery Method */}
             <div>
@@ -461,7 +461,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
               <select
                 value={data.budgetDeliveryMethod || 'STANDARD'}
                 onChange={(e) => handleFieldChange('budgetDeliveryMethod', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
               >
                 <option value="STANDARD">Standard (Recommended)</option>
                 <option value="ACCELERATED">Accelerated</option>
@@ -489,7 +489,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                     placeholder="0"
                     min="-90"
                     max="900"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
                   />
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Increase or decrease bids for mobile devices (-90% to +900%)
@@ -507,7 +507,7 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
                     placeholder="0"
                     min="-90"
                     max="900"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
                   />
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Increase or decrease bids for tablet devices (-90% to +900%)
@@ -608,11 +608,11 @@ const BudgetSettings = ({ data, updateData, errors, onValidate }) => {
       )}
 
       {/* Help Section */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+      <div className="bg-white/10 backdrop-blur-md border border-blue-200/20 rounded-lg p-4">
         <div className="flex items-start space-x-3">
           <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-800">
               Budget & Bidding Tips
             </h4>
             <ul className="text-sm text-gray-600 dark:text-gray-400 mt-2 space-y-1">

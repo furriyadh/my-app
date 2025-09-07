@@ -54,7 +54,7 @@ class MerchantCenterService:
         """تهيئة خدمة Merchant Center"""
         self.client = None
         self.mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID')
-        self.developer_token = os.getenv('GOOGLE_DEVELOPER_TOKEN')
+        self.developer_token = os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN')
         self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID')
         self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET')
         self.refresh_token = os.getenv('GOOGLE_ADS_REFRESH_TOKEN')

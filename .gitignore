@@ -4,6 +4,8 @@
 .env.development
 .env.production
 .env.test
+.env.*
+!.env.example
 
 # Google Credentials - بيانات اعتماد Google الحساسة
 credentials/google_ads_credentials.json
@@ -32,3 +34,105 @@ Thumbs.db
 google_ads.yaml
 
 ads_config.yaml
+
+# Logs - ملفات السجلات
+*.log
+logs/
+backend/app.log
+backend/google_ads_api.log
+app.log
+
+# Database files - ملفات قاعدة البيانات
+*.db
+*.sqlite
+*.sqlite3
+backend/client_requests.db
+backend/google_ads.db
+
+# Python cache - ذاكرة التخزين المؤقت لـ Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments - البيئات الافتراضية
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+ai_env/
+backend/venv/
+backend/ai_env/
+
+# IDE files - ملفات محررات النصوص
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files - ملفات النظام
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files - الملفات المؤقتة
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Uploads - ملفات الرفع
+uploads/
+backend/uploads/
+
+# Test files - ملفات الاختبار
+test_results/
+backend/test_results/
+
+# Google Ads data - بيانات Google Ads
+google_ads_data/
+backend/google_ads_data/
+google_ads_mcc_data/
+backend/google_ads_mcc_data/
+
+# Generated files - الملفات المُولدة
+generated/
+backend/generated/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Backup files - ملفات النسخ الاحتياطي
+*.backup
+*.bak
+*.old
+
+# API Keys and Secrets - مفاتيح API والأسرار
+api_keys.txt
+secrets.txt
+config.json
+config.yaml
+config.yml

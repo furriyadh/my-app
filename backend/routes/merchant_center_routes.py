@@ -16,13 +16,18 @@ merchant_center_bp = Blueprint('merchant_center', __name__)
 
 # استيراد خدمة Merchant Center
 try:
-    from backend.services.merchant_center_service import merchant_center_service
+    from services.merchant_center_service import merchant_center_service
     MERCHANT_CENTER_AVAILABLE = True
     logger.info("✅ تم تحميل خدمة Merchant Center بنجاح")
-except ImportError as e:
-    MERCHANT_CENTER_AVAILABLE = False
-    logger.warning(f"⚠️ لم يتم تحميل خدمة Merchant Center: {e}")
-    merchant_center_service = None
+except ImportError:
+    try:
+        from ..services.merchant_center_service import merchant_center_service
+        MERCHANT_CENTER_AVAILABLE = True
+        logger.info("✅ تم تحميل خدمة Merchant Center بنجاح")
+    except ImportError as e:
+        MERCHANT_CENTER_AVAILABLE = False
+        logger.warning(f"⚠️ لم يتم تحميل خدمة Merchant Center: {e}")
+        merchant_center_service = None
 
 @merchant_center_bp.route('/health', methods=['GET'])
 def health():

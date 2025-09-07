@@ -20,10 +20,10 @@ import os
 import logging
 from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass, field
-from dotenv import load_dotenv
+from dotenv import load_dotenv('.env.development')
 
 # تحميل متغيرات البيئة
-load_dotenv()
+load_dotenv('.env.development')()
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class MCCSettings:
         """تحميل إعدادات MCC من متغيرات البيئة"""
         return cls(
             enabled=os.getenv('GOOGLE_ADS_USE_MCC', 'false').lower() == 'true',
-            login_customer_id=os.getenv('GOOGLE_ADS_LOGIN_CUSTOMER_ID'),
+            login_customer_id=os.getenv('MCC_LOGIN_CUSTOMER_ID'),
             auto_discover_accounts=os.getenv('GOOGLE_ADS_AUTO_DISCOVER_ACCOUNTS', 'true').lower() == 'true',
             include_manager_accounts=os.getenv('GOOGLE_ADS_INCLUDE_MANAGER_ACCOUNTS', 'false').lower() == 'true',
             include_test_accounts=os.getenv('GOOGLE_ADS_INCLUDE_TEST_ACCOUNTS', 'false').lower() == 'true',
@@ -115,11 +115,11 @@ class GoogleAdsConfig:
     
     def _load_from_env(self):
         """تحميل الإعدادات من متغيرات البيئة"""
-        self.developer_token = os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN') or os.getenv('GOOGLE_DEVELOPER_TOKEN')
-        self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID') or os.getenv('GOOGLE_CLIENT_ID')
-        self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET') or os.getenv('GOOGLE_CLIENT_SECRET')
+        self.developer_token = os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN')
+        self.client_id = os.getenv('GOOGLE_ADS_CLIENT_ID') or os.getenv('GOOGLE_ADS_CLIENT_ID')
+        self.client_secret = os.getenv('GOOGLE_ADS_CLIENT_SECRET') or os.getenv('GOOGLE_ADS_CLIENT_SECRET')
         self.refresh_token = os.getenv('GOOGLE_ADS_REFRESH_TOKEN') or os.getenv('GOOGLE_REFRESH_TOKEN')
-        self.login_customer_id = os.getenv('GOOGLE_ADS_LOGIN_CUSTOMER_ID') or os.getenv('MCC_LOGIN_CUSTOMER_ID')
+        self.login_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID')
         
         # إعدادات الأداء
         self.timeout = int(os.getenv('GOOGLE_ADS_TIMEOUT', '60'))

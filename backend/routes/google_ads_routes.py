@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify
 
-google_ads_bp = Blueprint('google_ads', __name__, url_prefix='/api/google-ads')
+google_ads_routes_bp = Blueprint('google_ads_routes', __name__, url_prefix='/api/google-ads-routes')
 
-@google_ads_bp.route('/health', methods=['GET'])
+@google_ads_routes_bp.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'healthy', 'message': 'Google Ads API يعمل'})
+    return jsonify({'status': 'healthy', 'message': 'Google Ads Routes API يعمل'})
 
-@google_ads_bp.route('/test', methods=['GET'])
+@google_ads_routes_bp.route('/test', methods=['GET'])
 def test():
-    return jsonify({'test': 'success', 'message': 'اختبار نجح'})
+    return jsonify({'test': 'success', 'message': 'اختبار Google Ads Routes نجح'})
 
-__all__ = ['google_ads_bp']
+__all__ = ['google_ads_routes_bp']
 

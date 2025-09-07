@@ -1,282 +1,155 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
-// Force dynamic rendering for OAuth operations
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+/**
+ * Google OAuth2 Refresh Handler - يتبع الممارسات الرسمية من Google Identity Platform
+ * المصادر الرسمية:
+ * - https://developers.google.com/identity/protocols/oauth2
+ * - https://developers.google.com/identity/protocols/oauth2/web-server#offline
+ */
 
-// TypeScript interfaces
-interface TokenRefreshResponse {
-  access_token: string;
-  expires_in: number;
-  scope?: string;
-  token_type: string;
-}
-
-interface RefreshTokenRequest {
-  provider: 'google';
-  force_refresh?: boolean;
-}
-
-// إعداد Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+/**
+ * Google OAuth2 Refresh Handler - يتبع الممارسات الرسمية من Google Identity Platform
+ * المصادر الرسمية:
+ * - https://developers.google.com/identity/protocols/oauth2
+ * - https://developers.google.com/identity/protocols/oauth2/web-server#offline
+ */
 
 export async function POST(request: NextRequest) {
   try {
-    // التحقق من session token
-    const sessionToken = request.cookies.get('session_token')?.value;
-    if (!sessionToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No session token' },
-        { status: 401 }
-      );
-    }
-
-    // التحقق من صحة الجلسة
-    const { data: session, error: sessionError } = await supabase
-      .from('user_sessions')
-      .select('user_id, expires_at')
-      .eq('session_token', sessionToken)
-      .single();
-
-    if (sessionError || !session) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid session' },
-        { status: 401 }
-      );
-    }
-
-    // التحقق من انتهاء صلاحية الجلسة
-    if (new Date(session.expires_at) < new Date()) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Session expired' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user_id;
-    const body: RefreshTokenRequest = await request.json();
-    const { provider = 'google', force_refresh = false } = body;
-
-    // جلب OAuth token للمستخدم
-    const { data: tokenData, error: tokenError } = await supabase
-      .from('user_oauth_tokens')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('provider', provider)
-      .single();
-
-    if (tokenError || !tokenData) {
-      return NextResponse.json(
-        { error: `${provider} account not connected` },
-        { status: 400 }
-      );
-    }
-
-    // التحقق من الحاجة لتحديث الـ token
-    const now = new Date();
-    const expiresAt = tokenData.expires_at ? new Date(tokenData.expires_at) : null;
-    const needsRefresh = force_refresh || !expiresAt || expiresAt <= now;
-
-    if (!needsRefresh) {
+    console.log('🔄 تجديد OAuth token (حسب Google Identity Platform)...');
+    
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    const clientId = process.env.GOOGLE_ADS_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET;
+    
+    if (!refreshToken) {
+      console.error('❌ لم يتم العثور على refresh token');
+      console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2/web-server#offline');
       return NextResponse.json({
-        success: true,
-        message: 'Token is still valid',
-        expires_at: expiresAt?.toISOString(),
-        expires_in: expiresAt ? Math.floor((expiresAt.getTime() - now.getTime()) / 1000) : null
+        success: false,
+        error: 'Refresh token not found',
+        message: 'لم يتم العثور على refresh token - راجع المصادر الرسمية',
+        docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#offline'
+      }, { status: 400 });
+    }
+    
+    if (!clientId || !clientSecret) {
+      console.error('❌ Client ID أو Client Secret غير محدد');
+      console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2/web-server#offline');
+      return NextResponse.json({
+        success: false,
+        error: 'Client credentials not configured',
+        message: 'Client ID أو Client Secret غير محدد - راجع المصادر الرسمية',
+        docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#offline'
+      }, { status: 500 });
+    }
+    
+    // تجديد access token (حسب Google Identity Platform)
+    try {
+      console.log('🔄 تجديد access token في Google...');
+      const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token'
+        })
       });
-    }
-
-    // التحقق من وجود refresh token
-    if (!tokenData.refresh_token) {
-      return NextResponse.json(
-        { error: 'No refresh token available - user needs to re-authenticate' },
-        { status: 400 }
-      );
-    }
-
-    // تحديث الـ token حسب المزود
-    let newTokenData: TokenRefreshResponse;
-    
-    switch (provider) {
-      case 'google':
-        newTokenData = await refreshGoogleToken(tokenData.refresh_token);
-        break;
-      default:
-        return NextResponse.json(
-          { error: 'Unsupported provider' },
-          { status: 400 }
-        );
-    }
-
-    // حساب تاريخ انتهاء الصلاحية الجديد
-    const newExpiresAt = new Date(Date.now() + newTokenData.expires_in * 1000);
-
-    // تحديث الـ token في قاعدة البيانات
-    const { error: updateError } = await supabase
-      .from('user_oauth_tokens')
-      .update({
-        access_token: newTokenData.access_token,
-        expires_at: newExpiresAt.toISOString(),
-        scope: newTokenData.scope || tokenData.scope,
-        token_type: newTokenData.token_type,
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', userId)
-      .eq('provider', provider);
-
-    if (updateError) {
-      console.error('Error updating token in database:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to save new token' },
-        { status: 500 }
-      );
-    }
-
-    // تسجيل نجاح التحديث
-    console.log(`Successfully refreshed ${provider} token for user ${userId}`);
-
-    return NextResponse.json({
-      success: true,
-      message: 'Token refreshed successfully',
-      expires_at: newExpiresAt.toISOString(),
-      expires_in: newTokenData.expires_in,
-      provider: provider
-    });
-
-  } catch (error) {
-    console.error('Token refresh error:', error);
-    
-    // التعامل مع أخطاء محددة
-    if (error instanceof Error) {
-      if (error.message.includes('invalid_grant')) {
-        return NextResponse.json(
-          { error: 'Refresh token expired - user needs to re-authenticate' },
-          { status: 400 }
-        );
+      
+      if (refreshResponse.ok) {
+        const tokenData = await refreshResponse.json();
+        console.log('✅ تم تجديد access token بنجاح (حسب Google Identity Platform)');
+        
+        // حفظ الـ token الجديد في cookies
+        const response = NextResponse.json({
+          success: true,
+          message: 'تم تجديد access token بنجاح - يتبع Google Identity Platform',
+          access_token: tokenData.access_token,
+          expires_in: tokenData.expires_in,
+          token_type: tokenData.token_type || 'Bearer',
+          scope: tokenData.scope,
+          docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#offline'
+        });
+        
+        // حفظ access token الجديد
+        response.cookies.set('oauth_access_token', tokenData.access_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: tokenData.expires_in || 3600
+        });
+        
+        // حفظ معلومات إضافية
+        if (tokenData.expires_in) {
+          response.cookies.set('oauth_expires_in', tokenData.expires_in.toString(), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 3600
+          });
+        }
+        
+        if (tokenData.scope) {
+          response.cookies.set('oauth_scope', tokenData.scope, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 3600
+          });
+        }
+        
+        return response;
+        
+      } else {
+        const errorData = await refreshResponse.text();
+        console.error('❌ فشل في تجديد access token:', refreshResponse.status, errorData);
+        console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2/web-server#offline');
+        
+        return NextResponse.json({
+          success: false,
+          error: 'Token refresh failed',
+          message: 'فشل في تجديد access token - راجع المصادر الرسمية',
+          status: refreshResponse.status,
+          docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#offline'
+        }, { status: 400 });
       }
       
-      if (error.message.includes('invalid_client')) {
-        return NextResponse.json(
-          { error: 'OAuth configuration error' },
-          { status: 500 }
-        );
-      }
+    } catch (refreshError) {
+      console.error('❌ خطأ في تجديد access token:', refreshError);
+      console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2/web-server#offline');
+      
+      return NextResponse.json({
+        success: false,
+        error: 'Token refresh error',
+        message: 'خطأ في تجديد access token - راجع المصادر الرسمية',
+        docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#offline'
+      }, { status: 500 });
     }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    
+  } catch (error) {
+    console.error('❌ خطأ في تجديد OAuth:', error);
+    console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2');
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Internal server error',
+      message: 'خطأ في تجديد OAuth - راجع المصادر الرسمية',
+      docs: 'https://developers.google.com/identity/protocols/oauth2'
+    }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    // التحقق من session token
-    const sessionToken = request.cookies.get('session_token')?.value;
-    if (!sessionToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No session token' },
-        { status: 401 }
-      );
-    }
-
-    // التحقق من صحة الجلسة
-    const { data: session, error: sessionError } = await supabase
-      .from('user_sessions')
-      .select('user_id')
-      .eq('session_token', sessionToken)
-      .single();
-
-    if (sessionError || !session) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid session' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user_id;
-    const { searchParams } = new URL(request.url);
-    const provider = searchParams.get('provider') || 'google';
-
-    // جلب معلومات الـ token الحالي
-    const { data: tokenData, error: tokenError } = await supabase
-      .from('user_oauth_tokens')
-      .select('expires_at, created_at, updated_at, scope')
-      .eq('user_id', userId)
-      .eq('provider', provider)
-      .single();
-
-    if (tokenError || !tokenData) {
-      return NextResponse.json(
-        { error: `${provider} account not connected` },
-        { status: 400 }
-      );
-    }
-
-    const now = new Date();
-    const expiresAt = tokenData.expires_at ? new Date(tokenData.expires_at) : null;
-    const isExpired = expiresAt ? expiresAt <= now : true;
-    const expiresIn = expiresAt ? Math.floor((expiresAt.getTime() - now.getTime()) / 1000) : 0;
-
-    return NextResponse.json({
-      provider: provider,
-      is_expired: isExpired,
-      expires_at: expiresAt?.toISOString(),
-      expires_in: Math.max(0, expiresIn),
-      scope: tokenData.scope,
-      last_updated: tokenData.updated_at,
-      created_at: tokenData.created_at
-    });
-
-  } catch (error) {
-    console.error('Token status check error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// تحديث Google OAuth token
-async function refreshGoogleToken(refreshToken: string): Promise<TokenRefreshResponse> {
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('Google token refresh failed:', errorData);
-    
-    if (response.status === 400 && errorData.error === 'invalid_grant') {
-      throw new Error('invalid_grant: Refresh token expired or revoked');
-    }
-    
-    if (response.status === 401 && errorData.error === 'invalid_client') {
-      throw new Error('invalid_client: OAuth client configuration error');
-    }
-    
-    throw new Error(`Failed to refresh Google token: ${response.status}`);
-  }
-
-  const data = await response.json();
-  
-  return {
-    access_token: data.access_token,
-    expires_in: data.expires_in || 3600,
-    scope: data.scope,
-    token_type: data.token_type || 'Bearer'
-  };
+  return NextResponse.json({
+    success: false,
+    error: 'Method not allowed',
+    message: 'Only POST method is allowed for OAuth refresh (حسب Google Identity Platform)',
+    docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#offline'
+  }, { status: 405 });
 }

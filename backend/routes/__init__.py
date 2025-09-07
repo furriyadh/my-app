@@ -113,6 +113,26 @@ def register_routes(app):
     except Exception as e:
         print(f"❌ خطأ في استيراد merchant_center_routes: {e}")
     
+    # 10. محاولة استيراد account_linking
+    try:
+        from .account_linking import account_linking_bp
+        blueprints_to_register.append((account_linking_bp, "/api/account-linking", "Account Linking"))
+        print("✅ تم استيراد account_linking_bp")
+    except ImportError as e:
+        print(f"⚠️ فشل استيراد account_linking_bp: {e}")
+    except Exception as e:
+        print(f"❌ خطأ في استيراد account_linking: {e}")
+    
+    # 11. محاولة استيراد oauth2_routes
+    try:
+        from .oauth2_routes import oauth2_bp
+        blueprints_to_register.append((oauth2_bp, "/api/oauth", "OAuth2 Routes"))
+        print("✅ تم استيراد oauth2_bp")
+    except ImportError as e:
+        print(f"⚠️ فشل استيراد oauth2_bp: {e}")
+    except Exception as e:
+        print(f"❌ خطأ في استيراد oauth2_routes: {e}")
+    
     # تسجيل جميع Blueprints المستوردة بنجاح
     registered_count = 0
     failed_count = 0

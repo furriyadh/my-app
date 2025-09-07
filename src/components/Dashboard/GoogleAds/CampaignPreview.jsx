@@ -146,9 +146,9 @@ const CampaignPreview = () => {
   // Device preview components
   const DeviceFrame = ({ children, device }) => {
     const frameStyles = {
-      desktop: "w-full max-w-4xl mx-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4",
+      desktop: "w-full max-w-4xl mx-auto bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg p-4",
       mobile: "w-80 mx-auto bg-gray-900 rounded-3xl p-2",
-      tablet: "w-96 mx-auto bg-gray-100 dark:bg-gray-800 rounded-xl p-3"
+      tablet: "w-96 mx-auto bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-xl p-3"
     };
 
     return (
@@ -169,11 +169,11 @@ const CampaignPreview = () => {
     const isMobile = device === "mobile";
     
     return (
-      <div className={`bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 ${
+      <div className={`bg-white/15 backdrop-blur-md rounded-lg border border-blue-200/30 p-4 ${
         isMobile ? "text-sm" : ""
       }`}>
         <div className="flex items-start space-x-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-gray-800 font-bold text-sm">
             Ad
           </div>
           <div className="flex-1">
@@ -217,7 +217,7 @@ const CampaignPreview = () => {
       {/* Header */}
       <div className="text-center">
         <Eye className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-800 mb-2">
           Campaign Preview & Launch
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -226,7 +226,7 @@ const CampaignPreview = () => {
       </div>
 
       {/* Campaign Status */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800">
+      <div className="bg-white/10 backdrop-blur-md border border-green-200/30 rounded-lg p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <CheckCircle className="w-8 h-8 text-green-500" />
@@ -251,8 +251,8 @@ const CampaignPreview = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg">
+        <div className="flex border-b border-blue-200/30">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
@@ -261,7 +261,7 @@ const CampaignPreview = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400 bg-green-50 dark:bg-green-900/20'
+                    ? 'text-green-200 drop-shadow-sm border-b-2 border-green-400 bg-green-500/20 backdrop-blur-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
@@ -278,7 +278,7 @@ const CampaignPreview = () => {
             <div className="space-y-6">
               {/* Device Selection */}
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800">
                   Ad Preview
                 </h3>
                 <div className="flex items-center space-x-2">
@@ -332,14 +332,14 @@ const CampaignPreview = () => {
 
               {/* Preview Controls */}
               <div className="flex items-center justify-center space-x-4">
-                <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
                   <ArrowLeft className="w-4 h-4" />
                   <span>Previous</span>
                 </button>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Showing 2 of {campaignData.assets.headlines.length} ad variations
                 </span>
-                <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <button className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
                   <span>Next</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -434,14 +434,14 @@ const CampaignPreview = () => {
 
               {/* Keywords */}
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-800 mb-3">
                   Target Keywords
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {campaignData.keywords.map((keyword, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm"
+                      className="px-3 py-1 bg-white/15 backdrop-blur-md border border-blue-200/30 text-blue-100 drop-shadow-sm rounded-full text-sm"
                     >
                       {keyword}
                     </span>
@@ -489,29 +489,29 @@ const CampaignPreview = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-4 bg-white/15 backdrop-blur-md rounded-lg">
+                  <div className="text-xl font-bold text-gray-900 dark:text-gray-800">
                     {performanceEstimates.ctr}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Expected CTR</div>
                 </div>
                 
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-4 bg-white/15 backdrop-blur-md rounded-lg">
+                  <div className="text-xl font-bold text-gray-900 dark:text-gray-800">
                     {performanceEstimates.cpc}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Expected CPC</div>
                 </div>
                 
-                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-4 bg-white/15 backdrop-blur-md rounded-lg">
+                  <div className="text-xl font-bold text-gray-900 dark:text-gray-800">
                     {performanceEstimates.cpa}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Expected CPA</div>
                 </div>
               </div>
 
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+              <div className="bg-yellow-500/20 backdrop-blur-sm rounded-lg p-4 border border-yellow-300/30">
                 <div className="flex items-start space-x-3">
                   <Info className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                   <div>
@@ -542,7 +542,7 @@ const CampaignPreview = () => {
                   { item: "Landing page optimized", completed: false },
                   { item: "Campaign schedule configured", completed: true }
                 ].map((check, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div key={index} className="flex items-center space-x-3 p-3 bg-white/15 backdrop-blur-md rounded-lg">
                     {check.completed ? (
                       <CheckCircle className="w-5 h-5 text-green-500" />
                     ) : (
@@ -550,7 +550,7 @@ const CampaignPreview = () => {
                     )}
                     <span className={`flex-1 ${
                       check.completed 
-                        ? 'text-gray-900 dark:text-white' 
+                        ? 'text-gray-900 dark:text-gray-800' 
                         : 'text-yellow-800 dark:text-yellow-300'
                     }`}>
                       {check.item}
@@ -585,26 +585,26 @@ const CampaignPreview = () => {
       {/* Action Buttons */}
       <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             <Edit className="w-4 h-4" />
             <span>Edit Campaign</span>
           </button>
           
-          <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             <Download className="w-4 h-4" />
             <span>Export Preview</span>
           </button>
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             Save as Draft
           </button>
           
           <button
             onClick={launchCampaign}
             disabled={isLaunching}
-            className="flex items-center space-x-2 px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center space-x-2 px-8 py-3 bg-green-600 hover:bg-green-700 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLaunching ? (
               <RefreshCw className="w-4 h-4 animate-spin" />

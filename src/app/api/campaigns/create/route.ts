@@ -69,9 +69,9 @@ class GoogleAdsCampaignManager {
 
     if (this.isApiAvailable) {
       this.client = new GoogleAdsApi({
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        developer_token: process.env.GOOGLE_DEVELOPER_TOKEN!,
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID!,
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET!,
+        developer_token: process.env.GOOGLE_ADS_DEVELOPER_TOKEN!,
       });
     }
   }
@@ -149,7 +149,7 @@ class GoogleAdsCampaignManager {
     // محاكاة إنشاء حملة للاختبار
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const mockCampaignId = `mock_${Date.now()}`;
+    const mockCampaignId = `error_${Date.now()}`;
     
     return {
       success: true,
@@ -448,9 +448,9 @@ export async function POST(request: NextRequest) {
 
     // التحقق من متغيرات البيئة (اختياري للاختبار)
     const requiredEnvVars = [
-      'GOOGLE_CLIENT_ID',
-      'GOOGLE_CLIENT_SECRET', 
-      'GOOGLE_DEVELOPER_TOKEN',
+      'GOOGLE_ADS_CLIENT_ID',
+      'GOOGLE_ADS_CLIENT_SECRET', 
+              'GOOGLE_ADS_DEVELOPER_TOKEN',
       'MCC_LOGIN_CUSTOMER_ID',
       'GOOGLE_REFRESH_TOKEN'
     ];

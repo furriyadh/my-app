@@ -41,66 +41,9 @@ const QuickActions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
 
-  // Mock recent actions data
-  const mockRecentActions = [
-    {
-      id: 1,
-      action: "Created new campaign",
-      campaign: "Summer Sale 2024",
-      timestamp: "2 hours ago",
-      type: "create",
-      icon: Plus
-    },
-    {
-      id: 2,
-      action: "Paused campaign",
-      campaign: "Brand Awareness",
-      timestamp: "5 hours ago",
-      type: "pause",
-      icon: Pause
-    },
-    {
-      id: 3,
-      action: "Updated budget",
-      campaign: "Holiday Special",
-      timestamp: "1 day ago",
-      type: "edit",
-      icon: Edit3
-    },
-    {
-      id: 4,
-      action: "Downloaded report",
-      campaign: "Q2 Performance",
-      timestamp: "2 days ago",
-      type: "download",
-      icon: Download
-    }
-  ];
-
-  // Mock notifications
-  const mockNotifications = [
-    {
-      id: 1,
-      title: "Campaign budget alert",
-      message: "Summer Sale campaign has used 90% of budget",
-      type: "warning",
-      timestamp: "1 hour ago"
-    },
-    {
-      id: 2,
-      title: "Performance milestone",
-      message: "Holiday Special reached 1000 conversions!",
-      type: "success",
-      timestamp: "3 hours ago"
-    },
-    {
-      id: 3,
-      title: "Optimization suggestion",
-      message: "Consider increasing bid for high-performing keywords",
-      type: "info",
-      timestamp: "1 day ago"
-    }
-  ];
+  // إرجاع قوائم فارغة بدلاً من البيانات الوهمية
+  const mockRecentActions = [];
+  const mockNotifications = [];
 
   // Load data
   useEffect(() => {
@@ -252,88 +195,88 @@ const QuickActions = () => {
     }
   ];
 
-  // Color configurations
+  // Color configurations - Updated for animated wave background
   const colorConfigs = {
     blue: {
-      bg: "bg-blue-50 dark:bg-blue-900/20",
-      border: "border-blue-200 dark:border-blue-800",
-      text: "text-blue-700 dark:text-blue-400",
-      icon: "text-blue-600 dark:text-blue-400",
-      hover: "hover:bg-blue-100 dark:hover:bg-blue-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-blue-300/30",
+      text: "text-blue-100 drop-shadow-sm",
+      icon: "text-blue-200 drop-shadow-sm",
+      hover: "hover:bg-blue-500/20"
     },
     purple: {
-      bg: "bg-purple-50 dark:bg-purple-900/20",
-      border: "border-purple-200 dark:border-purple-800",
-      text: "text-purple-700 dark:text-purple-400",
-      icon: "text-purple-600 dark:text-purple-400",
-      hover: "hover:bg-purple-100 dark:hover:bg-purple-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-purple-300/30",
+      text: "text-purple-100 drop-shadow-sm",
+      icon: "text-purple-200 drop-shadow-sm",
+      hover: "hover:bg-purple-500/20"
     },
     green: {
-      bg: "bg-green-50 dark:bg-green-900/20",
-      border: "border-green-200 dark:border-green-800",
-      text: "text-green-700 dark:text-green-400",
-      icon: "text-green-600 dark:text-green-400",
-      hover: "hover:bg-green-100 dark:hover:bg-green-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-green-300/30",
+      text: "text-green-100 drop-shadow-sm",
+      icon: "text-green-200 drop-shadow-sm",
+      hover: "hover:bg-green-500/20"
     },
     orange: {
-      bg: "bg-orange-50 dark:bg-orange-900/20",
-      border: "border-orange-200 dark:border-orange-800",
-      text: "text-orange-700 dark:text-orange-400",
-      icon: "text-orange-600 dark:text-orange-400",
-      hover: "hover:bg-orange-100 dark:hover:bg-orange-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-orange-300/30",
+      text: "text-orange-100 drop-shadow-sm",
+      icon: "text-orange-200 drop-shadow-sm",
+      hover: "hover:bg-orange-500/20"
     },
     teal: {
-      bg: "bg-teal-50 dark:bg-teal-900/20",
-      border: "border-teal-200 dark:border-teal-800",
-      text: "text-teal-700 dark:text-teal-400",
-      icon: "text-teal-600 dark:text-teal-400",
-      hover: "hover:bg-teal-100 dark:hover:bg-teal-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-teal-300/30",
+      text: "text-teal-100 drop-shadow-sm",
+      icon: "text-teal-200 drop-shadow-sm",
+      hover: "hover:bg-teal-500/20"
     },
     red: {
-      bg: "bg-red-50 dark:bg-red-900/20",
-      border: "border-red-200 dark:border-red-800",
-      text: "text-red-700 dark:text-red-400",
-      icon: "text-red-600 dark:text-red-400",
-      hover: "hover:bg-red-100 dark:hover:bg-red-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-red-300/30",
+      text: "text-red-100 drop-shadow-sm",
+      icon: "text-red-200 drop-shadow-sm",
+      hover: "hover:bg-red-500/20"
     },
     gray: {
-      bg: "bg-gray-50 dark:bg-gray-900/20",
-      border: "border-gray-200 dark:border-gray-800",
-      text: "text-gray-700 dark:text-gray-400",
-      icon: "text-gray-600 dark:text-gray-400",
-      hover: "hover:bg-gray-100 dark:hover:bg-gray-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-gray-300/30",
+      text: "text-gray-100 drop-shadow-sm",
+      icon: "text-gray-200 drop-shadow-sm",
+      hover: "hover:bg-gray-500/20"
     },
     indigo: {
-      bg: "bg-indigo-50 dark:bg-indigo-900/20",
-      border: "border-indigo-200 dark:border-indigo-800",
-      text: "text-indigo-700 dark:text-indigo-400",
-      icon: "text-indigo-600 dark:text-indigo-400",
-      hover: "hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+      bg: "bg-white/15 backdrop-blur-md",
+      border: "border-indigo-300/30",
+      text: "text-indigo-100 drop-shadow-sm",
+      icon: "text-indigo-200 drop-shadow-sm",
+      hover: "hover:bg-indigo-500/20"
     }
   };
 
-  // Priority colors
+  // Priority colors - Updated for animated wave background
   const priorityColors = {
-    high: "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30",
-    medium: "text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30",
-    low: "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30"
+    high: "text-red-200 drop-shadow-sm bg-red-500/20 backdrop-blur-sm border border-red-300/20",
+    medium: "text-yellow-200 drop-shadow-sm bg-yellow-500/20 backdrop-blur-sm border border-yellow-300/20",
+    low: "text-green-200 drop-shadow-sm bg-green-500/20 backdrop-blur-sm border border-green-300/20"
   };
 
   // Loading skeleton
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 animate-pulse">
+        <div key={index} className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-blue-200/30 animate-pulse">
           <div className="flex items-center space-x-4 mb-4">
-            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            <div className="w-10 h-10 bg-blue-200/30 rounded-lg"></div>
             <div>
-              <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-              <div className="w-48 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="w-32 h-4 bg-blue-200/30 rounded mb-2"></div>
+              <div className="w-48 h-3 bg-blue-200/30 rounded"></div>
             </div>
           </div>
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div key={i} className="w-full h-3 bg-blue-200/30 rounded"></div>
             ))}
           </div>
         </div>
@@ -357,12 +300,12 @@ const QuickActions = () => {
           </div>
           <div className="flex items-center space-x-2">
             {action.badge && (
-              <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">
+              <span className="px-2 py-1 text-xs font-medium bg-yellow-500/20 text-yellow-200 backdrop-blur-sm border border-yellow-300/20 rounded-full drop-shadow-sm">
                 {action.badge}
               </span>
             )}
             {action.shortcut && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+              <span className="text-xs text-blue-200 drop-shadow-sm font-mono">
                 {action.shortcut}
               </span>
             )}
@@ -371,7 +314,7 @@ const QuickActions = () => {
         <h3 className={`font-semibold mb-1 ${colors.text} group-hover:text-opacity-80`}>
           {action.title}
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-blue-200 drop-shadow-sm">
           {action.description}
         </p>
         <div className="flex items-center justify-end mt-3">
@@ -385,7 +328,7 @@ const QuickActions = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Quick Actions</h2>
+          <h2 className="text-2xl font-bold text-gray-900 drop-shadow-lg">Quick Actions</h2>
         </div>
         <LoadingSkeleton />
       </div>
@@ -397,14 +340,14 @@ const QuickActions = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 drop-shadow-lg mb-2">
             Quick Actions
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-blue-100 drop-shadow-md">
             Streamline your workflow with one-click actions
           </p>
         </div>
-        <button className="flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+        <button className="flex items-center space-x-2 text-blue-200 hover:text-blue-100 transition-colors drop-shadow-sm">
           <Settings className="w-4 h-4" />
           <span className="text-sm">Customize</span>
         </button>
@@ -412,7 +355,7 @@ const QuickActions = () => {
 
       {/* Quick Actions Grid */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 drop-shadow-md mb-4">
           Common Actions
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -424,38 +367,38 @@ const QuickActions = () => {
 
       {/* Suggested Actions */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 drop-shadow-md mb-4">
           Suggested Actions
         </h3>
         <div className="space-y-3">
           {suggestedActions.map(action => {
             const Icon = action.icon;
             return (
-              <div key={action.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 group cursor-pointer">
+              <div key={action.id} className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-blue-200/30 hover:shadow-lg transition-all duration-200 group cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <div className="p-2 bg-blue-500/20 backdrop-blur-sm border border-blue-300/20 rounded-lg">
+                      <Icon className="w-5 h-5 text-blue-200 drop-shadow-sm" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                        <h4 className="font-semibold text-gray-900 drop-shadow-sm">
                           {action.title}
                         </h4>
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${priorityColors[action.priority]}`}>
                           {action.priority}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <p className="text-sm text-blue-100 drop-shadow-sm mb-2">
                         {action.description}
                       </p>
-                      <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center space-x-2 text-xs text-blue-200 drop-shadow-sm">
                         <TrendingUp className="w-3 h-3" />
                         <span>{action.impact}</span>
                       </div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                  <ArrowRight className="w-4 h-4 text-blue-300 group-hover:text-blue-200 transition-colors drop-shadow-sm" />
                 </div>
               </div>
             );
@@ -467,22 +410,22 @@ const QuickActions = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Actions */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-4">
             Recent Actions
           </h3>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="  rounded-lg border border-gray-200 dark:border-gray-700">
             {recentActions.length > 0 ? (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {recentActions.map(action => {
                   const Icon = action.icon;
                   return (
-                    <div key={action.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div key={action.id} className="p-4 hover:bg-white/20 backdrop-blur-sm transition-colors">
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <div className="p-2 bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg">
                           <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-800">
                             {action.action}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -508,21 +451,21 @@ const QuickActions = () => {
 
         {/* Learning Resources */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-4">
             Learning Resources
           </h3>
           <div className="space-y-3">
             {learningResources.map(resource => {
               const Icon = resource.icon;
               return (
-                <div key={resource.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 group cursor-pointer">
+                <div key={resource.id} className="  rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 group cursor-pointer">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                         <Icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">
+                        <h4 className="font-medium text-gray-900 dark:text-gray-800">
                           {resource.title}
                         </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -542,13 +485,13 @@ const QuickActions = () => {
       {/* Notifications Panel */}
       {notifications.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-4">
             Recent Notifications
           </h3>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="  rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {notifications.map(notification => (
-                <div key={notification.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div key={notification.id} className="p-4 hover:bg-white/20 backdrop-blur-sm transition-colors">
                   <div className="flex items-start space-x-3">
                     <div className={`p-1 rounded-full ${
                       notification.type === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
@@ -562,7 +505,7 @@ const QuickActions = () => {
                       }`} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-800">
                         {notification.title}
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400">

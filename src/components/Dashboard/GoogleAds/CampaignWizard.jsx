@@ -298,13 +298,13 @@ const CampaignWizard = () => {
   const CurrentStepComponent = steps[currentStep].component;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-transparent">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-800">
                 Create New Campaign
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -323,7 +323,7 @@ const CampaignWizard = () => {
               <button
                 onClick={saveDraft}
                 disabled={isSaving}
-                className="flex items-center space-x-2 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="flex items-center space-x-2 px-3 py-2 text-sm bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Draft</span>
@@ -332,7 +332,7 @@ const CampaignWizard = () => {
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
+          <div className="w-full bg-white/20 backdrop-blur-sm rounded-full h-2 mb-6">
             <motion.div
               className="bg-blue-600 h-2 rounded-full"
               initial={{ width: 0 }}
@@ -352,9 +352,9 @@ const CampaignWizard = () => {
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
                     index < currentStep
-                      ? 'bg-green-500 border-green-500 text-white'
+                      ? 'bg-green-500 border-green-500 text-gray-800'
                       : index === currentStep
-                      ? 'bg-blue-500 border-blue-500 text-white'
+                      ? 'bg-blue-500 border-blue-500 text-gray-800'
                       : index === currentStep + 1
                       ? 'border-blue-300 dark:border-blue-600 text-blue-500 dark:text-blue-400 hover:border-blue-500 dark:hover:border-blue-400'
                       : 'border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
@@ -370,7 +370,7 @@ const CampaignWizard = () => {
                   <div
                     className={`text-sm font-medium ${
                       index <= currentStep
-                        ? 'text-gray-900 dark:text-white'
+                        ? 'text-gray-900 dark:text-gray-800'
                         : 'text-gray-500 dark:text-gray-400'
                     }`}
                   >
@@ -386,14 +386,14 @@ const CampaignWizard = () => {
         </div>
 
         {/* Step Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg shadow-lg">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 {steps[currentStep].icon}
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-800">
                   {steps[currentStep].title}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -423,11 +423,11 @@ const CampaignWizard = () => {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div className="px-6 py-4 bg-white/10 backdrop-blur-md border border-blue-200/20 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <button
               onClick={handlePrevious}
               disabled={currentStep === 0}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
@@ -451,7 +451,7 @@ const CampaignWizard = () => {
               <button
                 onClick={handleNext}
                 disabled={isLoading || Object.keys(errors).length > 0}
-                className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-gray-800 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 <span>

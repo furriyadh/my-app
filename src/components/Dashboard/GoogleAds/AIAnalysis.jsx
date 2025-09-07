@@ -274,7 +274,7 @@ const AIAnalysis = () => {
       {/* Header */}
       <div className="text-center">
         <Brain className="w-16 h-16 text-purple-500 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-800 mb-2">
           AI Campaign Analysis
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -284,11 +284,11 @@ const AIAnalysis = () => {
 
       {/* Analysis Status */}
       {isAnalyzing && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 text-center">
+        <div className="bg-white/15 backdrop-blur-md rounded-lg p-8 border border-blue-200/30 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <RefreshCw className="w-8 h-8 text-purple-500 animate-spin" />
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-800">
                 Analyzing Your Campaign
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -296,7 +296,7 @@ const AIAnalysis = () => {
               </p>
             </div>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-gray-200 bg-white/15 backdrop-blur-md rounded-full h-2">
             <div className="bg-purple-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
           </div>
         </div>
@@ -306,7 +306,7 @@ const AIAnalysis = () => {
       {analysisData && !isAnalyzing && (
         <>
           {/* Overall Score */}
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+          <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-400 mb-2">
@@ -328,8 +328,8 @@ const AIAnalysis = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-lg">
+            <div className="flex border-b border-blue-200/30">Background 
               {tabs.map(tab => {
                 const Icon = tab.icon;
                 return (
@@ -355,7 +355,7 @@ const AIAnalysis = () => {
                 <div className="space-y-6">
                   {/* Strengths */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-4 flex items-center">
                       <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
                       Strengths
                     </h3>
@@ -391,7 +391,7 @@ const AIAnalysis = () => {
 
                   {/* Weaknesses */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-4 flex items-center">
                       <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
                       Areas for Improvement
                     </h3>
@@ -432,7 +432,7 @@ const AIAnalysis = () => {
 
                   {/* Opportunities */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-800 mb-4 flex items-center">
                       <Rocket className="w-5 h-5 mr-2 text-blue-500" />
                       Growth Opportunities
                     </h3>
@@ -451,7 +451,7 @@ const AIAnalysis = () => {
                                 <span className="px-2 py-1 bg-green-200 dark:bg-green-900/40 text-green-800 dark:text-green-300 rounded-full">
                                   {opportunity.potentialImpact}
                                 </span>
-                                <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
+                                <span className="px-2 py-1 bg-gray-200 bg-white/15 backdrop-blur-md text-gray-700 dark:text-gray-300 rounded-full">
                                   {opportunity.effort} Effort
                                 </span>
                                 <span className={`px-2 py-1 rounded-full ${
@@ -463,7 +463,7 @@ const AIAnalysis = () => {
                                 </span>
                               </div>
                             </div>
-                            <button className="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <button className="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors">
                               Apply
                             </button>
                           </div>
@@ -511,8 +511,8 @@ const AIAnalysis = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                  <div className="bg-white/15 backdrop-blur-md rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-800 mb-3 flex items-center">
                       <Info className="w-5 h-5 mr-2 text-blue-500" />
                       Prediction Confidence: {analysisData.performancePrediction.confidenceLevel}%
                     </h4>
@@ -528,12 +528,12 @@ const AIAnalysis = () => {
               {activeTab === "recommendations" && (
                 <div className="space-y-6">
                   {recommendations.map(rec => (
-                    <div key={rec.id} className="p-6 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div key={rec.id} className="p-6 bg-white/15 backdrop-blur-md rounded-lg border border-gray-200 dark:border-gray-600">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
                             <Lightbulb className="w-5 h-5 text-yellow-500" />
-                            <h4 className="font-semibold text-gray-900 dark:text-white">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-800">
                               {rec.title}
                             </h4>
                             <span className={`px-2 py-1 text-xs rounded-full ${
@@ -565,7 +565,7 @@ const AIAnalysis = () => {
                           ) : (
                             <button
                               onClick={() => applyRecommendation(rec.id)}
-                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors"
                             >
                               Apply
                             </button>
@@ -581,22 +581,22 @@ const AIAnalysis = () => {
               {activeTab === "competitors" && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="text-center p-6 bg-white/15 backdrop-blur-md rounded-lg">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-800">
                         ${analysisData.competitorInsights.averageCpc}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Industry Avg CPC</div>
                     </div>
                     
-                    <div className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="text-center p-6 bg-white/15 backdrop-blur-md rounded-lg">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-800">
                         {analysisData.competitorInsights.averageCtr}%
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Industry Avg CTR</div>
                     </div>
                     
-                    <div className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="text-center p-6 bg-white/15 backdrop-blur-md rounded-lg">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-800">
                         {analysisData.competitorInsights.marketShare}%
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Your Market Share</div>
@@ -604,13 +604,13 @@ const AIAnalysis = () => {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-800 mb-4">
                       Top Competitors
                     </h4>
                     <div className="space-y-3">
                       {analysisData.competitorInsights.topCompetitors.map((competitor, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <span className="font-medium text-gray-900 dark:text-white">
+                        <div key={index} className="flex items-center justify-between p-4 bg-white/15 backdrop-blur-md rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-gray-800">
                             {competitor}
                           </span>
                           <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -622,7 +622,7 @@ const AIAnalysis = () => {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-800 mb-4">
                       Your Competitive Advantages
                     </h4>
                     <div className="space-y-2">
@@ -647,24 +647,24 @@ const AIAnalysis = () => {
           <button
             onClick={startAnalysis}
             disabled={isAnalyzing}
-            className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>Re-analyze</span>
           </button>
           
-          <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             <Download className="w-4 h-4" />
             <span>Export Report</span>
           </button>
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             Save Analysis
           </button>
           
-          <button className="flex items-center space-x-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          <button className="flex items-center space-x-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-gray-800 rounded-lg transition-colors">
             <span>Continue to Preview</span>
           </button>
         </div>

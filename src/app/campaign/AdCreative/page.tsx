@@ -377,7 +377,7 @@ export default function AdCreativePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
         {/* مؤشر التقدم */}
         <ProgressIndicator currentStep={2} totalSteps={5} />

@@ -224,7 +224,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
             value={locationSearch}
             onChange={(e) => setLocationSearch(e.target.value)}
             placeholder="Search for countries, states, cities..."
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
           />
         </div>
 
@@ -235,11 +235,11 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
               <button
                 key={location}
                 onClick={() => addLocation(location)}
-                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                className="w-full text-left px-3 py-2 hover:bg-white/20 backdrop-blur-sm border-b border-gray-100 dark:border-gray-600 last:border-b-0"
               >
                 <div className="flex items-center space-x-2">
                   <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-900 dark:text-white">{location}</span>
+                  <span className="text-sm text-gray-900 dark:text-gray-800">{location}</span>
                 </div>
               </button>
             ))}
@@ -281,7 +281,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
           {languages.map((language) => (
             <label
               key={language.code}
-              className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+              className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-white/20 backdrop-blur-sm cursor-pointer"
             >
               <input
                 type="checkbox"
@@ -296,7 +296,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                 }}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-900 dark:text-white">{language.name}</span>
+              <span className="text-sm text-gray-900 dark:text-gray-800">{language.name}</span>
             </label>
           ))}
         </div>
@@ -324,7 +324,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
               {demographicsOptions.ageGroups.map((age) => (
                 <label
                   key={age.id}
-                  className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-white/20 backdrop-blur-sm cursor-pointer"
                 >
                   <input
                     type="checkbox"
@@ -332,7 +332,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                     onChange={() => handleDemographicsChange('ageGroups', age.id)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-900 dark:text-white">{age.name}</span>
+                  <span className="text-sm text-gray-900 dark:text-gray-800">{age.name}</span>
                 </label>
               ))}
             </div>
@@ -345,7 +345,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
               {demographicsOptions.genders.map((gender) => (
                 <label
                   key={gender.id}
-                  className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-white/20 backdrop-blur-sm cursor-pointer"
                 >
                   <input
                     type="checkbox"
@@ -353,7 +353,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                     onChange={() => handleDemographicsChange('genders', gender.id)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-900 dark:text-white">{gender.name}</span>
+                  <span className="text-sm text-gray-900 dark:text-gray-800">{gender.name}</span>
                 </label>
               ))}
             </div>
@@ -374,7 +374,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                   {demographicsOptions.parentalStatus.map((status) => (
                     <label
                       key={status.id}
-                      className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-white/20 backdrop-blur-sm cursor-pointer"
                     >
                       <input
                         type="checkbox"
@@ -382,7 +382,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                         onChange={() => handleDemographicsChange('parentalStatus', status.id)}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">{status.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-800">{status.name}</span>
                     </label>
                   ))}
                 </div>
@@ -395,7 +395,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                   {demographicsOptions.householdIncome.map((income) => (
                     <label
                       key={income.id}
-                      className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      className="flex items-center space-x-2 p-3 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-white/20 backdrop-blur-sm cursor-pointer"
                     >
                       <input
                         type="checkbox"
@@ -403,7 +403,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                         onChange={() => handleDemographicsChange('householdIncome', income.id)}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">{income.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-800">{income.name}</span>
                     </label>
                   ))}
                 </div>
@@ -432,15 +432,15 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
               <div className="flex items-center space-x-2">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                   (data.audiences || []).includes(interest.id)
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    ? 'bg-blue-500 text-gray-800'
+                    : 'bg-white/15 backdrop-blur-md border border-blue-200/30 text-gray-600 dark:text-gray-300'
                 }`}>
                   {interest.icon}
                 </div>
                 <span className={`text-sm font-medium ${
                   (data.audiences || []).includes(interest.id)
                     ? 'text-blue-900 dark:text-blue-100'
-                    : 'text-gray-900 dark:text-white'
+                    : 'text-gray-900 dark:text-gray-800'
                 }`}>
                   {interest.name}
                 </span>
@@ -469,12 +469,12 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                 onChange={(e) => setKeywordInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addKeyword()}
                 placeholder="Enter keywords (comma-separated)"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
               />
             </div>
             <button
               onClick={addKeyword}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-gray-800 rounded-md hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -520,12 +520,12 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
                   onChange={(e) => setNegativeKeywordInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addNegativeKeyword()}
                   placeholder="Enter negative keywords (comma-separated)"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/15 backdrop-blur-md dark:text-gray-800"
                 />
               </div>
               <button
                 onClick={addNegativeKeyword}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-red-600 text-gray-800 rounded-md hover:bg-red-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -598,7 +598,7 @@ const TargetingOptions = ({ data, updateData, errors, onValidate }) => {
         <div className="flex items-start space-x-3">
           <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-800">
               Targeting Tips
             </h4>
             <ul className="text-sm text-gray-600 dark:text-gray-400 mt-2 space-y-1">

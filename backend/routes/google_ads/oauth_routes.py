@@ -18,9 +18,9 @@ from typing import Dict, Any, Optional
 from flask import Blueprint, request, jsonify, redirect, session, url_for  # type: ignore
 
 # استيراد الخدمات
-from backend.services.oauth_handler import OAuthHandler
-from backend.services.google_ads_client import GoogleAdsClientService, GoogleAdsConfig
-from backend.config import Config
+from services.oauth_handler import OAuthHandler
+from services.google_ads_client import GoogleAdsClientManager
+from config import Config
 
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
@@ -127,18 +127,11 @@ def oauth_callback():
         
         # اختبار الاتصال بـ Google Ads API
         try:
-            google_ads_config = GoogleAdsConfig(
-                client_id=Config.GOOGLE_CLIENT_ID,
-                client_secret=Config.GOOGLE_CLIENT_SECRET,
-                refresh_token=token_result.get('refresh_token'),
-                developer_token=Config.GOOGLE_ADS_DEVELOPER_TOKEN,
-                customer_id=Config.GOOGLE_ADS_CUSTOMER_ID
-            )
-            
-            google_ads_client = GoogleAdsClientService(google_ads_config)
-            accessible_customers = google_ads_client.get_accessible_customers()
-            
-            logger.info(f"تم الحصول على {len(accessible_customers)} حساب متاح")
+            google_ads_client = GoogleAdsClientManager()
+            if google_ads_client.is_initialized:
+                logger.info("✅ تم اختبار الاتصال بـ Google Ads API بنجاح")
+            else:
+                logger.warning("⚠️ Google Ads Client غير مهيأ - سيتم استخدام OAuth2 Manager")
             
         except Exception as ads_error:
             logger.warning(f"تحذير: لم يتم اختبار Google Ads API: {str(ads_error)}")
@@ -289,14 +282,14 @@ def oauth_config():
         return arabic_jsonify({
             "success": True,
             "config": {
-                "client_id": Config.GOOGLE_CLIENT_ID,
+                "client_id": Config.GOOGLE_ADS_CLIENT_ID,
                 "scopes": [
                     "https://www.googleapis.com/auth/adwords"
                 ],
                 "redirect_uri": url_for('google_ads_oauth.oauth_callback', _external=True),
                 "response_type": "code",
                 "access_type": "offline",
-                "prompt": "consent"
+                # إزالة prompt تماماً
             }
         })
         
@@ -321,7 +314,7 @@ def test_oauth():
         
         # فحص الإعدادات
         try:
-            if Config.GOOGLE_CLIENT_ID and Config.GOOGLE_CLIENT_SECRET:
+            if Config.GOOGLE_ADS_CLIENT_ID and Config.GOOGLE_ADS_CLIENT_SECRET:
                 test_results["config_check"] = True
                 test_results["client_credentials"] = True
             else:
@@ -333,19 +326,12 @@ def test_oauth():
         try:
             refresh_token = session.get('refresh_token')
             if refresh_token:
-                google_ads_config = GoogleAdsConfig(
-                    client_id=Config.GOOGLE_CLIENT_ID,
-                    client_secret=Config.GOOGLE_CLIENT_SECRET,
-                    refresh_token=refresh_token,
-                    developer_token=Config.GOOGLE_ADS_DEVELOPER_TOKEN,
-                    customer_id=Config.GOOGLE_ADS_CUSTOMER_ID
-                )
-                
-                google_ads_client = GoogleAdsClientService(google_ads_config)
-                accessible_customers = google_ads_client.get_accessible_customers()
-                
-                test_results["google_ads_api"] = True
-                test_results["accessible_customers"] = len(accessible_customers)
+                google_ads_client = GoogleAdsClientManager()
+                if google_ads_client.is_initialized:
+                    test_results["google_ads_api"] = True
+                    test_results["accessible_customers"] = "متاح"
+                else:
+                    test_results["errors"].append("Google Ads Client غير مهيأ")
             else:
                 test_results["errors"].append("لا يوجد refresh token للاختبار")
                 

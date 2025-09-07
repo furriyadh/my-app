@@ -553,22 +553,23 @@ class APIConnector:
         
         await asyncio.sleep(0.1)  # محاكاة وقت الاستجابة
         
-        # استجابة وهمية
-        mock_data = {
-            'message': 'استجابة وهمية',
+        # استجابة فارغة بدلاً من البيانات الوهمية
+        empty_data = {
+            'message': 'No data available',
             'method': request.method.value,
             'url': request.url,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'error': 'No real data available'
         }
         
         return APIResponse(
             request_id=request_id,
-            success=True,
-            status_code=200,
+            success=False,
+            status_code=404,
             headers={'Content-Type': 'application/json'},
-            json_data=mock_data,
-            text_data=json.dumps(mock_data),
-            error_message=""
+            json_data=empty_data,
+            text_data=json.dumps(empty_data),
+            error_message="No real data available"
         )
     
     def _build_url(self, url: str) -> str:

@@ -111,12 +111,12 @@ const Dashboard: React.FC = () => {
       {/* Header skeleton */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="w-64 h-8 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-          <div className="w-96 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="w-64 h-8 bg-blue-200/30 rounded mb-2"></div>
+          <div className="w-96 h-4 bg-blue-200/30 rounded"></div>
         </div>
         <div className="flex space-x-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            <div key={i} className="w-10 h-10 bg-blue-200/30 rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -124,11 +124,11 @@ const Dashboard: React.FC = () => {
       {/* Content skeleton */}
       <div className="space-y-8">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <div className="w-48 h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+          <div key={index} className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-200/30">
+            <div className="w-48 h-6 bg-blue-200/30 rounded mb-4"></div>
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div key={i} className="w-full h-4 bg-blue-200/30 rounded"></div>
               ))}
             </div>
           </div>
@@ -141,7 +141,7 @@ const Dashboard: React.FC = () => {
   const DashboardHeader = () => (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-800 mb-2">
           Dashboard Overview
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -163,13 +163,13 @@ const Dashboard: React.FC = () => {
 
       <div className="flex items-center space-x-3">
         {/* View Mode Toggle */}
-        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="flex bg-white/10 backdrop-blur-md rounded-lg p-1 border border-blue-200/30">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-md transition-colors ${
               viewMode === "grid"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                ? "bg-blue-500/30 text-blue-200 backdrop-blur-sm shadow-sm"
+                : "text-blue-100 hover:text-gray-800 hover:bg-white/10"
             }`}
             title="Grid View"
           >
@@ -179,8 +179,8 @@ const Dashboard: React.FC = () => {
             onClick={() => setViewMode("list")}
             className={`p-2 rounded-md transition-colors ${
               viewMode === "list"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                ? "bg-blue-500/30 text-blue-200 backdrop-blur-sm shadow-sm"
+                : "text-blue-100 hover:text-gray-800 hover:bg-white/10"
             }`}
             title="List View"
           >
@@ -192,21 +192,21 @@ const Dashboard: React.FC = () => {
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
+          className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors disabled:opacity-50"
           title="Refresh Dashboard"
         >
           <RefreshCw className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`} />
         </button>
 
-        <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Export Data">
+        <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Export Data">
           <Download className="w-5 h-5" />
         </button>
 
-        <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Dashboard Settings">
+        <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Dashboard Settings">
           <Settings className="w-5 h-5" />
         </button>
 
-        <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Notifications">
+        <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Notifications">
           <Bell className="w-5 h-5" />
         </button>
       </div>
@@ -215,9 +215,9 @@ const Dashboard: React.FC = () => {
 
   // Section visibility controls
   const SectionControls = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-6">
+    <div className="bg-white/15 backdrop-blur-md rounded-lg p-4 border border-blue-200/30 mb-6 shadow-lg">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+        <h3 className="text-sm font-medium text-gray-800 drop-shadow-md">
           Dashboard Sections
         </h3>
         <div className="flex items-center space-x-2">
@@ -229,8 +229,8 @@ const Dashboard: React.FC = () => {
                 onClick={() => toggleSection(section.key)}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   section.visible
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                    : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    ? "bg-blue-500/30 text-blue-200 backdrop-blur-sm border border-blue-300/30 drop-shadow-sm"
+                    : "bg-white/10 text-blue-100 backdrop-blur-sm border border-blue-200/20 hover:bg-white/20 drop-shadow-sm"
                 }`}
                 title={`Toggle ${section.title}`}
               >
@@ -260,13 +260,13 @@ const Dashboard: React.FC = () => {
     if (visibleSectionsList.length === 0) {
       return (
         <div className="text-center py-12">
-          <div className="flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto mb-4">
-            <EyeOff className="w-8 h-8 text-gray-400" />
+          <div className="flex items-center justify-center w-16 h-16 bg-white/15 backdrop-blur-md border border-blue-200/30 rounded-full mx-auto mb-4">
+            <EyeOff className="w-8 h-8 text-blue-200 drop-shadow-sm" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-medium text-gray-800 drop-shadow-md mb-2">
             No sections visible
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-blue-100 drop-shadow-sm mb-6">
             Enable dashboard sections to view your data
           </p>
         </div>
@@ -283,11 +283,11 @@ const Dashboard: React.FC = () => {
             <div key={section.key} className="group">
               {viewMode === "list" && (
                 <div className="flex items-center space-x-2 mb-4">
-                  <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  <Icon className="w-5 h-5 text-blue-200 drop-shadow-sm" />
+                  <h2 className="text-xl font-semibold text-gray-800 drop-shadow-md">
                     {section.title}
                   </h2>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-sm text-blue-100 drop-shadow-sm">
                     {section.description}
                   </span>
                 </div>
@@ -309,7 +309,7 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardHeader />
         <SectionControls />

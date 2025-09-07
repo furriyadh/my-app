@@ -17,7 +17,7 @@ export default function NotFound() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-lg w-full text-center">
         {/* 404 Animation */}
         <div className="mb-8">

@@ -1388,7 +1388,7 @@ def health_check():
         }), 500
 
 # تسجيل معلومات Blueprint
-logger.info(f"✅ تم تحميل Google Ads Reports Blueprint - الخدمات متاحة: {REPORTS_SERVICES_AVAILABLE}")
+logger.info(f"✅ تم تحميل Google Ads Reports Blueprint")
 logger.info(f"📊 حالة الخدمات: {sum(REPORTS_SERVICES_STATUS.values())}/8 متاحة")
 
 # تصدير Blueprint والكلاسات

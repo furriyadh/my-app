@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Search, Globe, Smartphone, ShoppingBag, Zap, TrendingUp, MapPin, Youtube, CheckCircle, Play, Monitor } from 'lucide-react';
 
 // Import specialized campaign components
@@ -152,8 +152,9 @@ const iconColorVariants = {
   teal: 'text-teal-600 dark:text-teal-400'
 };
 
-const CampaignNewPage: React.FC = () => {
+const CampaignNewPageContent: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   // Service and Account Selection State
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
@@ -208,13 +209,72 @@ const CampaignNewPage: React.FC = () => {
 
   // Check for service selection on mount
   React.useEffect(() => {
-    setShowServiceModal(true);
-  }, []);
+    // Check for OAuth errors in URL
+    const error = searchParams.get('error');
+    const message = searchParams.get('message');
+    const description = searchParams.get('description');
+    
+    if (error) {
+      console.error('OAuth Error:', { error, message, description });
+      // يمكن إضافة عرض رسالة خطأ للمستخدم هنا
+      alert(`OAuth Error: ${message || error}`);
+    }
+    
+    // Check if user has connected accounts before showing modal
+    checkConnectedAccounts();
+  }, [searchParams]);
+
+  // Check if user has connected Google Ads accounts
+  const checkConnectedAccounts = async () => {
+    try {
+      // Check if user has seen the service modal before
+      const hasSeenModal = localStorage.getItem('hasSeenServiceModal');
+      
+      const response = await fetch('/api/user/accounts', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      const data = await response.json();
+      
+      // If no Google Ads accounts are connected and user hasn't seen modal, show it
+      if ((!data.google_ads || data.google_ads.length === 0) && !hasSeenModal) {
+        setShowServiceModal(true);
+      } else if (data.google_ads && data.google_ads.length > 0) {
+        // User has connected accounts, load them and proceed
+        setUserAccounts(data);
+        // Mark that user has accounts so modal won't show again
+        localStorage.setItem('hasSeenServiceModal', 'true');
+        
+        // Check if user has selected a specific account
+        const selectedAccount = localStorage.getItem('selectedGoogleAdsAccount');
+        if (selectedAccount) {
+          const account = JSON.parse(selectedAccount);
+          console.log(`✅ الحساب المختار للحملة: ${account.customerId} (${account.accountName})`);
+        } else {
+          console.log('📋 يوجد حسابات Google Ads لكن لم يتم اختيار حساب محدد للحملة');
+        }
+      }
+    } catch (error) {
+      console.log('No connected accounts found');
+      // Only show modal if user hasn't seen it before
+      const hasSeenModal = localStorage.getItem('hasSeenServiceModal');
+      if (!hasSeenModal) {
+        setShowServiceModal(true);
+      }
+    }
+  };
 
   // Load user accounts from API
   const loadUserAccounts = async () => {
     try {
-      const response = await fetch('/api/user/accounts/');
+      const response = await fetch('/api/user/accounts/', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       if (response.ok) {
         const accounts = await response.json();
         setUserAccounts(accounts);
@@ -476,7 +536,7 @@ const CampaignNewPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       {/* Service Selection Modal */}
       <ServiceSelectionModal
         isOpen={showServiceModal}
@@ -500,7 +560,7 @@ const CampaignNewPage: React.FC = () => {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => router.back()}
-            className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+            className="p-2 rounded-lg   shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
@@ -536,7 +596,7 @@ const CampaignNewPage: React.FC = () => {
         </div>
 
         {/* Campaign Setup Progress */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="  rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Campaign Setup Progress</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Complete each step to launch your campaign</p>
@@ -555,7 +615,7 @@ const CampaignNewPage: React.FC = () => {
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                     step.id === 1 
                       ? 'bg-blue-600 border-blue-600 text-white' 
-                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
+                      : '  border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
                   }`}>
                     {step.id === 1 ? (
                       <CheckCircle className="w-5 h-5" />
@@ -584,7 +644,7 @@ const CampaignNewPage: React.FC = () => {
         </div>
 
         {/* Campaign Type Selection */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="  rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Select a campaign type</h2>
             <p className="text-gray-600 dark:text-gray-400">Choose the campaign type that best fits your advertising goals</p>
@@ -604,7 +664,7 @@ const CampaignNewPage: React.FC = () => {
                 className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 hover:shadow-lg ${
                   formData.campaignType === campaignType.id 
                     ? `${colorVariants[campaignType.color as keyof typeof colorVariants]} border-opacity-100` 
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600  '
                 }`}
               >
                 {/* Badge */}
@@ -687,6 +747,14 @@ const CampaignNewPage: React.FC = () => {
 
       </div>
     </div>
+  );
+};
+
+const CampaignNewPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CampaignNewPageContent />
+    </Suspense>
   );
 };
 

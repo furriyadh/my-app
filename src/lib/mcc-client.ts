@@ -97,7 +97,7 @@ class MCCClient {
       refresh_token: process.env.GOOGLE_ADS_REFRESH_TOKEN!,
       developer_token: process.env.GOOGLE_ADS_DEVELOPER_TOKEN!,
       manager_account_id: process.env.GOOGLE_ADS_MANAGER_ACCOUNT_ID!,
-      login_customer_id: process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID,
+              login_customer_id: process.env.MCC_LOGIN_CUSTOMER_ID,
     };
   }
 
@@ -462,7 +462,7 @@ class MCCClient {
   private async makeGoogleAdsRequest(method: string, endpoint: string, data?: any, customerId?: string): Promise<any> {
     try {
       const targetCustomerId = customerId || this.config.manager_account_id;
-      const url = `https://googleads.googleapis.com/v14/customers/${targetCustomerId}/${endpoint}`;
+             const url = `https://googleads.googleapis.com/v20/customers/${targetCustomerId}/${endpoint}`;
       
       const headers = {
         'Authorization': `Bearer ${await this.getAccessToken()}`,
