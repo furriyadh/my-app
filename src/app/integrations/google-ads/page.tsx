@@ -30,7 +30,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import AnimatedList from '@/components/AnimatedList';
-import { supabase, getClientRequests, subscribeToClientRequests, type ClientRequest } from '@/lib/supabase';
+import { getClientRequests, subscribeToClientRequests, type ClientRequest } from '@/lib/supabase';
 
 // Component منفصل للتعامل مع searchParams
 const GoogleAdsContent: React.FC = () => {
