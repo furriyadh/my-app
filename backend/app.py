@@ -18,7 +18,7 @@ if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
 # استيراد الإعدادات
-from config import Config, DevelopmentConfig
+from config import Config
 
 # إعداد التسجيل
 logging.basicConfig(
@@ -36,11 +36,7 @@ def create_app(config_class=None):
     
     # تحديد الإعدادات
     if config_class is None:
-        env = os.getenv('FLASK_ENV', 'development')
-        if env == 'development':
-            config_class = DevelopmentConfig
-        else:
-            config_class = Config
+        config_class = Config
     
     app.config.from_object(config_class)
     
