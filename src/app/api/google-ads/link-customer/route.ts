@@ -28,7 +28,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Forward request to Flask backend (proper flow)
-    const backendUrl = 'http://localhost:5000/api/link-customer';
+    const backendUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://furriyadh.com/api/link-customer'
+      : 'http://localhost:5000/api/link-customer';
     
     const response = await fetch(backendUrl, {
       method: 'POST',

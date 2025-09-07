@@ -88,7 +88,7 @@ export const REGEX_PATTERNS = {
 export const GOOGLE_ADS_CONFIG = {
   // OAuth Configuration - محدث بالـ client ID الجديد
   CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID,
-  REDIRECT_URI: process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/oauth/google/callback', // تم توحيد المسار مع الباك اند
+  REDIRECT_URI: process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com/api/oauth/google/callback' : 'http://localhost:3000/api/oauth/google/callback'), // تم توحيد المسار مع الباك اند
   
   // API Configuration
   DEVELOPER_TOKEN: process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',

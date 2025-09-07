@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لجلب حسابات MCC
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
     
     const response = await fetch(`${backendUrl}/api/oauth/mcc-accounts`, {
       method: 'GET',

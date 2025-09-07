@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لإلغاء OAuth (حسب Google Ads API Documentation)
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
     
     try {
       console.log('🔄 إلغاء OAuth في الباك اند...');

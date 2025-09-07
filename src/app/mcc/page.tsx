@@ -38,7 +38,10 @@ export default function MCCPage() {
       setLoading(true);
       
       // استخدام النظام الموجود في الباك اند
-      const response = await fetch('http://localhost:5000/api/mcc/accounts', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://furriyadh.com/api/mcc/accounts'
+        : 'http://localhost:5000/api/mcc/accounts';
+      const response = await fetch(backendUrl, {
         headers: {
           'Content-Type': 'application/json',
           // يمكن إضافة authorization header هنا
