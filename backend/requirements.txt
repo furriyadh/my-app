@@ -52,7 +52,6 @@ rich==13.7.0
 
 # SSL & Security
 certifi>=2023.11.17
-urllib3>=2.1.0
 
 # Protocol Buffers (مطلوب لـ Google Ads API)
 protobuf>=4.25.0
@@ -66,7 +65,7 @@ googleapis-common-protos>=1.63.2
 
 # Database - Supabase (Railway compatible)
 supabase==2.3.4
-httpx==0.24.0
+httpx>=0.24.0,<0.26.0
 postgrest==0.13.0
 # Fix for proxy argument issue
 urllib3==1.26.18
