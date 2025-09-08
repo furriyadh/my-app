@@ -64,7 +64,7 @@ grpcio-tools>=1.59.0
 # Additional Google Libraries
 googleapis-common-protos>=1.63.2
 
-# Database - Supabase (Windows compatible)
+# Database - Supabase (Railway compatible)
 supabase==2.3.4
-httpx==0.25.2
+httpx==0.24.0
 postgrest==0.13.0

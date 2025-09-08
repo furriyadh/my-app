@@ -95,15 +95,47 @@ try:
     SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rendxYmdjZmR6Y3Fta2d6d2d5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTkzMzk4NSwiZXhwIjoyMDY1NTA5OTg1fQ.Xp687KZnQNvZ99ygaielsRLEIT3ubciunYcNoRZhfd4')
     
     # إنشاء عميل Supabase مع معالجة أفضل للأخطاء
+    logger.info(f"🔍 تشخيص Supabase:")
+    logger.info(f"   - URL: {SUPABASE_URL}")
+    logger.info(f"   - Key length: {len(SUPABASE_KEY) if SUPABASE_KEY else 0}")
+    
     try:
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        logger.info("🔄 محاولة إنشاء عميل Supabase...")
+        
+        # إعدادات خاصة لـ Railway
+        import httpx
+        from supabase import create_client, Client
+        
+        # إنشاء عميل httpx مخصص لـ Railway
+        http_client = httpx.Client(
+            timeout=30.0,
+            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
+        )
+        
+        # إنشاء عميل Supabase مع العميل المخصص
+        supabase: Client = create_client(
+            SUPABASE_URL, 
+            SUPABASE_KEY,
+            options={"client": http_client}
+        )
+        
         SUPABASE_AVAILABLE = True
         logger.info("✅ Supabase متاح")
     except Exception as supabase_error:
         logger.error(f"❌ فشل تهيئة Supabase: {supabase_error}")
-        logger.error("   ❌ تأكد من صحة الإعدادات في .env.development أو متغيرات البيئة في Railway")
-        supabase = None
-        SUPABASE_AVAILABLE = False
+        logger.error(f"   - نوع الخطأ: {type(supabase_error).__name__}")
+        logger.error(f"   - تفاصيل الخطأ: {str(supabase_error)}")
+        
+        # محاولة إنشاء عميل بسيط بدون خيارات
+        try:
+            logger.info("🔄 محاولة إنشاء عميل Supabase بسيط...")
+            supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+            SUPABASE_AVAILABLE = True
+            logger.info("✅ Supabase متاح (الطريقة البسيطة)")
+        except Exception as simple_error:
+            logger.error(f"❌ فشل في الطريقة البسيطة أيضاً: {simple_error}")
+            supabase = None
+            SUPABASE_AVAILABLE = False
 except ImportError as e:
     logger.warning(f"⚠️ Supabase غير متاح: {e}")
     supabase = None
