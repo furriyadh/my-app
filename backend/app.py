@@ -610,28 +610,53 @@ def get_account_stats(customer_id):
 def health_check():
     """فحص صحة الخادم"""
     try:
-        # اختبار الاتصال بـ Google Ads API
-        client = get_google_ads_client()
-        
-        return jsonify({
+        # فحص أساسي للخادم
+        basic_health = {
             'status': 'healthy',
             'timestamp': datetime.now().isoformat(),
-            'services': {
-                'google_ads_official_library': True,
-                'google_ads_client': True
-            },
-            'config': {
-                'mcc_customer_id': MCC_CUSTOMER_ID,
-                'developer_token_configured': bool(DEVELOPER_TOKEN),
-                'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN),
-                'api_version': 'v21'
-            },
-            'library_info': {
-                'source': 'google_ads_lib (Official)',
-                'version': '28.0.0',
-                'proto_plus': True
-            }
-        })
+            'server': 'running',
+            'port': int(os.getenv('PORT', 5000)),
+            'environment': os.getenv('RAILWAY_ENVIRONMENT', 'local')
+        }
+        
+        # محاولة اختبار Google Ads API (اختياري)
+        try:
+            client = get_google_ads_client()
+            basic_health.update({
+                'services': {
+                    'google_ads_official_library': True,
+                    'google_ads_client': True
+                },
+                'config': {
+                    'mcc_customer_id': MCC_CUSTOMER_ID,
+                    'developer_token_configured': bool(DEVELOPER_TOKEN),
+                    'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN),
+                    'api_version': 'v21'
+                },
+                'library_info': {
+                    'source': 'google_ads_lib (Official)',
+                    'version': '28.0.0',
+                    'proto_plus': True
+                }
+            })
+        except Exception as api_error:
+            # إذا فشل Google Ads API، نعيد الخادم كـ healthy لكن مع تحذير
+            basic_health.update({
+                'services': {
+                    'google_ads_official_library': False,
+                    'google_ads_client': False
+                },
+                'warning': f'Google Ads API غير متاح: {str(api_error)}',
+                'config': {
+                    'mcc_customer_id': MCC_CUSTOMER_ID,
+                    'developer_token_configured': bool(DEVELOPER_TOKEN),
+                    'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN),
+                    'api_version': 'v21'
+                }
+            })
+        
+        return jsonify(basic_health)
+        
     except Exception as e:
         logger.error(f"❌ فشل فحص الصحة: {e}")
         return jsonify({
@@ -1098,10 +1123,12 @@ def sync_all_statuses():
         }), 500
 
 if __name__ == '__main__':
+    # استخدام المنفذ من متغير البيئة PORT (Railway) أو 5000 للتطوير المحلي
+    port = int(os.getenv('PORT', 5000))
     app.run(
         host='0.0.0.0',
-        port=5000,
-        debug=True,
+        port=port,
+        debug=not IS_PRODUCTION,  # تعطيل debug في الإنتاج
         threaded=True
     )
 
