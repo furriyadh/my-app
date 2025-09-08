@@ -6,16 +6,8 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔗 Next.js API: Link customer to MCC...');
     
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('oauth_access_token')?.value;
-    
-    if (!accessToken) {
-      return NextResponse.json({
-        success: false,
-        error: 'No access token found',
-        message: 'لم يتم العثور على access token'
-      }, { status: 401 });
-    }
+    // لا نحتاج access token لأن الـ backend يستخدم refresh token مباشرة
+    console.log('ℹ️ استخدام refresh token من متغيرات البيئة في الـ backend');
     
     const { customerId, account_name } = await request.json();
     
