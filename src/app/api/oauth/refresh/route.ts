@@ -79,10 +79,11 @@ export async function POST(request: NextRequest) {
         
         // حفظ access token الجديد
         response.cookies.set('oauth_access_token', tokenData.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: tokenData.expires_in || 3600
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: tokenData.expires_in || 3600,
+          path: '/'
         });
         
         // حفظ معلومات إضافية

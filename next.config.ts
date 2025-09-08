@@ -37,6 +37,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true, // مؤقت لحل مشاكل ESLint
   },
 
+
   // إعدادات محسنة للـ webpack (تحسين السرعة)
   webpack: (config, { isServer, dev }) => {
     config.resolve.fallback = {
@@ -62,9 +63,14 @@ const nextConfig: NextConfig = {
     return config;
   },
   
+  
   // تحسينات إضافية للـ performance
   experimental: {
     // optimizeCss: true, // تعطيل مؤقت لحل مشكلة critters
+    // إصلاح مشكلة clientReferenceManifest
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'furriyadh.com'],
+    },
   },
   
   // تكوين turbopack الجديد

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase/client';
+import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('🔄 Next.js API: Get client requests from Supabase...');
     
-    // الحصول على المستخدم الحالي من cookies
-    const cookies = request.cookies;
-    const oauthUserInfo = cookies.get('oauth_user_info')?.value;
+    // الحصول على المستخدم الحالي من HttpOnly cookies
+    const cookieStore = cookies();
+    const oauthUserInfo = cookieStore.get('oauth_user_info')?.value;
     
     if (!oauthUserInfo) {
       console.log('ℹ️ No OAuth user info found');
@@ -53,9 +54,9 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
     
-    // الحصول على المستخدم الحالي من cookies
-    const cookies = request.cookies;
-    const oauthUserInfo = cookies.get('oauth_user_info')?.value;
+    // الحصول على المستخدم الحالي من HttpOnly cookies
+    const cookieStore = cookies();
+    const oauthUserInfo = cookieStore.get('oauth_user_info')?.value;
     
     if (!oauthUserInfo) {
       console.log('ℹ️ No OAuth user info found');

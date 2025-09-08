@@ -190,9 +190,10 @@ const GoogleAdsContent: React.FC = () => {
     
     if (oauthSuccess === 'true') {
       console.log('✅ OAuth completed successfully:', message);
-      localStorage.setItem('hasSeenServiceModal', 'true');
-      localStorage.setItem('googleAdsConnected', 'true');
-      localStorage.setItem('googleAdsConnectionTime', new Date().toISOString());
+      
+      // استخدام HttpOnly cookies بدلاً من localStorage
+      // يتم حفظ البيانات في cookies من خلال API routes
+      console.log('💾 OAuth data saved in HttpOnly cookies by API routes');
       
       // Clear URL parameters
       const url = new URL(window.location.href);
@@ -571,11 +572,9 @@ const GoogleAdsContent: React.FC = () => {
       
       // Check cookies first (note: httpOnly cookies won't show here)
       console.log('🔍 Checking cookies:', {
-        hasAccessToken: document.cookie.includes('oauth_access_token='),
-        hasRefreshToken: document.cookie.includes('oauth_refresh_token='),
         hasGoogleAdsConnected: document.cookie.includes('google_ads_connected=true'),
         allCookies: document.cookie,
-        note: 'httpOnly cookies (oauth tokens) will not appear in document.cookie'
+        note: 'HttpOnly cookies (oauth tokens) are secure and not accessible via JavaScript'
       });
       
       // First, get accounts from the customer's OAuth session (not all MCC accounts)

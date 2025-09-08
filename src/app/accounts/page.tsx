@@ -83,10 +83,13 @@ const AccountsPage: React.FC = () => {
         console.log('🔌 Disconnecting account:', accountId);
         
         // إلغاء جميع الأذونات والكوكيز
-        document.cookie = 'oauth_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'oauth_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        await fetch('/api/oauth/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        // Clear non-HttpOnly cookies
         document.cookie = 'google_ads_connected=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'oauth_user_info=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         
         // مسح localStorage
         localStorage.removeItem('hasSeenServiceModal');
@@ -102,7 +105,7 @@ const AccountsPage: React.FC = () => {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
-              token: document.cookie.split('oauth_access_token=')[1]?.split(';')[0] || ''
+              token: '' // HttpOnly cookies not accessible via JavaScript
             })
           });
         } catch (revokeError) {

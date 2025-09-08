@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // إرسال HttpOnly cookies
       body: JSON.stringify({
         customerId,
         account_name

@@ -220,16 +220,17 @@ const IntegrationsPage: React.FC = () => {
           try {
             console.log('🔌 Disconnecting Google Ads...');
             
-            // Clear all cookies
-            document.cookie = 'oauth_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            document.cookie = 'oauth_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            document.cookie = 'google_ads_connected=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            document.cookie = 'oauth_user_info=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            // Clear HttpOnly cookies through API call
+            await fetch('/api/oauth/logout', {
+              method: 'POST',
+              credentials: 'include'
+            });
             
-            // Clear localStorage
+            // Clear non-HttpOnly cookies
+            document.cookie = 'google_ads_connected=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            
+            // Clear localStorage (for UI state only)
             localStorage.removeItem('hasSeenServiceModal');
-            localStorage.removeItem('googleAdsConnected');
-            localStorage.removeItem('googleAdsConnectionTime');
             localStorage.removeItem('selectedGoogleAdsAccount');
             
             // Revoke Google permissions
@@ -240,7 +241,7 @@ const IntegrationsPage: React.FC = () => {
                   'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams({
-                  token: document.cookie.split('oauth_access_token=')[1]?.split(';')[0] || ''
+                  token: '' // HttpOnly cookies not accessible via JavaScript
                 })
               });
             } catch (revokeError) {
@@ -277,15 +278,11 @@ const IntegrationsPage: React.FC = () => {
   // Optimized connection check - reduced API calls
   useEffect(() => {
     const checkGoogleAdsConnection = () => {
-      // Check localStorage first (fastest)
-      const isConnectedLocal = localStorage.getItem('googleAdsConnected') === 'true';
-      
-      // Check cookies for OAuth tokens
-      const hasAccessToken = document.cookie.includes('oauth_access_token=');
+      // Check cookies for connection status (HttpOnly tokens not accessible via JavaScript)
       const isGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
       
-      // If any connection indicator is found, mark as connected
-      if (isConnectedLocal || hasAccessToken || isGoogleAdsConnected) {
+      // If connection indicator is found, mark as connected
+      if (isGoogleAdsConnected) {
         setIntegrations(prev => 
           prev.map(integration => 
             integration.id === 'google-ads' 

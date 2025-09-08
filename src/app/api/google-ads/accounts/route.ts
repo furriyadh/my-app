@@ -94,7 +94,8 @@ async function getGoogleAdsAccounts(accessToken: string, developerToken: string)
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' // إرسال HttpOnly cookies
     });
 
     if (!response.ok) {

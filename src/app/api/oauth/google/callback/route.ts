@@ -174,40 +174,41 @@ export async function GET(request: NextRequest) {
         `${baseUrl}${redirectAfter}?oauth_success=true&message=${encodeURIComponent('تم ربط الحساب بنجاح')}`
       );
       
-      // حفظ بيانات الجلسة (حسب Google Identity Platform)
+      // حفظ بيانات الجلسة (حسب Google Identity Platform) - JWT + HttpOnly Cookies
       console.log('🔍 فحص access_token:', tokenData.access_token ? 'موجود' : 'غير موجود');
       console.log('🔍 طول access_token:', tokenData.access_token ? tokenData.access_token.length : 0);
       if (tokenData.access_token) {
-        console.log('💾 حفظ access_token في الكوكيز...');
+        console.log('💾 حفظ access_token في HttpOnly Cookies...');
         console.log('🔍 Token length:', tokenData.access_token.length);
         console.log('🔍 Token preview:', tokenData.access_token.substring(0, 50) + '...');
+        
+        // حفظ OAuth access token في HttpOnly cookie
         successResponse.cookies.set('oauth_access_token', tokenData.access_token, {
-          httpOnly: true,
-          secure: false, // تعطيل HTTPS في التطوير
-          sameSite: 'lax',
-          maxAge: 3600, // 1 hour for testing
-          path: '/' // تأكد من أن الكوكي متاح في جميع المسارات
-          // إزالة domain للسماح بـ localhost
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: 3600,          // 1 hour
+          path: '/'
         });
         
-        // إضافة cookie لحالة الاتصال
+        // إضافة cookie لحالة الاتصال (غير HttpOnly للوصول من JavaScript)
         successResponse.cookies.set('google_ads_connected', 'true', {
           httpOnly: false, // يجب أن يكون false ليكون متاحاً في JavaScript
-          secure: false, // تعطيل HTTPS في التطوير
-          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
           maxAge: 34560000, // 400 يوم (أقصى مدة)
-          path: '/' // تأكد من أن الكوكي متاح في جميع المسارات
+          path: '/'
         });
       }
       
       if (tokenData.refresh_token) {
+        // حفظ OAuth refresh token في HttpOnly cookie
         successResponse.cookies.set('oauth_refresh_token', tokenData.refresh_token, {
-          httpOnly: true,
-          secure: false, // تعطيل HTTPS في التطوير
-          sameSite: 'lax',
-          maxAge: 3600, // 1 hour for testing
-          path: '/' // تأكد من أن الكوكي متاح في جميع المسارات
-          // إزالة domain للسماح بـ localhost
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: 30 * 24 * 3600, // 30 يوم
+          path: '/'
         });
       }
       

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 // Cache للنتائج لتجنب المكالمات المتكررة
 const accountsCache = new Map<string, { data: any, timestamp: number }>();
@@ -165,9 +166,8 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🔄 GET /api/user/accounts - جلب حسابات المستخدم...');
     
-    // الحصول على access token من cookies
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
+    // الحصول على access token من HttpOnly cookies
+    const cookieStore = cookies();
     
     // تشخيص cookies أولاً
     const allCookies = cookieStore.getAll();

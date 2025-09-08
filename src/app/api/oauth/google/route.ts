@@ -113,41 +113,46 @@ export async function GET(request: NextRequest) {
       });
       
       jsonResponse.cookies.set('oauth_code_verifier', codeVerifier, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 600
+        httpOnly: true,        // يمنع الوصول من JavaScript
+        secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+        sameSite: 'strict',    // يمنع هجمات CSRF
+        maxAge: 600,
+        path: '/'
       });
       
       jsonResponse.cookies.set('oauth_state', state, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 600
+        httpOnly: true,        // يمنع الوصول من JavaScript
+        secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+        sameSite: 'strict',    // يمنع هجمات CSRF
+        maxAge: 600,
+        path: '/'
       });
       
       jsonResponse.cookies.set('oauth_session_id', sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 600
+        httpOnly: true,        // يمنع الوصول من JavaScript
+        secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+        sameSite: 'strict',    // يمنع هجمات CSRF
+        maxAge: 600,
+        path: '/'
       });
       
       if (mcc_customer_id) {
         jsonResponse.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 600
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: 600,
+          path: '/'
         });
       }
       
       if (redirect_after) {
         jsonResponse.cookies.set('oauth_redirect_after', redirect_after, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 600
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: 600,
+          path: '/'
         });
       }
       
@@ -159,36 +164,40 @@ export async function GET(request: NextRequest) {
     
     // حفظ code_verifier (مطلوب لـ PKCE)
     response.cookies.set('oauth_code_verifier', codeVerifier, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 600 // 10 دقائق
+      httpOnly: true,        // يمنع الوصول من JavaScript
+      secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+      sameSite: 'strict',    // يمنع هجمات CSRF
+      maxAge: 600,           // 10 دقائق
+      path: '/'
     });
     
     // حفظ state (للتحقق من الأمان)
     response.cookies.set('oauth_state', state, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 600 // 10 دقائق
+      httpOnly: true,        // يمنع الوصول من JavaScript
+      secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+      sameSite: 'strict',    // يمنع هجمات CSRF
+      maxAge: 600,           // 10 دقائق
+      path: '/'
     });
     
     // حفظ معاملات إضافية
     if (mcc_customer_id) {
       response.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 600
+        httpOnly: true,        // يمنع الوصول من JavaScript
+        secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+        sameSite: 'strict',    // يمنع هجمات CSRF
+        maxAge: 600,
+        path: '/'
       });
     }
     
     if (redirect_after) {
       response.cookies.set('oauth_redirect_after', redirect_after, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 600
+        httpOnly: true,        // يمنع الوصول من JavaScript
+        secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+        sameSite: 'strict',    // يمنع هجمات CSRF
+        maxAge: 600,
+        path: '/'
       });
     }
     

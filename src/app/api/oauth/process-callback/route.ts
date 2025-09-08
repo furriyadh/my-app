@@ -112,19 +112,21 @@ export async function POST(request: NextRequest) {
       // حفظ بيانات الجلسة (حسب Google Identity Platform)
       if (tokenData.access_token) {
         successResponse.cookies.set('oauth_access_token', tokenData.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 3600 // ساعة واحدة
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: 3600,          // ساعة واحدة
+          path: '/'
         });
       }
       
       if (tokenData.refresh_token) {
         successResponse.cookies.set('oauth_refresh_token', tokenData.refresh_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 2592000 // 30 يوم
+          httpOnly: true,        // يمنع الوصول من JavaScript
+          secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+          sameSite: 'strict',    // يمنع هجمات CSRF
+          maxAge: 2592000,       // 30 يوم
+          path: '/'
         });
       }
       
