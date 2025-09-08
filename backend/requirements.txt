@@ -66,5 +66,5 @@ googleapis-common-protos>=1.63.2
 
 # Database - Supabase (Windows compatible)
 supabase==2.3.4
-httpx>=0.24.0,<0.26.0
-postgrest>=0.13.0
+httpx==0.25.2
+postgrest==0.13.0

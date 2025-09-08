@@ -95,9 +95,15 @@ try:
     SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rendxYmdjZmR6Y3Fta2d6d2d5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTkzMzk4NSwiZXhwIjoyMDY1NTA5OTg1fQ.Xp687KZnQNvZ99ygaielsRLEIT3ubciunYcNoRZhfd4')
     
     # إنشاء عميل Supabase مع معالجة أفضل للأخطاء
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    SUPABASE_AVAILABLE = True
-    logger.info("✅ Supabase متاح")
+    try:
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        SUPABASE_AVAILABLE = True
+        logger.info("✅ Supabase متاح")
+    except Exception as supabase_error:
+        logger.error(f"❌ فشل تهيئة Supabase: {supabase_error}")
+        logger.error("   ❌ تأكد من صحة الإعدادات في .env.development أو متغيرات البيئة في Railway")
+        supabase = None
+        SUPABASE_AVAILABLE = False
 except ImportError as e:
     logger.warning(f"⚠️ Supabase غير متاح: {e}")
     supabase = None
