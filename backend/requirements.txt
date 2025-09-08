@@ -68,3 +68,5 @@ googleapis-common-protos>=1.63.2
 supabase==2.3.4
 httpx==0.24.0
 postgrest==0.13.0
+# Fix for proxy argument issue
+urllib3==1.26.18

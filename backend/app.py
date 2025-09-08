@@ -102,22 +102,8 @@ try:
     try:
         logger.info("🔄 محاولة إنشاء عميل Supabase...")
         
-        # إعدادات خاصة لـ Railway
-        import httpx
-        from supabase import create_client, Client
-        
-        # إنشاء عميل httpx مخصص لـ Railway
-        http_client = httpx.Client(
-            timeout=30.0,
-            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
-        )
-        
-        # إنشاء عميل Supabase مع العميل المخصص
-        supabase: Client = create_client(
-            SUPABASE_URL, 
-            SUPABASE_KEY,
-            options={"client": http_client}
-        )
+        # إنشاء عميل Supabase بسيط بدون خيارات معقدة
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
         
         SUPABASE_AVAILABLE = True
         logger.info("✅ Supabase متاح")
@@ -126,16 +112,10 @@ try:
         logger.error(f"   - نوع الخطأ: {type(supabase_error).__name__}")
         logger.error(f"   - تفاصيل الخطأ: {str(supabase_error)}")
         
-        # محاولة إنشاء عميل بسيط بدون خيارات
-        try:
-            logger.info("🔄 محاولة إنشاء عميل Supabase بسيط...")
-            supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-            SUPABASE_AVAILABLE = True
-            logger.info("✅ Supabase متاح (الطريقة البسيطة)")
-        except Exception as simple_error:
-            logger.error(f"❌ فشل في الطريقة البسيطة أيضاً: {simple_error}")
-            supabase = None
-            SUPABASE_AVAILABLE = False
+        # تعطيل Supabase مؤقتاً والاستمرار بدون قاعدة البيانات
+        logger.warning("⚠️ تعطيل Supabase مؤقتاً - التطبيق سيعمل بدون قاعدة البيانات")
+        supabase = None
+        SUPABASE_AVAILABLE = False
 except ImportError as e:
     logger.warning(f"⚠️ Supabase غير متاح: {e}")
     supabase = None
@@ -148,6 +128,10 @@ except Exception as e:
 
 def init_supabase():
     """التحقق من الاتصال بـ Supabase"""
+    if not SUPABASE_AVAILABLE or supabase is None:
+        logger.warning("⚠️ Supabase غير متاح - تخطي اختبار الاتصال")
+        return False
+        
     try:
         # اختبار الاتصال
         result = supabase.table('client_requests').select('id').limit(1).execute()
@@ -159,7 +143,10 @@ def init_supabase():
         return False
 
 # التحقق من الاتصال بـ Supabase عند بدء التشغيل
-init_supabase()
+if SUPABASE_AVAILABLE:
+    init_supabase()
+else:
+    logger.warning("⚠️ تخطي اختبار Supabase - غير متاح")
 
 # تحميل الإعدادات من متغيرات البيئة
 MCC_CUSTOMER_ID = os.getenv('MCC_LOGIN_CUSTOMER_ID')
