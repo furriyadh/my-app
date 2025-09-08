@@ -77,6 +77,7 @@ except ImportError:
                 # إضافة user_id افتراضي للاختبار
                 g.user_id = "test_user_123"
                 return f(*args, **kwargs)
+            wrapper.__name__ = f.__name__
             return wrapper
 
 try:
