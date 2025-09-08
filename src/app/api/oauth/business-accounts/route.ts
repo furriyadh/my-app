@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لجلب الحسابات التجارية
-    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
+    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
     
     const response = await fetch(`${backendUrl}/api/oauth/business-accounts`, {
       method: 'GET',
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لإنشاء الحساب التجاري
-    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
+    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
     
     const response = await fetch(`${backendUrl}/api/oauth/business-accounts`, {
       method: 'POST',

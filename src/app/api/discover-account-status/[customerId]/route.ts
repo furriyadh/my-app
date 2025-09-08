@@ -20,7 +20,7 @@ export async function GET(
     
     // استدعاء Flask backend
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? `https://furriyadh.com/api/discover-account-status/${customerId}`
+      ? `https://my-app-production-28d2.up.railway.app/api/discover-account-status/${customerId}`
       : `http://localhost:5000/api/discover-account-status/${customerId}`;
     
     const response = await fetch(backendUrl, {

@@ -34,8 +34,8 @@ class Config:
     # URLs حسب البيئة
     if IS_PRODUCTION:
         FRONTEND_URL = "https://furriyadh.com"
-        BACKEND_URL = "https://furriyadh.com"
-        API_BASE_URL = "https://furriyadh.com/api"
+        BACKEND_URL = "https://my-app-production-28d2.up.railway.app"
+        API_BASE_URL = "https://my-app-production-28d2.up.railway.app/api"
     else:
         FRONTEND_URL = "http://localhost:3000"
         BACKEND_URL = "http://localhost:5000"

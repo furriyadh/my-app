@@ -819,7 +819,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
       });
 
       const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://furriyadh.com/api/google-ads' 
+        ? 'https://my-app-production-28d2.up.railway.app/api/google-ads' 
         : '/api/google-ads';
       const response = await fetch(`${backendUrl}?${params}`);
       
@@ -874,7 +874,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
       console.log(`🔧 Performing ${action} on campaign ${campaignId}`);
       
       const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://furriyadh.com/api/google-ads' 
+        ? 'https://my-app-production-28d2.up.railway.app/api/google-ads' 
         : '/api/google-ads';
       const response = await fetch(backendUrl, {
         method: 'PUT',

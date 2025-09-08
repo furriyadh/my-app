@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     // الاتصال بالباك اند للحصول على بيانات MCC
-    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
+    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
     
     const response = await fetch(`${backendUrl}/api/mcc/accounts`, {
       method: 'GET',
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     // الاتصال بالباك اند لتنفيذ العملية
-    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
+    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
     
     const response = await fetch(`${backendUrl}/api/mcc/accounts/${operation}`, {
       method: 'POST',

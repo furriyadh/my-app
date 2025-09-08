@@ -5,8 +5,9 @@ import { cookies } from 'next/headers';
 import { config } from 'dotenv';
 import path from 'path';
 
-// تحميل متغيرات البيئة بشكل صريح
-config({ path: path.resolve(process.cwd(), '.env.development') });
+// تحميل متغيرات البيئة حسب البيئة
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+config({ path: path.resolve(process.cwd(), envFile) });
 
 /**
  * Google OAuth2 Callback Handler - يتبع الممارسات الرسمية من Google Ads API Documentation

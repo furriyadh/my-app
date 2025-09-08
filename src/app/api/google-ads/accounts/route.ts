@@ -87,7 +87,7 @@ async function getGoogleAdsAccounts(accessToken: string, developerToken: string)
     
     // استدعاء الباك اند الذي يستخدم Google Ads API Client Library (الطريقة الرسمية)
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://furriyadh.com/api/user/accounts'
+      ? 'https://my-app-production-28d2.up.railway.app/api/user/accounts'
       : 'http://localhost:5000/api/user/accounts';
     const response = await fetch(backendUrl, {
       method: 'GET',

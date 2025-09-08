@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     // الحصول على الحسابات المرتبطة من Google Ads API (حسب Google Ads API Documentation)
     try {
       console.log('🔄 الحصول على الحسابات المرتبطة من الباك اند الذي يستخدم Google Ads API Client Library...');
-      const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:5000');
+      const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
       const response = await fetch(`${backendUrl}/api/oauth/accounts`, {
         method: 'GET',
         headers: {

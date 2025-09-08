@@ -1,9 +1,9 @@
 // Configuration file for API URLs and environment variables
 export const config = {
-  // API Configuration - Now using Next.js API Routes
+  // API Configuration - Using Railway Backend
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com/api' : 'http://localhost:3000/api'),
-    backendUrl: process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000'),
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app/api' : 'http://localhost:3000/api'),
+    backendUrl: process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000'),
     frontendUrl: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000'),
   },
   

@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
-// تحميل متغيرات البيئة
-require('dotenv').config({ path: '.env.development' });
+// تحميل متغيرات البيئة حسب البيئة
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+require('dotenv').config({ path: envFile });
 
 const nextConfig: NextConfig = {
   // تكوين بسيط وآمن
