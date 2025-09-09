@@ -100,35 +100,17 @@ try:
     logger.info(f"   - Key length: {len(SUPABASE_KEY) if SUPABASE_KEY else 0}")
     
     try:
-        logger.info("🔄 محاولة إنشاء عميل Supabase...")
+        logger.info("🔄 إنشاء عميل Supabase...")
         
-        # إنشاء عميل Supabase مع معالجة أفضل للأخطاء
-        import httpx
-        logger.info(f"   - httpx version: {httpx.__version__}")
-        
-        # إنشاء عميل Supabase بسيط
+        # إنشاء عميل Supabase بسيط بدون اختبار فوري
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-        
-        # اختبار الاتصال
-        test_result = supabase.table('client_requests').select('id').limit(1).execute()
-        logger.info("✅ Supabase متاح ومتصل")
         SUPABASE_AVAILABLE = True
+        logger.info("✅ Supabase تم إنشاؤه بنجاح")
         
     except Exception as supabase_error:
-        logger.error(f"❌ فشل تهيئة Supabase: {supabase_error}")
-        logger.error(f"   - نوع الخطأ: {type(supabase_error).__name__}")
-        logger.error(f"   - تفاصيل الخطأ: {str(supabase_error)}")
-        
-        # محاولة إنشاء عميل بدون اختبار الاتصال
-        try:
-            logger.info("🔄 محاولة إنشاء عميل Supabase بدون اختبار الاتصال...")
-            supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-            SUPABASE_AVAILABLE = True
-            logger.info("✅ Supabase متاح (بدون اختبار الاتصال)")
-        except Exception as fallback_error:
-            logger.error(f"❌ فشل في المحاولة الثانية: {fallback_error}")
-            supabase = None
-            SUPABASE_AVAILABLE = False
+        logger.error(f"❌ فشل إنشاء Supabase: {supabase_error}")
+        supabase = None
+        SUPABASE_AVAILABLE = False
 except ImportError as e:
     logger.warning(f"⚠️ Supabase غير متاح: {e}")
     supabase = None
