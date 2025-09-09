@@ -18,39 +18,45 @@ export async function GET(
       }, { status: 400 });
     }
     
-    // استدعاء Flask backend
+    // جلب الحالة الفعلية من Flask Backend (Railway)
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? `https://my-app-production-28d2.up.railway.app/api/discover-account-status/${customerId}`
-      : `http://localhost:5000/api/discover-account-status/${customerId}`;
+      ? 'https://my-app-production-28d2.up.railway.app'
+      : 'http://localhost:5000';
     
-    const response = await fetch(backendUrl, {
+    const backendResponse = await fetch(`${backendUrl}/api/check-link-status/${customerId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Backend error: ${response.status} - ${errorText}`);
-      
-      return NextResponse.json({
-        success: false,
-        error: `Backend error: ${response.status}`,
-        message: 'خطأ في الخادم الخلفي'
-      }, { status: response.status });
+
+    if (backendResponse.ok) {
+      const backendData = await backendResponse.json();
+      console.log(`✅ تم جلب الحالة الفعلية من Flask Backend للحساب ${customerId}:`, backendData);
+      return NextResponse.json(backendData);
+    } else {
+      console.warn(`⚠️ Flask Backend error for ${customerId}:`, backendResponse.status);
+      // إرجاع حالة افتراضية في حالة فشل Backend
+      const result = {
+        success: true,
+        customer_id: customerId,
+        status: 'NOT_LINKED',
+        account_type: 'REGULAR_ACCOUNT',
+        is_connected: false,
+        is_linked_to_mcc: false,
+        display_status: 'Link Google Ads',
+        link_details: {
+          success: false,
+          lastChecked: new Date().toISOString(),
+          error: `Backend error: ${backendResponse.status}`
+        },
+        lastSync: new Date().toISOString(),
+        campaignsCount: 0,
+        monthlySpend: 0,
+        message: 'Backend unavailable - using default status'
+      };
+      return NextResponse.json(result);
     }
-    
-    const result = await response.json();
-    
-    console.log(`✅ Account ${customerId} discovery result:`, {
-      success: result.success,
-      status: result.status,
-      status_changed: result.status_changed,
-      previous_status: result.previous_status
-    });
-    
-    return NextResponse.json(result);
     
   } catch (error) {
     console.error('❌ Error in discover account status API:', error);

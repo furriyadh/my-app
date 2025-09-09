@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
     console.log('🔄 GET /api/user/accounts - جلب حسابات المستخدم...');
     
     // الحصول على access token من HttpOnly cookies
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     
     // تشخيص cookies أولاً
     const allCookies = cookieStore.getAll();
@@ -197,41 +197,45 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    console.log('🔄 جلب حسابات المستخدم من Google Ads API مباشرة...');
+    console.log('🔄 جلب حسابات المستخدم من Flask Backend...');
     
-    console.log('🔍 فحص cookies:', {
-      oauth_access_token: accessToken ? `موجود (${accessToken.substring(0, 30)}...)` : 'غير موجود',
-      oauth_refresh_token: refreshToken ? `موجود (${refreshToken.substring(0, 30)}...)` : 'غير موجود',
-      cookiesCount: allCookies.length,
-      allCookies: allCookies.map(c => ({ name: c.name, hasValue: !!c.value, length: c.value?.length || 0 })),
-      developer_token: process.env.GOOGLE_ADS_DEVELOPER_TOKEN ? 'محدد' : 'غير محدد'
-    });
-    
-    // إذا يوجد access token، استخدمه مباشرة
+    // إذا يوجد access token، استخدمه مع Flask Backend
     if (accessToken) {
-      console.log('✅ استخدام access token الموجود');
-      const directAccounts = await getRealCustomerAccounts(accessToken);
+      console.log('✅ استخدام access token مع Flask Backend');
       
-      const formattedAccounts = {
-        google_ads: directAccounts,
-        merchant_center: [],
-        youtube: [],
-        analytics: [],
-        business: []
-      };
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://my-app-production-28d2.up.railway.app'
+        : 'http://localhost:5000';
       
-      // حفظ في الكاش
-      accountsCache.set(accessToken, {
-        data: formattedAccounts,
-        timestamp: Date.now()
-      });
-      
-      return NextResponse.json(formattedAccounts, { 
-        status: 200,
+      const response = await fetch(`${backendUrl}/api/user/accounts`, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         }
       });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ تم جلب الحسابات من Flask Backend:', data);
+        
+        // حفظ في الكاش
+        accountsCache.set(accessToken, {
+          data: data,
+          timestamp: Date.now()
+        });
+        
+        return NextResponse.json(data);
+      } else {
+        console.error('❌ Flask Backend error:', response.status, response.statusText);
+        return NextResponse.json({
+          google_ads: [],
+          merchant_center: [],
+          youtube: [],
+          analytics: [],
+          business: []
+        }, { status: 200 });
+      }
     }
     
     // إذا لم يوجد access token، جرب استخدام refresh token

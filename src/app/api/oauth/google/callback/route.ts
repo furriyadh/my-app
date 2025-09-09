@@ -239,7 +239,7 @@ export async function GET(request: NextRequest) {
             maxAge: 3600
           });
           
-          // حفظ بيانات المستخدم الكاملة في قاعدة البيانات
+          // حفظ بيانات المستخدم في Supabase باستخدام Service Role (يتجاوز RLS)
           try {
             const { saveUserProfile } = await import('@/lib/supabase');
             const savedProfile = await saveUserProfile(userInfo);

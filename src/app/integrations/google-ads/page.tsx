@@ -310,8 +310,79 @@ const GoogleAdsContent: React.FC = () => {
         const updatedRequests = Array.from(updatedRequestsMap.values());
         if (updatedRequests && updatedRequests.length > 0) {
           console.log('✅ تم حفظ البيانات في قاعدة البيانات');
-          // معالجة البيانات المحفوظة
-          const accountsFromSupabase = updatedRequests.map((req: ClientRequest) => {
+          // معالجة البيانات المحفوظة مع دمج الإحصائيات من Google Ads API
+          const accountsFromSupabase = await Promise.all(
+            updatedRequests.map(async (req: ClientRequest) => {
+              let displayStatus = 'Link Google Ads';
+              let isLinkedToMCC = false;
+              
+              switch (req.status as string) {
+                case 'PENDING':
+                  displayStatus = 'Awaiting Acceptance';
+                  isLinkedToMCC = false;
+                  break;
+                case 'ACTIVE':
+                  displayStatus = 'Connected';
+                  isLinkedToMCC = true;
+                  break;
+                case 'REJECTED':
+                case 'REFUSED':
+                  displayStatus = 'Send again';
+                  isLinkedToMCC = false;
+                  break;
+                case 'CANCELLED':
+                  displayStatus = 'Link Google Ads';
+                  isLinkedToMCC = false;
+                  break;
+                default:
+                  displayStatus = 'Link Google Ads';
+                  isLinkedToMCC = false;
+              }
+              
+              // جلب الإحصائيات من Google Ads API
+              let stats = { campaignsCount: 0, monthlySpend: 0 };
+              try {
+                const statsResponse = await fetch(`/api/google-ads/accounts/${req.customer_id}/stats`);
+                if (statsResponse.ok) {
+                  const statsData = await statsResponse.json();
+                  if (statsData.success) {
+                    stats = {
+                      campaignsCount: statsData.summary?.total_campaigns || 0,
+                      monthlySpend: statsData.summary?.total_cost_currency || 0
+                    };
+                  }
+                }
+              } catch (statsError) {
+                console.warn(`⚠️ فشل في جلب إحصائيات الحساب ${req.customer_id}:`, statsError);
+              }
+              
+              return {
+                id: req.customer_id,
+                customerId: req.customer_id,
+                name: req.account_name || `Account ${req.customer_id}`,
+                status: 'ENABLED' as const,
+                isTestAccount: false,
+                isManager: false,
+                accountType: 'REGULAR_ACCOUNT' as const,
+                isConnected: true,
+                isLinkedToMCC: isLinkedToMCC,
+                displayStatus: displayStatus,
+                linkDetails: req.link_details,
+                lastSync: req.updated_at || new Date().toISOString(),
+                campaignsCount: stats.campaignsCount,
+                monthlySpend: stats.monthlySpend,
+                details: {}
+              };
+            })
+          );
+          
+          console.log('🎯 الحسابات النهائية من Supabase مع الإحصائيات:', accountsFromSupabase);
+          setAccounts(accountsFromSupabase);
+        }
+      } else {
+        // معالجة البيانات الموجودة مع دمج الإحصائيات من Google Ads API
+        const accountsFromSupabase = await Promise.all(
+          clientRequests.map(async (req: ClientRequest) => {
             let displayStatus = 'Link Google Ads';
             let isLinkedToMCC = false;
             
@@ -333,21 +404,27 @@ const GoogleAdsContent: React.FC = () => {
                 displayStatus = 'Link Google Ads';
                 isLinkedToMCC = false;
                 break;
-              case 'NOT_LINKED':
-                displayStatus = 'Link Google Ads';
-                isLinkedToMCC = false;
-                break;
-              case 'SUSPENDED':
-                displayStatus = 'Suspended';
-                isLinkedToMCC = false;
-                break;
               default:
                 displayStatus = 'Link Google Ads';
                 isLinkedToMCC = false;
-                break;
             }
             
-            console.log(`✅ حساب ${req.customer_id}: ${req.status} → ${displayStatus}`);
+            // جلب الإحصائيات من Google Ads API
+            let stats = { campaignsCount: 0, monthlySpend: 0 };
+            try {
+              const statsResponse = await fetch(`/api/google-ads/accounts/${req.customer_id}/stats`);
+              if (statsResponse.ok) {
+                const statsData = await statsResponse.json();
+                if (statsData.success) {
+                  stats = {
+                    campaignsCount: statsData.summary?.total_campaigns || 0,
+                    monthlySpend: statsData.summary?.total_cost_currency || 0
+                  };
+                }
+              }
+            } catch (statsError) {
+              console.warn(`⚠️ فشل في جلب إحصائيات الحساب ${req.customer_id}:`, statsError);
+            }
             
             return {
               id: req.customer_id,
@@ -355,144 +432,26 @@ const GoogleAdsContent: React.FC = () => {
               name: req.account_name || `Account ${req.customer_id}`,
               status: 'ENABLED' as const,
               isTestAccount: false,
+              isManager: false,
+              accountType: 'REGULAR_ACCOUNT' as const,
               isConnected: true,
               isLinkedToMCC: isLinkedToMCC,
               displayStatus: displayStatus,
               linkDetails: req.link_details,
               lastSync: req.updated_at || new Date().toISOString(),
-              campaignsCount: 0,
-              monthlySpend: 0,
+              campaignsCount: stats.campaignsCount,
+              monthlySpend: stats.monthlySpend,
               details: {}
             };
-          });
-          
-          console.log('🎯 الحسابات النهائية من Supabase:', accountsFromSupabase);
-          
-          // تحديث الحسابات مع الحفاظ على التحديثات المحلية
-          setAccounts(prevAccounts => {
-            // دمج البيانات من Supabase مع التحديثات المحلية
-            const mergedAccounts = accountsFromSupabase.map(supabaseAccount => {
-              const localAccount = prevAccounts.find(acc => acc.customerId === supabaseAccount.customerId);
-              
-              // إذا كان هناك تحديث محلي حديث (خلال آخر 10 ثواني)، استخدمه
-              if (localAccount && localAccount.lastSync && supabaseAccount.lastSync) {
-                const localTime = new Date(localAccount.lastSync).getTime();
-                const supabaseTime = new Date(supabaseAccount.lastSync).getTime();
-                const timeDiff = localTime - supabaseTime;
-                
-                // إذا كان التحديث المحلي أحدث من Supabase، استخدمه
-                if (timeDiff > 0 && timeDiff < 10000) { // 10 ثواني
-                  console.log(`🔄 استخدام التحديث المحلي للحساب ${supabaseAccount.customerId}`);
-                  return localAccount;
-                }
-              }
-              
-              return supabaseAccount;
-            });
-            
-            return mergedAccounts;
-          });
-          
-          const pendingAccounts = accountsFromSupabase.filter((acc: GoogleAdsAccount) => 
-            acc.displayStatus === 'Awaiting Acceptance'
-          );
-          setPendingInvitations(pendingAccounts.map((acc: GoogleAdsAccount) => acc.customerId));
-        }
-        return;
+          })
+        );
+        
+        console.log('🎯 الحسابات النهائية من Supabase مع الإحصائيات:', accountsFromSupabase);
+        setAccounts(accountsFromSupabase);
       }
-      
-      // تحويل طلبات قاعدة البيانات إلى حسابات
-      const accountsFromSupabase = clientRequests.map((req: ClientRequest) => {
-        let displayStatus = 'Link Google Ads';
-        let isLinkedToMCC = false;
-        
-        switch (req.status as string) {
-          case 'PENDING':
-            displayStatus = 'Awaiting Acceptance';
-            isLinkedToMCC = false;
-            break;
-          case 'ACTIVE':
-            displayStatus = 'Connected';
-            isLinkedToMCC = true;
-            break;
-          case 'REJECTED':
-          case 'REFUSED':
-            displayStatus = 'Send again';
-            isLinkedToMCC = false;
-            break;
-          case 'CANCELLED':
-            displayStatus = 'Link Google Ads';
-            isLinkedToMCC = false;
-            break;
-          case 'NOT_LINKED':
-            displayStatus = 'Link Google Ads';
-            isLinkedToMCC = false;
-            break;
-          case 'SUSPENDED':
-            displayStatus = 'Suspended';
-            isLinkedToMCC = false;
-            break;
-          default:
-            displayStatus = 'Link Google Ads';
-            isLinkedToMCC = false;
-            break;
-        }
-        
-        console.log(`✅ حساب ${req.customer_id}: ${req.status} → ${displayStatus}`);
-        
-        return {
-          id: req.customer_id,
-          customerId: req.customer_id,
-          name: req.account_name || `Account ${req.customer_id}`,
-          status: 'ENABLED' as const,
-          isTestAccount: false,
-          isConnected: true,
-          isLinkedToMCC: isLinkedToMCC,
-          displayStatus: displayStatus,
-          linkDetails: req.link_details,
-          lastSync: req.updated_at || new Date().toISOString(),
-          campaignsCount: 0,
-          monthlySpend: 0,
-          details: {}
-        };
-      });
-      
-      console.log('🎯 الحسابات النهائية من Supabase:', accountsFromSupabase);
-      
-      // تحديث الحسابات مع الحفاظ على التحديثات المحلية
-      setAccounts(prevAccounts => {
-        // دمج البيانات من Supabase مع التحديثات المحلية
-        const mergedAccounts = accountsFromSupabase.map(supabaseAccount => {
-          const localAccount = prevAccounts.find(acc => acc.customerId === supabaseAccount.customerId);
-          
-          // إذا كان هناك تحديث محلي حديث (خلال آخر 10 ثواني)، استخدمه
-          if (localAccount && localAccount.lastSync && supabaseAccount.lastSync) {
-            const localTime = new Date(localAccount.lastSync).getTime();
-            const supabaseTime = new Date(supabaseAccount.lastSync).getTime();
-            const timeDiff = localTime - supabaseTime;
-            
-            // إذا كان التحديث المحلي أحدث من Supabase، استخدمه
-            if (timeDiff > 0 && timeDiff < 10000) { // 10 ثواني
-              console.log(`🔄 استخدام التحديث المحلي للحساب ${supabaseAccount.customerId}`);
-              return localAccount;
-            }
-          }
-          
-          return supabaseAccount;
-        });
-        
-        return mergedAccounts;
-      });
-      
-      // تحديث قائمة الانتظار
-      const pendingAccounts = accountsFromSupabase.filter((acc: GoogleAdsAccount) => 
-        acc.displayStatus === 'Awaiting Acceptance'
-      );
-      setPendingInvitations(pendingAccounts.map((acc: GoogleAdsAccount) => acc.customerId));
       
     } catch (error) {
       console.error('❌ خطأ في جلب الحسابات من Supabase:', error);
-      setAccounts([]);
     } finally {
       setLoading(false);
     }
@@ -627,14 +586,14 @@ const GoogleAdsContent: React.FC = () => {
                 }
               }
               
-              // جلب الحالة الفعلية من Flask backend مباشرة
-              console.log(`🔍 Fetching real-time status from Flask backend for account ${customerId}...`);
+              // جلب الحالة الفعلية من Next.js API (بدلاً من Flask backend)
+              console.log(`🔍 Fetching real-time status from Next.js API for account ${customerId}...`);
               
               let displayStatus = 'Link Google Ads';
               let isLinkedToMCC = false;
               let linkDetails = null;
               
-              // استدعاء Flask backend للحصول على الحالة الفعلية
+              // استدعاء Next.js API للحصول على الحالة الفعلية
               try {
                 const statusResponse = await fetch(`/api/discover-account-status/${customerId}`, {
                   method: 'GET',
@@ -643,12 +602,12 @@ const GoogleAdsContent: React.FC = () => {
                 
                 if (statusResponse.ok) {
                   const statusData = await statusResponse.json();
-                  console.log(`📊 Flask backend status for ${customerId}:`, statusData);
+                  console.log(`📊 Next.js API status for ${customerId}:`, statusData);
                   
                   if (statusData.success) {
                     linkDetails = statusData.link_details;
                     
-                    // تحديد الحالة بناءً على Flask backend
+                    // تحديد الحالة بناءً على Next.js API
                     switch (statusData.status) {
                       case 'PENDING':
                         displayStatus = 'Awaiting Acceptance';
@@ -693,7 +652,7 @@ const GoogleAdsContent: React.FC = () => {
                           customer_id: customerId,
                           request_type: 'link_request',
                           account_name: account.name || `Account ${customerId}`,
-                          status: statusData.status, // الحالة الفعلية من Flask backend
+                          status: statusData.status, // الحالة الفعلية من Next.js API
                           link_details: statusData.link_details
                         })
                       });
@@ -707,13 +666,13 @@ const GoogleAdsContent: React.FC = () => {
                       console.warn(`⚠️ خطأ في حفظ الحالة للحساب ${customerId}:`, error);
                     }
                   } else {
-                    console.warn(`⚠️ Flask backend returned error for ${customerId}:`, statusData.error);
+                    console.warn(`⚠️ Next.js API returned error for ${customerId}:`, statusData.error);
                   }
                 } else {
-                  console.warn(`⚠️ Failed to fetch status from Flask backend for ${customerId}:`, statusResponse.status);
+                  console.warn(`⚠️ Failed to fetch status from Next.js API for ${customerId}:`, statusResponse.status);
                 }
               } catch (error) {
-                console.warn(`⚠️ Error calling Flask backend for ${customerId}:`, error);
+                console.warn(`⚠️ Error calling Next.js API for ${customerId}:`, error);
               }
               
               return {
@@ -848,7 +807,7 @@ const GoogleAdsContent: React.FC = () => {
       let acceptedCount = 0;
       let rejectedCount = 0;
       
-      // Check each pending account from official backend
+      // Check each pending account from Next.js API
       for (const customerId of pending) {
         try {
           console.log(`🔍 Checking ${customerId} using official API...`);
@@ -999,7 +958,7 @@ const GoogleAdsContent: React.FC = () => {
       }
       
       // Create link request using Next.js API route (proper flow)
-      const linkResponse = await fetch(`/api/google-ads/link-customer`, {
+      const linkResponse = await fetch(`/api/oauth/link-account`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1076,8 +1035,11 @@ const GoogleAdsContent: React.FC = () => {
       console.log(`🖱️ User clicked ${account.customerId} - checking status using official API`);
       
       try {
-        const backendUrl = `/api/google-ads/link-status/${account.customerId}`;
-        const response = await fetch(backendUrl);
+        const nextjsApiUrl = `/api/discover-account-status/${account.customerId}`;
+        const response = await fetch(nextjsApiUrl, {
+          method: 'GET',
+          credentials: 'include'
+        });
         if (response.ok) {
           const data = await response.json();
           console.log(`📊 Click status check result:`, data);

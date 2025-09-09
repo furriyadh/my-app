@@ -2,21 +2,62 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export const supabase = supabaseUrl && supabaseAnonKey 
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
 
+// Service role client for admin operations (bypasses RLS)
+export const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
+
 // Function to save or update user profile
 export async function saveUserProfile(userInfo: any): Promise<UserProfile | null> {
-  if (!supabase) {
-    console.error('Supabase not configured');
+  if (!supabaseAdmin) {
+    console.error('Supabase admin not configured');
     return null;
   }
   
   try {
+    // تحويل Google ID إلى UUID format
+    const generateUUID = (googleId: string) => {
+      // استخدام Google ID كأساس لإنشاء UUID
+      const hash = googleId.padEnd(32, '0').substring(0, 32);
+      return `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
+    };
+
+    const userId = generateUUID(userInfo.id);
+
+    // أولاً: إنشاء user في جدول users إذا لم يكن موجوداً
+    const { data: existingUser, error: userSelectError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (!existingUser) {
+      // إنشاء user جديد
+      const { error: userInsertError } = await supabaseAdmin
+        .from('users')
+        .insert([{
+          id: userId,
+          email: userInfo.email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+
+      if (userInsertError) {
+        console.error('❌ Error creating user:', userInsertError);
+        return null;
+      }
+      console.log('✅ Created user in users table');
+    }
+
     const profileData = {
-      id: userInfo.id,
+      id: userId,
+      user_id: userId, // إضافة user_id المطلوب
       email: userInfo.email,
       name: userInfo.name || null,
       picture: userInfo.picture || null,
@@ -26,7 +67,7 @@ export async function saveUserProfile(userInfo: any): Promise<UserProfile | null
     };
 
     // محاولة التحديث أولاً
-    const { data: existingProfile, error: selectError } = await supabase
+    const { data: existingProfile, error: selectError } = await supabaseAdmin
       .from('user_profiles')
       .select('*')
       .eq('id', userInfo.id)
@@ -34,7 +75,7 @@ export async function saveUserProfile(userInfo: any): Promise<UserProfile | null
 
     if (existingProfile) {
       // تحديث الملف الموجود
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('user_profiles')
         .update(profileData)
         .eq('id', userInfo.id)
@@ -50,7 +91,7 @@ export async function saveUserProfile(userInfo: any): Promise<UserProfile | null
       return data;
     } else {
       // إنشاء ملف جديد
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('user_profiles')
         .insert([{
           ...profileData,

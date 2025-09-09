@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
       jsonResponse.cookies.set('oauth_code_verifier', codeVerifier, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: 'strict',    // يمنع هجمات CSRF
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
         maxAge: 600,
         path: '/'
       });
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
       jsonResponse.cookies.set('oauth_state', state, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: 'strict',    // يمنع هجمات CSRF
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
         maxAge: 600,
         path: '/'
       });
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
       jsonResponse.cookies.set('oauth_session_id', sessionId, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: 'strict',    // يمنع هجمات CSRF
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
         maxAge: 600,
         path: '/'
       });
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
         jsonResponse.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: 'strict',    // يمنع هجمات CSRF
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
           maxAge: 600,
           path: '/'
         });
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
         jsonResponse.cookies.set('oauth_redirect_after', redirect_after, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: 'strict',    // يمنع هجمات CSRF
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
           maxAge: 600,
           path: '/'
         });
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
     response.cookies.set('oauth_code_verifier', codeVerifier, {
       httpOnly: true,        // يمنع الوصول من JavaScript
       secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-      sameSite: 'strict',    // يمنع هجمات CSRF
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
       maxAge: 600,           // 10 دقائق
       path: '/'
     });
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
     response.cookies.set('oauth_state', state, {
       httpOnly: true,        // يمنع الوصول من JavaScript
       secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-      sameSite: 'strict',    // يمنع هجمات CSRF
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
       maxAge: 600,           // 10 دقائق
       path: '/'
     });
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
       response.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: 'strict',    // يمنع هجمات CSRF
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
         maxAge: 600,
         path: '/'
       });
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
       response.cookies.set('oauth_redirect_after', redirect_after, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: 'strict',    // يمنع هجمات CSRF
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
         maxAge: 600,
         path: '/'
       });

@@ -1140,6 +1140,9 @@ def sync_all_statuses():
 if __name__ == '__main__':
     # استخدام المنفذ من متغير البيئة PORT (Railway) أو 5000 للتطوير المحلي
     port = int(os.getenv('PORT', 5000))
+    
+    # استخدام Flask development server في جميع الحالات
+    # Railway سيتعامل مع production server تلقائياً
     app.run(
         host='0.0.0.0',
         port=port,
