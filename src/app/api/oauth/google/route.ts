@@ -65,8 +65,23 @@ export async function GET(request: NextRequest) {
     // تحديد redirect_uri حسب البيئة (حسب Google Ads API Documentation)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000');
     const redirectUri = `${baseUrl}/api/oauth/google/callback`;
+    
+    // التحقق من تطابق redirect_uri مع Google Cloud Console
+    console.log('🔍 NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
+    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+    console.log('🔍 Final redirectUri:', redirectUri);
     console.log('🔗 Base URL:', baseUrl);
     console.log('🔗 Redirect URI:', redirectUri);
+    
+    // التحقق من أن redirect_uri يطابق Google Cloud Console
+    const expectedRedirectUri = 'https://furriyadh.com/api/oauth/google/callback';
+    if (redirectUri !== expectedRedirectUri) {
+      console.error('❌ redirect_uri mismatch!');
+      console.error('Expected:', expectedRedirectUri);
+      console.error('Actual:', redirectUri);
+    } else {
+      console.log('✅ redirect_uri matches Google Cloud Console');
+    }
     
     // توليد PKCE و state (حسب Google Identity Platform)
     const { codeVerifier, codeChallenge } = generatePKCE();
