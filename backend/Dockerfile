@@ -30,7 +30,8 @@ EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/api/health || exit 1
+    CMD curl -f http://localhost:${PORT:-5000}/api/health || exit 1
 
-# Start command
-CMD ["python", "app.py"]
+# Make start script executable and set as start command
+RUN chmod +x start.sh
+CMD ["./start.sh"]
