@@ -88,19 +88,24 @@ else:
 
 # بدون تشفير - تخزين مباشر
 
-# إعداد Supabase مع Python 3.10
+# إعداد Supabase مع إصدار محدث
 try:
     from supabase import create_client, Client
     SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL', 'https://mkzwqbgcfdzcqmkgzwgy.supabase.co')
     SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rendxYmdjZmR6Y3Fta2d6d2d5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTkzMzk4NSwiZXhwIjoyMDY1NTA5OTg1fQ.Xp687KZnQNvZ99ygaielsRLEIT3ubciunYcNoRZhfd4')
     
-    logger.info("🔄 إنشاء عميل Supabase مع Python 3.10...")
+    logger.info("🔄 إنشاء عميل Supabase مع إصدار محدث...")
+    logger.info(f"🔍 SUPABASE_URL: {SUPABASE_URL}")
+    logger.info(f"🔍 SUPABASE_KEY length: {len(SUPABASE_KEY) if SUPABASE_KEY else 0}")
+    
+    # إنشاء العميل بدون معاملات إضافية
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
     SUPABASE_AVAILABLE = True
     logger.info("✅ Supabase تم إنشاؤه بنجاح")
     
 except Exception as e:
     logger.error(f"❌ فشل إنشاء Supabase: {e}")
+    logger.error(f"🔍 نوع الخطأ: {type(e).__name__}")
     supabase = None
     SUPABASE_AVAILABLE = False
 

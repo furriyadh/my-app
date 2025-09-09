@@ -1,5 +1,5 @@
-# Use Python 3.10 slim image (more stable with Supabase)
-FROM python:3.10-slim
+# Use Python 3.13 slim image (matches local development)
+FROM python:3.13-slim
 
 # Set working directory
 WORKDIR /app
