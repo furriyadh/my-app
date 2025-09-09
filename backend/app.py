@@ -1141,6 +1141,10 @@ if __name__ == '__main__':
     # استخدام المنفذ من متغير البيئة PORT (Railway) أو 5000 للتطوير المحلي
     port = int(os.getenv('PORT', 5000))
     
+    print(f"🚀 Starting Flask app on port {port}")
+    print(f"📊 Environment: {os.getenv('RAILWAY_ENVIRONMENT', 'local')}")
+    print(f"🔧 Production mode: {IS_PRODUCTION}")
+    
     # استخدام Flask development server في جميع الحالات
     # Railway سيتعامل مع production server تلقائياً
     app.run(
