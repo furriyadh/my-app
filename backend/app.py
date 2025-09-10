@@ -1020,6 +1020,7 @@ if __name__ == '__main__':
         logger.warning(f"⚠️ تحذير: فشل في الاتصال بـ Google Ads API: {e}")
         logger.warning("⚠️ سيتم إنشاء العميل عند الحاجة")
         # لا نتوقف - نستمر في تشغيل الخادم
+        pass
 
 @app.route('/api/sync-all-statuses', methods=['POST'])
 def sync_all_statuses():
@@ -1166,12 +1167,17 @@ if __name__ == '__main__':
     print(f"📊 Environment: {os.getenv('RAILWAY_ENVIRONMENT', 'local')}")
     print(f"🔧 Production mode: {IS_PRODUCTION}")
     
-    # استخدام Flask development server في جميع الحالات
-    # Railway سيتعامل مع production server تلقائياً
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=not IS_PRODUCTION,  # تعطيل debug في الإنتاج
-        threaded=True
-    )
+    # في Railway، استخدم Gunicorn (سيتم تشغيله عبر start.sh)
+    # في التطوير المحلي، استخدم Flask development server
+    if os.getenv('RAILWAY_ENVIRONMENT'):
+        print("🚀 Railway environment detected - Gunicorn will handle the server")
+        # لا نقوم بتشغيل app.run() في Railway
+    else:
+        print("💻 Local development - using Flask development server")
+        app.run(
+            host='0.0.0.0',
+            port=port,
+            debug=True,
+            threaded=True
+        )
 
