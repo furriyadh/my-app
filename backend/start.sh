@@ -26,6 +26,6 @@ python --version
 echo "📦 Testing app.py import..."
 python -c "import app; print('✅ app.py imported successfully')"
 
-# بدء Gunicorn
+# بدء Gunicorn مع إعدادات مبسطة
 echo "🔧 Starting Gunicorn..."
-exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 --access-logfile - --error-logfile - --log-level info app:app
+exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 60 --access-logfile - --error-logfile - --log-level debug --preload app:app
