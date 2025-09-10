@@ -47,6 +47,7 @@ const Header: React.FC<HeaderProps> = ({ toggleActive }) => {
                 className="hide-sidebar-toggle transition-all inline-block hover:text-primary-500 cursor-pointer"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   console.log('🍔 Hamburger menu clicked!');
                   toggleActive();
                 }}

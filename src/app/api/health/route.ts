@@ -2,58 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    // فحص حالة الخادم الأمامي
-    const frontendStatus = {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      version: '1.0.0'
-    };
+    const backendUrl = process.env.NODE_ENV === 'production'
+      ? 'https://my-app-production-28d2.up.railway.app'
+      : 'http://localhost:5000';
 
-    // محاولة فحص الخادم الخلفي
-    let backendStatus = null;
+    let backendHealth = {};
     try {
-      const backendUrl = process.env.NODE_ENV === 'production'
-        ? 'https://my-app-production-28d2.up.railway.app'
-        : 'http://localhost:5000';
-      
-      const backendResponse = await fetch(`${backendUrl}/api/health`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        signal: AbortSignal.timeout(5000) // timeout بعد 5 ثوان
-      });
-
+      const backendResponse = await fetch(`${backendUrl}/api/health`);
       if (backendResponse.ok) {
-        backendStatus = await backendResponse.json();
+        backendHealth = await backendResponse.json();
       } else {
-        backendStatus = {
-          status: 'unhealthy',
-          error: `Backend returned ${backendResponse.status}`,
-          timestamp: new Date().toISOString()
-        };
+        backendHealth = { status: 'unhealthy', message: `Backend responded with status ${backendResponse.status}` };
       }
     } catch (error) {
-      backendStatus = {
-        status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      };
+      backendHealth = { status: 'unhealthy', message: `Could not connect to backend: ${error instanceof Error ? error.message : String(error)}` };
     }
 
     return NextResponse.json({
       success: true,
-      frontend: frontendStatus,
-      backend: backendStatus,
-      overall: backendStatus?.status === 'healthy' ? 'healthy' : 'degraded'
-    });
+      frontend: {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        version: '1.0.0' // يمكنك تحديث هذا الإصدار حسب الحاجة
+      },
+      backend: backendHealth,
+      overall_status: (backendHealth as any).status === 'healthy' ? 'healthy' : 'degraded'
+    }, { status: 200 });
 
   } catch (error) {
+    console.error('Error in frontend health check:', error);
     return NextResponse.json({
       success: false,
-      error: 'Health check failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Internal server error during health check',
+      details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }
 }

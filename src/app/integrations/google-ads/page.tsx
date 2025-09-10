@@ -544,30 +544,14 @@ const GoogleAdsContent: React.FC = () => {
       console.log('📥 Fetching customer accounts from OAuth session...');
       console.log('🔍 Current accounts state:', accounts.length);
       
-      // Check authentication status first
-      console.log('🔍 Checking authentication status...');
-      const authResponse = await fetch('/api/auth/status', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
+      // Check cookies first (faster check)
+      const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+      console.log('🔍 Google Ads connection cookie:', hasGoogleAdsConnected);
       
-      if (!authResponse.ok) {
-        console.error('❌ Authentication check failed:', authResponse.status);
-        alert('❌ فشل في التحقق من حالة المصادقة. يرجى تسجيل الدخول أولاً.');
-        window.location.href = '/authentication/sign-in';
-        return;
-      }
-      
-      const authData = await authResponse.json();
-      console.log('🔍 Authentication status:', authData);
-      
-      if (!authData.authenticated) {
-        console.warn('⚠️ User not authenticated, redirecting to sign-in...');
-        alert('⚠️ يرجى تسجيل الدخول أولاً للوصول إلى حسابات Google Ads.');
-        window.location.href = '/authentication/sign-in';
+      if (!hasGoogleAdsConnected) {
+        console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+        alert('⚠️ يرجى الاتصال بـ Google Ads أولاً من صفحة التكاملات.');
+        window.location.href = '/integrations';
         return;
       }
       
@@ -591,7 +575,7 @@ const GoogleAdsContent: React.FC = () => {
         console.warn('⚠️ Token refresh error, but continuing:', refreshError);
       }
       
-      // Check cookies first (note: httpOnly cookies won't show here)
+      // Check cookies (note: httpOnly cookies won't show here)
       console.log('🔍 Checking cookies:', {
         hasGoogleAdsConnected: document.cookie.includes('google_ads_connected=true'),
         allCookies: document.cookie,
@@ -805,70 +789,23 @@ const GoogleAdsContent: React.FC = () => {
     console.log('🔄 Component mounted - starting account fetch...');
     console.log('🔍 Initial state - accounts:', accounts.length, 'loading:', loading);
     
-    // Check authentication status first
-    const checkAuthAndFetch = async () => {
-      try {
-        console.log('🔍 Checking authentication status on component mount...');
-        const authResponse = await fetch('/api/auth/status', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include'
-        });
-        
-        if (!authResponse.ok) {
-          console.error('❌ Authentication check failed:', authResponse.status);
-          alert('❌ فشل في التحقق من حالة المصادقة. يرجى تسجيل الدخول أولاً.');
-          window.location.href = '/authentication/sign-in';
-          return;
-        }
-        
-        const authData = await authResponse.json();
-        console.log('🔍 Authentication status:', authData);
-        
-        if (!authData.authenticated) {
-          console.warn('⚠️ User not authenticated, redirecting to sign-in...');
-          alert('⚠️ يرجى تسجيل الدخول أولاً للوصول إلى صفحة Google Ads.');
-          window.location.href = '/authentication/sign-in';
-          return;
-        }
-        
-        // If authenticated, try to refresh token first
-        console.log('🔄 Attempting to refresh token if needed...');
-        try {
-          const refreshResponse = await fetch('/api/oauth/refresh', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-          });
-          
-          if (refreshResponse.ok) {
-            console.log('✅ Token refreshed successfully');
-          } else {
-            console.warn('⚠️ Token refresh failed, but continuing with existing token');
-          }
-        } catch (refreshError) {
-          console.warn('⚠️ Token refresh error, but continuing:', refreshError);
-        }
-        
-        // If authenticated, proceed with fetching accounts
-        console.log('✅ User authenticated, proceeding with account fetch...');
-        
-        // التدفق الصحيح: Frontend → قاعدة البيانات مباشرة (أسرع وأكثر دقة)
-        // أولاً: جلب الحسابات من قاعدة البيانات مباشرة
-        fetchAccountsFromSupabase();
-        
-      } catch (error) {
-        console.error('❌ Error checking authentication:', error);
-        alert('❌ خطأ في التحقق من المصادقة. يرجى المحاولة مرة أخرى.');
-        window.location.href = '/authentication/sign-in';
-      }
-    };
+    // Check cookies first (faster check)
+    const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+    console.log('🔍 Google Ads connection cookie:', hasGoogleAdsConnected);
     
-    checkAuthAndFetch();
+    if (!hasGoogleAdsConnected) {
+      console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+      alert('⚠️ يرجى الاتصال بـ Google Ads أولاً من صفحة التكاملات.');
+      window.location.href = '/integrations';
+      return;
+    }
+    
+    // If cookie exists, proceed with fetching accounts directly
+    console.log('✅ Google Ads connection cookie found, proceeding with account fetch...');
+    
+    // التدفق الصحيح: Frontend → قاعدة البيانات مباشرة (أسرع وأكثر دقة)
+    // أولاً: جلب الحسابات من قاعدة البيانات مباشرة
+    fetchAccountsFromSupabase();
     
     // الاشتراك في التحديثات الفورية من Supabase
     const subscription = subscribeToClientRequests((payload) => {
@@ -1042,30 +979,14 @@ const GoogleAdsContent: React.FC = () => {
 
   const handleLinkToMCC = async (customerId: string, accountName: string) => {
     try {
-      // Check authentication status first
-      console.log('🔍 Checking authentication before linking...');
-      const authResponse = await fetch('/api/auth/status', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
+      // Check cookies first (faster check)
+      const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+      console.log('🔍 Google Ads connection cookie:', hasGoogleAdsConnected);
       
-      if (!authResponse.ok) {
-        console.error('❌ Authentication check failed:', authResponse.status);
-        alert('❌ فشل في التحقق من حالة المصادقة. يرجى تسجيل الدخول أولاً.');
-        window.location.href = '/authentication/sign-in';
-        return;
-      }
-      
-      const authData = await authResponse.json();
-      console.log('🔍 Authentication status:', authData);
-      
-      if (!authData.authenticated) {
-        console.warn('⚠️ User not authenticated, redirecting to sign-in...');
-        alert('⚠️ يرجى تسجيل الدخول أولاً لإرسال طلبات الربط.');
-        window.location.href = '/authentication/sign-in';
+      if (!hasGoogleAdsConnected) {
+        console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+        alert('⚠️ يرجى الاتصال بـ Google Ads أولاً من صفحة التكاملات.');
+        window.location.href = '/integrations';
         return;
       }
       
@@ -1318,13 +1239,13 @@ const GoogleAdsContent: React.FC = () => {
                     
                     {/* Link Google Ads button */}
                     <div className="ml-2 sm:ml-4">
-                      <button
+                        <button
                         onClick={() => handleLinkToMCC(account.customerId, account.name)}
                         className={`flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium border transition-colors cursor-pointer ${
                           loadingAccounts[account.customerId]
-                            ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
-                            : 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border-green-500/30'
-                        }`}
+                              ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                              : 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border-green-500/30'
+                          }`}
                         disabled={loadingAccounts[account.customerId]}
                         title="Click to link to MCC"
                       >
