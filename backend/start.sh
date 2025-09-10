@@ -19,6 +19,13 @@ fi
 
 echo "✅ app.py found"
 
+# اختبار Python و app.py قبل بدء Gunicorn
+echo "🐍 Testing Python..."
+python --version
+
+echo "📦 Testing app.py import..."
+python -c "import app; print('✅ app.py imported successfully')"
+
 # بدء Gunicorn
 echo "🔧 Starting Gunicorn..."
 exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 --access-logfile - --error-logfile - --log-level info app:app
