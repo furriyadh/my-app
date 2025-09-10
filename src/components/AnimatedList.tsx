@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'motion/react';
 
 const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }) => {
@@ -46,7 +46,7 @@ const AnimatedList = ({
   displayScrollbar = true,
   initialSelectedIndex = -1
 }: {
-  items?: any[];
+  items?: React.ReactNode[];
   onItemSelect?: (item: any, index: number) => void;
   showGradients?: boolean;
   enableArrowNavigation?: boolean;
@@ -116,12 +116,12 @@ const AnimatedList = ({
   }, [selectedIndex, keyboardNav]);
 
   return (
-    <div className={`relative w-[500px] ${className}`}>
+    <div className={`relative w-full sm:w-[400px] md:w-[500px] lg:w-[600px] xl:w-[700px] ${className}`}>
       <div
         ref={listRef}
-        className={`max-h-[400px] overflow-y-auto p-4 ${
+        className={`max-h-[300px] sm:max-h-[350px] md:max-h-[400px] lg:max-h-[450px] xl:max-h-[500px] overflow-y-auto p-2 sm:p-3 md:p-4 ${
           displayScrollbar
-            ? '[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-[#060010] [&::-webkit-scrollbar-thumb]:bg-[#222] [&::-webkit-scrollbar-thumb]:rounded-[4px]'
+            ? '[&::-webkit-scrollbar]:w-[6px] sm:[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-[#060010] [&::-webkit-scrollbar-thumb]:bg-[#222] [&::-webkit-scrollbar-thumb]:rounded-[4px]'
             : 'scrollbar-hide'
         }`}
         onScroll={handleScroll}
@@ -143,8 +143,8 @@ const AnimatedList = ({
               }
             }}
           >
-            <div className={`p-4 bg-[#111] rounded-lg ${selectedIndex === index ? 'bg-[#222]' : ''} ${itemClassName}`}>
-              {typeof item === 'string' ? <p className="text-white m-0">{item}</p> : item}
+            <div className={`p-2 sm:p-3 md:p-4 bg-[#111] rounded-lg ${selectedIndex === index ? 'bg-[#222]' : ''} ${itemClassName}`}>
+              <p className="text-white m-0 text-sm sm:text-base">{item}</p>
             </div>
           </AnimatedItem>
         ))}

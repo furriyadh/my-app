@@ -26,7 +26,7 @@ import json
 from google.protobuf.message import DecodeError
 from grpc import ClientCallDetails, StatusCode, CallCredentials
 
-from google.ads.googleads.errors import GoogleAdsException
+from ..errors import GoogleAdsException
 
 _REQUEST_ID_KEY = "request-id"
 # Codes that are retried upon by google.api_core.

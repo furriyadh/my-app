@@ -26,7 +26,8 @@ import logging
 
 from grpc import UnaryUnaryClientInterceptor, UnaryStreamClientInterceptor
 
-from google.ads.googleads.interceptors import Interceptor, mask_message
+from .interceptor import Interceptor
+from .helpers import mask_message
 from types import SimpleNamespace
 
 

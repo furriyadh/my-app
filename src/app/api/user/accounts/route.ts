@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       valuePreview: c.value?.substring(0, 30) + '...' || 'empty'
     })));
     
-    const accessToken = cookieStore.get('oauth_access_token')?.value;
+    let accessToken = cookieStore.get('oauth_access_token')?.value;
     const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
     
     console.log('🔍 فحص OAuth tokens:', {
@@ -187,6 +187,29 @@ export async function GET(request: NextRequest) {
       cookiesCount: allCookies.length,
       allCookieNames: allCookies.map(c => c.name)
     });
+    
+    // إذا لم يوجد access token، حاول تجديده باستخدام refresh token
+    if (!accessToken && refreshToken) {
+      console.log('🔄 محاولة تجديد access token...');
+      try {
+        const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/oauth/refresh`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          accessToken = refreshData.access_token;
+          console.log('✅ تم تجديد access token بنجاح');
+        } else {
+          console.error('❌ فشل في تجديد access token');
+        }
+      } catch (refreshError) {
+        console.error('❌ خطأ في تجديد access token:', refreshError);
+      }
+    }
     
     // فحص الكاش أولاً
     if (accessToken) {

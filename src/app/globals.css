@@ -123,6 +123,20 @@ body {
   position: relative !important;
 }
 
+.main-wrapper-content.active {
+  .sidebar-area {
+    @apply ltr:left-0 rtl:right-0 xl:ltr:-left-full xl:rtl:-right-full;
+  }
+  
+  .main-content {
+    @apply ltr:pl-[15px] md:ltr:pl-[25px] rtl:pr-[15px] md:rtl:pr-[25px];
+  }
+  
+  .header-area {
+    @apply ltr:left-[15px] rtl:right-[15px] md:ltr:left-[25px] md:rtl:right-[25px];
+  }
+}
+
 /** Force ALL text to white in dashboard */
 .main-wrapper-content h1,
 .main-wrapper-content h2, 

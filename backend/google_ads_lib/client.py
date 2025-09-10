@@ -20,8 +20,8 @@ from google.api_core.gapic_v1.client_info import ClientInfo
 import grpc.experimental
 from proto.enums import ProtoEnumMeta
 
-from google.ads.googleads import config, oauth2, util
-from google.ads.googleads.interceptors import (
+from . import config, oauth2, util
+from .interceptors import (
     MetadataInterceptor,
     ExceptionInterceptor,
     LoggingInterceptor,

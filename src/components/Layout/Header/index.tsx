@@ -44,8 +44,12 @@ const Header: React.FC<HeaderProps> = ({ toggleActive }) => {
             <div className="relative leading-none top-px ltr:mr-[13px] ltr:md:mr-[18px] ltr:lg:mr-[23px] rtl:ml-[13px] rtl:md:ml-[18px] rtl:lg:ml-[23px]">
               <button
                 type="button"
-                className="hide-sidebar-toggle transition-all inline-block hover:text-primary-500"
-                onClick={toggleActive}
+                className="hide-sidebar-toggle transition-all inline-block hover:text-primary-500 cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log('🍔 Hamburger menu clicked!');
+                  toggleActive();
+                }}
               >
                 <i className="material-symbols-outlined !text-[20px]">menu</i>
               </button>

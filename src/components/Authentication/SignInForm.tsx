@@ -81,28 +81,17 @@ const SignInForm: React.FC = () => {
   };
 
   const handleOAuthSignIn = async (provider: "google" | "facebook" | "apple") => {
-    // التأكد من تحميل supabase قبل المتابعة
-    if (!supabase) {
-      setMessage("جاري تحميل النظام...");
-      return;
-    }
-    
     setIsLoading(true);
     setMessage("");
+    
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-          redirectTo: process.env.NODE_ENV === 'production' 
-            ? 'https://furriyadh.com/dashboard' 
-            : `${window.location.origin}/dashboard`,
-        },
-      });
-
-      if (error) {
-        setMessage(`خطأ في المصادقة: ${error.message}`);
+      // استخدام Google Ads OAuth المخصص بدلاً من Supabase OAuth
+      if (provider === "google") {
+        // التوجه إلى Google Ads OAuth endpoint
+        const redirectAfter = encodeURIComponent('/dashboard');
+        window.location.href = `/api/oauth/google?redirect_after=${redirectAfter}`;
       } else {
-        setMessage("");
+        setMessage(`مصادقة ${provider} غير متاحة حالياً. يرجى استخدام Google.`);
       }
     } catch (err: any) {
       setMessage("حدث خطأ غير متوقع أثناء عملية المصادقة.");

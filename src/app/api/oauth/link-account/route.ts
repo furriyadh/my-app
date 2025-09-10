@@ -6,13 +6,38 @@ export async function POST(request: NextRequest) {
     console.log('🔗 ربط الحساب الإعلاني...');
     
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('oauth_access_token')?.value;
+    let accessToken = cookieStore.get('oauth_access_token')?.value;
+    const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    
+    // إذا لم يوجد access token، حاول تجديده باستخدام refresh token
+    if (!accessToken && refreshToken) {
+      console.log('🔄 محاولة تجديد access token...');
+      try {
+        const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/oauth/refresh`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          accessToken = refreshData.access_token;
+          console.log('✅ تم تجديد access token بنجاح');
+        } else {
+          console.error('❌ فشل في تجديد access token');
+        }
+      } catch (refreshError) {
+        console.error('❌ خطأ في تجديد access token:', refreshError);
+      }
+    }
     
     if (!accessToken) {
       return NextResponse.json({
         success: false,
         error: 'No access token found',
-        message: 'لم يتم العثور على access token'
+        message: 'لم يتم العثور على access token - يرجى إعادة تسجيل الدخول',
+        error_type: 'OAUTH_ERROR'
       }, { status: 401 });
     }
     

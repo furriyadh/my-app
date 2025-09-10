@@ -39,6 +39,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
   // إنشاء دالة toggleActive
   const toggleActive = () => {
+    console.log('🔄 Toggling sidebar, current state:', active);
     setActive(!active);
   };
 

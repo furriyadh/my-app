@@ -45,11 +45,32 @@ else:
 # إضافة مسار المكتبة الرسمية
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'google_ads_lib'))
 
-# استيراد المكتبة الرسمية
-from google_ads_lib.client import GoogleAdsClient
-from google_ads_lib.config import load_from_env
-from google_ads_lib.errors import GoogleAdsException
-from google_ads_lib import oauth2, config
+# استيراد المكتبة الرسمية مع معالجة الأخطاء
+try:
+    from google_ads_lib.client import GoogleAdsClient
+    from google_ads_lib.config import load_from_env
+    from google_ads_lib.errors import GoogleAdsException
+    from google_ads_lib import oauth2, config
+    print("✅ Google Ads Library imported successfully from local google_ads_lib")
+except Exception as e:
+    print(f"⚠️ Warning: Local Google Ads Library import failed: {e}")
+    # محاولة استيراد المكتبة الرسمية كبديل
+    try:
+        from google.ads.googleads.client import GoogleAdsClient
+        from google.ads.googleads.config import load_from_env
+        from google.ads.googleads.errors import GoogleAdsException
+        from google.ads.googleads import oauth2, config
+        print("✅ Google Ads Library imported successfully from official package")
+    except Exception as e2:
+        print(f"❌ Both local and official Google Ads Library imports failed: {e2}")
+        # إنشاء classes وهمية للاختبار
+        class GoogleAdsClient:
+            @staticmethod
+            def load_from_dict(*args, **kwargs):
+                raise Exception("Google Ads Library not available")
+        
+        class GoogleAdsException(Exception):
+            pass
 
 # إعداد التسجيل
 logging.basicConfig(
