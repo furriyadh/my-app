@@ -1326,9 +1326,9 @@ const GoogleAdsContent: React.FC = () => {
                 </div>
               ))}
               onItemSelect={handleAccountSelect}
-              showGradients={false}
+              showGradients={true}
               enableArrowNavigation={true}
-              displayScrollbar={false}
+              displayScrollbar={true}
               className="w-full"
             />
           ) : (
