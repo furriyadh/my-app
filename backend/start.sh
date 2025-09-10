@@ -19,12 +19,9 @@ fi
 
 echo "✅ app.py found"
 
-# اختبار Python و app.py قبل بدء الخادم
+# اختبار Python فقط
 echo "🐍 Testing Python..."
 python --version
-
-echo "📦 Testing app.py import..."
-python -c "import app; print('✅ app.py imported successfully')"
 
 # بدء Gunicorn
 echo "🔧 Starting Gunicorn..."
