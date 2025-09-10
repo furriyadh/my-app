@@ -991,8 +991,14 @@ if __name__ == '__main__':
     logger.info("📚 النظام يستخدم المكتبة الرسمية Google Ads Python فقط")
     logger.info("✅ جميع العمليات تتم عبر Google Ads API الرسمي v21")
     
-    # سيتم إنشاء Google Ads Client عند الحاجة فقط
-    logger.info("✅ سيتم إنشاء Google Ads Client عند الحاجة")
+    # اختبار الاتصال بـ Google Ads API
+    try:
+        test_client = get_google_ads_client()
+        logger.info("✅ تم التحقق من الاتصال بـ Google Ads API بنجاح")
+    except Exception as e:
+        logger.error(f"❌ فشل في الاتصال بـ Google Ads API: {e}")
+        logger.error("❌ تأكد من صحة الإعدادات في .env.development")
+        exit(1)
 
 @app.route('/api/sync-all-statuses', methods=['POST'])
 def sync_all_statuses():
