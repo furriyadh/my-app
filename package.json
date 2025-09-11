@@ -24,11 +24,10 @@
     "@radix-ui/react-toast": "^1.2.14",
     "@react-google-maps/api": "^2.20.7",
     "@react-spring/web": "^10.0.1",
-    "@react-three/drei": "^10.3.0",
-    "@react-three/fiber": "^9.1.2",
     "@remixicon/react": "^4.6.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.56.1",
+    "@tabler/icons-react": "^3.34.1",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/pg": "^8.15.4",
     "apexcharts": "^4.7.0",
@@ -65,11 +64,9 @@
     "react-svg-worldmap": "^2.0.0-alpha.16",
     "recharts": "^2.15.4",
     "remixicon": "^4.6.0",
-    "simplex-noise": "^4.0.3",
     "swiper": "^11.2.6",
     "tailwind-merge": "^3.3.1",
-    "tailwind-scrollbar": "^4.0.2",
-    "three": "^0.177.0"
+    "tailwind-scrollbar": "^4.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -82,7 +79,6 @@
     "@types/phoenix": "^1.6.6",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@types/three": "^0.177.0",
     "autoprefixer": "^10.4.21",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "eslint": "^9",

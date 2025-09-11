@@ -655,20 +655,8 @@ def health_check():
             'environment': os.getenv('RAILWAY_ENVIRONMENT', 'local')
         }
         
-        # إضافة معلومات التكوين فقط (بدون اختبار Google Ads API)
-        basic_health.update({
-            'config': {
-                'api_version': 'v21',
-                'developer_token_configured': bool(DEVELOPER_TOKEN),
-                'mcc_customer_id': MCC_CUSTOMER_ID,
-                'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN)
-            },
-            'environment': os.getenv('RAILWAY_ENVIRONMENT', 'local'),
-            'library_info': {
-                'proto_plus': True,
-                'source': 'google_ads_lib'
-            }
-        })
+        # إضافة معلومات بسيطة فقط
+        basic_health['environment'] = os.getenv('RAILWAY_ENVIRONMENT', 'local')
         
         return jsonify(basic_health)
         

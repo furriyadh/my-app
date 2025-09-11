@@ -11,6 +11,7 @@ import PerformanceChart from "@/components/Dashboard/PerformanceChart";
 import RecentCampaigns from "@/components/Dashboard/RecentCampaigns";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import GoogleAds from "@/components/Dashboard/GoogleAds";
+import DarkMode from "@/components/Layout/Header/DarkMode";
 
 const DashboardPage: React.FC = () => {
   const searchParams = useSearchParams();
@@ -364,7 +365,12 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen relative bg-transparent">
-      {/* محتوى الصفحة - AnimatedWave الآن في LayoutProvider */}
+      {/* زر الوضع الليلي/النهاري */}
+      <div className="fixed top-4 right-4 z-50 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-lg p-2 border border-blue-200/30 dark:border-gray-600/30 shadow-lg">
+        <DarkMode />
+      </div>
+      
+      {/* محتوى الصفحة */}
       <div className="relative z-10">
         {/* تم إزالة النافذة المنبثقة نهائياً */}
         {/* 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import { InteractiveInput } from '@/components/ui/interactive-input';
+import DarkMode from '@/components/Layout/Header/DarkMode';
 
 // Integration Card Component
 interface IntegrationCardProps {
@@ -301,6 +302,11 @@ const IntegrationsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen p-6">
+      {/* زر الوضع الليلي/النهاري */}
+      <div className="fixed top-4 right-4 z-50 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-lg p-2 border border-blue-200/30 dark:border-gray-600/30 shadow-lg">
+        <DarkMode />
+      </div>
+      
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">

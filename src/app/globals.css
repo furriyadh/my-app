@@ -116,12 +116,237 @@ body {
   @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 leading-normal dark:text-gray-400;
 }
 
-/** Clean Dashboard - AnimatedWave Background Only */
+/* ضمان أن الوضع النهاري يعمل بشكل صحيح */
+html:not(.dark) {
+  color-scheme: light;
+}
+
+/* ضمان أن زر الوضع الليلي يعمل بشكل صحيح */
+.light-dark-toggle {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.light-dark-toggle:hover {
+  transform: scale(1.1) !important;
+  transition: transform 0.2s ease !important;
+}
+
+/** Clean Dashboard */
 .main-wrapper-content {
   background: transparent !important;
   min-height: 100vh !important;
   position: relative !important;
 }
+
+/* دعم الوضع الليلي للداشبورد */
+.dark .main-wrapper-content {
+  background: #0f172a !important;
+}
+
+/* دعم الوضع الليلي للكروت */
+.dark .bg-white\/10 {
+  background-color: rgba(31, 41, 55, 0.3) !important;
+}
+
+.dark .bg-white\/15 {
+  background-color: rgba(31, 41, 55, 0.4) !important;
+}
+
+.dark .border-blue-200\/30 {
+  border-color: rgba(75, 85, 99, 0.3) !important;
+}
+
+.dark .text-white {
+  color: #f9fafb !important;
+}
+
+.dark .text-blue-100 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+/* دعم الوضع الليلي للألوان الأخرى */
+.dark .text-green-400 {
+  color: #86efac !important;
+}
+
+.dark .text-blue-400 {
+  color: #93c5fd !important;
+}
+
+.dark .text-yellow-400 {
+  color: #fde047 !important;
+}
+
+.dark .text-red-400 {
+  color: #fca5a5 !important;
+}
+
+.dark .text-purple-400 {
+  color: #c4b5fd !important;
+}
+
+.dark .text-orange-400 {
+  color: #fdba74 !important;
+}
+
+/* دعم الوضع الليلي للخلفيات الملونة */
+.dark .bg-green-500\/20 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.dark .bg-blue-500\/20 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .bg-yellow-500\/20 {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+}
+
+.dark .bg-red-500\/20 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .bg-purple-500\/20 {
+  background-color: rgba(168, 85, 247, 0.2) !important;
+}
+
+.dark .bg-orange-500\/20 {
+  background-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+/* دعم الوضع الليلي للجداول */
+.dark .bg-white\/5 {
+  background-color: rgba(31, 41, 55, 0.1) !important;
+}
+
+.dark .bg-white\/8 {
+  background-color: rgba(31, 41, 55, 0.15) !important;
+}
+
+/* دعم الوضع الليلي للحدود */
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+/* دعم الوضع الليلي للظلال */
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* دعم الوضع الليلي للنصوص */
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-800 {
+  color: #e5e7eb !important;
+}
+
+/* دعم الوضع الليلي للخلفيات */
+.dark .bg-gray-50 {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #4b5563 !important;
+}
+
+/* دعم الوضع الليلي للزر الوضع الليلي/النهاري */
+.dark .light-dark-toggle {
+  color: #fbbf24 !important;
+}
+
+.dark .light-dark-toggle:hover {
+  color: #f59e0b !important;
+}
+
+/* دعم الوضع الليلي للـ Aceternity Sidebar */
+.dark .bg-background {
+  background-color: #0f172a !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-700 {
+  border-color: #4b5563 !important;
+}
+
+/* تحسين الـ Sidebar للهواتف */
+@media (max-width: 768px) {
+  .sidebar-mobile {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .sidebar-mobile.active {
+    transform: translateX(0);
+  }
+}
+
+/* تحسينات إضافية للـ Aceternity Sidebar */
+.sidebar-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.sidebar-item-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-item-hover:hover {
+  transform: translateX(4px);
+}
+
+/* تحسين الـ scrollbar للـ Sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+.dark .sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.3);
+}
+
+.dark .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.5);
+}
+
 
 .main-wrapper-content.active {
   .sidebar-area {
@@ -339,6 +564,9 @@ button {
   }
 }
 .dark {
+  /* ضمان أن الوضع الليلي يعمل بشكل صحيح */
+  color-scheme: dark;
+  
   .sidebar-custom-scrollbar {
     /* Handle */
     &::-webkit-scrollbar-thumb {

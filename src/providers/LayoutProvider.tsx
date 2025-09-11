@@ -5,10 +5,9 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import SidebarMenu from "../components/Layout/SidebarMenu";
+import { Sidebar, MobileSidebar } from "../components/Layout/Sidebar";
 import Header from "../components/Layout/Header/index";
 import Footer from "../components/Layout/Footer";
-import AnimatedWave from "../components/ui/AnimatedWave";
 
 
 // Dynamic import للـ supabase client لتجنب مشاكل prerendering
@@ -34,6 +33,7 @@ interface LayoutProviderProps {
 const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
   const [active, setActive] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -41,6 +41,11 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const toggleActive = () => {
     console.log('🔄 Toggling sidebar, current state:', active);
     setActive(!active);
+  };
+
+  // إنشاء دالة toggleSidebar
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   // تحديد الصفحات التي لا تحتاج إلى dashboard layout
@@ -99,33 +104,21 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   // التخطيط الكامل للصفحات المحمية (dashboard فقط)
   return (
     <div className={`main-wrapper-content ${active ? "active" : ""} min-h-screen relative`}>
-      {/* خلفية AnimatedWave المتحركة لجميع صفحات الداشبورد */}
-      <div className="fixed inset-0 z-0">
-        <AnimatedWave
-          speed={0.015}
-          amplitude={30}
-          smoothness={300}
-          wireframe={true}
-          waveColor="#ffffff"
-          opacity={0.6}
-          mouseInteraction={true}
-          quality="medium"
-          waveOffsetY={-300}
-          waveRotation={29.8}
-          autoDetectBackground={false}
-          backgroundColor="#000000"
-          ease={12}
-          mouseDistortionStrength={0.5}
-          mouseDistortionSmoothness={100}
-          mouseDistortionDecay={0.0005}
-          mouseShrinkScaleStrength={0.7}
-          mouseShrinkScaleRadius={200}
-        />
-      </div>
 
       {/* Sidebar */}
       <div className="relative z-20 pointer-events-auto">
-        <SidebarMenu toggleActive={toggleActive} />
+        <Sidebar
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+          className="hidden lg:flex"
+        />
+        <MobileSidebar
+          isOpen={active}
+          onClose={toggleActive}
+          activeItem="overview"
+          onItemClick={() => {}}
+          className="lg:hidden"
+        />
       </div>
 
       {/* Main Content Area */}

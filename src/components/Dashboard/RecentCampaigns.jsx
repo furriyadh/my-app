@@ -66,7 +66,7 @@ const RecentCampaigns = () => {
       }
     });
 
-  // Status configurations - Updated for AnimatedWave background
+  // Status configurations
   const statusConfigs = {
     active: {
       color: "text-green-200 drop-shadow-sm",
