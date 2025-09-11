@@ -655,41 +655,20 @@ def health_check():
             'environment': os.getenv('RAILWAY_ENVIRONMENT', 'local')
         }
         
-        # محاولة اختبار Google Ads API (اختياري)
-        try:
-            client = get_google_ads_client()
-            basic_health.update({
-                'services': {
-                    'google_ads_official_library': True,
-                    'google_ads_client': True
-                },
-                'config': {
-                    'mcc_customer_id': MCC_CUSTOMER_ID,
-                    'developer_token_configured': bool(DEVELOPER_TOKEN),
-                    'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN),
-                    'api_version': 'v21'
-                },
-                'library_info': {
-                    'source': 'google_ads_lib (Official)',
-                    'version': '28.0.0',
-                    'proto_plus': True
-                }
-            })
-        except Exception as api_error:
-            # إذا فشل Google Ads API، نعيد الخادم كـ healthy لكن مع تحذير
-            basic_health.update({
-                'services': {
-                    'google_ads_official_library': False,
-                    'google_ads_client': False
-                },
-                'warning': f'Google Ads API غير متاح: {str(api_error)}',
-                'config': {
-                    'mcc_customer_id': MCC_CUSTOMER_ID,
-                    'developer_token_configured': bool(DEVELOPER_TOKEN),
-                    'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN),
-                    'api_version': 'v21'
-                }
-            })
+        # إضافة معلومات التكوين فقط (بدون اختبار Google Ads API)
+        basic_health.update({
+            'config': {
+                'api_version': 'v21',
+                'developer_token_configured': bool(DEVELOPER_TOKEN),
+                'mcc_customer_id': MCC_CUSTOMER_ID,
+                'oauth_configured': bool(CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN)
+            },
+            'environment': os.getenv('RAILWAY_ENVIRONMENT', 'local'),
+            'library_info': {
+                'proto_plus': True,
+                'source': 'google_ads_lib'
+            }
+        })
         
         return jsonify(basic_health)
         
@@ -1012,15 +991,8 @@ if __name__ == '__main__':
     logger.info("📚 النظام يستخدم المكتبة الرسمية Google Ads Python فقط")
     logger.info("✅ جميع العمليات تتم عبر Google Ads API الرسمي v21")
     
-    # اختبار الاتصال بـ Google Ads API (اختياري - لا نتوقف عند الفشل)
-    try:
-        test_client = get_google_ads_client()
-        logger.info("✅ تم التحقق من الاتصال بـ Google Ads API بنجاح")
-    except Exception as e:
-        logger.warning(f"⚠️ تحذير: فشل في الاتصال بـ Google Ads API: {e}")
-        logger.warning("⚠️ سيتم إنشاء العميل عند الحاجة")
-        # لا نتوقف - نستمر في تشغيل الخادم
-        pass
+    # لا نحاول اختبار Google Ads API عند البدء - سيتم إنشاؤه عند الحاجة
+    logger.info("✅ الخادم جاهز - Google Ads Client سيتم إنشاؤه عند الحاجة")
 
 @app.route('/api/sync-all-statuses', methods=['POST'])
 def sync_all_statuses():
