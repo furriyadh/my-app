@@ -1054,7 +1054,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   <Target className="w-8 h-8 text-gray-800" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-gray-800 bg-clip-text text-transparent">
+                  <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600">
                     Google Ads Dashboard
                   </h1>
                   <p className="text-gray-600 font-medium">AI-Powered Campaign Management</p>

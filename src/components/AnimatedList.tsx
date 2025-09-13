@@ -3,7 +3,7 @@ import { motion, useInView } from 'motion/react';
 
 const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }) => {
   const ref = useRef(null);
-  const inView = useInView(ref, { amount: 0.5, triggerOnce: false });
+  const inView = useInView(ref, { amount: 0.5 });
   return (
     <motion.div
       ref={ref}
@@ -15,7 +15,7 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }) => 
       transition={{ duration: 0.2, delay }}
       className="mb-4 cursor-pointer"
     >
-      {children}
+     {children}
     </motion.div>
   );
 };

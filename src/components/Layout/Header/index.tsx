@@ -10,11 +10,7 @@ import Fullscreen from "./Fullscreen";
 import Notifications from "./Notifications";
 import ProfileMenu from "./ProfileMenu";
 
-interface HeaderProps {
-  toggleActive: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ toggleActive }) => {
+const Header: React.FC = () => {
   useEffect(() => {
     const elementId = document.getElementById("header");
     const handleScroll = () => {
@@ -37,25 +33,10 @@ const Header: React.FC<HeaderProps> = ({ toggleActive }) => {
     <>
       <div
         id="header"
-        className="header-area py-[13px] px-[20px] md:px-[25px] fixed top-0 z-[90] rounded-b-md transition-all"
+        className="header-area py-[13px] px-[20px] md:px-[25px] fixed top-0 z-[90] rounded-b-md transition-all bg-white dark:bg-gray-800 shadow-sm"
       >
         <div className="md:flex md:items-center md:justify-between">
           <div className="flex items-center justify-center md:justify-normal">
-            <div className="relative leading-none top-px ltr:mr-[13px] ltr:md:mr-[18px] ltr:lg:mr-[23px] rtl:ml-[13px] rtl:md:ml-[18px] rtl:lg:ml-[23px]">
-              <button
-                type="button"
-                className="hide-sidebar-toggle transition-all inline-block hover:text-primary-500 cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('🍔 Hamburger menu clicked!');
-                  toggleActive();
-                }}
-              >
-                <i className="material-symbols-outlined !text-[20px]">menu</i>
-              </button>
-            </div>
-
             <SearchForm />
 
             <AppsMenu />

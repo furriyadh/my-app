@@ -11,7 +11,6 @@ import PerformanceChart from "@/components/Dashboard/PerformanceChart";
 import RecentCampaigns from "@/components/Dashboard/RecentCampaigns";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import GoogleAds from "@/components/Dashboard/GoogleAds";
-import DarkMode from "@/components/Layout/Header/DarkMode";
 
 const DashboardPage: React.FC = () => {
   const searchParams = useSearchParams();
@@ -35,7 +34,7 @@ const DashboardPage: React.FC = () => {
       // Main Dashboard Sections
       case "analytics":
         return (
-          <div className="p-6 space-y-6 min-h-screen bg-transparent">
+          <div className="p-6 space-y-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Analytics Dashboard
@@ -79,7 +78,7 @@ const DashboardPage: React.FC = () => {
 
       case "reports":
         return (
-          <div className="p-6 space-y-6 min-h-screen bg-transparent">
+          <div className="p-6 space-y-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Reports & Insights
@@ -122,7 +121,7 @@ const DashboardPage: React.FC = () => {
 
       case "campaigns":
         return (
-          <div className="p-6 space-y-6 min-h-screen bg-transparent">
+          <div className="p-6 space-y-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Campaign Management
@@ -169,7 +168,7 @@ const DashboardPage: React.FC = () => {
 
       case "performance":
         return (
-          <div className="p-6 space-y-6 min-h-screen bg-transparent">
+          <div className="p-6 space-y-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Performance Metrics
@@ -236,7 +235,7 @@ const DashboardPage: React.FC = () => {
       // Account Management Sections
       case "billing":
         return (
-          <div className="p-6 min-h-screen bg-transparent">
+          <div className="p-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Billing & Payments
@@ -269,7 +268,7 @@ const DashboardPage: React.FC = () => {
 
       case "profile":
         return (
-          <div className="p-6 min-h-screen bg-transparent">
+          <div className="p-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 My Profile
@@ -302,7 +301,7 @@ const DashboardPage: React.FC = () => {
 
       case "settings":
         return (
-          <div className="p-6 min-h-screen bg-transparent">
+          <div className="p-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Settings
@@ -337,7 +336,7 @@ const DashboardPage: React.FC = () => {
       // Default Overview Section
       default:
         return (
-          <div className="p-6 space-y-6 min-h-screen bg-transparent">
+          <div className="p-6 space-y-6 min-h-screen">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg mb-2">
                 Dashboard Overview
@@ -364,26 +363,8 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative bg-transparent">
-      {/* زر الوضع الليلي/النهاري */}
-      <div className="fixed top-4 right-4 z-50 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-lg p-2 border border-blue-200/30 dark:border-gray-600/30 shadow-lg">
-        <DarkMode />
-      </div>
-      
-      {/* محتوى الصفحة */}
-      <div className="relative z-10">
-        {/* تم إزالة النافذة المنبثقة نهائياً */}
-        {/* 
-        {showModal && (
-          <AccountSelectionModal
-            isOpen={showModal}
-            onClose={handleCloseModal}
-            onSelect={handleModalSelect}
-          />
-        )}
-        */}
-        {renderSection()}
-      </div>
+    <div className="min-h-screen">
+      {renderSection()}
     </div>
   );
 };

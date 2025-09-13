@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import { InteractiveInput } from '@/components/ui/interactive-input';
-import DarkMode from '@/components/Layout/Header/DarkMode';
 
 // Integration Card Component
 interface IntegrationCardProps {
@@ -302,21 +301,16 @@ const IntegrationsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen p-6">
-      {/* زر الوضع الليلي/النهاري */}
-      <div className="fixed top-4 right-4 z-50 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-lg p-2 border border-blue-200/30 dark:border-gray-600/30 shadow-lg">
-        <DarkMode />
-      </div>
-      
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">
-          <h1 className="text-5xl font-bold text-white mb-4">Integrations</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">Integrations</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Connect your accounts and external services to enhance your advertising campaigns.
           </p>
-          <div className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+          <div className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full border border-gray-200">
             <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-white font-medium">
+            <span className="text-gray-800 font-medium">
               {connectedCount} of {totalCount} connected
             </span>
           </div>

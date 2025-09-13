@@ -5,10 +5,9 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { Sidebar, MobileSidebar } from "../components/Layout/Sidebar";
+import SidebarMenu from "../components/Layout/SidebarMenu";
 import Header from "../components/Layout/Header/index";
 import Footer from "../components/Layout/Footer";
-
 
 // Dynamic import للـ supabase client لتجنب مشاكل prerendering
 const useSupabaseClient = () => {
@@ -32,21 +31,8 @@ interface LayoutProviderProps {
 
 const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
-  const [active, setActive] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-
-  // إنشاء دالة toggleActive
-  const toggleActive = () => {
-    console.log('🔄 Toggling sidebar, current state:', active);
-    setActive(!active);
-  };
-
-  // إنشاء دالة toggleSidebar
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
 
   // تحديد الصفحات التي لا تحتاج إلى dashboard layout
   const isAuthPage = pathname?.startsWith('/authentication') || 
@@ -103,28 +89,17 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
   // التخطيط الكامل للصفحات المحمية (dashboard فقط)
   return (
-    <div className={`main-wrapper-content ${active ? "active" : ""} min-h-screen relative`}>
+    <div className="main-wrapper-content min-h-screen relative">
 
       {/* Sidebar */}
       <div className="relative z-20 pointer-events-auto">
-        <Sidebar
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
-          className="hidden lg:flex"
-        />
-        <MobileSidebar
-          isOpen={active}
-          onClose={toggleActive}
-          activeItem="overview"
-          onItemClick={() => {}}
-          className="lg:hidden"
-        />
+        <SidebarMenu />
       </div>
 
       {/* Main Content Area */}
       <div className="main-content relative z-10 pointer-events-auto">
         {/* Header */}
-        <Header toggleActive={toggleActive} />
+        <Header />
 
         {/* Page Content */}
         <div className="main-content-container bg-transparent">

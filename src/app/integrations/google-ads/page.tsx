@@ -41,7 +41,7 @@ interface GoogleAdsAccount {
   details?: any;
 }
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import AnimatedList from '@/components/AnimatedList';
@@ -1190,7 +1190,7 @@ const GoogleAdsContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen p-4 sm:p-6 md:p-8 relative">
         <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
@@ -1240,27 +1240,27 @@ const GoogleAdsContent: React.FC = () => {
                     {/* Link Google Ads button */}
                     <div className="ml-2 sm:ml-4">
                         <button
-                        onClick={() => handleLinkToMCC(account.customerId, account.name)}
+                          onClick={() => handleLinkToMCC(account.customerId, account.name)}
                         className={`flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium border transition-colors cursor-pointer ${
-                          loadingAccounts[account.customerId]
+                            loadingAccounts[account.customerId]
                               ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
                               : 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border-green-500/30'
                           }`}
-                        disabled={loadingAccounts[account.customerId]}
-                        title="Click to link to MCC"
-                      >
-                        {loadingAccounts[account.customerId] ? (
-                          <>
-                            <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5 animate-spin"></span>
-                            ⏳ Linking...
-                          </>
-                        ) : (
-                          <>
-                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
-                            Link Google Ads
-                          </>
-                        )}
-                      </button>
+                          disabled={loadingAccounts[account.customerId]}
+                          title="Click to link to MCC"
+                        >
+                          {loadingAccounts[account.customerId] ? (
+                            <>
+                              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5 animate-spin"></span>
+                              ⏳ Linking...
+                            </>
+                          ) : (
+                            <>
+                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
+                              Link Google Ads
+                            </>
+                          )}
+                        </button>
                     </div>
                   </div>
                 </div>
