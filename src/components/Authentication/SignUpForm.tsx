@@ -44,10 +44,17 @@ const SignUpForm: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // تحديد رابط إعادة التوجيه بعد تأكيد البريد الإلكتروني ليعود إلى النظام
+      const redirectUrl =
+        process.env.NODE_ENV === "production"
+          ? "https://furriyadh.com/authentication/confirm-email"
+          : `${window.location.origin}/authentication/confirm-email`;
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: { full_name: fullName },
         },
       });
@@ -59,8 +66,17 @@ const SignUpForm: React.FC = () => {
           setMessage(`خطأ في التسجيل: ${signUpError.message}`);
         }
       } else if (data.user) {
-        // لا نقوم بتسجيل الدخول التلقائي، فقط نطلب من المستخدم تأكيد البريد الإلكتروني
-        setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
+        // إذا أعاد Supabase جلسة مباشرة (حسب إعدادات البريد في لوحة Supabase) ننقل المستخدم إلى الـ Dashboard
+        if (data.session) {
+          setMessage("تم التسجيل بنجاح! جاري التوجيه إلى لوحة التحكم...");
+          setTimeout(() => {
+            router.push("/dashboard");
+            router.refresh();
+          }, 1000);
+        } else {
+          // في حالة تفعيل تأكيد البريد الإلكتروني بدون جلسة مباشرة
+          setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
+        }
       } else {
         setMessage("بدأت عملية التسجيل. يرجى التحقق من بريدك الإلكتروني للتأكيد.");
       }
