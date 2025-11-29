@@ -77,36 +77,38 @@ const ScrollList = <T,>({
   const itemVariants: Variants = {
     hidden: {
       opacity: 0,
-      scale: 0.7,
-      transition: { duration: 0.35, ease: "easeOut" },
+      scale: 0.85,
+      transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] },
     },
     focused: {
       opacity: 1,
       scale: 1,
       zIndex: 10,
-      transition: { duration: 0.35, ease: "easeOut" },
+      transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
     },
     next: {
       opacity: 1,
-      scale: 0.95,
+      scale: 0.97,
       zIndex: 5,
-      transition: { duration: 0.35, ease: "easeOut" },
+      transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
     },
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.35, ease: "easeOut" },
+      transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] },
     },
   };
 
   return (
     <div
       ref={listRef}
-      className="scroll-list__wrp scrollbar-hidden mx-auto w-full"
+      className="scroll-list__wrp scrollbar-hidden mx-auto w-full scroll-smooth"
       style={{ 
         height: "500px", 
         overflowY: "auto",
-        padding: "10px 0"
+        padding: "10px 0",
+        scrollBehavior: "smooth",
+        WebkitOverflowScrolling: "touch"
       }}
     >
       {data.map((item, index) => {

@@ -884,4 +884,3 @@ class ShoppingCampaignCreator:
                 
         except Exception as e:
             print(f"⚠️ خطأ في إضافة تتبع تحويلات التسوق: {e}")
-

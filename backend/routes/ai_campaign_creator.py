@@ -874,6 +874,33 @@ def get_keyword_cpc_data():
                                     logger.warning(f"   ⚠️ Country code '{country_code}' not found in country_map")
                             else:
                                 logger.warning(f"   ⚠️ No countryCode provided for location {loc.get('name')}")
+                                logger.info(f"   🔍 Attempting to infer country from location name...")
+                                
+                                # Smart fallback: Try to detect country from location name
+                                location_name_lower = loc.get('name', '').lower()
+                                inferred_code = None
+                                
+                                # Saudi Arabia detection
+                                if any(term in location_name_lower for term in ['saudi', 'السعودية', 'رياض', 'riyadh', 'jeddah', 'جدة', 'dammam', 'الدمام']):
+                                    inferred_code = 'SA'
+                                # UAE detection  
+                                elif any(term in location_name_lower for term in ['uae', 'emirates', 'الإمارات', 'dubai', 'دبي', 'abu dhabi', 'أبو ظبي']):
+                                    inferred_code = 'AE'
+                                # Egypt detection
+                                elif any(term in location_name_lower for term in ['egypt', 'مصر', 'cairo', 'القاهرة']):
+                                    inferred_code = 'EG'
+                                # Kuwait detection
+                                elif any(term in location_name_lower for term in ['kuwait', 'الكويت']):
+                                    inferred_code = 'KW'
+                                # Qatar detection
+                                elif any(term in location_name_lower for term in ['qatar', 'قطر', 'doha', 'الدوحة']):
+                                    inferred_code = 'QA'
+                                
+                                if inferred_code:
+                                    location_id = country_map.get(inferred_code)
+                                    if location_id and location_id not in location_ids:
+                                        location_ids.append(location_id)
+                                        logger.info(f"   ✅ Inferred country '{inferred_code}' from location name, added {location_id} for Keyword Planner")
                     
                     # FALLBACK: Try to search for location by name using Google Ads API
                     elif 'name' in loc:
@@ -955,8 +982,15 @@ def get_keyword_cpc_data():
                 from services.website_analyzer import WebsiteAnalyzer
                 website_analyzer = WebsiteAnalyzer()
                 analysis_result = website_analyzer.analyze_website(website_url)
-                if analysis_result.get('success') and 'suggested_keywords' in analysis_result:
-                    keywords = analysis_result['suggested_keywords'][:10]
+                if analysis_result.get('success') and analysis_result.get('analysis', {}).get('keywords_suggestions'):
+                    # keywords_suggestions is a dict with 'primary', 'secondary', 'long_tail' keys
+                    keywords_suggestions = analysis_result['analysis']['keywords_suggestions']
+                    # Combine all keyword categories, prioritizing primary
+                    keywords = (
+                        keywords_suggestions.get('primary', [])[:5] +
+                        keywords_suggestions.get('secondary', [])[:3] +
+                        keywords_suggestions.get('long_tail', [])[:2]
+                    )
                     logger.info(f"Extracted {len(keywords)} keywords from website analysis")
             except Exception as e:
                 logger.warning(f"Could not extract keywords from website: {str(e)}")
@@ -1031,9 +1065,33 @@ def get_keyword_cpc_data():
             # Use location_ids from frontend
             if not location_ids:
                 if proximity_targets:
-                    # Skip Keyword Planner if only proximity targets are provided (no country-level IDs)
-                    logger.warning("⚠️ Proximity targeting only - skipping Keyword Planner")
-                    raise Exception("Keyword Planner skipped - using proximity targeting only")
+                    # Try to infer country from proximity targets
+                    logger.warning("⚠️ No location_ids but proximity_targets exist - attempting to infer country...")
+                    
+                    for prox in proximity_targets:
+                        loc_name = prox.get('name', '').lower()
+                        logger.info(f"   🔍 Analyzing proximity target: {loc_name}")
+                        
+                        # Saudi Arabia
+                        if any(term in loc_name for term in ['saudi', 'السعودية', 'رياض', 'riyadh', 'jeddah', 'جدة', 'dammam', 'الدمام']):
+                            if '2682' not in location_ids:
+                                location_ids.append('2682')
+                                logger.info(f"   ✅ Inferred Saudi Arabia (2682) from proximity target name")
+                        # UAE
+                        elif any(term in loc_name for term in ['uae', 'emirates', 'الإمارات', 'dubai', 'دبي', 'abu dhabi', 'أبو ظبي']):
+                            if '2784' not in location_ids:
+                                location_ids.append('2784')
+                                logger.info(f"   ✅ Inferred UAE (2784) from proximity target name")
+                        # Egypt
+                        elif any(term in loc_name for term in ['egypt', 'مصر', 'cairo', 'القاهرة']):
+                            if '2818' not in location_ids:
+                                location_ids.append('2818')
+                                logger.info(f"   ✅ Inferred Egypt (2818) from proximity target name")
+                    
+                    if not location_ids:
+                        # Still no location_ids, use Saudi Arabia as default for Keyword Planner only
+                        location_ids = ['2682']
+                        logger.warning("⚠️ Could not infer country, using default Saudi Arabia (2682) for Keyword Planner")
                 else:
                     # NO DEFAULT - User must select locations
                     logger.error("❌ No location_ids for Keyword Planner - user must select locations!")

@@ -26,24 +26,121 @@ import {
   Clock,
   Zap
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 const RecentCampaigns = () => {
+  const router = useRouter();
+  const { t } = useTranslation();
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
+  const [error, setError] = useState(null);
 
-  // إرجاع قائمة فارغة بدلاً من البيانات الوهمية
-  const mockCampaigns = [];
-
-  // Load campaigns
+  // Load campaigns from API
   useEffect(() => {
-    setTimeout(() => {
-      setCampaigns(mockCampaigns);
+    fetchCampaigns();
+  }, [statusFilter]);
+
+  const fetchCampaigns = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://my-app-production-28d2.up.railway.app/api' 
+        : 'http://localhost:5000/api';
+
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') {
+        params.append('status', statusFilter.toUpperCase());
+      }
+
+      const response = await fetch(`${backendUrl}/campaigns?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add auth token if available
+          ...(typeof window !== 'undefined' && localStorage.getItem('auth_token') && {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          })
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        const formattedCampaigns = (result.data?.campaigns || result.campaigns || []).map(campaign => ({
+          id: campaign.id,
+          name: campaign.name || 'Unnamed Campaign',
+          type: mapCampaignType(campaign.type || campaign.campaignType),
+          status: mapCampaignStatus(campaign.status),
+          budget: campaign.budget || 0,
+          spent: campaign.cost || campaign.spent || 0,
+          impressions: campaign.impressions || 0,
+          clicks: campaign.clicks || 0,
+          conversions: campaign.conversions || 0,
+          ctr: campaign.ctr || 0,
+          cpc: campaign.cpc || 0,
+          roas: campaign.roas || 0,
+          performance: calculatePerformance(campaign),
+          startDate: campaign.created_date || campaign.start_date || new Date().toISOString(),
+          endDate: campaign.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          lastModified: campaign.last_modified || campaign.created_date || 'Recently'
+        }));
+        
+        setCampaigns(formattedCampaigns);
+      } else {
+        throw new Error(result.error || 'Failed to fetch campaigns');
+      }
+    } catch (err) {
+      console.error('Error fetching campaigns:', err);
+      setError(err.message);
+      // Set empty campaigns on error
+      setCampaigns([]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  // Helper functions
+  const mapCampaignType = (type) => {
+    const typeMap = {
+      'SEARCH': 'Search',
+      'DISPLAY': 'Display',
+      'SHOPPING': 'Shopping',
+      'VIDEO': 'Video',
+      'APP': 'App',
+      'PERFORMANCE_MAX': 'Performance Max',
+      'DEMAND_GEN': 'Demand Gen'
+    };
+    return typeMap[type] || 'Search';
+  };
+
+  const mapCampaignStatus = (status) => {
+    const statusMap = {
+      'ENABLED': 'active',
+      'PAUSED': 'paused',
+      'REMOVED': 'ended',
+      'DRAFT': 'draft'
+    };
+    return statusMap[status] || 'draft';
+  };
+
+  const calculatePerformance = (campaign) => {
+    const roas = campaign.roas || 0;
+    if (roas >= 4) return 'excellent';
+    if (roas >= 2.5) return 'good';
+    if (roas >= 1.5) return 'average';
+    if (roas > 0) return 'poor';
+    return 'pending';
+  };
 
   // Filter and sort campaigns
   const filteredCampaigns = campaigns
@@ -352,16 +449,19 @@ const RecentCampaigns = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-800 mb-2">
-            Recent Campaigns
+            {t.dashboard?.recentCampaigns || 'Recent Campaigns'}
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Manage and monitor your advertising campaigns
+            {t.dashboard?.manageCampaigns || 'Manage and monitor your advertising campaigns'}
           </p>
         </div>
         
-        <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-gray-800 px-4 py-2 rounded-lg transition-colors">
+        <button 
+          onClick={() => router.push('/campaign/new')}
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+        >
           <Plus className="w-4 h-4" />
-          <span>New Campaign</span>
+          <span>{t.campaign?.newCampaign || 'New Campaign'}</span>
         </button>
       </div>
 
@@ -409,6 +509,25 @@ const RecentCampaigns = () => {
       {/* Campaigns List */}
       {isLoading ? (
         <LoadingSkeleton />
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className="flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-800 mb-2">
+            {t.dashboard?.errorLoadingCampaigns || 'Error loading campaigns'}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            {error}
+          </p>
+          <button 
+            onClick={fetchCampaigns}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto"
+          >
+            <Activity className="w-4 h-4" />
+            <span>{t.common?.retry || 'Try Again'}</span>
+          </button>
+        </div>
       ) : filteredCampaigns.length > 0 ? (
         <div className="space-y-4">
           {filteredCampaigns.map(campaign => (
@@ -421,17 +540,20 @@ const RecentCampaigns = () => {
             <AlertCircle className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-800 mb-2">
-            No campaigns found
+            {t.dashboard?.noCampaignsFound || 'No campaigns found'}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
             {searchTerm || statusFilter !== "all" 
-              ? "Try adjusting your search or filter criteria"
-              : "Get started by creating your first campaign"
+              ? t.dashboard?.tryAdjustingFilters || "Try adjusting your search or filter criteria"
+              : t.dashboard?.getStartedCampaign || "Get started by creating your first campaign"
             }
           </p>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-gray-800 px-4 py-2 rounded-lg transition-colors mx-auto">
+          <button 
+            onClick={() => router.push('/campaign/new')}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto"
+          >
             <Plus className="w-4 h-4" />
-            <span>Create Campaign</span>
+            <span>{t.campaign?.createCampaign || 'Create Campaign'}</span>
           </button>
         </div>
       )}

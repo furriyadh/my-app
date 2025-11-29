@@ -44,10 +44,20 @@ const SignUpForm: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // تحديد رابط إعادة التوجيه بعد تأكيد البريد الإلكتروني ليتم توجيه المستخدم لصفحة تأكيد البريد (يدعم التطوير والإنتاج)
+      const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+
+      const redirectUrl = appUrl
+        ? `${appUrl}/authentication/confirm-email`
+        : undefined;
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: { full_name: fullName },
         },
       });
@@ -59,8 +69,17 @@ const SignUpForm: React.FC = () => {
           setMessage(`خطأ في التسجيل: ${signUpError.message}`);
         }
       } else if (data.user) {
-        // لا نقوم بتسجيل الدخول التلقائي، فقط نطلب من المستخدم تأكيد البريد الإلكتروني
+        // إذا أعاد Supabase جلسة مباشرة (حسب إعدادات البريد في لوحة Supabase) ننقل المستخدم إلى الـ Dashboard
+        if (data.session) {
+          setMessage("تم التسجيل بنجاح! جاري التوجيه إلى لوحة التحكم...");
+          setTimeout(() => {
+            router.push("/dashboard");
+            router.refresh();
+          }, 1000);
+        } else {
+          // في حالة تفعيل تأكيد البريد الإلكتروني بدون جلسة مباشرة
         setMessage("تم التسجيل بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.");
+        }
       } else {
         setMessage("بدأت عملية التسجيل. يرجى التحقق من بريدك الإلكتروني للتأكيد.");
       }
@@ -80,20 +99,29 @@ const SignUpForm: React.FC = () => {
     
     setIsLoading(true);
     setMessage("");
+    
     try {
+      // مصادقة الحساب في Supabase (وليس Google Ads) حتى يكون لكل عميل حساب واحد متكامل
+      if (provider === "google") {
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL ||
+          (typeof window !== "undefined" ? window.location.origin : "");
+
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
+          provider: "google",
         options: {
-          redirectTo: process.env.NODE_ENV === 'production' 
-            ? 'https://furriyadh.com/dashboard' 
-            : `${window.location.origin}/dashboard`,
+            redirectTo: appUrl ? `${appUrl}/dashboard` : undefined,
         },
       });
 
       if (error) {
-        setMessage(`Error: ${error.message}`);
+          setMessage(`خطأ في المصادقة: ${error.message}`);
       } else {
+          // Supabase سيتولى إعادة التوجيه بعد المصادقة
         setMessage("");
+        }
+      } else {
+        setMessage(`مصادقة ${provider} غير متاحة حالياً. يرجى استخدام Google.`);
       }
     } catch (err: any) {
       setMessage("حدث خطأ غير متوقع أثناء عملية المصادقة.");

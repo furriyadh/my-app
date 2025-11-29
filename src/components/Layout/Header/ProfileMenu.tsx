@@ -3,18 +3,90 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("@/utils/supabase/client").then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+
+  return supabase;
+};
 
 const ProfileMenu: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = useSupabaseClient();
 
   const [active, setActive] = useState<boolean>(false);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null); // Ref for the dropdown container
- 
+
   const handleDropdownToggle = () => {
     setActive((prevState) => !prevState);
   };
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    try {
+      setIsLoggingOut(true);
+
+      if (supabase) {
+        // إنهاء جلسة Supabase (حماية الداشبورد)
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error("خطأ في تسجيل الخروج من Supabase:", error);
+        }
+      }
+
+      // محاولة تنظيف جلسة Google Ads والكوكيز عبر الـ API (اختياري)
+      try {
+        await fetch("/api/oauth/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.warn("⚠️ تعذر إنهاء جلسة Google Ads بالكامل:", err);
+      }
+
+      // مسح localStorage بالكامل لضمان عدم ظهور بيانات المستخدم السابق
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("cached_google_ads_accounts");
+        localStorage.removeItem("oauth_user_info");
+        localStorage.removeItem("userEmail");
+        // مسح إحصائيات الحسابات
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("account_stats_")) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        console.log("✅ تم مسح localStorage بالكامل");
+      }
+    } catch (err) {
+      console.error("خطأ غير متوقع أثناء تسجيل الخروج:", err);
+    } finally {
+      setActive(false);
+      setIsLoggingOut(false);
+    }
     
+    // نقل المستخدم مباشرة إلى صفحة تسجيل الدخول بدون إظهار صفحة وسيطة
+    // استخدام window.location للتأكد من إعادة تحميل الصفحة بالكامل
+    if (typeof window !== "undefined") {
+      window.location.href = "/authentication/sign-in";
+    }
+  };
+
   // Handle clicks outside the dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -176,17 +248,17 @@ const ProfileMenu: React.FC = () => {
               </Link>
             </li>
             <li>
-              <Link
-                href="/authentication/logout/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/authentication/logout/" ? "text-primary-500" : ""
-                }`}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full text-left block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 disabled:opacity-60"
+                disabled={isLoggingOut}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   logout
                 </i>
-                Logout
-              </Link>
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </button>
             </li>
           </ul>
         </div>

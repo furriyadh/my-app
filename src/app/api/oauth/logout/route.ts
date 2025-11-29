@@ -71,6 +71,11 @@ export async function POST(request: NextRequest) {
     response.cookies.delete('oauth_code_verifier');
     response.cookies.delete('oauth_mcc_customer_id');
     response.cookies.delete('oauth_redirect_after');
+    response.cookies.delete('oauth_expires_in');
+    response.cookies.delete('oauth_scope');
+    
+    // حذف Google Ads connection cookie
+    response.cookies.delete('google_ads_connected');
     
     console.log('✅ تم حذف جميع الـ cookies المحلية');
     

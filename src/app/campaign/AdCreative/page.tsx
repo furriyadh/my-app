@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useRouter } from 'next/navigation';
 import { useCampaignContext } from '../../../lib/context/CampaignContext';
 import { Button } from '../../../components/ui/Button';
@@ -307,11 +308,13 @@ const ValidationDisplay: React.FC<{ errors: string[] }> = ({ errors }) => {
 export default function AdCreativePage() {
   const router = useRouter();
   const { state, updateCampaignData } = useCampaignContext();
+  const { t, language, isRTL } = useTranslation();
   
   const [selectedAdType, setSelectedAdType] = useState<AdType>('search');
   const [adCreativeData, setAdCreativeData] = useState<any>({});
   const [isValid, setIsValid] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+
 
   // تحديث بيانات الإعلان
   const handleAdDataChange = (data: any) => {

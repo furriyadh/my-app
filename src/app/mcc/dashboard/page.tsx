@@ -43,6 +43,8 @@ interface UserInfo {
 
 export default function MCCDashboard() {
   const router = useRouter();
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [accounts, setAccounts] = useState<MCCAccount[]>([]);
   const [stats, setStats] = useState<MCCStats | null>(null);
@@ -55,6 +57,20 @@ export default function MCCDashboard() {
   useEffect(() => {
     loadUserData();
     loadMCCData();
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
   }, []);
 
   const loadUserData = () => {

@@ -131,6 +131,14 @@ export const useCampaignContext = () => {
   return context;
 };
 
+// Safe version that doesn't throw errors - returns null if not in provider
+export const useCampaignContextSafe = () => {
+  const context = useContext(CampaignContext);
+  // Return null if context is undefined (not within provider)
+  // This won't throw an error, allowing the component to render
+  return context || null;
+};
+
 interface CampaignProviderProps {
   children: ReactNode;
 }

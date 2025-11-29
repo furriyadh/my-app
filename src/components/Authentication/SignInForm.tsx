@@ -32,13 +32,13 @@ const SignInForm: React.FC = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // التأكد من تحميل supabase قبل المتابعة
     if (!supabase) {
       setMessage("جاري تحميل النظام...");
       return;
     }
-    
+
     setMessage("");
     setIsLoading(true);
 
@@ -58,14 +58,8 @@ const SignInForm: React.FC = () => {
         }
       } else if (data.user && data.session) {
         setMessage("تم تسجيل الدخول بنجاح! جاري التوجيه...");
-        
-        // التأكد من حفظ الجلسة في localStorage
-        await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token
-        });
-        
-        // انتظار قصير للتأكد من حفظ الجلسة ثم التوجيه
+
+        // Supabase يقوم بحفظ الجلسة تلقائياً، فقط نقوم بالتوجيه إلى لوحة التحكم
         setTimeout(() => {
           router.push("/dashboard");
           router.refresh(); // إعادة تحديث الصفحة للتأكد من تطبيق حالة المصادقة
@@ -90,12 +84,15 @@ const SignInForm: React.FC = () => {
     setIsLoading(true);
     setMessage("");
     try {
+      // تحديد رابط إعادة التوجيه بناءً على بيئة التشغيل (يدعم التطوير والإنتاج)
+      const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: process.env.NODE_ENV === 'production' 
-            ? 'https://furriyadh.com/dashboard' 
-            : `${window.location.origin}/dashboard`,
+          redirectTo: appUrl ? `${appUrl}/dashboard` : undefined,
         },
       });
 

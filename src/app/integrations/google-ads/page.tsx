@@ -1,5 +1,228 @@
 'use client';
 
+// CSS styles للتأثيرات البصرية
+const styles = `
+  .updated-account {
+    animation: updatePulse 2s ease-in-out;
+    border: 2px solid #10b981 !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3) !important;
+  }
+  
+  .syncing-account {
+    animation: syncPulse 1s infinite;
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+  }
+  
+  @keyframes updatePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes syncPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  
+  /* كارت الحسابات - تأثير التوهج المتقدم مع تتبع الماوس */
+  .accounts-card {
+    --glow-x: 50%;
+    --glow-y: 50%;
+    --glow-intensity: 0;
+    --glow-radius: 1000px;
+    --glow-color: 16, 185, 129;
+    --border-glow: rgba(16, 185, 129, 0.7);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* التوهج الخارجي الكبير - يتبع الماوس */
+  .accounts-card::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    border-radius: 68px;
+    background: radial-gradient(
+      var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 1)) 0%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.7)) 15%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.5)) 30%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.3)) 50%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.15)) 70%,
+      transparent 90%
+    );
+    pointer-events: none;
+    z-index: -1;
+    transition: all 0.15s ease;
+    filter: blur(25px);
+    opacity: var(--glow-intensity);
+  }
+  
+  /* التوهج الداخلي - spotlight effect */
+  .accounts-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    background: radial-gradient(
+      700px circle at var(--glow-x) var(--glow-y),
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.35)) 0%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.2)) 25%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.1)) 45%,
+      rgba(var(--glow-color), calc(var(--glow-intensity) * 0.05)) 60%,
+      transparent 80%
+    );
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--glow-intensity);
+    transition: opacity 0.15s ease;
+  }
+  
+  /* تأثير hover على الكارت الرئيسي */
+  .accounts-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* تأثير الحدود المتوهجة */
+  .accounts-card > div:first-child {
+    transition: all 0.3s ease;
+    box-shadow: 
+      0 0 0 1px rgba(16, 185, 129, 0.2),
+      0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .accounts-card:hover > div:first-child {
+    box-shadow: 
+      0 0 0 2px rgba(16, 185, 129, 0.5),
+      0 0 30px rgba(16, 185, 129, 0.3),
+      0 0 60px rgba(16, 185, 129, 0.2),
+      0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* تأثير hover على الكروت الداخلية */
+  .account-item {
+    transition: all 0.3s ease;
+  }
+  
+  .account-item:hover {
+    transform: translateX(4px);
+    box-shadow: 
+      0 0 20px rgba(16, 185, 129, 0.15),
+      inset 0 0 30px rgba(16, 185, 129, 0.05);
+  }
+  
+  /* الكرات المتحركة - Floating particles */
+  @keyframes float-slow {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px); 
+      opacity: 0.8;
+    }
+    25% { 
+      transform: translateY(-15px) translateX(10px); 
+      opacity: 0.6;
+    }
+    50% { 
+      transform: translateY(-25px) translateX(-5px); 
+      opacity: 0.9;
+    }
+    75% { 
+      transform: translateY(-10px) translateX(-15px); 
+      opacity: 0.5;
+    }
+  }
+  
+  @keyframes float-medium {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) scale(1); 
+      opacity: 0.7;
+    }
+    33% { 
+      transform: translateY(-20px) translateX(15px) scale(1.2); 
+      opacity: 0.5;
+    }
+    66% { 
+      transform: translateY(-10px) translateX(-10px) scale(0.8); 
+      opacity: 0.9;
+    }
+  }
+  
+  @keyframes float-fast {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) rotate(0deg); 
+      opacity: 0.6;
+    }
+    20% { 
+      transform: translateY(-12px) translateX(8px) rotate(90deg); 
+      opacity: 0.8;
+    }
+    40% { 
+      transform: translateY(-20px) translateX(-5px) rotate(180deg); 
+      opacity: 0.4;
+    }
+    60% { 
+      transform: translateY(-8px) translateX(-12px) rotate(270deg); 
+      opacity: 0.9;
+    }
+    80% { 
+      transform: translateY(-15px) translateX(5px) rotate(360deg); 
+      opacity: 0.5;
+    }
+  }
+  
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+  
+  .animate-float-medium {
+    animation: float-medium 6s ease-in-out infinite;
+  }
+  
+  .animate-float-fast {
+    animation: float-fast 4s ease-in-out infinite;
+  }
+  
+  .status-connected {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+  }
+  
+  .status-pending {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: white !important;
+  }
+  
+  .status-link {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white !important;
+  }
+`;
+
+// دالة لتنسيق رقم الحساب الأعلاني
+const formatCustomerId = (customerId: string): string => {
+  // إزالة أي مسافات أو شرطات موجودة
+  const cleanId = customerId.replace(/[\s-]/g, '');
+  
+  // التحقق من أن الرقم صحيح (10 أرقام)
+  if (cleanId.length === 10 && /^\d+$/.test(cleanId)) {
+    // تقسيم الرقم إلى 3-3-4
+    return `${cleanId.slice(0, 3)}-${cleanId.slice(3, 6)}-${cleanId.slice(6, 10)}`;
+  }
+  
+  // إذا لم يكن 10 أرقام، إرجاع الرقم كما هو
+  return customerId;
+};
+
 // TypeScript interfaces
 interface GoogleAdsAccount {
   id: string;
@@ -12,6 +235,12 @@ interface GoogleAdsAccount {
   isConnected: boolean;
   isLinkedToMCC: boolean;
   displayStatus: string;
+  // حالة وصول الإحصائيات من Google Ads لهذا الحساب
+  isAccessible?: boolean;
+  accessErrorCode?: string | null;
+  accessMessage?: string | null;
+  // علامة للحسابات المرتبطة لكن المعطّلة (تحتاج تفعيل)
+  isDisabled?: boolean;
   linkDetails?: {
     success: boolean;
     linkStatus: string;
@@ -26,27 +255,470 @@ interface GoogleAdsAccount {
   details?: any;
 }
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import AnimatedList from '@/components/AnimatedList';
-import { supabase, getClientRequests, subscribeToClientRequests, type ClientRequest } from '@/lib/supabase';
+import Announcement from '@/components/seraui/Announcement';
+import { supabase, subscribeToClientRequests, type ClientRequest } from '@/lib/supabase';
 
 // Component منفصل للتعامل مع searchParams
 const GoogleAdsContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // ✅ تحميل الحسابات من localStorage فوراً عند بدء التشغيل
+  const [accounts, setAccounts] = useState<GoogleAdsAccount[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('cached_google_ads_accounts');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          console.log('⚡ تحميل فوري من الكاش:', parsed.length, 'حساب');
+          return parsed;
+        }
+      } catch (e) {
+        console.warn('⚠️ فشل تحميل الكاش');
+      }
+    }
+    return [];
+  });
+  
   const [loadingAccounts, setLoadingAccounts] = useState<Record<string, boolean>>({});
   const [pendingInvitations, setPendingInvitations] = useState<string[]>([]);
   
   // حالات النظام
-  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(true);
+  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const autoRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const dataFetchedRef = useRef(false);
+  
+  // حالة الإشعار بعد إرسال طلب الربط
+  const [linkNotification, setLinkNotification] = useState<{
+    show: boolean;
+    customerId: string;
+    accountName: string;
+  } | null>(null);
+  
+  // حالة إشعار الخطأ (للحسابات المعلقة أو المرتبطة بالفعل)
+  const [errorNotification, setErrorNotification] = useState<{
+    show: boolean;
+    type: 'ACCOUNT_SUSPENDED' | 'ALREADY_LINKED' | 'PERMISSION_DENIED' | 'GENERAL_ERROR';
+    customerId: string;
+    message: string;
+    messageEn?: string;
+    helpUrl?: string;
+  } | null>(null);
+
+  // دالة إعداد Server-Sent Events للمزامنة الفورية
+  const setupSSEConnection = () => {
+    try {
+      // إغلاق الاتصال السابق إذا كان موجوداً
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      console.log('🔄 إعداد اتصال Server-Sent Events للمزامنة الفورية...');
+      
+      // إنشاء اتصال SSE جديد
+      const eventSource = new EventSource('/api/account-status-stream');
+      eventSourceRef.current = eventSource;
+
+      // معالجة رسائل الاتصال
+      eventSource.onopen = () => {
+        console.log('✅ تم الاتصال بـ SSE stream بنجاح');
+      };
+
+      // معالجة تحديثات الحالة
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'connected') {
+            console.log('🔗 SSE:', data.message);
+          } else if (data.type === 'heartbeat') {
+            console.log('💓 SSE Heartbeat:', data.message);
+          } else if (data.type === 'status_update') {
+            console.log(`🔄 تحديث فوري للحساب ${data.customer_id}: ${data.status}`);
+            
+            // تحديث الواجهة فوراً
+            let newDisplayStatus = '';
+            let newIsLinkedToMCC = false;
+            
+            switch (data.status) {
+              case 'ACTIVE':
+                newDisplayStatus = 'Connected';
+                newIsLinkedToMCC = true;
+                break;
+              case 'PENDING':
+                newDisplayStatus = 'Pending';
+                newIsLinkedToMCC = false;
+                break;
+              case 'DISABLED':
+              case 'SUSPENDED':
+              case 'CUSTOMER_NOT_ENABLED':
+                newDisplayStatus = 'Connected (Inactive)';
+                newIsLinkedToMCC = true;
+                break;
+              case 'REJECTED':
+              case 'REFUSED':
+              case 'CANCELLED':
+              case 'NOT_LINKED':
+              default:
+                newDisplayStatus = 'Link Google Ads';
+                newIsLinkedToMCC = false;
+            }
+            
+            // تحديث الحساب في الواجهة (الحفاظ على isDisabled)
+            setAccounts(prevAccounts => {
+              const updatedAccounts = prevAccounts.map(acc => 
+                acc.customerId === data.customer_id 
+                  ? { 
+                      ...acc, 
+                      isLinkedToMCC: newIsLinkedToMCC, 
+                      displayStatus: newDisplayStatus,
+                      isDisabled: acc.isDisabled, // الحفاظ على حالة التعطيل
+                      lastSync: data.updated_at
+                    }
+                  : acc
+              );
+              
+              // التأكد من تحديث الحالة
+              console.log(`🔄 SSE Updated account ${data.customer_id} status: ${newDisplayStatus} (linked: ${newIsLinkedToMCC}, isDisabled: ${prevAccounts.find(a => a.customerId === data.customer_id)?.isDisabled})`);
+              
+              // التحقق من تحديث الحالة بعد التحديث
+              setTimeout(() => {
+                verifyAccountStatusUpdate(data.customer_id, newDisplayStatus, newIsLinkedToMCC);
+              }, 100);
+              
+              return updatedAccounts;
+            });
+            
+            // لا توجد إشعارات للمستخدم - فقط logs في console
+            if (data.status === 'REJECTED' || data.status === 'REFUSED' || data.status === 'CANCELLED' || data.status === 'NOT_LINKED') {
+              if (data.status === 'NOT_LINKED') {
+                console.log(`🔄 العميل ألغى ربط الحساب ${data.customer_id} من Google Ads Console`);
+              } else {
+                console.log(`❌ تم رفض دعوة الحساب ${data.customer_id}`);
+              }
+            }
+            
+            if (data.status === 'ACTIVE') {
+              console.log(`✅ تم قبول دعوة الحساب ${data.customer_id}`);
+            }
+          } else if (data.type === 'error') {
+            console.error('❌ خطأ في SSE:', data.message);
+          }
+        } catch (error) {
+          console.error('❌ خطأ في معالجة رسالة SSE:', error);
+        }
+      };
+
+      // معالجة الأخطاء
+      eventSource.onerror = (error) => {
+        console.warn('⚠️ خطأ في اتصال SSE:', error);
+        
+        // التحقق من حالة الاتصال
+        if (eventSource.readyState === EventSource.CLOSED) {
+          console.log('🔄 اتصال SSE مغلق - إعادة المحاولة...');
+          // إعادة محاولة الاتصال بعد 2 ثانية
+          setTimeout(() => {
+            if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
+              console.log('🔄 إعادة محاولة الاتصال بـ SSE...');
+              setupSSEConnection();
+            }
+          }, 2000);
+        } else if (eventSource.readyState === EventSource.CONNECTING) {
+          console.log('🔄 محاولة الاتصال بـ SSE...');
+        } else {
+          console.log('🔄 اتصال SSE في حالة غير متوقعة:', eventSource.readyState);
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ خطأ في إعداد SSE:', error);
+    }
+  };
+
+  // دالة مساعدة للتحقق من تحديث الحالة
+  const verifyAccountStatusUpdate = (customerId: string, expectedStatus: string, expectedLinked: boolean) => {
+    const account = accounts.find(acc => acc.customerId === customerId);
+    if (account) {
+      const statusMatch = account.displayStatus === expectedStatus;
+      const linkedMatch = account.isLinkedToMCC === expectedLinked;
+      
+      if (statusMatch && linkedMatch) {
+        console.log(`✅ Account ${customerId} status correctly updated: ${expectedStatus} (linked: ${expectedLinked})`);
+        return true;
+      } else {
+        console.warn(`⚠️ Account ${customerId} status mismatch - Expected: ${expectedStatus} (${expectedLinked}), Actual: ${account.displayStatus} (${account.isLinkedToMCC})`);
+        return false;
+      }
+    } else {
+      console.warn(`⚠️ Account ${customerId} not found in accounts list`);
+      return false;
+    }
+  };
+
+  // دالة مزامنة حالة حساب واحد مع Google Ads API (سريعة ومباشرة)
+  const syncSingleAccountStatus = async (customerId: string) => {
+    try {
+      if (!customerId || customerId === 'undefined') {
+        console.error('❌ Invalid customerId:', customerId);
+        return false;
+      }
+      
+      console.log(`🔄 تحديث حالة الحساب ${customerId}...`);
+      
+      // إظهار حالة التحميل للحساب المحدد فقط
+      setLoadingAccounts(prev => ({ ...prev, [customerId]: true }));
+      
+      const response = await fetch(`/api/sync-account-status/${customerId}`, {
+        method: 'POST',
+        credentials: 'include',
+        signal: AbortSignal.timeout(10000) // 10 seconds timeout
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`📊 نتيجة تحديث ${customerId}:`, data);
+        
+        const apiStatus = data.api_status || data.db_status;
+        
+        // تحديد الحالة الجديدة
+        let newDisplayStatus = 'Link Google Ads';
+        let newIsLinkedToMCC = false;
+        
+        switch (apiStatus) {
+          case 'ACTIVE':
+            newDisplayStatus = 'Connected';
+            newIsLinkedToMCC = true;
+            break;
+          case 'PENDING':
+            newDisplayStatus = 'Pending';
+            newIsLinkedToMCC = false;
+            break;
+          default:
+            newDisplayStatus = 'Link Google Ads';
+            newIsLinkedToMCC = false;
+        }
+        
+        // تحديث الـ UI مباشرة (الحفاظ على isDisabled)
+        setAccounts(prev => {
+          const updated = prev.map(acc => {
+            if (acc.customerId === customerId) {
+              // إذا كانت الحالة الحالية Pending ولم يُرجع الباك‑إند ACTIVE أو PENDING صريحاً
+              // نحافظ على Pending (الطلب لا يزال معلقاً)
+              if (acc.displayStatus === 'Pending' && apiStatus !== 'ACTIVE' && apiStatus !== 'REJECTED' && apiStatus !== 'CANCELLED') {
+                console.log(`⏳ الحساب ${customerId} لا يزال في انتظار القبول - الإبقاء على Pending`);
+                return { ...acc, lastSync: new Date().toISOString(), isDisabled: acc.isDisabled };
+              }
+              return { ...acc, displayStatus: newDisplayStatus, isLinkedToMCC: newIsLinkedToMCC, isDisabled: acc.isDisabled, lastSync: new Date().toISOString() };
+            }
+            return acc;
+          });
+          localStorage.setItem('cached_google_ads_accounts', JSON.stringify(updated));
+          return updated;
+        });
+        
+        console.log(`✅ تم تحديث ${customerId}: ${newDisplayStatus}`);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error(`❌ خطأ في تحديث ${customerId}:`, error);
+      return false;
+    } finally {
+      setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
+    }
+  };
+
+  // دالة مزامنة حالة الحساب مع Google Ads API (تُستدعى فقط عند الضغط على زر Refresh)
+  const syncAccountStatus = async (customerId: string, showNotification: boolean = false) => {
+    try {
+      // التحقق من صحة customerId
+      if (!customerId || customerId === 'undefined') {
+        console.error('❌ Invalid customerId in syncAccountStatus:', customerId);
+        return false;
+      }
+      
+      console.log(`🔄 مزامنة حالة الحساب ${customerId}...`);
+      
+      // تم إزالة الفحص المتكرر التلقائي - التحديث يتم فقط عند الضغط على زر Refresh
+      
+      // تحديث timestamp فقط دون تغيير الحالة المرئية للمستخدم (الحفاظ على isDisabled)
+      setAccounts(prevAccounts => 
+        prevAccounts.map(acc => 
+          acc.customerId === customerId 
+            ? { 
+                ...acc, 
+                isDisabled: acc.isDisabled,
+                lastSync: new Date().toISOString()
+              }
+            : acc
+        )
+      );
+      
+      // إظهار تأثير بصري للمزامنة
+      const accountElement = document.querySelector(`[data-customer-id="${customerId}"]`);
+      if (accountElement) {
+        accountElement.classList.add('syncing-account');
+      }
+      
+      // إضافة retry logic مع timeout
+      let response;
+      let retryCount = 0;
+      const maxRetries = 2; // تقليل عدد المحاولات
+      
+      while (retryCount < maxRetries) {
+        try {
+          response = await fetch(`/api/sync-account-status/${customerId}`, {
+            method: 'POST',
+            credentials: 'include',
+            signal: AbortSignal.timeout(15000) // 15 seconds timeout
+          });
+          break; // نجحت المحاولة
+        } catch (error) {
+          retryCount++;
+          console.warn(`⚠️ محاولة ${retryCount}/${maxRetries} فشلت:`, error);
+          
+          if (retryCount >= maxRetries) {
+            throw error; // فشلت جميع المحاولات
+          }
+          
+          // انتظار قبل المحاولة التالية
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
+      }
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log(`✅ تم مزامنة الحساب ${customerId}: ${data.db_status} → ${data.api_status}`);
+          
+          // تحديث الواجهة فوراً (حتى لو لم تتغير الحالة)
+          let newDisplayStatus = '';
+          let newIsLinkedToMCC = false;
+          
+          switch (data.api_status) {
+            case 'ACTIVE':
+              newDisplayStatus = 'Connected';
+              newIsLinkedToMCC = true;
+              break;
+            case 'PENDING':
+              newDisplayStatus = 'Pending';
+              newIsLinkedToMCC = false;
+              break;
+            case 'DISABLED':
+            case 'SUSPENDED':
+            case 'CUSTOMER_NOT_ENABLED':
+              newDisplayStatus = 'Connected (Inactive)';
+              newIsLinkedToMCC = true;
+              break;
+            case 'REJECTED':
+            case 'REFUSED':
+            case 'CANCELLED':
+            case 'NOT_LINKED':
+            default:
+              newDisplayStatus = 'Link Google Ads';
+              newIsLinkedToMCC = false;
+          }
+          
+          // تحديث الواجهة فوراً مع تأثير بصري (الحفاظ على isDisabled)
+          setAccounts(prevAccounts => {
+            const updatedAccounts = prevAccounts.map(acc => 
+              acc.customerId === customerId 
+                ? { 
+                    ...acc, 
+                    isLinkedToMCC: newIsLinkedToMCC, 
+                    displayStatus: newDisplayStatus,
+                    isDisabled: acc.isDisabled,
+                    lastSync: new Date().toISOString()
+                  }
+                : acc
+            );
+            
+            // التأكد من تحديث الحالة
+            console.log(`🔄 Updated account ${customerId} status: ${newDisplayStatus} (linked: ${newIsLinkedToMCC}, isDisabled: ${prevAccounts.find(a => a.customerId === customerId)?.isDisabled})`);
+            
+            // التحقق من تحديث الحالة بعد التحديث
+            setTimeout(() => {
+              verifyAccountStatusUpdate(customerId, newDisplayStatus, newIsLinkedToMCC);
+            }, 100);
+            
+            return updatedAccounts;
+          });
+          
+          // إظهار تأثير بصري للتحديث
+          const accountElement = document.querySelector(`[data-customer-id="${customerId}"]`);
+          if (accountElement) {
+            // إزالة تأثير المزامنة
+            accountElement.classList.remove('syncing-account');
+            // إضافة تأثير التحديث
+            accountElement.classList.add('updated-account');
+            setTimeout(() => {
+              accountElement.classList.remove('updated-account');
+            }, 2000);
+          }
+          
+          if (data.status_changed) {
+            console.log(`🔄 تم اكتشاف تغيير في الحساب ${customerId}: ${newDisplayStatus} (${newIsLinkedToMCC ? 'مرتبط' : 'غير مرتبط'})`);
+            
+            // لا توجد إشعارات للمستخدم
+          } else {
+            console.log(`ℹ️ الحساب ${customerId} محدث بالفعل: ${newDisplayStatus}`);
+            
+            // لا توجد إشعارات للمستخدم
+          }
+          
+          return true;
+        }
+      }
+      
+      // إزالة loading في نهاية الدالة
+      setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
+      
+      return false;
+    } catch (error) {
+      console.error(`❌ خطأ في مزامنة الحساب ${customerId}:`, error);
+      
+      // لا نحتاج لتغيير الحالة في حالة الخطأ لأننا لم نغيرها أصلاً
+      
+      // إزالة التأثير البصري للمزامنة في حالة الخطأ
+      const accountElement = document.querySelector(`[data-customer-id="${customerId}"]`);
+      if (accountElement) {
+        accountElement.classList.remove('syncing-account');
+      }
+      
+      // إزالة loading في حالة الخطأ
+      setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
+      
+      // معالجة أنواع مختلفة من الأخطاء
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.warn(`⚠️ مشكلة في الاتصال بالخادم للحساب ${customerId}`);
+        if (showNotification) {
+          console.error(`⚠️ مشكلة في الاتصال بالخادم للحساب ${customerId} - يرجى المحاولة مرة أخرى.`);
+        }
+      } else if (error.name === 'AbortError') {
+        console.warn(`⚠️ انتهت مهلة الطلب للحساب ${customerId}`);
+        if (showNotification) {
+          console.error(`⚠️ انتهت مهلة الطلب للحساب ${customerId} - يرجى المحاولة مرة أخرى.`);
+        }
+      } else {
+        console.error(`❌ خطأ غير متوقع للحساب ${customerId}:`, error);
+        if (showNotification) {
+          console.error(`❌ خطأ غير متوقع للحساب ${customerId} - يرجى المحاولة مرة أخرى.`);
+        }
+      }
+      
+      return false;
+    }
+  };
 
   // دالة الاكتشاف التلقائي للحالات باستخدام المكتبة الرسمية
   const autoDiscoverAccountStatuses = async () => {
@@ -59,6 +731,13 @@ const GoogleAdsContent: React.FC = () => {
       
       // فحص جميع الحسابات (ليس فقط PENDING)
       for (const account of accounts) {
+        // مزامنة حالة الحساب أولاً
+        const synced = await syncAccountStatus(account.customerId);
+        if (synced) {
+          updatedCount++;
+          continue; // إذا تمت المزامنة، لا نحتاج للفحص الإضافي
+        }
+        
         // فحص الحالة من النظام الجديد
         const response = await fetch(`/api/discover-account-status/${account.customerId}`, {
           method: 'GET',
@@ -77,36 +756,33 @@ const GoogleAdsContent: React.FC = () => {
             
             switch (data.status) {
               case 'PENDING':
-                newDisplayStatus = 'Awaiting Acceptance';
+                newDisplayStatus = 'Pending';
                 newIsLinkedToMCC = false;
                 break;
               case 'ACTIVE':
                 newDisplayStatus = 'Connected';
                 newIsLinkedToMCC = true;
                 break;
+              case 'DISABLED':
+              case 'SUSPENDED':
+              case 'CUSTOMER_NOT_ENABLED':
+                newDisplayStatus = 'Connected (Inactive)';
+                newIsLinkedToMCC = true;
+                break;
               case 'REJECTED':
               case 'REFUSED':
-                newDisplayStatus = 'Send again';
-                newIsLinkedToMCC = false;
-                break;
               case 'CANCELLED':
-                newDisplayStatus = 'Link Google Ads';
-                newIsLinkedToMCC = false;
-                break;
               case 'NOT_LINKED':
+              default:
                 newDisplayStatus = 'Link Google Ads';
                 newIsLinkedToMCC = false;
-                break;
-              default:
-                newDisplayStatus = account.displayStatus;
-                newIsLinkedToMCC = account.isLinkedToMCC;
             }
             
-            // تحديث الواجهة فوراً
+            // تحديث الواجهة فوراً (الحفاظ على isDisabled)
             setAccounts(prevAccounts => 
               prevAccounts.map(acc => 
                 acc.customerId === account.customerId 
-                  ? { ...acc, isLinkedToMCC: newIsLinkedToMCC, displayStatus: newDisplayStatus }
+                  ? { ...acc, isLinkedToMCC: newIsLinkedToMCC, displayStatus: newDisplayStatus, isDisabled: acc.isDisabled }
                   : acc
               )
             );
@@ -136,40 +812,19 @@ const GoogleAdsContent: React.FC = () => {
     }
   };
 
-  // تفعيل المزامنة التلقائية كل 30 ثانية (باستخدام النظام الحالي)
+  // تفعيل المزامنة التلقائية كل 30 ثانية (فحص جميع الحسابات)
   useEffect(() => {
     if (isAutoSyncEnabled && accounts.length > 0) {
       const interval = setInterval(() => {
-        console.log('🔄 المزامنة التلقائية - فحص الحسابات في حالة PENDING...');
+        console.log('🔄 المزامنة التلقائية - فحص جميع الحسابات...');
         
-        // فحص الحسابات في حالة PENDING فقط
-        const pendingAccounts = accounts.filter(acc => acc.displayStatus === 'Awaiting Acceptance');
-        
-        pendingAccounts.forEach(async (account) => {
+        // فحص جميع الحسابات (ليس فقط PENDING)
+        accounts.forEach(async (account) => {
           try {
-            const response = await fetch(`/api/discover-account-status/${account.customerId}`, {
-              method: 'GET',
-              credentials: 'include'
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              
-              if (data.success && data.status === 'ACTIVE') {
-                console.log(`🎉 تم اكتشاف تحديث تلقائي: الحساب ${account.customerId} أصبح Connected!`);
-                
-                // تحديث الواجهة فوراً
-                setAccounts(prevAccounts => 
-                  prevAccounts.map(acc => 
-                    acc.customerId === account.customerId 
-                      ? { ...acc, isLinkedToMCC: true, displayStatus: 'Connected' }
-                      : acc
-                  )
-                );
-                
-                // إزالة من قائمة المراقبة
-                setPendingInvitations(prev => prev.filter(id => id !== account.customerId));
-              }
+            // استخدام دالة المزامنة المحسنة
+            const synced = await syncAccountStatus(account.customerId);
+            if (synced) {
+              console.log(`✅ تم تحديث الحساب ${account.customerId} تلقائياً`);
             }
           } catch (error) {
             console.error(`❌ خطأ في فحص الحساب ${account.customerId}:`, error);
@@ -196,10 +851,12 @@ const GoogleAdsContent: React.FC = () => {
       console.log('💾 OAuth data saved in HttpOnly cookies by API routes');
       
       // Clear URL parameters
+      if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       url.searchParams.delete('oauth_success');
       url.searchParams.delete('message');
       window.history.replaceState({}, '', url.toString());
+      }
       
       // Wait a bit for cookies to be set, then fetch accounts
       setTimeout(() => {
@@ -270,14 +927,29 @@ const GoogleAdsContent: React.FC = () => {
     }
   };
 
-  // دالة لجلب البيانات مباشرة من Supabase
+  // دالة لجلب البيانات مباشرة من Supabase (مفلترة لكل مستخدم عبر API Next.js)
   const fetchAccountsFromSupabase = async () => {
     try {
-      setLoading(true);
+      // إزالة setLoading
       console.log('📥 جلب الحسابات مباشرة من Supabase...');
       
-      const allClientRequests = await getClientRequests();
-      console.log('📋 جميع طلبات العملاء من Supabase:', allClientRequests);
+      // استخدام API داخلي مفلتر بالمستخدم الحالي بدلاً من جلب كل العملاء من الباك‑إند
+      const response = await fetch('/api/client-requests', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('❌ فشل في جلب client_requests من /api/client-requests:', response.status, response.statusText);
+        return;
+      }
+
+      const result = await response.json();
+      const allClientRequests: ClientRequest[] = Array.isArray(result.data) ? result.data : [];
+      console.log('📋 جميع طلبات العملاء (حسب المستخدم الحالي) من Supabase:', allClientRequests);
       
       // تجميع السجلات حسب customer_id واختيار أحدث سجل لكل حساب
       const clientRequestsMap = new Map<string, ClientRequest>();
@@ -295,12 +967,26 @@ const GoogleAdsContent: React.FC = () => {
         console.log('ℹ️ لا توجد طلبات في قاعدة البيانات - جلب الحسابات من Google Ads API وحفظها');
         // إذا لم توجد طلبات في قاعدة البيانات، اجلب الحسابات من Google Ads API وحفظها
         await fetchAndSaveAccountsToDatabase();
-        // إعادة جلب البيانات من قاعدة البيانات بعد الحفظ
-        const allUpdatedRequests = await getClientRequests();
+        // إعادة جلب البيانات لنفس المستخدم الحالي فقط عبر API Next.js
+        const updatedResponse = await fetch('/api/client-requests', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!updatedResponse.ok) {
+          console.error('❌ فشل في إعادة جلب client_requests بعد الحفظ:', updatedResponse.status, updatedResponse.statusText);
+          return;
+        }
+
+        const updatedResult = await updatedResponse.json();
+        const updatedAllRequests: ClientRequest[] = Array.isArray(updatedResult.data) ? updatedResult.data : [];
         
         // تجميع السجلات حسب customer_id واختيار أحدث سجل لكل حساب
         const updatedRequestsMap = new Map<string, ClientRequest>();
-        allUpdatedRequests.forEach((req: ClientRequest) => {
+        updatedAllRequests.forEach((req: ClientRequest) => {
           const existing = updatedRequestsMap.get(req.customer_id);
           if (!existing || new Date(req.updated_at) > new Date(existing.updated_at)) {
             updatedRequestsMap.set(req.customer_id, req);
@@ -310,51 +996,47 @@ const GoogleAdsContent: React.FC = () => {
         const updatedRequests = Array.from(updatedRequestsMap.values());
         if (updatedRequests && updatedRequests.length > 0) {
           console.log('✅ تم حفظ البيانات في قاعدة البيانات');
-          // معالجة البيانات المحفوظة مع دمج الإحصائيات من Google Ads API
-          const accountsFromSupabase = await Promise.all(
-            updatedRequests.map(async (req: ClientRequest) => {
-              let displayStatus = 'Link Google Ads';
-              let isLinkedToMCC = false;
-              
-              switch (req.status as string) {
-                case 'PENDING':
-                  displayStatus = 'Awaiting Acceptance';
-                  isLinkedToMCC = false;
-                  break;
-                case 'ACTIVE':
-                  displayStatus = 'Connected';
-                  isLinkedToMCC = true;
-                  break;
-                case 'REJECTED':
-                case 'REFUSED':
-                  displayStatus = 'Send again';
-                  isLinkedToMCC = false;
-                  break;
-                case 'CANCELLED':
-                  displayStatus = 'Link Google Ads';
-                  isLinkedToMCC = false;
-                  break;
-                default:
-                  displayStatus = 'Link Google Ads';
-                  isLinkedToMCC = false;
-              }
-              
-              // جلب الإحصائيات من Google Ads API
-              let stats = { campaignsCount: 0, monthlySpend: 0 };
-              try {
-                const statsResponse = await fetch(`/api/google-ads/accounts/${req.customer_id}/stats`);
-                if (statsResponse.ok) {
-                  const statsData = await statsResponse.json();
-                  if (statsData.success) {
-                    stats = {
-                      campaignsCount: statsData.summary?.total_campaigns || 0,
-                      monthlySpend: statsData.summary?.total_cost_currency || 0
-                    };
-                  }
-                }
-              } catch (statsError) {
-                console.warn(`⚠️ فشل في جلب إحصائيات الحساب ${req.customer_id}:`, statsError);
-              }
+          // معالجة البيانات المحفوظة من قاعدة البيانات فقط (بدون استدعاء Google Ads API)
+          // استدعاء Google Ads API يتم فقط عند الضغط على زر "Refresh"
+          const accountsFromSupabase = updatedRequests.map((req: ClientRequest) => {
+                let displayStatus = 'Link Google Ads';
+                let isLinkedToMCC = false;
+                
+            // استخدام الحالة المحفوظة في قاعدة البيانات (بدون استدعاء Google Ads API)
+            // التحقق من link_details لمعرفة إذا كان الحساب معطّل
+            const linkDetails = req.link_details || {};
+            const isDisabledFromDB = linkDetails.is_disabled === true || linkDetails.needs_activation === true;
+            
+            switch (req.status as string) {
+                        case 'PENDING':
+                          displayStatus = 'Pending';
+                          isLinkedToMCC = false;
+                          break;
+                        case 'ACTIVE':
+                          displayStatus = 'Connected';
+                          isLinkedToMCC = true;
+                          break;
+                        case 'DISABLED':
+                        case 'SUSPENDED':
+                        case 'CUSTOMER_NOT_ENABLED':
+                          displayStatus = 'Connected';
+                          isLinkedToMCC = true;
+                          break;
+                        case 'REJECTED':
+                        case 'REFUSED':
+                        case 'CANCELLED':
+                        case 'NOT_LINKED':
+                        default:
+                          displayStatus = 'Link Google Ads';
+                          isLinkedToMCC = false;
+                      }
+            console.log(`📋 الحالة المحفوظة للحساب ${req.customer_id}: ${displayStatus} (${req.status}), isDisabled=${isDisabledFromDB}`);
+            
+            // استخدام القيم الافتراضية (بدون استدعاء Google Ads API)
+            const stats = { campaignsCount: 0, monthlySpend: 0 };
+            const isAccessible = true;
+            const accessErrorCode: string | null = null;
+            const accessMessage: string | null = null;
               
               return {
                 id: req.customer_id,
@@ -367,63 +1049,93 @@ const GoogleAdsContent: React.FC = () => {
                 isConnected: true,
                 isLinkedToMCC: isLinkedToMCC,
                 displayStatus: displayStatus,
+                isDisabled: isDisabledFromDB,
+              isAccessible,
+              accessErrorCode,
+              accessMessage,
                 linkDetails: req.link_details,
                 lastSync: req.updated_at || new Date().toISOString(),
                 campaignsCount: stats.campaignsCount,
                 monthlySpend: stats.monthlySpend,
                 details: {}
               };
-            })
-          );
+          });
           
-          console.log('🎯 الحسابات النهائية من Supabase مع الإحصائيات:', accountsFromSupabase);
-          setAccounts(accountsFromSupabase);
+        // فلترة الحسابات الصحيحة فقط
+        const validAccounts = accountsFromSupabase.filter(acc => 
+          acc.customerId && acc.customerId !== 'undefined' && acc.customerId.trim() !== ''
+        );
+        
+          console.log('🎯 الحسابات النهائية من Supabase:', validAccounts);
+        console.log('📊 تفاصيل الحالات:', validAccounts.map(acc => ({
+          customerId: acc.customerId,
+          displayStatus: acc.displayStatus,
+          isLinkedToMCC: acc.isLinkedToMCC
+        })));
+        setAccounts(validAccounts);
+        // Cache accounts for instant loading next time
+        localStorage.setItem('cached_google_ads_accounts', JSON.stringify(validAccounts));
+        console.log('💾 Cached accounts to localStorage');
         }
       } else {
-        // معالجة البيانات الموجودة مع دمج الإحصائيات من Google Ads API
-        const accountsFromSupabase = await Promise.all(
-          clientRequests.map(async (req: ClientRequest) => {
+        // معالجة البيانات الموجودة من قاعدة البيانات فقط (بدون استدعاء Google Ads API)
+        // استدعاء Google Ads API يتم فقط عند الضغط على زر "Refresh"
+        const accountsFromSupabase = clientRequests.map((req: ClientRequest) => {
             let displayStatus = 'Link Google Ads';
             let isLinkedToMCC = false;
             
-            switch (req.status as string) {
-              case 'PENDING':
-                displayStatus = 'Awaiting Acceptance';
-                isLinkedToMCC = false;
-                break;
-              case 'ACTIVE':
-                displayStatus = 'Connected';
-                isLinkedToMCC = true;
-                break;
-              case 'REJECTED':
-              case 'REFUSED':
-                displayStatus = 'Send again';
-                isLinkedToMCC = false;
-                break;
-              case 'CANCELLED':
-                displayStatus = 'Link Google Ads';
-                isLinkedToMCC = false;
-                break;
-              default:
-                displayStatus = 'Link Google Ads';
-                isLinkedToMCC = false;
-            }
+            // التحقق من link_details لمعرفة إذا كان الحساب معطّل
+            const linkDetails = req.link_details || {};
+            const isDisabledFromDB = linkDetails.is_disabled === true || linkDetails.needs_activation === true;
             
-            // جلب الإحصائيات من Google Ads API
+            // استخدام الحالة المحفوظة في قاعدة البيانات (بدون استدعاء Google Ads API)
+            switch (req.status as string) {
+                    case 'PENDING':
+                      displayStatus = 'Pending';
+                      isLinkedToMCC = false;
+                      break;
+                    case 'ACTIVE':
+                      displayStatus = 'Connected';
+                      isLinkedToMCC = true;
+                      break;
+                    case 'DISABLED':
+                    case 'SUSPENDED':
+                    case 'CUSTOMER_NOT_ENABLED':
+                      displayStatus = 'Connected';
+                      isLinkedToMCC = true;
+                      break;
+                    case 'REJECTED':
+                    case 'REFUSED':
+                    case 'CANCELLED':
+                    case 'NOT_LINKED':
+                    default:
+                      displayStatus = 'Link Google Ads';
+                      isLinkedToMCC = false;
+                  }
+            console.log(`📋 الحالة المحفوظة للحساب ${req.customer_id}: ${displayStatus} (${req.status}), isDisabled=${isDisabledFromDB}`);
+            
+            // استخدام الإحصائيات المخزنة مؤقتاً أو القيم الافتراضية (بدون استدعاء Google Ads API)
+            // الإحصائيات الفعلية تُجلب فقط عند الضغط على زر "Refresh"
             let stats = { campaignsCount: 0, monthlySpend: 0 };
+            let isAccessible = true;
+            let accessErrorCode: string | null = null;
+            let accessMessage: string | null = null;
+            
+            // محاولة قراءة الإحصائيات من الكاش المحلي
             try {
-              const statsResponse = await fetch(`/api/google-ads/accounts/${req.customer_id}/stats`);
-              if (statsResponse.ok) {
-                const statsData = await statsResponse.json();
-                if (statsData.success) {
+              const cachedStats = localStorage.getItem(`account_stats_${req.customer_id}`);
+              if (cachedStats) {
+                const parsed = JSON.parse(cachedStats);
                   stats = {
-                    campaignsCount: statsData.summary?.total_campaigns || 0,
-                    monthlySpend: statsData.summary?.total_cost_currency || 0
+                  campaignsCount: parsed.campaignsCount || 0,
+                  monthlySpend: parsed.monthlySpend || 0
                   };
-                }
+                isAccessible = parsed.isAccessible !== false;
+                accessErrorCode = parsed.accessErrorCode || null;
+                accessMessage = parsed.accessMessage || null;
               }
-            } catch (statsError) {
-              console.warn(`⚠️ فشل في جلب إحصائيات الحساب ${req.customer_id}:`, statsError);
+            } catch (e) {
+              console.warn(`⚠️ فشل في قراءة الإحصائيات المخزنة للحساب ${req.customer_id}`);
             }
             
             return {
@@ -437,23 +1149,40 @@ const GoogleAdsContent: React.FC = () => {
               isConnected: true,
               isLinkedToMCC: isLinkedToMCC,
               displayStatus: displayStatus,
+              isDisabled: isDisabledFromDB,
+              isAccessible,
+              accessErrorCode,
+              accessMessage,
               linkDetails: req.link_details,
               lastSync: req.updated_at || new Date().toISOString(),
               campaignsCount: stats.campaignsCount,
               monthlySpend: stats.monthlySpend,
               details: {}
             };
-          })
+          });
+        
+        // فلترة الحسابات الصحيحة فقط
+        const validAccounts = accountsFromSupabase.filter(acc => 
+          acc.customerId && acc.customerId !== 'undefined' && acc.customerId.trim() !== ''
         );
         
-        console.log('🎯 الحسابات النهائية من Supabase مع الإحصائيات:', accountsFromSupabase);
-        setAccounts(accountsFromSupabase);
+        console.log('🎯 الحسابات النهائية من Supabase:', validAccounts);
+        console.log('📊 تفاصيل الحالات:', validAccounts.map(acc => ({
+          customerId: acc.customerId,
+          displayStatus: acc.displayStatus,
+          isLinkedToMCC: acc.isLinkedToMCC,
+          isDisabled: acc.isDisabled
+        })));
+        setAccounts(validAccounts);
+        // Cache accounts for instant loading next time
+        localStorage.setItem('cached_google_ads_accounts', JSON.stringify(validAccounts));
+        console.log('💾 Cached accounts to localStorage');
       }
       
     } catch (error) {
       console.error('❌ خطأ في جلب الحسابات من Supabase:', error);
     } finally {
-      setLoading(false);
+      // إزالة setLoading
     }
   };
 
@@ -482,54 +1211,216 @@ const GoogleAdsContent: React.FC = () => {
     console.log('⏹️ تم إيقاف التحديث التلقائي');
   };
 
-  // دالة مزامنة الحالات من Google Ads API
+  // دالة مزامنة الحالات من Google Ads API (تُستدعى فقط عند الضغط على زر Refresh)
   const syncStatusesFromGoogleAds = async () => {
     try {
       setSyncing(true);
-      console.log('🔄 بدء مزامنة الحالات من Google Ads API...');
+      console.log('🔄 بدء مزامنة الحالات من Google Ads API (يدوياً)...');
       
-      const response = await fetch('/api/sync-statuses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'فشل في المزامنة');
+      // مزامنة كل حساب مرة واحدة فقط
+      let syncedCount = 0;
+      let errorCount = 0;
+      const updatedStatuses: { [key: string]: { displayStatus: string; isLinkedToMCC: boolean; isDisabled?: boolean } } = {};
+      
+      for (const account of accounts) {
+        try {
+          console.log(`🔄 مزامنة الحساب ${account.customerId}...`);
+          
+          // استدعاء sync-account-status مرة واحدة فقط لكل حساب
+          const syncResponse = await fetch(`/api/sync-account-status/${account.customerId}`, {
+            method: 'POST',
+            credentials: 'include',
+            signal: AbortSignal.timeout(15000) // 15 seconds timeout
+          });
+          
+          if (syncResponse.ok) {
+            const syncData = await syncResponse.json();
+            console.log(`📊 نتيجة مزامنة ${account.customerId}:`, JSON.stringify(syncData, null, 2));
+            console.log(`📊 api_status: ${syncData.api_status}, db_status: ${syncData.db_status}`);
+            
+            if (syncData.success || syncData.api_status) {
+              syncedCount++;
+              // استخدام api_status أولاً لأنه يعكس الحالة الفعلية من Google Ads API
+              const apiStatus = syncData.api_status || syncData.db_status;
+              console.log(`✅ تم مزامنة الحساب ${account.customerId}: apiStatus=${apiStatus}, db_status=${syncData.db_status}`);
+              
+              // تحديد الحالة الجديدة بناءً على api_status
+              let newDisplayStatus = 'Link Google Ads';
+              let newIsLinkedToMCC = false;
+              
+              // التحقق من علامة is_disabled من الباك‑إند
+              const linkDetails = syncData.link_details || {};
+              const isDisabled = linkDetails.is_disabled === true || linkDetails.needs_activation === true;
+              
+              
+              switch (apiStatus) {
+                case 'ACTIVE':
+                  newDisplayStatus = 'Connected';
+                  newIsLinkedToMCC = true;
+                  break;
+                case 'PENDING':
+                  newDisplayStatus = 'Pending';
+                  newIsLinkedToMCC = false;
+                  break;
+                case 'REJECTED':
+                case 'REFUSED':
+                case 'CANCELLED':
+                case 'NOT_LINKED':
+                default:
+                  newDisplayStatus = 'Link Google Ads';
+                  newIsLinkedToMCC = false;
+              }
+              
+              updatedStatuses[account.customerId] = { displayStatus: newDisplayStatus, isLinkedToMCC: newIsLinkedToMCC, isDisabled };
+              console.log(`🔄 حالة ${account.customerId}: apiStatus=${apiStatus} → displayStatus=${newDisplayStatus}, isLinkedToMCC=${newIsLinkedToMCC}, isDisabled=${isDisabled}`);
+              
+              // جلب الإحصائيات وحفظها في localStorage (فقط للحسابات المرتبطة)
+              if (newIsLinkedToMCC) {
+                try {
+                  const statsResponse = await fetch(`/api/google-ads/accounts/${account.customerId}/stats`);
+                  if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    if (statsData.success) {
+                      const statsToCache = {
+                        campaignsCount: statsData.summary?.total_campaigns || 0,
+                        monthlySpend: statsData.summary?.total_cost_currency || 0,
+                        isAccessible: true,
+                        accessErrorCode: null,
+                        accessMessage: null,
+                        lastUpdated: new Date().toISOString()
+                      };
+                      localStorage.setItem(`account_stats_${account.customerId}`, JSON.stringify(statsToCache));
+                      console.log(`💾 تم حفظ إحصائيات الحساب ${account.customerId} في الكاش`);
+                    }
+                  }
+                } catch (statsError) {
+                  console.warn(`⚠️ فشل في جلب إحصائيات الحساب ${account.customerId}:`, statsError);
+                }
+              }
+            }
+          } else {
+            errorCount++;
+            console.warn(`⚠️ فشل في مزامنة الحساب ${account.customerId}: ${syncResponse.status}`);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`❌ خطأ في مزامنة الحساب ${account.customerId}:`, error);
+        }
       }
-
-      const data = await response.json();
-      console.log('✅ تمت المزامنة بنجاح:', data);
       
-      // إعادة جلب البيانات من Supabase بعد المزامنة
-      await fetchAccountsFromSupabase();
+      // تحديث الـ UI مباشرة بناءً على نتائج المزامنة
+      if (Object.keys(updatedStatuses).length > 0) {
+        setAccounts(prevAccounts => {
+          const newAccounts = prevAccounts.map(acc => {
+            const updatedStatus = updatedStatuses[acc.customerId];
+            if (updatedStatus) {
+              console.log(`🔄 تحديث UI للحساب ${acc.customerId}: ${acc.displayStatus} → ${updatedStatus.displayStatus}, isDisabled: ${updatedStatus.isDisabled}`);
+              return {
+                ...acc,
+                displayStatus: updatedStatus.displayStatus,
+                isLinkedToMCC: updatedStatus.isLinkedToMCC,
+                isDisabled: updatedStatus.isDisabled || false,
+                lastSync: new Date().toISOString()
+              };
+            }
+            return acc;
+          });
+          
+          // حفظ في localStorage
+          localStorage.setItem('cached_google_ads_accounts', JSON.stringify(newAccounts));
+          console.log('💾 تم تحديث الكاش المحلي');
+          
+          return newAccounts;
+        });
+      }
       
       // إظهار رسالة نجاح
-      if (data.synced_count > 0) {
-        alert(`✅ تمت مزامنة ${data.synced_count} حساب بنجاح!\n\nالتحديثات:\n${data.sync_results?.map((r: any) => `• ${r.customer_id}: ${r.old_status} → ${r.new_status}`).join('\n') || ''}`);
-      } else {
-        alert('ℹ️ جميع الحسابات محدثة بالفعل - لا توجد تغييرات');
+      if (syncedCount > 0) {
+        console.log(`✅ تمت مزامنة ${syncedCount} حساب بنجاح!`);
+      }
+      if (errorCount > 0) {
+        console.warn(`⚠️ فشل في مزامنة ${errorCount} حساب`);
+      }
+      if (syncedCount === 0 && errorCount === 0) {
+        console.log('ℹ️ لا توجد حسابات للمزامنة');
       }
       
     } catch (error) {
       console.error('❌ خطأ في المزامنة:', error);
-      alert(`❌ فشل في المزامنة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+      console.error(`❌ فشل في المزامنة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
     } finally {
       setSyncing(false);
     }
   };
 
-  // Fetch accounts from API using official Google Ads library
+  // Fetch accounts - يستخدم البيانات المحفوظة في Supabase أولاً
+  // لتحديث البيانات من Google Ads API، استخدم زر "Refresh"
   const fetchAccounts = async () => {
     try {
-      setLoading(true);
-      console.log('📥 Fetching customer accounts from OAuth session...');
+      console.log('📥 Fetching accounts (using Supabase data)...');
+      
+      // Check cookies first (faster check)
+      const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+      console.log('🔍 Google Ads connection cookie:', hasGoogleAdsConnected);
+      
+      if (!hasGoogleAdsConnected) {
+        console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/integrations';
+        }
+        return;
+      }
+      
+      // جلب البيانات من Supabase أولاً (بدون استدعاء Google Ads API)
+      await fetchAccountsFromSupabase();
+      
+      console.log('✅ Accounts loaded from Supabase');
+      console.log('ℹ️ To update from Google Ads API, use the Refresh button');
+      
+    } catch (error) {
+      console.error('❌ Error fetching accounts:', error);
+    }
+  };
+
+  // Fetch accounts from Google Ads API (يُستدعى فقط عند الحاجة)
+  const fetchAccountsFromGoogleAdsAPI = async () => {
+    try {
+      console.log('📥 Fetching customer accounts from Google Ads API...');
       console.log('🔍 Current accounts state:', accounts.length);
       
-      // Check cookies first (note: httpOnly cookies won't show here)
+      // Check cookies first (faster check)
+      const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+      console.log('🔍 Google Ads connection cookie:', hasGoogleAdsConnected);
+      
+      if (!hasGoogleAdsConnected) {
+        console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/integrations';
+        }
+        return;
+      }
+      
+      // Try to refresh token if needed
+      console.log('🔄 Attempting to refresh token if needed...');
+      try {
+        const refreshResponse = await fetch('/api/oauth/refresh', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+        
+        if (refreshResponse.ok) {
+          console.log('✅ Token refreshed successfully');
+        } else {
+          console.warn('⚠️ Token refresh failed, but continuing with existing token');
+        }
+      } catch (refreshError) {
+        console.warn('⚠️ Token refresh error, but continuing:', refreshError);
+      }
+      
+      // Check cookies (note: httpOnly cookies won't show here)
       console.log('🔍 Checking cookies:', {
         hasGoogleAdsConnected: document.cookie.includes('google_ads_connected=true'),
         allCookies: document.cookie,
@@ -572,9 +1463,12 @@ const GoogleAdsContent: React.FC = () => {
                 return null;
               }
               
-              // Check account statistics using Next.js API
+              // Check account statistics using Next.js API + حالة إمكانية الوصول
               const statsResponse = await fetch(`/api/google-ads/accounts/${customerId}/stats`);
               let stats = { campaignsCount: 0, monthlySpend: 0 };
+              let isAccessible = true;
+              let accessErrorCode: string | null = null;
+              let accessMessage: string | null = null;
               
               if (statsResponse.ok) {
                 const statsData = await statsResponse.json();
@@ -583,96 +1477,96 @@ const GoogleAdsContent: React.FC = () => {
                     campaignsCount: statsData.summary?.total_campaigns || 0,
                     monthlySpend: statsData.summary?.total_cost_currency || 0
                   };
+                } else if (statsData.error === 'ACCOUNT_NOT_ACCESSIBLE') {
+                  // الحساب غير قابل للوصول من MCC الحالي حسب Google Ads API
+                  isAccessible = false;
+                  accessErrorCode = statsData.error;
+                  accessMessage = statsData.message || 'This Google Ads account is not accessible from the current MCC or is not enabled.';
+                }
+              } else if (statsResponse.status === 401) {
+                const errorData = await statsResponse.json();
+                if (errorData.error_type === 'OAUTH_REAUTH_REQUIRED' && errorData.redirect_to_auth) {
+                  console.warn(`⚠️ OAuth re-authentication required for account ${customerId}`);
+                  // يمكن إضافة إعادة توجيه للمصادقة هنا إذا لزم الأمر
                 }
               }
               
-              // جلب الحالة الفعلية من Next.js API (بدلاً من Flask backend)
-              console.log(`🔍 Fetching real-time status from Next.js API for account ${customerId}...`);
+              // جلب الحالة الفعلية من Google Ads API مباشرة
+              console.log(`🔍 Fetching real-time status from Google Ads API for account ${customerId}...`);
               
               let displayStatus = 'Link Google Ads';
               let isLinkedToMCC = false;
               let linkDetails = null;
               
-              // استدعاء Next.js API للحصول على الحالة الفعلية
+              // استدعاء API للمزامنة المباشرة مع Google Ads API مع retry
               try {
-                const statusResponse = await fetch(`/api/discover-account-status/${customerId}`, {
-                  method: 'GET',
-                  credentials: 'include'
-                });
+                let syncResponse;
+                let retryCount = 0;
+                const maxRetries = 2;
                 
-                if (statusResponse.ok) {
-                  const statusData = await statusResponse.json();
-                  console.log(`📊 Next.js API status for ${customerId}:`, statusData);
-                  
-                  if (statusData.success) {
-                    linkDetails = statusData.link_details;
+                while (retryCount < maxRetries) {
+                  try {
+                    syncResponse = await fetch(`/api/sync-account-status/${customerId}`, {
+                      method: 'POST',
+                      credentials: 'include',
+                      signal: AbortSignal.timeout(10000) // 10 seconds timeout
+                    });
+                    break; // نجحت المحاولة
+                  } catch (error) {
+                    retryCount++;
+                    console.warn(`⚠️ محاولة ${retryCount}/${maxRetries} فشلت للحساب ${customerId}:`, error);
                     
-                    // تحديد الحالة بناءً على Next.js API
-                    switch (statusData.status) {
+                    if (retryCount >= maxRetries) {
+                      throw error; // فشلت جميع المحاولات
+                    }
+                    
+                    // انتظار قبل المحاولة التالية
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                  }
+                }
+                
+                if (syncResponse.ok) {
+                  const syncData = await syncResponse.json();
+                  console.log(`📊 Google Ads API sync for ${customerId}:`, syncData);
+                  
+                  if (syncData.success) {
+                    linkDetails = syncData.link_details;
+                    
+                    // تحديد الحالة بناءً على Google Ads API
+                    switch (syncData.api_status) {
                       case 'PENDING':
-                        displayStatus = 'Awaiting Acceptance';
+                        displayStatus = 'Pending';
                         isLinkedToMCC = false;
                         break;
                       case 'ACTIVE':
-                  displayStatus = 'Connected';
-                  isLinkedToMCC = true;
+                        displayStatus = 'Connected';
+                        isLinkedToMCC = true;
+                        break;
+                      case 'DISABLED':
+                      case 'SUSPENDED':
+                      case 'CUSTOMER_NOT_ENABLED':
+                        displayStatus = 'Connected (Inactive)';
+                        isLinkedToMCC = true;
                         break;
                       case 'REJECTED':
                       case 'REFUSED':
-                        displayStatus = 'Send again';
-                  isLinkedToMCC = false;
-                        break;
                       case 'CANCELLED':
-                  displayStatus = 'Link Google Ads';
-                  isLinkedToMCC = false;
-                        break;
                       case 'NOT_LINKED':
-                        displayStatus = 'Link Google Ads';
-                        isLinkedToMCC = false;
-                        break;
-                      case 'SUSPENDED':
-                        displayStatus = 'Suspended';
-                        isLinkedToMCC = false;
-                        break;
                       default:
                         displayStatus = 'Link Google Ads';
                         isLinkedToMCC = false;
                         break;
                     }
                     
-                    console.log(`✅ Updated status for ${customerId}: ${displayStatus} (${statusData.status})`);
-                    
-                    // حفظ الحالة في قاعدة البيانات للتخزين
-                    try {
-                      const saveResponse = await fetch('/api/client-requests', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                          customer_id: customerId,
-                          request_type: 'link_request',
-                          account_name: account.name || `Account ${customerId}`,
-                          status: statusData.status, // الحالة الفعلية من Next.js API
-                          link_details: statusData.link_details
-                        })
-                      });
-                      
-                      if (saveResponse.ok) {
-                        console.log(`✅ تم حفظ الحالة الفعلية ${statusData.status} للحساب ${customerId} في قاعدة البيانات`);
-                      } else {
-                        console.warn(`⚠️ فشل في حفظ الحالة للحساب ${customerId}:`, saveResponse.status);
-                      }
-                    } catch (error) {
-                      console.warn(`⚠️ خطأ في حفظ الحالة للحساب ${customerId}:`, error);
-                    }
+                    console.log(`✅ Updated status for ${customerId}: ${displayStatus} (${syncData.api_status})`);
                   } else {
-                    console.warn(`⚠️ Next.js API returned error for ${customerId}:`, statusData.error);
+                    console.warn(`⚠️ Google Ads API sync failed for ${customerId}:`, syncData.error);
                   }
                 } else {
-                  console.warn(`⚠️ Failed to fetch status from Next.js API for ${customerId}:`, statusResponse.status);
+                  console.warn(`⚠️ Failed to sync with Google Ads API for ${customerId}:`, syncResponse.status);
                 }
               } catch (error) {
-                console.warn(`⚠️ Error calling Next.js API for ${customerId}:`, error);
+                console.warn(`⚠️ Error syncing with Google Ads API for ${customerId}:`, error);
               }
               
               return {
@@ -684,6 +1578,9 @@ const GoogleAdsContent: React.FC = () => {
                 isConnected: true,
                 isLinkedToMCC: isLinkedToMCC,
                 displayStatus: displayStatus,
+                isAccessible,
+                accessErrorCode,
+                accessMessage,
                 linkDetails: linkDetails, // Real-time link information
                 lastSync: new Date().toISOString(),
                 campaignsCount: stats.campaignsCount,
@@ -708,15 +1605,29 @@ const GoogleAdsContent: React.FC = () => {
           })
         );
         
-        // Filter out null accounts (invalid customerIds)
-        const validAccounts = accountsWithStats.filter(account => account !== null);
+        // Filter out null accounts and invalid customerIds
+        const validAccounts = accountsWithStats.filter(account => 
+          account !== null && 
+          account.customerId && 
+          account.customerId !== 'undefined' && 
+          account.customerId.trim() !== ''
+        );
         console.log('🔍 Setting accounts state with:', validAccounts);
-        console.log('🔍 Account names:', validAccounts.map(acc => ({ id: acc.customerId, name: acc.name })));
+        console.log('🔍 Account names:', validAccounts.map(acc => ({ id: acc.customerId, name: acc.name, status: acc.displayStatus })));
+        
+        // التأكد من تحديث الحالة
+        validAccounts.forEach(acc => {
+          console.log(`🔄 Setting account ${acc.customerId} status: ${acc.displayStatus} (linked: ${acc.isLinkedToMCC})`);
+        });
+        
         setAccounts(validAccounts);
+        // Cache accounts for instant loading next time
+        localStorage.setItem('cached_google_ads_accounts', JSON.stringify(validAccounts));
+        console.log('💾 Cached accounts to localStorage');
         
         // تحديث قائمة الانتظار بناءً على قاعدة البيانات فقط
         const pendingAccounts = validAccounts.filter(acc => 
-          acc.displayStatus === 'Awaiting Acceptance'
+          acc.displayStatus === 'Pending'
         );
         setPendingInvitations(pendingAccounts.map(acc => acc.customerId));
         console.log('📋 Updated pending invitations:', pendingAccounts.map(acc => acc.customerId));
@@ -735,35 +1646,110 @@ const GoogleAdsContent: React.FC = () => {
       console.error('❌ Error fetching accounts from official API:', error);
       setAccounts([]);
     } finally {
-      setLoading(false);
+      // إزالة setLoading
     }
   };
 
   useEffect(() => {
-    console.log('🔄 Component mounted - starting account fetch...');
-    console.log('🔍 Initial state - accounts:', accounts.length, 'loading:', loading);
+    // ✅ منع التحميل المتكرر
+    if (dataFetchedRef.current) return;
     
-    // التدفق الصحيح: Frontend → قاعدة البيانات مباشرة (أسرع وأكثر دقة)
-    // أولاً: جلب الحسابات من قاعدة البيانات مباشرة
-    fetchAccountsFromSupabase();
+    console.log('🔄 Component mounted - accounts from cache:', accounts.length);
+    
+    // Check cookies first (faster check)
+    const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+    
+    if (!hasGoogleAdsConnected) {
+      console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+      window.location.href = '/integrations';
+      return;
+      }
+    
+    dataFetchedRef.current = true;
+    
+    // ✅ إذا كان هناك حسابات مخزنة، نعرضها فوراً ونتحقق في الخلفية
+    // التحقق من المستخدم في الخلفية بدون حظر العرض
+    const verifyAndLoadData = async () => {
+      try {
+        const response = await fetch('/api/oauth/user-info');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.user) {
+            const currentUserId = data.user.id;
+            const currentUserEmail = data.user.email;
+            
+            // التحقق السريع من تطابق المستخدم
+            const cachedUserInfo = localStorage.getItem('oauth_user_info');
+            let shouldRefresh = false;
+            
+            if (cachedUserInfo) {
+              try {
+                const parsed = JSON.parse(cachedUserInfo);
+                // إذا تغير المستخدم، نمسح الكاش ونجلب من جديد
+                if (parsed.id !== currentUserId || parsed.email !== currentUserEmail) {
+                  console.log('🔄 User changed! Clearing cache...');
+                  localStorage.removeItem('cached_google_ads_accounts');
+                  setAccounts([]);
+                  shouldRefresh = true;
+                }
+              } catch (e) {
+                shouldRefresh = true;
+              }
+            } else {
+              shouldRefresh = true;
+            }
+            
+            // حفظ معلومات المستخدم
+            localStorage.setItem('oauth_user_info', JSON.stringify(data.user));
+            localStorage.setItem('userEmail', currentUserEmail);
+            
+            // جلب البيانات الجديدة فقط إذا لزم الأمر أو لا توجد حسابات
+            if (shouldRefresh || accounts.length === 0) {
+              await fetchAccountsFromSupabase();
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Error verifying user:', error);
+        // في حالة الخطأ، نحاول جلب البيانات إذا لم تكن موجودة
+        if (accounts.length === 0) {
+          await fetchAccountsFromSupabase();
+    }
+      }
+    };
+    
+    // تشغيل التحقق في الخلفية بدون حظر العرض
+    verifyAndLoadData();
+    
+    // ✅ تأخير إعداد الاتصالات حتى لا تؤثر على سرعة التحميل الأولي
+    let subscription: { unsubscribe: () => void } = { unsubscribe: () => {} };
+    const setupConnections = setTimeout(() => {
+    // إعداد Server-Sent Events للمزامنة الفورية
+    setupSSEConnection();
     
     // الاشتراك في التحديثات الفورية من Supabase
-    const subscription = subscribeToClientRequests((payload) => {
+      subscription = subscribeToClientRequests((payload) => {
       console.log('🔄 تحديث فوري من Supabase:', payload);
-      // إعادة جلب البيانات عند حدوث تغيير فقط
       if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
         console.log('📥 تحديث البيانات بسبب تغيير في قاعدة البيانات');
         fetchAccountsFromSupabase();
       }
     });
+    }, 1000); // تأخير ثانية واحدة
     
     // Cleanup عند إلغاء تحميل المكون
     return () => {
+      clearTimeout(setupConnections);
       if (autoRefreshIntervalRef.current) {
         clearInterval(autoRefreshIntervalRef.current);
       }
       // إلغاء الاشتراك في التحديثات الفورية
       subscription.unsubscribe();
+      // إغلاق اتصال SSE
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        console.log('🔌 تم إغلاق اتصال SSE');
+      }
     };
   }, []);
 
@@ -798,7 +1784,7 @@ const GoogleAdsContent: React.FC = () => {
       const pending = pendingInvitations;
       
       if (pending.length === 0) {
-        alert('ℹ️ No pending invitations to check.');
+        console.log('ℹ️ No pending invitations to check.');
         return;
       }
       
@@ -827,52 +1813,57 @@ const GoogleAdsContent: React.FC = () => {
               console.log(`✅ Account ${customerId} was accepted!`);
               acceptedCount++;
               
-              // Update UI immediately
+              // Update UI immediately (الحفاظ على isDisabled)
               setAccounts(prevAccounts => 
                 prevAccounts.map(acc => 
                   acc.customerId === customerId 
-                    ? { ...acc, isLinkedToMCC: true, displayStatus: 'Connected' }
+                    ? { ...acc, isLinkedToMCC: true, displayStatus: 'Connected', isDisabled: acc.isDisabled }
                     : acc
                 )
               );
             } else if (data.success && data.status === 'PENDING') {
-              // Still pending
+              // Still pending - فحص إضافي للكشف عن الرفض
               console.log(`⏳ Account ${customerId} is still pending approval`);
+              
+              // فحص إضافي: إذا كان الحساب في PENDING لأكثر من 30 ثانية، فحص مرة أخرى
+              const account = accounts.find(acc => acc.customerId === customerId);
+              if (account) {
+                const accountCreated = new Date(account.lastSync || Date.now());
+                const timeSinceCreated = Date.now() - accountCreated.getTime();
+                const thirtySeconds = 30 * 1000; // 30 ثانية
+                
+                if (timeSinceCreated > thirtySeconds) {
+                  console.log(`🔄 Account ${customerId} in PENDING for more than 30 seconds - checking for rejection`);
+                  
+                  // فحص إضافي بعد 1 ثانية
+                  setTimeout(() => {
+                    syncAccountStatus(customerId, true);
+                  }, 1000);
+                }
+              }
             } else if (data.success && (data.status === 'REJECTED' || data.status === 'REFUSED')) {
               // Invitation rejected ❌
-              console.log(`❌ Account ${customerId} invitation was rejected`);
+              console.log(`❌ Account ${customerId} invitation was ${data.status.toLowerCase()}`);
               rejectedCount++;
               
-              // Update UI to show "Send again"
+              // Update UI to show "Link Google Ads" (إزالة isDisabled لأن الحساب غير مرتبط)
               setAccounts(prevAccounts => 
                 prevAccounts.map(acc => 
                   acc.customerId === customerId 
-                    ? { ...acc, isLinkedToMCC: false, displayStatus: 'Send again' }
+                    ? { ...acc, isLinkedToMCC: false, displayStatus: 'Link Google Ads', isDisabled: false }
                     : acc
                 )
               );
-            } else if (data.success && data.status === 'CANCELLED') {
-              // Invitation cancelled 🚫
-              console.log(`🚫 Account ${customerId} invitation was cancelled`);
+            } else if (data.success && (data.status === 'CANCELLED' || data.status === 'NOT_LINKED')) {
+              // Invitation cancelled or not linked ❌
+              console.log(`❌ Account ${customerId} invitation was ${data.status.toLowerCase()}`);
               rejectedCount++;
               
-              // Update UI to show "Link Google Ads"
+              // Update UI to show "Link Google Ads" (إزالة isDisabled لأن الحساب غير مرتبط)
               setAccounts(prevAccounts => 
                 prevAccounts.map(acc => 
                   acc.customerId === customerId 
-                    ? { ...acc, isLinkedToMCC: false, displayStatus: 'Link Google Ads' }
-                    : acc
-                )
-              );
-            } else if (data.success && data.status === 'NOT_LINKED') {
-              // Not linked yet
-              console.log(`ℹ️ Account ${customerId} is not linked`);
-              
-              // Update UI to show "Link Google Ads"
-              setAccounts(prevAccounts => 
-                prevAccounts.map(acc => 
-                  acc.customerId === customerId 
-                    ? { ...acc, isLinkedToMCC: false, displayStatus: 'Link Google Ads' }
+                    ? { ...acc, isLinkedToMCC: false, displayStatus: 'Link Google Ads', isDisabled: false }
                     : acc
                 )
               );
@@ -887,7 +1878,7 @@ const GoogleAdsContent: React.FC = () => {
       }
       
       // Update pending invitations list
-      const updatedPending = accounts.filter(acc => acc.displayStatus === 'Awaiting Acceptance').map(acc => acc.customerId);
+      const updatedPending = accounts.filter(acc => acc.displayStatus === 'Pending').map(acc => acc.customerId);
       setPendingInvitations(updatedPending);
       
       // Show results
@@ -909,20 +1900,58 @@ const GoogleAdsContent: React.FC = () => {
         message += 'ℹ️ No changes detected. Some invitations may need more time.';
       }
       
-      alert(message);
+      console.log(message);
       
     } catch (error) {
       console.log('❌ Error checking invitation status:', error);
-      alert('❌ Error checking invitation status. Please try again.');
+      console.error('❌ Error checking invitation status. Please try again.');
     }
   };
 
   const handleLinkToMCC = async (customerId: string, accountName: string) => {
     try {
+      // التحقق من صحة customerId
+      if (!customerId || customerId === 'undefined') {
+        console.error('❌ Invalid customerId in handleLinkToMCC:', customerId);
+        return;
+      }
+      
+      // Check cookies first (faster check)
+      const hasGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
+      console.log('🔍 Google Ads connection cookie:', hasGoogleAdsConnected);
+      
+      if (!hasGoogleAdsConnected) {
+        console.warn('⚠️ No Google Ads connection cookie found, redirecting to integrations...');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/integrations';
+        }
+        return;
+      }
+      
+      // Try to refresh token if needed
+      console.log('🔄 Attempting to refresh token if needed...');
+      try {
+        const refreshResponse = await fetch('/api/oauth/refresh', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+        
+        if (refreshResponse.ok) {
+          console.log('✅ Token refreshed successfully');
+        } else {
+          console.warn('⚠️ Token refresh failed, but continuing with existing token');
+        }
+      } catch (refreshError) {
+        console.warn('⚠️ Token refresh error, but continuing:', refreshError);
+      }
+      
       // Check account status before linking
       const account = accounts.find(acc => acc.customerId === customerId);
       if (account?.status === 'SUSPENDED') {
-        alert('❌ Cannot link suspended account.\n\nPlease reactivate account in Google Ads Console first.');
+        console.error('❌ Cannot link suspended account - please reactivate account in Google Ads Console first.');
         return;
       }
       
@@ -934,7 +1963,6 @@ const GoogleAdsContent: React.FC = () => {
       const currentAccount = accounts.find(acc => acc.customerId === customerId);
       if (currentAccount?.displayStatus === 'Connected') {
         console.log('✅ الحساب مربوط بالفعل!');
-        alert('✅ This account is already connected to your MCC!');
         setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
         return;
       }
@@ -965,7 +1993,7 @@ const GoogleAdsContent: React.FC = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          customerId: customerId,
+          customer_id: customerId,
           account_name: accountName
         })
       });
@@ -974,53 +2002,133 @@ const GoogleAdsContent: React.FC = () => {
         const linkResult = await linkResponse.json();
         console.log('✅ Link request created using official API:', linkResult);
         
-        // Update UI to show "Awaiting Acceptance" with fresh timestamp
-        setAccounts(prevAccounts => 
-          prevAccounts.map(account => 
+        // Update UI to show "Pending" with fresh timestamp (الحفاظ على isDisabled)
+        setAccounts(prevAccounts => {
+          const updatedAccounts = prevAccounts.map(account => 
             account.customerId === customerId 
               ? { 
                   ...account, 
                   isLinkedToMCC: false, 
-                  displayStatus: 'Awaiting Acceptance',
+                  displayStatus: 'Pending',
+                  isDisabled: account.isDisabled,
                   lastSync: new Date().toISOString() // تحديث timestamp للتحديث المحلي
                 }
               : account
-          )
         );
+          
+          // التأكد من تحديث الحالة
+          console.log(`🔄 Link request sent for account ${customerId} - status: Pending`);
+          return updatedAccounts;
+        });
         
         // Add to pending invitations
         setPendingInvitations(prev => [...prev, customerId]);
         
-        // لا نحتاج التحديث التلقائي - Real-time subscriptions ستحدث البيانات
-        console.log('✅ طلب الربط تم إرساله - Real-time subscriptions ستحدث الحالة تلقائياً');
+        // ✅ الحالة تبقى Pending حتى يضغط المستخدم على زر Refresh يدوياً
+        console.log('✅ طلب الربط تم إرساله - الحالة ستبقى Pending حتى الضغط على زر Refresh');
         
-        // لا نحتاج fetchAccounts() - التحديث الفوري للواجهة كافي
-        console.log('✅ UI updated immediately - no need to refetch data');
+        // إظهار إشعار مع رابط للذهاب إلى صفحة Managers في Google Ads
+        setLinkNotification({
+          show: true,
+          customerId: customerId,
+          accountName: accountName
+        });
         
-        alert(`✅ Link invitation sent successfully using official Google Ads API!\n\n📋 Accept the invitation:\n1. Go to Google Ads Console (ads.google.com)\n2. Settings → Account Access → Account Management\n3. Find invitation from MCC account ${linkResult.mcc_customer_id}\n4. Click "Accept" on the invitation\n\n⚡ Status will update automatically in real-time!\n\n🔧 Using: ${linkResult.source}`);
+        // إخفاء الإشعار تلقائياً بعد 30 ثانية
+        setTimeout(() => {
+          setLinkNotification(null);
+        }, 30000);
         
       } else {
-        const errorResult = await linkResponse.json();
+        let errorResult: any = {};
+        try {
+          errorResult = await linkResponse.json();
+        } catch (parseError) {
+          console.error('❌ Failed to parse error response:', parseError);
+          errorResult = {
+            error: 'Failed to parse response',
+            message: 'فشل في تحليل استجابة الخادم',
+            error_type: 'PARSE_ERROR'
+          };
+        }
+        
         console.error('❌ Failed to create link request:', errorResult);
+        const errorStr = JSON.stringify(errorResult).toLowerCase();
+        
+        // 🔴 معالجة خطأ 500 أو ALREADY_MANAGED (الحساب معلق)
+        if (linkResponse.status === 500 || errorStr.includes('already_managed') || errorStr.includes('already managed')) {
+          console.log('🔴 الحساب معلق - إظهار إشعار');
+          setErrorNotification({
+            show: true,
+            type: 'ACCOUNT_SUSPENDED',
+            customerId: customerId,
+            message: 'This Google Ads account is suspended due to policy violation. Please contact Google Ads support to resolve this issue.',
+            helpUrl: 'https://support.google.com/google-ads/answer/1704381'
+          });
+          
+          // تحديث حالة الحساب في الواجهة
+          setAccounts(prevAccounts => 
+            prevAccounts.map(account => 
+              account.customerId === customerId 
+                ? { ...account, displayStatus: 'Suspended', isDisabled: true }
+                : account
+            )
+          );
+          
+          setTimeout(() => setErrorNotification(null), 20000);
+          return;
+        }
         
         // Handle specific error types
         if (errorResult.error_type === 'OAUTH_ERROR') {
-          alert(`🔐 مشكلة في المصادقة:\n\n${errorResult.message}\n\nيرجى إعادة تسجيل الدخول إلى Google Ads`);
+          console.error(`🔐 مشكلة في المصادقة: ${errorResult.message}`);
           // Redirect to OAuth
-          window.location.href = '/api/oauth/google';
+          if (typeof window !== 'undefined') {
+            window.location.href = '/api/oauth/google';
+          }
         } else if (errorResult.error_type === 'NETWORK_ERROR') {
-          alert(`🌐 مشكلة في الاتصال:\n\n${errorResult.message}\n\nيرجى المحاولة مرة أخرى خلال دقائق`);
+          console.error(`🌐 مشكلة في الاتصال: ${errorResult.message}`);
+          // إظهار إشعار للمستخدم
+          setErrorNotification({
+            show: true,
+            type: 'GENERAL_ERROR',
+            customerId: customerId,
+            message: 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.',
+            messageEn: 'Network error occurred. Please try again.'
+          });
+          setTimeout(() => setErrorNotification(null), 10000);
         } else if (errorResult.errors && Array.isArray(errorResult.errors)) {
           const errorMessages = errorResult.errors.map((err: any) => `• ${err.error_code}: ${err.message}`).join('\n');
-          alert(`❌ Google Ads API Error:\n\n${errorMessages}\n\nRequest ID: ${errorResult.request_id || 'N/A'}`);
+          console.error(`❌ Google Ads API Error: ${errorMessages} - Request ID: ${errorResult.request_id || 'N/A'}`);
+          // إظهار إشعار للمستخدم
+          setErrorNotification({
+            show: true,
+            type: 'GENERAL_ERROR',
+            customerId: customerId,
+            message: 'حدث خطأ أثناء ربط الحساب. يرجى المحاولة مرة أخرى.',
+            messageEn: errorMessages
+          });
+          setTimeout(() => setErrorNotification(null), 15000);
         } else {
-          alert(`❌ فشل في إرسال طلب الربط:\n\n${errorResult.message || errorResult.error || 'خطأ غير معروف'}\n\nيرجى المحاولة مرة أخرى`);
+          // Fallback for any other error type
+          const errorMessage = errorResult.message || errorResult.error || 'خطأ غير معروف';
+          const errorType = errorResult.error_type || 'UNKNOWN_ERROR';
+          console.error(`❌ فشل في إرسال طلب الربط: ${errorMessage} - نوع الخطأ: ${errorType}`);
+          // إظهار إشعار للمستخدم
+          setErrorNotification({
+            show: true,
+            type: 'GENERAL_ERROR',
+            customerId: customerId,
+            message: errorMessage,
+            messageEn: errorResult.message_en || 'An error occurred while linking the account.'
+          });
+          setTimeout(() => setErrorNotification(null), 15000);
         }
       }
       
     } catch (error) {
       console.error('❌ Error linking account to MCC:', error);
-      alert('Error linking account to MCC. Please try again.');
+      // لا توجد إشعارات للمستخدم
     } finally {
       // Remove loading state for this specific account only
       setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
@@ -1030,333 +2138,425 @@ const GoogleAdsContent: React.FC = () => {
   const handleAccountSelect = async (account: GoogleAdsAccount, index: number) => {
     console.log('Selected account:', account);
     
-    // Check status when clicking on account
-    if (account.displayStatus === 'PENDING') {
-      console.log(`🖱️ User clicked ${account.customerId} - checking status using official API`);
-      
-      try {
-        const nextjsApiUrl = `/api/discover-account-status/${account.customerId}`;
-        const response = await fetch(nextjsApiUrl, {
-          method: 'GET',
-          credentials: 'include'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`📊 Click status check result:`, data);
-          
-          if (data.success && data.status === 'ACTIVE') {
-            console.log(`🎉 Account ${account.customerId} is now Connected!`);
-            
-            // Update UI immediately
-            setAccounts(prevAccounts => 
-              prevAccounts.map(acc => 
-                acc.customerId === account.customerId 
-                  ? { ...acc, isLinkedToMCC: true, displayStatus: 'Connected' }
-                  : acc
-              )
-            );
-            
-            // Remove from pending invitations
-            setPendingInvitations(prev => prev.filter(id => id !== account.customerId));
-            
-            alert(`🎉 Excellent! Account ${account.customerId} is now Connected!\n\n✅ Status updated instantly via official Google Ads API.`);
-          } else if (data.success && data.status === 'PENDING') {
-            console.log(`⏳ Account ${account.customerId} is still pending`);
-            alert(`⏳ Account ${account.customerId} is still pending approval.\n\nPlease check Google Ads Console to accept the invitation.`);
-          } else if (data.success && (data.status === 'REJECTED' || data.status === 'REFUSED' || data.status === 'CANCELLED')) {
-            console.log(`❌ Account ${account.customerId} invitation was ${data.status.toLowerCase()}`);
-            
-            // Update UI to show "Link Google Ads"
-            setAccounts(prevAccounts => 
-              prevAccounts.map(acc => 
-                acc.customerId === account.customerId 
-                  ? { ...acc, isLinkedToMCC: false, displayStatus: 'Link Google Ads' }
-                  : acc
-              )
-            );
-            
-            // Remove from pending invitations
-            setPendingInvitations(prev => prev.filter(id => id !== account.customerId));
-            
-            alert(`❌ Invitation for account ${account.customerId} was ${data.status.toLowerCase()}.\n\nYou can send a new invitation by clicking "Link Google Ads".`);
-          }
-        }
-      } catch (error) {
-        console.log(`❌ Status check failed for ${account.customerId}:`, error);
-      }
+    // التحقق من صحة customerId
+    if (!account.customerId || account.customerId === 'undefined') {
+      console.error('❌ Invalid customerId:', account.customerId);
+      return;
+    }
+    
+    // عند النقر على حساب، نعرض فقط البيانات المخزنة (بدون استدعاء Google Ads API)
+    // للتحديث من Google Ads API، يجب الضغط على زر "Refresh"
+    console.log(`🖱️ User clicked ${account.customerId} - showing cached data`);
+    console.log(`📋 Account status: ${account.displayStatus}, isLinkedToMCC: ${account.isLinkedToMCC}`);
+    
+    // إذا كان الحساب في حالة "Send again"، نعرض رسالة للمستخدم
+    if (account.displayStatus === 'Pending') {
+      console.log(`ℹ️ Account ${account.customerId} is pending - use Refresh button to check status`);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white">Loading accounts...</p>
-        </div>
-      </div>
-    );
-  }
+  // إزالة شاشة التحميل نهائياً
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-2">
+    <>
+      {/* CSS Styles للتأثيرات البصرية */}
+      <style dangerouslySetInnerHTML={{ __html: styles }} />
+      
+      <div className="min-h-screen p-4 sm:p-6 md:p-8 relative">
+        <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
+          {/* Header + Refresh Button (button below) */}
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3">
               <img 
                 src="/images/integrations/google-ads-logo.svg" 
                 alt="Google Ads" 
-                className="w-8 h-8"
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
               />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Accounts</h1>
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+                Accounts
+              </h1>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Manage your connected accounts</p>
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center text-sm text-green-400">
-                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                متصل مباشرة بـ Supabase - تحديثات فورية ✨
-          </div>
+            <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+              Manage your connected accounts
+            </p>
+
+            {/* شريط التحديث المحسّن */}
+            <div className="mt-5 flex flex-col items-center gap-3">
+              {/* معلومات آخر تحديث */}
+              {lastSyncTime && (
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>
+                    Last update: {(() => {
+                      const diff = Math.floor((Date.now() - lastSyncTime.getTime()) / 1000 / 60);
+                      if (diff < 1) return 'Just now';
+                      if (diff < 60) return `${diff} min ago`;
+                      const hours = Math.floor(diff / 60);
+                      if (hours < 24) return `${hours}h ago`;
+                      return `${Math.floor(hours / 24)}d ago`;
+                    })()}
+                  </span>
+                  {/* تنبيه إذا مر وقت طويل */}
+                  {Date.now() - lastSyncTime.getTime() > 60 * 60 * 1000 && (
+                    <span className="text-amber-400 text-[10px]">(may be outdated)</span>
+                  )}
+                </div>
+              )}
+              
+              {/* زر التحديث الرئيسي */}
               <button
+                type="button"
                 onClick={syncStatusesFromGoogleAds}
                 disabled={syncing}
-                className={`flex items-center px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
+                className={`group relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   syncing
-                    ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30 cursor-not-allowed'
-                    : 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border-blue-500/30'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 cursor-wait'
+                    : 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400/60 hover:from-emerald-500/20 hover:to-green-500/20 hover:shadow-lg hover:shadow-emerald-500/10'
                 }`}
-                title="مزامنة الحالات من Google Ads API"
               >
                 {syncing ? (
                   <>
-                    <div className="w-3 h-3 border border-yellow-300 border-t-transparent rounded-full animate-spin mr-1.5"></div>
-                    جاري المزامنة...
+                    {/* أيقونة تحميل دوارة */}
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Checking accounts...</span>
                   </>
                 ) : (
                   <>
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1.5"></span>
-                    🔄 مزامنة الحالات
+                    {/* أيقونة تحديث */}
+                    <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Refresh Statuses</span>
                   </>
                 )}
               </button>
-            </div>
-          </div>
-
-          {/* Status Check Button */}
-          {pendingInvitations.length > 0 && (
-            <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-              <p className="text-yellow-300 text-sm">
-                ⏳ {pendingInvitations.length} invitation(s) pending - Status updates automatically in real-time
+              
+              {/* نص توضيحي صغير */}
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                Check for new link requests or status changes
               </p>
             </div>
-          )}
+            
+            {/* إشعار بعد إرسال طلب الربط - تصميم مثل كروت الداشبورد */}
+            {linkNotification?.show && (
+              <div className="mt-5 w-full max-w-sm mx-auto">
+                <div 
+                  className="relative rounded-[20px] border border-emerald-500/30 bg-[#001008] p-5 overflow-hidden transition-all duration-300 hover:border-emerald-500/50"
+                  style={{
+                    boxShadow: '0 0 30px rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(16, 185, 129, 0.1)'
+                  }}
+                >
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-emerald-500/5 via-transparent to-green-500/5 pointer-events-none"></div>
+                  
+                  {/* Header */}
+                  <div className="relative flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50"></div>
+                      <span className="text-emerald-400 text-sm font-semibold">Link Request Sent</span>
+                    </div>
+                    <button
+                      onClick={() => setLinkNotification(null)}
+                      className="text-gray-600 hover:text-emerald-400 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Account ID */}
+                  <div className="relative mb-4">
+                    <p className="text-gray-400 text-sm">
+                      Account <span className="font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(linkNotification.customerId)}</span>
+                    </p>
+                  </div>
+                  
+                  {/* Steps */}
+                  <div className="relative flex items-center justify-center gap-2 text-xs text-gray-500 mb-5 py-3 px-4 rounded-xl bg-black/30 border border-emerald-500/10">
+                    <span className="text-emerald-400 font-medium">Open Google Ads</span>
+                    <svg className="w-3 h-3 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span className="text-gray-400">Managers</span>
+                    <svg className="w-3 h-3 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span className="text-emerald-400 font-medium">Accept</span>
+                  </div>
+                  
+                  {/* Button - رابط مباشر لصفحة Managers في الحساب المحدد */}
+                  <a
+                    href={`https://ads.google.com/aw/accountaccess/managers?__e=${linkNotification.customerId.replace(/-/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-black text-sm font-bold transition-all hover:from-emerald-400 hover:to-green-400 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.98]"
+                  >
+                    <span>Accept in Google Ads</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                  
+                  {/* Bottom glow */}
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                </div>
+              </div>
+            )}
+            
+            {/* 🔴 إشعار الخطأ (الحساب المعلق) - بنفس تصميم النافذة الخضراء */}
+            {errorNotification?.show && (
+              <div className="mt-5 w-full max-w-sm mx-auto">
+                <div 
+                  className="relative rounded-[20px] border border-red-500/30 bg-[#100808] p-5 overflow-hidden transition-all duration-300 hover:border-red-500/50"
+                  style={{
+                    boxShadow: '0 0 30px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.1)'
+                  }}
+                >
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-red-500/5 via-transparent to-orange-500/5 pointer-events-none"></div>
+                  
+                  {/* Header */}
+                  <div className="relative flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-lg shadow-red-400/50"></div>
+                      <span className="text-red-400 text-sm font-semibold">Account Suspended</span>
+                    </div>
+                    <button
+                      onClick={() => setErrorNotification(null)}
+                      className="text-gray-600 hover:text-red-400 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Account ID */}
+                  <div className="relative mb-4">
+                    <p className="text-gray-400 text-sm">
+                      Account <span className="font-mono text-red-300 bg-red-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(errorNotification.customerId)}</span>
+                    </p>
+                  </div>
+                  
+                  {/* Message */}
+                  <div className="relative mb-5 py-3 px-4 rounded-xl bg-black/30 border border-red-500/10">
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      {errorNotification.message}
+                    </p>
+                  </div>
+                  
+                  {/* Button */}
+                  {errorNotification.helpUrl && (
+                    <a
+                      href={errorNotification.helpUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold transition-all hover:from-red-400 hover:to-orange-400 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
+                    >
+                      <span>Contact Google Support</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  )}
+                  
+                  {/* Bottom glow */}
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                </div>
+              </div>
+            )}
+          </div>
+
+
 
 
           {/* Accounts List */}
           {accounts.length > 0 ? (
+            <div 
+              className="accounts-card relative group -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16"
+              onMouseMove={(e) => {
+                const card = e.currentTarget;
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                // تأثير سلس مع requestAnimationFrame
+                requestAnimationFrame(() => {
+                  card.style.setProperty('--glow-x', `${x}%`);
+                  card.style.setProperty('--glow-y', `${y}%`);
+                  card.style.setProperty('--glow-intensity', '1');
+                });
+              }}
+              onMouseLeave={(e) => {
+                const card = e.currentTarget;
+                // تأخير بسيط للتلاشي السلس
+                requestAnimationFrame(() => {
+                  card.style.setProperty('--glow-intensity', '0');
+                });
+              }}
+              onMouseEnter={(e) => {
+                const card = e.currentTarget;
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--glow-x', `${x}%`);
+                card.style.setProperty('--glow-y', `${y}%`);
+              }}
+            >
+              {/* الحاوية الخارجية باللون الأخضر - بنفس أسلوب الداشبورد مع توهج أقوى */}
+              <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-emerald-500/60 via-green-400/40 to-teal-500/60 shadow-2xl shadow-emerald-500/30 transition-all duration-500 hover:shadow-emerald-500/50 hover:from-emerald-400/70 hover:via-green-300/50 hover:to-teal-400/70 overflow-hidden">
+                
+                {/* Inner container - خلفية داكنة خضراء */}
+                <div className="relative rounded-[26px] bg-[#001008] backdrop-blur-xl p-5 overflow-hidden">
+                  {/* الكرات المتحركة - خضراء */}
+                  <div className="absolute top-5 left-6 w-1.5 h-1.5 bg-emerald-400/60 rounded-full animate-float-slow"></div>
+                  <div className="absolute top-10 right-12 w-1 h-1 bg-green-300/50 rounded-full animate-float-medium"></div>
+                  <div className="absolute top-1/3 right-1/4 w-1.5 h-1.5 bg-emerald-300/40 rounded-full animate-float-slow"></div>
+                  <div className="absolute bottom-1/4 left-1/4 w-1 h-1 bg-teal-400/40 rounded-full animate-float-fast"></div>
+                  <div className="absolute bottom-10 right-8 w-1.5 h-1.5 bg-green-400/50 rounded-full animate-float-medium"></div>
+                  <div className="absolute bottom-14 left-12 w-1 h-1 bg-emerald-400/40 rounded-full animate-float-slow"></div>
+                  
+                  {/* Corner glows داخلية خفيفة - خضراء */}
+                  <div className="absolute -top-20 -left-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                  <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                  
             <AnimatedList
-              items={accounts.map((account) => (
-                <div key={account.id} className="w-full">
+              items={accounts.map((account) => {
+                // تحديد لون الكارت حسب حالة الاتصال
+                const isConnected = account.displayStatus === 'Connected';
+                const isPending = account.displayStatus === 'Pending';
+                
+                return (
+                <div 
+                  key={account.id} 
+                  className={`account-item w-full relative transition-all duration-300 rounded-xl p-3 ${
+                    isPending
+                      ? 'bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-yellow-500/10 border border-amber-500/30' 
+                      : 'bg-[#001a0d] border border-emerald-500/20 hover:bg-[#002a15] hover:border-emerald-500/40'
+                  }`}
+                >
                   {/* Account Display with inline Action Button */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        isConnected 
+                          ? 'bg-emerald-500/20 border-2 border-emerald-400/50' 
+                          : isPending
+                          ? 'bg-amber-500/20 border-2 border-amber-400/50'
+                          : 'bg-[#0a1f15] border border-emerald-500/20'
+                      }`}>
                         <img 
                           src="/images/integrations/google-ads-logo.svg" 
                           alt="Google Ads" 
-                          className="w-4 h-4"
+                          className="w-6 h-6 sm:w-8 sm:h-8"
                         />
                       </div>
-                      <div>
-                        <p className="text-white font-medium text-sm">
-                          {account.name}
-                        </p>
-                        <p className="text-gray-400 text-xs">
-                          ID: {account.customerId}
-                        </p>
-                        {/* Status indicators */}
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          {/* Account Status */}
-                          {account.status === 'SUSPENDED' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-red-500/20 text-red-300 border border-red-500/30">
-                              <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
-                              🚫 Suspended
-                            </span>
-                          ) : account.status === 'ENABLED' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-green-500/20 text-green-300 border border-green-500/30">
-                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
-                              Active
-                            </span>
-                          ) : account.status === 'CANCELLED' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                              <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-1.5"></span>
-                              Cancelled
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-gray-500/20 text-gray-300 border border-gray-500/30">
-                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-1.5"></span>
-                              ❓ Unknown
-                            </span>
-                          )}
-                          
-                          {/* Test Account Indicator */}
-                          {account.isTestAccount && (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                              <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1.5"></span>
-                              🧪 Test
-                            </span>
-                          )}
-                          
-                          {/* Account Type Indicator */}
-                          {account.accountType === 'MCC_MANAGER' && (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mr-1.5"></span>
-                              👑 Manager
-                            </span>
-                          )}
-                          
-                          {/* Link Status Timestamp */}
-                          {account.linkDetails && (
-                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1.5"></span>
-                              🕒 Real-time
+                      <div className="flex flex-col">
+                        <p className="text-white font-medium text-xs sm:text-sm flex items-center flex-wrap gap-1">
+                          <span>Google Ads Account</span>
+                          <span className="text-gray-300 font-mono text-xs sm:text-sm">
+                            {formatCustomerId(account.customerId)}
                           </span>
-                          )}
-                        </div>
+                        </p>
                       </div>
                     </div>
                     
-                    {/* Dynamic button that changes based on status */}
-                    <div className="ml-4">
-                      {account.displayStatus === 'Connected' ? (
-                        // ACTIVE status - Connected
-                        <div className="flex items-center px-3 py-1.5 rounded text-xs font-medium border bg-blue-500/20 text-blue-300 border-blue-500/30">
-                          <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1.5 animate-pulse"></span>
-                          Connected
-                        </div>
-                      ) : account.displayStatus === 'Awaiting Acceptance' ? (
-                        // PENDING status - Awaiting Acceptance (clickable for instant check)
-                        <button
-                          onClick={async () => {
-                            console.log(`🔍 فحص فوري لحالة الحساب ${account.customerId}...`);
-                            
-                            try {
-                              const response = await fetch(`/api/discover-account-status/${account.customerId}`, {
-                                method: 'GET',
-                                credentials: 'include'
-                              });
-                              
-                              if (response.ok) {
-                                const data = await response.json();
-                                
-                                if (data.success && data.status === 'ACTIVE') {
-                                  console.log(`🎉 الحساب ${account.customerId} أصبح Connected!`);
-                                  
-                                  // تحديث الواجهة فوراً
-                                  setAccounts(prevAccounts => 
-                                    prevAccounts.map(acc => 
-                                      acc.customerId === account.customerId 
-                                        ? { ...acc, isLinkedToMCC: true, displayStatus: 'Connected' }
-                                        : acc
-                                    )
-                                  );
-                                  
-                                  setPendingInvitations(prev => prev.filter(id => id !== account.customerId));
-                                  
-                                  alert(`🎉 Excellent! Account ${account.customerId} is now Connected!\n\n✅ Status updated instantly via Google Ads API.`);
-                            } else {
-                                  console.log(`⏳ الحساب ${account.customerId} ما زال في انتظار القبول`);
-                                  alert(`⏳ Account ${account.customerId} is still pending approval.\n\nPlease check Google Ads Console to accept the invitation.`);
-                                }
-                              }
-                            } catch (error) {
-                              console.error('❌ خطأ في فحص الحالة:', error);
-                              alert('❌ Error checking status. Please try again.');
-                            }
-                          }}
-                          className="flex items-center px-3 py-1.5 rounded text-xs font-medium border bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 border-yellow-500/30 transition-colors cursor-pointer"
-                          title="Click to check status instantly - Invitation sent, please accept in Google Ads Console"
-                        >
-                          <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5 animate-pulse"></span>
-                          ⏳ Awaiting Acceptance
-                        </button>
-                      ) : account.displayStatus === 'Send again' ? (
-                        // REJECTED status - Send again button
+                    {/* Status Button - ألوان خضراء متناسقة */}
+                    <div className="ml-2 sm:ml-4 flex items-center gap-1">
                         <button
                           onClick={() => handleLinkToMCC(account.customerId, account.name)}
-                          className="flex items-center px-3 py-1.5 rounded text-xs font-medium border bg-red-500/20 text-red-300 hover:bg-red-500/30 border-red-500/30 transition-colors"
-                          title="Previous invitation was rejected - click to send again"
-                        >
-                          <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
-                          ❌ Send again
-                        </button>
-                      ) : account.displayStatus === 'Suspended' ? (
-                        // SUSPENDED status - Suspended button (not clickable)
-                        <div className="flex items-center px-3 py-1.5 rounded text-xs font-medium border bg-red-500/20 text-red-300 border-red-500/30 cursor-not-allowed">
-                          <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
-                          🚫 Suspended
-                        </div>
-                      ) : (
-                        // CANCELLED/NOT_LINKED status - Link Google Ads button
-                        <button
-                          onClick={() => handleLinkToMCC(account.customerId, account.name)}
-                          className={`flex items-center px-3 py-1.5 rounded text-xs font-medium border transition-colors cursor-pointer ${
+                          className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold border-2 transition-all duration-300 shadow-lg ${
                             loadingAccounts[account.customerId]
-                              ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
-                              : 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border-green-500/30'
+                              ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white border-teal-400 shadow-teal-500/40 cursor-wait animate-pulse'
+                              : isConnected
+                              ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-300 shadow-emerald-500/50 cursor-default'
+                              : isPending
+                              ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-yellow-400 shadow-yellow-500/40 cursor-default animate-pulse'
+                              : 'bg-[#0a2018] text-emerald-300 border-emerald-600/50 shadow-emerald-900/30 cursor-pointer hover:bg-gradient-to-r hover:from-emerald-600 hover:to-green-600 hover:text-white hover:border-emerald-400 hover:shadow-emerald-500/50'
                           }`}
-                          disabled={loadingAccounts[account.customerId]}
-                          title="Click to link to MCC"
+                          disabled={
+                            loadingAccounts[account.customerId] || 
+                            isConnected || 
+                            isPending
+                          }
+                          title={
+                            isConnected 
+                              ? 'Already connected to MCC' 
+                              : isPending
+                              ? 'Link request pending - waiting for approval'
+                              : 'Click to link to MCC'
+                          }
                         >
                           {loadingAccounts[account.customerId] ? (
                             <>
-                              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5 animate-spin"></span>
-                              ⏳ Linking...
+                              <span className="w-2 h-2 bg-white rounded-full mr-2 animate-ping"></span>
+                              <span>Linking...</span>
                             </>
                           ) : (
                             <>
-                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
-                              Link Google Ads
+                              <span className={`w-2 h-2 rounded-full mr-2 ${
+                                isConnected
+                                  ? 'bg-white shadow-lg shadow-white/50'
+                                  : isPending
+                                  ? 'bg-black'
+                                  : 'bg-emerald-400'
+                              }`}></span>
+                              {isPending 
+                                ? 'Pending' 
+                                : isConnected
+                                ? 'Connected'
+                                : 'Link Google Ads'}
                             </>
                           )}
                         </button>
-                      )}
                     </div>
                   </div>
                 </div>
-              ))}
-              onItemSelect={handleAccountSelect}
-              showGradients={false}
+              );})}
+              onItemSelect={(item, index) => {
+                // item هو JSX element، نحتاج للحصول على account object من accounts array
+                const account = accounts[index];
+                if (account) {
+                  handleAccountSelect(account, index);
+                }
+              }}
+              showGradients={true}
               enableArrowNavigation={true}
-              displayScrollbar={false}
+              displayScrollbar={true}
               className="w-full"
             />
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-12">
-              <div className="w-16 h-16 /10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-white/5 border border-white/10">
                 <img 
                   src="/images/integrations/google-ads-logo.svg" 
                   alt="Google Ads" 
-                  className="w-8 h-8 opacity-50"
+                  className="w-6 h-6 sm:w-8 sm:h-8 opacity-50"
                 />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
-                {loading ? 'Loading Accounts...' : 'No Google Ads Accounts Found'}
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-2">
+                No Google Ads Accounts Found
               </h3>
-              <p className="text-white/70 mb-6 max-w-sm mx-auto text-sm">
-                {loading 
-                  ? 'Fetching your Google Ads accounts from OAuth session...' 
-                  : 'No Google Ads accounts found. Please check browser console for details and ensure you have active Google Ads accounts.'
-                }
+              <p className="text-white/70 mb-4 sm:mb-6 max-w-sm mx-auto text-xs sm:text-sm">
+                No Google Ads accounts found. Please check browser console for details and ensure you have active Google Ads accounts.
               </p>
-              {!loading && (
+              {(
               <div className="space-y-3">
                 <button
                     onClick={() => {
                       console.log('🔄 Manual refresh requested');
                       fetchAccounts();
                     }}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm sm:text-base"
                 >
                     <span>Refresh Accounts</span>
                 </button>
@@ -1366,6 +2566,7 @@ const GoogleAdsContent: React.FC = () => {
           )}
         </div>
     </div>
+    </>
   );
 };
 
@@ -1373,7 +2574,7 @@ const GoogleAdsContent: React.FC = () => {
 const GoogleAdsAccountsPage: React.FC = () => {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading Google Ads...</p>

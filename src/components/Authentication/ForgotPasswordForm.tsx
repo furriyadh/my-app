@@ -38,10 +38,15 @@ const ForgotPasswordForm: React.FC = () => {
     setMessage("");
     setIsLoading(true);
 
+    // تحديد رابط إعادة التوجيه بناءً على بيئة التشغيل (يدعم التطوير والإنتاج)
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (typeof window !== "undefined" ? window.location.origin : "");
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: process.env.NODE_ENV === 'production' 
-        ? 'https://furriyadh.com/authentication/update-password' 
-        : `${window.location.origin}/authentication/update-password`, // Redirect to a page where user can set new password
+      redirectTo: appUrl
+        ? `${appUrl}/authentication/reset-password?mode=reset`
+        : undefined, // Redirect to a page where user can set new password
     });
 
     if (error) {

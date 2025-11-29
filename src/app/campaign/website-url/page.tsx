@@ -8,6 +8,8 @@ import GlowButton from '@/components/ui/glow-button';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import CampaignProgress from '@/components/ui/campaign-progress';
 
 const WebsiteUrlPage: React.FC = () => {
   const router = useRouter();
@@ -23,8 +25,7 @@ const WebsiteUrlPage: React.FC = () => {
   const [isUrlVerified, setIsUrlVerified] = useState(false);
   const [isDetectingLanguage, setIsDetectingLanguage] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const [isRTL, setIsRTL] = useState(false);
+  const { t, language, isRTL } = useTranslation();
 
   // Dynamic colors based on campaign type
   const campaignTypeColors = {
@@ -236,14 +237,6 @@ const WebsiteUrlPage: React.FC = () => {
     setCampaignType(campaignData.campaignType || '');
   }, []);
 
-  // Detect language from localStorage
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-      setIsRTL(savedLanguage === 'ar');
-    }
-  }, []);
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -601,13 +594,13 @@ const WebsiteUrlPage: React.FC = () => {
       // Small delay to show 100%
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Navigate to language selection (modal will close on page change)
-      router.push('/campaign/language-selection');
+      // Navigate to location targeting (language detected automatically)
+      router.push('/campaign/location-targeting');
       
     } catch (error) {
       console.log('⚠️ Error:', error);
       // Still navigate even if detection fails
-      router.push('/campaign/language-selection');
+      router.push('/campaign/location-targeting');
     }
     // Note: Don't close modal here - let it stay until page navigation completes
   };
@@ -617,120 +610,11 @@ const WebsiteUrlPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Analyzing Website Modal - Dynamic colors based on campaign type */}
-      {isDetectingLanguage && (
-        <div
-          className="fixed inset-0 z-[9999] backdrop-blur-3xl animate-fadeIn"
-          dir="ltr"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`
-          }}
-        >
-          {/* Animated Background Orbs - Enhanced */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className={`absolute top-1/4 left-1/4 w-[500px] h-[500px] ${modalColors.orb1.replace('/20', '/30')} rounded-full blur-3xl animate-pulse animate-float`}></div>
-            <div className={`absolute bottom-1/4 right-1/4 w-[500px] h-[500px] ${modalColors.orb2.replace('/20', '/30')} rounded-full blur-3xl animate-pulse delay-700`} style={{ animationDelay: '2s' }}></div>
-            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${modalColors.orb1.replace('/20', '/20')} rounded-full blur-3xl animate-pulse delay-1000`} style={{ animationDelay: '4s' }}></div>
-            <div className={`absolute top-[15%] right-[15%] w-[300px] h-[300px] ${modalColors.orb2.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
-            <div className={`absolute bottom-[15%] left-[15%] w-[350px] h-[350px] ${modalColors.orb1.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '3s' }}></div>
-            {/* Floating particles */}
-            <div className={`absolute top-[10%] left-[15%] w-4 h-4 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '8s' }}></div>
-            <div className={`absolute top-[30%] right-[20%] w-3 h-3 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '10s', animationDelay: '1s' }}></div>
-            <div className={`absolute bottom-[25%] left-[25%] w-5 h-5 ${modalColors.orb1.replace('/20', '/40')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '12s', animationDelay: '2s' }}></div>
-            <div className={`absolute top-[60%] right-[30%] w-4 h-4 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '9s', animationDelay: '3s' }}></div>
-            <div className={`absolute bottom-[40%] right-[15%] w-3 h-3 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '11s', animationDelay: '4s' }}></div>
-          </div>
-
-          <div 
-            className={`relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 rounded-3xl p-10 max-w-lg w-full ${modalColors.border} shadow-2xl backdrop-blur-xl animate-scaleIn`}
-            style={{ 
-              marginLeft: isRTL ? '280px' : '0',
-              marginRight: isRTL ? '0' : '280px',
-              boxShadow: modalColors.shadow
-            }}
-          >
-            {/* Enhanced Glow Effect */}
-            <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${modalColors.progressGlow} blur-2xl`}></div>
-            
-            <div className="relative z-10">
-              {/* Icon/Logo */}
-              <div className="flex justify-center mb-6">
-                <div className="relative">
-                  <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${modalColors.icon} blur-xl opacity-75 animate-pulse`}></div>
-                  <div className={`relative w-20 h-20 rounded-full bg-gradient-to-r ${modalColors.icon} flex items-center justify-center shadow-lg ${modalColors.iconShadow} animate-pulse`}>
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center mb-8" dir={isRTL ? 'rtl' : 'ltr'}>
-                <h2 className={`text-3xl font-bold bg-gradient-to-r ${modalColors.title} bg-clip-text text-transparent mb-3 animate-pulse`}>
-                  {language === 'ar' ? 'تحليل الموقع' : 'Analyzing Website'}
-                </h2>
-                <p className="text-gray-300 text-sm">
-                  {language === 'ar' 
-                    ? 'الذكاء الاصطناعي يقوم بتحليل موقعك واكتشاف اللغة...' 
-                    : 'Our AI is analyzing your website and detecting the language...'}
-                </p>
-              </div>
-              
-              {/* Progress Bar with Glow */}
-              <div className="mb-6 relative">
-                <div className={`absolute inset-0 bg-gradient-to-r ${modalColors.progressGlow} blur-lg rounded-full`}></div>
-                <Progress 
-                  variant="slim" 
-                  value={analyzeProgress} 
-                  className="w-full relative z-10" 
-                  indicatorClassName={`bg-gradient-to-r ${modalColors.progress}`}
-                  indicatorStyle={{
-                    boxShadow: `0 0 20px ${modalColors.primary}cc, 0 0 40px ${modalColors.secondary}99`
-                  }}
-                />
-              </div>
-              
-              {/* Progress Percentage */}
-              <div className="text-center mb-8">
-                <p className={`text-4xl font-bold bg-gradient-to-r ${modalColors.title} bg-clip-text text-transparent animate-pulse`}>
-                  {analyzeProgress}%
-                </p>
-              </div>
-              
-              {/* Animated Status Messages */}
-              <div className="mb-6 space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className={`flex items-center gap-3 text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-2 h-2 rounded-full ${modalColors.dots[0]} animate-pulse`}></div>
-                  <span className="text-sm">{language === 'ar' ? 'جلب محتوى الموقع...' : 'Fetching website content...'}</span>
-                </div>
-                <div className={`flex items-center gap-3 text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-2 h-2 rounded-full ${modalColors.dots[1]} animate-pulse`} style={{ animationDelay: '0.2s' }}></div>
-                  <span className="text-sm">{language === 'ar' ? 'اكتشاف اللغة...' : 'Detecting language...'}</span>
-                </div>
-                <div className={`flex items-center gap-3 text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-2 h-2 rounded-full ${modalColors.dots[2]} animate-pulse`} style={{ animationDelay: '0.4s' }}></div>
-                  <span className="text-sm">{language === 'ar' ? 'معالجة البيانات...' : 'Processing metadata...'}</span>
-                </div>
-              </div>
-
-              {/* Loading Dots */}
-              <div className="flex justify-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${modalColors.dots[0]} animate-bounce`}></div>
-                <div className={`w-3 h-3 rounded-full ${modalColors.dots[1]} animate-bounce`} style={{ animationDelay: '0.1s' }}></div>
-                <div className={`w-3 h-3 rounded-full ${modalColors.dots[2]} animate-bounce`} style={{ animationDelay: '0.2s' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen bg-black">
+      {/* Campaign Progress */}
+      <CampaignProgress currentStep={0} totalSteps={3} />
       
-      {/* Hide page content when analyzing */}
-      {!isDetectingLanguage && (
-      <div className="container mx-auto px-4 py-8" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container mx-auto px-4 py-8" dir="ltr">
         
         {/* Header */}
           <div className="text-center mb-8">
@@ -751,12 +635,12 @@ const WebsiteUrlPage: React.FC = () => {
               {/* Input Field */}
               <div>
                 <CardItem translateZ={50}>
-                  <label className={`block text-sm font-semibold text-white mb-3 drop-shadow-md ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <label className="block text-sm font-semibold text-white mb-3 drop-shadow-md text-left">
                   {language === 'ar' ? 'رابط موقعك الإلكتروني' : 'Your Website URL'}
                 </label>
                 </CardItem>
                 <CardItem translateZ={60} as="div" className="!w-full">
-                <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="flex gap-3">
                     {/* HTTPS Prefix - Matches input border state */}
                     <div className={`w-28 px-4 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white flex items-center justify-center transition-all duration-200 ${
                       !isValidUrl && websiteUrl 
@@ -773,7 +657,7 @@ const WebsiteUrlPage: React.FC = () => {
                     {/* URL Input with Icon */}
                     <div className="flex-1 relative">
                     {/* Link Icon */}
-                    <LinkIcon className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${
+                    <LinkIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${
                       !isValidUrl && websiteUrl 
                         ? 'text-red-300/70' 
                         : isUrlVerified
@@ -788,8 +672,8 @@ const WebsiteUrlPage: React.FC = () => {
                       onFocus={() => setIsFocused(true)}
                       onBlur={() => setIsFocused(false)}
                       placeholder={language === 'ar' ? 'example.com' : 'www.example.com'}
-                      dir={isRTL ? 'ltr' : 'ltr'}
-                      className={`w-full px-4 ${isRTL ? 'pr-12 pl-12' : 'pl-12 pr-12'} py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
+                      dir="ltr"
+                      className={`w-full px-4 pl-12 pr-12 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
                         focus:outline-none focus:ring-4 focus:bg-white/25 
                         transition-all duration-200 overflow-x-auto whitespace-nowrap
                         ${
@@ -805,7 +689,7 @@ const WebsiteUrlPage: React.FC = () => {
                     
                     {/* Status Icon */}
                     {websiteUrl && (
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2`}>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
                         {!isValidUrl ? (
                           <XCircle className="w-5 h-5 text-red-300" />
                         ) : isUrlVerified ? (
@@ -820,9 +704,9 @@ const WebsiteUrlPage: React.FC = () => {
                 {/* Error Message */}
                 {!isValidUrl && websiteUrl && urlErrorMessage && (
                   <CardItem translateZ={40} as="div" className="!w-full">
-                  <div className={`mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm">
                     <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <div className="text-left">
                       <p className="text-sm font-semibold text-red-200">{language === 'ar' ? 'رابط غير صحيح' : 'Invalid URL'}</p>
                       <p className="text-sm text-red-300">{urlErrorMessage}</p>
                     </div>
@@ -833,13 +717,13 @@ const WebsiteUrlPage: React.FC = () => {
                 {/* Success Message - White style matching card */}
                 {isUrlVerified && (
                   <CardItem translateZ={40} as="div" className="!w-full">
-                    <div className={`mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm">
                       <CheckCircle2 className="w-5 h-5 text-white/80 flex-shrink-0 mt-0.5" />
-                      <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <div className="text-left">
                         <p className="text-sm font-semibold text-white">{language === 'ar' ? 'رابط صحيح' : 'Valid URL'}</p>
                         <p className="text-sm text-white/80">{language === 'ar' ? 'تنسيق الرابط صحيح' : 'URL format is correct'}</p>
                       </div>
-                  </div>
+                    </div>
                   </CardItem>
                 )}
               </div>
@@ -970,13 +854,13 @@ const WebsiteUrlPage: React.FC = () => {
         </div>
 
         {/* Navigation Buttons - Outside card */}
-        <div className={`flex justify-between items-center max-w-2xl mx-auto mt-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="flex justify-between items-center max-w-2xl mx-auto mt-8">
             <GlowButton
               onClick={handleBack}
               variant="green"
             >
-              <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
+              <span className="flex items-center gap-2">
+                <ArrowLeft className="w-5 h-5" />
                 {language === 'ar' ? 'السابق' : 'Previous'}
               </span>
             </GlowButton>
@@ -986,14 +870,13 @@ const WebsiteUrlPage: React.FC = () => {
             disabled={!websiteUrl || !isValidUrl || !isUrlVerified || isDetectingLanguage}
               variant="blue"
             >
-              <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <span className="flex items-center gap-2">
                     {language === 'ar' ? 'متابعة' : 'Continue'}
-                    {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                    <ArrowRight className="w-5 h-5" />
               </span>
             </GlowButton>
         </div>
       </div>
-      )}
     </div>
   );
 };

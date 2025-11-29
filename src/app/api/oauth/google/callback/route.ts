@@ -231,12 +231,12 @@ export async function GET(request: NextRequest) {
             verified_email: userInfo.verified_email
           });
           
-          // حفظ معلومات المستخدم في cookies
+          // حفظ معلومات المستخدم في cookies - مدة طويلة لتتوافق مع google_ads_connected
           successResponse.cookies.set('oauth_user_info', JSON.stringify(userInfo), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 3600
+            maxAge: 30 * 24 * 3600 // 30 يوم - نفس مدة refresh_token
           });
           
           // حفظ بيانات المستخدم في Supabase باستخدام Service Role (يتجاوز RLS)

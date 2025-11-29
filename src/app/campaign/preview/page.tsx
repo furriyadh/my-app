@@ -8,6 +8,7 @@ import { CardStack } from '@/components/ui/card-stack';
 import Announcement from '@/components/seraui/Announcement';
 import { Progress } from '@/components/ui/progress';
 import { subscribeToClientRequests } from '@/lib/supabase';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface AdVariation {
   headlines: string[];
@@ -27,6 +28,7 @@ const formatCustomerId = (customerId: string): string => {
 
 export default function CampaignPreviewPage() {
   const router = useRouter();
+  const { t, language, isRTL } = useTranslation();
   const [adVariations, setAdVariations] = useState<AdVariation[]>([]);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [websiteDomain, setWebsiteDomain] = useState('');
@@ -39,8 +41,6 @@ export default function CampaignPreviewPage() {
   const [showPublishingModal, setShowPublishingModal] = useState(false);
   const [publishProgress, setPublishProgress] = useState(0);
   const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const [isRTL, setIsRTL] = useState(false);
   
   // Announcement notifications state
   const [announcement, setAnnouncement] = useState<{
@@ -174,15 +174,6 @@ export default function CampaignPreviewPage() {
 
   const modalColors = getModalColors();
 
-  // Detect language from localStorage
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-      setIsRTL(savedLanguage === 'ar');
-    }
-  }, []);
-
   useEffect(() => {
     // Get generated content from localStorage
     const campaignDataStr = localStorage.getItem('campaignData') || '{}';
@@ -245,10 +236,24 @@ export default function CampaignPreviewPage() {
   const fetchConnectedAccounts = async () => {
     console.log('📥 جلب الحسابات المرتبطة من Supabase (نفس طريقة صفحة integrations)...');
     try {
-      // Import Supabase
-      const { getClientRequests } = await import('@/lib/supabase');
-      const allClientRequests = await getClientRequests();
-      console.log('📋 إجمالي الطلبات من Supabase:', allClientRequests.length);
+      // جلب طلبات العميل المربوطة بالمستخدم الحالي فقط عبر API Next.js
+      const response = await fetch('/api/client-requests', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('❌ فشل في جلب client_requests من /api/client-requests:', response.status, response.statusText);
+        setConnectedAccounts([]);
+        return;
+      }
+
+      const result = await response.json();
+      const allClientRequests = Array.isArray(result.data) ? result.data : [];
+      console.log('📋 إجمالي الطلبات (حسب المستخدم الحالي):', allClientRequests.length);
       console.log('📋 جميع الطلبات:', allClientRequests);
       
       if (allClientRequests.length === 0) {
@@ -304,8 +309,8 @@ export default function CampaignPreviewPage() {
       
       // ⚡ OPTIMIZATION: Filter out non-linked accounts BEFORE checking status (faster!)
       const userAccounts = clientRequests.filter((req: any) => {
-        // TEMPORARY: Show all accounts regardless of user_email for debugging
-        const isUserAccount = true; // userEmail ? req.user_email === userEmail : true;
+        // فلترة الحسابات الخاصة بهذا المستخدم فقط (حسب البريد المخزن مع الطلب)
+        const isUserAccount = userEmail ? req.user_email === userEmail : true;
         
         // 🚀 Pre-filter: Skip accounts that are clearly not linked in DB
         const dbStatus = req.status?.toUpperCase();
@@ -361,107 +366,55 @@ export default function CampaignPreviewPage() {
         userPicture: req.user_picture
       }));
       
-      console.log('📊 الحسابات قبل التحقق من الحالة الفعلية:', formattedAccounts);
+      console.log('📊 الحسابات من قاعدة البيانات:', formattedAccounts);
       
-      // 🧠 SMART: Verify actual account status using same API as integrations page
-      try {
-        console.log(`🧠 التحقق الذكي: جلب الحالة الفعلية لـ ${formattedAccounts.length} حساب فقط من Google Ads API...`);
-        const startTime = Date.now();
-        
-        // ⚡ Check accounts in parallel with shorter timeout
-        const verifiedAccounts = await Promise.all(
-          formattedAccounts.map(async (account, index) => {
-            try {
-              const cleanCustomerId = account.customerId.replace(/-/g, '');
-              console.log(`🔍 [${index + 1}/${formattedAccounts.length}] التحقق من ${account.customerId}...`);
-              
-              const syncResponse = await fetch(`http://localhost:5000/api/sync-account-status/${cleanCustomerId}`, {
-                method: 'POST',
-                credentials: 'include',
-                signal: AbortSignal.timeout(8000) // ⚡ 8 seconds timeout (reduced from 10)
-              });
-              
-              if (syncResponse.ok) {
-                const data = await syncResponse.json();
-                console.log(`✅ ${account.customerId}:`, data);
-                
-                if (data.success) {
-                  const apiStatus = data.api_status || 'UNKNOWN';
-                  const accountStatus = data.account_status || 'UNKNOWN';
-                  
-                  console.log(`📊 ${account.customerId}: api_status=${apiStatus}, account_status=${accountStatus}`);
-                  
-                  // Check if account is linked to MCC
-                  if (apiStatus === 'NOT_LINKED' || apiStatus === 'REJECTED' || apiStatus === 'CANCELLED') {
-                    console.log(`🔴 ${account.customerId}: غير مرتبط بالـ MCC (${apiStatus}) - سيتم إخفاؤه`);
-                    return null;
-                  }
-                  
-                  // Map account status (this is the CUSTOMER status from Google Ads)
+      // ✅ استخدام البيانات من Supabase مباشرة (بدون استدعاء Google Ads API)
+      // الحالة الفعلية تم تخزينها في Supabase من صفحة integrations/google-ads
+      // للتحديث من Google Ads API، يجب الذهاب لصفحة integrations/google-ads والضغط على زر Refresh
+      
+      // تحويل الحالة من Supabase إلى الحالة المتوقعة
+      formattedAccounts = formattedAccounts.map((account: any) => {
+        const dbStatus = account.status?.toUpperCase() || 'UNKNOWN';
                   let mappedStatus = 'ACTIVE';
+        let linkStatus = 'ACTIVE';
                   
-                  // Check account_status first (this indicates if account is enabled in Google Ads)
-                  if (accountStatus === 'ENABLED' || accountStatus === 'ACTIVE') {
+        switch (dbStatus) {
+          case 'ACTIVE':
                     mappedStatus = 'ACTIVE';
-                  } else if (accountStatus === 'SUSPENDED') {
-                    mappedStatus = 'SUSPENDED';
-                  } else if (accountStatus === 'CANCELED' || accountStatus === 'CANCELLED') {
-                    mappedStatus = 'CANCELED';
-                  } else if (accountStatus === 'CLOSED') {
-                    mappedStatus = 'CLOSED';
-                  } else if (accountStatus === 'UNKNOWN' || accountStatus === 'NOT_ENABLED') {
-                    // If account status is unknown or not enabled, check if it's linked
-                    if (apiStatus === 'ACTIVE') {
-                      // Linked but account not fully enabled yet
-                      mappedStatus = 'NOT_ENABLED';
-                    } else if (apiStatus === 'PENDING') {
+            linkStatus = 'ACTIVE';
+            break;
+          case 'PENDING':
                       mappedStatus = 'PENDING';
-                    } else {
-                      mappedStatus = 'NOT_ENABLED';
-                    }
-                  } else {
-                    // Default to ACTIVE if linked
-                    if (apiStatus === 'ACTIVE') {
+            linkStatus = 'PENDING';
+            break;
+          case 'NOT_LINKED':
+          case 'REJECTED':
+          case 'CANCELLED':
+          case 'REMOVED':
+            // هذه الحسابات تم تصفيتها سابقاً، لكن للتأكد
+            mappedStatus = 'NOT_LINKED';
+            linkStatus = dbStatus;
+            break;
+          default:
                       mappedStatus = 'ACTIVE';
-                    } else {
-                      mappedStatus = apiStatus;
-                    }
+            linkStatus = 'ACTIVE';
                   }
                   
-                  console.log(`🔄 ${account.customerId}: final_status=${mappedStatus}, api_status=${apiStatus}, account_status=${accountStatus}`);
+        console.log(`📋 ${account.customerId}: db_status=${dbStatus}, mapped_status=${mappedStatus}, link_status=${linkStatus}`);
                   
                   return {
                     ...account,
                     status: mappedStatus,
-                    linkStatus: apiStatus
+          linkStatus: linkStatus
                   };
-                } else {
-                  // Failed to get status - exclude account
-                  console.log(`⚠️ ${account.customerId}: فشل التحقق (${data.error || 'unknown'}) - سيتم إخفاؤه`);
-                  return null;
-                }
-              } else {
-                console.warn(`⚠️ ${account.customerId}: فشل الاتصال بالـ API (${syncResponse.status}) - سيتم إخفاؤه`);
-                return null;
-              }
-            } catch (error) {
-              console.warn(`⚠️ خطأ في التحقق من ${account.customerId}:`, error);
-              return null;
-            }
-          })
-        );
-        
-        // Filter out null accounts (not linked or failed)
-        formattedAccounts = verifiedAccounts.filter(acc => acc !== null) as any[];
-        
-        const endTime = Date.now();
-        const duration = ((endTime - startTime) / 1000).toFixed(2);
-        console.log(`✅ تمت تصفية الحسابات: ${formattedAccounts.length} حساب مرتبط بالـ MCC في ${duration} ثانية`);
-        
-      } catch (error) {
-        console.warn('⚠️ خطأ في التحقق من الحالة الفعلية:', error);
-        console.warn('⚠️ سيتم استخدام البيانات من قاعدة البيانات');
-      }
+      });
+      
+      // تصفية الحسابات غير المرتبطة
+      formattedAccounts = formattedAccounts.filter((acc: any) => 
+        acc.linkStatus === 'ACTIVE' || acc.linkStatus === 'PENDING'
+      );
+      
+      console.log(`✅ الحسابات المرتبطة: ${formattedAccounts.length} حساب`);
       
       // Check if no accounts after filtering
       if (formattedAccounts.length === 0) {
@@ -477,7 +430,7 @@ export default function CampaignPreviewPage() {
       }
       
       setConnectedAccounts(formattedAccounts);
-      console.log('✅ تم تحميل الحسابات بنجاح (مع الحالة الفعلية):', formattedAccounts);
+      console.log('✅ تم تحميل الحسابات بنجاح (من Supabase):', formattedAccounts);
       
     } catch (error) {
       console.error('❌ خطأ في جلب الحسابات:', error);
@@ -892,6 +845,12 @@ export default function CampaignPreviewPage() {
     }
   };
 
+  // Helper function to detect Arabic text
+  const isArabic = (text: string) => {
+    const arabicRegex = /[\u0600-\u06FF]/;
+    return arabicRegex.test(text);
+  };
+
   // Create cards for CardStack
   const cards = adVariations.map((ad, index) => ({
     id: index,
@@ -928,14 +887,21 @@ export default function CampaignPreviewPage() {
 
           {/* Headlines */}
           <div className="space-y-1.5">
-            <h3 className="text-sm md:text-base font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-snug line-clamp-1">
+            <h3 
+              className="text-sm md:text-base font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-snug line-clamp-1"
+              dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
+            >
               {ad.headlines[0]}
             </h3>
             
             {/* Descriptions */}
             <div className="space-y-0.5">
               {ad.descriptions.slice(0, 2).map((desc, idx) => (
-                <p key={idx} className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-1">
+                <p 
+                  key={idx} 
+                  className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-1"
+                  dir={isArabic(desc) ? 'rtl' : 'ltr'}
+                >
                   {desc}
                 </p>
               ))}
@@ -947,7 +913,7 @@ export default function CampaignPreviewPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         
         {/* Announcement Notification */}
@@ -965,10 +931,10 @@ export default function CampaignPreviewPage() {
         
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-base max-w-4xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-400 text-base max-w-4xl mx-auto" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' 
               ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك. شاهد المعاينات على اليمين.'
               : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience. View previews on the right."}
@@ -977,7 +943,7 @@ export default function CampaignPreviewPage() {
 
         {/* Variations Counter */}
         <div className="mb-8">
-          <div className={`inline-flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className="inline-flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             <span className="font-semibold text-purple-600 dark:text-purple-400">
               {language === 'ar' ? `تم إنشاء ${totalVariations} نسخة إعلانية` : `${totalVariations} ad variations generated`}
@@ -990,13 +956,13 @@ export default function CampaignPreviewPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
           
           {/* Left Side - Edit Button */}
-          <div className={`flex items-center justify-center ${isRTL ? 'lg:justify-end' : 'lg:justify-start'}`}>
+          <div className="flex items-center justify-center lg:justify-start">
             <div>
-              <p className={`text-gray-700 dark:text-gray-300 text-lg ${isRTL ? 'text-right' : 'text-left'}`}>
+              <p className="text-gray-700 dark:text-gray-300 text-lg text-left" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
                 <button
                   onClick={handleEditAds}
-                  className={`inline-flex items-center gap-1 hover:underline font-semibold ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className="inline-flex items-center gap-1 hover:underline font-semibold"
                 >
                   <span className="!text-blue-600 dark:!text-blue-500">{language === 'ar' ? 'تعديل الإعلانات' : 'Edit ads'}</span>
                   <Edit2 className="w-4 h-4 !text-blue-600 dark:!text-blue-500" />
@@ -1027,11 +993,11 @@ export default function CampaignPreviewPage() {
             variant="blue"
             disabled={isLoading}
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="flex items-center gap-2">
               {isLoading 
                 ? (language === 'ar' ? 'جاري النشر...' : 'Publishing...') 
                 : (language === 'ar' ? 'نشر الحملة' : 'Publish Campaign')}
-              {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+              <ArrowRight className="w-5 h-5" />
             </span>
           </GlowButton>
         </div>
@@ -1040,7 +1006,9 @@ export default function CampaignPreviewPage() {
       {/* Account Selection Modal - Dynamic colors based on campaign type */}
       {showAccountModal && (
         <div className="fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4" style={{
-          background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`
+          background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
+          paddingLeft: isRTL ? '0' : '280px',
+          paddingRight: isRTL ? '280px' : '0'
         }}>
           {/* Animated Background Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1058,15 +1026,13 @@ export default function CampaignPreviewPage() {
           </div>
           
           <div 
-            className="bg-white dark:bg-black rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden border border-gray-900 dark:border-white/10 relative z-10" 
+            className="bg-white dark:bg-black rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden border border-gray-900 dark:border-white/10 relative z-10"
             style={{ 
-              marginLeft: isRTL ? '280px' : '0',
-              marginRight: isRTL ? '0' : '280px'
             }}
           >
             {/* Header - Centered */}
             <div className="px-6 py-5 border-b border-gray-900 dark:border-white/10">
-              <div className="flex flex-col items-center justify-center text-center gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="flex flex-col items-center justify-center text-center gap-3" dir="ltr">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 border border-white/10">
                   <img 
                     src="/images/integrations/google-ads-logo.svg" 
@@ -1086,10 +1052,10 @@ export default function CampaignPreviewPage() {
             </div>
 
             {/* Accounts List - Scrollable for many accounts like integrations */}
-            <div className="p-6 overflow-y-auto max-h-[60vh] bg-white dark:bg-black custom-scrollbar" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="p-6 overflow-y-auto max-h-[60vh] bg-white dark:bg-black custom-scrollbar" dir="ltr">
               {/* Auto-refresh indicator */}
               {isRefreshingStatus && (
-                <div className={`mb-4 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800 animate-pulse ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="mb-4 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800 animate-pulse">
                   <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1156,8 +1122,8 @@ export default function CampaignPreviewPage() {
                           }}
                         >
                           {/* Account Display */}
-                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
                               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                                 selectedAccount === account.customerId
                                   ? 'bg-blue-500/20 border border-blue-500/50'
@@ -1169,24 +1135,24 @@ export default function CampaignPreviewPage() {
                                   className="w-8 h-8"
                                 />
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                              <div className="text-left">
                                 <p className="text-gray-900 dark:text-white font-medium text-sm">
-                                  {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className={`text-gray-700 dark:text-gray-300 font-mono ${isRTL ? 'mr-2' : 'ml-2'} text-sm`}>{formatCustomerId(account.customerId)}</span>
+                                  {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className="text-gray-700 dark:text-gray-300 font-mono ml-2 text-sm">{formatCustomerId(account.customerId)}</span>
                                 </p>
                               </div>
                             </div>
                             
                             {/* Status Badge with Activation Button */}
-                            <div className={`${isRTL ? 'mr-4' : 'ml-4'} flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className="ml-4 flex items-center gap-2">
                               {isEnabled ? (
-                                <div className={`flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${isRTL ? 'ml-1.5' : 'mr-1.5'} bg-green-400`}></span>
+                                <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30">
+                                  <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-400"></span>
                                   {language === 'ar' ? 'نشط' : 'Active'}
                                 </div>
                               ) : (
                                 <>
-                                  <div className={`flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${isRTL ? 'ml-1.5' : 'mr-1.5'} bg-orange-400`}></span>
+                                  <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30">
+                                    <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-orange-400"></span>
                                     {language === 'ar' ? 'غير مفعّل' : 'Not Enabled'}
                                   </div>
                                   <a
@@ -1194,7 +1160,7 @@ export default function CampaignPreviewPage() {
                                     target="_blank"
                                     rel="nofollow noopener noreferrer"
                                     onClick={handleActivateClick}
-                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-xs font-medium ${isRTL ? 'flex-row-reverse' : ''}`}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-xs font-medium"
                                     title={language === 'ar' ? 'تفعيل الحساب' : 'Activate Account'}
                                   >
                                     <span>{language === 'ar' ? 'تفعيل' : 'Activate'}</span>
@@ -1261,13 +1227,13 @@ export default function CampaignPreviewPage() {
             `}</style>
 
             {/* Footer - GlowButton style like campaign pages */}
-            <div className={`px-6 py-4 bg-white dark:bg-black border-t border-gray-900 dark:border-white/10 flex justify-between items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className="px-6 py-4 bg-white dark:bg-black border-t border-gray-900 dark:border-white/10 flex justify-between items-center gap-4">
               <GlowButton
                 onClick={() => setShowAccountModal(false)}
                 variant="green"
               >
-                <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
+                <span className="flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5" />
                   {language === 'ar' ? 'إلغاء' : 'Cancel'}
                 </span>
               </GlowButton>
@@ -1342,7 +1308,9 @@ export default function CampaignPreviewPage() {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            background: `radial-gradient(circle at center, ${modalColors.bgGradient}, rgba(0, 0, 0, 0.9))`
+            background: `radial-gradient(circle at center, ${modalColors.bgGradient}, rgba(0, 0, 0, 0.9))`,
+            paddingLeft: isRTL ? '0' : '280px',
+            paddingRight: isRTL ? '280px' : '0'
           }}
         >
           {/* Animated Background Orbs */}
@@ -1354,8 +1322,6 @@ export default function CampaignPreviewPage() {
           <div 
             className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 rounded-2xl p-10 max-w-lg w-full border border-white/10 shadow-2xl backdrop-blur-xl animate-scaleIn" 
             style={{ 
-              marginLeft: isRTL ? '280px' : '0',
-              marginRight: isRTL ? '0' : '280px',
               boxShadow: `0 0 60px ${modalColors.primary}4d, 0 0 100px ${modalColors.secondary}33`
             }}
           >
@@ -1372,7 +1338,7 @@ export default function CampaignPreviewPage() {
                 </div>
               </div>
 
-              <div className="text-center mb-8" dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="text-center mb-8" dir="ltr">
                 <h2 className={`text-3xl font-bold bg-gradient-to-r ${modalColors.title} bg-clip-text text-transparent mb-3 animate-pulse`}>
                   {language === 'ar' ? 'نشر الحملة' : 'Publishing Campaign'}
                 </h2>

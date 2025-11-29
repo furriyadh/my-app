@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronDown, Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import GlowButton from '@/components/ui/glow-button';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 // Google Ads Language IDs mapping
 const LANGUAGES = [
@@ -81,14 +82,6 @@ export default function LanguageSelectionPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Detect language from localStorage
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-      setIsRTL(savedLanguage === 'ar');
-    }
-  }, []);
 
   // Load campaign data and saved/detected language on mount
   useEffect(() => {
@@ -188,7 +181,7 @@ export default function LanguageSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         
         {/* Header */}
@@ -200,7 +193,7 @@ export default function LanguageSelectionPage() {
 
         {/* Language Selection */}
         <div className="max-w-2xl mx-auto mb-12">
-          <label className={`block text-base font-medium text-gray-700 dark:text-gray-300 mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-3 text-left">
             {language === 'ar' ? 'اختر اللغة' : 'Select Language'}
           </label>
 
@@ -208,9 +201,9 @@ export default function LanguageSelectionPage() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`w-full px-6 py-4 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 shadow-sm`}
+              className="w-full px-6 py-4 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-left flex items-center justify-between hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 shadow-sm"
             >
-              <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center gap-3">
                 <ReactCountryFlag
                   countryCode={selectedLanguage.countryCode}
                   svg
@@ -239,8 +232,8 @@ export default function LanguageSelectionPage() {
                     placeholder={language === 'ar' ? 'بحث عن اللغات...' : 'Search languages...'}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    dir={isRTL ? 'rtl' : 'ltr'}
-                    className={`w-full px-4 py-2 bg-white dark:!bg-black border border-gray-300 dark:!border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 text-gray-900 dark:!text-white placeholder-gray-500 dark:!placeholder-gray-500 [color-scheme:dark] ${isRTL ? 'text-right' : 'text-left'}`}
+                    dir="ltr"
+                    className="w-full px-4 py-2 bg-white dark:!bg-black border border-gray-300 dark:!border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 text-gray-900 dark:!text-white placeholder-gray-500 dark:!placeholder-gray-500 [color-scheme:dark] text-left"
                     style={isDark ? { backgroundColor: '#000000', color: '#ffffff', borderColor: '#1f2937' } : {}}
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -260,7 +253,7 @@ export default function LanguageSelectionPage() {
                           <button
                             key={lang.id}
                             onClick={() => handleLanguageSelect(lang)}
-                            className={`w-full px-4 py-3 flex items-center gap-3 rounded-lg transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''} ${
+                            className={`w-full px-4 py-3 flex items-center gap-3 rounded-lg transition-all duration-200 ${
                               isSelected
                                 ? 'text-blue-700 dark:!text-white'
                                 : 'bg-transparent hover:bg-gray-100 dark:hover:!bg-transparent text-gray-700 dark:!text-white'
@@ -275,7 +268,7 @@ export default function LanguageSelectionPage() {
                                 height: '1.5em',
                               }}
                             />
-                            <span className={`flex-1 ${isRTL ? 'text-right' : 'text-left'} font-medium`}>{lang.name}</span>
+                            <span className="flex-1 text-left font-medium">{lang.name}</span>
                             {isSelected && (
                               <Check className="w-5 h-5 text-blue-600 dark:!text-white" />
                             )}
@@ -291,13 +284,13 @@ export default function LanguageSelectionPage() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className={`flex justify-between items-center max-w-2xl mx-auto ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="flex justify-between items-center max-w-2xl mx-auto">
           <GlowButton
             onClick={() => router.push('/campaign/website-url')}
             variant="green"
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
+            <span className="flex items-center gap-2">
+              <ArrowLeft className="w-5 h-5" />
               {language === 'ar' ? 'الخطوة السابقة' : 'Previous Step'}
             </span>
           </GlowButton>
@@ -306,9 +299,9 @@ export default function LanguageSelectionPage() {
             onClick={handleNext}
             variant="purple"
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="flex items-center gap-2">
               {language === 'ar' ? 'الخطوة التالية' : 'Next Step'}
-              {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+              <ArrowRight className="w-5 h-5" />
             </span>
           </GlowButton>
         </div>

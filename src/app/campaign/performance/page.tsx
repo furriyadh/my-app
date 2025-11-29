@@ -1,14 +1,16 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, TrendingUp, Eye, MousePointer, Target, Users, BarChart3, Zap, DollarSign, Check } from 'lucide-react';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 // Performance Estimates Component
 const PerformanceEstimates: React.FC<{
   dailyBudget?: number;
   budgetLevel?: string;
 }> = ({ dailyBudget = 100, budgetLevel = 'intermediate' }) => {
+  const { t, isRTL } = useTranslation();
   // Calculate estimated metrics based on budget
   const calculateMetrics = () => {
     const baseMetrics = {
@@ -53,30 +55,30 @@ const PerformanceEstimates: React.FC<{
   const performanceMetrics = [
     {
       icon: <Eye className="w-5 h-5" />,
-      label: 'Expected Impressions',
+      label: t.campaign?.expectedImpressions || 'Expected Impressions',
       value: `${(metrics.impressions.min / 1000).toFixed(1)}K - ${(metrics.impressions.max / 1000).toFixed(1)}K`,
-      subtext: 'per day',
+      subtext: t.campaign?.perDay || 'per day',
       color: 'blue'
     },
     {
       icon: <MousePointer className="w-5 h-5" />,
-      label: 'Expected Clicks',
+      label: t.campaign?.expectedClicks || 'Expected Clicks',
       value: `${metrics.clicks.min} - ${metrics.clicks.max}`,
-      subtext: `${metrics.ctr.toFixed(1)}% CTR`,
+      subtext: `${metrics.ctr.toFixed(1)}% ${t.campaign?.ctr || 'CTR'}`,
       color: 'green'
     },
     {
       icon: <Target className="w-5 h-5" />,
-      label: 'Expected Conversions',
+      label: t.campaign?.expectedConversions || 'Expected Conversions',
       value: `${metrics.conversions.min} - ${metrics.conversions.max}`,
-      subtext: `${metrics.conversionRate.toFixed(1)}% conversion rate`,
+      subtext: `${metrics.conversionRate.toFixed(1)}% ${t.campaign?.conversionRate || 'conversion rate'}`,
       color: 'purple'
     },
     {
       icon: <DollarSign className="w-5 h-5" />,
-      label: 'Avg. Cost Per Click',
+      label: t.campaign?.avgCostPerClick || 'Avg. Cost Per Click',
       value: `$${metrics.cpc.toFixed(2)}`,
-      subtext: 'estimated CPC',
+      subtext: t.campaign?.estimatedCPC || 'estimated CPC',
       color: 'amber'
     }
   ];
@@ -111,9 +113,9 @@ const PerformanceEstimates: React.FC<{
     <div className="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900/20 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Expected Performance</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Realistic projections for {budgetLevel} level campaigns
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t.campaign?.expectedPerformance || 'Expected Performance'}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
+            {t.campaign?.realisticProjections || 'Realistic projections for'} {budgetLevel} {t.campaign?.levelCampaigns || 'level campaigns'}
           </p>
         </div>
         <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
@@ -146,35 +148,35 @@ const PerformanceEstimates: React.FC<{
         <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
           <div className="flex items-center gap-3 mb-2">
             <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h4 className="font-semibold text-blue-700 dark:text-blue-300">Performance Factors</h4>
+            <h4 className="font-semibold text-blue-700 dark:text-blue-300" dir={isRTL ? 'rtl' : 'ltr'}>{t.campaign?.performanceFactors || 'Performance Factors'}</h4>
           </div>
-          <ul className="space-y-2 text-sm text-blue-600 dark:text-blue-400">
+          <ul className="space-y-2 text-sm text-blue-600 dark:text-blue-400" dir={isRTL ? 'rtl' : 'ltr'}>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-              Location targeting precision affects CTR by 15-30%
+              {t.campaign?.locationTargetingCTR || 'Location targeting precision affects CTR by 15-30%'}
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-              Ad quality score can improve CPC by up to 50%
+              {t.campaign?.adQualityScore || 'Ad quality score can improve CPC by up to 50%'}
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-              Landing page relevance impacts conversion rate significantly
+              {t.campaign?.landingPageRelevance || 'Landing page relevance impacts conversion rate significantly'}
             </li>
           </ul>
         </div>
 
         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-          <p className="text-sm font-semibold text-green-700 dark:text-green-300 mb-1">
-            💡 Optimization Tip
+          <p className="text-sm font-semibold text-green-700 dark:text-green-300 mb-1" dir={isRTL ? 'rtl' : 'ltr'}>
+            💡 {t.campaign?.optimizationTip || 'Optimization Tip'}
           </p>
-          <p className="text-sm text-green-600 dark:text-green-400">
+          <p className="text-sm text-green-600 dark:text-green-400" dir={isRTL ? 'rtl' : 'ltr'}>
             {
               budgetLevel === 'beginner'
-              ? "Great starting budget! Focus on targeted keywords to maximize conversions. You can expect solid results with proper optimization."
+              ? (t.campaign?.beginnerTip || "Great starting budget! Focus on targeted keywords to maximize conversions. You can expect solid results with proper optimization.")
               : budgetLevel === 'intermediate'
-              ? "Excellent budget for steady growth. You can target competitive keywords while maintaining good ROI and conversion rates."
-              : "Premium budget for maximum impact. Target high-value keywords and expect excellent visibility with strong conversion performance."
+              ? (t.campaign?.intermediateTip || "Excellent budget for steady growth. You can target competitive keywords while maintaining good ROI and conversion rates.")
+              : (t.campaign?.expertTip || "Premium budget for maximum impact. Target high-value keywords and expect excellent visibility with strong conversion performance.")
             }
           </p>
         </div>
@@ -185,9 +187,10 @@ const PerformanceEstimates: React.FC<{
 
 const PerformancePage: React.FC = () => {
   const router = useRouter();
+  const { t, language, isRTL } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
       {/* Header */}
       <div className="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -199,7 +202,7 @@ const PerformancePage: React.FC = () => {
               <ArrowLeft className="w-5 h-5 mr-2" />
               Back
             </button>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Performance Preview</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t.campaign?.performancePreview || 'Performance Preview'}</h1>
             <div className="w-20" />
           </div>
         </div>
@@ -216,7 +219,7 @@ const PerformancePage: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-3 mb-4">
               <Users className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Audience Reach</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t.campaign?.audienceReach || 'Audience Reach'}</h3>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
@@ -238,7 +241,7 @@ const PerformancePage: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-3 mb-4">
               <Zap className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Optimizations</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t.campaign?.quickOptimizations || 'Quick Optimizations'}</h3>
             </div>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">

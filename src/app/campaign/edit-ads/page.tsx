@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Edit2, Sparkles, RefreshCw, Save } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
 import { CardStack } from '@/components/ui/card-stack';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface GeneratedContent {
   headlines: string[];
@@ -14,6 +15,7 @@ interface GeneratedContent {
 
 export default function EditAdsPage() {
   const router = useRouter();
+  const { t, language, isRTL } = useTranslation();
   const [content, setContent] = useState<GeneratedContent>({
     headlines: [],
     descriptions: [],
@@ -26,17 +28,6 @@ export default function EditAdsPage() {
   const [selectedLanguageCode, setSelectedLanguageCode] = useState<string>('ar'); // Default to Arabic
   const [isRegenerating, setIsRegenerating] = useState<{[key: string]: boolean}>({});
   const [hasChanges, setHasChanges] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const [isRTL, setIsRTL] = useState(false);
-
-  // Detect language from localStorage
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-      setIsRTL(savedLanguage === 'ar');
-    }
-  }, []);
 
   useEffect(() => {
     // Load data from localStorage
@@ -292,12 +283,12 @@ export default function EditAdsPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         
         {/* Header */}
         <div className="mb-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' ? 'أنشأ الذكاء الاصطناعي أفضل الإعلانات لك' : 'Furriyadh AI has created the best ads for you'}
           </h1>
         </div>
@@ -311,9 +302,9 @@ export default function EditAdsPage() {
             {/* Ad Headlines Section */}
             <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
               <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
-                <div className={`flex items-center justify-between mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">{language === 'ar' ? 'عناوين الإعلانات' : 'Ad Headlines'}</h2>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'عناوين الإعلانات' : 'Ad Headlines'}</h2>
                     <span className="text-xs text-gray-500 dark:text-gray-400">ⓘ</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">{language === 'ar' ? 'الحد الأقصى 30 حرف' : '30 characters max.'}</span>
                   </div>
@@ -327,7 +318,7 @@ export default function EditAdsPage() {
                 {content.headlines.map((headline, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-3 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 text-gray-900 dark:text-white ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 text-gray-900 dark:text-white"
                   >
                     <span className="text-xs text-gray-400 dark:text-gray-500 w-6">{index + 1}.</span>
                     <input
@@ -335,8 +326,8 @@ export default function EditAdsPage() {
                       value={headline}
                       onChange={(e) => handleEditText('headlines', index, e.target.value)}
                       maxLength={30}
-                      dir={isRTL ? 'rtl' : 'ltr'}
-                      className={`flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                      className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 text-left"
                       placeholder={language === 'ar' ? 'أدخل العنوان...' : 'Enter headline...'}
                     />
                     <span className="text-xs text-gray-400 dark:text-gray-500">{headline.length}/30</span>
@@ -360,9 +351,9 @@ export default function EditAdsPage() {
             {/* Ad Descriptions Section */}
             <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
               <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
-                <div className={`flex items-center justify-between mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">{language === 'ar' ? 'أوصاف الإعلانات' : 'Ad Descriptions'}</h2>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'أوصاف الإعلانات' : 'Ad Descriptions'}</h2>
                     <span className="text-xs text-gray-500 dark:text-gray-400">ⓘ</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">{language === 'ar' ? 'الحد الأقصى 90 حرف' : '90 characters max.'}</span>
                   </div>
@@ -376,7 +367,7 @@ export default function EditAdsPage() {
                 {content.descriptions.map((description, index) => (
                   <div
                     key={index}
-                    className={`flex items-start gap-3 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 text-gray-900 dark:text-white ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className="flex items-start gap-3 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 text-gray-900 dark:text-white"
                   >
                     <span className="text-xs text-gray-400 dark:text-gray-500 w-6 mt-1">{index + 1}.</span>
                     <div className="flex-1">
@@ -385,11 +376,11 @@ export default function EditAdsPage() {
                         onChange={(e) => handleEditText('descriptions', index, e.target.value)}
                         maxLength={90}
                         rows={2}
-                        dir={isRTL ? 'rtl' : 'ltr'}
-                        className={`w-full bg-transparent text-sm resize-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        className="w-full bg-transparent text-sm resize-none outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 text-left"
                         placeholder={language === 'ar' ? 'أدخل الوصف...' : 'Enter description...'}
                       />
-                      <div className={`text-xs text-gray-400 dark:text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{description.length}/90</div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-left">{description.length}/90</div>
                     </div>
                     <button
                       onClick={() => handleRegenerateItem('descriptions', index)}
@@ -417,13 +408,13 @@ export default function EditAdsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className={`flex justify-center gap-6 mt-12 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="flex justify-center gap-6 mt-12">
           <GlowButton
             onClick={handleGoBack}
             variant="green"
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
+            <span className="flex items-center gap-2">
+              <ArrowLeft className="w-5 h-5" />
               {language === 'ar' ? 'رجوع' : 'Go Back'}
             </span>
           </GlowButton>
@@ -433,7 +424,7 @@ export default function EditAdsPage() {
             variant="blue"
             disabled={!hasChanges}
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="flex items-center gap-2">
               <Save className="w-5 h-5" />
               {language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}
             </span>

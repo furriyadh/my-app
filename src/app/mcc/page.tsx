@@ -24,6 +24,8 @@ interface MCCStats {
 
 export default function MCCPage() {
   const router = useRouter();
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
   const [accounts, setAccounts] = useState<MCCAccount[]>([]);
   const [stats, setStats] = useState<MCCStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,20 @@ export default function MCCPage() {
 
   useEffect(() => {
     fetchMCCData();
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
   }, []);
 
   const fetchMCCData = async () => {

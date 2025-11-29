@@ -24,9 +24,25 @@ const SelectAdsAccountContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
 
   useEffect(() => {
     fetchGoogleAdsAccounts();
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
   }, []);
 
   const fetchGoogleAdsAccounts = async () => {
@@ -150,14 +166,16 @@ const SelectAdsAccountContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen  py-12">
+    <div className="min-h-screen py-12" dir="ltr">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            اختر حسابك الإعلاني
+          <h1 className="text-3xl font-bold text-gray-900 mb-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            {language === 'ar' ? 'اختر حسابك الإعلاني' : 'Select your Ads Account'}
           </h1>
-          <p className="text-lg text-gray-600">
-            تم العثور على {accounts.length} حساب إعلاني مرتبط بإيميلك
+          <p className="text-lg text-gray-600" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            {language === 'ar' 
+              ? `تم العثور على ${accounts.length} حساب إعلاني مرتبط بإيميلك`
+              : `Found ${accounts.length} ad account(s) linked to your email`}
           </p>
         </div>
 

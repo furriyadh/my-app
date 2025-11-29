@@ -182,9 +182,8 @@ const LockScreenContent: React.FC = () => {
       if (isValidPassword) {
         localStorage.setItem("lastActivity", Date.now().toString());
         localStorage.setItem("isAuthenticated", "true");
-        window.location.href = process.env.NODE_ENV === 'production' 
-          ? 'https://furriyadh.com/dashboard' 
-          : "/dashboard";
+        // استخدام مسار نسبي ليدعم التطوير والإنتاج تلقائياً
+        window.location.href = "/dashboard";
       } else {
         const newAttempts = state.attempts + 1;
         
@@ -225,18 +224,16 @@ const LockScreenContent: React.FC = () => {
 
   // Handle forgot password
   const handleForgotPassword = useCallback(() => {
-    window.location.href = process.env.NODE_ENV === 'production' 
-      ? 'https://furriyadh.com/authentication/forgot-password' 
-      : "/authentication/forgot-password";
+    // مسار نسبي يعمل في التطوير والإنتاج
+    window.location.href = "/authentication/forgot-password";
   }, []);
 
   // Handle switch user
   const handleSwitchUser = useCallback(() => {
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("lastActivity");
-    window.location.href = process.env.NODE_ENV === 'production' 
-      ? 'https://furriyadh.com/authentication/sign-in' 
-      : "/authentication/sign-in";
+    // مسار نسبي يعمل في التطوير والإنتاج
+    window.location.href = "/authentication/sign-in";
   }, []);
 
   // Furriyadh Logo Component
@@ -500,9 +497,10 @@ const LockScreenContent: React.FC = () => {
                       
                       <button
                         type="button"
-                        onClick={() => window.location.href = process.env.NODE_ENV === 'production' 
-                          ? 'https://furriyadh.com/settings' 
-                          : "/settings"}
+                        onClick={() => {
+                          // مسار نسبي لصفحة الإعدادات يدعم التطوير والإنتاج
+                          window.location.href = "/settings";
+                        }}
                         className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors flex items-center gap-1"
                       >
                         <Settings className="w-4 h-4" />

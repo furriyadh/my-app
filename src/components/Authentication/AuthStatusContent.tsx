@@ -4,11 +4,32 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { Session } from "@supabase/supabase-js";
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("@/utils/supabase/client").then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+
+  return supabase;
+};
 
 interface AuthStatus {
   authenticated: boolean;
   message: string;
-  user: any;
+  user: {
+    id: string;
+    email: string | null;
+    name?: string | null;
+    picture?: string | null;
+  } | null;
   backend_status: any;
   tokens: {
     has_access_token: boolean;
@@ -18,60 +39,153 @@ interface AuthStatus {
 }
 
 const AuthStatusContent: React.FC = () => {
+  const supabase = useSupabaseClient();
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
+  const buildStatusFromSession = (session: Session | null): AuthStatus => {
+    if (!session) {
+      return {
+        authenticated: false,
+        message: "لا يوجد جلسة نشطة. يرجى تسجيل الدخول.",
+        user: null,
+        backend_status: null,
+        tokens: {
+          has_access_token: false,
+          has_refresh_token: false,
+          has_user_info: false,
+        },
+      };
+    }
+
+    const user = session.user;
+    const metadata: any = user?.user_metadata || {};
+
+    return {
+      authenticated: true,
+      message: "المستخدم مصادق عليه من خلال Supabase.",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: metadata.full_name || metadata.name || null,
+        picture: metadata.avatar_url || null,
+      },
+      backend_status: null,
+      tokens: {
+        has_access_token: !!session.access_token,
+        has_refresh_token: !!session.refresh_token,
+        has_user_info: !!user,
+      },
+    };
+  };
 
   const checkAuthStatus = async () => {
+    if (!supabase) return;
+
     setIsLoading(true);
     setError("");
     
     try {
-      const response = await fetch('/api/auth/status', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-      const data = await response.json();
-      setAuthStatus(data);
+      if (error) {
+        console.error("خطأ في فحص حالة المصادقة من Supabase:", error);
+        setError("فشل في فحص حالة المصادقة");
+        setAuthStatus(
+          buildStatusFromSession(null)
+        );
+        // إعادة التوجيه إلى صفحة تسجيل الدخول عند الخطأ
+        setTimeout(() => {
+          router.push("/authentication/sign-in");
+        }, 3000);
+        return;
+      }
 
-      if (!data.authenticated) {
+      const status = buildStatusFromSession(session);
+      setAuthStatus(status);
+
+      if (!status.authenticated) {
         // إعادة توجيه إلى صفحة تسجيل الدخول إذا لم يكن المستخدم مصادق عليه
         setTimeout(() => {
-          router.push('/authentication/sign-in');
+          router.push("/authentication/sign-in");
         }, 3000);
       }
-    } catch (error) {
-      console.error('خطأ في فحص حالة المصادقة:', error);
+    } catch (err) {
+      console.error("خطأ غير متوقع في فحص حالة المصادقة:", err);
       setError("فشل في فحص حالة المصادقة");
+      setAuthStatus(buildStatusFromSession(null));
+      setTimeout(() => {
+        router.push("/authentication/sign-in");
+      }, 3000);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/api/oauth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+  useEffect(() => {
+    if (!supabase) return;
 
-      if (response.ok) {
-        router.push('/authentication/logout');
+    // فحص الجلسة الحالية عند تحميل المكون
+    checkAuthStatus();
+
+    // الاستماع لتغييرات حالة المصادقة من Supabase
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const status = buildStatusFromSession(session);
+      setAuthStatus(status);
+
+      if (!status.authenticated) {
+        router.push("/authentication/sign-in");
       }
-    } catch (error) {
-      console.error('خطأ في تسجيل الخروج:', error);
-    }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    if (!supabase) return;
+
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("خطأ في تسجيل الخروج من Supabase:", error);
+      }
+    } catch (err) {
+      console.error("خطأ غير متوقع في تسجيل الخروج:", err);
+    } finally {
+      setIsLoading(false);
+      router.push("/authentication/sign-in");
+      router.refresh();
+      }
   };
+
+  // عرض حالة التحميل إذا لم يتم تحميل supabase بعد
+  if (!supabase) {
+    return (
+      <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px]">
+        <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                جاري تحميل النظام...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+    }
 
   if (isLoading) {
     return (

@@ -32,9 +32,25 @@ const AccountsPage: React.FC = () => {
   const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState<GoogleAdsAccount | null>(null);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
 
   useEffect(() => {
     fetchAccounts();
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
   }, []);
 
   const fetchAccounts = async () => {
@@ -246,33 +262,35 @@ const AccountsPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">جاري تحميل الحسابات...</p>
+          <p className="text-gray-600 dark:text-gray-400" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            {language === 'ar' ? 'جاري تحميل الحسابات...' : 'Loading accounts...'}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6" dir="ltr">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                استعراض الحسابات المربوطة
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                {language === 'ar' ? 'استعراض الحسابات المربوطة' : 'Connected Accounts Overview'}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                إدارة ومراقبة جميع حسابات Google Ads المربوطة بحسابك
+              <p className="text-gray-600 dark:text-gray-400" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                {language === 'ar' ? 'إدارة ومراقبة جميع حسابات Google Ads المربوطة بحسابك' : 'Manage and monitor all your connected Google Ads accounts'}
               </p>
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="  rounded-lg px-4 py-2 border border-gray-200 dark:border-gray-700">
+              <div className="rounded-lg px-4 py-2 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {accounts.length} حساب مربوط
+                  <span className="text-sm text-gray-600 dark:text-gray-400" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                    {accounts.length} {language === 'ar' ? 'حساب مربوط' : 'Connected Accounts'}
                   </span>
                 </div>
               </div>
@@ -282,7 +300,7 @@ const AccountsPage: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
-                إضافة حساب جديد
+                <span dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'إضافة حساب جديد' : 'Add New Account'}</span>
               </button>
             </div>
           </div>

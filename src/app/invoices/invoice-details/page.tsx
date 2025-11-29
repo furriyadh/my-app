@@ -1,11 +1,30 @@
+"use client";
+
 import InvoiceDetailsTable from "@/components/Invoices/InvoiceDetailsTable";
 import Link from "next/link";
+import { useState, useEffect } from 'react';
 
 export default function Page() {
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
+
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
+  }, []);
+
   return (
     <>
-      <div className="mb-[25px] md:flex items-center justify-between">
-        <h5 className="!mb-0">Invoice Details</h5>
+      <div className="mb-[25px] md:flex items-center justify-between" dir="ltr">
+        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'تفاصيل الفاتورة' : 'Invoice Details'}</h5>
 
         <ol className="breadcrumb mt-[12px] md:mt-0">
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
@@ -16,16 +35,16 @@ export default function Page() {
               <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                 home
               </i>
-              Dashboard
+              {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
             </Link>
           </li>
 
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Invoices
+            <span dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'الفواتير' : 'Invoices'}</span>
           </li>
 
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Invoice Details
+            <span dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'تفاصيل الفاتورة' : 'Invoice Details'}</span>
           </li>
         </ol>
       </div>

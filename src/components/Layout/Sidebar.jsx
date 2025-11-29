@@ -80,29 +80,30 @@ export function Sidebar({ className, ...props }) {
   }
 
   const renderNavItem = (item) => (
-    <Button
-      key={item.id}
-      variant={activeItem === item.id ? "secondary" : "ghost"}
-      className={cn(
-        "w-full justify-start gap-3 h-12 px-3",
-        activeItem === item.id && "shadow-sm",
-        item.highlight && "border border-blue-200 dark:border-blue-800"
-      )}
-      onClick={() => handleItemClick(item.id)}
-    >
-      <item.icon className="h-5 w-5" />
-      <div className="flex-1 text-right">
-        <div className="font-medium">{item.label}</div>
-        {item.description && (
-          <div className="text-xs text-muted-foreground">{item.description}</div>
+    <a key={item.id} href={item.href} className="block">
+      <Button
+        variant={activeItem === item.id ? "secondary" : "ghost"}
+        className={cn(
+          "w-full justify-start gap-3 h-12 px-3",
+          activeItem === item.id && "shadow-sm",
+          item.highlight && "border border-blue-200 dark:border-blue-800"
         )}
-      </div>
-      {item.badge && (
-        <Badge variant={item.badge === "Connect" ? "default" : "secondary"} className="text-xs">
-          {item.badge}
-        </Badge>
-      )}
-    </Button>
+        onClick={() => handleItemClick(item.id)}
+      >
+        <item.icon className="h-5 w-5" />
+        <div className="flex-1 text-right">
+          <div className="font-medium">{item.label}</div>
+          {item.description && (
+            <div className="text-xs text-muted-foreground">{item.description}</div>
+          )}
+        </div>
+        {item.badge && (
+          <Badge variant={item.badge === "Connect" ? "default" : "secondary"} className="text-xs">
+            {item.badge}
+          </Badge>
+        )}
+      </Button>
+    </a>
   )
 
   return (

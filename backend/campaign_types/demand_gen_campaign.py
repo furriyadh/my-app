@@ -599,4 +599,3 @@ class DemandGenCampaignCreator:
                 
         except Exception as e:
             print(f"⚠️ خطأ في إضافة تتبع تحويلات توليد الطلب: {e}")
-

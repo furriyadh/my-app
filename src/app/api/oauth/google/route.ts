@@ -62,9 +62,22 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
     
-    // تحديد redirect_uri حسب البيئة (حسب Google Ads API Documentation)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://furriyadh.com' : 'http://localhost:3000');
-    const redirectUri = `${baseUrl}/api/oauth/google/callback`;
+    // تحديد baseUrl
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://furriyadh.com'
+        : 'http://localhost:3000');
+
+    // تفضيل رابط إعادة التوجيه القادم من متغيرات البيئة (للتطابق مع Google Cloud Console)
+    const redirectUriFromEnv =
+      process.env.GOOGLE_REDIRECT_URI ||
+      process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI ||
+      '';
+
+    // تحديد redirect_uri النهائي (إما من env أو مبني من baseUrl)
+    const redirectUri =
+      redirectUriFromEnv || `${baseUrl}/api/oauth/google/callback`;
     
     // التحقق من تطابق redirect_uri مع Google Cloud Console
     console.log('🔍 NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
@@ -73,8 +86,12 @@ export async function GET(request: NextRequest) {
     console.log('🔗 Base URL:', baseUrl);
     console.log('🔗 Redirect URI:', redirectUri);
     
-    // التحقق من أن redirect_uri يطابق Google Cloud Console
-    const expectedRedirectUri = 'https://furriyadh.com/api/oauth/google/callback';
+    // التحقق من أن redirect_uri يطابق Google Cloud Console (لأغراض التشخيص فقط)
+    const expectedRedirectUri =
+      redirectUriFromEnv ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://furriyadh.com/api/oauth/google/callback'
+        : 'http://localhost:3000/api/oauth/google/callback');
     if (redirectUri !== expectedRedirectUri) {
       console.error('❌ redirect_uri mismatch!');
       console.error('Expected:', expectedRedirectUri);

@@ -12,7 +12,7 @@ import base64
 import hashlib
 import secrets
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, Response, stream_with_context
 from flask_cors import CORS
 
 # تحميل متغيرات البيئة
@@ -88,21 +88,40 @@ else:
 
 # بدون تشفير - تخزين مباشر
 
-# إعداد Supabase مع إصدار محدث
+# تسجيل Blueprints
+try:
+    from routes.ai_campaign_creator import ai_campaign_creator_bp
+    app.register_blueprint(ai_campaign_creator_bp, url_prefix='/api/ai-campaign')
+    logger.info("✅ تم تسجيل AI Campaign Creator Blueprint")
+except Exception as e:
+    logger.error(f"❌ فشل تسجيل AI Campaign Creator Blueprint: {e}")
+
+try:
+    from routes.ai_campaign_flow import ai_campaign_flow_bp
+    app.register_blueprint(ai_campaign_flow_bp, url_prefix='/api/campaign-flow')
+    logger.info("✅ تم تسجيل AI Campaign Flow Blueprint")
+except Exception as e:
+    logger.error(f"❌ فشل تسجيل AI Campaign Flow Blueprint: {e}")
+
+# إعداد Supabase مع إصدار محدث (باستخدام متغيرات البيئة فقط بدون قيم افتراضية حساسة)
 try:
     from supabase import create_client, Client
-    SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL', 'https://mkzwqbgcfdzcqmkgzwgy.supabase.co')
-    SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rendxYmdjZmR6Y3Fta2d6d2d5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTkzMzk4NSwiZXhwIjoyMDY1NTA5OTg1fQ.Xp687KZnQNvZ99ygaielsRLEIT3ubciunYcNoRZhfd4')
-    
+    SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
+    SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+
     logger.info("🔄 إنشاء عميل Supabase مع إصدار محدث...")
-    logger.info(f"🔍 SUPABASE_URL: {SUPABASE_URL}")
+    logger.info(f"🔍 SUPABASE_URL موجود: {bool(SUPABASE_URL)}")
     logger.info(f"🔍 SUPABASE_KEY length: {len(SUPABASE_KEY) if SUPABASE_KEY else 0}")
-    
+
+    # تأكيد توافر متغيرات البيئة قبل إنشاء العميل
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        raise ValueError("متغيرات البيئة الخاصة بـ Supabase غير مضبوطة (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)")
+
     # إنشاء العميل بدون معاملات إضافية
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
     SUPABASE_AVAILABLE = True
     logger.info("✅ Supabase تم إنشاؤه بنجاح")
-    
+
 except Exception as e:
     logger.error(f"❌ فشل إنشاء Supabase: {e}")
     logger.error(f"🔍 نوع الخطأ: {type(e).__name__}")
@@ -211,16 +230,16 @@ def handle_google_ads_exception(exception):
                     'trigger': error.trigger.string_value if hasattr(error, 'trigger') and hasattr(error.trigger, 'string_value') else None,
                     'location': []
                 }
-                
+
                 if hasattr(error, 'location') and error.location:
                     for field_path_element in error.location.field_path_elements:
                         error_dict['location'].append({
                             'field_name': field_path_element.field_name,
                             'index': field_path_element.index if hasattr(field_path_element, 'index') else None
                         })
-                
+
                 errors.append(error_dict)
-            
+
             return {
                 'success': False,
                 'error': 'GoogleAdsFailure',
@@ -241,6 +260,36 @@ def handle_google_ads_exception(exception):
             'error': 'Exception handling failed',
             'message': str(exception)
         }
+
+
+def convert_status_to_db_safe(api_status: str) -> str:
+    """
+    تحويل حالات Google Ads API إلى حالات آمنة ومتوافقة مع جدول client_requests في Supabase.
+
+    نستخدم نفس المنطق الموجود في google_ads_official_service._convert_status_to_db_safe
+    لتوحيد القيم المخزنة في قاعدة البيانات.
+    """
+    # في Google Ads API:
+    # - ACTIVE = الرابط نشط ومقبول ✅
+    # - INACTIVE = الرابط غير نشط (تم رفضه أو إلغاؤه سابقاً) = NOT_LINKED
+    # - PENDING = طلب ربط في الانتظار (طلب جديد)
+    # - DISABLED = الحساب معطّل/غير مفعّل
+    # 
+    # ⚠️ INACTIVE يعني طلب قديم غير نشط - يجب اعتباره NOT_LINKED
+    status_mapping = {
+        'PENDING': 'PENDING',
+        'ACTIVE': 'ACTIVE',
+        'INACTIVE': 'NOT_LINKED',  # ✅ INACTIVE = طلب قديم غير نشط (تم رفضه/إلغاؤه)
+        'DISABLED': 'SUSPENDED',  # ✅ DISABLED = الحساب معطّل/غير مفعّل (CUSTOMER_NOT_ENABLED)
+        'REFUSED': 'REJECTED',
+        'CANCELED': 'REJECTED',
+        'CANCELLED': 'REJECTED',
+        'UNKNOWN': 'NOT_LINKED',
+        'UNSPECIFIED': 'NOT_LINKED',
+        # في حالة الأخطاء العامة نعتبرها NOT_LINKED لتفادي تعارض مع الـ constraint
+        'ERROR': 'NOT_LINKED',
+    }
+    return status_mapping.get(str(api_status or '').upper(), 'NOT_LINKED')
 
 @app.route('/api/user/accounts', methods=['GET'])
 def get_user_accounts():
@@ -350,7 +399,9 @@ def link_customer():
     """ربط حساب عميل بـ MCC باستخدام المكتبة الرسمية"""
     try:
         data = request.get_json()
-        customer_id = data.get('customerId')
+        # دعم كلا الصيغتين: customer_id و customerId
+        customer_id = data.get('customer_id') or data.get('customerId')
+        account_name = data.get('account_name') or data.get('accountName') or 'Unknown Account'
         
         if not customer_id:
             return jsonify({
@@ -613,12 +664,439 @@ def get_account_stats(customer_id):
         return jsonify(handle_google_ads_exception(e)), 400
         
     except Exception as e:
-        logger.error(f"❌ خطأ عام في get_account_stats: {e}")
+        error_text = str(e)
+        logger.error(f"❌ خطأ عام في get_account_stats: {error_text}")
+
+        # في بعض الحالات تكون الأخطاء عبارة عن مشاكل صلاحيات أو حساب غير مفعّل
+        # من Google Ads (USER_PERMISSION_DENIED / CUSTOMER_NOT_ENABLED)
+        # نرجع 200 مع success=False بدلاً من 500 حتى لا يعتبرها الـ frontend كـ crash.
+        permission_markers = [
+            "USER_PERMISSION_DENIED",
+            "CUSTOMER_NOT_ENABLED",
+            "The caller does not have permission",
+            "The customer account can't be accessed because it is not yet enabled or has been deactivated.",
+        ]
+        if any(marker in error_text for marker in permission_markers):
+            logger.warning(
+                f"⚠️ حساب غير متاح أو صلاحيات غير كافية للحساب {customer_id} - سيتم إرجاع نتيجة فارغة بدلاً من 500"
+            )
+            return jsonify({
+                'success': False,
+                'customer_id': customer_id,
+                'campaigns': [],
+                'summary': {
+                    'total_campaigns': 0,
+                    'total_impressions': 0,
+                    'total_clicks': 0,
+                    'total_cost_micros': 0,
+                    'total_cost_currency': 0,
+                },
+                'source': 'google_ads_official_library_v21',
+                'error': 'ACCOUNT_NOT_ACCESSIBLE',
+                'error_details': error_text,
+                'message': 'لا يمكن الوصول إلى هذا الحساب لأنه غير مفعّل أو لا توجد صلاحيات كافية على MCC الحالي.'
+            }), 200
+
+        # أي أخطاء أخرى حقيقية تظل 500
+        return jsonify({
+            'success': False,
+            'error': error_text,
+            'message': 'خطأ في جلب إحصائيات الحساب'
+        }), 500
+
+
+@app.route('/api/account-status-stream', methods=['GET'])
+def account_status_stream():
+    """توفير SSE بسيط لحالة الحسابات (connected + heartbeat فقط حالياً)"""
+    try:
+        logger.info("📡 بدء اتصال SSE لـ /api/account-status-stream")
+
+        def generate():
+            # حدث اتصال أولي
+            connected_event = json.dumps({
+                'type': 'connected',
+                'message': 'SSE connection established',
+                'timestamp': datetime.now().isoformat()
+            })
+            yield f"data: {connected_event}\n\n"
+
+            # نبضات دورية للحفاظ على الاتصال
+            while True:
+                heartbeat_event = json.dumps({
+                    'type': 'heartbeat',
+                    'message': 'alive',
+                    'timestamp': datetime.now().isoformat()
+                })
+                yield f"data: {heartbeat_event}\n\n"
+                import time as _time
+                _time.sleep(15)
+
+        return Response(
+            stream_with_context(generate()),
+            mimetype='text/event-stream',
+        )
+
+    except Exception as e:
+        logger.error(f"❌ خطأ في SSE account_status_stream: {e}")
         return jsonify({
             'success': False,
             'error': str(e),
-            'message': 'خطأ في جلب إحصائيات الحساب'
+            'message': 'Failed to establish SSE stream'
         }), 500
+
+
+@app.route('/api/sync-account-status/<customer_id>', methods=['POST'])
+def sync_account_status(customer_id):
+    """مزامنة حالة ربط الحساب مع MCC وتحديث Supabase"""
+    try:
+        # تنظيف معرف العميل
+        clean_customer_id = str(customer_id).replace('-', '').strip()
+
+        if not clean_customer_id.isdigit() or len(clean_customer_id) != 10:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid customer ID format',
+                'message': 'معرف العميل يجب أن يكون 10 أرقام'
+            }), 400
+
+        logger.info(f"🔄 مزامنة حالة الحساب {clean_customer_id} مع MCC {MCC_CUSTOMER_ID}")
+
+        # الحالة الحالية في قاعدة البيانات (Supabase)
+        db_status = 'NOT_LINKED'
+        last_request = None
+        try:
+            requests = get_client_requests_from_db(clean_customer_id)
+            if requests:
+                last_request = requests[0]
+                db_status = last_request.get('status') or 'NOT_LINKED'
+        except Exception as e:
+            logger.warning(f"⚠️ فشل في جلب حالة الحساب من Supabase للحساب {clean_customer_id}: {e}")
+
+        # الحالة الفعلية من Google Ads API (خام من Google)
+        api_status = 'NOT_LINKED'
+        link_details = {
+            'mcc_customer_id': MCC_CUSTOMER_ID,
+            'checked_at': datetime.now().isoformat()
+        }
+
+        try:
+            client = get_google_ads_client()
+            ga_service = client.get_service("GoogleAdsService")
+
+            # الطريقة 1: البحث في customer_client_link من MCC
+            query = f"""
+                SELECT
+                    customer_client_link.client_customer,
+                    customer_client_link.status
+                FROM customer_client_link
+                WHERE customer_client_link.client_customer = 'customers/{clean_customer_id}'
+            """
+
+            search_request = client.get_type("SearchGoogleAdsRequest")
+            search_request.customer_id = MCC_CUSTOMER_ID
+            search_request.query = query
+
+            response = ga_service.search(request=search_request)
+            found_link = False
+
+            raw_link_status = None
+            for row in response:
+                link = row.customer_client_link
+                if link.client_customer and link.client_customer.endswith(clean_customer_id):
+                    raw_link_status = link.status.name if link.status else 'UNKNOWN'
+                    link_details.update({
+                        'link_status': raw_link_status,
+                        'raw_status': raw_link_status,
+                        'method': 'customer_client_link'
+                    })
+                    found_link = True
+                    logger.info(f"🔗 وجدنا رابط للحساب {clean_customer_id} عبر customer_client_link: {raw_link_status}")
+                    break
+            
+            # الطريقة 2: تحديد الحالة بناءً على raw_link_status
+            if found_link:
+                # التحقق من حالة الرابط أولاً
+                if raw_link_status == 'ACTIVE':
+                    # ✅ الرابط نشط = الحساب مرتبط ومُفعّل
+                    api_status = 'ACTIVE'
+                    link_details.update({
+                        'verified': True,
+                        'is_disabled': False,
+                        'needs_activation': False
+                    })
+                    logger.info(f"✅ الحساب {clean_customer_id} مرتبط ومُفعّل (link_status=ACTIVE)")
+                elif raw_link_status == 'PENDING':
+                    # ⏳ PENDING = دعوة معلقة في انتظار القبول
+                    # نتحقق من الوصول المباشر للتأكد
+                    logger.info(f"🔍 التحقق من الوصول الفعلي للحساب {clean_customer_id} (link_status=PENDING)...")
+                    try:
+                        direct_query = """
+                            SELECT customer.id, customer.descriptive_name, customer.status
+                            FROM customer
+                            LIMIT 1
+                        """
+                        direct_request = client.get_type("SearchGoogleAdsRequest")
+                        direct_request.customer_id = clean_customer_id
+                        direct_request.query = direct_query
+                        
+                        direct_response = ga_service.search(request=direct_request)
+                        access_success = False
+                        for row in direct_response:
+                            # ✅ نجحنا في الوصول = الحساب مرتبط فعلاً ومُفعّل
+                            access_success = True
+                            api_status = 'ACTIVE'
+                            link_details.update({
+                                'link_status': 'ACTIVE',
+                                'verified': True,
+                                'method': 'direct_access_verified',
+                                'customer_name': row.customer.descriptive_name if row.customer.descriptive_name else None,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"✅ الحساب {clean_customer_id} مرتبط فعلاً ومُفعّل (تم التحقق بالوصول المباشر)")
+                            break
+                        
+                        if not access_success:
+                            # لم نحصل على نتائج = دعوة معلقة
+                            api_status = 'PENDING'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"⏳ الحساب {clean_customer_id} - دعوة معلقة (لا يوجد وصول مباشر)")
+                    except GoogleAdsException as direct_error:
+                        error_str = str(direct_error)
+                        if 'RESOURCE_EXHAUSTED' in error_str:
+                            logger.warning(f"⚠️ خطأ كوتا أثناء التحقق من الحساب {clean_customer_id}")
+                            raise direct_error
+                        elif 'CUSTOMER_NOT_ENABLED' in error_str or 'PERMISSION_DENIED' in error_str:
+                            # ⏳ لا يمكن الوصول + link_status=PENDING = دعوة معلقة
+                            api_status = 'PENDING'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"⏳ الحساب {clean_customer_id} - دعوة معلقة (CUSTOMER_NOT_ENABLED)")
+                        else:
+                            # أي خطأ آخر = دعوة معلقة
+                            api_status = 'PENDING'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False,
+                                'verification_error': error_str[:50]
+                            })
+                            logger.info(f"⏳ الحساب {clean_customer_id} - دعوة معلقة (خطأ: {error_str[:50]})")
+                    except Exception as direct_error:
+                        error_str = str(direct_error)
+                        if 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_str.lower():
+                            logger.warning(f"⚠️ خطأ كوتا أثناء التحقق من الحساب {clean_customer_id}")
+                            raise direct_error
+                        else:
+                            # أي خطأ = دعوة معلقة
+                            api_status = 'PENDING'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"⏳ الحساب {clean_customer_id} - دعوة معلقة (خطأ عام)")
+                elif raw_link_status == 'INACTIVE':
+                    # ❌ INACTIVE = الرابط غير نشط (مُلغى/منتهي/مرفوض)
+                    # نتحقق من الوصول المباشر للتأكد
+                    logger.info(f"🔍 التحقق من الوصول الفعلي للحساب {clean_customer_id} (link_status=INACTIVE)...")
+                    try:
+                        direct_query = """
+                            SELECT customer.id, customer.descriptive_name, customer.status
+                            FROM customer
+                            LIMIT 1
+                        """
+                        direct_request = client.get_type("SearchGoogleAdsRequest")
+                        direct_request.customer_id = clean_customer_id
+                        direct_request.query = direct_query
+                        
+                        direct_response = ga_service.search(request=direct_request)
+                        access_success = False
+                        for row in direct_response:
+                            # ✅ نجحنا في الوصول = الحساب مرتبط فعلاً (رغم أن link_status=INACTIVE)
+                            access_success = True
+                            api_status = 'ACTIVE'
+                            link_details.update({
+                                'link_status': 'ACTIVE',
+                                'verified': True,
+                                'method': 'direct_access_verified',
+                                'customer_name': row.customer.descriptive_name if row.customer.descriptive_name else None,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"✅ الحساب {clean_customer_id} مرتبط فعلاً (link_status=INACTIVE لكن الوصول ناجح)")
+                            break
+                        
+                        if not access_success:
+                            # ❌ لم نحصل على نتائج + INACTIVE = الربط مُلغى
+                            api_status = 'NOT_LINKED'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"❌ الحساب {clean_customer_id} - الربط مُلغى (link_status=INACTIVE)")
+                    except GoogleAdsException as direct_error:
+                        error_str = str(direct_error)
+                        if 'RESOURCE_EXHAUSTED' in error_str:
+                            logger.warning(f"⚠️ خطأ كوتا أثناء التحقق من الحساب {clean_customer_id}")
+                            raise direct_error
+                        else:
+                            # ❌ فشل الوصول + INACTIVE = الربط مُلغى
+                            api_status = 'NOT_LINKED'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"❌ الحساب {clean_customer_id} - الربط مُلغى (INACTIVE + فشل الوصول)")
+                    except Exception as direct_error:
+                        error_str = str(direct_error)
+                        if 'RESOURCE_EXHAUSTED' in error_str or 'quota' in error_str.lower():
+                            logger.warning(f"⚠️ خطأ كوتا أثناء التحقق من الحساب {clean_customer_id}")
+                            raise direct_error
+                        else:
+                            # ❌ أي خطأ + INACTIVE = الربط مُلغى
+                            api_status = 'NOT_LINKED'
+                            link_details.update({
+                                'verified': False,
+                                'is_disabled': False,
+                                'needs_activation': False
+                            })
+                            logger.info(f"❌ الحساب {clean_customer_id} - الربط مُلغى (INACTIVE + خطأ عام)")
+                else:
+                    # أي حالة أخرى (REFUSED, CANCELED, CANCELLED, UNKNOWN, etc.) = غير مرتبط
+                    api_status = 'NOT_LINKED'
+                    link_details.update({
+                        'verified': False,
+                        'is_disabled': False,
+                        'needs_activation': False
+                    })
+                    logger.info(f"❌ الحساب {clean_customer_id} غير مرتبط (link_status={raw_link_status})")
+            elif not found_link:
+                # لم نجد أي رابط في customer_client_link
+                api_status = 'NOT_LINKED'
+                logger.info(f"❌ الحساب {clean_customer_id} غير مرتبط (لا يوجد رابط)")
+
+        except GoogleAdsException as e:
+            logger.error(f"❌ Google Ads API error in sync_account_status for {clean_customer_id}: {e}")
+            error_payload = handle_google_ads_exception(e)
+
+            # محاولة استخراج كود الخطأ الرئيسي
+            primary_code = None
+            is_quota_error = False
+            try:
+                if error_payload.get('errors'):
+                    first_error = error_payload['errors'][0]
+                    primary_code = first_error.get('error_code')
+                    # التحقق من خطأ الكوتا
+                    if primary_code == 'RESOURCE_EXHAUSTED' or 'quota' in str(first_error).lower():
+                        is_quota_error = True
+                # التحقق أيضاً من نص الخطأ
+                if 'RESOURCE_EXHAUSTED' in str(e) or 'quota' in str(e).lower():
+                    is_quota_error = True
+            except Exception:
+                primary_code = None
+
+            # إذا كان خطأ كوتا، نحتفظ بالحالة القديمة ولا نُحدّث
+            if is_quota_error:
+                logger.warning(f"⚠️ خطأ كوتا للحساب {clean_customer_id} - الاحتفاظ بالحالة القديمة: {db_status}")
+                return jsonify({
+                    'success': False,
+                    'customer_id': clean_customer_id,
+                    'db_status': db_status,  # الحالة القديمة
+                    'api_status': 'QUOTA_EXHAUSTED',
+                    'status_changed': False,
+                    'quota_error': True,
+                    'message': 'تم استهلاك كوتا Google Ads API - الحالة المحفوظة لم تتغير',
+                    'link_details': link_details
+                })
+
+            # حساب حالة منطقية خام بناءً على الخطأ
+            if primary_code in ('CUSTOMER_NOT_ENABLED', 'USER_PERMISSION_DENIED', 'CUSTOMER_NOT_FOUND'):
+                api_status = 'NOT_LINKED'
+            else:
+                api_status = 'ERROR'
+
+            link_details.update({
+                'error': error_payload,
+                'error_type': error_payload.get('error'),
+            })
+
+        except Exception as e:
+            logger.error(f"❌ خطأ عام في Google Ads أثناء sync_account_status للحساب {clean_customer_id}: {e}")
+            
+            # التحقق من خطأ الكوتا في الاستثناء العام
+            if 'RESOURCE_EXHAUSTED' in str(e) or 'quota' in str(e).lower():
+                logger.warning(f"⚠️ خطأ كوتا (استثناء عام) للحساب {clean_customer_id} - الاحتفاظ بالحالة القديمة: {db_status}")
+                return jsonify({
+                    'success': False,
+                    'customer_id': clean_customer_id,
+                    'db_status': db_status,  # الحالة القديمة
+                    'api_status': 'QUOTA_EXHAUSTED',
+                    'status_changed': False,
+                    'quota_error': True,
+                    'message': 'تم استهلاك كوتا Google Ads API - الحالة المحفوظة لم تتغير',
+                    'link_details': link_details
+                })
+            
+            api_status = 'ERROR'
+            link_details.update({
+                'error': str(e),
+                'error_type': 'GENERAL_ERROR'
+            })
+
+        # تحويل الحالة الخام إلى قيمة آمنة ومتوافقة مع قاعدة البيانات
+        db_safe_status = convert_status_to_db_safe(api_status)
+
+        status_changed = db_safe_status != db_status
+
+        # تحديث Supabase بحالة الحساب (إن أمكن) - فقط إذا لم يكن خطأ عام
+        # لا نُحدّث إذا كانت الحالة ERROR لأنها قد تكون مؤقتة
+        if api_status != 'ERROR':
+            try:
+                save_client_request_to_db(
+                    clean_customer_id,
+                    request_type='status_update',
+                    account_name=(last_request or {}).get('account_name'),
+                    oauth_data=(last_request or {}).get('oauth_data'),
+                    status=db_safe_status,
+                    link_details=link_details
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ فشل في تحديث حالة الحساب في Supabase للحساب {clean_customer_id}: {e}")
+        else:
+            logger.warning(f"⚠️ لم يتم تحديث الحالة في Supabase للحساب {clean_customer_id} بسبب خطأ عام")
+
+        # DEBUG: طباعة link_details قبل الإرسال
+        is_disabled_flag = link_details.get('is_disabled', False)
+        needs_activation_flag = link_details.get('needs_activation', False)
+        logger.info(f"📤 إرسال response للحساب {clean_customer_id}: api_status={api_status}, is_disabled={is_disabled_flag}, needs_activation={needs_activation_flag}")
+        
+        return jsonify({
+            'success': api_status not in ('ERROR',),
+            'customer_id': clean_customer_id,
+            'db_status': db_safe_status if api_status != 'ERROR' else db_status,
+            'api_status': api_status,
+            'status_changed': status_changed if api_status != 'ERROR' else False,
+            'link_details': link_details
+        })
+
+    except Exception as e:
+        logger.error(f"❌ خطأ عام في sync_account_status للحساب {customer_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'خطأ في مزامنة حالة الحساب'
+        }), 500
+
 
 @app.route('/health', methods=['GET'])
 @app.route('/api/health', methods=['GET'])
@@ -687,8 +1165,9 @@ def save_client_request_to_db(customer_id, request_type, account_name=None, oaut
             logger.warning("⚠️ Supabase غير متاح - تخطي حفظ البيانات")
             return False
             
-        # التحقق من وجود طلب سابق
-        existing = supabase.table('client_requests').select('id').eq('customer_id', customer_id).eq('request_type', request_type).order('created_at', desc=True).limit(1).execute()
+        # التحقق من وجود أي طلب سابق لهذا الحساب (بغض النظر عن request_type)
+        # هذا يضمن تحديث نفس السجل بدلاً من إنشاء سجلات متعددة
+        existing = supabase.table('client_requests').select('id, request_type').eq('customer_id', customer_id).order('created_at', desc=True).limit(1).execute()
         
         # إعداد البيانات
         data = {

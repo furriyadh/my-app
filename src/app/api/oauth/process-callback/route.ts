@@ -48,9 +48,17 @@ export async function POST(request: NextRequest) {
     // معالجة الكود مباشرة في الفرونت اند (بدون الباك اند)
     const clientId = process.env.GOOGLE_ADS_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET;
-    const redirectUri = process.env.NODE_ENV === 'production' 
-      ? 'https://furriyadh.com/api/oauth/google/callback'
-      : 'http://localhost:3000/api/oauth/google/callback';
+    // استخدام نفس منطق تحديد redirect_uri المستخدم في مسار OAuth الرئيسي (يدعم التطوير والإنتاج)
+    const redirectUriFromEnv =
+      process.env.GOOGLE_REDIRECT_URI ||
+      process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI ||
+      '';
+
+    const redirectUri =
+      redirectUriFromEnv ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://furriyadh.com/api/oauth/google/callback'
+        : 'http://localhost:3000/api/oauth/google/callback');
     
     if (!clientId || !clientSecret) {
       console.error('❌ Client ID أو Client Secret غير محدد');

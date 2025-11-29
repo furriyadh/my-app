@@ -269,6 +269,14 @@ def create_campaign():
                 ads_service = GoogleAdsClientService()
                 campaign_builder = CampaignBuilder()
                 
+                # تمرير Real CPC من البيانات إلى Campaign Builder
+                real_cpc = data.get('realCPC') or data.get('maxCpcBid')
+                if real_cpc:
+                    campaign_builder._real_cpc = real_cpc
+                    logger.info(f"✅ Using Real CPC from Google Ads Historical Metrics: ${real_cpc:.2f}")
+                else:
+                    logger.warning("⚠️ No Real CPC provided, using default bid strategy")
+                
                 # بناء الحملة
                 built_campaign = campaign_builder.build_campaign(campaign_data)
                 
@@ -339,7 +347,7 @@ def get_campaign(campaign_id):
             "target_audience": {
                 "age_range": "25-45",
                 "gender": "ALL",
-                "locations": ["السعودية", "الإمارات"],
+                "locations": [],
                 "interests": ["تكنولوجيا", "تسوق"]
             },
             "keywords": [

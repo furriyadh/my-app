@@ -8,6 +8,10 @@ export default {
     // Or if using `src` directory:
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    'animate-canopy-horizontal',
+    'animate-canopy-vertical',
+  ],
   theme: {
     screens: {
       'xs': '475px',
@@ -144,6 +148,8 @@ export default {
         'scale-in': 'scaleIn 0.2s ease-out',
         'bounce-in': 'bounceIn 0.6s ease-out',
         'tilt': 'tilt 10s infinite linear',
+        'canopy-horizontal': 'canopy-x var(--duration) infinite linear',
+        'canopy-vertical': 'canopy-y var(--duration) linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -178,6 +184,14 @@ export default {
           '75%': {
             transform: 'rotate(-1deg)',
           },
+        },
+        'canopy-x': {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(calc(-100% - var(--gap)))' },
+        },
+        'canopy-y': {
+          from: { transform: 'translateY(0)' },
+          to: { transform: 'translateY(calc(-100% - var(--gap)))' },
         },
       },
       boxShadow: {

@@ -164,7 +164,7 @@ async function getRealCustomerAccounts(accessToken: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔄 GET /api/user/accounts - جلب حسابات المستخدم...');
+    console.log('🔄 GET /api/user/accounts - جلب حسابات المستخدم الحالي فقط...');
     
     // الحصول على access token من HttpOnly cookies
     const cookieStore = await cookies();
@@ -180,62 +180,73 @@ export async function GET(request: NextRequest) {
     
     const accessToken = cookieStore.get('oauth_access_token')?.value;
     const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
+    
+    // استخراج معلومات المستخدم الحالي
+    let currentUserEmail = null;
+    let currentUserId = null;
+    if (userInfoCookie) {
+      try {
+        const userInfo = JSON.parse(userInfoCookie);
+        currentUserEmail = userInfo.email;
+        currentUserId = userInfo.id;
+        console.log('👤 المستخدم الحالي:', { id: currentUserId, email: currentUserEmail });
+      } catch (e) {
+        console.warn('⚠️ فشل في تحليل oauth_user_info');
+      }
+    }
     
     console.log('🔍 فحص OAuth tokens:', {
       oauth_access_token: accessToken ? `موجود (${accessToken.length} chars)` : 'غير موجود',
       oauth_refresh_token: refreshToken ? `موجود (${refreshToken.length} chars)` : 'غير موجود',
+      currentUser: currentUserEmail || 'غير معروف',
       cookiesCount: allCookies.length,
       allCookieNames: allCookies.map(c => c.name)
     });
     
-    // فحص الكاش أولاً
-    if (accessToken) {
-      const cached = accountsCache.get(accessToken);
+    // فحص الكاش أولاً - استخدام مفتاح يشمل user ID لضمان عدم خلط البيانات
+    const cacheKey = currentUserId ? `${currentUserId}_${accessToken}` : accessToken;
+    if (cacheKey) {
+      const cached = accountsCache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        console.log('✅ إرجاع البيانات من الكاش');
+        console.log('✅ إرجاع البيانات من الكاش للمستخدم:', currentUserEmail);
         return NextResponse.json(cached.data);
       }
     }
     
-    console.log('🔄 جلب حسابات المستخدم من Flask Backend...');
+    // ✅ استخدام access token المستخدم الحالي مباشرة مع Google API
+    // ❌ لا نستدعي Flask Backend لأنه يجلب جميع حسابات MCC
+    console.log('🔄 جلب حسابات المستخدم الحالي مباشرة من Google Ads API...');
     
-    // إذا يوجد access token، استخدمه مع Flask Backend
     if (accessToken) {
-      console.log('✅ استخدام access token مع Flask Backend');
+      console.log('✅ استخدام access token المستخدم الحالي مباشرة مع Google API');
       
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://my-app-production-28d2.up.railway.app'
-        : 'http://localhost:5000';
+      // جلب الحسابات مباشرة من Google API باستخدام access token المستخدم
+      const directAccounts = await getRealCustomerAccounts(accessToken);
       
-      const response = await fetch(`${backendUrl}/api/user/accounts`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+      console.log(`📊 تم جلب ${directAccounts.length} حساب للمستخدم ${currentUserEmail}`);
+      
+      const formattedAccounts = {
+        google_ads: directAccounts,
+        merchant_center: [],
+        youtube: [],
+        analytics: [],
+        business: [],
+        user: {
+          id: currentUserId,
+          email: currentUserEmail
         }
-      });
+      };
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ تم جلب الحسابات من Flask Backend:', data);
-        
-        // حفظ في الكاش
-        accountsCache.set(accessToken, {
-          data: data,
+      // حفظ في الكاش مع مفتاح يشمل user ID
+      if (cacheKey) {
+        accountsCache.set(cacheKey, {
+          data: formattedAccounts,
           timestamp: Date.now()
         });
-        
-        return NextResponse.json(data);
-      } else {
-        console.error('❌ Flask Backend error:', response.status, response.statusText);
-        return NextResponse.json({
-          google_ads: [],
-          merchant_center: [],
-          youtube: [],
-          analytics: [],
-          business: []
-        }, { status: 200 });
       }
+      
+      return NextResponse.json(formattedAccounts);
     }
     
     // إذا لم يوجد access token، جرب استخدام refresh token
@@ -265,12 +276,18 @@ export async function GET(request: NextRequest) {
           const newAccessToken = tokenData.access_token;
           const directAccounts = await getRealCustomerAccounts(newAccessToken);
           
+          console.log(`📊 تم جلب ${directAccounts.length} حساب للمستخدم ${currentUserEmail} (بعد تجديد التوكن)`);
+          
           const formattedAccounts = {
             google_ads: directAccounts,
             merchant_center: [],
             youtube: [],
             analytics: [],
-            business: []
+            business: [],
+            user: {
+              id: currentUserId,
+              email: currentUserEmail
+            }
           };
           
           return NextResponse.json(formattedAccounts, { 
@@ -290,6 +307,7 @@ export async function GET(request: NextRequest) {
     console.log('📊 سبب عدم وجود access token:', {
       hasAccessToken: !!accessToken,
       hasRefreshToken: !!refreshToken,
+      currentUser: currentUserEmail,
       suggestion: 'العميل قد يحتاج لإعادة OAuth'
     });
     
@@ -299,6 +317,10 @@ export async function GET(request: NextRequest) {
       youtube: [],
       analytics: [],
       business: [],
+      user: {
+        id: currentUserId,
+        email: currentUserEmail
+      },
       debug: {
         hasAccessToken: !!accessToken,
         hasRefreshToken: !!refreshToken,

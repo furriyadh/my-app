@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
       {/* Content skeleton */}
       <div className="space-y-8">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+          <div key={index} className="bg-white dark:bg-black rounded-xl p-6 border border-gray-200 dark:border-gray-700">
             <div className="w-48 h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -215,7 +215,7 @@ const Dashboard: React.FC = () => {
 
   // Section visibility controls
   const SectionControls = () => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-6">
+    <div className="bg-white dark:bg-black rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900 dark:text-white">
           Dashboard Sections

@@ -3,8 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 const Footer: React.FC = () => {
+  const { t, language, isRTL } = useTranslation();
+
   return (
     <>
       <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-gray-100 dark:border-[#172036]">
@@ -31,10 +34,8 @@ const Footer: React.FC = () => {
                 />
               </Link>
 
-              <p className="leading-[1.6]">
-                With customizable dashboards tailored to your needs, collaborate
-                effortlessly with your team and stay ahead with real-time
-                updates.
+              <p className="leading-[1.6]" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.footer.description}
               </p>
 
               <div className="mt-[20px] md:mt-[35px]">
@@ -70,120 +71,132 @@ const Footer: React.FC = () => {
             </div>
 
             <div className="ltr:xl:pl-[142px] rtl:xl:pr-[142px]">
-              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold">
-                Our Products
+              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.footer.products}
               </h3>
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Trezo Dashboard
+                    {t.footer.trezoDashboard}
                   </Link>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <a
                     href="#"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Tagus Admin
+                    {t.footer.tagusAdmin}
                   </a>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <a
                     href="#"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    eCademy LMS
+                    {t.footer.eCademyLMS}
                   </a>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <a
                     href="#"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Admash Template
+                    {t.footer.admashTemplate}
                   </a>
                 </li>
               </ul>
             </div>
 
             <div className="ltr:xl:pl-[130px] rtl:xl:pr-[130px]">
-              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold">
-                Quick Links
+              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.footer.quickLinks}
               </h3>
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Home
+                    {t.footer.home}
                   </Link>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/front-page/features/"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Features
+                    {t.footer.features}
                   </Link>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/front-page/team"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Our Team
+                    {t.navbar.team}
                   </Link>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/front-page/contact"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Contact
+                    {t.footer.contact}
                   </Link>
                 </li>
               </ul>
             </div>
 
             <div className="ltr:xl:pl-[80px] rtl:xl:pr-[80px]">
-              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold">
-                Privacy Policy
+              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.footer.privacy}
               </h3>
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/settings/terms-conditions/"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Terms & Conditions
+                    {t.footer.termsConditions}
                   </Link>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <a
                     href="#"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Cookie Policy
+                    {t.footer.cookiePolicy}
                   </a>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <a
                     href="#"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Notice at Collection
+                    {t.footer.noticeAtCollection}
                   </a>
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/settings/privacy-policy/"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    Privacy Policy
+                    {t.footer.privacy}
                   </Link>
                 </li>
               </ul>
@@ -193,8 +206,8 @@ const Footer: React.FC = () => {
 
         <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] bg-white dark:bg-[#0c1427] text-center">
           <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
-            <p className="leading-[1.6]">
-              © <span className="text-purple-500">2025, Furriyadh</span> All rights reserved.{" "}
+            <p className="leading-[1.6]" dir={isRTL ? 'rtl' : 'ltr'}>
+              © <span className="text-purple-500">2025, Furriyadh</span> {t.footer.copyright}{" "}
               <a
                 href="https://furriyadh.com/"
                 target="_blank"

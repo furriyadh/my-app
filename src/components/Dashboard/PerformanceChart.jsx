@@ -40,31 +40,7 @@ const PerformanceChart = () => {
   const [timeRange, setTimeRange] = useState('30d');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // إرجاع بيانات فارغة بدلاً من البيانات الوهمية
-  const generateMockData = (days) => {
-    const data = [];
-    const baseDate = new Date();
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(baseDate);
-      date.setDate(date.getDate() - i);
-      
-      data.push({
-        date: date.toISOString().split('T')[0],
-        displayDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        impressions: 0,
-        clicks: 0,
-        spend: 0.0,
-        conversions: 0,
-        ctr: 0.0,
-        cpc: 0.0,
-        roas: 0.0
-      });
-    }
-    return data;
-  };
-
+  const [error, setError] = useState(null);
   const [chartData, setChartData] = useState([]);
 
   // Time range configurations
@@ -105,26 +81,105 @@ const PerformanceChart = () => {
 
   // Load data based on time range
   useEffect(() => {
-    setIsLoading(true);
-    const selectedRange = timeRanges.find(range => range.value === timeRange);
-    const data = generateMockData(selectedRange.days);
-    
-    setTimeout(() => {
-      setChartData(data);
-      setIsLoading(false);
-    }, 800);
+    fetchPerformanceData();
   }, [timeRange]);
+
+  const fetchPerformanceData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://my-app-production-28d2.up.railway.app/api' 
+        : 'http://localhost:5000/api';
+
+      const selectedRange = timeRanges.find(range => range.value === timeRange);
+      
+      const params = new URLSearchParams({
+        days: selectedRange.days.toString()
+      });
+
+      const response = await fetch(`${backendUrl}/campaigns/performance?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(typeof window !== 'undefined' && localStorage.getItem('auth_token') && {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          })
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const formattedData = formatPerformanceData(result.data, selectedRange.days);
+          setChartData(formattedData);
+        } else {
+          // Use fallback data if API doesn't return proper data
+          setChartData(generateFallbackData(selectedRange.days));
+        }
+      } else {
+        // Use fallback data on error
+        setChartData(generateFallbackData(selectedRange.days));
+      }
+    } catch (err) {
+      console.error('Error fetching performance data:', err);
+      setError(err.message);
+      // Use fallback data on error
+      const selectedRange = timeRanges.find(range => range.value === timeRange);
+      setChartData(generateFallbackData(selectedRange.days));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatPerformanceData = (data, days) => {
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map(item => ({
+        date: item.date,
+        displayDate: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        impressions: item.impressions || 0,
+        clicks: item.clicks || 0,
+        spend: item.spend || item.cost || 0,
+        conversions: item.conversions || 0,
+        ctr: item.ctr || 0,
+        cpc: item.cpc || 0,
+        roas: item.roas || 0
+      }));
+    }
+    return generateFallbackData(days);
+  };
+
+  const generateFallbackData = (days) => {
+    const data = [];
+    const baseDate = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(baseDate);
+      date.setDate(date.getDate() - i);
+      
+      data.push({
+        date: date.toISOString().split('T')[0],
+        displayDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        impressions: 0,
+        clicks: 0,
+        spend: 0.0,
+        conversions: 0,
+        ctr: 0.0,
+        cpc: 0.0,
+        roas: 0.0
+      });
+    }
+    return data;
+  };
 
   // Refresh data
   const handleRefresh = () => {
     setIsRefreshing(true);
-    const selectedRange = timeRanges.find(range => range.value === timeRange);
-    const data = generateMockData(selectedRange.days);
-    
-    setTimeout(() => {
-      setChartData(data);
+    fetchPerformanceData().finally(() => {
       setIsRefreshing(false);
-    }, 1000);
+    });
   };
 
   // Calculate summary statistics

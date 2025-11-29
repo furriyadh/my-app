@@ -57,10 +57,12 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
         // إعداد OAuth للحسابات الخاصة - ربط حساب موجود - يوجه لـ Google OAuth
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID || 'your-google-client-id';
         
-        // بناء على البيئة redirectUri
-        const redirectUri = process.env.NODE_ENV === 'production'
-          ? 'https://furriyadh.com/api/oauth/google/callback'
-          : 'http://localhost:3000/api/oauth/google/callback';
+        // استخدام نفس منطق تحديد redirect_uri المستخدم في الـ API (يدعم التطوير والإنتاج)
+        const redirectUri =
+          process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI ||
+          (typeof window !== 'undefined'
+            ? `${window.location.origin}/api/oauth/google/callback`
+            : 'http://localhost:3000/api/oauth/google/callback');
         
         const scope = 'openid profile email https://www.googleapis.com/auth/adwords';
         const state = Math.random().toString(36).substring(7);

@@ -5,6 +5,8 @@ import AccountSelectionModal from '@/components/Modals/AccountSelectionModal';
 import { AccountOption } from '@/types/modal';
 
 export default function OnboardingPage() {
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<AccountOption | null>(null);
 
@@ -15,6 +17,20 @@ export default function OnboardingPage() {
     }, 1000); // Delay for dramatic effect
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
   }, []);
 
   const handleOptionSelect = (option: string) => {

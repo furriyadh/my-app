@@ -65,6 +65,8 @@ interface Subscription {
 }
 
 const BillingPage: React.FC = () => {
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
   const [stats, setStats] = useState<BillingStats>({
     currentSpend: 2847.50,
     monthlyBudget: 5000,
@@ -136,11 +138,19 @@ const BillingPage: React.FC = () => {
   });
 
   const [selectedTab, setSelectedTab] = useState<'overview' | 'methods' | 'history' | 'subscription'>('overview');
-  const [isRTL, setIsRTL] = useState(false);
 
+  // Listen for language changes
   useEffect(() => {
-    const dir = document.documentElement.getAttribute('dir');
-    setIsRTL(dir === 'rtl');
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
   }, []);
 
   // AI-Powered Predictions
@@ -201,7 +211,7 @@ const BillingPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-gray-950 via-gray-900 to-black">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-gray-950 via-gray-900 to-black" dir="ltr">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -210,8 +220,14 @@ const BillingPage: React.FC = () => {
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Billing & Payments</h1>
-            <p className="text-gray-400 text-lg">Manage your subscription, payments, and billing history</p>
+            <h1 className="text-4xl font-bold text-white mb-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              {language === 'ar' ? 'الفواتير والمدفوعات' : 'Billing & Payments'}
+            </h1>
+            <p className="text-gray-400 text-lg" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              {language === 'ar' 
+                ? 'إدارة اشتراكك والمدفوعات وسجل الفواتير' 
+                : 'Manage your subscription, payments, and billing history'}
+            </p>
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}

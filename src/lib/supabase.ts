@@ -38,12 +38,15 @@ export async function saveUserProfile(userInfo: any): Promise<UserProfile | null
       .single();
 
     if (!existingUser) {
-      // إنشاء user جديد
+      // إنشاء user جديد لمستخدم OAuth (بدون كلمة مرور فعلية)
       const { error: userInsertError } = await supabaseAdmin
         .from('users')
         .insert([{
           id: userId,
           email: userInfo.email,
+          // تعيين قيم آمنة للمستخدمين القادمين من Google لتجنب قيود NOT NULL
+          password: 'oauth_user',
+          auth_provider: 'google',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }]);
@@ -146,24 +149,35 @@ export interface UserProfile {
 
 // Function to get all client requests
 export async function getClientRequests(): Promise<ClientRequest[]> {
-  if (!supabase) {
-    console.error('Supabase not configured');
-    return [];
-  }
-  
   try {
-    const { data, error } = await supabase
-      .from('client_requests')
-      .select('*')
-      .order('created_at', { ascending: false })
+    // جلب طلبات العملاء عبر الباك إند (Flask) بدلاً من الوصول المباشر لـ Supabase من المتصفح
+    const backendUrl =
+      process.env.BACKEND_API_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://my-app-production-28d2.up.railway.app'
+        : 'http://localhost:5000');
 
-    if (error) {
-      console.error('❌ Supabase error:', error)
-      throw error
+    const response = await fetch(`${backendUrl}/api/get-client-requests/all`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      console.error('❌ Backend get-client-requests error:', response.status, response.statusText);
+      return [];
     }
 
-    console.log('✅ Fetched client requests from Supabase:', data?.length || 0)
-    return data || []
+    const data = await response.json();
+
+    // في حالة /all، الباك إند يرجّع قائمة مباشرة
+    if (Array.isArray(data)) {
+      console.log('✅ Fetched client requests from backend:', data.length);
+      return data as ClientRequest[];
+    }
+
+    // في الحالات الأخرى (لو تغيّر الـ endpoint)، نحاول التعامل مع شكل كائن
+    const requests = (data && Array.isArray(data.requests)) ? data.requests : [];
+    console.log('✅ Fetched client requests from backend (wrapped):', requests.length);
+    return requests as ClientRequest[];
   } catch (error) {
     console.error('❌ Error fetching client requests:', error)
     return []

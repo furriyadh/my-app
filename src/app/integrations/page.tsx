@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import { InteractiveInput } from '@/components/ui/interactive-input';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 // Integration Card Component
 interface IntegrationCardProps {
@@ -44,6 +45,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
   onConnect
 }) => {
   const colors = getIntegrationColors(title);
+  const { language, isRTL } = useTranslation();
 
   return (
     <GlowingBorderCard 
@@ -60,7 +62,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
               ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
               : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
           }`}>
-            {status === 'connected' ? 'CONNECTED' : 'FEATURED'}
+            {status === 'connected' ? (language === 'ar' ? 'متصل' : 'CONNECTED') : (language === 'ar' ? 'مميز' : 'FEATURED')}
           </div>
           
           {/* Icon */}
@@ -91,45 +93,25 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
         {/* Footer Section */}
         <div className="w-full px-1 pb-1">
           {status === 'connected' ? (
-            // Connected state - dual buttons
-            <div className="flex gap-1 w-full">
-              <InteractiveInput
-                className="bg-green-500 text-white flex-1"
-                variant="default"
-                inputSize="small"
-                glow={true}
-                rounded="custom"
-                hideAnimations={false}
-                uppercase={true}
-                textEffect="normal"
-                shimmerColor="#39FF14"
-                shimmerSize="0.1em"
-                shimmerDuration="3s"
-                borderRadius="100px"
-                background="rgba(0, 0, 0, 1)"
-                onClick={() => window.location.href = '/integrations/google-ads'}
-              >
-                Manage
-              </InteractiveInput>
-              <InteractiveInput
-                className="text-white flex-1 !bg-red-500"
-                variant="default"
-                inputSize="small"
-                glow={true}
-                rounded="custom"
-                hideAnimations={false}
-                uppercase={true}
-                textEffect="normal"
-                shimmerColor="#FF0000"
-                shimmerSize="0.1em"
-                shimmerDuration="3s"
-                borderRadius="100px"
-                background="#EF4444"
-                onClick={onConnect}
-              >
-                Disconnect
-              </InteractiveInput>
-            </div>
+            // Connected state - فقط زر إدارة (بدون زر Disconnect)
+            <InteractiveInput
+              className="bg-green-500 text-white w-full"
+              variant="default"
+              inputSize="small"
+              glow={true}
+              rounded="custom"
+              hideAnimations={false}
+              uppercase={true}
+              textEffect="normal"
+              shimmerColor="#39FF14"
+              shimmerSize="0.1em"
+              shimmerDuration="3s"
+              borderRadius="100px"
+              background="rgba(0, 0, 0, 1)"
+              onClick={() => window.location.href = '/integrations/google-ads'}
+            >
+              {language === 'ar' ? 'إدارة' : 'Manage'}
+            </InteractiveInput>
           ) : (
             // Not connected state - single button
             <InteractiveInput
@@ -148,7 +130,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
               background="rgba(0, 0, 0, 1)"
               onClick={onConnect}
             >
-              Get Started
+              {language === 'ar' ? 'ابدأ' : 'Get Started'}
             </InteractiveInput>
           )}
         </div>
@@ -160,6 +142,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
 // Main Integrations Page Component
 const IntegrationsPage: React.FC = () => {
   const router = useRouter();
+  const { t, language, isRTL } = useTranslation();
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: 'google-ads',
@@ -174,7 +157,7 @@ const IntegrationsPage: React.FC = () => {
           />
         </div>
       ),
-      status: 'not-connected' as const
+      status: 'not-connected'
     },
     {
       id: 'google-analytics',
@@ -189,7 +172,7 @@ const IntegrationsPage: React.FC = () => {
           />
         </div>
       ),
-      status: 'not-connected' as const
+      status: 'not-connected'
     },
     {
       id: 'google-tag-manager',
@@ -204,7 +187,7 @@ const IntegrationsPage: React.FC = () => {
           />
         </div>
       ),
-      status: 'not-connected' as const
+      status: 'not-connected'
     }
   ]);
 
@@ -252,7 +235,7 @@ const IntegrationsPage: React.FC = () => {
             setIntegrations(prev => 
               prev.map(integration => 
                 integration.id === 'google-ads' 
-                  ? { ...integration, status: 'not-connected' as const }
+                  ? { ...integration, status: 'not-connected' }
                   : integration
               )
             );
@@ -275,21 +258,38 @@ const IntegrationsPage: React.FC = () => {
     }
   };
 
+
   // Optimized connection check - reduced API calls
   useEffect(() => {
-    const checkGoogleAdsConnection = () => {
-      // Check cookies for connection status (HttpOnly tokens not accessible via JavaScript)
-      const isGoogleAdsConnected = document.cookie.includes('google_ads_connected=true');
-      
-      // If connection indicator is found, mark as connected
-      if (isGoogleAdsConnected) {
+    const checkGoogleAdsConnection = async () => {
+      try {
+        // فحص الاتصال لكل عميل بناءً على البيانات المخزنة في Supabase (client_requests)
+        const response = await fetch('/api/client-requests', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          console.warn('⚠️ فشل في فحص حالة Google Ads من /api/client-requests:', response.status, response.statusText);
+          return;
+        }
+
+        const result = await response.json();
+        const requests = Array.isArray(result.data) ? result.data : [];
+        const hasGoogleAdsConnection = requests.length > 0;
+
         setIntegrations(prev => 
           prev.map(integration => 
             integration.id === 'google-ads' 
-              ? { ...integration, status: 'connected' as const }
+              ? { ...integration, status: hasGoogleAdsConnection ? 'connected' : 'not-connected' }
               : integration
           )
         );
+      } catch (error) {
+        console.warn('⚠️ خطأ في فحص حالة Google Ads:', error);
       }
     };
 
@@ -300,18 +300,20 @@ const IntegrationsPage: React.FC = () => {
   const totalCount = integrations.length;
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6" dir="ltr">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">
-          <h1 className="text-5xl font-bold text-white mb-4">Integrations</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Connect your accounts and external services to enhance your advertising campaigns.
+          <h1 className="text-5xl font-bold text-white mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            {t.integrations?.title || 'Integrations'}
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+            {t.integrations?.description || 'Connect your accounts and external services to enhance your advertising campaigns.'}
           </p>
           <div className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
             <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-white font-medium">
-              {connectedCount} of {totalCount} connected
+            <span className="text-white font-medium" dir={isRTL ? 'rtl' : 'ltr'}>
+              {isRTL ? `${connectedCount} من ${totalCount} متصل` : `${connectedCount} of ${totalCount} connected`}
             </span>
           </div>
         </div>

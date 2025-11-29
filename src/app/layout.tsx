@@ -62,6 +62,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
+        {/* Google Maps API - Load globally (باستخدام متغير البيئة فقط بدون مفتاح افتراضي في الكود) */}
+        <script 
+          async
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`}
+        />
+        
         {/* Prevent FOUC (Flash of Unstyled Content) */}
         <style dangerouslySetInnerHTML={{
           __html: `

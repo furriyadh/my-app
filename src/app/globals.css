@@ -15,7 +15,7 @@
   --text-4xl: 36px;
   --text-5xl: 40px;
   --color-white: #ffffff;
-  --color-black: #3a4252;
+  --color-black: #000000;
   --color-dark: #000000;
   --color-primary-50: #ecf0ff;
   --color-primary-100: #dde4ff;
@@ -84,9 +84,9 @@
   --color-gray-400: #8695aa;
   --color-gray-500: #64748b;
   --color-gray-600: #526077;
-  --color-gray-700: #434e61;
-  --color-gray-800: #3a4252;
-  --color-gray-900: #23272e;
+  --color-gray-700: #1a0b2e;
+  --color-gray-800: #0f0820;
+  --color-gray-900: #060010;
   --color-warning-50: #fff8e1;
   --color-warning-100: #ffecb3;
   --color-warning-200: #ffe082;
@@ -113,39 +113,46 @@
 /** Body */
 html,
 body {
-  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 leading-normal dark:text-gray-400;
+  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto leading-normal;
+  background-color: #ffffff;
+  color: #000000;
+  --header-bg: #ffffff;
+  --footer-bg: #ffffff;
+}
+
+html.dark,
+html.dark body {
+  background-color: #000000;
+  color: #ffffff;
+  --header-bg: #000000;
+  --footer-bg: #000000;
 }
 
 /** Clean Dashboard - AnimatedWave Background Only */
 .main-wrapper-content {
-  background: transparent !important;
+  background-color: #ffffff !important;
   min-height: 100vh !important;
   position: relative !important;
 }
 
-/** Force ALL text to white in dashboard */
-.main-wrapper-content h1,
-.main-wrapper-content h2, 
-.main-wrapper-content h3,
-.main-wrapper-content h4,
-.main-wrapper-content h5,
-.main-wrapper-content h6,
-.main-wrapper-content button,
-.main-wrapper-content a,
-.main-wrapper-content span,
-.main-wrapper-content p,
-.main-wrapper-content div {
-  color: white !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+.dark .main-wrapper-content {
+  background-color: #000000 !important;
 }
+
+/** Text colors for dashboard - removed as handled globally */
 
 /** Paragraph */
 p {
   @apply mb-[15px] leading-[1.8];
+  color: #000000;
 
   &:last-child {
     @apply mb-0;
   }
+}
+
+.dark p {
+  color: #ffffff;
 }
 
 /** Heading */
@@ -167,7 +174,29 @@ h1,
 .display-3,
 .display-2,
 .display-1 {
-  @apply text-black font-bold leading-tight mb-[10px] dark:text-white;
+  @apply font-bold leading-tight mb-[10px];
+  color: #000000;
+}
+
+.dark h6,
+.dark .h6,
+.dark h5,
+.dark .h5,
+.dark h4,
+.dark .h4,
+.dark h3,
+.dark .h3,
+.dark h2,
+.dark .h2,
+.dark h1,
+.dark .h1,
+.dark .display-6,
+.dark .display-5,
+.dark .display-4,
+.dark .display-3,
+.dark .display-2,
+.dark .display-1 {
+  color: #ffffff;
 }
 .h6,
 h6,
@@ -203,6 +232,38 @@ h1,
 /** Button */
 button {
   @apply cursor-pointer;
+  color: inherit;
+}
+
+.dark button {
+  color: inherit;
+}
+
+/** Links */
+a {
+  color: #000000;
+}
+
+.dark a {
+  color: #ffffff;
+}
+
+/** Span and Div text */
+span {
+  color: inherit;
+}
+
+div {
+  color: inherit;
+}
+
+/** Label */
+label {
+  color: #000000;
+}
+
+.dark label {
+  color: #ffffff;
 }
 
 /* Sidebar */
@@ -325,6 +386,30 @@ button {
   }
 }
 .dark {
+  color-scheme: dark;
+}
+
+/* Dark mode colors */
+.dark body {
+  background-color: #000000 !important;
+  @apply text-gray-100;
+}
+
+.dark .main-content {
+  background-color: #000000 !important;
+}
+
+.dark .header {
+  background-color: #000000 !important;
+  @apply border-gray-700;
+}
+
+.dark .footer {
+  background-color: #000000 !important;
+  @apply border-gray-700;
+}
+
+.dark {
   .sidebar-custom-scrollbar {
     /* Handle */
     &::-webkit-scrollbar-thumb {
@@ -418,13 +503,9 @@ button {
 
 /** Header */
 .header-area {
-  @apply left-[15px] right-[15px] md:left-[25px] md:right-[25px] ltr:xl:left-[285px] rtl:xl:right-[285px] z-[90];
+  @apply left-[15px] right-[15px] md:left-[25px] md:right-[25px] ltr:xl:left-[380px] rtl:xl:right-[380px] z-[90];
+  transition: left 0.3s ease-in-out, right 0.3s ease-in-out;
 
-  .hide-sidebar-toggle {
-    &.active {
-      @apply text-primary-500;
-    }
-  }
   .connected-apps-menu {
     .connected-apps-dropdown {
       @apply opacity-0 invisible;
@@ -498,7 +579,8 @@ button {
 
 /** Main Content */
 .main-content {
-  @apply pt-[143px] px-[15px] md:pt-[95px] md:pl-[25px] md:pr-[25px] ltr:xl:pl-[285px] rtl:xl:pr-[285px];
+  @apply pt-[143px] px-[15px] md:pt-[95px] md:pl-[25px] md:pr-[25px] ltr:xl:pl-[380px] rtl:xl:pr-[380px];
+  transition: padding 0.3s ease-in-out;
 }
 .main-content-wrap {
   &.active {
@@ -508,9 +590,74 @@ button {
   }
 }
 
+/* Sidebar closed state - adjust content */
+.sidebar-closed .main-content {
+  @apply ltr:xl:pl-[25px] rtl:xl:pr-[25px];
+}
+
+/* Sidebar closed state - adjust header */
+.sidebar-closed .header-area {
+  @apply ltr:xl:left-[25px] rtl:xl:right-[25px];
+}
+
 /** Card */
 .trezo-card {
   @apply border-0 shadow-none;
+  background-color: #ffffff;
+}
+
+.dark .trezo-card {
+  background-color: #000000;
+}
+
+/** Override all bg-white in dark mode */
+.dark .bg-white {
+  background-color: #000000 !important;
+}
+
+.dark [class~="bg-white"] {
+  background-color: #000000 !important;
+}
+
+/** Ensure main content container is correct color */
+.dark .main-content-container,
+.dark .container,
+.dark main,
+.dark section {
+  color: #ffffff;
+}
+
+.main-content-container,
+.container,
+main,
+section {
+  color: #000000;
+}
+
+/** Override text colors in cards for consistency */
+.dark .trezo-card * {
+  color: inherit;
+}
+
+.dark .trezo-card h1,
+.dark .trezo-card h2,
+.dark .trezo-card h3,
+.dark .trezo-card h4,
+.dark .trezo-card h5,
+.dark .trezo-card h6 {
+  color: #ffffff !important;
+}
+
+.dark .trezo-card p,
+.dark .trezo-card span:not([class*="text-"]),
+.dark .trezo-card div:not([class*="text-"]):not([class*="bg-"]) {
+  color: #ffffff;
+}
+
+.trezo-card p,
+.trezo-card span:not([class*="text-"]),
+.trezo-card div:not([class*="text-"]):not([class*="bg-"]) {
+  color: #000000;
 }
 
 
@@ -1132,6 +1279,26 @@ html[dir="rtl"] {
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
 /** Table */
 .table-responsive {
   -webkit-overflow-scrolling: touch;
@@ -1413,7 +1580,7 @@ html[dir="rtl"] {
 
     &::after {
       content: "";
-      border-color: #3a4252 transparent transparent transparent;
+      border-color: #0f0820 transparent transparent transparent;
       @apply absolute top-full left-1/2 ltr:-ml-[5px] rtl:-mr-[5px] border-[5px];
     }
   }
@@ -1422,7 +1589,7 @@ html[dir="rtl"] {
       @apply top-[127%] bottom-auto;
 
       &::after {
-        border-color: transparent transparent #3a4252 transparent;
+        border-color: transparent transparent #0f0820 transparent;
         @apply top-auto bottom-full;
       }
     }
@@ -1438,7 +1605,7 @@ html[dir="rtl"] {
 
     &::after {
       content: "";
-      border-color: #3a4252 transparent transparent transparent;
+      border-color: #0f0820 transparent transparent transparent;
       @apply absolute top-full left-1/2 ltr:-ml-[5px] rtl:-mr-[5px] border-[5px];
     }
   }
@@ -1452,7 +1619,7 @@ html[dir="rtl"] {
       @apply top-[127%] bottom-auto;
 
       &::after {
-        border-color: transparent transparent #3a4252 transparent;
+        border-color: transparent transparent #0f0820 transparent;
         @apply top-auto bottom-full;
       }
     }
@@ -1841,4 +2008,143 @@ html[dir="rtl"] {
       @apply text-[30px];
     }
   }
+}
+
+/* Modern Loader Text - Force White Color - MAXIMUM PRIORITY */
+.modern-loader-text,
+.modern-loader-text *,
+.modern-loader-text span,
+.modern-loader-text p,
+.modern-loader-text div,
+.modern-loader-text a,
+.modern-loader-text label {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Override ALL possible text color variations */
+.modern-loader-text [class*="text-"],
+.modern-loader-text [class*="color"],
+.modern-loader-text [style*="color"],
+.modern-loader-text *[class],
+.modern-loader-text *[style] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
+}
+
+/* Override globals.css default black text */
+html .modern-loader-text,
+body .modern-loader-text,
+html .modern-loader-text *,
+body .modern-loader-text * {
+  color: #ffffff !important;
+}
+
+/* Premium Modal Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), 0 0 60px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* AI-themed gradient animation */
+@keyframes gradient-xy {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-xy {
+  background-size: 400% 400%;
+  animation: gradient-xy 15s ease infinite;
+}
+
+/* Animated Testimonials Keyframes */
+@keyframes canopy-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap, 16px)));
+  }
+}
+
+@keyframes canopy-y {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap, 16px)));
+  }
+}
+
+.animate-canopy-horizontal {
+  animation: canopy-x var(--duration, 40s) linear infinite;
+}
+
+.animate-canopy-vertical {
+  animation: canopy-y var(--duration, 40s) linear infinite;
+}
+
+/* Force black background for the entire application */
+html, body {
+  background-color: #000000 !important;
+}
+
+body {
+  background: #000000 !important;
 }

@@ -6,6 +6,9 @@ import OverviewCards from "./OverviewCards";
 import PerformanceChart from "./PerformanceChart";
 import RecentCampaigns from "./RecentCampaigns";
 import QuickActions from "./QuickActions";
+import CampaignStats from "./CampaignStats";
+import MagicBento from "./MagicBento";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 import {
   LayoutDashboard,
   TrendingUp,
@@ -25,6 +28,7 @@ import {
 } from "lucide-react";
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const section = searchParams.get("section");
   
@@ -32,8 +36,10 @@ const Dashboard: React.FC = () => {
   const [viewMode, setViewMode] = useState("grid"); // grid or list
   const [visibleSections, setVisibleSections] = useState({
     overview: true,
+    bento: true,
     performance: true,
     campaigns: true,
+    stats: true,
     actions: true
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -73,32 +79,48 @@ const Dashboard: React.FC = () => {
   }> = [
     {
       key: "overview",
-      title: "Performance Overview",
-      description: "Key metrics and KPIs",
+      title: t.dashboard?.performanceOverview || "Performance Overview",
+      description: t.dashboard?.keyMetrics || "Key metrics and KPIs",
       icon: TrendingUp,
       component: OverviewCards,
       visible: visibleSections.overview
     },
     {
+      key: "bento",
+      title: t.dashboard?.campaignCards || "Campaign Cards",
+      description: t.dashboard?.interactiveView || "Interactive campaign view",
+      icon: Grid3X3,
+      component: MagicBento,
+      visible: visibleSections.bento
+    },
+    {
       key: "performance",
-      title: "Performance Analytics",
-      description: "Detailed charts and trends",
+      title: t.dashboard?.performanceAnalytics || "Performance Analytics",
+      description: t.dashboard?.detailedMetrics || "Detailed charts and trends",
       icon: Activity,
       component: PerformanceChart,
       visible: visibleSections.performance
     },
     {
       key: "campaigns",
-      title: "Recent Campaigns",
-      description: "Campaign management",
+      title: t.dashboard?.recentCampaigns || "Recent Campaigns",
+      description: t.dashboard?.manageCampaigns || "Campaign management",
       icon: LayoutDashboard,
       component: RecentCampaigns,
       visible: visibleSections.campaigns
     },
     {
+      key: "stats",
+      title: t.dashboard?.campaignStatistics || "Campaign Statistics",
+      description: t.dashboard?.detailedBreakdown || "Detailed breakdown",
+      icon: Activity,
+      component: CampaignStats,
+      visible: visibleSections.stats
+    },
+    {
       key: "actions",
-      title: "Quick Actions",
-      description: "Workflow shortcuts",
+      title: t.dashboard?.quickActions || "Quick Actions",
+      description: t.dashboard?.workflowShortcuts || "Workflow shortcuts",
       icon: Zap,
       component: QuickActions,
       visible: visibleSections.actions
@@ -142,20 +164,20 @@ const Dashboard: React.FC = () => {
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-800 mb-2">
-          Dashboard Overview
+          {t.dashboard?.performanceOverview || 'Dashboard Overview'}
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Monitor your advertising performance and manage campaigns
+          {t.dashboard?.manageCampaigns || 'Monitor your advertising performance and manage campaigns'}
         </p>
         <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center space-x-1">
             <Calendar className="w-4 h-4" />
-            <span>Last updated: {new Date().toLocaleString()}</span>
+            <span>{t.dashboard?.lastUpdated || 'Last updated'}: {new Date().toLocaleString()}</span>
           </div>
           {isRefreshing && (
             <div className="flex items-center space-x-1 text-blue-600 dark:text-blue-400">
               <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Refreshing...</span>
+              <span>{t.dashboard?.refreshData || 'Refreshing'}...</span>
             </div>
           )}
         </div>

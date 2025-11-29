@@ -57,16 +57,12 @@ export async function GET(
       
       const data = await response.json();
       
-      if (data.success) {
-        console.log(`✅ تم جلب إحصائيات الحساب ${customerId} من Flask Backend:`, data);
-        return NextResponse.json(data);
-      } else {
-        return NextResponse.json({
-          success: false,
-          error: data.error || 'Backend error',
-          message: data.message || 'خطأ في الخادم الخلفي'
-        }, { status: 500 });
-      }
+      // نثق في كود الباك اند ليحدد الـ status المناسب
+      // - في الحالات العادية: success=true مع status 200
+      // - في حسابات غير متاحة (CUSTOMER_NOT_ENABLED / USER_PERMISSION_DENIED): success=false مع status 200
+      // - في أخطاء أخرى: success=false مع status 400/500
+      console.log(`📊 Flask account stats response للحساب ${customerId}:`, data);
+      return NextResponse.json(data, { status: response.status });
       
     } catch (apiError) {
       console.error(`❌ خطأ في الاتصال بـ Flask Backend:`, apiError);

@@ -1,6 +1,10 @@
+'use client';
+
 import React, { useState } from "react";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 const CreditsComponent: React.FC = () => {
+  const { t, isRTL } = useTranslation();
   const [promoCode, setPromoCode] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   
@@ -63,22 +67,22 @@ const CreditsComponent: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen bg-transparent" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="bg-white/15 backdrop-blur-md border border-blue-200/30 px-6 py-4">
         <div className="flex items-center text-sm text-blue-200 drop-shadow-sm mb-2">
-          <span>Settings</span>
+          <span>{t.sidebar.settings || 'Settings'}</span>
           <span className="mx-2">/</span>
-          <span>Billing</span>
+          <span>{t.sidebar.billing || 'Billing'}</span>
           <span className="mx-2">/</span>
-          <span>Furriyadh Credits</span>
+          <span>{t.billing?.furriyadhCredits || 'Furriyadh Credits'}</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800 drop-shadow-lg">
-          Furriyadh Credits
+          {t.billing?.furriyadhCredits || 'Furriyadh Credits'}
         </h1>
         <p className="text-blue-100 drop-shadow-md mt-1">
-          Get an overview of your balance and check your eligibility for free credits.{" "}
-          <a href="#" className="text-blue-600 hover:text-blue-700">Read more</a>
+          {t.billing?.creditsOverview || 'Get an overview of your balance and check your eligibility for free credits.'}{" "}
+          <a href="#" className="text-blue-600 hover:text-blue-700">{t.common.readMore || 'Read more'}</a>
         </p>
       </div>
 
@@ -96,7 +100,7 @@ const CreditsComponent: React.FC = () => {
                     <path d="M9 12C9 11.4477 8.55228 11 8 11H6C5.44772 11 5 11.4477 5 12C5 12.5523 5.44772 13 6 13H8C8.55228 13 9 12.5523 9 12Z" fill="#FFFFFF"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-black dark:text-gray-800">Balance</h3>
+                <h3 className="text-xl font-bold text-black dark:text-gray-800">{t.billing?.balance || 'Balance'}</h3>
               </div>
               
               <div className="grid grid-cols-2 gap-6 mb-6">

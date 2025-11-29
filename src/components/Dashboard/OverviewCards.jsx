@@ -21,6 +21,7 @@ import {
 const OverviewCards = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [animateCards, setAnimateCards] = useState(false);
+  const [error, setError] = useState(null);
 
   // البيانات الحقيقية من API
   const [metricsData, setMetricsData] = useState({
@@ -74,14 +75,66 @@ const OverviewCards = () => {
     }
   });
 
-  // Simulate loading
+  // Load metrics from API
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setAnimateCards(true);
-    }, 1000);
-    return () => clearTimeout(timer);
+    fetchMetrics();
   }, []);
+
+  const fetchMetrics = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://my-app-production-28d2.up.railway.app/api' 
+        : 'http://localhost:5000/api';
+
+      const response = await fetch(`${backendUrl}/campaigns/metrics`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(typeof window !== 'undefined' && localStorage.getItem('auth_token') && {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          })
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setMetricsData({
+            totalSpend: calculateMetric(result.data.totalSpend, result.data.previousSpend),
+            impressions: calculateMetric(result.data.impressions, result.data.previousImpressions),
+            clicks: calculateMetric(result.data.clicks, result.data.previousClicks),
+            conversions: calculateMetric(result.data.conversions, result.data.previousConversions),
+            ctr: calculateMetric(result.data.ctr, result.data.previousCtr),
+            cpc: calculateMetric(result.data.cpc, result.data.previousCpc),
+            roas: calculateMetric(result.data.roas, result.data.previousRoas),
+            qualityScore: calculateMetric(result.data.qualityScore, result.data.previousQualityScore)
+          });
+        }
+      }
+
+      setAnimateCards(true);
+    } catch (err) {
+      console.error('Error fetching metrics:', err);
+      setError(err.message);
+      setAnimateCards(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const calculateMetric = (current = 0, previous = 0) => {
+    const change = previous > 0 ? ((current - previous) / previous) * 100 : 0;
+    return {
+      current: current || 0,
+      previous: previous || 0,
+      change: change,
+      trend: change > 0 ? 'up' : change < 0 ? 'down' : 'neutral'
+    };
+  };
 
   // Format numbers
   const formatNumber = (num) => {

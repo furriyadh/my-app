@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   images: {
     unoptimized: true,
-    domains: ['furriyadh.com', 'www.furriyadh.com', 'localhost'],
+    domains: ['furriyadh.com', 'www.furriyadh.com', 'localhost', 'flagcdn.com'],
   },
   
   // إعدادات البيئة

@@ -1,206 +1,807 @@
-"use client";
+'use client';
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-
-interface SidebarMenuProps {
-  toggleActive: () => void;
-}
-
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useTranslation } from "@/lib/hooks/useTranslation";
+import { 
+  BarChart3, 
+  Plus, 
+  Link as LinkIcon, 
+  CloudUpload, 
+  Users, 
+  Settings,
+  Building2,
+  CreditCard,
+  ChevronDown,
+  ChevronUp,
+  Menu,
+  X,
+  Sparkles,
+  Zap,
+  TrendingUp,
+  FolderKanban,
+  Eye,
+  Edit,
+  FileText,
+  Bell,
+  Search,
+  Clock
+} from "lucide-react";
+ 
+const SidebarMenu: React.FC = React.memo(() => {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const [isOrganizationDropdownOpen, setIsOrganizationDropdownOpen] = React.useState(false);
-  const [userPlan, setUserPlan] = React.useState<'basic' | 'premium'>('basic');
-
-  const toggleOrganizationDropdown = () => {
-    setIsOrganizationDropdownOpen(!isOrganizationDropdownOpen);
+  
+  // State for submenu dropdowns
+  const [billingOpen, setBillingOpen] = React.useState(false);
+  const [accountsOpen, setAccountsOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [campaignsOpen, setCampaignsOpen] = React.useState(false);
+  
+  // Use translation hook
+  const { t, language, isRTL } = useTranslation();
+  
+  // State for sidebar open/close
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  
+  // State for Quick Search
+  const [searchQuery, setSearchQuery] = React.useState('');
+  
+  // State for Recent Pages
+  const [recentPages, setRecentPages] = React.useState<{ path: string; name: string }[]>([]);
+  
+  // State for selected campaign type color
+  const [campaignTypeColor, setCampaignTypeColor] = React.useState({
+    gradient: 'from-yellow-500 to-orange-600',
+    hoverGradient: 'from-yellow-400 to-orange-500'
+  });
+  
+  // Toggle sidebar
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Helper functions for active states
-  const isOverviewActive = () => {
-    return pathname === '/dashboard' || pathname?.includes('section=overview');
-  };
 
-  const isActiveSection = (section: string) => {
+  // Handle responsive sidebar - close on mobile by default
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1280) { // xl breakpoint
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    
+    // Check on mount
+    handleResize();
+    
+    // Listen to resize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Update campaign color based on selected campaign type
+  React.useEffect(() => {
+    const updateCampaignColor = () => {
+      try {
+        const campaignData = localStorage.getItem('campaignData');
+        if (campaignData) {
+          const data = JSON.parse(campaignData);
+          const campaignType = data.campaignType;
+
+          // Map campaign types to colors (same as campaign/new page)
+          const colorMap: { [key: string]: { gradient: string; hoverGradient: string } } = {
+            'SEARCH': { 
+              gradient: 'from-yellow-500 to-orange-600', 
+              hoverGradient: 'from-yellow-400 to-orange-500' 
+            },
+            'DISPLAY': { 
+              gradient: 'from-green-500 to-emerald-600', 
+              hoverGradient: 'from-green-400 to-emerald-500' 
+            },
+            'SHOPPING': { 
+              gradient: 'from-blue-500 to-cyan-600', 
+              hoverGradient: 'from-blue-400 to-cyan-500' 
+            },
+            'VIDEO': { 
+              gradient: 'from-purple-500 to-pink-600', 
+              hoverGradient: 'from-purple-400 to-pink-500' 
+            },
+            'APP': { 
+              gradient: 'from-orange-500 to-red-600', 
+              hoverGradient: 'from-orange-400 to-red-500' 
+            },
+            'PERFORMANCE_MAX': { 
+              gradient: 'from-pink-500 to-rose-600', 
+              hoverGradient: 'from-pink-400 to-rose-500' 
+            },
+            'DEMAND_GEN': { 
+              gradient: 'from-red-500 to-pink-600', 
+              hoverGradient: 'from-red-400 to-pink-500' 
+            }
+          };
+          
+          if (campaignType && colorMap[campaignType]) {
+            setCampaignTypeColor(colorMap[campaignType]);
+          }
+        }
+      } catch (error) {
+        console.error('Error reading campaign type:', error);
+      }
+    };
+    
+    // Update on mount
+    updateCampaignColor();
+    
+    // Listen for storage changes
+    window.addEventListener('storage', updateCampaignColor);
+    
+    // Listen for custom event when campaign type changes
+    window.addEventListener('campaignTypeChanged', updateCampaignColor);
+
+    return () => {
+      window.removeEventListener('storage', updateCampaignColor);
+      window.removeEventListener('campaignTypeChanged', updateCampaignColor);
+    };
+  }, []);
+
+
+  // Auto-open submenu if user is on a related page
+  React.useEffect(() => {
+    if (pathname?.includes('section=billing') || pathname?.includes('billing') || pathname?.includes('/invoices')) {
+      setBillingOpen(true);
+    } else {
+      setBillingOpen(false);
+    }
+    
+    if (pathname?.startsWith('/accounts') || pathname?.startsWith('/my-profile')) {
+      setAccountsOpen(true);
+    } else {
+      setAccountsOpen(false);
+    }
+    
+    if (pathname?.startsWith('/settings')) {
+      setSettingsOpen(true);
+    } else {
+      setSettingsOpen(false);
+    }
+    
+    if (pathname?.includes('/campaign/performance') || pathname?.includes('/campaign/edit-ads') || pathname?.includes('/campaign/preview')) {
+      setCampaignsOpen(true);
+    } else {
+      setCampaignsOpen(false);
+    }
+  }, [pathname]);
+
+  // Track Recent Pages
+  React.useEffect(() => {
+    if (!pathname || pathname === '/' || pathname === '/dashboard') {
+      // Don't track dashboard or root as recent
+      return;
+    }
+    
+    try {
+      // Load recent pages from localStorage
+      const storedPages = localStorage.getItem('recentPages');
+      const pages: { path: string; name: string }[] = storedPages ? JSON.parse(storedPages) : [];
+      
+      // Get page name from pathname
+      const getPageName = (path: string) => {
+        if (!path) return 'Page';
+        if (path === '/dashboard') return 'Dashboard';
+        if (path.includes('/campaign/new')) return 'New Campaign';
+        if (path.includes('/campaign/performance')) return 'Campaign Performance';
+        if (path.includes('/campaign/edit-ads')) return 'Edit Ads';
+        if (path.includes('/campaign/preview')) return 'Preview Campaign';
+        if (path.includes('/campaign/location-targeting')) return 'Location Targeting';
+        if (path.includes('/campaign/budget-scheduling')) return 'Budget & Scheduling';
+        if (path.includes('/campaign/website-url')) return 'Website URL';
+        if (path.includes('/integrations/google-ads')) return 'Google Ads';
+        if (path.includes('/integrations')) return 'Integrations';
+        if (path.includes('/accounts')) return 'Accounts';
+        if (path.includes('/my-profile')) return 'My Profile';
+        if (path.includes('/notifications')) return 'Notifications';
+        if (path.includes('/invoices')) return 'Invoices';
+        if (path.includes('/settings')) return 'Settings';
+        const segments = path.split('/').filter(Boolean);
+        return segments[segments.length - 1]?.replace(/-/g, ' ')?.replace(/\b\w/g, l => l.toUpperCase()) || 'Page';
+      };
+      
+      const currentPage = { path: pathname, name: getPageName(pathname) };
+      
+      // Check if page already exists
+      const existingIndex = pages.findIndex(p => p.path === pathname);
+      if (existingIndex !== -1) {
+        pages.splice(existingIndex, 1);
+      }
+      
+      // Add to beginning
+      pages.unshift(currentPage);
+      
+      // Keep only last 5 and filter out invalid entries
+      const recentPagesLimit = pages
+        .filter(p => p && p.path && p.name)
+        .slice(0, 5);
+      
+      // Save to localStorage
+      localStorage.setItem('recentPages', JSON.stringify(recentPagesLimit));
+      setRecentPages(recentPagesLimit);
+    } catch (error) {
+      console.error('Error tracking recent pages:', error);
+    }
+  }, [pathname]);
+
+  // Load recent pages on mount
+  React.useEffect(() => {
+    try {
+      const storedPages = localStorage.getItem('recentPages');
+      if (storedPages) {
+        const parsedPages = JSON.parse(storedPages);
+        // Filter out any invalid entries
+        const validPages = parsedPages.filter((p: any) => p && p.path && p.name);
+        setRecentPages(validPages);
+      }
+    } catch (error) {
+      console.error('Error loading recent pages:', error);
+      // Clear corrupted data
+      localStorage.removeItem('recentPages');
+    }
+  }, []);
+
+  // Helper functions for active states - Always accurate
+  const isOverviewActive = React.useMemo(() => {
+    return pathname === '/dashboard' || pathname === '/';
+  }, [pathname]);
+
+  const isActiveSection = React.useCallback((section: string) => {
     return pathname?.includes(`section=${section}`);
-  };
+  }, [pathname]);
+  
+  const isBillingActive = React.useMemo(() => {
+    return pathname?.includes('section=billing') || pathname?.includes('/billing');
+  }, [pathname]);
+
+  const isCampaignActive = React.useMemo(() => {
+    return pathname?.startsWith('/campaign');
+  }, [pathname]);
+
+  const isIntegrationsActive = React.useMemo(() => {
+    return pathname?.startsWith('/integrations');
+  }, [pathname]);
+
+  const isAccountsActive = React.useMemo(() => {
+    return pathname?.startsWith('/accounts');
+  }, [pathname]);
+
+  const isSettingsActive = React.useMemo(() => {
+    return pathname?.startsWith('/settings');
+  }, [pathname]);
+
+  const isCampaignsActive = React.useMemo(() => {
+    return pathname?.includes('/campaign/performance') || 
+           pathname?.includes('/campaign/edit-ads') || 
+           pathname?.includes('/campaign/preview');
+  }, [pathname]);
+
+  const isNotificationsActive = React.useMemo(() => {
+    return pathname?.startsWith('/notifications');
+  }, [pathname]);
+
+  const campaignsSubItems = React.useMemo(() => [
+    { id: 'performance', name: t.sidebar.campaignPerformance || 'Campaign Performance', href: '/campaign/performance' },
+    { id: 'edit-ads', name: t.sidebar.editAds || 'Edit Ads', href: '/campaign/edit-ads' },
+    { id: 'preview', name: t.sidebar.previewCampaign || 'Preview Campaign', href: '/campaign/preview' }
+  ], [t]);
+
+  const billingSubItems = React.useMemo(() => [
+    { id: 'credit', name: t.sidebar.credit || 'Credit', href: '/dashboard?section=billing&sub=credit' },
+    { id: 'subscriptions', name: t.sidebar.subscriptions || 'Subscriptions', href: '/dashboard?section=billing&sub=subscriptions' },
+    { id: 'payments', name: t.sidebar.payments || 'Payments', href: '/dashboard?section=billing&sub=payments' },
+    { id: 'invoices', name: t.sidebar.invoices || 'Invoices', href: '/invoices' }
+  ], [t]);
+
+  const accountsSubItems = React.useMemo(() => [
+    { id: 'google-ads', name: t.sidebar.googleAdsAccounts || 'Google Ads Accounts', href: '/accounts' },
+    { id: 'profile', name: t.sidebar.myProfile || 'My Profile', href: '/my-profile' }
+  ], [t]);
+
+  const settingsSubItems = React.useMemo(() => [
+    { id: 'general', name: t.sidebar.general || 'General', href: '/settings' },
+    { id: 'privacy', name: t.sidebar.privacyPolicy || 'Privacy Policy', href: '/settings/privacy-policy' },
+    { id: 'terms', name: t.sidebar.termsConditions || 'Terms & Conditions', href: '/settings/terms-conditions' },
+    { id: 'connections', name: t.sidebar.connections || 'Connections', href: '/settings/connections' },
+    { id: 'password', name: t.sidebar.changePassword || 'Change Password', href: '/settings/change-password' }
+  ], [t]);
+
+  const allTabs = React.useMemo(() => [
+    {
+      id: 1,
+      name: t.sidebar.overview || 'Overview',
+      icon: BarChart3,
+      href: '/dashboard',
+      isActive: isOverviewActive,
+      hasSubmenu: false,
+      gradient: 'from-purple-600 to-violet-600',
+      hoverGradient: 'from-purple-500 to-violet-500',
+      badge: { text: `5 ${t.sidebar.active || 'Active'}`, color: 'bg-purple-500' },
+      tooltip: t.sidebar.viewDashboardStats || 'View your dashboard statistics'
+    },
+    {
+      id: 2,
+      name: t.sidebar.newCampaign || 'New Campaign',
+      icon: Plus,
+      href: '/campaign/new',
+      isActive: isCampaignActive,
+      hasSubmenu: false,
+      gradient: campaignTypeColor.gradient,
+      hoverGradient: campaignTypeColor.hoverGradient,
+      badge: null,
+      tooltip: t.sidebar.createNewCampaign || 'Create a new advertising campaign',
+      sparkle: true
+    },
+    {
+      id: 3,
+      name: t.sidebar.myCampaigns || 'My Campaigns',
+      icon: FolderKanban,
+      href: '/campaign/performance',
+      isActive: isCampaignsActive,
+      hasSubmenu: true,
+      subItems: campaignsSubItems,
+      gradient: 'from-violet-600 to-fuchsia-600',
+      hoverGradient: 'from-violet-500 to-fuchsia-500',
+      badge: { text: '12', color: 'bg-violet-500' },
+      tooltip: t.sidebar.viewManageCampaigns || 'View and manage your campaigns'
+    },
+    {
+      id: 4,
+      name: t.sidebar.integrations || 'Integrations',
+      icon: LinkIcon,
+      href: '/integrations',
+      isActive: isIntegrationsActive,
+      hasSubmenu: false,
+      gradient: 'from-green-600 to-emerald-600',
+      hoverGradient: 'from-green-500 to-emerald-500',
+      badge: { text: '3', color: 'bg-green-500' },
+      tooltip: t.sidebar.manageIntegrations || 'Manage your connected integrations'
+    },
+    {
+      id: 5,
+      name: t.sidebar.assetUpload || 'Asset Upload',
+      icon: CloudUpload,
+      href: '/dashboard?section=asset-upload',
+      isActive: isActiveSection('asset-upload'),
+      hasSubmenu: false,
+      gradient: 'from-cyan-600 to-teal-600',
+      hoverGradient: 'from-cyan-500 to-teal-500',
+      badge: { text: '24', color: 'bg-cyan-500' },
+      tooltip: t.sidebar.uploadManageAssets || 'Upload and manage your assets'
+    },
+    {
+      id: 6,
+      name: t.sidebar.billing || 'Billing',
+      icon: CreditCard,
+      href: '/dashboard?section=billing',
+      isActive: isBillingActive,
+      hasSubmenu: true,
+      subItems: billingSubItems,
+      gradient: 'from-orange-600 to-yellow-600',
+      hoverGradient: 'from-orange-500 to-yellow-500',
+      badge: { text: '$150', color: 'bg-orange-500' },
+      tooltip: t.sidebar.viewBillingPayments || 'View billing and payments'
+    },
+    {
+      id: 7,
+      name: t.sidebar.accounts || 'Accounts',
+      icon: Users,
+      href: '/accounts',
+      isActive: isAccountsActive,
+      hasSubmenu: true,
+      subItems: accountsSubItems,
+      gradient: 'from-purple-600 to-pink-600',
+      hoverGradient: 'from-purple-500 to-pink-500',
+      badge: { text: '2', color: 'bg-purple-500' },
+      tooltip: t.sidebar.manageAccounts || 'Manage your connected accounts'
+    },
+    {
+      id: 8,
+      name: t.sidebar.notifications || 'Notifications',
+      icon: Bell,
+      href: '/notifications',
+      isActive: isNotificationsActive,
+      hasSubmenu: false,
+      gradient: 'from-rose-600 to-red-600',
+      hoverGradient: 'from-rose-500 to-red-500',
+      badge: { text: '7', color: 'bg-rose-500' },
+      tooltip: t.sidebar.viewNotifications || 'View your notifications'
+    },
+    {
+      id: 9,
+      name: t.sidebar.settings || 'Settings',
+      icon: Settings,
+      href: '/settings',
+      isActive: isSettingsActive,
+      hasSubmenu: true,
+      subItems: settingsSubItems,
+      gradient: 'from-gray-600 to-slate-600',
+      hoverGradient: 'from-gray-500 to-slate-500',
+      badge: null,
+      tooltip: t.sidebar.configurePreferences || 'Configure your preferences'
+    }
+  ], [pathname, t, isOverviewActive, isCampaignActive, isCampaignsActive, isIntegrationsActive, isActiveSection, isBillingActive, isAccountsActive, isNotificationsActive, isSettingsActive, campaignsSubItems, billingSubItems, accountsSubItems, settingsSubItems, campaignTypeColor]);
+
+  // Filter tabs based on search query
+  const filteredTabs = React.useMemo(() => {
+    if (!searchQuery) return allTabs;
+    const query = searchQuery.toLowerCase();
+    return allTabs.filter(tab => 
+      tab.name.toLowerCase().includes(query) ||
+      tab.subItems?.some(sub => sub.name.toLowerCase().includes(query))
+    );
+  }, [allTabs, searchQuery]);
 
   return (
     <>
-      <div className="sidebar-area fixed z-[100] top-0 h-screen w-[300px] overflow-y-auto overflow-x-hidden border-r border-gray-700 flex flex-col scrollbar-hide" style={{backgroundColor: '#060010'}}>
-        <style jsx>{`
-          .scrollbar-hide {
-            -ms-overflow-style: none;  /* Internet Explorer 10+ */
-            scrollbar-width: none;  /* Firefox */
-          }
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;  /* Safari and Chrome */
-          }
-        `}</style>
+      {/* Hamburger Button - Beautiful & Floating */}
+      {!isSidebarOpen && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8, rotate: -90 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          exit={{ opacity: 0, scale: 0.8, rotate: 90 }}
+          whileHover={{ scale: 1.1, rotate: 180 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleSidebar}
+          className={`fixed top-6 z-[101] p-4 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-2xl hover:shadow-indigo-500/50 transition-all duration-300 group ${
+            isRTL ? 'right-6' : 'left-6'
+          }`}
+        >
+          {/* Glow effect */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-75 blur-xl transition-opacity duration-300"></div>
+          
+          {/* Icon */}
+          <Menu className="w-7 h-7 relative z-10 drop-shadow-lg" />
+          
+          {/* Pulse animation */}
+          <span className="absolute top-1 right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+          </span>
+        </motion.button>
+      )}
 
-        <div className="flex-1 px-4 py-6">
+      {/* Sidebar */}
+      <motion.div
+        initial={false}
+        animate={{
+          x: isSidebarOpen 
+            ? 0 
+            : isRTL 
+              ? 360 
+              : -360
+        }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className={`fixed top-0 h-screen w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl ${
+          isRTL 
+            ? 'right-0 border-l' 
+            : 'left-0 border-r'
+        }`}
+        style={{
+          backgroundColor: '#000000'
+        }}
+      >
+        {/* Close Button - Beautiful */}
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: 90 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleSidebar}
+          className={`absolute top-3 p-2.5 text-gray-400 hover:text-white hover:bg-gradient-to-br hover:from-red-500 hover:to-pink-600 rounded-xl transition-all duration-300 group ${
+            isRTL ? 'left-6' : 'right-6'
+          }`}
+        >
+          <X className="w-6 h-6 group-hover:drop-shadow-lg transition-all" />
+        </motion.button>
+
           {/* Organization Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">O</span>
+        <div className="mb-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative transition-transform hover:scale-105">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <Building2 className="w-8 h-8 text-white" />
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Organization Name
-                  </h2>
-                  <div className="flex items-center space-x-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
-                      Basic Plan
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <div className={`absolute -top-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900 ${
+                isRTL ? '-left-1' : '-right-1'
+              }`}></div>
+            </div>
+            
+            <div className="flex-1">
+              <p className="text-lg font-bold mb-1.5 text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.sidebar.organizationName || 'Organization Name'}
+              </p>
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-indigo-900/60 text-indigo-200 border border-indigo-700/30" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.sidebar.basicPlan || 'Basic Plan'}
+              </span>
             </div>
           </div>
+        </div>
 
-          {/* Main Dashboard Section */}
-          <div className="space-y-1">
-            <h3 className="uppercase tracking-widest px-3 mb-3" style={{fontSize: '12px', fontWeight: '600', color: '#4B5563', opacity: '0.9'}}>
-              DASHBOARD
-            </h3>
-            
-            {/* Overview */}
-            <Link
-              href="/dashboard?section=overview"
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                isOverviewActive()
-                  ? 'bg-white/20 backdrop-blur-sm border border-blue-300/30 text-blue-200 shadow-lg border-l-4 border-blue-500 transform scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200 hover:shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              <span className="text-sm font-medium">Overview</span>
-              {isOverviewActive() && (
-                <div className="absolute right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              )}
-            </Link>
-
-            {/* New Campaign */}
-            <Link
-              href="/campaign/new"
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                pathname === '/campaign/new'
-                  ? 'bg-white/20 backdrop-blur-sm border border-green-300/30 text-green-200 shadow-lg border-l-4 border-green-500 transform scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-green-50/70 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span className="text-sm font-medium">New Campaign</span>
-              <span className="ml-auto bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-[10px] px-2 py-0.5 rounded-full font-medium">
-                Create
-              </span>
-              {pathname === '/campaign/new' && (
-                <div className="absolute right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              )}
-            </Link>
-
-            {/* Integrations */}
-            <Link
-              href="/integrations"
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                pathname === '/integrations'
-                  ? 'bg-white/20 backdrop-blur-sm border border-purple-300/30 text-purple-200 shadow-lg border-l-4 border-purple-500 transform scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-              <span className="text-sm font-medium">Integrations</span>
-              <span className="ml-auto bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-[10px] px-2 py-0.5 rounded-full font-medium">
-                Connect
-              </span>
-              {pathname === '/integrations' && (
-                <div className="absolute right-2 w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              )}
-            </Link>
-
-
-
-            {/* Asset Upload */}
-            <Link
-              href="/dashboard?section=asset-upload"
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                isActiveSection('asset-upload')
-                  ? 'bg-white/20 backdrop-blur-sm border border-blue-300/30 text-blue-200 shadow-lg border-l-4 border-blue-500 transform scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200 hover:shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              <span className="text-sm font-medium">Asset Upload</span>
-              {isActiveSection('asset-upload') && (
-                <div className="absolute right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              )}
-            </Link>
-          </div>
-
-          {/* Account Management Section */}
-          <div className="mt-8 space-y-1">
-            <h3 className="uppercase tracking-widest px-3 mb-3" style={{fontSize: '12px', fontWeight: '600', color: '#4B5563', opacity: '0.9'}}>
-              ACCOUNT MANAGEMENT
-            </h3>
-            
-            {/* Accounts */}
-            <Link
-              href="/accounts"
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                pathname === '/accounts'
-                  ? 'bg-white/20 backdrop-blur-sm border border-gray-300/30 text-gray-200 shadow-lg border-l-4 border-gray-500 transform scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200 hover:shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
-              <span className="text-sm font-medium">Accounts</span>
-              {pathname === '/accounts' && (
-                <div className="absolute right-2 w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
-              )}
-            </Link>
-
-            {/* Settings */}
-            <Link
-              href="/settings"
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 relative ${
-                pathname === '/settings'
-                  ? 'bg-white/20 backdrop-blur-sm border border-gray-300/30 text-gray-200 shadow-lg border-l-4 border-gray-500 transform scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200 hover:shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span className="text-sm font-medium">Settings</span>
-              {pathname === '/settings' && (
-                <div className="absolute right-2 w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
-              )}
-            </Link>
+        {/* Quick Search Bar */}
+        <div className="mb-3 relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-all duration-300">
+            <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder={t.sidebar.quickSearch || 'Quick search...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-sm"
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Mobile overlay */}
-      <div className="fixed inset-0 z-[99] bg-black/50 lg:hidden" onClick={toggleActive}></div>
+        {/* Recent Pages */}
+        {recentPages.length > 0 && !searchQuery && (
+          <div className="mb-3 px-2">
+            <div className="flex items-center gap-2 mb-1.5 text-xs text-gray-400 font-semibold uppercase tracking-wider" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Clock className="w-3.5 h-3.5" />
+              <span>{t.sidebar.recentPages || 'Recent Pages'}</span>
+            </div>
+            <div className="space-y-1">
+              {recentPages.slice(0, 3).filter(page => page && page.path).map((page, index) => (
+                <Link
+                  key={index}
+                  href={page.path || '/dashboard'}
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 truncate group"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></div>
+                    <span>{page.name || 'Page'}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+      {/* Sidebar navigation */}
+      <div className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto p-2'>
+        {/* All Tabs */}
+        <div className='flex flex-col gap-1'>
+          {filteredTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isOpen = tab.id === 3 ? campaignsOpen : tab.id === 6 ? billingOpen : tab.id === 7 ? accountsOpen : tab.id === 9 ? settingsOpen : false;
+            const setOpen = tab.id === 3 ? setCampaignsOpen : tab.id === 6 ? setBillingOpen : tab.id === 7 ? setAccountsOpen : tab.id === 9 ? setSettingsOpen : () => {};
+            
+            return (
+              <div key={`tab-${tab.id}`}>
+                {/* Tab with or without submenu */}
+                {tab.hasSubmenu ? (
+                  <>
+                    {/* Main Tab Button (with submenu) - ENHANCED */}
+                    <button
+                      onClick={() => setOpen(!isOpen)}
+                      className={`
+                        relative group flex items-center justify-between w-full px-6 py-4 transition-all overflow-hidden
+                        ${
+                          tab.isActive
+                            ? 'text-white'
+                            : 'text-gray-400 hover:text-gray-200'
+                        }
+                      `}
+                      title={tab.tooltip}
+                    >
+                      {/* Background highlight for active tab with custom gradient */}
+                      {tab.isActive && (
+                      <motion.div
+                          layoutId='sidebarTabBackground'
+                          className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                        />
+                      )}
+
+                      {/* Hover gradient effect */}
+                      {!tab.isActive && (
+                        <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
+                      )}
+
+                      {/* Glow effect on hover */}
+                      <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
+
+                      {/* Tab content with icon and text */}
+                      <div className='flex items-center gap-4 z-10 flex-1'>
+                        <motion.div
+                          animate={tab.isActive ? { scale: [1, 1.1, 1] } : {}}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <Icon className={`w-6 h-6 ${tab.isActive ? 'drop-shadow-lg' : ''} group-hover:scale-110 transition-transform`} />
+                      </motion.div>
+                        <span className='text-lg font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{tab.name}</span>
+                        
+                        {/* Badge */}
+                        {tab.badge && (
+                          <div className={`${tab.badge.color} text-white text-xs font-bold px-2 py-0.5 rounded-full ${isRTL ? 'mr-auto' : 'ml-auto'} ${tab.isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity`}>
+                            {tab.badge.text}
+                          </div>
+                        )}
+                </div>
+
+                      {/* Chevron Icon */}
+                      <div className={`z-10 ${isRTL ? 'mr-2' : 'ml-2'}`}>
+            <motion.div
+                          animate={{ rotate: isOpen ? 180 : 0 }}
+                          transition={{ duration: 0.3 }}
+              >
+                          <ChevronDown className='w-5 h-5' />
+                        </motion.div>
+                  </div>
+                    </button>
+
+                    {/* Submenu - ENHANCED */}
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className={`${isRTL ? 'mr-12' : 'ml-12'} mt-2 mb-3 space-y-2`}
+                      >
+                        {tab.subItems?.map((subItem) => {
+                          const isSubItemActive = pathname === subItem.href || pathname?.includes(subItem.id);
+                          
+                          return (
+            <Link
+                              key={subItem.id}
+                              href={subItem.href}
+                              prefetch={true}
+                              className={`
+                                relative block px-5 py-3 text-base rounded-lg transition-all group overflow-hidden
+                                ${
+                                  isSubItemActive
+                                    ? 'text-white'
+                                    : 'text-gray-400 hover:text-gray-200'
+                                }
+                              `}
+              >
+                              {/* Gradient Background for Active Submenu - using parent gradient */}
+                              {isSubItemActive && (
+                      <motion.div
+                                  layoutId={`submenu-${tab.id}-background`}
+                                  className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                                />
+                              )}
+                              
+                              {/* Hover gradient effect */}
+                              {!isSubItemActive && (
+                                <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
+                              )}
+                              
+                              {/* Submenu Text */}
+                              <span className='relative z-10 font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{subItem.name}</span>
+                              
+                              {/* White Dot Indicator */}
+                              {isSubItemActive && (
+                  <motion.div 
+                                  layoutId={`submenu-${tab.id}-dot`}
+                                  className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white ${
+                                    isRTL ? 'left-3' : 'right-3'
+                                  }`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                                  transition={{ delay: 0.1 }}
+                  />
+              )}
+            </Link>
+                          );
+                        })}
+            </motion.div>
+                    )}
+                  </>
+                ) : (
+                  /* Main Tab Link (without submenu) - ENHANCED */
+            <Link
+                    href={tab.href}
+                    prefetch={true}
+                    className={`
+                      relative group flex items-center w-full px-6 py-4 transition-all overflow-hidden
+                      ${
+                        tab.isActive
+                          ? 'text-white'
+                          : 'text-gray-400 hover:text-gray-200'
+                      }
+                    `}
+                    title={tab.tooltip}
+                  >
+                    {/* Background highlight for active tab with custom gradient */}
+                    {tab.isActive && (
+                      <motion.div
+                        layoutId='sidebarTabBackground'
+                        className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    )}
+
+                    {/* Hover gradient effect */}
+                    {!tab.isActive && (
+                      <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
+                    )}
+
+                    {/* Glow effect on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
+
+                    {/* Tab content with icon and text */}
+                    <div className='flex items-center gap-4 z-10 flex-1'>
+                      <motion.div
+                        animate={tab.isActive ? { scale: [1, 1.2, 1] } : {}}
+                        transition={{ duration: 0.5, repeat: tab.sparkle ? Infinity : 0, repeatDelay: 3 }}
+                      >
+                        <Icon className={`w-6 h-6 ${tab.isActive ? 'drop-shadow-lg' : ''} group-hover:scale-110 transition-transform`} />
+                      </motion.div>
+                      <span className='text-lg font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{tab.name}</span>
+                </div>
+
+                    {/* Badge */}
+                    {tab.badge && (
+                      <div className={`${tab.badge.color} text-white text-xs font-bold px-2 py-0.5 rounded-full z-10 ${tab.isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity`}>
+                        {tab.badge.text}
+                      </div>
+                    )}
+
+                    {/* Sparkles for New Campaign */}
+                    {tab.sparkle && tab.isActive && (
+                      <Sparkles className={`w-4 h-4 absolute top-2 z-10 text-yellow-300 animate-pulse ${isRTL ? 'left-2' : 'right-2'}`} />
+                    )}
+
+                    {/* Small dot indicator */}
+                    {tab.isActive && !tab.badge && (
+                  <motion.div 
+                        layoutId='sidebarActiveDot'
+                        className={`absolute w-2.5 h-2.5 rounded-full bg-white ${
+                          isRTL ? 'left-4' : 'right-4'
+                        }`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                  />
+              )}
+            </Link>
+                )}
+                  </div>
+            );
+          })}
+        </div>
+      </div>
+      </motion.div>
+
+      {/* Overlay when sidebar is open on mobile/tablet */}
+      {isSidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={toggleSidebar}
+          className="fixed inset-0 bg-black/50 z-[99] xl:hidden backdrop-blur-sm"
+        />
+      )}
     </>
   );
-};
+});
+
+SidebarMenu.displayName = 'SidebarMenu';
 
 export default SidebarMenu;

@@ -10,9 +10,11 @@ from datetime import datetime, timedelta
 import json
 import re
 
-from .ai_processor import AIProcessor
-from .google_ads_client import GoogleAdsClientService
+from .real_ai_processor import RealAIProcessor
+from .google_ads_official_service import GoogleAdsOfficialService
 from .website_analyzer import WebsiteAnalyzer
+from .keyword_planner_service import KeywordPlannerService
+import os
 
 class CampaignBuilder:
     """بناء الحملات الإعلانية الذكي"""
@@ -20,9 +22,10 @@ class CampaignBuilder:
     def __init__(self):
         """تهيئة بناء الحملات"""
         self.logger = logging.getLogger(__name__)
-        self.ai_processor = AIProcessor()
-        self.google_ads_client = GoogleAdsClientService()
+        self.ai_processor = RealAIProcessor()
+        self.google_ads_service = GoogleAdsOfficialService()
         self.website_analyzer = WebsiteAnalyzer()
+        self.keyword_planner = KeywordPlannerService()
         
         self.logger.info("تم تهيئة بناء الحملات الذكي")
     
@@ -42,26 +45,30 @@ class CampaignBuilder:
                 if website_result['success']:
                     website_analysis = website_result['analysis']
             
-            # تحليل الكلمات المفتاحية بالذكاء الاصطناعي
-            keywords_result = self.ai_processor.analyze_keywords(
-                campaign_request.get('business_description', ''),
-                campaign_request.get('target_audience', '')
-            )
+            # تحليل الكلمات المفتاحية بالذكاء الاصطناعي + Google Keyword Planner
+            keywords_result = self._extract_real_keywords(campaign_request, website_analysis)
             
             # دمج الكلمات المفتاحية من الموقع
             if website_analysis:
                 website_keywords = website_analysis.get('keywords_suggestions', {})
-                keywords_result = self._merge_keyword_sources(keywords_result, website_keywords)
+                if website_keywords:
+                    keywords_result = self._merge_keyword_sources(keywords_result, website_keywords)
             
             # إنشاء النسخ الإعلانية
-            ad_copies_result = self.ai_processor.generate_ad_copy(
-                [kw['keyword'] for kw in keywords_result.get('keywords', [])[:10]],
-                {
-                    'name': campaign_request.get('business_name', ''),
-                    'description': campaign_request.get('business_description', ''),
-                    'website': campaign_request.get('website_url', '')
-                }
-            )
+            # إعداد الكلمات المفتاحية للنسخ الإعلانية
+            keywords_list = keywords_result.get('keywords', []) if keywords_result.get('keywords') else []
+            if not isinstance(keywords_list, list):
+                keywords_list = []
+            keywords_for_ads = [kw.get('keyword', '') for kw in keywords_list[:10]] if keywords_list and isinstance(keywords_list, list) and len(keywords_list) > 0 else []
+            
+            ad_copies_result = self.ai_processor.generate_ad_copy({
+                'campaign_type': campaign_request.get('campaign_type', 'SEARCH'),
+                'business_name': campaign_request.get('business_name', ''),
+                'business_type': campaign_request.get('business_type', ''),
+                'business_description': campaign_request.get('business_description', ''),
+                'website_url': campaign_request.get('website_url', ''),
+                'keywords': keywords_for_ads
+            })
             
             # بناء هيكل الحملة
             campaign_structure = self._build_campaign_structure(
@@ -132,7 +139,7 @@ class CampaignBuilder:
                 'business_type': business_info.get('business_type', 'عام'),
                 'services': business_info.get('services', []),
                 'target_audience': 'عام',
-                'budget': 1000,  # ميزانية افتراضية
+                'budget': 1500.0,  # Default budget, user can modify
                 'customer_id': customer_id,
                 'create_in_google_ads': bool(customer_id)
             }
@@ -218,10 +225,10 @@ class CampaignBuilder:
             'name': request.get('name', f"حملة {datetime.now().strftime('%Y-%m-%d')}"),
             'type': 'SEARCH',
             'status': 'PAUSED',  # تبدأ متوقفة للمراجعة
-            'budget': request.get('budget', 1000),
+            'budget': request.get('budget'),
             'bidding_strategy': 'MANUAL_CPC',
-            'target_locations': request.get('target_locations', ['السعودية']),
-            'target_languages': request.get('target_languages', ['ar']),
+            'target_locations': request.get('target_locations', []),
+            'target_languages': request.get('target_languages', []),
             'start_date': datetime.now().strftime('%Y-%m-%d'),
             'end_date': (datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d')
         }
@@ -267,8 +274,8 @@ class CampaignBuilder:
     def _build_targeting_settings(self, request: Dict[str, Any], website_analysis: Dict[str, Any] = None) -> Dict[str, Any]:
         """بناء إعدادات الاستهداف"""
         targeting = {
-            'locations': request.get('target_locations', ['السعودية']),
-            'languages': request.get('target_languages', ['ar']),
+            'locations': request.get('target_locations', []),
+            'languages': request.get('target_languages', []),
             'demographics': {
                 'age_ranges': request.get('age_ranges', ['25-34', '35-44', '45-54']),
                 'genders': request.get('genders', ['MALE', 'FEMALE'])
@@ -360,7 +367,7 @@ class CampaignBuilder:
             extensions['structured_snippets'] = [
                 {
                     'header': 'الخدمات',
-                    'values': website_analysis.get('business_analysis', {}).get('services', [])[:10]
+                    'values': (website_analysis.get('business_analysis', {}).get('services') or [])[:10] if website_analysis.get('business_analysis', {}).get('services') and isinstance(website_analysis.get('business_analysis', {}).get('services'), list) and len(website_analysis.get('business_analysis', {}).get('services', [])) > 0 else []
                 }
             ]
         
@@ -382,7 +389,12 @@ class CampaignBuilder:
                                    website_analysis: Dict[str, Any] = None) -> Dict[str, Any]:
         """تحسين الميزانية والمزايدة"""
         
-        total_budget = request.get('budget', 1000)
+        total_budget = request.get('budget')
+        # Provide default budget if None to prevent TypeError in arithmetic operations
+        if total_budget is None:
+            total_budget = 1500.0  # Default budget in local currency
+            self.logger.warning(f"⚠️ Budget not provided, using default: {total_budget}")
+        
         keywords_list = keywords.get('keywords', [])
         
         # تحليل المنافسة للكلمات المفتاحية
@@ -602,17 +614,20 @@ class CampaignBuilder:
         return formatted_keywords
     
     def _calculate_keyword_bid(self, keyword: Dict[str, Any]) -> float:
-        """حساب مزايدة الكلمة المفتاحية"""
-        base_bid = 1.5
+        """حساب مزايدة الكلمة المفتاحية باستخدام Real CPC من Google Ads Historical Metrics"""
+        # استخدام Real CPC إذا كان متوفراً، وإلا استخدام القيمة الافتراضية
+        # Use explicit None check to handle 0.0 CPC values correctly
+        real_cpc = getattr(self, '_real_cpc', None)
+        base_bid = real_cpc if real_cpc is not None else 1.5
         
         # تعديل بناءً على الصلة
         relevance = keyword.get('relevance', 50)
         if relevance > 80:
-            base_bid *= 1.3
+            base_bid *= 1.2  # زيادة أقل للكلمات عالية الصلة
         elif relevance > 60:
             base_bid *= 1.1
         elif relevance < 30:
-            base_bid *= 0.8
+            base_bid *= 0.9  # تقليل أقل للكلمات منخفضة الصلة
         
         return round(base_bid, 2)
     
@@ -656,10 +671,15 @@ class CampaignBuilder:
         """دمج الكلمات المفتاحية من مصادر مختلفة"""
         merged_keywords = ai_keywords.copy()
         
+        # التأكد من أن keywords هو list
+        if 'keywords' not in merged_keywords or not isinstance(merged_keywords['keywords'], list):
+            merged_keywords['keywords'] = []
+        
         if website_keywords and 'primary' in website_keywords:
             # إضافة الكلمات المفتاحية من الموقع
             website_kw_list = []
-            for kw in website_keywords['primary'][:10]:  # أول 10 فقط
+            primary_keywords = website_keywords.get('primary', []) if website_keywords.get('primary') else []
+            for kw in primary_keywords[:10] if primary_keywords and isinstance(primary_keywords, list) and len(primary_keywords) > 0 else []:  # أول 10 فقط
                 website_kw_list.append({
                     'keyword': kw,
                     'source': 'website',
@@ -681,14 +701,14 @@ class CampaignBuilder:
             campaign_data = campaign_structure['campaign'].copy()
             campaign_data['budget'] = budget_optimization['daily_budget']
             
-            campaign_id = self.google_ads_client.create_campaign(customer_id, campaign_data)
+            campaign_id = self.google_ads_service.create_campaign(customer_id, campaign_data)
             if not campaign_id:
                 return {'success': False, 'error': 'فشل في إنشاء الحملة'}
             
             # إنشاء مجموعات الإعلانات
             created_ad_groups = []
             for ad_group_data in campaign_structure['ad_groups']:
-                ad_group_id = self.google_ads_client.create_ad_group(
+                ad_group_id = self.google_ads_service.create_ad_group(
                     customer_id, campaign_id, ad_group_data
                 )
                 if ad_group_id:
@@ -699,13 +719,13 @@ class CampaignBuilder:
                     
                     # إضافة الكلمات المفتاحية
                     if ad_group_data.get('keywords'):
-                        self.google_ads_client.add_keywords(
+                        self.google_ads_service.add_keywords(
                             customer_id, ad_group_id, ad_group_data['keywords']
                         )
                     
                     # إنشاء الإعلانات
                     for ad_data in ad_group_data.get('ads', []):
-                        self.google_ads_client.create_text_ad(
+                        self.google_ads_service.create_text_ad(
                             customer_id, ad_group_id, ad_data
                         )
             
@@ -783,18 +803,20 @@ class CampaignBuilder:
     
     def _extract_competitor_keywords(self, competitors_analysis: List[Dict[str, Any]]) -> List[str]:
         """استخراج الكلمات المفتاحية من تحليل المنافسين"""
-        competitor_keywords = []
+        all_competitor_keywords = []
         
         for competitor in competitors_analysis:
             keywords = competitor.get('keywords', [])
-            for keyword in keywords[:10]:  # أول 10 من كل منافس
+            competitor_keywords_list = keywords if keywords else []
+            # Take first 10 keywords from each competitor
+            for keyword in competitor_keywords_list[:10] if competitor_keywords_list and isinstance(competitor_keywords_list, list) and len(competitor_keywords_list) > 0 else []:
                 if isinstance(keyword, dict):
-                    competitor_keywords.append(keyword.get('keyword', ''))
+                    all_competitor_keywords.append(keyword.get('keyword', ''))
                 else:
-                    competitor_keywords.append(str(keyword))
+                    all_competitor_keywords.append(str(keyword))
         
         # إزالة التكرارات
-        return list(set(competitor_keywords))
+        return list(set(all_competitor_keywords))
     
     def _analyze_competitor_strategies(self, competitors_analysis: List[Dict[str, Any]]) -> Dict[str, Any]:
         """تحليل استراتيجيات المنافسين"""
@@ -809,7 +831,7 @@ class CampaignBuilder:
         for competitor in competitors_analysis:
             if 'pricing_strategy' in competitor:
                 strategies['pricing_strategies'].append(competitor['pricing_strategy'])
-            if 'value_propositions' in competitor:
+            if 'value_propositions' in competitor and isinstance(competitor['value_propositions'], list):
                 strategies['value_propositions'].extend(competitor['value_propositions'])
         
         return strategies
@@ -836,52 +858,178 @@ class CampaignBuilder:
 
     # ===== الدوال المفقودة المطلوبة =====
     
-    def create_campaign(self, campaign_data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_campaign(self, campaign_data: Dict[str, Any] = None, campaign_type: str = "search_ads", website_url: str = None, daily_budget: float = None, target_locations: List[str] = None, target_language: str = None, phone_number: str = None, schedule: Dict[str, Any] = None) -> Dict[str, Any]:
         """إنشاء حملة إعلانية جديدة"""
         try:
-            self.logger.info(f"بدء إنشاء حملة: {campaign_data.get('name', 'غير محدد')}")
+            # Track if campaign_data was originally provided
+            campaign_data_provided = campaign_data is not None
             
-            # التحقق من البيانات المطلوبة
+            # إنشاء campaign_data إذا لم تكن موجودة
+            if campaign_data is None:
+                campaign_data = {}
+            
+            # إضافة نوع الحملة والموقع والميزانية إلى البيانات
+            campaign_data['campaign_type'] = campaign_type
+            if website_url:
+                campaign_data['website_url'] = website_url
+            if daily_budget:
+                campaign_data['daily_budget'] = daily_budget
+                # If budget not in original data, use daily_budget
+                if 'budget' not in campaign_data:
+                    campaign_data['budget'] = daily_budget * 30  # Monthly budget
+            if target_locations:
+                campaign_data['target_locations'] = target_locations
+            if target_language:
+                campaign_data['target_language'] = target_language
+            if phone_number:
+                campaign_data['phone_number'] = phone_number
+            if schedule:
+                campaign_data['schedule'] = schedule
+            
+            self.logger.info(f"بدء إنشاء حملة: {campaign_data.get('name', 'غير محدد')} - نوع: {campaign_type}")
+            
+            # التحقق من البيانات المطلوبة - always validate required fields
             required_fields = ['name', 'budget', 'keywords']
             for field in required_fields:
-                if not campaign_data.get(field):
+                if field not in campaign_data or campaign_data[field] is None:
                     return {
                         'success': False,
                         'error': f'الحقل المطلوب مفقود: {field}',
                         'message': 'بيانات الحملة غير مكتملة'
                     }
             
-            # إنشاء معرف فريد للحملة
-            campaign_id = f"camp_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            # استخدام المكتبة الرسمية لإنشاء الحملة
+            customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID')
             
-            # بناء هيكل الحملة الأساسي
+            # للاختبار: إنشاء حملة وهمية إذا لم تكن متغيرات البيئة محددة
+            if not os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN') or not customer_id:
+                self.logger.warning("⚠️ متغيرات البيئة غير محددة - سيتم إنشاء حملة وهمية للاختبار")
+                return {
+                    'success': True,
+                    'campaign_id': f"test_campaign_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    'message': 'تم إنشاء حملة وهمية للاختبار (متغيرات البيئة غير محددة)',
+                    'campaign_data': campaign_data
+                }
+            
+            # إنشاء الحملة باستخدام المكتبة الرسمية
+            campaign_type = campaign_data.get('type', 'SEARCH')
+            campaign_result = None
+            
+            # استخدام دالة create_campaign العامة
+            campaign_result = self.google_ads_service.create_campaign(customer_id, campaign_data)
+            
+            if not campaign_result:
+                return {
+                    'success': False,
+                    'error': 'فشل في إنشاء الحملة',
+                    'message': 'لم يتم إنشاء الحملة بنجاح'
+                }
+            
+            campaign_id = campaign_result
+            
+            # تعريف هيكل الحملة
             campaign_structure = {
                 'campaign_id': campaign_id,
-                'name': campaign_data['name'],
-                'type': campaign_data.get('type', 'SEARCH'),
-                'status': campaign_data.get('status', 'PAUSED'),
-                'budget': {
-                    'amount': campaign_data['budget'],
-                    'delivery_method': campaign_data.get('budget_delivery', 'STANDARD')
-                },
-                'bidding_strategy': {
-                    'type': campaign_data.get('bidding_strategy', 'MANUAL_CPC'),
-                    'target_cpa': campaign_data.get('target_cpa'),
-                    'target_roas': campaign_data.get('target_roas')
-                },
-                'targeting': {
-                    'locations': campaign_data.get('target_locations', ['السعودية']),
-                    'languages': campaign_data.get('target_languages', ['ar']),
-                    'demographics': campaign_data.get('demographics', {})
-                },
-                'schedule': {
-                    'start_date': campaign_data.get('start_date', datetime.now().strftime('%Y-%m-%d')),
-                    'end_date': campaign_data.get('end_date'),
-                    'ad_schedule': campaign_data.get('ad_schedule', [])
-                }
+                'campaign_info': campaign_data,
+                'ad_groups': [],
+                'extensions': []
             }
             
-            # إنشاء مجموعات الإعلانات
+            # إنشاء مجموعة إعلانات باستخدام المكتبة الرسمية
+            # استخدام Real CPC إذا كان متوفراً (بالدولار من Google Ads Historical Metrics)
+            # Use explicit None checks to handle 0.0 CPC values correctly
+            real_cpc = getattr(self, '_real_cpc', None)
+            if real_cpc is not None:
+                cpc_bid_usd = real_cpc
+            elif campaign_data.get('cpc_bid') is not None:
+                cpc_bid_usd = campaign_data.get('cpc_bid')
+            elif campaign_data.get('realCPC') is not None:
+                cpc_bid_usd = campaign_data.get('realCPC')
+            elif campaign_data.get('maxCpcBid') is not None:
+                cpc_bid_usd = campaign_data.get('maxCpcBid')
+            else:
+                cpc_bid_usd = 1.0
+            
+            self.logger.info(f"💰 استخدام Real CPC من التوقعات: ${cpc_bid_usd:.2f} USD (سيتم تحويله تلقائياً لعملة الحساب)")
+            
+            ad_group_result = self.google_ads_service.create_ad_group(customer_id, campaign_id, {
+                'name': f"{campaign_data['name']} - المجموعة الرئيسية",
+                'cpc_bid': cpc_bid_usd  # سيتم تحويله تلقائياً في create_ad_group
+            })
+            
+            if not ad_group_result:
+                return {
+                    'success': False,
+                    'error': 'فشل في إنشاء مجموعة الإعلانات',
+                    'message': 'لم يتم إنشاء مجموعة الإعلانات بنجاح'
+                }
+            
+            ad_group_id = ad_group_result
+            self.logger.info(f"✅ تم إنشاء مجموعة الإعلانات: {ad_group_id}")
+            
+            # إضافة الكلمات المفتاحية باستخدام المكتبة الرسمية
+            keywords = campaign_data.get('keywords', [])
+            if keywords:
+                keywords_result = self.google_ads_service.add_keywords(customer_id, ad_group_id, keywords)
+                if keywords_result:
+                    self.logger.info(f"✅ تم إضافة {len(keywords)} كلمة مفتاحية")
+                else:
+                    self.logger.warning("فشل في إضافة الكلمات المفتاحية")
+            
+            # إنشاء الإعلانات باستخدام المكتبة الرسمية حسب نوع الحملة
+            ad_copies = campaign_data.get('ad_copies', [])
+            campaign_type = campaign_data.get('type', 'SEARCH')
+            
+            if ad_copies:
+                for ad_copy in ad_copies[:3]:  # أول 3 إعلانات
+                    ad_result = None
+                    
+                    # إنشاء الإعلان حسب النوع
+                    if campaign_type == 'SEARCH':
+                        ad_result = self.google_ads_service.create_text_ad(customer_id, ad_group_id, ad_copy)
+                    elif campaign_type == 'DISPLAY':
+                        ad_result = self.google_ads_service.create_display_ad(customer_id, ad_group_id, ad_copy)
+                    elif campaign_type == 'VIDEO':
+                        ad_result = self.google_ads_service.create_video_ad(customer_id, ad_group_id, ad_copy)
+                    elif campaign_type == 'SHOPPING':
+                        ad_result = self.google_ads_service.create_shopping_ad(customer_id, ad_group_id, ad_copy)
+                    elif campaign_type == 'CALL_ADS':
+                        ad_result = self.google_ads_service.create_call_ad(customer_id, ad_group_id, ad_copy)
+                    else:
+                        # افتراضي: إعلان نصي
+                        ad_result = self.google_ads_service.create_text_ad(customer_id, ad_group_id, ad_copy)
+                    
+                    if ad_result:
+                        self.logger.info(f"✅ تم إنشاء إعلان {campaign_type}: {ad_result}")
+                    else:
+                        self.logger.warning(f"فشل في إنشاء إعلان {campaign_type}")
+            
+            # إضافة امتدادات الحملة باستخدام المكتبة الرسمية
+            extensions_data = {
+                'site_links': [
+                    {'text': 'خدماتنا', 'url': f"{campaign_data.get('website_url', '')}/services", 'description': 'تعرف على جميع خدماتنا'},
+                    {'text': 'اتصل بنا', 'url': f"{campaign_data.get('website_url', '')}/contact", 'description': 'تواصل معنا الآن'},
+                    {'text': 'الأسعار', 'url': f"{campaign_data.get('website_url', '')}/pricing", 'description': 'عرض أسعارنا'}
+                ],
+                'phone_number': campaign_data.get('phone_number'),
+                'country_code': 'SA'
+            }
+            
+            extensions_result = self.google_ads_service.create_extensions(customer_id, campaign_id, extensions_data)
+            if extensions_result:
+                self.logger.info("✅ تم إضافة امتدادات الحملة")
+            else:
+                self.logger.warning("فشل في إضافة امتدادات الحملة")
+            
+            # تعيين الاستهداف الجغرافي باستخدام المكتبة الرسمية
+            if campaign_data.get('target_locations'):
+                geo_result = self.google_ads_service.set_geographic_targeting(customer_id, campaign_id, campaign_data['target_locations'])
+                if geo_result:
+                    self.logger.info("✅ تم تعيين الاستهداف الجغرافي")
+                else:
+                    self.logger.warning("فشل في تعيين الاستهداف الجغرافي")
+            
+            # إنشاء الإعلانات باستخدام المكتبة الرسمية
             ad_groups = []
             keywords = campaign_data.get('keywords', [])
             
@@ -964,7 +1112,7 @@ class CampaignBuilder:
             
             # تحديد استراتيجية المزايدة المثلى
             bidding_strategy = self._determine_optimal_bidding_strategy(
-                business_type, business_info.get('budget', 1000), keyword_analysis
+                business_type, business_info.get('budget'), keyword_analysis
             )
             
             # إنشاء إعدادات الاستهداف المتقدمة
@@ -976,7 +1124,7 @@ class CampaignBuilder:
                     'name': f"حملة {business_name} - {business_type}",
                     'type': campaign_strategy['campaign_type'],
                     'objective': campaign_strategy['objective'],
-                    'budget': business_info.get('budget', 1000),
+                    'budget': business_info.get('budget'),
                     'bidding_strategy': bidding_strategy,
                     'status': 'PAUSED'  # تبدأ متوقفة للمراجعة
                 },
@@ -1088,7 +1236,7 @@ class CampaignBuilder:
             ]
             
             # تحسينات الميزانية
-            current_budget = performance_data.get('budget', 1000)
+            current_budget = performance_data.get('budget')
             if performance_analysis['budget_utilization'] > 0.9:
                 optimization_plan['budget_adjustments'] = {
                     'recommendation': 'زيادة الميزانية',
@@ -1330,7 +1478,95 @@ class CampaignBuilder:
             return 'متوسط'
         else:
             return 'منخفض'
+    
+    def _extract_real_keywords(self, campaign_request: Dict[str, Any], website_analysis: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """استخراج الكلمات المفتاحية الحقيقية باستخدام Google Keyword Planner"""
+        try:
+            self.logger.info("🔍 بدء استخراج الكلمات المفتاحية الحقيقية...")
+            
+            # الحصول على customer_id من متغيرات البيئة
+            customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID')
+            if not customer_id:
+                return {
+                    'success': False,
+                    'error': 'Google Ads Customer ID مطلوب',
+                    'message': 'يجب إعداد Google Ads Customer ID في متغيرات البيئة'
+                }
+            
+            # إعداد معاملات Keyword Planner
+            website_url = campaign_request.get('website_url', '')
+            business_name = campaign_request.get('business_name', '')
+            business_type = campaign_request.get('business_type', '')
+            
+            # إعداد البذور (Seeds)
+            keyword_texts = []
+            if business_name:
+                keyword_texts.append(business_name)
+            if business_type:
+                keyword_texts.append(business_type)
+            
+            # إعداد المعاملات الديناميكية حسب اختيار العميل في الفرونت إند
+            location_ids = campaign_request.get('target_locations', ['2682'])  # Google Ads location IDs من الفرونت إند
+            language_id = campaign_request.get('target_language', '1019')  # Google Ads language ID من الفرونت إند
+            
+            # استخدام الدالة الرئيسية الجديدة مع المعاملات الديناميكية
+            keywords_result = self.keyword_planner.main_generate_keyword_ideas(
+                customer_id=customer_id,
+                location_ids=location_ids,
+                language_id=language_id,
+                keyword_texts=keyword_texts,
+                page_url=website_url
+            )
+            
+            if keywords_result['success']:
+                keywords = keywords_result['keywords']
+                self.logger.info(f"✅ تم استخراج {len(keywords)} كلمة مفتاحية حقيقية من Google Keyword Planner")
+                
+                # تحويل إلى التنسيق المطلوب
+                formatted_keywords = []
+                for kw_data in keywords:
+                    formatted_keywords.append({
+                        'keyword': kw_data.get('keyword', ''),
+                        'search_volume': kw_data.get('avg_monthly_searches', 0),
+                        'competition': self._map_competition_level(kw_data.get('competition', 'UNKNOWN')),
+                        'competition_index': kw_data.get('competition_index', 0),
+                        'low_bid': kw_data.get('low_top_of_page_bid_micros', 0),
+                        'high_bid': kw_data.get('high_top_of_page_bid_micros', 0),
+                        'source': 'google_keyword_planner_real'
+                    })
+                
+                return {
+                    'success': True,
+                    'keywords': formatted_keywords,
+                    'total_count': len(formatted_keywords),
+                    'message': f'تم استخراج {len(formatted_keywords)} كلمة مفتاحية حقيقية من Google Keyword Planner'
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': f'فشل استخراج الكلمات المفتاحية من Google Keyword Planner: {keywords_result.get("error")}',
+                    'message': 'تعذر استخراج الكلمات المفتاحية الحقيقية'
+                }
+                
+        except Exception as e:
+            self.logger.error(f"❌ خطأ في استخراج الكلمات المفتاحية الحقيقية: {e}")
+            return {
+                'success': False,
+                'error': f'خطأ في استخراج الكلمات المفتاحية: {e}',
+                'message': 'تعذر استخراج الكلمات المفتاحية الحقيقية'
+            }
+    
+    def _map_competition_level(self, google_competition: str) -> str:
+        """تحويل مستوى المنافسة من Google إلى نص عربي"""
+        competition_map = {
+            'LOW': 'منخفض',
+            'MEDIUM': 'متوسط', 
+            'HIGH': 'عالي',
+            'UNKNOWN': 'غير معروف'
+        }
+        return competition_map.get(google_competition, 'غير معروف')
 
 # تصدير الكلاس
 __all__ = ['CampaignBuilder']
+
 
