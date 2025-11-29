@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense, useState, useEffect } from 'react';
 import ResetPasswordForm from "@/components/Authentication/ResetPasswordForm";
 
