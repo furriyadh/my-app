@@ -4,10 +4,11 @@ FROM python:3.13-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (including bash for start.sh)
 RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
+    bash \
+    gcc  \
+    g++  \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,5 +37,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/api/health || exit 1
 
-# Set as start command
-CMD ["./start.sh"]
+# Set as start command (explicitly via bash to avoid shebang/line-ending issues)
+CMD ["bash", "./start.sh"]
