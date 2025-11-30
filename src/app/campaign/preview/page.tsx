@@ -931,8 +931,8 @@ export default function CampaignPreviewPage() {
         )}
         
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="mb-4 sm:mb-8 text-center">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-base max-w-4xl mx-auto" dir={language === 'ar' ? 'rtl' : 'ltr'}>

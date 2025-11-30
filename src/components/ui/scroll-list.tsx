@@ -11,7 +11,7 @@ interface ScrollListProps<T> {
 const ScrollList = <T,>({
   data,
   renderItem,
-  itemHeight = 120, // Default item height
+  itemHeight = 155, // Default item height
 }: ScrollListProps<T>) => {
   // useRef to get a reference to the scrollable div element
   const listRef = useRef<HTMLDivElement>(null);
@@ -20,6 +20,25 @@ const ScrollList = <T,>({
 
   // useScroll hook from Framer Motion to track scroll progress (can be used for additional animations)
   const { scrollYProgress } = useScroll({ container: listRef });
+
+  // Responsive: detect screen size
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize('mobile');
+      } else if (width < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   useEffect(() => {
     const updateFocusedItem = () => {
@@ -77,44 +96,72 @@ const ScrollList = <T,>({
   const itemVariants: Variants = {
     hidden: {
       opacity: 0,
-      scale: 0.85,
-      transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] },
+      scale: 0.7,
+      transition: { duration: 0.35, ease: "easeOut" },
     },
     focused: {
       opacity: 1,
       scale: 1,
       zIndex: 10,
-      transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
+      transition: { duration: 0.35, ease: "easeOut" },
     },
     next: {
       opacity: 1,
-      scale: 0.97,
+      scale: 0.95,
       zIndex: 5,
-      transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
+      transition: { duration: 0.35, ease: "easeOut" },
     },
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] },
+      transition: { duration: 0.35, ease: "easeOut" },
     },
   };
+
+  // Responsive values based on screen size
+  const getResponsiveValues = () => {
+    switch (screenSize) {
+      case 'mobile':
+        return {
+          containerHeight: "480px",
+          itemHeightMultiplier: 0.72,
+          padding: "px-3"
+        };
+      case 'tablet':
+        return {
+          containerHeight: "550px",
+          itemHeightMultiplier: 0.85,
+          padding: "px-4"
+        };
+      default: // desktop
+        return {
+          containerHeight: "600px",
+          itemHeightMultiplier: 1,
+          padding: "px-4"
+        };
+    }
+  };
+
+  const responsive = getResponsiveValues();
+  const responsiveItemHeight = Math.round(itemHeight * responsive.itemHeightMultiplier);
 
   return (
     <div
       ref={listRef}
+      // Tailwind CSS classes for styling: hidden scrollbar, centered horizontally, full width
       className="scroll-list__wrp scrollbar-hidden mx-auto w-full scroll-smooth touch-pan-y"
+      // Inline style for fixed height and scrollability of the main container
       style={{ 
-        height: "500px", 
+        height: responsive.containerHeight, 
         overflowY: "auto",
-        overflowX: "hidden", // Prevent horizontal scroll
-        padding: "10px 0",
+        overflowX: "hidden",
         scrollBehavior: "smooth",
         WebkitOverflowScrolling: "touch",
-        touchAction: "pan-y", // Only allow vertical touch scrolling
+        touchAction: "pan-y",
       }}
     >
       {data.map((item, index) => {
-        let variant = "visible"; // Default variant - show all items
+        let variant = "hidden"; // Default variant
 
         // Determine the animation variant based on the item's position relative to the focused item
         if (index === focusedIndex) {
@@ -122,24 +169,23 @@ const ScrollList = <T,>({
         } else if (index === focusedIndex + 1) {
           variant = "next"; // The item immediately following the focused one
         } else {
-          // Show all items - increased range to show all
-          const isWithinVisibleRange = Math.abs(index - focusedIndex) <= 10;
+          // Items within a certain range (2 items above/below) of the focused item are visible
+          const isWithinVisibleRange = Math.abs(index - focusedIndex) <= 2;
           if (isWithinVisibleRange) {
             variant = "visible";
-          } else {
-            variant = "visible"; // Still show even if far
           }
         }
 
         return (
           <motion.div
-            key={index}
-            className="scroll-list__item mx-auto w-full max-w-2xl px-2 sm:px-4 mb-1"
-            variants={itemVariants}
-            initial="hidden"
-            animate={variant}
+            key={index} // Unique key for React list rendering
+            className={`scroll-list__item mx-auto max-w-3xl ${responsive.padding}`}
+            variants={itemVariants} // Apply defined animation variants
+            initial="hidden" // Initial animation state
+            animate={variant} // Animate to this variant based on scroll position
+            // Set the height of each individual item.
             style={{
-              height: itemHeight ? `${itemHeight}px` : "auto",
+              height: `${responsiveItemHeight}px`,
             }}
           >
             {renderItem(item, index)}

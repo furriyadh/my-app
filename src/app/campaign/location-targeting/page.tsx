@@ -2139,12 +2139,12 @@ const LocationTargetingPage: React.FC = () => {
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-4 sm:mb-8">
+        <div className="text-center mb-3 sm:mb-6">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
             {language === 'ar' ? 'أين تريد أن تظهر إعلاناتك؟' : 'Where do you want your ads to show up?'}
               {isInitializing && (
-                <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-xs font-medium text-blue-600 dark:text-blue-400">
-                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-600/30 border-t-blue-600"></div>
+                <span className="inline-flex items-center gap-2 px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">
+                  <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 border-2 border-blue-600/30 border-t-blue-600"></div>
                   {language === 'ar' ? 'جاري التحميل' : 'Loading'}
                 </span>
               )}

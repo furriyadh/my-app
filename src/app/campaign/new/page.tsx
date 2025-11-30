@@ -167,11 +167,11 @@ const CampaignNewPage: React.FC = () => {
       {/* Campaign Progress */}
       <CampaignProgress currentStep={0} totalSteps={3} />
       
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-4 sm:mb-8">
+        <div className="text-center mb-3 sm:mb-6">
           <h1 
-            className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
+            className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white"
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {t.campaign?.chooseCampaignType || 'Choose Your Campaign Type'}
@@ -212,7 +212,7 @@ const CampaignNewPage: React.FC = () => {
                   
                   return (
                     <div 
-                    className={`relative p-3 sm:p-4 ${colors[index % colors.length]} rounded-xl cursor-pointer transition-all duration-150 ease-out h-full flex flex-col justify-between border ${
+                    className={`relative p-3 sm:p-4 ${colors[index % colors.length]} rounded-xl cursor-pointer transition-all duration-150 ease-out h-full flex flex-col justify-center border ${
                         isSelected 
                           ? 'ring-2 sm:ring-4 ring-gray-900/30 dark:ring-white/60 shadow-2xl shadow-gray-400/70 dark:shadow-black/40 scale-[1.02] border-gray-300 dark:border-white/30' 
                           : 'shadow-lg shadow-gray-300/60 dark:shadow-black/20 hover:shadow-xl hover:shadow-gray-400/70 dark:hover:shadow-black/30 hover:scale-[1.01] border-gray-200 dark:border-white/10'
@@ -221,12 +221,12 @@ const CampaignNewPage: React.FC = () => {
                     >
                     {/* Professional Badge - Top Right */}
                     {badge && (
-                      <div className="absolute -top-2 -right-2 z-10">
-                        <div className={`bg-gradient-to-r ${badge.bgGradient} text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 shadow-lg ring-2 ring-white/20 backdrop-blur-sm transform hover:scale-105 transition-all duration-200`}>
+                      <div className="absolute -top-2 -right-1 sm:-right-2 z-10">
+                        <div className={`bg-gradient-to-r ${badge.bgGradient} text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 shadow-lg ring-1 sm:ring-2 ring-white/20 backdrop-blur-sm`}>
                           <span className={`${badge.iconColor} [&>svg]:w-3 [&>svg]:h-3 sm:[&>svg]:w-4 sm:[&>svg]:h-4`}>
                             {badge.icon}
                           </span>
-                          <span className="text-[10px] sm:text-xs font-bold drop-shadow-md">
+                          <span className="text-[10px] sm:text-xs font-bold drop-shadow-md whitespace-nowrap">
                             {language === 'ar' ? badge.text_ar : badge.text}
                           </span>
                         </div>
@@ -242,30 +242,30 @@ const CampaignNewPage: React.FC = () => {
                       </div>
                     )}
                     
-                    <div>
+                      <div>
                       {/* Icon and Title */}
-                      <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
                           <IconComponent className="w-5 h-5 sm:w-7 sm:h-7 text-white drop-shadow-md" strokeWidth={2} />
                         </div>
                         <h3 
-                          className="text-base sm:text-lg font-bold text-white drop-shadow-md text-left"
+                          className="text-base sm:text-lg font-bold text-white drop-shadow-md text-left leading-tight"
                           dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           {isRTL ? campaignType.name : campaignType.name_en}
                         </h3>
                       </div>
                       <p 
-                        className="text-white/90 text-xs sm:text-sm leading-relaxed drop-shadow text-left line-clamp-2"
+                        className="text-white/90 text-xs sm:text-sm leading-snug sm:leading-relaxed drop-shadow text-left mt-1 line-clamp-1 sm:line-clamp-2"
                         dir={isRTL ? 'rtl' : 'ltr'}
                       >
                           {getCampaignDescription(campaignType.type)}
-                      </p>
+                        </p>
                       </div>
                     </div>
                   );
                 }}
-                itemHeight={100}
+                itemHeight={110}
               />
             </div>
 

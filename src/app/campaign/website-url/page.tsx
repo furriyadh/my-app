@@ -618,8 +618,8 @@ const WebsiteUrlPage: React.FC = () => {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="ltr">
         
         {/* Header */}
-          <div className="text-center mb-4 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-4">
+          <div className="text-center mb-3 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
             {language === 'ar' ? 'ما هو رابط موقعك الإلكتروني؟' : 'What is your website URL?'}
           </h2>
         </div>

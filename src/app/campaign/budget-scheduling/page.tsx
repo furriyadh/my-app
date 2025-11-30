@@ -1095,8 +1095,8 @@ const BudgetSchedulingPage: React.FC = () => {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-5xl">
         
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-10">
-          <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="text-center mb-3 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             {language === 'ar' ? 'أطلق إعلاناتك باختيار ميزانية إعلانية يومية' : 'Launch your ads by selecting a daily ad budget'}
           </h2>
         </div>
