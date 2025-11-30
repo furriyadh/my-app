@@ -17,8 +17,27 @@ from services.campaign_builder import CampaignBuilder
 from services.website_analyzer import WebsiteAnalyzer
 from services.google_ads_official_service import GoogleAdsOfficialService
 
-# Create Blueprint
-ai_campaign_flow_bp = Blueprint('ai_campaign_flow', __name__, url_prefix='/api/ai-campaign')
+# Create Blueprint (url_prefix is set in app.py)
+ai_campaign_flow_bp = Blueprint('ai_campaign_flow', __name__)
+
+# Add CORS headers to all responses
+@ai_campaign_flow_bp.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
+# Handle OPTIONS requests for all routes (CORS preflight)
+@ai_campaign_flow_bp.route('/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    """Handle CORS preflight requests for all routes"""
+    from flask import jsonify
+    response = jsonify({'status': 'ok'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response, 200
 
 # Initialize services (lazy load AIProcessor to avoid startup errors)
 ai_campaign_selector = AICampaignSelector()

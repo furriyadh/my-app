@@ -9,6 +9,7 @@ import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
+import ModernLoader from '@/components/ui/modern-loader';
 
 const BudgetSchedulingPage: React.FC = () => {
   const router = useRouter();
@@ -25,9 +26,19 @@ const BudgetSchedulingPage: React.FC = () => {
     conversions: 9 
   });
   const [isLoadingEstimates, setIsLoadingEstimates] = useState(false);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   
   const [keywordData, setKeywordData] = useState<any>(null);
   const { t, language, isRTL } = useTranslation();
+  
+  // Check if desktop on mount
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1280);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
   
   // Competition indicators from Google Ads Historical Metrics
   const [competitionData, setCompetitionData] = useState<{
@@ -941,6 +952,8 @@ const BudgetSchedulingPage: React.FC = () => {
       
       try {
         console.log('🔍 Fetching Historical Metrics from backend...');
+        const apiUrl = getApiUrl('/api/ai-campaign/get-historical-metrics');
+        console.log('   🌐 API URL:', apiUrl);
         console.log('   📦 Request data:', {
           keywords_count: keywords.length,
           website_url: campaignData.websiteUrl,
@@ -948,16 +961,29 @@ const BudgetSchedulingPage: React.FC = () => {
           language_id: languageId
         });
         
-        const histResponse = await fetch(getApiUrl('/api/ai-campaign/get-historical-metrics'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            keywords,
-            website_url: campaignData.websiteUrl,
-            target_locations: targetLocations,
-            language_id: languageId
-          })
-        });
+        // Create AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
+        let histResponse: Response;
+        try {
+          histResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              keywords,
+              website_url: campaignData.websiteUrl,
+              target_locations: targetLocations,
+              language_id: languageId
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+        } catch (fetchErr) {
+          clearTimeout(timeoutId);
+          console.error('❌ Fetch failed:', fetchErr);
+          throw fetchErr;
+        }
         
         if (!histResponse.ok) {
           throw new Error(`HTTP error! status: ${histResponse.status}`);
@@ -1379,7 +1405,7 @@ const BudgetSchedulingPage: React.FC = () => {
                     shadow-lg shadow-blue-500/20 dark:shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40">
                     <Eye className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400 drop-shadow-lg" />
                     <div className="absolute inset-0 bg-blue-500/5 rounded-2xl animate-pulse"></div>
-                  </div>
+      </div>
                   <div className="text-center">
                     <p className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1 drop-shadow">
                       {language === 'ar' ? 'مرات الظهور' : 'Impressions'}
@@ -1389,8 +1415,8 @@ const BudgetSchedulingPage: React.FC = () => {
                         console.log('🖼️ Rendering Impressions:', estimates.impressions);
                         return estimates.impressions.toLocaleString();
                       })()}
-                    </div>
-                  </div>
+                </div>
+              </div>
                 </CardItem>
                 
                 <div className="w-px h-px sm:h-auto sm:w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent hidden sm:block"></div>
@@ -1402,7 +1428,7 @@ const BudgetSchedulingPage: React.FC = () => {
                     shadow-lg shadow-purple-500/20 dark:shadow-purple-500/30 group-hover:shadow-xl group-hover:shadow-purple-500/40">
                     <MousePointer className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600 dark:text-purple-400 drop-shadow-lg" />
                     <div className="absolute inset-0 bg-purple-500/5 rounded-2xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                  </div>
+                </div>
                   <div className="text-center">
                     <p className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1 drop-shadow">
                       {language === 'ar' ? 'النقرات' : 'Clicks'}
@@ -1412,8 +1438,8 @@ const BudgetSchedulingPage: React.FC = () => {
                         console.log('🖱️ Rendering Clicks:', estimates.clicks);
                         return estimates.clicks.toLocaleString();
                       })()}
-                    </div>
-                  </div>
+                </div>
+              </div>
                 </CardItem>
                 
                 <div className="w-px h-px sm:h-auto sm:w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent hidden sm:block"></div>
@@ -1525,7 +1551,7 @@ const BudgetSchedulingPage: React.FC = () => {
         </CardContainer>
         
         {/* Navigation Buttons */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 mt-8 sm:mt-12 max-w-4xl mx-auto px-4 sm:px-0">
+        <div className="flex justify-between items-center max-w-xl mx-auto mt-8 px-4 sm:px-0">
           <GlowButton
             onClick={() => router.push('/campaign/location-targeting')}
             variant="green"
@@ -1538,106 +1564,110 @@ const BudgetSchedulingPage: React.FC = () => {
           
           <GlowButton
             onClick={async () => {
+              // Show loading modal immediately
+              setIsGeneratingContent(true);
+              console.log('🚀 Starting content generation - showing loader...');
+              
+              // Track start time to ensure minimum 5 seconds display
+              const startTime = Date.now();
+              const MIN_LOADER_TIME = 5000; // 5 seconds minimum
+              
               try {
-              // Get real CPC from localStorage (calculated from real Google Ads data)
-              const realCPC = localStorage.getItem('realCPC');
-              const realCPCValue = realCPC ? parseFloat(realCPC) : null;
-              
-              const updatedData = {
-                ...campaignData,
-                dailyBudget: selectedBudget, // Display budget in selected currency
-                dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
-                currency: currency,
-                realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
-                maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
-              };
-              
-              console.log('💰 Campaign Data with Real CPC:', {
-                dailyBudgetUSD: selectedBudgetUSD,
-                realCPC: realCPCValue,
-                maxCpcBid: realCPCValue
-              });
-              
-              localStorage.setItem('campaignData', JSON.stringify(updatedData));
+                // Get real CPC from localStorage (calculated from real Google Ads data)
+                const realCPC = localStorage.getItem('realCPC');
+                const realCPCValue = realCPC ? parseFloat(realCPC) : null;
+                
+                const updatedData = {
+                  ...campaignData,
+                  dailyBudget: selectedBudget, // Display budget in selected currency
+                  dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
+                  currency: currency,
+                  realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
+                  maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
+                };
+                
+                console.log('💰 Campaign Data with Real CPC:', {
+                  dailyBudgetUSD: selectedBudgetUSD,
+                  realCPC: realCPCValue,
+                  maxCpcBid: realCPCValue
+                });
+                
+                localStorage.setItem('campaignData', JSON.stringify(updatedData));
                 
                 // Get keywords from localStorage
                 const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
                 const generatedContent = JSON.parse(generatedContentStr);
                 const keywordsList = generatedContent.keywords || [];
                 
+                // Re-read campaignData from localStorage to get the latest detected language
+                const latestCampaignDataStr = localStorage.getItem('campaignData') || '{}';
+                const latestCampaignData = JSON.parse(latestCampaignDataStr);
+                const targetLanguage = latestCampaignData.selectedLanguageCode || latestCampaignData.detectedLanguageCode || 'ar';
+                
+                console.log('🌍 Target language for ad generation:', targetLanguage);
+                
                 // Generate ad content (headlines and descriptions) for SEARCH campaigns
-                if (campaignData?.campaignType === 'SEARCH' && (!generatedContent.headlines || !generatedContent.descriptions)) {
+                const needsContentGeneration = campaignData?.campaignType === 'SEARCH' && 
+                  (!generatedContent.headlines || generatedContent.headlines.length === 0 || 
+                   !generatedContent.descriptions || generatedContent.descriptions.length === 0);
+                
+                if (needsContentGeneration) {
                   console.log('🎨 Generating ad content for SEARCH campaign...');
                   
-                  try {
-                    const contentResponse = await fetch(getApiUrl('/api/ai-campaign/generate-campaign-content'), {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        website_url: campaignData.websiteUrl,
-                        campaign_type: 'SEARCH',
-                        budget: selectedBudgetUSD,
-                        keywords_list: keywordsList,
-                        target_language: campaignData.selectedLanguageCode || 'ar'
-                      })
-                    });
+                  const contentResponse = await fetch(getApiUrl('/api/ai-campaign/generate-campaign-content'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      website_url: latestCampaignData.websiteUrl || campaignData.websiteUrl,
+                      campaign_type: 'SEARCH',
+                      budget: selectedBudgetUSD,
+                      keywords_list: keywordsList,
+                      target_language: targetLanguage
+                    })
+                  });
+                  
+                  if (contentResponse.ok) {
+                    const contentResult = await contentResponse.json();
+                    console.log('✅ Ad content generated:', contentResult);
                     
-                    if (contentResponse.ok) {
-                      const contentResult = await contentResponse.json();
-                      console.log('✅ Ad content generated:', contentResult);
+                    if (contentResult.success && contentResult.content) {
+                      const updatedGeneratedContent = {
+                        ...generatedContent,
+                        headlines: contentResult.content.headlines || [],
+                        descriptions: contentResult.content.descriptions || [],
+                        keywords: keywordsList.length > 0 ? keywordsList : (contentResult.content.keywords || [])
+                      };
                       
-                      if (contentResult.success && contentResult.content) {
-                        // Merge generated content with existing keywords
-                        const updatedGeneratedContent = {
-                          ...generatedContent,
-                          headlines: contentResult.content.headlines || [],
-                          descriptions: contentResult.content.descriptions || [],
-                          keywords: keywordsList.length > 0 ? keywordsList : (contentResult.content.keywords || [])
-                        };
-                        
-                        localStorage.setItem('generatedContent', JSON.stringify(updatedGeneratedContent));
-                        console.log('💾 Saved generated content with headlines and descriptions');
-                        console.log(`   📝 Headlines: ${updatedGeneratedContent.headlines.length}`);
-                        console.log(`   📝 Descriptions: ${updatedGeneratedContent.descriptions.length}`);
-                      } else {
-                        console.warn('⚠️ Content generation returned success=false:', contentResult);
-                        alert(language === 'ar' 
-                          ? '⚠️ فشل في إنشاء المحتوى الإعلاني. سيتم الانتقال لصفحة المعاينة بدون محتوى.'
-                          : '⚠️ Failed to generate ad content. Proceeding to preview without content.');
-                      }
-                    } else {
-                      const errorData = await contentResponse.json().catch(() => ({ error: 'Unknown error' }));
-                      console.error('❌ Failed to generate ad content:', contentResponse.status, errorData);
-                      alert(language === 'ar' 
-                        ? '⚠️ فشل في إنشاء المحتوى الإعلاني. سيتم الانتقال لصفحة المعاينة بدون محتوى.'
-                        : '⚠️ Failed to generate ad content. Proceeding to preview without content.');
+                      localStorage.setItem('generatedContent', JSON.stringify(updatedGeneratedContent));
+                      console.log('💾 Saved generated content');
                     }
-                  } catch (fetchError) {
-                    console.error('❌ Error calling content generation API:', fetchError);
-                    alert(language === 'ar' 
-                      ? '⚠️ خطأ في الاتصال بالخادم. سيتم الانتقال لصفحة المعاينة بدون محتوى.'
-                      : '⚠️ Connection error. Proceeding to preview without content.');
                   }
                 } else {
-                  console.log('ℹ️ Ad content already exists or not a SEARCH campaign');
-                  if (generatedContent.headlines && generatedContent.descriptions) {
-                    console.log(`   ✅ Found ${generatedContent.headlines.length} headlines and ${generatedContent.descriptions.length} descriptions`);
-                  }
+                  console.log('ℹ️ Content already exists, skipping generation');
                 }
-              
-              // Set flag for campaign creation in progress
-              localStorage.setItem('creatingCampaign', 'true');
-              
-              // Navigate to preview page to review campaign before publishing
-              router.push('/campaign/preview');
+                
+                // Ensure loader shows for at least 5 seconds
+                const elapsedTime = Date.now() - startTime;
+                if (elapsedTime < MIN_LOADER_TIME) {
+                  const remainingTime = MIN_LOADER_TIME - elapsedTime;
+                  console.log(`⏳ Waiting ${remainingTime}ms to complete 5 seconds...`);
+                  await new Promise(resolve => setTimeout(resolve, remainingTime));
+                }
+                
+                // Set flag and navigate
+                localStorage.setItem('creatingCampaign', 'true');
+                console.log('✅ Done! Navigating to preview...');
+                router.push('/campaign/preview');
               } catch (error) {
-                console.error('❌ Error generating campaign content:', error);
-                // Still navigate to preview even if content generation fails
+                console.error('❌ Error:', error);
                 localStorage.setItem('creatingCampaign', 'true');
                 router.push('/campaign/preview');
+              } finally {
+                setIsGeneratingContent(false);
               }
             }}
             variant="purple"
+            disabled={isGeneratingContent}
           >
             <span className="flex items-center gap-2">
               {language === 'ar' ? 'الخطوة التالية' : 'Next Step'}
@@ -1647,6 +1677,44 @@ const BudgetSchedulingPage: React.FC = () => {
         </div>
 
       </div>
+      
+      {/* Modern Loader Modal - Centered with sidebar offset */}
+      {isGeneratingContent && (
+        <div 
+          className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
+          style={{ 
+            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
+            paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
+            paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
+          }}
+        >
+          <ModernLoader 
+            words={language === 'ar' ? [
+              'جاري التفكير...',
+              'كتابة نص الإعلان...',
+              'تحليل الموقع...',
+              'إنشاء العناوين...',
+              'تحسين الأوصاف...',
+              'جلب الكلمات المفتاحية...',
+              'تحضير الحملة...',
+              'معالجة الذكاء الاصطناعي...',
+              'تلميع المحتوى...',
+              'جاري الانتهاء...'
+            ] : [
+              'Thinking…',
+              'Writing ad copy…',
+              'Analyzing website…',
+              'Generating headlines…',
+              'Optimizing descriptions…',
+              'Fetching keywords…',
+              'Preparing campaign…',
+              'AI processing…',
+              'Polishing content…',
+              'Almost ready…'
+            ]}
+          />
+        </div>
+      )}
     </div>
   );
 };

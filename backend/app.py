@@ -65,26 +65,36 @@ app = Flask(__name__)
 NODE_ENV = os.getenv("NODE_ENV", "development")
 IS_PRODUCTION = NODE_ENV == "production"
 
-if IS_PRODUCTION:
-    # إعدادات الإنتاج - furriyadh.com
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": ["https://furriyadh.com", "https://www.furriyadh.com"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    })
-else:
-    # إعدادات التطوير - localhost
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    })
+# تفعيل CORS لجميع المسارات
+CORS(app, 
+     origins="*" if not IS_PRODUCTION else ["https://furriyadh.com", "https://www.furriyadh.com"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     supports_credentials=False if not IS_PRODUCTION else True
+)
+
+# إضافة CORS headers لجميع الردود
+@app.after_request
+def add_cors_headers(response):
+    if not IS_PRODUCTION:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    else:
+        origin = request.headers.get('Origin', '')
+        if origin in ['https://furriyadh.com', 'https://www.furriyadh.com']:
+            response.headers['Access-Control-Allow-Origin'] = origin
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    return response
+
+# Global OPTIONS handler for all routes
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With")
+        response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+        return response, 200
 
 # بدون تشفير - تخزين مباشر
 
@@ -98,7 +108,7 @@ except Exception as e:
 
 try:
     from routes.ai_campaign_flow import ai_campaign_flow_bp
-    app.register_blueprint(ai_campaign_flow_bp, url_prefix='/api/campaign-flow')
+    app.register_blueprint(ai_campaign_flow_bp, url_prefix='/api/ai-campaign-flow')
     logger.info("✅ تم تسجيل AI Campaign Flow Blueprint")
 except Exception as e:
     logger.error(f"❌ فشل تسجيل AI Campaign Flow Blueprint: {e}")

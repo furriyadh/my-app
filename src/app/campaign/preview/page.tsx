@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { subscribeToClientRequests } from '@/lib/supabase';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { getApiUrl } from '@/lib/config';
+import ModernLoader from '@/components/ui/modern-loader';
 
 interface AdVariation {
   headlines: string[];
@@ -42,6 +43,15 @@ export default function CampaignPreviewPage() {
   const [showPublishingModal, setShowPublishingModal] = useState(false);
   const [publishProgress, setPublishProgress] = useState(0);
   const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  
+  // Check if desktop on mount
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1280);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
   
   // Announcement notifications state
   const [announcement, setAnnouncement] = useState<{
@@ -674,13 +684,24 @@ export default function CampaignPreviewPage() {
 
       console.log('📦 Publishing campaign:', completeCampaignData);
       console.log('🎯 Selected customer_id:', selectedAccount);
+      
+      const apiUrl = getApiUrl('/api/ai-campaign/launch-campaign');
+      console.log('🌐 API URL:', apiUrl);
 
       // Launch campaign - this is the real work happening
-      const launchResponse = await fetch(getApiUrl('/api/ai-campaign/launch-campaign'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(completeCampaignData)
-      });
+      let launchResponse: Response;
+      try {
+        launchResponse = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(completeCampaignData)
+        });
+      } catch (fetchError) {
+        console.error('❌ Fetch error details:', fetchError);
+        console.error('❌ Error name:', (fetchError as Error).name);
+        console.error('❌ Error message:', (fetchError as Error).message);
+        throw new Error(`Network error: ${(fetchError as Error).message}. تأكد من أن الخادم يعمل على ${apiUrl}`);
+      }
 
       // Stop simulation and move to 90% when API responds
       clearInterval(progressInterval);
@@ -953,27 +974,11 @@ export default function CampaignPreviewPage() {
           </div>
         </div>
 
-        {/* Ad Preview Section */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
+        {/* Ad Preview Section - Centered Layout */}
+        <div className="flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
           
-          {/* Left Side - Edit Button */}
-          <div className="flex items-center justify-center lg:justify-start order-2 lg:order-1">
-            <div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center lg:text-left" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
-                <button
-                  onClick={handleEditAds}
-                  className="inline-flex items-center gap-1 hover:underline font-semibold"
-                >
-                  <span className="!text-blue-600 dark:!text-blue-500">{language === 'ar' ? 'تعديل الإعلانات' : 'Edit ads'}</span>
-                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 !text-blue-600 dark:!text-blue-500" />
-                </button>
-              </p>
-            </div>
-          </div>
-
-          {/* Right Side - Card Stack */}
-          <div className="flex items-center justify-center order-1 lg:order-2">
+          {/* Card Stack - Centered */}
+          <div className="flex items-center justify-center w-full">
             {cards.length > 0 ? (
               <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]">
                 <CardStack items={cards} offset={10} scaleFactor={0.06} />
@@ -986,6 +991,20 @@ export default function CampaignPreviewPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Edit Button - Below Card */}
+          <div className="flex items-center justify-center">
+            <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
+                <button
+                  onClick={handleEditAds}
+                  className="inline-flex items-center gap-1 hover:underline font-semibold"
+                >
+                  <span className="!text-blue-600 dark:!text-blue-500">{language === 'ar' ? 'تعديل الإعلانات' : 'Edit ads'}</span>
+                <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 !text-blue-600 dark:!text-blue-500" />
+                </button>
+              </p>
           </div>
         </div>
 
@@ -1010,8 +1029,8 @@ export default function CampaignPreviewPage() {
       {showAccountModal && (
         <div className="fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4" style={{
           background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
-          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '0' : '280px') : '0',
-          paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '280px' : '0') : '0'
+          paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
+          paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
         }}>
           {/* Animated Background Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1303,82 +1322,41 @@ export default function CampaignPreviewPage() {
         </div>
       )}
 
-      {/* Publishing Progress Modal */}
+      {/* Publishing Progress Modal with Modern Loader */}
       {showPublishingModal && (
         <div 
-          className="fixed inset-0 z-[9999] backdrop-blur-md" 
+          className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
           style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            background: `radial-gradient(circle at center, ${modalColors.bgGradient}, rgba(0, 0, 0, 0.9))`,
-            paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '0' : '280px') : '0',
-            paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '280px' : '0') : '0'
+            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
+            paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
+            paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
           }}
         >
-          {/* Animated Background Orbs */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className={`absolute top-1/4 left-1/3 w-96 h-96 ${modalColors.orb1} rounded-full blur-3xl animate-pulse`}></div>
-            <div className={`absolute bottom-1/4 right-1/3 w-96 h-96 ${modalColors.orb2} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
-          </div>
-
-          <div 
-            className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 rounded-2xl p-10 max-w-lg w-full border border-white/10 shadow-2xl backdrop-blur-xl animate-scaleIn" 
-            style={{ 
-              boxShadow: `0 0 60px ${modalColors.primary}4d, 0 0 100px ${modalColors.secondary}33`
-            }}
-          >
-            {/* Glow Effect */}
-            <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${modalColors.progressGlow} blur-xl`}></div>
-            
-            <div className="relative z-10">
-              {/* Icon/Logo */}
-              <div className="flex justify-center mb-6">
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${modalColors.icon} flex items-center justify-center shadow-lg ${modalColors.iconShadow} animate-pulse`}>
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="text-center mb-8" dir="ltr">
-                <h2 className={`text-3xl font-bold bg-gradient-to-r ${modalColors.title} bg-clip-text text-transparent mb-3 animate-pulse`}>
-                  {language === 'ar' ? 'نشر الحملة' : 'Publishing Campaign'}
-                </h2>
-                <p className="text-gray-300 text-sm">
-                  {language === 'ar' ? 'يرجى الانتظار بينما نقوم بنشر حملتك على إعلانات جوجل...' : 'Please wait while we publish your campaign to Google Ads...'}
-                </p>
-              </div>
-              
-              {/* Progress Bar with Glow */}
-              <div className="mb-8 relative">
-                <div className={`absolute inset-0 bg-gradient-to-r ${modalColors.progressGlow} blur-lg rounded-full`}></div>
-                <Progress 
-                  variant="slim" 
-                  value={publishProgress} 
-                  className="w-full relative z-10" 
-                  indicatorClassName={`bg-gradient-to-r ${modalColors.progress}`}
-                  indicatorStyle={{
-                    boxShadow: `0 0 20px ${modalColors.primary}cc, 0 0 40px ${modalColors.secondary}99`
-                  }}
-                />
-              </div>
-              
-              {/* Progress Percentage with Glow */}
-              <div className="text-center">
-                <p className={`text-5xl font-bold bg-gradient-to-r ${modalColors.title} bg-clip-text text-transparent animate-pulse`}>
-                  {publishProgress}%
-                </p>
-              </div>
-
-              {/* Loading Dots */}
-              <div className="flex justify-center gap-2 mt-6">
-                <div className={`w-2 h-2 rounded-full ${modalColors.dots[0]} animate-bounce`}></div>
-                <div className={`w-2 h-2 rounded-full ${modalColors.dots[1]} animate-bounce`} style={{ animationDelay: '0.1s' }}></div>
-                <div className={`w-2 h-2 rounded-full ${modalColors.dots[2]} animate-bounce`} style={{ animationDelay: '0.2s' }}></div>
-              </div>
-            </div>
-          </div>
+          <ModernLoader 
+            words={language === 'ar' ? [
+              'جاري الاتصال بـ Google Ads...',
+              'إنشاء الحملة...',
+              'إعداد الميزانية...',
+              'تكوين الاستهداف...',
+              'إضافة الكلمات المفتاحية...',
+              'إنشاء المجموعات الإعلانية...',
+              'رفع نص الإعلان...',
+              'إنهاء الإعدادات...',
+              'النشر على Google...',
+              'جاري الانتهاء...'
+            ] : [
+              'Connecting to Google Ads…',
+              'Creating campaign…',
+              'Setting up budget…',
+              'Configuring targeting…',
+              'Adding keywords…',
+              'Creating ad groups…',
+              'Uploading ad copy…',
+              'Finalizing settings…',
+              'Publishing to Google…',
+              'Almost done…'
+            ]}
+          />
         </div>
       )}
     </div>

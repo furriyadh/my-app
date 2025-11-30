@@ -294,7 +294,7 @@ const SidebarMenu: React.FC = React.memo(() => {
       if (isMobile) {
         // Ensure sidebar is closed on mobile
         if (isSidebarOpen) {
-          setIsSidebarOpen(false);
+        setIsSidebarOpen(false);
         }
       }
     }
@@ -324,8 +324,8 @@ const SidebarMenu: React.FC = React.memo(() => {
           document.documentElement.style.overflow = '';
           document.documentElement.style.height = '';
           document.documentElement.style.position = '';
-        };
-        
+    };
+    
         // Run cleanup immediately and continuously
         cleanup();
         const intervals = [
@@ -338,7 +338,7 @@ const SidebarMenu: React.FC = React.memo(() => {
           setTimeout(cleanup, 200),
           setTimeout(cleanup, 500)
         ];
-        
+    
         // Run cleanup every 100ms for first 2 seconds
         let cleanupCount = 0;
         const cleanupInterval = setInterval(() => {

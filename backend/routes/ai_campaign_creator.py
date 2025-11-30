@@ -148,6 +148,16 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
 
+# Handle OPTIONS requests for all routes (CORS preflight)
+@ai_campaign_creator_bp.route('/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    """Handle CORS preflight requests for all routes"""
+    response = jsonify({'status': 'ok'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response, 200
+
 # تهيئة الخدمات
 try:
     ai_content_generator = AIContentGenerator()
@@ -2095,71 +2105,95 @@ def detect_website_language():
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Method 1: Check HTML lang attribute
+            # Get HTML lang attribute (but don't trust it fully)
+            html_lang_attr = None
             html_tag = soup.find('html')
             if html_tag and html_tag.get('lang'):
-                lang_attr = html_tag.get('lang', '').lower().strip()
-                # Extract primary language code (e.g., 'en-US' -> 'en')
-                detected_lang_code = lang_attr.split('-')[0] if lang_attr else 'en'
-                confidence = 'high'
-                logger.info(f"✅ Detected from HTML lang attribute: {detected_lang_code}")
+                html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
+                logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
             
-            # Method 2: Check meta tags
-            if confidence == 'low':
-                meta_lang = soup.find('meta', attrs={'http-equiv': 'content-language'})
-                if meta_lang and meta_lang.get('content'):
-                    detected_lang_code = meta_lang.get('content', '').split('-')[0].lower()
-                    confidence = 'high'
-                    logger.info(f"✅ Detected from meta tag: {detected_lang_code}")
+            # Get meta tag language
+            meta_lang_attr = None
+            meta_lang = soup.find('meta', attrs={'http-equiv': 'content-language'})
+            if meta_lang and meta_lang.get('content'):
+                meta_lang_attr = meta_lang.get('content', '').split('-')[0].lower()
+                logger.info(f"📋 Meta tag language: {meta_lang_attr}")
             
-            # Method 3: Advanced text content analysis (Multi-language detection)
-            if confidence == 'low':
-                # Get text content (first 2000 chars only for speed)
-                text_content = soup.get_text()[:2000]
-                
-                # Language detection patterns
-                language_patterns = {
-                    'ar': r'[\u0600-\u06FF]',      # Arabic
-                    'zh': r'[\u4E00-\u9FFF]',      # Chinese
-                    'ja': r'[\u3040-\u309F\u30A0-\u30FF]',  # Japanese (Hiragana + Katakana)
-                    'ko': r'[\uAC00-\uD7AF]',      # Korean
-                    'th': r'[\u0E00-\u0E7F]',      # Thai
-                    'he': r'[\u0590-\u05FF]',      # Hebrew
-                    'ru': r'[\u0400-\u04FF]',      # Russian/Cyrillic
-                    'el': r'[\u0370-\u03FF]',      # Greek
-                    'hi': r'[\u0900-\u097F]',      # Hindi/Devanagari
-                    'bn': r'[\u0980-\u09FF]',      # Bengali
-                    'ta': r'[\u0B80-\u0BFF]',      # Tamil
-                    'te': r'[\u0C00-\u0C7F]',      # Telugu
-                    'kn': r'[\u0C80-\u0CFF]',      # Kannada
-                    'ml': r'[\u0D00-\u0D7F]',      # Malayalam
-                    'gu': r'[\u0A80-\u0AFF]',      # Gujarati
-                    'mr': r'[\u0900-\u097F]',      # Marathi (same as Hindi)
-                }
-                
-                # Count characters for each language
-                language_scores = {}
-                total_chars = len(text_content)
-                
-                for lang_code, pattern in language_patterns.items():
-                    matches = len(re.findall(pattern, text_content))
-                    if matches > 0:
-                        score = matches / total_chars if total_chars > 0 else 0
-                        language_scores[lang_code] = score
-                
+            # ALWAYS analyze actual content (don't trust HTML lang attribute alone)
+            # Get text content (first 3000 chars for better accuracy)
+            text_content = soup.get_text()[:3000]
+            
+            # Language detection patterns (non-Latin scripts)
+            language_patterns = {
+                'ar': r'[\u0600-\u06FF]',      # Arabic
+                'zh': r'[\u4E00-\u9FFF]',      # Chinese
+                'ja': r'[\u3040-\u309F\u30A0-\u30FF]',  # Japanese (Hiragana + Katakana)
+                'ko': r'[\uAC00-\uD7AF]',      # Korean
+                'th': r'[\u0E00-\u0E7F]',      # Thai
+                'he': r'[\u0590-\u05FF]',      # Hebrew
+                'ru': r'[\u0400-\u04FF]',      # Russian/Cyrillic
+                'el': r'[\u0370-\u03FF]',      # Greek
+                'hi': r'[\u0900-\u097F]',      # Hindi/Devanagari
+                'bn': r'[\u0980-\u09FF]',      # Bengali
+                'ta': r'[\u0B80-\u0BFF]',      # Tamil
+                'te': r'[\u0C00-\u0C7F]',      # Telugu
+                'kn': r'[\u0C80-\u0CFF]',      # Kannada
+                'ml': r'[\u0D00-\u0D7F]',      # Malayalam
+                'gu': r'[\u0A80-\u0AFF]',      # Gujarati
+                'fa': r'[\u0600-\u06FF]',      # Persian (same as Arabic script)
+                'ur': r'[\u0600-\u06FF]',      # Urdu (same as Arabic script)
+            }
+            
+            # Count characters for each language
+            language_scores = {}
+            # Count only non-space, non-digit characters
+            clean_text = re.sub(r'[\s\d\W]', '', text_content)
+            total_chars = len(clean_text)
+            
+            for lang_code, pattern in language_patterns.items():
+                matches = len(re.findall(pattern, text_content))
+                if matches > 0:
+                    score = matches / total_chars if total_chars > 0 else 0
+                    language_scores[lang_code] = score
+                    if score > 0.05:  # Log significant scores
+                        logger.info(f"   📊 {lang_code}: {matches} chars ({score:.1%})")
+            
+            # Determine language from content analysis
+            content_detected_lang = None
+            content_confidence = 'low'
+            
+            if language_scores:
                 # Find the language with highest score
-                if language_scores:
-                    detected_lang_code = max(language_scores, key=language_scores.get)
-                    max_score = language_scores[detected_lang_code]
-                    
-                    if max_score > 0.1:  # More than 10% of specific language characters
-                        confidence = 'high' if max_score > 0.5 else 'medium'
-                        logger.info(f"✅ Detected {detected_lang_code} from content analysis: {max_score:.2%}")
-                    else:
-                        # Fallback to English for Latin-based languages
-                        detected_lang_code = 'en'
-                        confidence = 'low'
-                        logger.info(f"✅ Defaulting to English (no strong language signals)")
+                content_detected_lang = max(language_scores, key=language_scores.get)
+                max_score = language_scores[content_detected_lang]
+                
+                if max_score > 0.05:  # More than 5% of specific language characters
+                    content_confidence = 'high' if max_score > 0.3 else 'medium'
+                    logger.info(f"✅ Content analysis detected: {content_detected_lang} ({max_score:.1%})")
+            
+            # DECISION LOGIC: Content analysis takes priority over HTML attributes
+            # This fixes the bug where sites have lang="en" but content is Arabic
+            if content_detected_lang and content_confidence in ['high', 'medium']:
+                # Content analysis wins - actual content is more reliable
+                detected_lang_code = content_detected_lang
+                confidence = content_confidence
+                if html_lang_attr and html_lang_attr != content_detected_lang:
+                    logger.warning(f"⚠️ HTML lang='{html_lang_attr}' but content is '{content_detected_lang}' - using content!")
+            elif html_lang_attr:
+                # Use HTML attribute only if content analysis found nothing
+                detected_lang_code = html_lang_attr
+                confidence = 'medium'  # Lower confidence since we couldn't verify from content
+                logger.info(f"✅ Using HTML lang attribute: {detected_lang_code} (content analysis inconclusive)")
+            elif meta_lang_attr:
+                # Fallback to meta tag
+                detected_lang_code = meta_lang_attr
+                confidence = 'low'
+                logger.info(f"✅ Using meta tag: {detected_lang_code}")
+            else:
+                # Default to English
+                detected_lang_code = 'en'
+                confidence = 'low'
+                logger.info(f"✅ Defaulting to English (no language signals found)")
             
         except Exception as e:
             logger.warning(f"⚠️ Error fetching website: {e}")

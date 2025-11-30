@@ -274,16 +274,16 @@ const GoogleAdsContent: React.FC = () => {
   // Load cached accounts after hydration (client-side only)
   useEffect(() => {
     setIsHydrated(true);
-    try {
-      const cached = localStorage.getItem('cached_google_ads_accounts');
-      if (cached) {
-        const parsed = JSON.parse(cached);
+      try {
+        const cached = localStorage.getItem('cached_google_ads_accounts');
+        if (cached) {
+          const parsed = JSON.parse(cached);
         console.log('⚡ تحميل من الكاش:', parsed.length, 'حساب');
         setAccounts(parsed);
+        }
+      } catch (e) {
+        console.warn('⚠️ فشل تحميل الكاش');
       }
-    } catch (e) {
-      console.warn('⚠️ فشل تحميل الكاش');
-    }
   }, []);
   
   const [loadingAccounts, setLoadingAccounts] = useState<Record<string, boolean>>({});
@@ -2463,34 +2463,34 @@ const GoogleAdsContent: React.FC = () => {
                       <span className="text-white font-medium text-sm sm:text-base whitespace-nowrap">
                         <span className="hidden sm:inline">Google Ads </span>
                         <span className="font-mono">{formatCustomerId(account.customerId)}</span>
-                      </span>
+                          </span>
                     </div>
                     
                     {/* Right: Status Button */}
-                    <button
-                      onClick={() => handleLinkToMCC(account.customerId, account.name)}
+                        <button
+                          onClick={() => handleLinkToMCC(account.customerId, account.name)}
                       className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold border-2 flex-shrink-0 transition-all whitespace-nowrap ${
-                        loadingAccounts[account.customerId]
+                            loadingAccounts[account.customerId]
                           ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white border-teal-400 cursor-wait animate-pulse'
-                          : isConnected
+                              : isConnected
                           ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-300 shadow-emerald-500/50'
-                          : isPending
+                              : isPending
                           ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-yellow-400 animate-pulse'
                           : 'bg-[#0a2018] text-emerald-300 border-emerald-600/50 hover:bg-emerald-600 hover:text-white hover:border-emerald-400'
-                      }`}
+                          }`}
                       disabled={loadingAccounts[account.customerId] || isConnected || isPending}
-                    >
+                        >
                       <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                         isConnected ? 'bg-white' : isPending ? 'bg-black' : 'bg-emerald-400'
-                      }`}></span>
+                              }`}></span>
                       {loadingAccounts[account.customerId] 
                         ? 'Linking...' 
                         : isPending 
-                        ? 'Pending' 
-                        : isConnected 
-                        ? 'Connected' 
+                                ? 'Pending' 
+                                : isConnected
+                                ? 'Connected'
                         : 'Link'}
-                    </button>
+                        </button>
                   </div>
                 </div>
               );})}
