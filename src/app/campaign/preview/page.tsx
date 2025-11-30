@@ -954,7 +954,7 @@ export default function CampaignPreviewPage() {
         </div>
 
         {/* Ad Preview Section */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
           
           {/* Left Side - Edit Button */}
           <div className="flex items-center justify-center lg:justify-start order-2 lg:order-1">
@@ -973,13 +973,13 @@ export default function CampaignPreviewPage() {
           </div>
 
           {/* Right Side - Card Stack */}
-          <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2">
+          <div className="flex items-center justify-center order-1 lg:order-2">
             {cards.length > 0 ? (
-              <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-none">
+              <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]">
                 <CardStack items={cards} offset={10} scaleFactor={0.06} />
               </div>
             ) : (
-              <div className="w-full max-w-[320px] sm:w-96 h-48 sm:h-64 md:w-[500px] md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
+              <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] h-48 sm:h-64 md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-14 md:w-14 border-b-2 border-blue-600 mx-auto mb-4"></div>
                   <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">{language === 'ar' ? 'جاري تحميل الإعلانات...' : 'Loading ads...'}</p>
