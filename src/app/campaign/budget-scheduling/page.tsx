@@ -1332,8 +1332,8 @@ const BudgetSchedulingPage: React.FC = () => {
             </div>
 
         {/* Estimated Results */}
-        <CardContainer containerClassName="max-w-4xl mx-auto mb-8 w-full">
-          <CardBody className="!h-auto !w-full relative overflow-hidden rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500
+        <CardContainer containerClassName="max-w-4xl mx-auto mb-8 w-full px-4 sm:px-0">
+          <CardBody className="!h-auto !w-full relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-2xl hover:shadow-3xl transition-all duration-500
             bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 
             dark:from-gray-900 dark:via-blue-950/20 dark:to-purple-950/20
             border-2 border-blue-200/40 dark:border-blue-800/30 backdrop-blur-xl">
@@ -1371,66 +1371,66 @@ const BudgetSchedulingPage: React.FC = () => {
                 </div>
             </div>
           ) : (
-              <div className="flex justify-around gap-8 relative z-10">
-                <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-3 flex-1 group">
-                  <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
+              <div className="flex flex-col sm:flex-row justify-around gap-4 sm:gap-8 relative z-10">
+                <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-2 sm:gap-3 flex-1 group">
+                  <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
                     bg-gradient-to-br from-blue-500/20 via-blue-400/10 to-transparent
                     dark:from-blue-500/30 dark:via-blue-400/20 dark:to-transparent
                     shadow-lg shadow-blue-500/20 dark:shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40">
-                    <Eye className="w-8 h-8 text-blue-600 dark:text-blue-400 drop-shadow-lg" />
+                    <Eye className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400 drop-shadow-lg" />
                     <div className="absolute inset-0 bg-blue-500/5 rounded-2xl animate-pulse"></div>
-      </div>
+                  </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1 drop-shadow">
+                    <p className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1 drop-shadow">
                       {language === 'ar' ? 'مرات الظهور' : 'Impressions'}
                     </p>
-                    <div className="text-3xl font-bold text-blue-800 dark:text-blue-200 drop-shadow-lg">
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-800 dark:text-blue-200 drop-shadow-lg">
                       {(() => {
                         console.log('🖼️ Rendering Impressions:', estimates.impressions);
                         return estimates.impressions.toLocaleString();
                       })()}
-                </div>
-              </div>
+                    </div>
+                  </div>
                 </CardItem>
                 
-                <div className="w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+                <div className="w-px h-px sm:h-auto sm:w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent hidden sm:block"></div>
                 
-                <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-3 flex-1 group">
-                  <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
+                <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-2 sm:gap-3 flex-1 group">
+                  <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
                     bg-gradient-to-br from-purple-500/20 via-purple-400/10 to-transparent
                     dark:from-purple-500/30 dark:via-purple-400/20 dark:to-transparent
                     shadow-lg shadow-purple-500/20 dark:shadow-purple-500/30 group-hover:shadow-xl group-hover:shadow-purple-500/40">
-                    <MousePointer className="w-8 h-8 text-purple-600 dark:text-purple-400 drop-shadow-lg" />
+                    <MousePointer className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600 dark:text-purple-400 drop-shadow-lg" />
                     <div className="absolute inset-0 bg-purple-500/5 rounded-2xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                </div>
+                  </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1 drop-shadow">
+                    <p className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1 drop-shadow">
                       {language === 'ar' ? 'النقرات' : 'Clicks'}
                     </p>
-                    <div className="text-3xl font-bold text-purple-800 dark:text-purple-200 drop-shadow-lg">
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-800 dark:text-purple-200 drop-shadow-lg">
                       {(() => {
                         console.log('🖱️ Rendering Clicks:', estimates.clicks);
                         return estimates.clicks.toLocaleString();
                       })()}
-                </div>
-              </div>
+                    </div>
+                  </div>
                 </CardItem>
                 
-                <div className="w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+                <div className="w-px h-px sm:h-auto sm:w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent hidden sm:block"></div>
                 
-                <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-3 flex-1 group">
-                  <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
+                <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-2 sm:gap-3 flex-1 group">
+                  <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
                     bg-gradient-to-br from-green-500/20 via-green-400/10 to-transparent
                     dark:from-green-500/30 dark:via-green-400/20 dark:to-transparent
                     shadow-lg shadow-green-500/20 dark:shadow-green-500/30 group-hover:shadow-xl group-hover:shadow-green-500/40">
-                    <Check className="w-8 h-8 text-green-600 dark:text-green-400 drop-shadow-lg" />
+                    <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 dark:text-green-400 drop-shadow-lg" />
                     <div className="absolute inset-0 bg-green-500/5 rounded-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-green-700 dark:text-green-300 mb-1 drop-shadow">
+                    <p className="text-xs sm:text-sm font-semibold text-green-700 dark:text-green-300 mb-1 drop-shadow">
                       {language === 'ar' ? 'التحويلات' : 'Conversions'}
                     </p>
-                    <div className="text-3xl font-bold text-green-800 dark:text-green-200 drop-shadow-lg">
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-800 dark:text-green-200 drop-shadow-lg">
                       {(() => {
                         console.log('✅ Rendering Conversions:', estimates.conversions);
                         return estimates.conversions.toLocaleString();
@@ -1529,11 +1529,10 @@ const BudgetSchedulingPage: React.FC = () => {
           <GlowButton
             onClick={() => router.push('/campaign/location-targeting')}
             variant="green"
-            className="w-full sm:w-auto min-w-[140px] sm:min-w-[160px]"
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <ArrowLeft className={`w-4 h-4 sm:w-5 sm:h-5 ${isRTL ? 'rotate-180' : ''}`} />
-              <span className="text-sm sm:text-base">{language === 'ar' ? 'الخطوة السابقة' : 'Previous Step'}</span>
+            <span className="flex items-center gap-2">
+              <ArrowLeft className="w-5 h-5" />
+              {language === 'ar' ? 'الخطوة السابقة' : 'Previous Step'}
             </span>
           </GlowButton>
           
@@ -1638,12 +1637,11 @@ const BudgetSchedulingPage: React.FC = () => {
                 router.push('/campaign/preview');
               }
             }}
-            variant="blue"
-            className="w-full sm:w-auto min-w-[140px] sm:min-w-[180px]"
+            variant="purple"
           >
-            <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className="text-sm sm:text-base">{language === 'ar' ? 'إنشاء الحملة' : 'Create Campaign'}</span>
-              <ArrowRight className={`w-4 h-4 sm:w-5 sm:h-5 ${isRTL ? 'rotate-180' : ''}`} />
+            <span className="flex items-center gap-2">
+              {language === 'ar' ? 'الخطوة التالية' : 'Next Step'}
+              <ArrowRight className="w-5 h-5" />
             </span>
           </GlowButton>
         </div>

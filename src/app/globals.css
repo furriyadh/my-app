@@ -2149,14 +2149,52 @@ body {
   background: #000000 !important;
 }
 
-/* CRITICAL: Prevent sidebar-open from causing black screen on desktop */
+/* CRITICAL: Prevent sidebar-open from causing black screen on desktop - MAXIMUM PRIORITY */
+/* This CSS must override ALL other CSS that might apply sidebar-open styles */
 @media (min-width: 1280px) {
+  /* Force remove sidebar-open classes styles on desktop - override everything */
   body.sidebar-open,
-  html.sidebar-open {
+  html.sidebar-open,
+  body[class*="sidebar-open"],
+  html[class*="sidebar-open"],
+  body.sidebar-open *,
+  html.sidebar-open * {
     overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    overflow: auto !important;
     position: static !important;
+    position: relative !important;
     width: auto !important;
     height: auto !important;
     top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    transform: none !important;
+  }
+  
+  body.sidebar-open {
+    top: auto !important;
+    position: static !important;
+    position: relative !important;
+  }
+  
+  /* Force normal styles on body and html on desktop - prevent any fixed positioning */
+  body,
+  html {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    position: static !important;
+    position: relative !important;
+    width: auto !important;
+    height: auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
   }
 }

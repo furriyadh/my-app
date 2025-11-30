@@ -267,22 +267,24 @@ const GoogleAdsContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // ✅ تحميل الحسابات من localStorage فوراً عند بدء التشغيل
-  const [accounts, setAccounts] = useState<GoogleAdsAccount[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('cached_google_ads_accounts');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          console.log('⚡ تحميل فوري من الكاش:', parsed.length, 'حساب');
-          return parsed;
-        }
-      } catch (e) {
-        console.warn('⚠️ فشل تحميل الكاش');
+  // ✅ Start with empty array for SSR consistency to prevent hydration mismatch
+  const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Load cached accounts after hydration (client-side only)
+  useEffect(() => {
+    setIsHydrated(true);
+    try {
+      const cached = localStorage.getItem('cached_google_ads_accounts');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        console.log('⚡ تحميل من الكاش:', parsed.length, 'حساب');
+        setAccounts(parsed);
       }
+    } catch (e) {
+      console.warn('⚠️ فشل تحميل الكاش');
     }
-    return [];
-  });
+  }, []);
   
   const [loadingAccounts, setLoadingAccounts] = useState<Record<string, boolean>>({});
   const [pendingInvitations, setPendingInvitations] = useState<string[]>([]);
@@ -2435,16 +2437,17 @@ const GoogleAdsContent: React.FC = () => {
                 return (
                 <div 
                   key={account.id} 
-                  className={`account-item w-full relative transition-all duration-300 rounded-xl p-3 ${
+                  className={`account-item w-full relative transition-all duration-300 rounded-xl p-3 sm:p-4 ${
                     isPending
                       ? 'bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-yellow-500/10 border border-amber-500/30' 
                       : 'bg-[#001a0d] border border-emerald-500/20 hover:bg-[#002a15] hover:border-emerald-500/40'
                   }`}
                 >
-                  {/* Account Display with inline Action Button */}
-                  <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  {/* Account Display - Responsive Row */}
+                  <div className="flex items-center justify-between relative z-10 gap-2">
+                    {/* Left: Icon + Account ID */}
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <div className={`w-9 h-9 sm:w-12 sm:h-12 flex-shrink-0 rounded-full flex items-center justify-center ${
                         isConnected 
                           ? 'bg-emerald-500/20 border-2 border-emerald-400/50' 
                           : isPending
@@ -2454,68 +2457,40 @@ const GoogleAdsContent: React.FC = () => {
                         <img 
                           src="/images/integrations/google-ads-logo.svg" 
                           alt="Google Ads" 
-                          className="w-6 h-6 sm:w-8 sm:h-8"
+                          className="w-5 h-5 sm:w-8 sm:h-8"
                         />
                       </div>
-                      <div className="flex flex-col">
-                        <p className="text-white font-medium text-xs sm:text-sm flex items-center flex-wrap gap-1">
-                          <span>Google Ads Account</span>
-                          <span className="text-gray-300 font-mono text-xs sm:text-sm">
-                            {formatCustomerId(account.customerId)}
-                          </span>
-                        </p>
-                      </div>
+                      <span className="text-white font-medium text-sm sm:text-base whitespace-nowrap">
+                        <span className="hidden sm:inline">Google Ads </span>
+                        <span className="font-mono">{formatCustomerId(account.customerId)}</span>
+                      </span>
                     </div>
                     
-                    {/* Status Button - ألوان خضراء متناسقة */}
-                    <div className="ml-2 sm:ml-4 flex items-center gap-1">
-                        <button
-                          onClick={() => handleLinkToMCC(account.customerId, account.name)}
-                          className={`flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold border-2 transition-all duration-300 shadow-lg ${
-                            loadingAccounts[account.customerId]
-                              ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white border-teal-400 shadow-teal-500/40 cursor-wait animate-pulse'
-                              : isConnected
-                              ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-300 shadow-emerald-500/50 cursor-default'
-                              : isPending
-                              ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-yellow-400 shadow-yellow-500/40 cursor-default animate-pulse'
-                              : 'bg-[#0a2018] text-emerald-300 border-emerald-600/50 shadow-emerald-900/30 cursor-pointer hover:bg-gradient-to-r hover:from-emerald-600 hover:to-green-600 hover:text-white hover:border-emerald-400 hover:shadow-emerald-500/50'
-                          }`}
-                          disabled={
-                            loadingAccounts[account.customerId] || 
-                            isConnected || 
-                            isPending
-                          }
-                          title={
-                            isConnected 
-                              ? 'Already connected to MCC' 
-                              : isPending
-                              ? 'Link request pending - waiting for approval'
-                              : 'Click to link to MCC'
-                          }
-                        >
-                          {loadingAccounts[account.customerId] ? (
-                            <>
-                              <span className="w-2 h-2 bg-white rounded-full mr-2 animate-ping"></span>
-                              <span>Linking...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span className={`w-2 h-2 rounded-full mr-2 ${
-                                isConnected
-                                  ? 'bg-white shadow-lg shadow-white/50'
-                                  : isPending
-                                  ? 'bg-black'
-                                  : 'bg-emerald-400'
-                              }`}></span>
-                              {isPending 
-                                ? 'Pending' 
-                                : isConnected
-                                ? 'Connected'
-                                : 'Link Google Ads'}
-                            </>
-                          )}
-                        </button>
-                    </div>
+                    {/* Right: Status Button */}
+                    <button
+                      onClick={() => handleLinkToMCC(account.customerId, account.name)}
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold border-2 flex-shrink-0 transition-all whitespace-nowrap ${
+                        loadingAccounts[account.customerId]
+                          ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white border-teal-400 cursor-wait animate-pulse'
+                          : isConnected
+                          ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-300 shadow-emerald-500/50'
+                          : isPending
+                          ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-yellow-400 animate-pulse'
+                          : 'bg-[#0a2018] text-emerald-300 border-emerald-600/50 hover:bg-emerald-600 hover:text-white hover:border-emerald-400'
+                      }`}
+                      disabled={loadingAccounts[account.customerId] || isConnected || isPending}
+                    >
+                      <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                        isConnected ? 'bg-white' : isPending ? 'bg-black' : 'bg-emerald-400'
+                      }`}></span>
+                      {loadingAccounts[account.customerId] 
+                        ? 'Linking...' 
+                        : isPending 
+                        ? 'Pending' 
+                        : isConnected 
+                        ? 'Connected' 
+                        : 'Link'}
+                    </button>
                   </div>
                 </div>
               );})}

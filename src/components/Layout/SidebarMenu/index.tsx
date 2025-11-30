@@ -61,35 +61,56 @@ const SidebarMenu: React.FC = React.memo(() => {
   // Use translation hook
   const { t, language, isRTL } = useTranslation();
   
-  // State for sidebar open/close - Use localStorage to persist state
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(() => {
-    // Initialize based on screen size and localStorage (client-side only)
-    if (typeof window !== 'undefined') {
-      // CRITICAL: Always clean up classes first to prevent black screen on refresh
+  // State for sidebar open/close - Start with false for SSR consistency
+  // This prevents hydration mismatch
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isHydrated, setIsHydrated] = React.useState(false);
+  
+  // Initialize sidebar state after hydration (client-side only)
+  React.useEffect(() => {
+    // Mark as hydrated
+    setIsHydrated(true);
+    
+    // CRITICAL: Always clean up classes first to prevent black screen on refresh
+    const cleanup = () => {
       document.body.classList.remove('sidebar-open');
       document.documentElement.classList.remove('sidebar-open');
       document.body.style.top = '';
       document.body.style.position = '';
       document.body.style.width = '';
       document.body.style.height = '';
-      
-      const isMobile = window.innerWidth < 1280; // xl breakpoint
-      
-      // On mobile, always start closed to prevent black screen
-      if (isMobile) {
-        return false; // Always closed on mobile initially
-      }
-      
-      // On desktop, check localStorage
-      const savedState = localStorage.getItem('sidebarOpen');
-      if (savedState !== null) {
-        return savedState === 'true';
-      }
-      // Default to open on desktop
-      return true;
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.bottom = '';
+      document.body.style.overflow = '';
+      document.body.style.overflowX = '';
+      document.body.style.overflowY = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+    };
+    
+    // Run cleanup immediately
+    cleanup();
+    
+    const isMobile = window.innerWidth < 1280; // xl breakpoint
+    
+    // On mobile, always start closed to prevent black screen
+    if (isMobile) {
+      // Remove from localStorage on mobile
+      localStorage.removeItem('sidebarOpen');
+      setIsSidebarOpen(false);
+    } else {
+      // On desktop, open sidebar by default
+      localStorage.removeItem('sidebarOpen');
+      setIsSidebarOpen(true);
     }
-    return false; // Default for SSR (closed)
-  });
+    
+    // Run cleanup multiple times to ensure it sticks
+    setTimeout(cleanup, 0);
+    setTimeout(cleanup, 10);
+    setTimeout(cleanup, 50);
+    setTimeout(cleanup, 100);
+  }, []);
   
   // State for Quick Search
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -107,20 +128,21 @@ const SidebarMenu: React.FC = React.memo(() => {
   const toggleSidebar = React.useCallback(() => {
     setIsSidebarOpen(prev => {
       const newState = !prev;
-      // Save to localStorage (only for desktop)
+      // Save to localStorage (only for desktop, but don't apply classes)
       if (typeof window !== 'undefined') {
         const isMobile = window.innerWidth < 1280;
         
-        // Only save to localStorage on desktop
-        if (!isMobile) {
-          localStorage.setItem('sidebarOpen', String(newState));
-        } else {
-          // On mobile, always remove from localStorage to prevent black screen on refresh
-          localStorage.removeItem('sidebarOpen');
-        }
-        
-        // Prevent body scroll on mobile when sidebar is open
+        // CRITICAL: On desktop, NEVER save to localStorage to prevent black screen
+        // Only save on mobile (but it will be removed on refresh anyway)
         if (isMobile) {
+          // On mobile, save temporarily but it will be removed on refresh
+          if (newState) {
+            localStorage.setItem('sidebarOpen', String(newState));
+          } else {
+            localStorage.removeItem('sidebarOpen');
+          }
+          
+          // Prevent body scroll on mobile when sidebar is open
           if (newState) {
             // Disable scroll on body and html
             document.body.classList.add('sidebar-open');
@@ -138,6 +160,38 @@ const SidebarMenu: React.FC = React.memo(() => {
               window.scrollTo(0, parseInt(scrollY || '0') * -1);
             }
           }
+        } else {
+          // On desktop, NEVER save to localStorage and NEVER apply classes
+          // CRITICAL: Remove classes immediately and aggressively
+          localStorage.removeItem('sidebarOpen');
+          
+          // Force remove classes and styles immediately
+          const forceCleanup = () => {
+            document.body.classList.remove('sidebar-open');
+            document.documentElement.classList.remove('sidebar-open');
+            document.body.style.top = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+            document.body.style.overflow = '';
+            document.body.style.overflowX = '';
+            document.body.style.overflowY = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.bottom = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.height = '';
+            document.documentElement.style.position = '';
+            document.documentElement.style.width = '';
+          };
+          
+          forceCleanup();
+          // Run cleanup multiple times to ensure it sticks
+          setTimeout(forceCleanup, 0);
+          setTimeout(forceCleanup, 1);
+          setTimeout(forceCleanup, 5);
+          setTimeout(forceCleanup, 10);
+          setTimeout(forceCleanup, 50);
         }
       }
       return newState;
@@ -161,12 +215,80 @@ const SidebarMenu: React.FC = React.memo(() => {
       const isMobile = window.innerWidth < 1280;
       
       // Always clean up any leftover classes from previous session (both mobile and desktop)
-      document.body.classList.remove('sidebar-open');
-      document.documentElement.classList.remove('sidebar-open');
-      document.body.style.top = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
+      const cleanup = () => {
+        document.body.classList.remove('sidebar-open');
+        document.documentElement.classList.remove('sidebar-open');
+        document.body.style.top = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.overflow = '';
+        document.body.style.overflowX = '';
+        document.body.style.overflowY = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.height = '';
+      };
+      
+      cleanup();
+      
+      // On desktop, set up MutationObserver to prevent sidebar-open class
+      if (!isMobile) {
+        // CRITICAL: Use MutationObserver to watch for sidebar-open class additions
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+              const target = mutation.target as HTMLElement;
+              if (target === document.body || target === document.documentElement) {
+                if (target.classList && target.classList.contains('sidebar-open')) {
+                  // Remove class immediately
+                  target.classList.remove('sidebar-open');
+                  if (target === document.body) {
+                    document.body.style.top = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    document.body.style.height = '';
+                    document.body.style.overflow = '';
+                  }
+                  if (target === document.documentElement) {
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.height = '';
+                  }
+                }
+              }
+            }
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+              const target = mutation.target as HTMLElement;
+              if (target === document.body || target === document.documentElement) {
+                if (target.style && (target.style.position === 'fixed' || target.style.overflow === 'hidden')) {
+                  cleanup();
+                }
+              }
+            }
+          });
+        });
+        
+        // Start observing
+        if (document.body) {
+          observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+            subtree: false
+          });
+        }
+        if (document.documentElement) {
+          observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+            subtree: false
+          });
+        }
+        
+        // Cleanup observer on unmount
+        return () => {
+          observer.disconnect();
+          cleanup();
+        };
+      }
       
       // On mobile, always ensure sidebar is closed on mount
       if (isMobile) {
@@ -183,39 +305,91 @@ const SidebarMenu: React.FC = React.memo(() => {
     if (typeof window !== 'undefined') {
       const isMobile = window.innerWidth < 1280;
       
-      // Only apply scroll lock on mobile, never on desktop
-      if (isMobile) {
-        if (isSidebarOpen) {
-          // Disable scroll on body and html
-          document.body.classList.add('sidebar-open');
-          document.documentElement.classList.add('sidebar-open');
-          // Save current scroll position
-          const scrollY = window.scrollY;
-          document.body.style.top = `-${scrollY}px`;
-        } else {
-          // Re-enable scroll
-          const scrollY = document.body.style.top;
+      // CRITICAL: On desktop, NEVER apply classes - always remove them aggressively
+      if (!isMobile) {
+        // Force remove classes on desktop - run continuously
+        const cleanup = () => {
           document.body.classList.remove('sidebar-open');
           document.documentElement.classList.remove('sidebar-open');
           document.body.style.top = '';
-          if (scrollY) {
-            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.height = '';
+          document.body.style.overflow = '';
+          document.body.style.overflowX = '';
+          document.body.style.overflowY = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.bottom = '';
+          document.documentElement.style.overflow = '';
+          document.documentElement.style.height = '';
+          document.documentElement.style.position = '';
+        };
+        
+        // Run cleanup immediately and continuously
+        cleanup();
+        const intervals = [
+          setTimeout(cleanup, 0),
+          setTimeout(cleanup, 1),
+          setTimeout(cleanup, 5),
+          setTimeout(cleanup, 10),
+          setTimeout(cleanup, 50),
+          setTimeout(cleanup, 100),
+          setTimeout(cleanup, 200),
+          setTimeout(cleanup, 500)
+        ];
+        
+        // Run cleanup every 100ms for first 2 seconds
+        let cleanupCount = 0;
+        const cleanupInterval = setInterval(() => {
+          cleanup();
+          cleanupCount++;
+          if (cleanupCount >= 20) { // 20 * 100ms = 2 seconds
+            clearInterval(cleanupInterval);
           }
-        }
+        }, 100);
+        
+        return () => {
+          intervals.forEach(id => clearTimeout(id));
+          clearInterval(cleanupInterval);
+          cleanup();
+        };
+      }
+      
+      // Only apply scroll lock on mobile
+      if (isSidebarOpen) {
+        // Disable scroll on body and html
+        document.body.classList.add('sidebar-open');
+        document.documentElement.classList.add('sidebar-open');
+        // Save current scroll position
+        const scrollY = window.scrollY;
+        document.body.style.top = `-${scrollY}px`;
       } else {
-        // On desktop, always ensure classes are removed (should never be applied)
+        // Re-enable scroll
+        const scrollY = document.body.style.top;
         document.body.classList.remove('sidebar-open');
         document.documentElement.classList.remove('sidebar-open');
         document.body.style.top = '';
+        if (scrollY) {
+          window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
       }
     }
     
     return () => {
       // Cleanup on unmount - always clean up
       if (typeof window !== 'undefined') {
-        document.body.classList.remove('sidebar-open');
-        document.documentElement.classList.remove('sidebar-open');
-        document.body.style.top = '';
+        const isMobile = window.innerWidth < 1280;
+        if (!isMobile) {
+          // On desktop, always clean up
+          document.body.classList.remove('sidebar-open');
+          document.documentElement.classList.remove('sidebar-open');
+          document.body.style.top = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.height = '';
+          document.body.style.overflow = '';
+        }
       }
     };
   }, [isSidebarOpen]);
@@ -599,6 +773,7 @@ const SidebarMenu: React.FC = React.memo(() => {
         }
         
         /* Prevent body scroll when sidebar is open on mobile - STRONG */
+        /* IMPORTANT: Only apply on mobile to prevent black screen on desktop */
         @media (max-width: 1279px) {
           body.sidebar-open {
             overflow: hidden !important;
@@ -613,30 +788,70 @@ const SidebarMenu: React.FC = React.memo(() => {
           }
         }
         
-        /* CRITICAL: Ensure desktop never has these styles applied - MAXIMUM PRIORITY */
+        /* CRITICAL: On desktop, COMPLETELY DISABLE sidebar-open styles */
+        /* This CSS runs FIRST and prevents any black screen issues */
         @media (min-width: 1280px) {
+          /* CRITICAL: Force remove ALL sidebar-open styles on desktop - override EVERYTHING */
+          /* This must be the FIRST CSS rule to prevent black screen */
           body.sidebar-open,
-          html.sidebar-open {
+          html.sidebar-open,
+          body[class*="sidebar-open"],
+          html[class*="sidebar-open"],
+          body.sidebar-open *,
+          html.sidebar-open * {
             overflow: visible !important;
             overflow-x: visible !important;
             overflow-y: visible !important;
+            overflow: auto !important;
             position: static !important;
+            position: relative !important;
             width: auto !important;
             height: auto !important;
             top: auto !important;
             left: auto !important;
             right: auto !important;
+            bottom: auto !important;
+            max-width: none !important;
+            max-height: none !important;
+            transform: none !important;
+            will-change: auto !important;
           }
           
           body.sidebar-open {
             top: auto !important;
             position: static !important;
+            position: relative !important;
+          }
+          
+          /* Force normal styles on body and html on desktop - prevent any fixed positioning */
+          /* This ensures body and html are NEVER fixed on desktop */
+          body,
+          html {
+            overflow: visible !important;
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+            position: static !important;
+            position: relative !important;
+            width: auto !important;
+            height: auto !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+          }
+          
+          /* CRITICAL: Prevent any CSS from applying fixed position on desktop */
+          body[style*="position: fixed"],
+          html[style*="position: fixed"] {
+            position: static !important;
+            position: relative !important;
           }
         }
       `}</style>
       
       {/* Hamburger Button - Beautiful & Floating */}
-      {!isSidebarOpen && (
+      {/* Only show after hydration to prevent hydration mismatch */}
+      {isHydrated && !isSidebarOpen && (
         <motion.button
           initial={{ opacity: 0, scale: 0.8, rotate: -90 }}
           animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -662,7 +877,8 @@ const SidebarMenu: React.FC = React.memo(() => {
         </motion.button>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Only render after hydration to prevent hydration mismatch */}
+      {isHydrated && (
       <motion.div
         initial={false}
         animate={{
@@ -995,9 +1211,10 @@ const SidebarMenu: React.FC = React.memo(() => {
         </div>
       </div>
       </motion.div>
+      )}
 
       {/* Overlay when sidebar is open on mobile/tablet - click to close */}
-      {isSidebarOpen && (
+      {isHydrated && isSidebarOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
