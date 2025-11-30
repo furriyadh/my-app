@@ -35,147 +35,6 @@ import {
   MapPin, Filter, Users, Percent, TrendingDown, AlertTriangle
 } from "lucide-react";
 
-// ✨ Magic Loader Component - Particle-based loader
-interface Particle {
-  radius: number;
-  x: number;
-  y: number;
-  angle: number;
-  speed: number;
-  accel: number;
-  decay: number;
-  life: number;
-}
-
-interface MagicLoaderProps {
-  size?: number;
-  particleCount?: number;
-  speed?: number;
-  hueRange?: [number, number];
-  className?: string;
-}
-
-const MagicLoader: React.FC<MagicLoaderProps> = ({
-  size = 200,
-  particleCount = 1,
-  speed = 1,
-  hueRange = [0, 360],
-  className
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | undefined>(undefined);
-  const particlesRef = useRef<Particle[]>([]);
-  const tickRef = useRef(0);
-  const globalAngleRef = useRef(0);
-  const globalRotationRef = useRef(0);
-
-  const createParticle = useCallback((centerX: number, centerY: number, tick: number, minSize: number): Particle => {
-    return {
-      radius: 7,
-      x: centerX + Math.cos(tick / 20) * minSize / 2,
-      y: centerY + Math.sin(tick / 20) * minSize / 2,
-      angle: globalRotationRef.current + globalAngleRef.current,
-      speed: 0,
-      accel: 0.01,
-      decay: 0.01,
-      life: 1
-    };
-  }, []);
-
-  const stepParticle = useCallback((particle: Particle, index: number) => {
-    particle.speed += particle.accel;
-    particle.x += Math.cos(particle.angle) * particle.speed * speed;
-    particle.y += Math.sin(particle.angle) * particle.speed * speed;
-    particle.angle += Math.PI / 64;
-    particle.accel *= 1.01;
-    particle.life -= particle.decay;
-    if (particle.life <= 0) {
-      particlesRef.current.splice(index, 1);
-    }
-  }, [speed]);
-
-  const drawParticle = useCallback((ctx: CanvasRenderingContext2D, particle: Particle, index: number, tick: number) => {
-    const hue = hueRange[0] + ((tick + (particle.life * 120)) % (hueRange[1] - hueRange[0]));
-    ctx.fillStyle = ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${particle.life})`;
-    ctx.beginPath();
-    if (particlesRef.current[index - 1]) {
-      ctx.moveTo(particle.x, particle.y);
-      ctx.lineTo(particlesRef.current[index - 1].x, particlesRef.current[index - 1].y);
-    }
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, Math.max(0.001, particle.life * particle.radius), 0, Math.PI * 2);
-    ctx.fill();
-    const sparkleSize = Math.random() * 1.25;
-    const sparkleX = particle.x + ((Math.random() - 0.5) * 35) * particle.life;
-    const sparkleY = particle.y + ((Math.random() - 0.5) * 35) * particle.life;
-    ctx.fillRect(Math.floor(sparkleX), Math.floor(sparkleY), sparkleSize, sparkleSize);
-  }, [hueRange]);
-
-  const animate = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const minSize = Math.min(rect.width, rect.height) * 0.5;
-    for (let i = 0; i < particleCount; i++) {
-      particlesRef.current.push(createParticle(centerX, centerY, tickRef.current, minSize));
-    }
-    particlesRef.current.forEach((particle, index) => {
-      stepParticle(particle, index);
-    });
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particlesRef.current.forEach((particle, index) => {
-      drawParticle(ctx, particle, index, tickRef.current);
-    });
-    globalRotationRef.current += Math.PI / 6 * speed;
-    globalAngleRef.current += Math.PI / 6 * speed;
-    tickRef.current++;
-    animationRef.current = requestAnimationFrame(animate);
-  }, [createParticle, stepParticle, drawParticle, particleCount, speed]);
-
-  const setupCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
-    ctx.scale(dpr, dpr);
-    ctx.globalCompositeOperation = 'lighter';
-    particlesRef.current = [];
-    tickRef.current = 0;
-    globalAngleRef.current = 0;
-    globalRotationRef.current = 0;
-  }, [size]);
-
-  useEffect(() => {
-    setupCanvas();
-    animate();
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [setupCanvas, animate]);
-
-  return (
-    <div className={`flex items-center justify-center ${className || ''}`}>
-      <canvas
-        ref={canvasRef}
-        className="max-w-full max-h-full"
-        style={{ width: size, height: size }}
-      />
-    </div>
-  );
-};
-
 // Types
 interface Campaign {
   id: string;
@@ -898,22 +757,11 @@ const DashboardPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
-        {/* Background glow effect - بنفسجي */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)'
-          }}
-        />
-        
-        {/* Magic Loader - Purple/Pink theme */}
-        <MagicLoader 
-          size={220}
-          particleCount={3}
-          speed={1.2}
-          hueRange={[260, 330]}
-          className="relative z-10"
-        />
+        {/* Simple Loading Spinner */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">{t.common?.loading || 'جاري التحميل...'}</p>
+        </div>
       </div>
     );
   }
