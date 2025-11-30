@@ -2616,9 +2616,9 @@ const LocationTargetingPage: React.FC = () => {
               <ArrowRight className="w-5 h-5" />
             </span>
           </GlowButton>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

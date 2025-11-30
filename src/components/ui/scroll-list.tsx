@@ -92,7 +92,7 @@ const ScrollList = <T,>({
     };
   }, [data, itemHeight]); // Dependencies: Re-run effect if data or itemHeight changes
 
-  // Framer Motion Variants for defining animation states for each item
+  // Framer Motion Variants for defining animation states for each item (ORIGINAL - no fading)
   const itemVariants: Variants = {
     hidden: {
       opacity: 0,
@@ -123,14 +123,14 @@ const ScrollList = <T,>({
     switch (screenSize) {
       case 'mobile':
         return {
-          containerHeight: "480px",
-          itemHeightMultiplier: 0.72,
+          containerHeight: "450px",
+          itemHeightMultiplier: 0.58,
           padding: "px-3"
         };
       case 'tablet':
         return {
-          containerHeight: "550px",
-          itemHeightMultiplier: 0.85,
+          containerHeight: "520px",
+          itemHeightMultiplier: 0.75,
           padding: "px-4"
         };
       default: // desktop
@@ -149,7 +149,7 @@ const ScrollList = <T,>({
     <div
       ref={listRef}
       // Tailwind CSS classes for styling: hidden scrollbar, centered horizontally, full width
-      className="scroll-list__wrp scrollbar-hidden mx-auto w-full scroll-smooth touch-pan-y"
+      className="scroll-list__wrp scrollbar-hidden mx-auto w-full"
       // Inline style for fixed height and scrollability of the main container
       style={{ 
         height: responsive.containerHeight, 
@@ -164,16 +164,13 @@ const ScrollList = <T,>({
         let variant = "hidden"; // Default variant
 
         // Determine the animation variant based on the item's position relative to the focused item
+        // ALL items are visible - no hiding
         if (index === focusedIndex) {
           variant = "focused"; // The currently focused item
         } else if (index === focusedIndex + 1) {
           variant = "next"; // The item immediately following the focused one
         } else {
-          // Items within a certain range (2 items above/below) of the focused item are visible
-          const isWithinVisibleRange = Math.abs(index - focusedIndex) <= 2;
-          if (isWithinVisibleRange) {
-            variant = "visible";
-          }
+          variant = "visible"; // All other items are visible
         }
 
         return (

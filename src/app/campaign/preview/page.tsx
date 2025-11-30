@@ -1106,8 +1106,8 @@ export default function CampaignPreviewPage() {
                       const activationUrl = `https://ads.google.com/aw/preferences?ocid=${account.customerId.replace(/-/g, '')}`;
                       
                       return (
-                        <div 
-                          key={account.customerId} 
+                      <div 
+                        key={account.customerId} 
                           onClick={() => isEnabled && setSelectedAccount(account.customerId)}
                           className={`relative w-full p-4 rounded-lg border transition-all ${
                             !isEnabled 
@@ -1115,47 +1115,47 @@ export default function CampaignPreviewPage() {
                               : selectedAccount === account.customerId
                                 ? 'bg-blue-500/10 border-blue-500 cursor-pointer'
                                 : 'bg-transparent border-gray-300 dark:border-white/10 hover:border-blue-400 dark:hover:border-blue-400/50 cursor-pointer'
-                          }`}
-                          style={{
-                            animationDelay: `${index * 0.05}s`,
-                            animation: 'fadeInUp 0.3s ease-out forwards',
-                            opacity: 0
-                          }}
-                        >
+                        }`}
+                        style={{
+                          animationDelay: `${index * 0.05}s`,
+                          animation: 'fadeInUp 0.3s ease-out forwards',
+                          opacity: 0
+                        }}
+                      >
                           {/* Account Display */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                selectedAccount === account.customerId
-                                  ? 'bg-blue-500/20 border border-blue-500/50'
-                                  : 'bg-white/5 border border-white/10'
-                              }`}>
-                                <img 
-                                  src="/images/integrations/google-ads-logo.svg" 
-                                  alt="Google Ads" 
-                                  className="w-8 h-8"
-                                />
-                              </div>
-                              <div className="text-left">
-                                <p className="text-gray-900 dark:text-white font-medium text-sm">
-                                  {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className="text-gray-700 dark:text-gray-300 font-mono ml-2 text-sm">{formatCustomerId(account.customerId)}</span>
-                                </p>
-                              </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                              selectedAccount === account.customerId
+                                ? 'bg-blue-500/20 border border-blue-500/50'
+                                : 'bg-white/5 border border-white/10'
+                            }`}>
+                              <img 
+                                src="/images/integrations/google-ads-logo.svg" 
+                                alt="Google Ads" 
+                                className="w-8 h-8"
+                              />
                             </div>
-                            
+                              <div className="text-left">
+                              <p className="text-gray-900 dark:text-white font-medium text-sm">
+                                  {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className="text-gray-700 dark:text-gray-300 font-mono ml-2 text-sm">{formatCustomerId(account.customerId)}</span>
+                              </p>
+                            </div>
+                          </div>
+                          
                             {/* Status Badge with Activation Button */}
                             <div className="ml-4 flex items-center gap-2">
                               {isEnabled ? (
-                                <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30">
-                                  <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-400"></span>
+                            <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-400"></span>
                                   {language === 'ar' ? 'نشط' : 'Active'}
-                                </div>
+                            </div>
                               ) : (
                                 <>
                                   <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30">
                                     <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-orange-400"></span>
                                     {language === 'ar' ? 'غير مفعّل' : 'Not Enabled'}
-                                  </div>
+                          </div>
                                   <a
                                     href={activationUrl}
                                     target="_blank"
@@ -1171,8 +1171,8 @@ export default function CampaignPreviewPage() {
                                   </a>
                                 </>
                               )}
-                            </div>
-                          </div>
+                        </div>
+                      </div>
                         </div>
                       );
                     })}
@@ -1251,36 +1251,36 @@ export default function CampaignPreviewPage() {
                   
                   return (
                     <>
-                      <GlowButton
-                        onClick={handlePublish}
-                        variant="blue"
+              <GlowButton
+                onClick={handlePublish}
+                variant="blue"
                         disabled={isButtonDisabled}
                         className={isAccountActive ? 'animate-pulse-slow' : ''}
-                      >
+              >
                         <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          {isLoading ? (
-                            <>
-                              <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
                               {language === 'ar' ? 'جاري النشر...' : 'Publishing...'}
-                            </>
-                          ) : (
-                            <>
+                    </>
+                  ) : (
+                    <>
                               {language === 'ar' ? 'نشر الحملة' : 'Publish Campaign'}
                               {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
-                            </>
-                          )}
-                        </span>
-                      </GlowButton>
+                    </>
+                  )}
+                </span>
+              </GlowButton>
                       
                       {/* Tooltip for disabled state */}
                       {!selectedAccount && (
                         <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block">
                           <div className="bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
                             {language === 'ar' ? 'يرجى اختيار حساب أولاً' : 'Please select an account first'}
-                          </div>
+            </div>
                         </div>
                       )}
                       {selectedAccount && !isAccountActive && (

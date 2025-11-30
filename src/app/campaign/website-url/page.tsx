@@ -724,7 +724,7 @@ const WebsiteUrlPage: React.FC = () => {
                         <p className="text-sm font-semibold text-white">{language === 'ar' ? 'رابط صحيح' : 'Valid URL'}</p>
                         <p className="text-sm text-white/80">{language === 'ar' ? 'تنسيق الرابط صحيح' : 'URL format is correct'}</p>
                       </div>
-                    </div>
+                  </div>
                   </CardItem>
                 )}
               </div>

@@ -169,9 +169,9 @@ const CampaignNewPage: React.FC = () => {
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-3 sm:mb-6">
+        <div className="text-center mb-2 sm:mb-6">
           <h1 
-            className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white"
+            className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white"
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {t.campaign?.chooseCampaignType || 'Choose Your Campaign Type'}
