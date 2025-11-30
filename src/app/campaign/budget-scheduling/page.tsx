@@ -1088,26 +1088,26 @@ const BudgetSchedulingPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-black" dir="ltr">
+    <div className="min-h-screen bg-black overflow-x-hidden" dir="ltr">
       {/* Campaign Progress */}
       <CampaignProgress currentStep={2} totalSteps={3} />
       
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-5xl">
         
         {/* Header */}
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="text-center mb-6 sm:mb-10">
+          <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
             {language === 'ar' ? 'أطلق إعلاناتك باختيار ميزانية إعلانية يومية' : 'Launch your ads by selecting a daily ad budget'}
           </h2>
         </div>
 
         {/* Currency Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-10 max-w-4xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-10 max-w-4xl mx-auto">
           {currencies.map((curr) => (
             <button
               key={curr}
               onClick={() => setCurrency(curr)}
-              className={`px-4 py-2 rounded-lg font-bold transition-all duration-200 ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base transition-all duration-200 ${
                 currency === curr
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 hover:scale-105'
@@ -1118,14 +1118,14 @@ const BudgetSchedulingPage: React.FC = () => {
           ))}
           <button
             onClick={() => setShowCustomModal(true)}
-            className="px-4 py-2 rounded-lg font-bold ml-2 transition-all duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-110 active:scale-95"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base ml-1 sm:ml-2 transition-all duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-110 active:scale-95"
           >
-            {language === 'ar' ? 'تحديد ميزانية مخصصة' : 'Set a custom budget'}
+            {language === 'ar' ? 'ميزانية مخصصة' : 'Custom budget'}
           </button>
         </div>
 
         {/* Budget Options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 relative max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12 relative max-w-4xl mx-auto">
           {budgetOptions.map((option, index) => {
             const gradients = [
               'bg-gradient-to-br from-yellow-500 to-orange-600',      // $5

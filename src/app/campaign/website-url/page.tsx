@@ -611,15 +611,15 @@ const WebsiteUrlPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black overflow-x-hidden">
       {/* Campaign Progress */}
       <CampaignProgress currentStep={0} totalSteps={3} />
       
-      <div className="container mx-auto px-4 py-8" dir="ltr">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="ltr">
         
         {/* Header */}
-          <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
+          <div className="text-center mb-4 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-4">
             {language === 'ar' ? 'ما هو رابط موقعك الإلكتروني؟' : 'What is your website URL?'}
           </h2>
         </div>

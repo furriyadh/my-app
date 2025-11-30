@@ -163,15 +163,15 @@ const CampaignNewPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-black" dir="ltr">
+    <div className="min-h-screen bg-black overflow-x-hidden" dir="ltr">
       {/* Campaign Progress */}
       <CampaignProgress currentStep={0} totalSteps={3} />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4 sm:mb-8">
           <h1 
-            className="text-3xl font-bold text-gray-900 dark:text-white mb-2"
+            className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {t.campaign?.chooseCampaignType || 'Choose Your Campaign Type'}
@@ -179,13 +179,13 @@ const CampaignNewPage: React.FC = () => {
         </div>
 
         {/* Campaign Type Selection */}
-        <div className="max-w-4xl mx-auto">
-          {/* ScrollList for Campaign Types */}
-          <div className="flex justify-center">
-            <ScrollList
+          <div className="max-w-4xl mx-auto">
+            {/* ScrollList for Campaign Types */}
+            <div className="flex justify-center">
+              <ScrollList
               data={CAMPAIGN_TYPES}
                 renderItem={(campaignType: CampaignType, index: number) => {
-                const colors = [
+                  const colors = [
                     'bg-gradient-to-br from-yellow-500 to-orange-600', // Search
                     'bg-gradient-to-br from-green-500 to-emerald-600',  // Display
                     'bg-gradient-to-br from-blue-500 to-cyan-600',   // Shopping
@@ -193,7 +193,7 @@ const CampaignNewPage: React.FC = () => {
                     'bg-gradient-to-br from-orange-500 to-red-600', // App
                     'bg-gradient-to-br from-pink-500 to-rose-600',   // Performance Max
                     'bg-gradient-to-br from-red-500 to-pink-600'     // Demand Gen
-                ];
+                  ];
                 
                 // Checkmark colors matching card gradients
                 const checkmarkColors = [
@@ -209,24 +209,24 @@ const CampaignNewPage: React.FC = () => {
                 const isSelected = selectedCampaignType === campaignType.type;
                 const IconComponent = campaignType.icon;
                 const badge = getCampaignBadge(campaignType.type);
-                
-                return (
-                  <div 
-                    className={`relative p-4 ${colors[index % colors.length]} rounded-xl cursor-pointer transition-all duration-150 ease-out h-full flex flex-col justify-between border ${
+                  
+                  return (
+                    <div 
+                    className={`relative p-3 sm:p-4 ${colors[index % colors.length]} rounded-xl cursor-pointer transition-all duration-150 ease-out h-full flex flex-col justify-between border ${
                         isSelected 
-                          ? 'ring-4 ring-gray-900/30 dark:ring-white/60 shadow-2xl shadow-gray-400/70 dark:shadow-black/40 scale-[1.02] border-gray-300 dark:border-white/30' 
+                          ? 'ring-2 sm:ring-4 ring-gray-900/30 dark:ring-white/60 shadow-2xl shadow-gray-400/70 dark:shadow-black/40 scale-[1.02] border-gray-300 dark:border-white/30' 
                           : 'shadow-lg shadow-gray-300/60 dark:shadow-black/20 hover:shadow-xl hover:shadow-gray-400/70 dark:hover:shadow-black/30 hover:scale-[1.01] border-gray-200 dark:border-white/10'
-                    }`}
+                      }`}
                       onClick={() => handleCampaignTypeSelect(campaignType.type)}
-                  >
+                    >
                     {/* Professional Badge - Top Right */}
                     {badge && (
                       <div className="absolute -top-2 -right-2 z-10">
-                        <div className={`bg-gradient-to-r ${badge.bgGradient} text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg ring-2 ring-white/20 backdrop-blur-sm transform hover:scale-105 transition-all duration-200`}>
-                          <span className={`${badge.iconColor} [&>svg]:w-4 [&>svg]:h-4`}>
+                        <div className={`bg-gradient-to-r ${badge.bgGradient} text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 shadow-lg ring-2 ring-white/20 backdrop-blur-sm transform hover:scale-105 transition-all duration-200`}>
+                          <span className={`${badge.iconColor} [&>svg]:w-3 [&>svg]:h-3 sm:[&>svg]:w-4 sm:[&>svg]:h-4`}>
                             {badge.icon}
                           </span>
-                          <span className="text-xs font-bold drop-shadow-md">
+                          <span className="text-[10px] sm:text-xs font-bold drop-shadow-md">
                             {language === 'ar' ? badge.text_ar : badge.text}
                           </span>
                         </div>
@@ -235,55 +235,55 @@ const CampaignNewPage: React.FC = () => {
                     
                     {/* Professional Checkmark - Fixed position */}
                     {isSelected && (
-                      <div className="absolute top-1/2 -translate-y-1/2 right-4 z-10">
-                        <div className={`flex items-center justify-center w-8 h-8 ${checkmarkColors[index % checkmarkColors.length]} rounded-full shadow-lg ring-2 ring-white/30`}>
-                          <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                      <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 z-10">
+                        <div className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 ${checkmarkColors[index % checkmarkColors.length]} rounded-full shadow-lg ring-2 ring-white/30`}>
+                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={3} />
                         </div>
                       </div>
                     )}
                     
                     <div>
                       {/* Icon and Title */}
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center justify-center w-10 h-10">
-                          <IconComponent className="w-7 h-7 text-white drop-shadow-md" strokeWidth={2} />
+                      <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                        <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+                          <IconComponent className="w-5 h-5 sm:w-7 sm:h-7 text-white drop-shadow-md" strokeWidth={2} />
                         </div>
                         <h3 
-                          className="text-lg font-bold text-white drop-shadow-md text-left"
+                          className="text-base sm:text-lg font-bold text-white drop-shadow-md text-left"
                           dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           {isRTL ? campaignType.name : campaignType.name_en}
                         </h3>
                       </div>
                       <p 
-                        className="text-white/90 text-sm leading-relaxed drop-shadow text-left"
+                        className="text-white/90 text-xs sm:text-sm leading-relaxed drop-shadow text-left line-clamp-2"
                         dir={isRTL ? 'rtl' : 'ltr'}
                       >
                           {getCampaignDescription(campaignType.type)}
                       </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              }}
-              itemHeight={120}
-            />
-          </div>
+                  );
+                }}
+                itemHeight={100}
+              />
+            </div>
 
-          {/* Navigation Button */}
-          <div className="mt-8 flex justify-center">
-            <GlowButton
-              onClick={handleNext}
-              disabled={!selectedCampaignType}
-              variant="blue"
-            >
-              <span className="flex items-center gap-2">
+            {/* Navigation Button */}
+            <div className="mt-4 sm:mt-8 flex justify-center">
+              <GlowButton
+                onClick={handleNext}
+                disabled={!selectedCampaignType}
+                variant="blue"
+              >
+                <span className="flex items-center gap-2">
                 {t.campaign?.nextStep || 'Next Step'}
-                <ArrowRight className="w-5 h-5" />
-              </span>
-            </GlowButton>
-          </div>
+                  <ArrowRight className="w-5 h-5" />
+                </span>
+              </GlowButton>
+            </div>
 
-        </div>
+          </div>
       </div>
     </div>
   );

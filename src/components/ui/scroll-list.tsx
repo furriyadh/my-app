@@ -102,13 +102,15 @@ const ScrollList = <T,>({
   return (
     <div
       ref={listRef}
-      className="scroll-list__wrp scrollbar-hidden mx-auto w-full scroll-smooth"
+      className="scroll-list__wrp scrollbar-hidden mx-auto w-full scroll-smooth touch-pan-y"
       style={{ 
         height: "500px", 
         overflowY: "auto",
+        overflowX: "hidden", // Prevent horizontal scroll
         padding: "10px 0",
         scrollBehavior: "smooth",
-        WebkitOverflowScrolling: "touch"
+        WebkitOverflowScrolling: "touch",
+        touchAction: "pan-y", // Only allow vertical touch scrolling
       }}
     >
       {data.map((item, index) => {
@@ -132,7 +134,7 @@ const ScrollList = <T,>({
         return (
           <motion.div
             key={index}
-            className="scroll-list__item mx-auto w-full max-w-2xl mb-1"
+            className="scroll-list__item mx-auto w-full max-w-2xl px-2 sm:px-4 mb-1"
             variants={itemVariants}
             initial="hidden"
             animate={variant}
