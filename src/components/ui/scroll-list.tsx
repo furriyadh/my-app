@@ -123,8 +123,8 @@ const ScrollList = <T,>({
     switch (screenSize) {
       case 'mobile':
         return {
-          containerHeight: "450px",
-          itemHeightMultiplier: 0.58,
+          containerHeight: "500px",
+          itemHeightMultiplier: 0.65,
           padding: "px-3"
         };
       case 'tablet':
@@ -176,7 +176,7 @@ const ScrollList = <T,>({
         return (
           <motion.div
             key={index} // Unique key for React list rendering
-            className={`scroll-list__item mx-auto max-w-3xl ${responsive.padding}`}
+            className={`scroll-list__item mx-auto max-w-3xl ${responsive.padding} mb-3 sm:mb-4`}
             variants={itemVariants} // Apply defined animation variants
             initial="hidden" // Initial animation state
             animate={variant} // Animate to this variant based on scroll position

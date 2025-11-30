@@ -212,7 +212,7 @@ const CampaignNewPage: React.FC = () => {
                   
                   return (
                     <div 
-                    className={`relative p-3 sm:p-4 ${colors[index % colors.length]} rounded-xl cursor-pointer transition-all duration-150 ease-out h-full flex flex-col justify-center border ${
+                    className={`relative p-4 sm:p-5 ${colors[index % colors.length]} rounded-xl cursor-pointer transition-all duration-150 ease-out h-full flex flex-col justify-center border ${
                         isSelected 
                           ? 'ring-2 sm:ring-4 ring-gray-900/30 dark:ring-white/60 shadow-2xl shadow-gray-400/70 dark:shadow-black/40 scale-[1.02] border-gray-300 dark:border-white/30' 
                           : 'shadow-lg shadow-gray-300/60 dark:shadow-black/20 hover:shadow-xl hover:shadow-gray-400/70 dark:hover:shadow-black/30 hover:scale-[1.01] border-gray-200 dark:border-white/10'
@@ -242,7 +242,7 @@ const CampaignNewPage: React.FC = () => {
                       </div>
                     )}
                     
-                      <div>
+                      <div className="space-y-2">
                       {/* Icon and Title */}
                       <div className="flex items-center gap-2 sm:gap-3">
                         <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
@@ -256,7 +256,7 @@ const CampaignNewPage: React.FC = () => {
                         </h3>
                       </div>
                       <p 
-                        className="text-white/90 text-xs sm:text-sm leading-snug sm:leading-relaxed drop-shadow text-left mt-1 line-clamp-1 sm:line-clamp-2"
+                        className="text-white/90 text-xs sm:text-sm leading-snug sm:leading-relaxed drop-shadow text-left mt-2 line-clamp-2"
                         dir={isRTL ? 'rtl' : 'ltr'}
                       >
                           {getCampaignDescription(campaignType.type)}
@@ -265,7 +265,7 @@ const CampaignNewPage: React.FC = () => {
                     </div>
                   );
                 }}
-                itemHeight={110}
+                itemHeight={130}
               />
             </div>
 
