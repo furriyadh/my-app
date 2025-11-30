@@ -78,11 +78,21 @@ export async function POST(request: NextRequest) {
         });
         
         // حفظ access token الجديد
+        // 📱 مدة طويلة للحفاظ على الجلسة على جميع الأجهزة
         response.cookies.set('oauth_access_token', tokenData.access_token, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: 'strict',    // يمنع هجمات CSRF
-          maxAge: tokenData.expires_in || 3600,
+          sameSite: 'lax',       // 🔧 lax للتوافق مع OAuth flow
+          maxAge: 7 * 24 * 3600, // 📱 7 أيام (سيتم تجديده تلقائياً عند الحاجة)
+          path: '/'
+        });
+        
+        // تجديد حالة الاتصال
+        response.cookies.set('google_ads_connected', 'true', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 365 * 24 * 3600, // 📱 سنة كاملة
           path: '/'
         });
         
@@ -92,7 +102,7 @@ export async function POST(request: NextRequest) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 3600
+            maxAge: 7 * 24 * 3600 // 📱 7 أيام
           });
         }
         
@@ -101,7 +111,7 @@ export async function POST(request: NextRequest) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 3600
+            maxAge: 7 * 24 * 3600 // 📱 7 أيام
           });
         }
         

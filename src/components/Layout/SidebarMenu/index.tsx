@@ -43,8 +43,20 @@ const SidebarMenu: React.FC = React.memo(() => {
   // Use translation hook
   const { t, language, isRTL } = useTranslation();
   
-  // State for sidebar open/close
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  // State for sidebar open/close - Use localStorage to persist state
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(() => {
+    // Initialize based on screen size and localStorage (client-side only)
+    if (typeof window !== 'undefined') {
+      // Check localStorage first
+      const savedState = localStorage.getItem('sidebarOpen');
+      if (savedState !== null) {
+        return savedState === 'true';
+      }
+      // Otherwise use screen size
+      return window.innerWidth >= 1280; // xl breakpoint
+    }
+    return true; // Default for SSR
+  });
   
   // State for Quick Search
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -58,29 +70,42 @@ const SidebarMenu: React.FC = React.memo(() => {
     hoverGradient: 'from-yellow-400 to-orange-500'
   });
   
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  // Toggle sidebar and save to localStorage
+  const toggleSidebar = React.useCallback(() => {
+    setIsSidebarOpen(prev => {
+      const newState = !prev;
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebarOpen', String(newState));
+        // Prevent body scroll on mobile when sidebar is open
+        if (window.innerWidth < 1280) {
+          if (newState) {
+            document.body.classList.add('sidebar-open');
+          } else {
+            document.body.classList.remove('sidebar-open');
+          }
+        }
+      }
+      return newState;
+    });
+  }, []);
 
-
-  // Handle responsive sidebar - close on mobile by default
+  // Handle responsive sidebar - only listen to resize events (not initial check)
   React.useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1280) { // xl breakpoint
+      // Only auto-close on mobile, don't auto-open
+      if (window.innerWidth < 1280 && isSidebarOpen) {
         setIsSidebarOpen(false);
-      } else {
-        setIsSidebarOpen(true);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('sidebarOpen', 'false');
+        }
       }
     };
     
-    // Check on mount
-    handleResize();
-    
-    // Listen to resize
+    // Only listen to resize (don't change on mount)
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isSidebarOpen]);
 
   // Update campaign color based on selected campaign type
   React.useEffect(() => {
@@ -443,6 +468,31 @@ const SidebarMenu: React.FC = React.memo(() => {
 
   return (
     <>
+      {/* Custom Scrollbar Styles */}
+      <style jsx global>{`
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.5);
+          border-radius: 3px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(139, 92, 246, 0.7);
+        }
+        
+        /* Prevent body scroll when sidebar is open on mobile */
+        @media (max-width: 1279px) {
+          body.sidebar-open {
+            overflow: hidden;
+          }
+        }
+      `}</style>
+      
       {/* Hamburger Button - Beautiful & Floating */}
       {!isSidebarOpen && (
         <motion.button
@@ -481,13 +531,15 @@ const SidebarMenu: React.FC = React.memo(() => {
               : -360
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed top-0 h-screen w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl ${
+        className={`fixed top-0 h-screen w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl overflow-hidden ${
           isRTL 
             ? 'right-0 border-l' 
             : 'left-0 border-r'
         }`}
         style={{
-          backgroundColor: '#000000'
+          backgroundColor: '#000000',
+          position: 'fixed',
+          willChange: 'transform'
         }}
       >
         {/* Close Button - Beautiful */}
@@ -574,7 +626,7 @@ const SidebarMenu: React.FC = React.memo(() => {
         )}
 
       {/* Sidebar navigation */}
-      <div className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto p-2'>
+      <div className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto overflow-x-hidden p-2 sidebar-scroll'>
         {/* All Tabs */}
         <div className='flex flex-col gap-1'>
           {filteredTabs.map((tab) => {

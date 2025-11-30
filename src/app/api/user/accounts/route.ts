@@ -255,6 +255,7 @@ export async function GET(request: NextRequest) {
     if (refreshToken) {
       try {
         // محاولة تجديد access token
+        console.log('🔄 محاولة تجديد access token باستخدام refresh token...');
         const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
           method: 'POST',
           headers: {
@@ -290,12 +291,37 @@ export async function GET(request: NextRequest) {
             }
           };
           
-          return NextResponse.json(formattedAccounts, { 
+          // 📱 حفظ الـ access token الجديد في cookies للحفاظ على الجلسة
+          const response = NextResponse.json(formattedAccounts, { 
             status: 200,
             headers: {
               'Content-Type': 'application/json',
             }
           });
+          
+          // 📱 حفظ access token الجديد - مدة طويلة للحفاظ على الجلسة على جميع الأجهزة
+          response.cookies.set('oauth_access_token', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 3600, // 📱 7 أيام
+            path: '/'
+          });
+          
+          // 📱 تجديد حالة الاتصال
+          response.cookies.set('google_ads_connected', 'true', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 365 * 24 * 3600, // 📱 سنة كاملة
+            path: '/'
+          });
+          
+          console.log('💾 تم حفظ access token الجديد في cookies');
+          return response;
+        } else {
+          const errorText = await tokenResponse.text();
+          console.error('❌ فشل تجديد access token:', tokenResponse.status, errorText);
         }
       } catch (error) {
         console.error('❌ خطأ في تجديد access token:', error);

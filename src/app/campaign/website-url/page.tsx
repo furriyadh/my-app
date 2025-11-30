@@ -24,8 +24,6 @@ const WebsiteUrlPage: React.FC = () => {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [urlErrorMessage, setUrlErrorMessage] = useState('');
   const [isUrlVerified, setIsUrlVerified] = useState(false);
-  const [isDetectingLanguage, setIsDetectingLanguage] = useState(false);
-  const [analyzeProgress, setAnalyzeProgress] = useState(0);
   const { t, language, isRTL } = useTranslation();
 
   // Dynamic colors based on campaign type
@@ -444,10 +442,6 @@ const WebsiteUrlPage: React.FC = () => {
       return;
     }
 
-    // Start detecting language
-    setIsDetectingLanguage(true);
-    setAnalyzeProgress(0);
-
     try {
       // Save basic data first
       const campaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
@@ -461,18 +455,11 @@ const WebsiteUrlPage: React.FC = () => {
       
       localStorage.setItem('campaignData', JSON.stringify(updatedData));
       
-      // Simulate progress animation
-      const progressInterval = setInterval(() => {
-        setAnalyzeProgress(prev => {
-          if (prev >= 95) return 95; // Stop at 95% until completion
-          return prev + 5;
-        });
-      }, 150);
+      // Navigate immediately - no waiting!
+      router.push('/campaign/location-targeting');
       
-      // Analyze website and generate forecast (REAL API from google-ads-official)
-      console.log('🚀 Analyzing website and generating forecast...');
-      
-      const startTime = Date.now();
+      // Start background analysis (don't wait for it)
+      console.log('🚀 Starting background website analysis...');
       
       // Get selected locations from localStorage
       const selectedLocationsStr = localStorage.getItem('selectedLocations');
@@ -493,8 +480,8 @@ const WebsiteUrlPage: React.FC = () => {
       const storedCampaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
       const dailyBudget = storedCampaignData.dailyBudget || 15;
       
-      // Start combined analysis (language detection + keyword generation + forecast)
-      const analysisPromise = fetch(getApiUrl('/api/ai-campaign/analyze-website-and-forecast'), {
+      // Start combined analysis in background (language detection + keyword generation + forecast)
+      fetch(getApiUrl('/api/ai-campaign/analyze-website-and-forecast'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -507,7 +494,7 @@ const WebsiteUrlPage: React.FC = () => {
         .then(response => response.json())
         .then(result => {
           if (result.success) {
-            console.log(`✅ Website Analysis Complete!`);
+            console.log(`✅ Background Website Analysis Complete!`);
             console.log(`   📊 Generated ${result.keywords.length} keywords from website`);
             console.log(`   💰 Monthly Impressions: ${result.forecast.monthly.impressions.toLocaleString()}`);
             console.log(`   🖱️ Monthly Clicks: ${result.forecast.monthly.clicks.toLocaleString()}`);
@@ -541,17 +528,17 @@ const WebsiteUrlPage: React.FC = () => {
             };
             
             localStorage.setItem('campaignData', JSON.stringify(finalData));
-            console.log('💾 Website analysis and forecast saved to localStorage');
+            console.log('💾 Background website analysis and forecast saved to localStorage');
           } else {
-            console.log('⚠️ Website analysis failed:', result.error);
+            console.log('⚠️ Background website analysis failed:', result.error);
           }
         })
         .catch(error => {
-          console.log('⚠️ Website analysis error:', error);
+          console.log('⚠️ Background website analysis error:', error);
         });
       
-      // Also detect language separately (optional, for UI display)
-      const languageDetectionPromise = fetch(getApiUrl('/api/ai-campaign/detect-website-language'), {
+      // Also detect language separately in background (optional, for UI display)
+      fetch(getApiUrl('/api/ai-campaign/detect-website-language'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ website_url: fullUrl })
@@ -559,7 +546,7 @@ const WebsiteUrlPage: React.FC = () => {
         .then(response => response.json())
         .then(result => {
           if (result.success) {
-            console.log(`✅ Detected language: ${result.language_code} (ID: ${result.language_id})`);
+            console.log(`✅ Background language detection: ${result.language_code} (ID: ${result.language_id})`);
             
             const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
             const finalData = {
@@ -575,35 +562,14 @@ const WebsiteUrlPage: React.FC = () => {
           }
         })
         .catch(error => {
-          console.log('⚠️ Language detection error:', error);
+          console.log('⚠️ Background language detection error:', error);
         });
-      
-      // Wait for both promises (minimum 3 seconds for UX)
-      await Promise.all([
-        analysisPromise,
-        languageDetectionPromise,
-        new Promise(resolve => setTimeout(resolve, 3000))
-      ]);
-      
-      // Complete progress
-      clearInterval(progressInterval);
-      setAnalyzeProgress(100);
-      
-      const totalTime = Date.now() - startTime;
-      console.log(`✅ Complete analysis in ${totalTime}ms, navigating...`);
-      
-      // Small delay to show 100%
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Navigate to location targeting (language detected automatically)
-      router.push('/campaign/location-targeting');
       
     } catch (error) {
       console.log('⚠️ Error:', error);
-      // Still navigate even if detection fails
+      // Still navigate even if there's an error
       router.push('/campaign/location-targeting');
     }
-    // Note: Don't close modal here - let it stay until page navigation completes
   };
 
   const handleBack = () => {
@@ -611,11 +577,39 @@ const WebsiteUrlPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black overflow-x-hidden">
+    <>
+      {/* Prevent zoom on mobile input focus */}
+      <style jsx global>{`
+        @media screen and (max-width: 768px) {
+          /* Prevent zoom on input focus - font-size 16px prevents iOS zoom */
+          input[type="url"],
+          input[type="text"],
+          input[type="tel"] {
+            font-size: 16px !important;
+            transform: translateZ(0);
+            -webkit-appearance: none;
+          }
+          
+          /* Keep input container visible when keyboard opens */
+          .url-input-container {
+            position: relative;
+            z-index: 10;
+          }
+        }
+      `}</style>
+      
+      <div className="min-h-screen bg-black overflow-x-hidden" style={{ 
+        position: 'relative',
+        minHeight: '100vh',
+        minHeight: '100dvh' // Use dynamic viewport height for mobile
+      }}>
       {/* Campaign Progress */}
       <CampaignProgress currentStep={0} totalSteps={3} />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="ltr">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="ltr" style={{
+          position: 'relative',
+          zIndex: 1
+        }}>
         
         {/* Header */}
           <div className="text-center mb-3 sm:mb-6">
@@ -625,10 +619,16 @@ const WebsiteUrlPage: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto url-input-container" style={{
+          position: 'relative',
+          zIndex: 2
+        }}>
           {/* URL Input Card - Dynamic colors based on campaign type */}
           <CardContainer containerClassName="w-full mb-8" speed="medium">
-            <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`}>
+            <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
+              position: 'relative',
+              zIndex: 3
+            }}>
               <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
                 <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
               </CardItem>
@@ -685,7 +685,12 @@ const WebsiteUrlPage: React.FC = () => {
                               : 'border-white/30 focus:border-white/70 focus:ring-white/30'
                         }`}
                       autoFocus
-                      style={{ textOverflow: 'clip' }}
+                      style={{ 
+                        textOverflow: 'clip',
+                        fontSize: '16px', // Prevent zoom on iOS
+                        transform: 'translateZ(0)', // Force hardware acceleration
+                        WebkitAppearance: 'none' // Remove iOS styling
+                      }}
                     />
                     
                     {/* Status Icon */}
@@ -868,7 +873,7 @@ const WebsiteUrlPage: React.FC = () => {
             
             <GlowButton
               onClick={handleNext}
-            disabled={!websiteUrl || !isValidUrl || !isUrlVerified || isDetectingLanguage}
+              disabled={!websiteUrl || !isValidUrl || !isUrlVerified}
               variant="blue"
             >
               <span className="flex items-center gap-2">
@@ -879,6 +884,7 @@ const WebsiteUrlPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

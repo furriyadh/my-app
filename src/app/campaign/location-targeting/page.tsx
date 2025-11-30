@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Search, X, Plus, Trash2, ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Search, X, Plus, Trash2, ArrowRight, CheckCircle, ChevronDown } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import { getCode, getName, getData } from 'country-list';
 import GlowButton from '@/components/ui/glow-button';
@@ -34,6 +34,7 @@ interface SearchResult {
 const LocationTargetingPage: React.FC = () => {
   const router = useRouter();
   const { t, language, isRTL } = useTranslation();
+  const [openRadiusDropdown, setOpenRadiusDropdown] = React.useState<string | null>(null);
   
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -1915,6 +1916,23 @@ const LocationTargetingPage: React.FC = () => {
     };
   }, [searchQuery, searchLocations]);
 
+  // Close radius dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openRadiusDropdown) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.radius-dropdown-container')) {
+          setOpenRadiusDropdown(null);
+        }
+      }
+    };
+
+    if (openRadiusDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [openRadiusDropdown]);
+
   // Load available countries on component mount
   useEffect(() => {
     const countries = getAllCountries();
@@ -2152,7 +2170,7 @@ const LocationTargetingPage: React.FC = () => {
         </div>
 
         {/* Main Card */}
-        <div className="bg-white dark:bg-black rounded-xl shadow-2xl border-2 border-gray-300 dark:border-white p-3 sm:p-6 max-w-3xl mx-auto mb-4 sm:mb-8">
+        <div className="bg-white dark:bg-black rounded-xl shadow-2xl border-2 border-gray-300 dark:border-white p-3 sm:p-6 max-w-3xl mx-auto mb-4 sm:mb-8" style={{ overflow: 'visible' }}>
           {/* Location Search Section */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3 drop-shadow-sm text-left">
@@ -2184,12 +2202,13 @@ const LocationTargetingPage: React.FC = () => {
 
             {/* Selected Locations Tags */}
             {selectedLocations.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4 relative" style={{ zIndex: 10 }}>
                 {selectedLocations.map((location) => (
                   <div 
                     key={location.id} 
-                    className="flex items-center space-x-2 bg-white dark:bg-black backdrop-blur-md rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-200"
+                    className="flex items-center space-x-2 bg-white dark:bg-black backdrop-blur-md rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-200 relative"
                     onClick={() => focusOnLocation(location)}
+                    style={{ overflow: 'visible' }}
                   >
                     <ReactCountryFlag 
                       countryCode={location.countryCode}
@@ -2203,23 +2222,49 @@ const LocationTargetingPage: React.FC = () => {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {location.name}
                     </span>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 relative z-10">
                       {location.locationType !== 'country' && (
-                        <select
-                          value={location.radius}
-                          onChange={(e) => {
-                            const newRadius = Number(e.target.value);
-                            updateCircleRadius(location.id, newRadius);
-                          }}
-                          className="text-xs bg-white dark:bg-black backdrop-blur-md border border-gray-300 dark:border-gray-600 rounded px-1 py-0.5 text-gray-700 dark:text-gray-300"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {radiusOptions.map(radius => (
-                            <option key={radius} value={radius}>
-                              {radius}km+
-                            </option>
-                          ))}
-                        </select>
+                        <div className="relative radius-dropdown-container z-[100]">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenRadiusDropdown(openRadiusDropdown === location.id ? null : location.id);
+                            }}
+                            className="text-xs bg-white dark:bg-gray-800 backdrop-blur-md border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-1 min-w-[70px] justify-between"
+                          >
+                            <span>{location.radius}km+</span>
+                            <ChevronDown className={`w-3 h-3 transition-transform ${openRadiusDropdown === location.id ? 'rotate-180' : ''}`} />
+                          </button>
+                          
+                          {/* Custom Dropdown */}
+                          {openRadiusDropdown === location.id && (
+                            <div 
+                              className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-lg shadow-2xl z-[9999] min-w-[70px] overflow-hidden radius-dropdown-container"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                position: 'absolute',
+                                zIndex: 9999
+                              }}
+                            >
+                              {radiusOptions.map(radius => (
+                                <button
+                                  key={radius}
+                                  onClick={() => {
+                                    updateCircleRadius(location.id, radius);
+                                    setOpenRadiusDropdown(null);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors ${
+                                    location.radius === radius
+                                      ? 'bg-blue-500 text-white dark:bg-blue-600 dark:text-white'
+                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+                                  }`}
+                                >
+                                  {radius}km+
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       )}
                       <button
                         onClick={() => removeLocation(location.id)}

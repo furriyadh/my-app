@@ -184,31 +184,34 @@ export async function GET(request: NextRequest) {
         
         // حفظ OAuth access token في HttpOnly cookie
         // 🔧 sameSite: 'lax' للسماح بالوصول بعد OAuth redirect
+        // 📱 مدة طويلة للحفاظ على الجلسة على جميع الأجهزة (لابتوب + هاتف)
         successResponse.cookies.set('oauth_access_token', tokenData.access_token, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
           sameSite: 'lax',       // lax للسماح بالوصول في same-site navigation
-          maxAge: 3600,          // 1 hour
+          maxAge: 7 * 24 * 3600, // 📱 7 أيام بدلاً من ساعة (سيتم تجديده تلقائياً)
           path: '/'
         });
         
         // إضافة cookie لحالة الاتصال (غير HttpOnly للوصول من JavaScript)
+        // 📱 مدة طويلة جداً للحفاظ على حالة الاتصال
         successResponse.cookies.set('google_ads_connected', 'true', {
           httpOnly: false, // يجب أن يكون false ليكون متاحاً في JavaScript
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',       // lax للسماح بالوصول في same-site navigation
-          maxAge: 34560000, // 400 يوم (أقصى مدة)
+          maxAge: 365 * 24 * 3600, // 📱 سنة كاملة (أقصى مدة عملية)
           path: '/'
         });
       }
       
       if (tokenData.refresh_token) {
         // حفظ OAuth refresh token في HttpOnly cookie
+        // 📱 مدة طويلة جداً - refresh token هو المفتاح للحفاظ على الجلسة
         successResponse.cookies.set('oauth_refresh_token', tokenData.refresh_token, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
           sameSite: 'lax',       // lax للسماح بالوصول في same-site navigation
-          maxAge: 30 * 24 * 3600, // 30 يوم
+          maxAge: 180 * 24 * 3600, // 📱 6 أشهر (refresh token من Google صالح لفترة طويلة)
           path: '/'
         });
       }
@@ -233,11 +236,12 @@ export async function GET(request: NextRequest) {
           });
           
           // حفظ معلومات المستخدم في cookies - مدة طويلة لتتوافق مع google_ads_connected
+          // 📱 مدة طويلة للحفاظ على معلومات المستخدم على جميع الأجهزة
           successResponse.cookies.set('oauth_user_info', JSON.stringify(userInfo), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 30 * 24 * 3600 // 30 يوم - نفس مدة refresh_token
+            maxAge: 180 * 24 * 3600 // 📱 6 أشهر - نفس مدة refresh_token
           });
           
           // حفظ بيانات المستخدم في Supabase باستخدام Service Role (يتجاوز RLS)

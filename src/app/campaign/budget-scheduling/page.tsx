@@ -1539,26 +1539,26 @@ const BudgetSchedulingPage: React.FC = () => {
           <GlowButton
             onClick={async () => {
               try {
-                // Get real CPC from localStorage (calculated from real Google Ads data)
-                const realCPC = localStorage.getItem('realCPC');
-                const realCPCValue = realCPC ? parseFloat(realCPC) : null;
-                
-                const updatedData = {
-                  ...campaignData,
-                  dailyBudget: selectedBudget, // Display budget in selected currency
-                  dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
-                  currency: currency,
-                  realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
-                  maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
-                };
-                
-                console.log('💰 Campaign Data with Real CPC:', {
-                  dailyBudgetUSD: selectedBudgetUSD,
-                  realCPC: realCPCValue,
-                  maxCpcBid: realCPCValue
-                });
-                
-                localStorage.setItem('campaignData', JSON.stringify(updatedData));
+              // Get real CPC from localStorage (calculated from real Google Ads data)
+              const realCPC = localStorage.getItem('realCPC');
+              const realCPCValue = realCPC ? parseFloat(realCPC) : null;
+              
+              const updatedData = {
+                ...campaignData,
+                dailyBudget: selectedBudget, // Display budget in selected currency
+                dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
+                currency: currency,
+                realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
+                maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
+              };
+              
+              console.log('💰 Campaign Data with Real CPC:', {
+                dailyBudgetUSD: selectedBudgetUSD,
+                realCPC: realCPCValue,
+                maxCpcBid: realCPCValue
+              });
+              
+              localStorage.setItem('campaignData', JSON.stringify(updatedData));
                 
                 // Get keywords from localStorage
                 const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
@@ -1624,12 +1624,12 @@ const BudgetSchedulingPage: React.FC = () => {
                     console.log(`   ✅ Found ${generatedContent.headlines.length} headlines and ${generatedContent.descriptions.length} descriptions`);
                   }
                 }
-                
-                // Set flag for campaign creation in progress
-                localStorage.setItem('creatingCampaign', 'true');
-                
-                // Navigate to preview page to review campaign before publishing
-                router.push('/campaign/preview');
+              
+              // Set flag for campaign creation in progress
+              localStorage.setItem('creatingCampaign', 'true');
+              
+              // Navigate to preview page to review campaign before publishing
+              router.push('/campaign/preview');
               } catch (error) {
                 console.error('❌ Error generating campaign content:', error);
                 // Still navigate to preview even if content generation fails
