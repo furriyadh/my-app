@@ -1016,12 +1016,36 @@ def get_keyword_cpc_data():
                 # Extract basic info from website
                 import requests
                 from bs4 import BeautifulSoup
+                from urllib.parse import urlparse
                 
                 if not website_url.startswith(('http://', 'https://')):
                     website_url = 'https://' + website_url
                 
+                # Try to fetch with www fallback
+                urls_to_try = [website_url]
+                parsed = urlparse(website_url)
+                if not parsed.netloc.startswith('www.'):
+                    www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
+                    if parsed.query:
+                        www_url += f"?{parsed.query}"
+                    urls_to_try.append(www_url)
+                
+                response = None
                 try:
-                    response = requests.get(website_url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+                    for url_attempt in urls_to_try:
+                        try:
+                            logger.info(f"🔗 Trying to fetch: {url_attempt}")
+                            response = requests.get(url_attempt, timeout=15, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+                            if response.status_code == 200:
+                                logger.info(f"✅ Successfully fetched: {url_attempt}")
+                                break
+                        except Exception as e:
+                            logger.warning(f"⚠️ Failed {url_attempt}: {e}")
+                            continue
+                    
+                    if not response or response.status_code != 200:
+                        raise Exception("Could not fetch website")
+                    
                     soup = BeautifulSoup(response.content, 'html.parser')
                     
                     # Extract title and meta description for context
@@ -1894,55 +1918,120 @@ def analyze_website_and_forecast():
             language_rn = googleads_service.language_constant_path(language_id)
             
             # Prepare keyword ideas request with URL seed (EXACTLY like google-ads-official)
-            keyword_ideas_request = client.get_type("GenerateKeywordIdeasRequest")
-            mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
-            keyword_ideas_request.customer_id = mcc_customer_id
-            keyword_ideas_request.language = language_rn
-            keyword_ideas_request.geo_target_constants = location_rns
-            keyword_ideas_request.include_adult_keywords = False
-            keyword_ideas_request.keyword_plan_network = (
-                client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
-            )
+            from urllib.parse import urlparse
             
-            # Use URL seed to generate keywords from website (EXACTLY like line 102 in example)
-            keyword_ideas_request.url_seed.url = website_url
+            # Try with www fallback for URL seed
+            urls_to_try = [website_url]
+            parsed = urlparse(website_url)
+            if not parsed.netloc.startswith('www.'):
+                www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
+                if parsed.query:
+                    www_url += f"?{parsed.query}"
+                urls_to_try.append(www_url)
             
-            logger.info(f"🚀 Step 1: Generating keyword ideas from website URL...")
-            
-            # Call API to get keyword ideas
-            keyword_ideas = keyword_plan_idea_service.generate_keyword_ideas(
-                request=keyword_ideas_request
-            )
-            
-            # Extract keywords and metrics
             keywords_data = []
             keywords_list = []
             
-            for idea in keyword_ideas:
-                keyword_text = idea.text
-                metrics = idea.keyword_idea_metrics
-                competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
-                
-                keywords_list.append(keyword_text)
-                keywords_data.append({
-                    'keyword': keyword_text,
-                    'avg_monthly_searches': metrics.avg_monthly_searches,
-                    'competition': competition_value
-                })
-                
-                # Limit to top 10 keywords
-                if len(keywords_list) >= 10:
-                    break
+            for url_attempt in urls_to_try:
+                try:
+                    keyword_ideas_request = client.get_type("GenerateKeywordIdeasRequest")
+                    mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
+                    keyword_ideas_request.customer_id = mcc_customer_id
+                    keyword_ideas_request.language = language_rn
+                    keyword_ideas_request.geo_target_constants = location_rns
+                    keyword_ideas_request.include_adult_keywords = False
+                    keyword_ideas_request.keyword_plan_network = (
+                        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
+                    )
+                    
+                    # Use URL seed to generate keywords from website (EXACTLY like line 102 in example)
+                    keyword_ideas_request.url_seed.url = url_attempt
+                    
+                    logger.info(f"🚀 Step 1: Generating keyword ideas from URL: {url_attempt}")
+                    
+                    # Call API to get keyword ideas
+                    keyword_ideas = keyword_plan_idea_service.generate_keyword_ideas(
+                        request=keyword_ideas_request
+                    )
+                    
+                    # Extract keywords and metrics
+                    for idea in keyword_ideas:
+                        keyword_text = idea.text
+                        metrics = idea.keyword_idea_metrics
+                        competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
+                        
+                        keywords_list.append(keyword_text)
+                        keywords_data.append({
+                            'keyword': keyword_text,
+                            'avg_monthly_searches': metrics.avg_monthly_searches,
+                            'competition': competition_value
+                        })
+                        
+                        # Limit to top 10 keywords
+                        if len(keywords_list) >= 10:
+                            break
+                    
+                    if keywords_list:
+                        logger.info(f"✅ Successfully generated keywords from: {url_attempt}")
+                        break
+                        
+                except Exception as url_error:
+                    logger.warning(f"⚠️ Failed to generate keywords from {url_attempt}: {url_error}")
+                    continue
             
             logger.info(f"✅ Step 1 Complete: Generated {len(keywords_list)} keywords from URL")
             for kw_data in keywords_data[:5]:
                 logger.info(f"   🔑 {kw_data['keyword']}: {kw_data['avg_monthly_searches']:,} searches/month, {kw_data['competition']} competition")
             
+            # If still no keywords, try with domain name as keyword seed
+            if not keywords_list:
+                logger.warning("⚠️ No keywords from URL, trying with domain name as seed...")
+                try:
+                    # Extract domain and convert to keywords
+                    domain = parsed.netloc.replace('www.', '')
+                    domain_words = domain.split('.')[0].replace('-', ' ').replace('_', ' ')
+                    
+                    keyword_ideas_request2 = client.get_type("GenerateKeywordIdeasRequest")
+                    keyword_ideas_request2.customer_id = mcc_customer_id
+                    keyword_ideas_request2.language = language_rn
+                    keyword_ideas_request2.geo_target_constants = location_rns
+                    keyword_ideas_request2.include_adult_keywords = False
+                    keyword_ideas_request2.keyword_plan_network = (
+                        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
+                    )
+                    keyword_ideas_request2.keyword_seed.keywords.append(domain_words)
+                    
+                    logger.info(f"🔄 Trying keyword seed with: '{domain_words}'")
+                    
+                    keyword_ideas2 = keyword_plan_idea_service.generate_keyword_ideas(
+                        request=keyword_ideas_request2
+                    )
+                    
+                    for idea in keyword_ideas2:
+                        keyword_text = idea.text
+                        metrics = idea.keyword_idea_metrics
+                        competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
+                        
+                        keywords_list.append(keyword_text)
+                        keywords_data.append({
+                            'keyword': keyword_text,
+                            'avg_monthly_searches': metrics.avg_monthly_searches,
+                            'competition': competition_value
+                        })
+                        
+                        if len(keywords_list) >= 10:
+                            break
+                    
+                    logger.info(f"✅ Fallback generated {len(keywords_list)} keywords from domain")
+                except Exception as fallback_error:
+                    logger.error(f"❌ Fallback keyword generation failed: {fallback_error}")
+            
             if not keywords_list:
                 return jsonify({
                     'success': False,
                     'error': 'No keywords generated from website',
-                    'message': 'لم يتم توليد كلمات مفتاحية من الموقع'
+                    'message': 'لم يتم توليد كلمات مفتاحية من الموقع. جرب موقع آخر أو تأكد من صحة الرابط.',
+                    'suggestion': 'تأكد من أن الرابط يعمل ويمكن الوصول إليه'
                 }), 400
             
             # Step 2: Generate forecast metrics using keywords (EXACTLY like google-ads-official)
@@ -2083,121 +2172,253 @@ def detect_website_language():
         logger.info(f"🌍 Detecting language for website: {website_url}")
         
         # Fetch website content and detect language
-        import requests
+        import requests as http_requests
         from bs4 import BeautifulSoup
         import re
+        from urllib.parse import urlparse
         
-        detected_lang_code = 'en'  # Default to English
-        confidence = 'low'
-        text_content = ''  # Initialize to avoid scope issues
+        # Variables to track results
+        detected_lang_code = None
+        confidence = 'none'
+        text_content = ''
+        
+        # Fetch the website (20 second timeout)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'ar,en,fr,es,de,it,ja,ko,zh,*;q=0.9',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+        
+        # Try to fetch the website - with www fallback
+        response = None
+        urls_to_try = [website_url]
+        
+        # Add www variant if not present
+        parsed = urlparse(website_url)
+        if parsed.netloc and not parsed.netloc.startswith('www.'):
+            www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
+            if parsed.query:
+                www_url += f"?{parsed.query}"
+            urls_to_try.append(www_url)
+        
+        fetch_error_msg = None
+        for url_attempt in urls_to_try:
+            try:
+                logger.info(f"🔗 Fetching: {url_attempt}")
+                response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
+                if response.status_code == 200:
+                    logger.info(f"✅ Website fetched successfully: {response.status_code}")
+                    break
+            except Exception as fetch_error:
+                fetch_error_msg = str(fetch_error)
+                logger.warning(f"⚠️ Failed to fetch {url_attempt}: {fetch_error}")
+                response = None
+                continue
+        
+        if not response or response.status_code != 200:
+            logger.error(f"❌ Could not fetch website from any URL variant")
+            return jsonify({
+                'success': False,
+                'error': 'Could not fetch website',
+                'message': f'لم نتمكن من الوصول للموقع لتحليل اللغة. تأكد من صحة الرابط وأن الموقع يعمل.',
+                'detected_language': None,
+                'language_id': None,
+                'confidence': 'none',
+                'suggestion': 'جرب إضافة www. للرابط أو تأكد من أن الموقع يعمل',
+                'error_details': fetch_error_msg
+            }), 400
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Get HTML lang attribute (for reference only)
+        html_lang_attr = None
+        html_tag = soup.find('html')
+        if html_tag and html_tag.get('lang'):
+            html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
+            logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
+        
+        # Remove script, style, and navigation elements for cleaner text
+        for element in soup(['script', 'style', 'nav', 'noscript', 'iframe', 'svg', 'header', 'footer']):
+            element.decompose()
+        
+        # Get main content text
+        text_content = soup.get_text(separator=' ', strip=True)
+        # Clean up the text - remove extra whitespace
+        text_content = re.sub(r'\s+', ' ', text_content).strip()
+        logger.info(f"📝 Extracted {len(text_content)} chars of text content")
+        
+        if len(text_content) < 50:
+            logger.error(f"❌ Not enough text content to analyze language")
+            return jsonify({
+                'success': False,
+                'error': 'Not enough content',
+                'message': 'الموقع لا يحتوي على نص كافٍ لتحليل اللغة',
+                'detected_language': None,
+                'language_id': None,
+                'confidence': 'none'
+            }), 400
+        
+        # ============================================================
+        # SMART LANGUAGE DETECTION USING langdetect LIBRARY
+        # ============================================================
+        detected_lang_code = None
+        confidence = 'none'
         
         try:
-            # Fetch the website (5 second timeout for reliability)
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': 'en,ar,fr,es,de,it,ja,ko,zh,*;q=0.9',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-            }
-            logger.info(f"🔗 Fetching: {website_url}")
-            response = requests.get(website_url, headers=headers, timeout=5, allow_redirects=True)
-            response.raise_for_status()
-            logger.info(f"✅ Website fetched successfully: {response.status_code}")
+            from langdetect import detect, detect_langs, LangDetectException
+            from langdetect import DetectorFactory
+            # Make detection deterministic
+            DetectorFactory.seed = 0
             
-            soup = BeautifulSoup(response.content, 'html.parser')
+            # Use multiple text samples for better accuracy
+            text_samples = [
+                text_content[:2000],  # First part
+                text_content[1000:3000] if len(text_content) > 3000 else text_content,  # Middle part
+                text_content[-2000:] if len(text_content) > 2000 else text_content  # Last part
+            ]
             
-            # Get HTML lang attribute (but don't trust it fully)
-            html_lang_attr = None
-            html_tag = soup.find('html')
-            if html_tag and html_tag.get('lang'):
-                html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
-                logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
+            # Get language probabilities
+            all_detections = []
+            for sample in text_samples:
+                if len(sample) > 100:
+                    try:
+                        langs = detect_langs(sample)
+                        for lang_prob in langs:
+                            all_detections.append({
+                                'lang': str(lang_prob.lang),
+                                'prob': lang_prob.prob
+                            })
+                    except LangDetectException:
+                        continue
             
-            # Get meta tag language
-            meta_lang_attr = None
-            meta_lang = soup.find('meta', attrs={'http-equiv': 'content-language'})
-            if meta_lang and meta_lang.get('content'):
-                meta_lang_attr = meta_lang.get('content', '').split('-')[0].lower()
-                logger.info(f"📋 Meta tag language: {meta_lang_attr}")
-            
-            # ALWAYS analyze actual content (don't trust HTML lang attribute alone)
-            # Get text content (first 3000 chars for better accuracy)
-            text_content = soup.get_text()[:3000]
-            
-            # Language detection patterns (non-Latin scripts)
-            language_patterns = {
-                'ar': r'[\u0600-\u06FF]',      # Arabic
-                'zh': r'[\u4E00-\u9FFF]',      # Chinese
-                'ja': r'[\u3040-\u309F\u30A0-\u30FF]',  # Japanese (Hiragana + Katakana)
-                'ko': r'[\uAC00-\uD7AF]',      # Korean
-                'th': r'[\u0E00-\u0E7F]',      # Thai
-                'he': r'[\u0590-\u05FF]',      # Hebrew
-                'ru': r'[\u0400-\u04FF]',      # Russian/Cyrillic
-                'el': r'[\u0370-\u03FF]',      # Greek
-                'hi': r'[\u0900-\u097F]',      # Hindi/Devanagari
-                'bn': r'[\u0980-\u09FF]',      # Bengali
-                'ta': r'[\u0B80-\u0BFF]',      # Tamil
-                'te': r'[\u0C00-\u0C7F]',      # Telugu
-                'kn': r'[\u0C80-\u0CFF]',      # Kannada
-                'ml': r'[\u0D00-\u0D7F]',      # Malayalam
-                'gu': r'[\u0A80-\u0AFF]',      # Gujarati
-                'fa': r'[\u0600-\u06FF]',      # Persian (same as Arabic script)
-                'ur': r'[\u0600-\u06FF]',      # Urdu (same as Arabic script)
-            }
-            
-            # Count characters for each language
-            language_scores = {}
-            # Count only non-space, non-digit characters
-            clean_text = re.sub(r'[\s\d\W]', '', text_content)
-            total_chars = len(clean_text)
-            
-            for lang_code, pattern in language_patterns.items():
-                matches = len(re.findall(pattern, text_content))
-                if matches > 0:
-                    score = matches / total_chars if total_chars > 0 else 0
-                    language_scores[lang_code] = score
-                    if score > 0.05:  # Log significant scores
-                        logger.info(f"   📊 {lang_code}: {matches} chars ({score:.1%})")
-            
-            # Determine language from content analysis
-            content_detected_lang = None
-            content_confidence = 'low'
-            
-            if language_scores:
-                # Find the language with highest score
-                content_detected_lang = max(language_scores, key=language_scores.get)
-                max_score = language_scores[content_detected_lang]
+            if all_detections:
+                # Aggregate results - sum probabilities for each language
+                lang_scores = {}
+                for det in all_detections:
+                    lang = det['lang']
+                    if lang not in lang_scores:
+                        lang_scores[lang] = 0
+                    lang_scores[lang] += det['prob']
                 
-                if max_score > 0.05:  # More than 5% of specific language characters
-                    content_confidence = 'high' if max_score > 0.3 else 'medium'
-                    logger.info(f"✅ Content analysis detected: {content_detected_lang} ({max_score:.1%})")
-            
-            # DECISION LOGIC: Content analysis takes priority over HTML attributes
-            # This fixes the bug where sites have lang="en" but content is Arabic
-            if content_detected_lang and content_confidence in ['high', 'medium']:
-                # Content analysis wins - actual content is more reliable
-                detected_lang_code = content_detected_lang
-                confidence = content_confidence
-                if html_lang_attr and html_lang_attr != content_detected_lang:
-                    logger.warning(f"⚠️ HTML lang='{html_lang_attr}' but content is '{content_detected_lang}' - using content!")
-            elif html_lang_attr:
-                # Use HTML attribute only if content analysis found nothing
-                detected_lang_code = html_lang_attr
-                confidence = 'medium'  # Lower confidence since we couldn't verify from content
-                logger.info(f"✅ Using HTML lang attribute: {detected_lang_code} (content analysis inconclusive)")
-            elif meta_lang_attr:
-                # Fallback to meta tag
-                detected_lang_code = meta_lang_attr
-                confidence = 'low'
-                logger.info(f"✅ Using meta tag: {detected_lang_code}")
+                # Get the best language
+                best_lang = max(lang_scores, key=lang_scores.get)
+                best_score = lang_scores[best_lang] / len(text_samples)  # Average probability
+                
+                detected_lang_code = best_lang
+                confidence = 'high' if best_score > 0.7 else ('medium' if best_score > 0.4 else 'low')
+                
+                # Log all detected languages with scores
+                sorted_langs = sorted(lang_scores.items(), key=lambda x: x[1], reverse=True)
+                logger.info(f"🔍 langdetect results:")
+                for lang, score in sorted_langs[:5]:
+                    avg_score = score / len(text_samples)
+                    logger.info(f"   📊 {lang}: {avg_score:.1%}")
+                
+                logger.info(f"✅ LANGDETECT: {detected_lang_code} (confidence: {confidence}, score: {best_score:.1%})")
             else:
-                # Default to English
-                detected_lang_code = 'en'
-                confidence = 'low'
-                logger.info(f"✅ Defaulting to English (no language signals found)")
-            
+                logger.warning("⚠️ langdetect could not detect language")
+                
+        except ImportError:
+            logger.warning("⚠️ langdetect library not installed, using fallback method")
         except Exception as e:
-            logger.warning(f"⚠️ Error fetching website: {e}")
-            # Keep default English
+            logger.warning(f"⚠️ langdetect error: {e}")
+        
+        # ============================================================
+        # FALLBACK: Manual detection for non-Latin scripts
+        # ============================================================
+        if not detected_lang_code:
+            logger.info("🔄 Using fallback manual detection...")
+            
+            # Check for non-Latin scripts
+            arabic_chars = len(re.findall(r'[\u0600-\u06FF]', text_content))
+            chinese_chars = len(re.findall(r'[\u4E00-\u9FFF]', text_content))
+            japanese_chars = len(re.findall(r'[\u3040-\u309F\u30A0-\u30FF]', text_content))
+            korean_chars = len(re.findall(r'[\uAC00-\uD7AF]', text_content))
+            cyrillic_chars = len(re.findall(r'[\u0400-\u04FF]', text_content))
+            hebrew_chars = len(re.findall(r'[\u0590-\u05FF]', text_content))
+            thai_chars = len(re.findall(r'[\u0E00-\u0E7F]', text_content))
+            greek_chars = len(re.findall(r'[\u0370-\u03FF]', text_content))
+            devanagari_chars = len(re.findall(r'[\u0900-\u097F]', text_content))
+            latin_chars = len(re.findall(r'[a-zA-Z]', text_content))
+            
+            total_chars = len(text_content)
+            
+            # Find the dominant script
+            scripts = {
+                'ar': arabic_chars,
+                'zh': chinese_chars,
+                'ja': japanese_chars,
+                'ko': korean_chars,
+                'ru': cyrillic_chars,
+                'he': hebrew_chars,
+                'th': thai_chars,
+                'el': greek_chars,
+                'hi': devanagari_chars,
+                'en': latin_chars
+            }
+            
+            best_script = max(scripts, key=scripts.get)
+            best_count = scripts[best_script]
+            
+            if best_count > 50:
+                detected_lang_code = best_script
+                confidence = 'medium'
+                logger.info(f"✅ FALLBACK: {detected_lang_code} ({best_count} chars)")
+        
+        # ============================================================
+        # SPECIAL HANDLING: Arabic vs Persian
+        # ============================================================
+        if detected_lang_code in ['ar', 'fa']:
+            # Persian-specific patterns
+            persian_patterns = [
+                r'\bاست\b', r'\bاین\b', r'\bنیست\b', r'\bخود\b', 
+                r'\bآن\b', r'\bچه\b', r'\bهست\b', r'\bبرای\b',
+                r'\bیک\b', r'\bمی\b', r'\bکه\b', r'\bاز\b'
+            ]
+            persian_score = sum(len(re.findall(p, text_content)) for p in persian_patterns)
+            
+            # Arabic-specific patterns (using Arabic-only letters: ة ى ؤ ئ)
+            arabic_only_chars = len(re.findall(r'[ةىؤئ]', text_content))
+            arabic_patterns = [
+                r'\bفي\b', r'\bإلى\b', r'\bعلى\b', r'\bهذا\b', r'\bهذه\b',
+                r'\bالتي\b', r'\bالذي\b', r'\bكان\b', r'\bأن\b', r'\bما\b'
+            ]
+            arabic_word_score = sum(len(re.findall(p, text_content)) for p in arabic_patterns)
+            arabic_score = arabic_only_chars * 2 + arabic_word_score
+            
+            logger.info(f"   🔍 Arabic vs Persian: Arabic={arabic_score}, Persian={persian_score}")
+            
+            if persian_score > arabic_score and persian_score > 10:
+                detected_lang_code = 'fa'
+                logger.info(f"✅ PERSIAN confirmed (score: {persian_score} vs Arabic: {arabic_score})")
+            else:
+                detected_lang_code = 'ar'
+                logger.info(f"✅ ARABIC confirmed (score: {arabic_score} vs Persian: {persian_score})")
+        
+        # ============================================================
+        # FINAL VALIDATION
+        # ============================================================
+        if not detected_lang_code:
+            # Last resort: use HTML lang attribute if available
+            if html_lang_attr:
+                detected_lang_code = html_lang_attr
+                confidence = 'low'
+                logger.info(f"⚠️ Using HTML lang attribute as last resort: {detected_lang_code}")
+            else:
+                logger.error(f"❌ Could not determine language")
+                return jsonify({
+                    'success': False,
+                    'error': 'Could not determine language',
+                    'message': 'لم نتمكن من تحديد لغة الموقع',
+                    'detected_language': None,
+                    'language_id': None,
+                    'confidence': 'none'
+                }), 400
+        
+        # Log final result
+        if html_lang_attr and html_lang_attr != detected_lang_code:
+            logger.warning(f"⚠️ HTML lang='{html_lang_attr}' but detected='{detected_lang_code}'")
+        logger.info(f"🎯 FINAL LANGUAGE: {detected_lang_code} (confidence: {confidence})")
         
         # Normalize language code (Chinese detection)
         if detected_lang_code == 'zh' and text_content:
@@ -2274,15 +2495,18 @@ def detect_website_language():
         })
             
     except Exception as e:
-        logger.error(f"Error detecting website language: {str(e)}")
-        # Return English as fallback
+        logger.error(f"❌ Error detecting website language: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        # Return error - NO GUESSING!
         return jsonify({
-            'success': True,
-            'language_code': 'en',
-            'language_id': '1000',
-            'confidence': 'low',
-            'error': str(e)
-        }), 200
+            'success': False,
+            'error': str(e),
+            'message': 'حدث خطأ أثناء تحليل لغة الموقع',
+            'language_code': None,
+            'language_id': None,
+            'confidence': 'none'
+        }), 500
 
 @ai_campaign_creator_bp.route('/regenerate-ad-element', methods=['POST', 'OPTIONS'])
 def regenerate_ad_element():
@@ -2411,7 +2635,25 @@ def launch_campaign():
         
         # Extract location IDs for Google Ads API using GeoTargetConstantService
         location_ids = []
-        proximity_targets = []  # For precise location targeting using coordinates
+        proximity_targets = []  # For precise location targeting using coordinates (cities/neighborhoods ONLY)
+        
+        # Extended country map with Google Ads location IDs
+        country_map = {
+            'SA': '2682', 'AE': '2784', 'EG': '2818', 'US': '2840',
+            'GB': '2826', 'DE': '2276', 'FR': '2250', 'IT': '2380',
+            'ES': '2724', 'CA': '2124', 'AU': '2036', 'IN': '2356',
+            'JP': '2392', 'KR': '2410', 'CN': '2156', 'BR': '2076',
+            'MX': '2484', 'RU': '2643', 'TR': '2792', 'NL': '2528',
+            'BE': '2056', 'SE': '2752', 'NO': '2578', 'DK': '2208',
+            'FI': '2246', 'PL': '2616', 'AT': '2040', 'CH': '2756',
+            'PT': '2620', 'GR': '2300', 'CZ': '2203', 'HU': '2348',
+            'IE': '2372', 'NZ': '2554', 'SG': '2702', 'MY': '2458',
+            'TH': '2764', 'ID': '2360', 'PH': '2608', 'VN': '2704',
+            'PK': '2586', 'BD': '2050', 'NG': '2566', 'ZA': '2710',
+            'KE': '2404', 'MA': '2504', 'TN': '2788', 'DZ': '2012',
+            'IQ': '2368', 'JO': '2400', 'LB': '2422', 'KW': '2414',
+            'QA': '2634', 'BH': '2048', 'OM': '2512', 'YE': '2887'
+        }
         
         for loc in target_locations:
             # Handle direct location_id (string/int)
@@ -2426,122 +2668,133 @@ def launch_campaign():
                     location_id = str(loc['location_id'])
                     if location_id not in location_ids:
                         location_ids.append(location_id)
+                    continue
                 
-                # PRIORITY: Use coordinates directly for precise targeting (cities, neighborhoods, etc.)
-                # This is MORE ACCURATE than searching by name in Google Ads API
-                elif 'coordinates' in loc and 'name' in loc:
-                    coords = loc['coordinates']
-                    radius = loc.get('radius', 10)
-                    proximity_targets.append({
-                        'latitude': coords.get('lat'),
-                        'longitude': coords.get('lng'),
-                        'radius_km': radius,
-                        'name': loc.get('name', '')
-                    })
-                    logger.info(f"✅ Using PRECISE proximity targeting for: {loc.get('name')} (lat: {coords.get('lat')}, lng: {coords.get('lng')}, radius: {radius}km)")
-                    
-                    # For Keyword Planner compatibility, add country-level location_id as fallback
-                    country_code = loc.get('countryCode', '')
-                    logger.info(f"   📍 Extracted countryCode: '{country_code}' from location")
-                    if country_code:
-                        country_map = {
-                            'SA': '2682', 'AE': '2784', 'EG': '2818', 'US': '2840',
-                            'GB': '2826', 'DE': '2276', 'FR': '2250', 'IT': '2380',
-                            'ES': '2724', 'CA': '2124', 'AU': '2036', 'IN': '2356'
-                        }
-                        location_id = country_map.get(country_code)
-                        if location_id:
-                            if location_id not in location_ids:
-                                location_ids.append(location_id)
-                                logger.info(f"   ✅ Added country '{country_code}' ({location_id}) for compatibility")
-                            else:
-                                logger.info(f"   ℹ️ Country '{country_code}' ({location_id}) already in location_ids")
-                        else:
-                            logger.warning(f"   ⚠️ Country code '{country_code}' not found in country_map")
+                # Get location type and other info
+                location_type = loc.get('location_type', '').lower()
+                location_name = loc.get('name', '')
+                country_code = loc.get('country_code', '') or loc.get('countryCode', '')
+                
+                logger.info(f"📍 Processing location: {location_name} (type: {location_type}, country: {country_code})")
+                
+                # CASE 1: COUNTRY - Use location_id for full country targeting
+                if location_type == 'country' or location_type == 'دولة':
+                    # Try to get country code from the location data
+                    if country_code and country_code in country_map:
+                        location_id = country_map[country_code]
+                        if location_id not in location_ids:
+                            location_ids.append(location_id)
+                        logger.info(f"✅ Using FULL COUNTRY targeting for: {location_name} (ID: {location_id})")
                     else:
-                        logger.warning(f"   ⚠️ No countryCode provided for location {loc.get('name')}")
-                
-                # FALLBACK: Try to search for location by name using Google Ads API (for countries/regions only)
-                elif 'name' in loc:
-                    try:
-                        from google.ads.googleads.client import GoogleAdsClient
-                        import os
+                        # Try to extract country code from place_id or search by name
+                        place_id = loc.get('place_id', '')
+                        # Check if the name matches a known country
+                        country_name_map = {
+                            'UK': 'GB', 'United Kingdom': 'GB', 'England': 'GB', 'Britain': 'GB',
+                            'USA': 'US', 'United States': 'US', 'America': 'US',
+                            'Saudi Arabia': 'SA', 'السعودية': 'SA', 'المملكة العربية السعودية': 'SA',
+                            'UAE': 'AE', 'United Arab Emirates': 'AE', 'الإمارات': 'AE',
+                            'Egypt': 'EG', 'مصر': 'EG',
+                            'Germany': 'DE', 'ألمانيا': 'DE',
+                            'France': 'FR', 'فرنسا': 'FR',
+                            'Spain': 'ES', 'إسبانيا': 'ES',
+                            'Italy': 'IT', 'إيطاليا': 'IT',
+                            'Canada': 'CA', 'كندا': 'CA',
+                            'Australia': 'AU', 'أستراليا': 'AU',
+                            'India': 'IN', 'الهند': 'IN',
+                            'Japan': 'JP', 'اليابان': 'JP',
+                            'China': 'CN', 'الصين': 'CN',
+                            'Brazil': 'BR', 'البرازيل': 'BR',
+                            'Mexico': 'MX', 'المكسيك': 'MX',
+                            'Russia': 'RU', 'روسيا': 'RU',
+                            'Turkey': 'TR', 'تركيا': 'TR',
+                            'Netherlands': 'NL', 'هولندا': 'NL',
+                            'Kuwait': 'KW', 'الكويت': 'KW',
+                            'Qatar': 'QA', 'قطر': 'QA',
+                            'Bahrain': 'BH', 'البحرين': 'BH',
+                            'Oman': 'OM', 'عمان': 'OM',
+                            'Jordan': 'JO', 'الأردن': 'JO',
+                            'Lebanon': 'LB', 'لبنان': 'LB',
+                            'Iraq': 'IQ', 'العراق': 'IQ',
+                            'Morocco': 'MA', 'المغرب': 'MA',
+                            'Tunisia': 'TN', 'تونس': 'TN',
+                            'Algeria': 'DZ', 'الجزائر': 'DZ',
+                        }
                         
-                        # Initialize Google Ads client
-                        yaml_path = os.path.join(os.path.dirname(__file__), '../services/google_ads.yaml')
-                        client = GoogleAdsClient.load_from_storage(yaml_path)
-                        
-                        gtc_service = client.get_service("GeoTargetConstantService")
-                        
-                        # Search for location by name
-                        location_name = loc.get('name', '')
-                        country_code = loc.get('countryCode', '')
-                        
-                        logger.info(f"🔍 Searching for location: {location_name} in country: {country_code}")
-                        
-                        # Build search query
-                        query = f"""
-                            SELECT
-                                geo_target_constant.id,
-                                geo_target_constant.name,
-                                geo_target_constant.canonical_name,
-                                geo_target_constant.country_code,
-                                geo_target_constant.target_type
-                            FROM geo_target_constant
-                            WHERE geo_target_constant.canonical_name LIKE '%{location_name}%'
-                        """
-                        
-                        if country_code:
-                            query += f" AND geo_target_constant.country_code = '{country_code}'"
-                        
-                        query += " LIMIT 5"
-                        
-                        ga_service = client.get_service("GoogleAdsService")
-                        response = ga_service.search(
-                            customer_id=os.getenv('GOOGLE_ADS_CUSTOMER_ID'),
-                            query=query
-                        )
-                        
-                        # Get the first matching result
-                        found_location = False
-                        for row in response:
-                            geo = row.geo_target_constant
-                            location_id = str(geo.id)
-                            logger.info(f"✅ Found location: {geo.canonical_name} (ID: {location_id})")
+                        detected_code = country_name_map.get(location_name)
+                        if detected_code and detected_code in country_map:
+                            location_id = country_map[detected_code]
                             if location_id not in location_ids:
                                 location_ids.append(location_id)
-                            found_location = True
-                            break
-                        
-                        if not found_location:
-                            logger.warning(f"⚠️ No Google Ads location found for: {location_name}")
-                            # Use proximity targeting if coordinates are available
-                            if 'coordinates' in loc:
-                                coords = loc['coordinates']
-                                radius = loc.get('radius', 10)
-                                proximity_targets.append({
-                                    'latitude': coords.get('lat'),
-                                    'longitude': coords.get('lng'),
-                                    'radius_km': radius,
-                                    'name': location_name
-                                })
-                                logger.info(f"📍 Will use proximity targeting for: {location_name} (radius: {radius}km)")
-                    
-                    except Exception as e:
-                        logger.error(f"❌ Error searching for location '{loc.get('name')}': {str(e)}")
-                        # Use proximity targeting if coordinates are available
-                        if 'coordinates' in loc:
-                            coords = loc['coordinates']
-                            radius = loc.get('radius', 10)
-                            proximity_targets.append({
-                                'latitude': coords.get('lat'),
-                                'longitude': coords.get('lng'),
-                                'radius_km': radius,
-                                'name': loc.get('name', '')
-                            })
-                            logger.info(f"📍 Error occurred - using proximity targeting for: {loc.get('name')} (radius: {radius}km)")
+                            logger.info(f"✅ Using FULL COUNTRY targeting for: {location_name} (ID: {location_id})")
                         else:
-                            logger.warning(f"⚠️ No coordinates available for '{loc.get('name')}' - location will be skipped")
+                            logger.warning(f"⚠️ Could not find country ID for: {location_name}")
+                
+                # CASE 2: REGION/STATE - Use location_id if available, search if not
+                elif location_type in ['region', 'state', 'administrative_area_level_1', 'منطقة', 'ولاية']:
+                    # Try to search for region in Google Ads
+                    logger.info(f"🔍 Searching for region: {location_name}")
+                    # For now, use country-level as fallback
+                    if country_code and country_code in country_map:
+                        location_id = country_map[country_code]
+                        if location_id not in location_ids:
+                            location_ids.append(location_id)
+                        logger.info(f"   ℹ️ Using country-level targeting as fallback for region: {location_name}")
+                
+                # CASE 3: CITY/NEIGHBORHOOD - Use proximity targeting for precise targeting
+                elif location_type in ['city', 'locality', 'neighborhood', 'sublocality', 'مدينة', 'حي', 'منطقة فرعية']:
+                    if 'coordinates' in loc:
+                        coords = loc['coordinates']
+                        radius = loc.get('radius', 10)
+                        proximity_targets.append({
+                            'latitude': coords.get('lat'),
+                            'longitude': coords.get('lng'),
+                            'radius_km': radius,
+                            'name': location_name
+                        })
+                        logger.info(f"✅ Using PROXIMITY targeting for city/neighborhood: {location_name} (radius: {radius}km)")
+                        
+                        # Also add country for Keyword Planner compatibility
+                        if country_code and country_code in country_map:
+                            location_id = country_map[country_code]
+                            if location_id not in location_ids:
+                                location_ids.append(location_id)
+                
+                # CASE 4: UNKNOWN TYPE - Check if it looks like a country, otherwise use proximity
+                else:
+                    # Check if name matches a known country
+                    country_name_map = {
+                        'UK': 'GB', 'United Kingdom': 'GB', 'England': 'GB',
+                        'USA': 'US', 'United States': 'US',
+                        'Saudi Arabia': 'SA', 'السعودية': 'SA',
+                        'UAE': 'AE', 'الإمارات': 'AE',
+                        'Egypt': 'EG', 'مصر': 'EG',
+                    }
+                    
+                    detected_code = country_name_map.get(location_name)
+                    if detected_code and detected_code in country_map:
+                        # It's a country - use full targeting
+                        location_id = country_map[detected_code]
+                        if location_id not in location_ids:
+                            location_ids.append(location_id)
+                        logger.info(f"✅ Detected as COUNTRY, using full targeting for: {location_name} (ID: {location_id})")
+                    elif 'coordinates' in loc:
+                        # Has coordinates but unknown type - use proximity
+                        coords = loc['coordinates']
+                        radius = loc.get('radius', 10)
+                        proximity_targets.append({
+                            'latitude': coords.get('lat'),
+                            'longitude': coords.get('lng'),
+                            'radius_km': radius,
+                            'name': location_name
+                        })
+                        logger.info(f"⚠️ Unknown location type for: {location_name}, using proximity targeting (radius: {radius}km)")
+                        
+                        # Add country for compatibility if available
+                        if country_code and country_code in country_map:
+                            location_id = country_map[country_code]
+                            if location_id not in location_ids:
+                                location_ids.append(location_id)
         
         # Validate that user has selected locations
         if not location_ids and not proximity_targets:

@@ -211,7 +211,8 @@ export default function CampaignPreviewPage() {
     }
 
     // Create multiple variations from the generated content
-    if (generatedContent.headlines && generatedContent.descriptions) {
+    if (generatedContent.headlines && generatedContent.headlines.length > 0 && 
+        generatedContent.descriptions && generatedContent.descriptions.length > 0) {
       const variations: AdVariation[] = [];
       const totalHeadlines = generatedContent.headlines.length;
       const totalDescriptions = generatedContent.descriptions.length;
@@ -239,7 +240,69 @@ export default function CampaignPreviewPage() {
       console.log('✅ Created', variations.length, 'variations');
       setAdVariations(variations);
     } else {
-      console.warn('⚠️ No headlines or descriptions found in generatedContent');
+      console.warn('⚠️ No headlines or descriptions found - generating content...');
+      
+      // Fallback: Generate content if missing
+      const generateMissingContent = async () => {
+        try {
+          const targetLanguage = campaignData.selectedLanguageCode || campaignData.detectedLanguageCode || 'ar';
+          const keywords = generatedContent.keywords || [];
+          
+          console.log('🔄 Generating missing ad content...');
+          
+          const response = await fetch(getApiUrl('/api/ai-campaign/generate-campaign-content'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              website_url: url,
+              campaign_type: campaignData.campaignType || 'SEARCH',
+              keywords_list: keywords,
+              target_language: targetLanguage
+            })
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.content) {
+              const newContent = {
+                ...generatedContent,
+                headlines: result.content.headlines || [],
+                descriptions: result.content.descriptions || [],
+                keywords: keywords.length > 0 ? keywords : (result.content.keywords || [])
+              };
+              
+              localStorage.setItem('generatedContent', JSON.stringify(newContent));
+              console.log('✅ Generated and saved content');
+              
+              // Create variations from new content
+              if (newContent.headlines.length > 0 && newContent.descriptions.length > 0) {
+                const newVariations: AdVariation[] = [];
+                for (let i = 0; i < Math.min(3, newContent.headlines.length); i++) {
+                  const headlineStart = i % newContent.headlines.length;
+                  const descStart = i % newContent.descriptions.length;
+                  
+                  newVariations.push({
+                    headlines: [
+                      newContent.headlines[headlineStart],
+                      newContent.headlines[(headlineStart + 1) % newContent.headlines.length],
+                      newContent.headlines[(headlineStart + 2) % newContent.headlines.length]
+                    ],
+                    descriptions: [
+                      newContent.descriptions[descStart],
+                      newContent.descriptions[(descStart + 1) % newContent.descriptions.length]
+                    ]
+                  });
+                }
+                setAdVariations(newVariations);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('❌ Failed to generate content:', error);
+        }
+      };
+      
+      generateMissingContent();
     }
   }, []);
 

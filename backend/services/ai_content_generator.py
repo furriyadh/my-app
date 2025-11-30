@@ -579,8 +579,10 @@ Return results in JSON format:
         }
     
     def _fetch_website_content(self, website_url: str) -> str:
-        """Fetch website content"""
+        """Fetch website content with www fallback"""
         try:
+            from urllib.parse import urlparse
+            
             # Add https:// if no scheme provided
             if not website_url.startswith(('http://', 'https://')):
                 website_url = f'https://{website_url}'
@@ -596,9 +598,29 @@ Return results in JSON format:
                 'Upgrade-Insecure-Requests': '1'
             }
             
-            # Fetch real content from website
-            response = requests.get(website_url, headers=headers, timeout=30)
-            response.raise_for_status()
+            # Try to fetch with www fallback
+            urls_to_try = [website_url]
+            parsed = urlparse(website_url)
+            if not parsed.netloc.startswith('www.'):
+                www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
+                if parsed.query:
+                    www_url += f"?{parsed.query}"
+                urls_to_try.append(www_url)
+            
+            response = None
+            for url_attempt in urls_to_try:
+                try:
+                    self.logger.info(f"🔗 Trying: {url_attempt}")
+                    response = requests.get(url_attempt, headers=headers, timeout=30)
+                    if response.status_code == 200:
+                        self.logger.info(f"✅ Successfully fetched: {url_attempt}")
+                        break
+                except Exception as e:
+                    self.logger.warning(f"⚠️ Failed {url_attempt}: {e}")
+                    continue
+            
+            if not response or response.status_code != 200:
+                raise Exception("Could not fetch website from any URL variant")
             
             # Extract text from HTML
             html_content = response.text

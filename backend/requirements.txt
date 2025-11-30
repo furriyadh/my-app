@@ -44,6 +44,9 @@ python-jose[cryptography]==3.3.0
 # Web Scraping & Parsing
 beautifulsoup4==4.12.2
 
+# Language Detection (Google's algorithm)
+langdetect==1.0.9
+
 # Data Visualization
 matplotlib>=3.8.0
 seaborn>=0.13.0

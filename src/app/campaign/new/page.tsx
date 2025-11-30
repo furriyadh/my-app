@@ -77,11 +77,23 @@ const CampaignNewPage: React.FC = () => {
   const handleCampaignTypeSelect = useCallback((campaignType: string) => {
     setSelectedCampaignType(campaignType);
     
-    // Save to localStorage and dispatch event to update sidebar color
+    // Clear ALL old campaign data and start fresh
     try {
+      // Remove all campaign-related data from localStorage
+      localStorage.removeItem('campaignData');
+      localStorage.removeItem('generatedContent');
+      localStorage.removeItem('selectedLocations');
+      localStorage.removeItem('forecastData');
+      localStorage.removeItem('cpcData');
+      localStorage.removeItem('initialEstimates');
+      localStorage.removeItem('creatingCampaign');
+      
+      // Save only the new campaign type
       localStorage.setItem('campaignData', JSON.stringify({
         campaignType: campaignType
       }));
+      
+      console.log('🧹 Cleared old campaign data, starting fresh with type:', campaignType);
       
       // Dispatch custom event to update sidebar
       window.dispatchEvent(new Event('campaignTypeChanged'));
