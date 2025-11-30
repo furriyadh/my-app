@@ -144,10 +144,11 @@ export async function GET(request: NextRequest) {
         docs: 'https://developers.google.com/identity/protocols/oauth2'
       });
       
+      // 🔧 sameSite: 'lax' مطلوب لـ OAuth redirects من Google
       jsonResponse.cookies.set('oauth_code_verifier', codeVerifier, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+        sameSite: 'lax',       // lax مطلوب لـ OAuth
         maxAge: 600,
         path: '/'
       });
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest) {
       jsonResponse.cookies.set('oauth_state', state, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+        sameSite: 'lax',       // lax مطلوب لـ OAuth
         maxAge: 600,
         path: '/'
       });
@@ -163,7 +164,7 @@ export async function GET(request: NextRequest) {
       jsonResponse.cookies.set('oauth_session_id', sessionId, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+        sameSite: 'lax',       // lax مطلوب لـ OAuth
         maxAge: 600,
         path: '/'
       });
@@ -172,7 +173,7 @@ export async function GET(request: NextRequest) {
         jsonResponse.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+          sameSite: 'lax',       // lax مطلوب لـ OAuth
           maxAge: 600,
           path: '/'
         });
@@ -182,7 +183,7 @@ export async function GET(request: NextRequest) {
         jsonResponse.cookies.set('oauth_redirect_after', redirect_after, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+          sameSite: 'lax',       // lax مطلوب لـ OAuth
           maxAge: 600,
           path: '/'
         });
@@ -195,10 +196,12 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(authUrl.toString());
     
     // حفظ code_verifier (مطلوب لـ PKCE)
+    // ⚠️ يجب استخدام sameSite: 'lax' لأن OAuth يتطلب redirect من موقع خارجي (Google)
+    // strict يمنع إرسال cookies في cross-site redirects
     response.cookies.set('oauth_code_verifier', codeVerifier, {
       httpOnly: true,        // يمنع الوصول من JavaScript
       secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+      sameSite: 'lax',       // 🔧 lax مطلوب لـ OAuth redirects من Google
       maxAge: 600,           // 10 دقائق
       path: '/'
     });
@@ -207,7 +210,7 @@ export async function GET(request: NextRequest) {
     response.cookies.set('oauth_state', state, {
       httpOnly: true,        // يمنع الوصول من JavaScript
       secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+      sameSite: 'lax',       // 🔧 lax مطلوب لـ OAuth redirects من Google
       maxAge: 600,           // 10 دقائق
       path: '/'
     });
@@ -217,7 +220,7 @@ export async function GET(request: NextRequest) {
       response.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+        sameSite: 'lax',       // 🔧 lax مطلوب لـ OAuth redirects من Google
         maxAge: 600,
         path: '/'
       });
@@ -227,7 +230,7 @@ export async function GET(request: NextRequest) {
       response.cookies.set('oauth_redirect_after', redirect_after, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // lax للتطوير، strict للإنتاج
+        sameSite: 'lax',       // 🔧 lax مطلوب لـ OAuth redirects من Google
         maxAge: 600,
         path: '/'
       });

@@ -183,10 +183,11 @@ export async function GET(request: NextRequest) {
         console.log('🔍 Token preview:', tokenData.access_token.substring(0, 50) + '...');
         
         // حفظ OAuth access token في HttpOnly cookie
+        // 🔧 sameSite: 'lax' للسماح بالوصول بعد OAuth redirect
         successResponse.cookies.set('oauth_access_token', tokenData.access_token, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: 'strict',    // يمنع هجمات CSRF
+          sameSite: 'lax',       // lax للسماح بالوصول في same-site navigation
           maxAge: 3600,          // 1 hour
           path: '/'
         });
@@ -195,7 +196,7 @@ export async function GET(request: NextRequest) {
         successResponse.cookies.set('google_ads_connected', 'true', {
           httpOnly: false, // يجب أن يكون false ليكون متاحاً في JavaScript
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'lax',       // lax للسماح بالوصول في same-site navigation
           maxAge: 34560000, // 400 يوم (أقصى مدة)
           path: '/'
         });
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
         successResponse.cookies.set('oauth_refresh_token', tokenData.refresh_token, {
           httpOnly: true,        // يمنع الوصول من JavaScript
           secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-          sameSite: 'strict',    // يمنع هجمات CSRF
+          sameSite: 'lax',       // lax للسماح بالوصول في same-site navigation
           maxAge: 30 * 24 * 3600, // 30 يوم
           path: '/'
         });
