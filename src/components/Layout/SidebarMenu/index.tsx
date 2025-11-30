@@ -47,15 +47,26 @@ const SidebarMenu: React.FC = React.memo(() => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(() => {
     // Initialize based on screen size and localStorage (client-side only)
     if (typeof window !== 'undefined') {
-      // Check localStorage first
+      const isMobile = window.innerWidth < 1280; // xl breakpoint
+      
+      // On mobile, always start closed to prevent black screen
+      if (isMobile) {
+        // Clean up any leftover classes from previous session
+        document.body.classList.remove('sidebar-open');
+        document.documentElement.classList.remove('sidebar-open');
+        document.body.style.top = '';
+        return false; // Always closed on mobile initially
+      }
+      
+      // On desktop, check localStorage
       const savedState = localStorage.getItem('sidebarOpen');
       if (savedState !== null) {
         return savedState === 'true';
       }
-      // Otherwise use screen size
-      return window.innerWidth >= 1280; // xl breakpoint
+      // Default to open on desktop
+      return true;
     }
-    return true; // Default for SSR
+    return false; // Default for SSR (closed)
   });
   
   // State for Quick Search
@@ -74,15 +85,36 @@ const SidebarMenu: React.FC = React.memo(() => {
   const toggleSidebar = React.useCallback(() => {
     setIsSidebarOpen(prev => {
       const newState = !prev;
-      // Save to localStorage
+      // Save to localStorage (only for desktop)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('sidebarOpen', String(newState));
+        const isMobile = window.innerWidth < 1280;
+        
+        // Only save to localStorage on desktop
+        if (!isMobile) {
+          localStorage.setItem('sidebarOpen', String(newState));
+        } else {
+          // On mobile, always remove from localStorage to prevent black screen on refresh
+          localStorage.removeItem('sidebarOpen');
+        }
+        
         // Prevent body scroll on mobile when sidebar is open
-        if (window.innerWidth < 1280) {
+        if (isMobile) {
           if (newState) {
+            // Disable scroll on body and html
             document.body.classList.add('sidebar-open');
+            document.documentElement.classList.add('sidebar-open');
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            document.body.style.top = `-${scrollY}px`;
           } else {
+            // Re-enable scroll
+            const scrollY = document.body.style.top;
             document.body.classList.remove('sidebar-open');
+            document.documentElement.classList.remove('sidebar-open');
+            document.body.style.top = '';
+            if (scrollY) {
+              window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
           }
         }
       }
@@ -90,21 +122,73 @@ const SidebarMenu: React.FC = React.memo(() => {
     });
   }, []);
 
-  // Handle responsive sidebar - only listen to resize events (not initial check)
+  // Remove auto-close on resize - sidebar only closes when X button is clicked
+  // No useEffect for auto-closing sidebar
+
+  // Clean up on mount to prevent black screen on mobile refresh
   React.useEffect(() => {
-    const handleResize = () => {
-      // Only auto-close on mobile, don't auto-open
-      if (window.innerWidth < 1280 && isSidebarOpen) {
-        setIsSidebarOpen(false);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('sidebarOpen', 'false');
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 1280;
+      
+      // On mobile, always ensure sidebar is closed and body scroll is enabled on mount
+      if (isMobile) {
+        // Clean up any leftover classes
+        document.body.classList.remove('sidebar-open');
+        document.documentElement.classList.remove('sidebar-open');
+        document.body.style.top = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        
+        // Ensure sidebar is closed on mobile
+        if (isSidebarOpen) {
+          setIsSidebarOpen(false);
         }
       }
-    };
+    }
+  }, []); // Only run on mount
+
+  // Ensure body scroll is disabled when sidebar opens on mobile
+  React.useEffect(() => {
+    // Clean up on mount (in case of page refresh with stale state)
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 1280;
+      
+      // Always clean up on mobile mount to prevent black screen
+      if (isMobile) {
+        document.body.classList.remove('sidebar-open');
+        document.documentElement.classList.remove('sidebar-open');
+        document.body.style.top = '';
+      }
+      
+      // Then apply state if sidebar should be open
+      if (isMobile && isSidebarOpen) {
+        // Disable scroll on body and html
+        document.body.classList.add('sidebar-open');
+        document.documentElement.classList.add('sidebar-open');
+        // Save current scroll position
+        const scrollY = window.scrollY;
+        document.body.style.top = `-${scrollY}px`;
+      } else if (isMobile && !isSidebarOpen) {
+        // Re-enable scroll
+        const scrollY = document.body.style.top;
+        document.body.classList.remove('sidebar-open');
+        document.documentElement.classList.remove('sidebar-open');
+        document.body.style.top = '';
+        if (scrollY) {
+          window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
+      }
+    }
     
-    // Only listen to resize (don't change on mount)
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      // Cleanup on unmount
+      if (typeof window !== 'undefined') {
+        document.body.classList.remove('sidebar-open');
+        document.documentElement.classList.remove('sidebar-open');
+        document.body.style.top = '';
+      }
+    };
   }, [isSidebarOpen]);
 
   // Update campaign color based on selected campaign type
@@ -485,10 +569,18 @@ const SidebarMenu: React.FC = React.memo(() => {
           background: rgba(139, 92, 246, 0.7);
         }
         
-        /* Prevent body scroll when sidebar is open on mobile */
+        /* Prevent body scroll when sidebar is open on mobile - STRONG */
         @media (max-width: 1279px) {
           body.sidebar-open {
-            overflow: hidden;
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+          
+          html.sidebar-open {
+            overflow: hidden !important;
+            height: 100% !important;
           }
         }
       `}</style>
@@ -531,7 +623,7 @@ const SidebarMenu: React.FC = React.memo(() => {
               : -360
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed top-0 h-screen w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl overflow-hidden ${
+        className={`fixed top-0 w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl overflow-hidden ${
           isRTL 
             ? 'right-0 border-l' 
             : 'left-0 border-r'
@@ -539,7 +631,10 @@ const SidebarMenu: React.FC = React.memo(() => {
         style={{
           backgroundColor: '#000000',
           position: 'fixed',
-          willChange: 'transform'
+          willChange: 'transform',
+          height: '100vh',
+          minHeight: '100vh',
+          touchAction: 'pan-y' // Allow vertical scroll only
         }}
       >
         {/* Close Button - Beautiful */}
@@ -626,7 +721,14 @@ const SidebarMenu: React.FC = React.memo(() => {
         )}
 
       {/* Sidebar navigation */}
-      <div className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto overflow-x-hidden p-2 sidebar-scroll'>
+      <div 
+        className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto overflow-x-hidden p-2 sidebar-scroll'
+        style={{
+          minHeight: 0, // Important for flex scroll
+          WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+          touchAction: 'pan-y' // Allow vertical scroll only
+        }}
+      >
         {/* All Tabs */}
         <div className='flex flex-col gap-1'>
           {filteredTabs.map((tab) => {
@@ -840,14 +942,13 @@ const SidebarMenu: React.FC = React.memo(() => {
       </div>
       </motion.div>
 
-      {/* Overlay when sidebar is open on mobile/tablet */}
+      {/* Overlay when sidebar is open on mobile/tablet - removed onClick to prevent auto-close */}
       {isSidebarOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={toggleSidebar}
-          className="fixed inset-0 bg-black/50 z-[99] xl:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 z-[99] xl:hidden backdrop-blur-sm pointer-events-none"
         />
       )}
     </>

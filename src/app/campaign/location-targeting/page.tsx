@@ -2151,11 +2151,40 @@ const LocationTargetingPage: React.FC = () => {
           -webkit-text-fill-color: rgba(255, 255, 255, 0.7) !important;
         }
       `}} />
-      <div className="min-h-screen bg-black overflow-x-hidden" dir="ltr">
-      {/* Campaign Progress */}
-      <CampaignProgress currentStep={1} totalSteps={3} />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      {/* Prevent zoom on mobile input focus */}
+      <style jsx global>{`
+        @media screen and (max-width: 768px) {
+          /* Prevent zoom on input focus - font-size 16px prevents iOS zoom */
+          input[type="text"],
+          input[type="url"],
+          input[type="tel"],
+          input[type="search"] {
+            font-size: 16px !important;
+            transform: translateZ(0);
+            -webkit-appearance: none;
+          }
+          
+          /* Keep input container visible when keyboard opens */
+          .location-input-container {
+            position: relative;
+            z-index: 10;
+          }
+        }
+      `}</style>
+      
+      <div className="min-h-screen bg-black overflow-x-hidden" dir="ltr" style={{ 
+        position: 'relative',
+        minHeight: '100vh',
+        minHeight: '100dvh' // Use dynamic viewport height for mobile
+      }}>
+        {/* Campaign Progress */}
+        <CampaignProgress currentStep={1} totalSteps={3} />
+        
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" style={{
+          position: 'relative',
+          zIndex: 1
+        }}>
         {/* Header */}
         <div className="text-center mb-3 sm:mb-6">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
@@ -2178,7 +2207,10 @@ const LocationTargetingPage: React.FC = () => {
             </label>
             
             {/* Search Input */}
-            <div className="relative mb-4 search-container">
+            <div className="relative mb-4 search-container location-input-container" style={{
+              position: 'relative',
+              zIndex: 2
+            }}>
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:!text-white/70 w-5 h-5 z-10" />
                 <input
                   type="text"
@@ -2189,6 +2221,11 @@ const LocationTargetingPage: React.FC = () => {
                   className="w-full pl-12 pr-4 py-3 bg-white dark:bg-black border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
                   dir="ltr"
                   suppressHydrationWarning={true}
+                  style={{ 
+                    fontSize: '16px', // Prevent zoom on iOS
+                    transform: 'translateZ(0)', // Force hardware acceleration
+                    WebkitAppearance: 'none' // Remove iOS styling
+                  }}
                 />
                 {searchQuery && (
                   <button

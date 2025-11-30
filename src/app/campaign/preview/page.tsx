@@ -856,40 +856,40 @@ export default function CampaignPreviewPage() {
   const cards = adVariations.map((ad, index) => ({
     id: index,
     content: (
-      <div className="w-full h-full flex flex-col">
+      <div className="w-full h-full flex flex-col min-h-[200px] sm:min-h-[240px]">
         {/* Platform Bar */}
-        <div className="bg-gray-50 dark:bg-black p-2.5 border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-gray-50 dark:bg-black p-2 sm:p-2.5 border-b border-gray-200 dark:border-gray-800">
           {getPlatformBar()}
         </div>
 
         {/* Ad Preview */}
-        <div className="p-4 bg-white dark:bg-black flex-1 flex flex-col justify-center">
-          <div className="mb-1.5">
-            <span className="text-[10px] font-bold text-gray-900 dark:text-white">
+        <div className="p-3 sm:p-4 bg-white dark:bg-black flex-1 flex flex-col justify-center">
+          <div className="mb-1 sm:mb-1.5">
+            <span className="text-[9px] sm:text-[10px] font-bold text-gray-900 dark:text-white">
               Sponsored
             </span>
           </div>
           
           {/* Website Info */}
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-4 h-4 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
-              <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+              <span className="text-[8px] sm:text-[10px] font-semibold text-gray-600 dark:text-gray-400">
                 {websiteDomain.charAt(0).toUpperCase()}
               </span>
             </div>
-            <div className="text-xs text-gray-900 dark:text-white font-medium truncate">
+            <div className="text-[10px] sm:text-xs text-gray-900 dark:text-white font-medium truncate">
               {websiteDomain}
             </div>
           </div>
 
-          <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-2 truncate">
+          <div className="text-[9px] sm:text-[10px] text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 truncate">
             https://{websiteDomain}
           </div>
 
           {/* Headlines */}
-          <div className="space-y-1.5">
+          <div className="space-y-1 sm:space-y-1.5">
             <h3 
-              className="text-sm md:text-base font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-snug line-clamp-1"
+              className="text-xs sm:text-sm md:text-base font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-2 sm:line-clamp-1"
               dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
             >
               {ad.headlines[0]}
@@ -900,7 +900,7 @@ export default function CampaignPreviewPage() {
               {ad.descriptions.slice(0, 2).map((desc, idx) => (
                 <p 
                   key={idx} 
-                  className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-1"
+                  className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-tight sm:leading-relaxed line-clamp-2 sm:line-clamp-1"
                   dir={isArabic(desc) ? 'rtl' : 'ltr'}
                 >
                   {desc}
@@ -931,56 +931,58 @@ export default function CampaignPreviewPage() {
         )}
         
         {/* Header */}
-        <div className="mb-4 sm:mb-8 text-center">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="mb-3 sm:mb-6 md:mb-8 text-center">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2 md:mb-3 px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-base max-w-4xl mx-auto" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-4xl mx-auto px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' 
-              ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك. شاهد المعاينات على اليمين.'
-              : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience. View previews on the right."}
+              ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك. شاهد المعاينات أدناه.'
+              : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience. View previews below."}
           </p>
         </div>
 
         {/* Variations Counter */}
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-6 md:mb-8">
           <div className="inline-flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <span className="font-semibold text-purple-600 dark:text-purple-400">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
+            <span className="font-semibold text-sm sm:text-base text-purple-600 dark:text-purple-400">
               {language === 'ar' ? `تم إنشاء ${totalVariations} نسخة إعلانية` : `${totalVariations} ad variations generated`}
             </span>
-            <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
           </div>
         </div>
 
         {/* Ad Preview Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mb-6 sm:mb-8">
           
           {/* Left Side - Edit Button */}
-          <div className="flex items-center justify-center lg:justify-start">
+          <div className="flex items-center justify-center lg:justify-start order-2 lg:order-1">
             <div>
-              <p className="text-gray-700 dark:text-gray-300 text-lg text-left" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center lg:text-left" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
                 <button
                   onClick={handleEditAds}
                   className="inline-flex items-center gap-1 hover:underline font-semibold"
                 >
                   <span className="!text-blue-600 dark:!text-blue-500">{language === 'ar' ? 'تعديل الإعلانات' : 'Edit ads'}</span>
-                  <Edit2 className="w-4 h-4 !text-blue-600 dark:!text-blue-500" />
+                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 !text-blue-600 dark:!text-blue-500" />
                 </button>
               </p>
             </div>
           </div>
 
           {/* Right Side - Card Stack */}
-          <div className="flex items-center justify-center lg:justify-end">
+          <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2">
             {cards.length > 0 ? (
-              <CardStack items={cards} offset={10} scaleFactor={0.06} />
+              <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-none">
+                <CardStack items={cards} offset={10} scaleFactor={0.06} />
+              </div>
             ) : (
-              <div className="w-96 h-64 md:w-[600px] md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
+              <div className="w-full max-w-[320px] sm:w-96 h-48 sm:h-64 md:w-[500px] md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-10 w-10 md:h-14 md:w-14 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">{language === 'ar' ? 'جاري تحميل الإعلانات...' : 'Loading ads...'}</p>
+                  <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-14 md:w-14 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">{language === 'ar' ? 'جاري تحميل الإعلانات...' : 'Loading ads...'}</p>
                 </div>
               </div>
             )}
@@ -1008,8 +1010,8 @@ export default function CampaignPreviewPage() {
       {showAccountModal && (
         <div className="fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4" style={{
           background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
-          paddingLeft: isRTL ? '0' : '280px',
-          paddingRight: isRTL ? '280px' : '0'
+          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '0' : '280px') : '0',
+          paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '280px' : '0') : '0'
         }}>
           {/* Animated Background Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1310,8 +1312,8 @@ export default function CampaignPreviewPage() {
             alignItems: 'center', 
             justifyContent: 'center',
             background: `radial-gradient(circle at center, ${modalColors.bgGradient}, rgba(0, 0, 0, 0.9))`,
-            paddingLeft: isRTL ? '0' : '280px',
-            paddingRight: isRTL ? '280px' : '0'
+            paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '0' : '280px') : '0',
+            paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1280 ? (isRTL ? '280px' : '0') : '0'
           }}
         >
           {/* Animated Background Orbs */}
