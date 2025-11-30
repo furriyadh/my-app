@@ -77,11 +77,7 @@ export function clearJWTCookies(): NextResponse {
  */
 export async function verifyJWTWithBackend(token: string): Promise<boolean> {
   try {
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://my-app-production-28d2.up.railway.app/api/auth/verify'
-      : 'http://localhost:5000/api/auth/verify';
-    
-    const response = await fetch(backendUrl, {
+    const response = await fetch(`${getBackendUrl()}/api/auth/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -107,11 +103,7 @@ export async function refreshJWTToken(): Promise<{ success: boolean; newToken?: 
       return { success: false };
     }
     
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://my-app-production-28d2.up.railway.app/api/auth/refresh'
-      : 'http://localhost:5000/api/auth/refresh';
-    
-    const response = await fetch(backendUrl, {
+    const response = await fetch(`${getBackendUrl()}/api/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

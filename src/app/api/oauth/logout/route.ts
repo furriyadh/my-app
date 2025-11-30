@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendUrl } from '@/lib/config';
 
 /**
  * OAuth Logout Handler - يتبع تدفق البيانات الصحيح
@@ -32,10 +33,8 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // إرسال طلب logout إلى Flask Backend
-    const backendUrl = process.env.NODE_ENV === 'production'
-      ? 'https://my-app-production-28d2.up.railway.app'
-      : 'http://localhost:5000';
+    // إرسال طلب logout إلى Flask Backend (باستخدام متغيرات البيئة فقط)
+    const backendUrl = getBackendUrl();
     
     if (accessToken) {
       try {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendUrl } from '@/lib/config';
 
 export async function GET(
   request: NextRequest,
@@ -33,9 +34,7 @@ export async function GET(
     
     // جلب إحصائيات الحساب من Flask Backend (Railway)
     try {
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://my-app-production-28d2.up.railway.app'
-        : 'http://localhost:5000';
+      const backendUrl = getBackendUrl();
       
       // إرسال الطلب إلى Flask Backend
       const response = await fetch(`${backendUrl}/api/user/accounts/${customerId}/stats`, {

@@ -42,8 +42,7 @@ export async function GET(request: NextRequest) {
     // محاولة الحصول على الحسابات مباشرة من Google Ads API (حسب Google Ads API Documentation)
     try {
       console.log('🔄 الحصول على الحسابات من الباك اند الذي يستخدم Google Ads API Client Library...');
-      const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
-      const googleAdsResponse = await fetch(`${backendUrl}/api/oauth/accounts`, {
+      const googleAdsResponse = await fetch(`${getBackendUrl()}/api/oauth/accounts`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -79,9 +78,8 @@ export async function GET(request: NextRequest) {
     
     // الاتصال بالباك اند لجلب الحسابات (كبديل)
     console.log('🔄 الحصول على الحسابات من الباك اند...');
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
     
-    const response = await fetch(`${backendUrl}/api/oauth/accounts`, {
+    const response = await fetch(`${getBackendUrl()}/api/oauth/accounts`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

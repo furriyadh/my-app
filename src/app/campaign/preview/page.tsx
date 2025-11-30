@@ -9,6 +9,7 @@ import Announcement from '@/components/seraui/Announcement';
 import { Progress } from '@/components/ui/progress';
 import { subscribeToClientRequests } from '@/lib/supabase';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { getApiUrl } from '@/lib/config';
 
 interface AdVariation {
   headlines: string[];
@@ -675,7 +676,7 @@ export default function CampaignPreviewPage() {
       console.log('🎯 Selected customer_id:', selectedAccount);
 
       // Launch campaign - this is the real work happening
-      const launchResponse = await fetch('http://localhost:5000/api/ai-campaign/launch-campaign', {
+      const launchResponse = await fetch(getApiUrl('/api/ai-campaign/launch-campaign'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(completeCampaignData)

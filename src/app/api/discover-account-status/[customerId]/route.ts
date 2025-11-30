@@ -18,10 +18,8 @@ export async function GET(
       }, { status: 400 });
     }
     
-    // جلب الحالة الفعلية من Flask Backend (Railway)
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://my-app-production-28d2.up.railway.app'
-      : 'http://localhost:5000';
+    // جلب الحالة الفعلية من Flask Backend (Railway) باستخدام متغيرات البيئة
+    const backendUrl = getBackendUrl();
     
     const backendResponse = await fetch(`${backendUrl}/api/check-link-status/${customerId}`, {
       method: 'GET',

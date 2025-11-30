@@ -10,6 +10,7 @@ import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
+import { getApiUrl } from '@/lib/config';
 
 const WebsiteUrlPage: React.FC = () => {
   const router = useRouter();
@@ -493,7 +494,7 @@ const WebsiteUrlPage: React.FC = () => {
       const dailyBudget = storedCampaignData.dailyBudget || 15;
       
       // Start combined analysis (language detection + keyword generation + forecast)
-      const analysisPromise = fetch('http://localhost:5000/api/ai-campaign/analyze-website-and-forecast', {
+      const analysisPromise = fetch(getApiUrl('/api/ai-campaign/analyze-website-and-forecast'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -550,7 +551,7 @@ const WebsiteUrlPage: React.FC = () => {
         });
       
       // Also detect language separately (optional, for UI display)
-      const languageDetectionPromise = fetch('http://localhost:5000/api/ai-campaign/detect-website-language', {
+      const languageDetectionPromise = fetch(getApiUrl('/api/ai-campaign/detect-website-language'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ website_url: fullUrl })

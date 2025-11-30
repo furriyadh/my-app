@@ -20,11 +20,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Forward request to Flask backend (proper flow)
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://my-app-production-28d2.up.railway.app/api/link-customer'
-      : 'http://localhost:5000/api/link-customer';
-    
-    const response = await fetch(backendUrl, {
+    const response = await fetch(`${getBackendUrl()}/api/link-customer`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

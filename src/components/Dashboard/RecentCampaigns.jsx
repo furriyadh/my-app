@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getBackendUrl } from "@/lib/config";
 import {
   Play,
   Pause,
@@ -49,9 +50,7 @@ const RecentCampaigns = () => {
       setIsLoading(true);
       setError(null);
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://my-app-production-28d2.up.railway.app/api' 
-        : 'http://localhost:5000/api';
+      const backendUrl = `${getBackendUrl()}/api`;
 
       const params = new URLSearchParams();
       if (statusFilter !== 'all') {

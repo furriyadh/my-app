@@ -8,6 +8,7 @@ import GlowButton from '@/components/ui/glow-button';
 import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
+import { getApiUrl } from '@/lib/config';
 
 const BudgetSchedulingPage: React.FC = () => {
   const router = useRouter();
@@ -712,7 +713,7 @@ const BudgetSchedulingPage: React.FC = () => {
       }));
       
       // Call API to get keyword CPC data
-      const response = await fetch('http://localhost:5000/api/ai-campaign/get-keyword-cpc-data', {
+      const response = await fetch(getApiUrl('/api/ai-campaign/get-keyword-cpc-data'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -947,7 +948,7 @@ const BudgetSchedulingPage: React.FC = () => {
           language_id: languageId
         });
         
-        const histResponse = await fetch('http://localhost:5000/api/ai-campaign/get-historical-metrics', {
+        const histResponse = await fetch(getApiUrl('/api/ai-campaign/get-historical-metrics'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1020,9 +1021,9 @@ const BudgetSchedulingPage: React.FC = () => {
         // Check if it's a network error
         if (histError instanceof TypeError && histError.message === 'Failed to fetch') {
           console.error('🔌 Network error: Backend is not responding. Please ensure:');
-          console.error('   1. Backend server is running on http://localhost:5000');
-          console.error('   2. No CORS issues');
-          console.error('   3. The endpoint /api/ai-campaign/get-historical-metrics exists');
+          console.error('   1. Backend server is running and reachable from the frontend environment');
+          console.error('   2. No CORS issues between frontend and backend');
+          console.error('   3. The endpoint /api/ai-campaign/get-historical-metrics exists on the backend');
         }
         
         // Set fallback estimates if API fails

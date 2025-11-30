@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendUrl } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,8 +27,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // الاتصال بالباك اند لربط الحساب
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
+    // الاتصال بالباك اند لربط الحساب (باستخدام متغيرات البيئة فقط)
+    const backendUrl = getBackendUrl();
     
     const response = await fetch(`${backendUrl}/api/link-customer`, {
       method: 'POST',

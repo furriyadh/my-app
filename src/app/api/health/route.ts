@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getBackendUrl } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   try {
-    const backendUrl = process.env.NODE_ENV === 'production'
-      ? 'https://my-app-production-28d2.up.railway.app'
-      : 'http://localhost:5000';
+    const backendUrl = getBackendUrl();
 
     let backendHealth = {};
     try {

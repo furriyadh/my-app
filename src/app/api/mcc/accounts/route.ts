@@ -30,9 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     // الاتصال بالباك اند للحصول على بيانات MCC
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
-    
-    const response = await fetch(`${backendUrl}/api/mcc/accounts`, {
+    const response = await fetch(`${getBackendUrl()}/api/mcc/accounts`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -96,9 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     // الاتصال بالباك اند لتنفيذ العملية
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
-    
-    const response = await fetch(`${backendUrl}/api/mcc/accounts/${operation}`, {
+    const response = await fetch(`${getBackendUrl()}/api/mcc/accounts/${operation}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

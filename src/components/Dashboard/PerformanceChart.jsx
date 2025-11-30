@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { getBackendUrl } from "@/lib/config";
 import {
   LineChart,
   Line,
@@ -89,9 +90,7 @@ const PerformanceChart = () => {
       setIsLoading(true);
       setError(null);
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://my-app-production-28d2.up.railway.app/api' 
-        : 'http://localhost:5000/api';
+      const backendUrl = `${getBackendUrl()}/api`;
 
       const selectedRange = timeRanges.find(range => range.value === timeRange);
       

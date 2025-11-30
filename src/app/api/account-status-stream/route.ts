@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getBackendUrl } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   try {
-    // الاتصال بالباك اند للحصول على SSE stream
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
+    // الاتصال بالباك اند للحصول على SSE stream (باستخدام متغيرات البيئة)
+    const backendUrl = getBackendUrl();
     
     const response = await fetch(`${backendUrl}/api/account-status-stream`, {
       method: 'GET',

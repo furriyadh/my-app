@@ -67,11 +67,9 @@ export async function POST(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لإلغاء OAuth (حسب Google Ads API Documentation)
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
-    
     try {
       console.log('🔄 إلغاء OAuth في الباك اند...');
-      const backendResponse = await fetch(`${backendUrl}/api/oauth/revoke`, {
+      const backendResponse = await fetch(`${getBackendUrl()}/api/oauth/revoke`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -27,9 +27,7 @@ export async function POST(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لإلغاء ربط الحساب
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
-    
-    const response = await fetch(`${backendUrl}/api/mcc/unlink-customer/${customer_id}`, {
+    const response = await fetch(`${getBackendUrl()}/api/mcc/unlink-customer/${customer_id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

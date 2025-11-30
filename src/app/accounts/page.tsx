@@ -55,10 +55,7 @@ const AccountsPage: React.FC = () => {
 
   const fetchAccounts = async () => {
     try {
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://my-app-production-28d2.up.railway.app/api/user/accounts'
-        : '/api/user/accounts';
-      const response = await fetch(backendUrl, {
+      const response = await fetch('/api/google-ads/accounts', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',

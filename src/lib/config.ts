@@ -1,12 +1,28 @@
-// Configuration helper for backend URL
+// Configuration helper for backend URL (works for development + production)
 export function getBackendUrl(): string {
-  // Check if we're in production
-  if (process.env.NODE_ENV === 'production') {
-    return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://my-app-production-28d2.up.railway.app';
+  const nodeEnv = process.env.NODE_ENV;
+
+  // ✅ Browser (Client Components): استخدم فقط المتغيرات العامة
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
   }
-  
-  // Development environment
-  return process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+
+  // ✅ Server-side (Next.js / Node) في الإنتاج نعتمد فقط على متغيرات البيئة
+  if (nodeEnv === 'production') {
+    // على Vercel/VPS يجب ضبط واحد على الأقل من هذه المتغيرات
+    return (
+      process.env.BACKEND_API_URL ||
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      ''
+    );
+  }
+
+  // ✅ Development (محليًا): نسمح بالسقوط إلى localhost إذا لم تُضبط المتغيرات
+  return (
+    process.env.BACKEND_API_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    'http://localhost:5000'
+  );
 }
 
 export function getApiUrl(path: string): string {

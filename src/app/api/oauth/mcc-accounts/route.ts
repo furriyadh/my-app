@@ -17,9 +17,7 @@ export async function GET(request: NextRequest) {
     }
     
     // الاتصال بالباك اند لجلب حسابات MCC
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
-    
-    const response = await fetch(`${backendUrl}/api/oauth/mcc-accounts`, {
+    const response = await fetch(`${getBackendUrl()}/api/oauth/mcc-accounts`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

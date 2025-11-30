@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { getBackendUrl } from './config'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -151,11 +152,7 @@ export interface UserProfile {
 export async function getClientRequests(): Promise<ClientRequest[]> {
   try {
     // جلب طلبات العملاء عبر الباك إند (Flask) بدلاً من الوصول المباشر لـ Supabase من المتصفح
-    const backendUrl =
-      process.env.BACKEND_API_URL ||
-      (process.env.NODE_ENV === 'production'
-        ? 'https://my-app-production-28d2.up.railway.app'
-        : 'http://localhost:5000');
+    const backendUrl = getBackendUrl()
 
     const response = await fetch(`${backendUrl}/api/get-client-requests/all`, {
       method: 'GET',

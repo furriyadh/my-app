@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Edit2, Sparkles, RefreshCw, Save } from 'lucide-
 import GlowButton from '@/components/ui/glow-button';
 import { CardStack } from '@/components/ui/card-stack';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { getApiUrl } from '@/lib/config';
 
 interface GeneratedContent {
   headlines: string[];
@@ -118,7 +119,7 @@ export default function EditAdsPage() {
       console.log(`📤 Sending to backend:`, requestData);
       
       // Call AI to regenerate this specific item
-      const response = await fetch('http://localhost:5000/api/ai-campaign/regenerate-ad-element', {
+      const response = await fetch(getApiUrl('/api/ai-campaign/regenerate-ad-element'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)

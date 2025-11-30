@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
+import { getBackendUrl } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Next.js API: Syncing all statuses from Google Ads API...');
     
-    const response = await fetch(`${backendUrl}/api/sync-all-statuses`, {
+    const response = await fetch(`${getBackendUrl()}/api/sync-all-statuses`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -4,6 +4,7 @@
 import axios from 'axios'
 import { API_ENDPOINTS, HTTP_STATUS, ERROR_MESSAGES } from '../utils/constants'
 import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/helpers'
+import { getApiUrl } from '@/lib/config'
 
 /**
  * API Service Class
@@ -11,7 +12,11 @@ import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/help
  */
 class APIService {
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app/api' : 'http://localhost:3000/api')
+    // ⚙️ Base URL موحّد لجميع البيئات:
+    // - إذا تم ضبط NEXT_PUBLIC_API_URL نستخدمه كما هو (مثلاً https://furriyadh.com/api)
+    // - وإلا نستخدم getApiUrl('api') الذي يبني الرابط من متغيرات البيئة BACKEND_API_URL / NEXT_PUBLIC_BACKEND_URL
+    const explicitBaseUrl = process.env.NEXT_PUBLIC_API_URL
+    this.baseURL = explicitBaseUrl || getApiUrl('api')
     this.timeout = 30000 // 30 seconds
     this.retryAttempts = 3
     this.retryDelay = 1000 // 1 second

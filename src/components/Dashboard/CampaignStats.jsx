@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { getBackendUrl } from "@/lib/config";
 import {
   PieChart,
   Pie,
@@ -57,9 +58,7 @@ const CampaignStats = () => {
       setIsLoading(true);
       setError(null);
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://my-app-production-28d2.up.railway.app/api' 
-        : 'http://localhost:5000/api';
+      const backendUrl = `${getBackendUrl()}/api`;
 
       const response = await fetch(`${backendUrl}/campaigns/stats`, {
         method: 'GET',

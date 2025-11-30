@@ -14,8 +14,8 @@ export async function POST(
       );
     }
 
-    // الاتصال بالباك اند لمزامنة حالة الحساب
-    const backendUrl = process.env.BACKEND_API_URL || (process.env.NODE_ENV === 'production' ? 'https://my-app-production-28d2.up.railway.app' : 'http://localhost:5000');
+    // الاتصال بالباك اند لمزامنة حالة الحساب (باستخدام متغيرات البيئة)
+    const backendUrl = getBackendUrl();
     
     // إضافة retry logic مع timeout
     let response;
