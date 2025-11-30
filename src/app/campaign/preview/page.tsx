@@ -954,7 +954,7 @@ export default function CampaignPreviewPage() {
         </div>
 
         {/* Ad Preview Section */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 mb-6 sm:mb-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
           
           {/* Left Side - Edit Button */}
           <div className="flex items-center justify-center lg:justify-start order-2 lg:order-1">

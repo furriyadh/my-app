@@ -33,6 +33,27 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* CRITICAL: Clean up sidebar-open classes immediately to prevent black screen */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // Remove sidebar-open classes immediately to prevent black screen on refresh
+                if (document.body) {
+                  document.body.classList.remove('sidebar-open');
+                  document.body.style.top = '';
+                  document.body.style.position = '';
+                  document.body.style.width = '';
+                  document.body.style.height = '';
+                }
+                if (document.documentElement) {
+                  document.documentElement.classList.remove('sidebar-open');
+                }
+              })();
+            `,
+          }}
+        />
         {/* Script لتطبيق RTL قبل رسم الصفحة لتجنب التضارب */}
         <script
           suppressHydrationWarning

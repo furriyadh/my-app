@@ -2178,9 +2178,9 @@ const LocationTargetingPage: React.FC = () => {
         minHeight: '100vh',
         minHeight: '100dvh' // Use dynamic viewport height for mobile
       }}>
-        {/* Campaign Progress */}
-        <CampaignProgress currentStep={1} totalSteps={3} />
-        
+      {/* Campaign Progress */}
+      <CampaignProgress currentStep={1} totalSteps={3} />
+      
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" style={{
           position: 'relative',
           zIndex: 1
@@ -2266,7 +2266,7 @@ const LocationTargetingPage: React.FC = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               setOpenRadiusDropdown(openRadiusDropdown === location.id ? null : location.id);
-                            }}
+                          }}
                             className="text-xs bg-white dark:bg-gray-800 backdrop-blur-md border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-1 min-w-[70px] justify-between"
                           >
                             <span>{location.radius}km+</span>
@@ -2277,13 +2277,13 @@ const LocationTargetingPage: React.FC = () => {
                           {openRadiusDropdown === location.id && (
                             <div 
                               className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-lg shadow-2xl z-[9999] min-w-[70px] overflow-hidden radius-dropdown-container"
-                              onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
                               style={{
                                 position: 'absolute',
                                 zIndex: 9999
                               }}
-                            >
-                              {radiusOptions.map(radius => (
+                        >
+                          {radiusOptions.map(radius => (
                                 <button
                                   key={radius}
                                   onClick={() => {
@@ -2296,9 +2296,9 @@ const LocationTargetingPage: React.FC = () => {
                                       : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                                   }`}
                                 >
-                                  {radius}km+
+                              {radius}km+
                                 </button>
-                              ))}
+                          ))}
                             </div>
                           )}
                         </div>
