@@ -1537,33 +1537,105 @@ const BudgetSchedulingPage: React.FC = () => {
           </GlowButton>
           
           <GlowButton
-            onClick={() => {
-              // Get real CPC from localStorage (calculated from real Google Ads data)
-              const realCPC = localStorage.getItem('realCPC');
-              const realCPCValue = realCPC ? parseFloat(realCPC) : null;
-              
-              const updatedData = {
-                ...campaignData,
-                dailyBudget: selectedBudget, // Display budget in selected currency
-                dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
-                currency: currency,
-                realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
-                maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
-              };
-              
-              console.log('💰 Campaign Data with Real CPC:', {
-                dailyBudgetUSD: selectedBudgetUSD,
-                realCPC: realCPCValue,
-                maxCpcBid: realCPCValue
-              });
-              
-              localStorage.setItem('campaignData', JSON.stringify(updatedData));
-              
-              // Set flag for campaign creation in progress
-              localStorage.setItem('creatingCampaign', 'true');
-              
-              // Navigate to preview page to review campaign before publishing
-              router.push('/campaign/preview');
+            onClick={async () => {
+              try {
+                // Get real CPC from localStorage (calculated from real Google Ads data)
+                const realCPC = localStorage.getItem('realCPC');
+                const realCPCValue = realCPC ? parseFloat(realCPC) : null;
+                
+                const updatedData = {
+                  ...campaignData,
+                  dailyBudget: selectedBudget, // Display budget in selected currency
+                  dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
+                  currency: currency,
+                  realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
+                  maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
+                };
+                
+                console.log('💰 Campaign Data with Real CPC:', {
+                  dailyBudgetUSD: selectedBudgetUSD,
+                  realCPC: realCPCValue,
+                  maxCpcBid: realCPCValue
+                });
+                
+                localStorage.setItem('campaignData', JSON.stringify(updatedData));
+                
+                // Get keywords from localStorage
+                const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
+                const generatedContent = JSON.parse(generatedContentStr);
+                const keywordsList = generatedContent.keywords || [];
+                
+                // Generate ad content (headlines and descriptions) for SEARCH campaigns
+                if (campaignData?.campaignType === 'SEARCH' && (!generatedContent.headlines || !generatedContent.descriptions)) {
+                  console.log('🎨 Generating ad content for SEARCH campaign...');
+                  
+                  try {
+                    const contentResponse = await fetch(getApiUrl('/api/ai-campaign/generate-campaign-content'), {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        website_url: campaignData.websiteUrl,
+                        campaign_type: 'SEARCH',
+                        budget: selectedBudgetUSD,
+                        keywords_list: keywordsList,
+                        target_language: campaignData.selectedLanguageCode || 'ar'
+                      })
+                    });
+                    
+                    if (contentResponse.ok) {
+                      const contentResult = await contentResponse.json();
+                      console.log('✅ Ad content generated:', contentResult);
+                      
+                      if (contentResult.success && contentResult.content) {
+                        // Merge generated content with existing keywords
+                        const updatedGeneratedContent = {
+                          ...generatedContent,
+                          headlines: contentResult.content.headlines || [],
+                          descriptions: contentResult.content.descriptions || [],
+                          keywords: keywordsList.length > 0 ? keywordsList : (contentResult.content.keywords || [])
+                        };
+                        
+                        localStorage.setItem('generatedContent', JSON.stringify(updatedGeneratedContent));
+                        console.log('💾 Saved generated content with headlines and descriptions');
+                        console.log(`   📝 Headlines: ${updatedGeneratedContent.headlines.length}`);
+                        console.log(`   📝 Descriptions: ${updatedGeneratedContent.descriptions.length}`);
+                      } else {
+                        console.warn('⚠️ Content generation returned success=false:', contentResult);
+                        alert(language === 'ar' 
+                          ? '⚠️ فشل في إنشاء المحتوى الإعلاني. سيتم الانتقال لصفحة المعاينة بدون محتوى.'
+                          : '⚠️ Failed to generate ad content. Proceeding to preview without content.');
+                      }
+                    } else {
+                      const errorData = await contentResponse.json().catch(() => ({ error: 'Unknown error' }));
+                      console.error('❌ Failed to generate ad content:', contentResponse.status, errorData);
+                      alert(language === 'ar' 
+                        ? '⚠️ فشل في إنشاء المحتوى الإعلاني. سيتم الانتقال لصفحة المعاينة بدون محتوى.'
+                        : '⚠️ Failed to generate ad content. Proceeding to preview without content.');
+                    }
+                  } catch (fetchError) {
+                    console.error('❌ Error calling content generation API:', fetchError);
+                    alert(language === 'ar' 
+                      ? '⚠️ خطأ في الاتصال بالخادم. سيتم الانتقال لصفحة المعاينة بدون محتوى.'
+                      : '⚠️ Connection error. Proceeding to preview without content.');
+                  }
+                } else {
+                  console.log('ℹ️ Ad content already exists or not a SEARCH campaign');
+                  if (generatedContent.headlines && generatedContent.descriptions) {
+                    console.log(`   ✅ Found ${generatedContent.headlines.length} headlines and ${generatedContent.descriptions.length} descriptions`);
+                  }
+                }
+                
+                // Set flag for campaign creation in progress
+                localStorage.setItem('creatingCampaign', 'true');
+                
+                // Navigate to preview page to review campaign before publishing
+                router.push('/campaign/preview');
+              } catch (error) {
+                console.error('❌ Error generating campaign content:', error);
+                // Still navigate to preview even if content generation fails
+                localStorage.setItem('creatingCampaign', 'true');
+                router.push('/campaign/preview');
+              }
             }}
             variant="blue"
           >
