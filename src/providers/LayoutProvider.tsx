@@ -5,9 +5,45 @@
 import React, { useState, ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { motion } from "motion/react";
 import SidebarMenu from "../components/Layout/SidebarMenu";
 import Header from "../components/Layout/Header/index";
 import Footer from "../components/Layout/Footer";
+
+// ✨ Purple Loader Component - All Purple Gradient
+const PurpleLoader = () => {
+  const transition = (x: number) => {
+    return {
+      duration: 1,
+      repeat: Infinity,
+      repeatType: "loop" as const,
+      delay: x * 0.2,
+      ease: "easeInOut" as const,
+    };
+  };
+  return (
+    <div className="flex items-center gap-3">
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: [0, 12, 0] }}
+        transition={transition(0)}
+        className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-400 to-violet-500 shadow-lg shadow-purple-500/60"
+      />
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: [0, 12, 0] }}
+        transition={transition(1)}
+        className="h-5 w-5 rounded-full border border-violet-300 bg-gradient-to-b from-violet-400 to-purple-600 shadow-lg shadow-violet-500/60"
+      />
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: [0, 12, 0] }}
+        transition={transition(2)}
+        className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/60"
+      />
+    </div>
+  );
+};
 
 // Dynamic import للـ supabase client لتجنب مشاكل prerendering
 const useSupabaseClient = () => {
@@ -99,10 +135,18 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   // عرض حالة التحميل للصفحات المحمية إذا لم يتم تحميل supabase بعد
   if (isDashboardPage && !supabase) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-800 drop-shadow-md">جاري تحميل النظام...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
+        {/* Background glow effect */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)'
+          }}
+        />
+        
+        {/* Purple Loader */}
+        <div className="relative z-10">
+          <PurpleLoader />
         </div>
       </div>
     );

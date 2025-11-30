@@ -1,335 +1,308 @@
 // API to fetch all campaigns with comprehensive metrics from Google Ads
+// 📊 يجلب البيانات فقط من الحسابات المرتبطة (Connected) في صفحة /integrations/google-ads
 import { NextRequest, NextResponse } from 'next/server';
-import { getBackendUrl } from '@/lib/config';
+import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 
-export async function GET(request: NextRequest) {
+// إنشاء Supabase client
+const getSupabaseAdmin = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  });
+};
+
+// دالة لجلب الحسابات المرتبطة من Supabase
+async function getConnectedAccounts(userId: string): Promise<string[]> {
   try {
-    const authHeader = request.headers.get('authorization');
+    const supabase = getSupabaseAdmin();
     
-    if (!authHeader) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authorization required',
-        campaigns: []
-      }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get('customerId');
-    const timeRange = searchParams.get('timeRange') || '30';
+    // جلب الحسابات المرتبطة (status = 'connected' أو 'approved')
+    const { data, error } = await supabase
+      .from('client_requests')
+      .select('customer_id, status')
+      .eq('user_id', userId)
+      .in('status', ['connected', 'approved', 'LINKED']);
     
-    // Call backend to fetch campaigns with all metrics
-    const backendUrl = getBackendUrl();
-    const response = await fetch(`${backendUrl}/api/campaigns?customerId=${customerId || ''}&timeRange=${timeRange}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      console.warn('Backend API error, returning mock data for development');
-      return NextResponse.json(generateMockCampaignsData(timeRange));
+    if (error) {
+      console.error('❌ خطأ في جلب الحسابات المرتبطة:', error);
+      return [];
     }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-
+    
+    const connectedIds = (data || []).map(row => row.customer_id).filter(Boolean);
+    console.log(`✅ تم العثور على ${connectedIds.length} حساب مرتبط`);
+    return connectedIds;
   } catch (error) {
-    console.error('Error fetching campaigns:', error);
-    // Return mock data for development
-    return NextResponse.json(generateMockCampaignsData('30'));
+    console.error('❌ خطأ في getConnectedAccounts:', error);
+    return [];
   }
 }
 
-// Generate comprehensive mock data with all metrics
-function generateMockCampaignsData(timeRange: string) {
-  const campaigns = [
-    {
-      id: '1',
-      name: 'Summer Sale Campaign',
-      type: 'SEARCH',
-      status: 'ENABLED',
-      budget: 5000,
-      budgetType: 'DAILY',
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
-      
-      // Basic Performance Metrics
-      impressions: 125000,
-      clicks: 8500,
-      ctr: 6.8,
-      conversions: 425,
-      conversionRate: 5.0,
-      interactions: 8500,
-      engagementRate: 4.2,
-      
-      // Cost & Revenue Metrics
-      cost: 4250.00,
-      averageCpc: 0.50,
-      averageCpm: 34.00,
-      averageCpv: 0.12,
-      costPerConversion: 10.00,
-      conversionsValue: 21250.00,
-      roas: 5.0,
-      
-      // Quality Score Metrics
-      qualityScore: 8,
-      historicalQualityScore: 7,
-      historicalCreativeQualityScore: 'ABOVE_AVERAGE',
-      historicalLandingPageQualityScore: 'ABOVE_AVERAGE',
-      historicalSearchPredictedCtr: 'ABOVE_AVERAGE',
-      
-      // Impression Share Metrics
-      searchImpressionShare: 75.5,
-      searchAbsoluteTopImpressionShare: 45.2,
-      searchTopImpressionShare: 68.3,
-      searchRankLostImpressionShare: 12.5,
-      searchBudgetLostImpressionShare: 12.0,
-      
-      // Advanced Metrics
-      allConversions: 450,
-      allConversionsValue: 22500.00,
-      crossDeviceConversions: 25,
-      viewThroughConversions: 15,
-      
-      // Device Performance
-      devicePerformance: {
-        desktop: { impressions: 50000, clicks: 3400, conversions: 200, cost: 1700 },
-        mobile: { impressions: 62500, clicks: 4250, conversions: 187, cost: 2125 },
-        tablet: { impressions: 12500, clicks: 850, conversions: 38, cost: 425 }
-      },
-      
-      // Audience Metrics
-      uniqueUsers: 95000,
-      averageImpressionFrequency: 1.32,
-      
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-11-25T00:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Video Brand Awareness',
-      type: 'VIDEO',
-      status: 'ENABLED',
-      budget: 3000,
-      budgetType: 'DAILY',
-      startDate: '2024-02-01',
-      
-      impressions: 500000,
-      clicks: 15000,
-      ctr: 3.0,
-      conversions: 450,
-      conversionRate: 3.0,
-      interactions: 20000,
-      engagementRate: 4.0,
-      
-      cost: 2800.00,
-      averageCpc: 0.19,
-      averageCpm: 5.60,
-      averageCpv: 0.08,
-      costPerConversion: 6.22,
-      conversionsValue: 13500.00,
-      roas: 4.82,
-      
-      // Video Specific Metrics
-      videoViews: 35000,
-      videoViewRate: 7.0,
-      videoQuartileP25Rate: 85.0,
-      videoQuartileP50Rate: 65.0,
-      videoQuartileP75Rate: 45.0,
-      videoQuartileP100Rate: 30.0,
-      
-      qualityScore: 7,
-      searchImpressionShare: 65.0,
-      
-      devicePerformance: {
-        desktop: { impressions: 150000, clicks: 4500, conversions: 135, cost: 840 },
-        mobile: { impressions: 300000, clicks: 9000, conversions: 270, cost: 1680 },
-        tablet: { impressions: 50000, clicks: 1500, conversions: 45, cost: 280 }
-      },
-      
-      uniqueUsers: 425000,
-      averageImpressionFrequency: 1.18,
-      
-      createdAt: '2024-02-01T00:00:00Z',
-      updatedAt: '2024-11-25T00:00:00Z'
-    },
-    {
-      id: '3',
-      name: 'Shopping Product Ads',
-      type: 'SHOPPING',
-      status: 'ENABLED',
-      budget: 7500,
-      budgetType: 'DAILY',
-      startDate: '2024-03-01',
-      
-      impressions: 350000,
-      clicks: 24500,
-      ctr: 7.0,
-      conversions: 1225,
-      conversionRate: 5.0,
-      interactions: 24500,
-      
-      cost: 7350.00,
-      averageCpc: 0.30,
-      averageCpm: 21.00,
-      costPerConversion: 6.00,
-      conversionsValue: 61250.00,
-      roas: 8.33,
-      
-      // E-commerce Specific Metrics
-      revenue: 61250.00,
-      orders: 1225,
-      averageOrderValue: 50.00,
-      averageCartSize: 2.3,
-      unitsSold: 2818,
-      costOfGoodsSold: 30625.00,
-      grossProfit: 30625.00,
-      grossProfitMargin: 50.0,
-      
-      qualityScore: 9,
-      searchImpressionShare: 82.0,
-      searchAbsoluteTopImpressionShare: 58.5,
-      
-      devicePerformance: {
-        desktop: { impressions: 105000, clicks: 7350, conversions: 368, cost: 2205 },
-        mobile: { impressions: 210000, clicks: 14700, conversions: 735, cost: 4410 },
-        tablet: { impressions: 35000, clicks: 2450, conversions: 122, cost: 735 }
-      },
-      
-      uniqueUsers: 280000,
-      averageImpressionFrequency: 1.25,
-      
-      createdAt: '2024-03-01T00:00:00Z',
-      updatedAt: '2024-11-25T00:00:00Z'
-    },
-    {
-      id: '4',
-      name: 'Display Retargeting',
-      type: 'DISPLAY',
-      status: 'ENABLED',
-      budget: 2000,
-      budgetType: 'DAILY',
-      startDate: '2024-04-01',
-      
-      impressions: 800000,
-      clicks: 12000,
-      ctr: 1.5,
-      conversions: 360,
-      conversionRate: 3.0,
-      interactions: 12000,
-      engagementRate: 2.8,
-      
-      cost: 1920.00,
-      averageCpc: 0.16,
-      averageCpm: 2.40,
-      costPerConversion: 5.33,
-      conversionsValue: 10800.00,
-      roas: 5.63,
-      
-      // Active View Metrics
-      activeViewImpressions: 720000,
-      activeViewViewability: 90.0,
-      activeViewMeasurability: 95.0,
-      activeViewCpm: 2.67,
-      
-      qualityScore: 6,
-      contentImpressionShare: 68.0,
-      
-      devicePerformance: {
-        desktop: { impressions: 240000, clicks: 3600, conversions: 108, cost: 576 },
-        mobile: { impressions: 480000, clicks: 7200, conversions: 216, cost: 1152 },
-        tablet: { impressions: 80000, clicks: 1200, conversions: 36, cost: 192 }
-      },
-      
-      uniqueUsers: 650000,
-      averageImpressionFrequency: 1.23,
-      
-      createdAt: '2024-04-01T00:00:00Z',
-      updatedAt: '2024-11-25T00:00:00Z'
-    },
-    {
-      id: '5',
-      name: 'Performance Max Universal',
-      type: 'PERFORMANCE_MAX',
-      status: 'PAUSED',
-      budget: 10000,
-      budgetType: 'DAILY',
-      startDate: '2024-05-01',
-      
-      impressions: 950000,
-      clicks: 47500,
-      ctr: 5.0,
-      conversions: 2375,
-      conversionRate: 5.0,
-      interactions: 47500,
-      
-      cost: 9500.00,
-      averageCpc: 0.20,
-      averageCpm: 10.00,
-      costPerConversion: 4.00,
-      conversionsValue: 95000.00,
-      roas: 10.0,
-      
-      qualityScore: 8,
-      searchImpressionShare: 88.0,
-      
-      devicePerformance: {
-        desktop: { impressions: 285000, clicks: 14250, conversions: 713, cost: 2850 },
-        mobile: { impressions: 570000, clicks: 28500, conversions: 1425, cost: 5700 },
-        tablet: { impressions: 95000, clicks: 4750, conversions: 237, cost: 950 }
-      },
-      
-      uniqueUsers: 780000,
-      averageImpressionFrequency: 1.22,
-      
-      createdAt: '2024-05-01T00:00:00Z',
-      updatedAt: '2024-11-25T00:00:00Z'
+// دالة لتجديد access token
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+  try {
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID || '',
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET || '',
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token'
+      })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.access_token;
     }
-  ];
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
 
-  // Calculate aggregate metrics
-  const totalImpressions = campaigns.reduce((sum, c) => sum + c.impressions, 0);
-  const totalClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0);
-  const totalConversions = campaigns.reduce((sum, c) => sum + c.conversions, 0);
-  const totalCost = campaigns.reduce((sum, c) => sum + c.cost, 0);
-  const totalConversionsValue = campaigns.reduce((sum, c) => sum + c.conversionsValue, 0);
+// دالة لجلب الحملات من حساب واحد
+async function fetchCampaignsFromAccount(customerId: string, accessToken: string, timeRange: string) {
+  try {
+    console.log(`📊 جلب حملات الحساب ${customerId}...`);
+    
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(timeRange));
+    
+    const startDateStr = startDate.toISOString().split('T')[0].replace(/-/g, '');
+    const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
+    
+    const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: `
+          SELECT 
+            campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type,
+            campaign.start_date, campaign.end_date, campaign_budget.amount_micros,
+            metrics.impressions, metrics.clicks, metrics.ctr, metrics.conversions,
+            metrics.conversions_value, metrics.cost_micros, metrics.average_cpc,
+            metrics.average_cpm, metrics.cost_per_conversion
+          FROM campaign
+          WHERE segments.date BETWEEN '${startDateStr}' AND '${endDateStr}'
+            AND campaign.status != 'REMOVED'
+          ORDER BY metrics.cost_micros DESC
+          LIMIT 100
+        `
+      }),
+      signal: AbortSignal.timeout(15000)
+    });
+    
+    if (!response.ok) {
+      console.warn(`⚠️ فشل جلب حملات الحساب ${customerId}:`, response.status);
+      return [];
+    }
+    
+    const data = await response.json();
+    const results = data.results || [];
+    console.log(`✅ تم جلب ${results.length} حملة من الحساب ${customerId}`);
+    
+    return results.map((row: any) => {
+      const campaign = row.campaign || {};
+      const metrics = row.metrics || {};
+      const budget = row.campaignBudget || {};
+      
+      const typeMap: Record<string, string> = {
+        'SEARCH': 'SEARCH', 'DISPLAY': 'DISPLAY', 'VIDEO': 'VIDEO',
+        'SHOPPING': 'SHOPPING', 'PERFORMANCE_MAX': 'PERFORMANCE_MAX'
+      };
+      
+      return {
+        id: campaign.id?.toString() || '',
+        name: campaign.name || 'Unnamed Campaign',
+        type: typeMap[campaign.advertisingChannelType] || campaign.advertisingChannelType || 'UNKNOWN',
+        status: campaign.status || 'UNKNOWN',
+        customerId: customerId,
+        budget: budget.amountMicros ? budget.amountMicros / 1000000 : 0,
+        impressions: parseInt(metrics.impressions) || 0,
+        clicks: parseInt(metrics.clicks) || 0,
+        ctr: parseFloat(metrics.ctr) || 0,
+        conversions: parseFloat(metrics.conversions) || 0,
+        conversionsValue: parseFloat(metrics.conversionsValue) || 0,
+        cost: metrics.costMicros ? metrics.costMicros / 1000000 : 0,
+        averageCpc: metrics.averageCpc ? metrics.averageCpc / 1000000 : 0,
+        averageCpm: metrics.averageCpm ? metrics.averageCpm / 1000000 : 0,
+        costPerConversion: metrics.costPerConversion ? metrics.costPerConversion / 1000000 : 0,
+        roas: metrics.costMicros && metrics.costMicros > 0 
+          ? (parseFloat(metrics.conversionsValue) || 0) / (metrics.costMicros / 1000000) : 0
+      };
+    });
+  } catch (error) {
+    console.error(`❌ خطأ في جلب حملات الحساب ${customerId}:`, error);
+    return [];
+  }
+}
 
-  return {
-    success: true,
-    campaigns: campaigns,
-    metrics: {
-      totalCampaigns: campaigns.length,
-      activeCampaigns: campaigns.filter(c => c.status === 'ENABLED').length,
-      totalSpend: totalCost,
-      impressions: totalImpressions,
-      clicks: totalClicks,
-      ctr: (totalClicks / totalImpressions * 100).toFixed(2),
-      conversions: totalConversions,
-      conversionsValue: totalConversionsValue,
-      roas: (totalConversionsValue / totalCost).toFixed(2),
-      averageCpc: (totalCost / totalClicks).toFixed(2),
-      averageCpm: (totalCost / totalImpressions * 1000).toFixed(2),
-      conversionRate: (totalConversions / totalClicks * 100).toFixed(2),
-      costPerConversion: (totalCost / totalConversions).toFixed(2),
-      
-      // Aggregate advanced metrics
-      qualityScore: (campaigns.reduce((sum, c) => sum + (c.qualityScore || 0), 0) / campaigns.length).toFixed(1),
-      impressionShare: (campaigns.reduce((sum, c) => sum + (c.searchImpressionShare || 0), 0) / campaigns.filter(c => c.searchImpressionShare).length).toFixed(1),
-      
-      // Campaign types distribution
-      campaignTypes: {
-        SEARCH: campaigns.filter(c => c.type === 'SEARCH').length,
-        VIDEO: campaigns.filter(c => c.type === 'VIDEO').length,
-        SHOPPING: campaigns.filter(c => c.type === 'SHOPPING').length,
-        DISPLAY: campaigns.filter(c => c.type === 'DISPLAY').length,
-        PERFORMANCE_MAX: campaigns.filter(c => c.type === 'PERFORMANCE_MAX').length
-      }
-    },
-    timeRange: parseInt(timeRange)
-  };
+export async function GET(request: NextRequest) {
+  try {
+    console.log('📊 GET /api/campaigns - جلب حملات الحسابات المرتبطة فقط...');
+    
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('timeRange') || '30';
+    
+    // الحصول على معلومات المستخدم و tokens من cookies
+    const cookieStore = await cookies();
+    let accessToken = cookieStore.get('oauth_access_token')?.value;
+    const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
+    
+    // استخراج user ID
+    let userId = null;
+    if (userInfoCookie) {
+      try {
+        const userInfo = JSON.parse(userInfoCookie);
+        userId = userInfo.id;
+        console.log('👤 المستخدم:', userInfo.email);
+      } catch (e) {}
+    }
+    
+    // تجديد access token إذا لزم الأمر
+    if (!accessToken && refreshToken) {
+      console.log('🔄 تجديد access token...');
+      accessToken = await refreshAccessToken(refreshToken) || undefined;
+    }
+    
+    // إذا لم يوجد access token أو user ID - إرجاع بيانات فارغة (وليس mock)
+    if (!accessToken || !userId) {
+      console.log('⚠️ لا يوجد access token أو user ID - إرجاع بيانات فارغة');
+      return NextResponse.json({
+        success: true,
+        campaigns: [],
+        accounts: [],
+        accountsCount: 0,
+        metrics: {
+          totalCampaigns: 0, activeCampaigns: 0, totalSpend: 0,
+          impressions: 0, clicks: 0, ctr: '0', conversions: 0,
+          conversionsValue: 0, roas: '0', averageCpc: '0', averageCpm: '0',
+          conversionRate: '0', costPerConversion: '0',
+          campaignTypes: { SEARCH: 0, VIDEO: 0, SHOPPING: 0, DISPLAY: 0, PERFORMANCE_MAX: 0 }
+        },
+        timeRange: parseInt(timeRange),
+        message: 'يرجى تسجيل الدخول وربط حساباتك الإعلانية.'
+      });
+    }
+    
+    // 🔑 جلب الحسابات المرتبطة فقط من Supabase
+    const connectedAccountIds = await getConnectedAccounts(userId);
+    
+    if (connectedAccountIds.length === 0) {
+      console.log('⚠️ لا توجد حسابات مرتبطة - إرجاع بيانات فارغة');
+      return NextResponse.json({
+        success: true,
+        campaigns: [],
+        accounts: [],
+        accountsCount: 0,
+        metrics: {
+          totalCampaigns: 0, activeCampaigns: 0, totalSpend: 0,
+          impressions: 0, clicks: 0, ctr: '0', conversions: 0,
+          conversionsValue: 0, roas: '0', averageCpc: '0', averageCpm: '0',
+          conversionRate: '0', costPerConversion: '0',
+          campaignTypes: { SEARCH: 0, VIDEO: 0, SHOPPING: 0, DISPLAY: 0, PERFORMANCE_MAX: 0 }
+        },
+        timeRange: parseInt(timeRange),
+        message: 'لا توجد حسابات مرتبطة. قم بربط حساباتك من صفحة التكاملات.'
+      });
+    }
+    
+    console.log(`🔗 جلب الحملات من ${connectedAccountIds.length} حساب مرتبط:`, connectedAccountIds);
+    
+    // جلب الحملات من جميع الحسابات المرتبطة بالتوازي
+    const campaignsPromises = connectedAccountIds.map(customerId => 
+      fetchCampaignsFromAccount(customerId, accessToken!, timeRange)
+    );
+    
+    const allCampaignsArrays = await Promise.all(campaignsPromises);
+    const allCampaigns = allCampaignsArrays.flat();
+    
+    console.log(`✅ تم جلب ${allCampaigns.length} حملة من ${connectedAccountIds.length} حساب مرتبط`);
+    
+    // إذا لم توجد حملات، إرجاع بيانات فارغة (وليس mock)
+    if (allCampaigns.length === 0) {
+      return NextResponse.json({
+        success: true,
+        campaigns: [],
+        accounts: connectedAccountIds,
+        accountsCount: connectedAccountIds.length,
+        metrics: {
+          totalCampaigns: 0, activeCampaigns: 0, totalSpend: 0,
+          impressions: 0, clicks: 0, ctr: '0', conversions: 0,
+          conversionsValue: 0, roas: '0', averageCpc: '0', averageCpm: '0',
+          conversionRate: '0', costPerConversion: '0',
+          campaignTypes: { SEARCH: 0, VIDEO: 0, SHOPPING: 0, DISPLAY: 0, PERFORMANCE_MAX: 0 }
+        },
+        timeRange: parseInt(timeRange),
+        message: 'لا توجد حملات نشطة في الحسابات المرتبطة.'
+      });
+    }
+    
+    // حساب المقاييس الإجمالية
+    const totalImpressions = allCampaigns.reduce((sum, c) => sum + c.impressions, 0);
+    const totalClicks = allCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+    const totalConversions = allCampaigns.reduce((sum, c) => sum + c.conversions, 0);
+    const totalCost = allCampaigns.reduce((sum, c) => sum + c.cost, 0);
+    const totalConversionsValue = allCampaigns.reduce((sum, c) => sum + c.conversionsValue, 0);
+    
+    return NextResponse.json({
+      success: true,
+      campaigns: allCampaigns,
+      accounts: connectedAccountIds,
+      accountsCount: connectedAccountIds.length,
+      metrics: {
+        totalCampaigns: allCampaigns.length,
+        activeCampaigns: allCampaigns.filter(c => c.status === 'ENABLED').length,
+        totalSpend: totalCost,
+        impressions: totalImpressions,
+        clicks: totalClicks,
+        ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0',
+        conversions: totalConversions,
+        conversionsValue: totalConversionsValue,
+        roas: totalCost > 0 ? (totalConversionsValue / totalCost).toFixed(2) : '0',
+        averageCpc: totalClicks > 0 ? (totalCost / totalClicks).toFixed(2) : '0',
+        averageCpm: totalImpressions > 0 ? ((totalCost / totalImpressions) * 1000).toFixed(2) : '0',
+        conversionRate: totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(2) : '0',
+        costPerConversion: totalConversions > 0 ? (totalCost / totalConversions).toFixed(2) : '0',
+        campaignTypes: {
+          SEARCH: allCampaigns.filter(c => c.type === 'SEARCH').length,
+          VIDEO: allCampaigns.filter(c => c.type === 'VIDEO').length,
+          SHOPPING: allCampaigns.filter(c => c.type === 'SHOPPING').length,
+          DISPLAY: allCampaigns.filter(c => c.type === 'DISPLAY').length,
+          PERFORMANCE_MAX: allCampaigns.filter(c => c.type === 'PERFORMANCE_MAX').length
+        }
+      },
+      timeRange: parseInt(timeRange),
+      source: 'google_ads_connected_accounts'
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching campaigns:', error);
+    // إرجاع بيانات فارغة في حالة الخطأ (وليس mock)
+    return NextResponse.json({
+      success: true,
+      campaigns: [],
+      accounts: [],
+      accountsCount: 0,
+      metrics: {
+        totalCampaigns: 0, activeCampaigns: 0, totalSpend: 0,
+        impressions: 0, clicks: 0, ctr: '0', conversions: 0,
+        conversionsValue: 0, roas: '0', averageCpc: '0', averageCpm: '0',
+        conversionRate: '0', costPerConversion: '0',
+        campaignTypes: { SEARCH: 0, VIDEO: 0, SHOPPING: 0, DISPLAY: 0, PERFORMANCE_MAX: 0 }
+      },
+      timeRange: 30,
+      error: 'حدث خطأ في جلب البيانات'
+    });
+  }
 }
 
 export async function POST(request: NextRequest) {

@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { motion } from "motion/react";
 import MagicBentoWrapper from "@/components/Dashboard/MagicBentoWrapper";
 import AnimatedBackground from "@/components/Dashboard/AnimatedBackground";
 import AIInsightsPanel from "@/components/Dashboard/AIInsightsPanel";
@@ -364,13 +365,44 @@ const DashboardPage: React.FC = () => {
     await fetchAllData();
   };
 
-  const handleDateRangeChange = (range: any, comparison?: any) => {
+  const handleDateRangeChange = async (range: any, comparison?: any) => {
     setDateRange(range);
     setComparisonData(comparison);
     
     // Calculate days difference
     const days = Math.ceil((range.endDate - range.startDate) / (1000 * 60 * 60 * 24));
-    setTimeRange(days.toString());
+    const newTimeRange = days.toString();
+    
+    // تحديث الفترة الزمنية
+    setTimeRange(newTimeRange);
+    
+    // جلب البيانات الجديدة مباشرة
+    console.log(`📅 تغيير الفترة الزمنية إلى ${days} يوم`);
+    
+    try {
+      setIsLoading(true);
+      setDataSource('api');
+      
+      const [campaignsResult, performanceResult] = await Promise.all([
+        fetch(`/api/campaigns?timeRange=${newTimeRange}`).then(res => res.json()),
+        fetch(`/api/campaigns/performance?days=${newTimeRange}`).then(res => res.json())
+      ]);
+      
+      if (campaignsResult.success) {
+        setCampaigns(campaignsResult.campaigns || []);
+        setMetrics(campaignsResult.metrics || {});
+      }
+      
+      if (performanceResult.success) {
+        setPerformanceData(performanceResult.data || []);
+      }
+      
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching data for new date range:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleCampaignStatus = async (campaignId: string, currentStatus: string) => {
@@ -442,11 +474,46 @@ const DashboardPage: React.FC = () => {
   // Filter campaigns
   const filteredCampaigns = useMemo(() => {
     let filtered = campaigns;
+    
+    // تصفية حسب نوع الحملة المحدد من القائمة
     if (selectedCampaignType !== 'all') {
-      filtered = campaigns.filter(c => c.type === selectedCampaignType);
+      filtered = filtered.filter(c => c.type === selectedCampaignType);
     }
+    
+    // تصفية حسب أنواع الحملات من الفلاتر المتقدمة
+    if (filters.campaignTypes && filters.campaignTypes.length > 0) {
+      filtered = filtered.filter(c => filters.campaignTypes.includes(c.type));
+    }
+    
+    // تصفية حسب الحالة
+    if (filters.statuses && filters.statuses.length > 0) {
+      filtered = filtered.filter(c => filters.statuses.includes(c.status));
+    }
+    
+    // تصفية حسب البحث
+    if (filters.searchQuery && filters.searchQuery.trim()) {
+      const query = filters.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.id.toLowerCase().includes(query)
+      );
+    }
+    
+    // تصفية حسب الأداء
+    if (filters.performanceFilters) {
+      if (filters.performanceFilters.minROAS !== undefined) {
+        filtered = filtered.filter(c => (c.roas || 0) >= filters.performanceFilters.minROAS!);
+      }
+      if (filters.performanceFilters.minCTR !== undefined) {
+        filtered = filtered.filter(c => (c.ctr || 0) >= filters.performanceFilters.minCTR!);
+      }
+      if (filters.performanceFilters.minConversions !== undefined) {
+        filtered = filtered.filter(c => (c.conversions || 0) >= filters.performanceFilters.minConversions!);
+      }
+    }
+    
     return filtered;
-  }, [campaigns, selectedCampaignType]);
+  }, [campaigns, selectedCampaignType, filters]);
 
   // Paginate campaigns
   const paginatedCampaigns = useMemo(() => {
@@ -516,21 +583,24 @@ const DashboardPage: React.FC = () => {
     const conversionRate = clicks > 0 ? ((conversions / clicks) * 100).toFixed(2) : '0';
     const costPerConversion = conversions > 0 ? (totalSpend / conversions).toFixed(2) : '0';
     
+    // التغييرات تكون صفر إذا لم توجد بيانات مقارنة (سيتم حسابها من API لاحقاً)
+    const hasData = totalSpend > 0 || totalRevenue > 0 || clicks > 0;
+    
     return {
       revenue: totalRevenue,
-      revenueChange: 24.5,
+      revenueChange: hasData ? (metrics.revenueChange || 0) : 0,
       spend: totalSpend,
-      spendChange: -5.2,
+      spendChange: hasData ? (metrics.spendChange || 0) : 0,
       roas: roas,
-      roasChange: 12.3,
+      roasChange: hasData ? (metrics.roasChange || 0) : 0,
       ctr: ctr,
-      ctrChange: 8.7,
+      ctrChange: hasData ? (metrics.ctrChange || 0) : 0,
       cpc: cpc,
-      cpcChange: -3.2,
+      cpcChange: hasData ? (metrics.cpcChange || 0) : 0,
       conversionRate: conversionRate,
-      conversionRateChange: 15.4,
+      conversionRateChange: hasData ? (metrics.conversionRateChange || 0) : 0,
       costPerConversion: costPerConversion,
-      costPerConversionChange: -8.1
+      costPerConversionChange: hasData ? (metrics.costPerConversionChange || 0) : 0
     };
   }, [metrics]);
 
@@ -754,13 +824,55 @@ const DashboardPage: React.FC = () => {
     );
   };
 
+  // ✨ Purple Loader Component - All Purple Gradient
+  const PurpleLoader = () => {
+    const transition = (x: number) => {
+      return {
+        duration: 1,
+        repeat: Infinity,
+        repeatType: "loop" as const,
+        delay: x * 0.2,
+        ease: "easeInOut" as const,
+      };
+    };
+    return (
+      <div className="flex items-center gap-3">
+        <motion.div
+          initial={{ y: 0 }}
+          animate={{ y: [0, 12, 0] }}
+          transition={transition(0)}
+          className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-400 to-violet-500 shadow-lg shadow-purple-500/60"
+        />
+        <motion.div
+          initial={{ y: 0 }}
+          animate={{ y: [0, 12, 0] }}
+          transition={transition(1)}
+          className="h-5 w-5 rounded-full border border-violet-300 bg-gradient-to-b from-violet-400 to-purple-600 shadow-lg shadow-violet-500/60"
+        />
+        <motion.div
+          initial={{ y: 0 }}
+          animate={{ y: [0, 12, 0] }}
+          transition={transition(2)}
+          className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/60"
+        />
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
-        {/* Simple Loading Spinner */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
-          <p className="text-gray-400 text-sm">{t.common?.loading || 'جاري التحميل...'}</p>
+        {/* Background glow effect */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)'
+          }}
+        />
+        
+        {/* Purple Loader */}
+        <div className="relative z-10">
+          <PurpleLoader />
         </div>
       </div>
     );
@@ -1777,14 +1889,22 @@ const DashboardPage: React.FC = () => {
             />
             
             {/* Last Updated + Data Source Indicator */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-2 text-xs text-gray-400">
-              <Clock className="w-4 h-4" />
-              <span>
-                {isRTL ? 'آخر تحديث' : 'Updated'}: {lastUpdated.toLocaleTimeString(isRTL ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+            <div className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 bg-purple-900/20 border border-purple-900/30 rounded-lg">
+              <Clock className="w-4 h-4 text-purple-400" />
+              <span className="hidden sm:inline">
+                {isRTL ? 'آخر تحديث' : 'Updated'}:
+              </span>
+              <span className="font-medium text-purple-300">
+                {lastUpdated.toLocaleTimeString(isRTL ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
               </span>
               {dataSource === 'cache' && (
                 <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-[10px] font-medium">
-                  Cached
+                  {isRTL ? 'مخزن' : 'Cached'}
+                </span>
+              )}
+              {isLoading && (
+                <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-300 rounded text-[10px] font-medium animate-pulse">
+                  {isRTL ? 'جاري التحديث...' : 'Updating...'}
                 </span>
               )}
             </div>
@@ -1968,10 +2088,10 @@ const DashboardPage: React.FC = () => {
                     </div>
             <div className="flex flex-col">
               <span className="stat-label">{isRTL ? 'جودة الإعلان' : 'Quality Score'}</span>
-              <span className="stat-value">{metrics.qualityScore || 7}/10</span>
-              <span className="stat-change positive">
-                <TrendingUp className="w-3 h-3" />
-                {isRTL ? 'جيد' : 'Good'}
+              <span className="stat-value">{metrics.qualityScore || 0}/10</span>
+              <span className={`stat-change ${(metrics.qualityScore || 0) >= 7 ? 'positive' : (metrics.qualityScore || 0) >= 5 ? '' : 'negative'}`}>
+                {(metrics.qualityScore || 0) >= 7 ? <TrendingUp className="w-3 h-3" /> : (metrics.qualityScore || 0) >= 5 ? null : <TrendingDown className="w-3 h-3" />}
+                {(metrics.qualityScore || 0) >= 7 ? (isRTL ? 'جيد' : 'Good') : (metrics.qualityScore || 0) >= 5 ? (isRTL ? 'متوسط' : 'Average') : (isRTL ? 'لا توجد بيانات' : 'N/A')}
               </span>
                     </div>
                   </div>
@@ -2393,6 +2513,8 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">Conversion Funnel</h3>
               </div>
               <p className="chart-description">User journey from impression to conversion</p>
+              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
+              {metrics.impressions > 0 ? (
               <ChartContainer
                 config={{
                   value: { label: "Count", color: CHART_COLORS.primary }
@@ -2402,9 +2524,9 @@ const DashboardPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                     data={[
-                      { stage: 'Impressions', value: metrics.impressions || 125000, percentage: 100 },
-                      { stage: 'Clicks', value: metrics.clicks || 8500, percentage: ((metrics.clicks || 8500) / (metrics.impressions || 125000) * 100).toFixed(1) },
-                      { stage: 'Conversions', value: metrics.conversions || 425, percentage: ((metrics.conversions || 425) / (metrics.clicks || 8500) * 100).toFixed(1) }
+                      { stage: 'Impressions', value: metrics.impressions || 0, percentage: 100 },
+                      { stage: 'Clicks', value: metrics.clicks || 0, percentage: metrics.impressions > 0 ? ((metrics.clicks || 0) / metrics.impressions * 100).toFixed(1) : 0 },
+                      { stage: 'Conversions', value: metrics.conversions || 0, percentage: metrics.clicks > 0 ? ((metrics.conversions || 0) / metrics.clicks * 100).toFixed(1) : 0 }
                     ]}
                     layout="vertical"
                   >
@@ -2420,6 +2542,14 @@ const DashboardPage: React.FC = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Filter className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No funnel data available</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* CTR vs CPC Trend - Purple/Cyan Theme */}
@@ -2429,6 +2559,7 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">CTR vs CPC Trend</h3>
           </div>
               <p className="chart-description">Click rate vs cost per click correlation</p>
+              {performanceData.length > 0 ? (
               <ChartContainer
                 config={{
                   ctr: { label: "CTR %", color: CHART_COLORS.tertiary },
@@ -2449,6 +2580,14 @@ const DashboardPage: React.FC = () => {
                   </ComposedChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Percent className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No CTR/CPC data available</p>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Impression Share Breakdown - Purple Gradient */}
@@ -2458,6 +2597,8 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">Impression Share Breakdown</h3>
               </div>
               <p className="chart-description">Lost opportunities analysis</p>
+              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
+              {metrics.impressionShare && parseFloat(metrics.impressionShare) > 0 ? (
               <ChartContainer
                 config={{
                   value: { label: "Percentage", color: CHART_COLORS.primary }
@@ -2467,11 +2608,11 @@ const DashboardPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                     data={[
-                      { metric: 'Search IS', value: 75.5 },
-                      { metric: 'Top IS', value: 68.3 },
-                      { metric: 'Abs Top IS', value: 45.2 },
-                      { metric: 'Lost (Budget)', value: 12.0 },
-                      { metric: 'Lost (Rank)', value: 12.5 }
+                      { metric: 'Search IS', value: parseFloat(metrics.impressionShare) || 0 },
+                      { metric: 'Top IS', value: parseFloat(metrics.topImpressionShare) || 0 },
+                      { metric: 'Abs Top IS', value: parseFloat(metrics.absTopImpressionShare) || 0 },
+                      { metric: 'Lost (Budget)', value: parseFloat(metrics.budgetLostImpressionShare) || 0 },
+                      { metric: 'Lost (Rank)', value: parseFloat(metrics.rankLostImpressionShare) || 0 }
                     ]}
                     layout="vertical"
                   >
@@ -2493,6 +2634,14 @@ const DashboardPage: React.FC = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No impression share data available</p>
+                  </div>
+                </div>
+              )}
                 </div>
 
             {/* Cost Analysis Over Time - Purple Theme */}
@@ -2502,6 +2651,7 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">Cost Analysis</h3>
               </div>
               <p className="chart-description">Spending trends and optimization</p>
+              {performanceData.length > 0 ? (
               <ChartContainer
                 config={{
                   cpc: { label: "Avg CPC", color: '#8B5CF6' },
@@ -2513,8 +2663,8 @@ const DashboardPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData.slice(0, 15).map(d => ({
                     ...d,
-                    cpm: (d.cost / d.impressions * 1000).toFixed(2),
-                    costPerConversion: (d.cost / d.conversions).toFixed(2)
+                    cpm: d.impressions > 0 ? (d.cost / d.impressions * 1000).toFixed(2) : 0,
+                    costPerConversion: d.conversions > 0 ? (d.cost / d.conversions).toFixed(2) : 0
                   }))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
                     <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
@@ -2527,6 +2677,14 @@ const DashboardPage: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No cost data available</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Geographic Performance - Cyan Gradient */}
@@ -2536,6 +2694,8 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">Top Locations</h3>
           </div>
               <p className="chart-description">Performance by geographic region</p>
+              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
+              {metrics.locationData && metrics.locationData.length > 0 ? (
               <ChartContainer
                 config={{
                   conversions: { label: "Conversions", color: '#06B6D4' }
@@ -2544,13 +2704,7 @@ const DashboardPage: React.FC = () => {
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
-                    data={[
-                      { location: 'Riyadh', conversions: 145, spend: 2100 },
-                      { location: 'Jeddah', conversions: 98, spend: 1580 },
-                      { location: 'Dammam', conversions: 67, spend: 1120 },
-                      { location: 'Mecca', conversions: 54, spend: 890 },
-                      { location: 'Medina', conversions: 42, spend: 750 }
-                    ]}
+                    data={metrics.locationData}
                     layout="vertical"
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
@@ -2558,13 +2712,21 @@ const DashboardPage: React.FC = () => {
                     <YAxis type="category" dataKey="location" stroke="#9f8fd4" fontSize={12} fontWeight={500} width={80} />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="conversions" radius={[0, 10, 10, 0]}>
-                      {[0, 1, 2, 3, 4].map((index) => (
+                      {(metrics.locationData || []).map((_: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={`rgba(6, 182, 212, ${1 - index * 0.15})`} />
                       ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No location data available</p>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Budget Pacing - Purple/Pink Theme */}
@@ -2574,6 +2736,7 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">Budget Pacing</h3>
               </div>
               <p className="chart-description">Daily budget consumption rate</p>
+              {performanceData.length > 0 ? (
               <ChartContainer
                 config={{
                   actual: { label: "Actual Spend", color: '#EC4899' },
@@ -2585,7 +2748,7 @@ const DashboardPage: React.FC = () => {
                   <AreaChart data={performanceData.slice(0, 15).map((d, i) => ({
                     day: d.day,
                     actual: d.cost * (i + 1),
-                    planned: 1200 * (i + 1)
+                    planned: (metrics.totalSpend || 0) / performanceData.length * (i + 1)
                   }))}>
                     <defs>
                       <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
@@ -2607,6 +2770,14 @@ const DashboardPage: React.FC = () => {
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <TrendingDown className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No budget data available</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Audience Demographics - Purple/Pink Bars */}
@@ -2616,6 +2787,8 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">Audience Demographics</h3>
           </div>
               <p className="chart-description">Audience breakdown by age and gender</p>
+              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
+              {metrics.demographicsData && metrics.demographicsData.length > 0 ? (
               <ChartContainer
                 config={{
                   male: { label: "Male", color: '#8B5CF6' },
@@ -2624,15 +2797,7 @@ const DashboardPage: React.FC = () => {
                 className="h-[320px]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={[
-                      { ageGroup: '18-24', male: 1200, female: 980 },
-                      { ageGroup: '25-34', male: 2100, female: 1850 },
-                      { ageGroup: '35-44', male: 1650, female: 1420 },
-                      { ageGroup: '45-54', male: 980, female: 890 },
-                      { ageGroup: '55+', male: 650, female: 540 }
-                    ]}
-                  >
+                  <BarChart data={metrics.demographicsData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
                     <XAxis dataKey="ageGroup" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
                     <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} />
@@ -2643,6 +2808,14 @@ const DashboardPage: React.FC = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No demographics data available</p>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* ROAS Trend - Purple Gradient */}
@@ -2652,6 +2825,7 @@ const DashboardPage: React.FC = () => {
                 <h3 className="!text-center">ROAS Trend</h3>
               </div>
               <p className="chart-description">Return on ad spend over time</p>
+              {performanceData.length > 0 ? (
               <ChartContainer
                 config={{
                   roas: { label: "ROAS", color: '#A855F7' }
@@ -2675,6 +2849,14 @@ const DashboardPage: React.FC = () => {
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No ROAS data available</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
