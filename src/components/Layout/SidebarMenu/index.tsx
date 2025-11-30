@@ -40,6 +40,9 @@ const SidebarMenu: React.FC = React.memo(() => {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [campaignsOpen, setCampaignsOpen] = React.useState(false);
   
+  // Check if any submenu is open
+  const hasOpenSubmenu = billingOpen || accountsOpen || settingsOpen || campaignsOpen;
+  
   // Use translation hook
   const { t, language, isRTL } = useTranslation();
   
@@ -124,6 +127,14 @@ const SidebarMenu: React.FC = React.memo(() => {
 
   // Remove auto-close on resize - sidebar only closes when X button is clicked
   // No useEffect for auto-closing sidebar
+
+  // Handle link click - close sidebar on mobile/tablet only
+  const handleLinkClick = React.useCallback(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      // Only close on mobile/tablet, not on desktop
+      setIsSidebarOpen(false);
+    }
+  }, []);
 
   // Clean up on mount to prevent black screen on mobile refresh
   React.useEffect(() => {
@@ -708,6 +719,7 @@ const SidebarMenu: React.FC = React.memo(() => {
                 <Link
                   key={index}
                   href={page.path || '/dashboard'}
+                  onClick={handleLinkClick}
                   className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 truncate group"
                 >
                   <div className="flex items-center gap-2">
@@ -722,11 +734,14 @@ const SidebarMenu: React.FC = React.memo(() => {
 
       {/* Sidebar navigation */}
       <div 
-        className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto overflow-x-hidden p-2 sidebar-scroll'
+        className={`flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-x-hidden p-2 sidebar-scroll ${
+          hasOpenSubmenu ? 'overflow-y-auto' : 'overflow-hidden'
+        }`}
         style={{
           minHeight: 0, // Important for flex scroll
-          WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-          touchAction: 'pan-y' // Allow vertical scroll only
+          WebkitOverflowScrolling: hasOpenSubmenu ? 'touch' : 'auto', // Smooth scrolling on iOS only when submenu open
+          touchAction: hasOpenSubmenu ? 'pan-y' : 'none', // Allow vertical scroll only when submenu open
+          paddingBottom: hasOpenSubmenu ? '2rem' : '0' // Add padding to show last item when submenu open
         }}
       >
         {/* All Tabs */}
@@ -818,6 +833,7 @@ const SidebarMenu: React.FC = React.memo(() => {
                               key={subItem.id}
                               href={subItem.href}
                               prefetch={true}
+                              onClick={handleLinkClick}
                               className={`
                                 relative block px-5 py-3 text-base rounded-lg transition-all group overflow-hidden
                                 ${
@@ -869,6 +885,7 @@ const SidebarMenu: React.FC = React.memo(() => {
             <Link
                     href={tab.href}
                     prefetch={true}
+                    onClick={handleLinkClick}
                     className={`
                       relative group flex items-center w-full px-6 py-4 transition-all overflow-hidden
                       ${
@@ -942,13 +959,14 @@ const SidebarMenu: React.FC = React.memo(() => {
       </div>
       </motion.div>
 
-      {/* Overlay when sidebar is open on mobile/tablet - removed onClick to prevent auto-close */}
+      {/* Overlay when sidebar is open on mobile/tablet - click to close */}
       {isSidebarOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 z-[99] xl:hidden backdrop-blur-sm pointer-events-none"
+          onClick={toggleSidebar}
+          className="fixed inset-0 bg-black/50 z-[99] xl:hidden backdrop-blur-sm cursor-pointer"
         />
       )}
     </>

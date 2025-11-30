@@ -943,7 +943,7 @@ export default function CampaignPreviewPage() {
         </div>
 
         {/* Variations Counter */}
-        <div className="mb-4 sm:mb-6 md:mb-8">
+        <div className="mb-3 sm:mb-4 md:mb-6">
           <div className="inline-flex items-center gap-2">
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
             <span className="font-semibold text-sm sm:text-base text-purple-600 dark:text-purple-400">
@@ -954,7 +954,7 @@ export default function CampaignPreviewPage() {
         </div>
 
         {/* Ad Preview Section */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mb-6 sm:mb-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 mb-6 sm:mb-8">
           
           {/* Left Side - Edit Button */}
           <div className="flex items-center justify-center lg:justify-start order-2 lg:order-1">
