@@ -2,41 +2,38 @@
 
 'use client';
 
-import React, { useState, ReactNode, useEffect, useRef } from "react";
+import React, { useState, ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import SidebarMenu from "../components/Layout/SidebarMenu";
 import Header from "../components/Layout/Header/index";
 import Footer from "../components/Layout/Footer";
-import { supabase } from "@/utils/supabase/client";
+
+// Dynamic import للـ supabase client لتجنب مشاكل prerendering
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+  
+  useEffect(() => {
+    // تحميل supabase client فقط في المتصفح
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+  
+  return supabase;
+};
 
 interface LayoutProviderProps {
   children: ReactNode;
 }
 
 const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
+  const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarActive, setSidebarActive] = useState(false);
-  const authCheckDone = useRef(false);
-
-  // ✅ التحقق السريع من الجلسة من localStorage أولاً
-  const [authChecked, setAuthChecked] = useState(() => {
-    if (typeof window !== 'undefined') {
-      // إذا كان هناك token محفوظ، نعتبر المستخدم مسجل دخول مبدئياً
-      const hasToken = localStorage.getItem('sb-mkzwqbgcfdzcqmkzwgy-auth-token');
-      return !!hasToken;
-    }
-    return false;
-  });
-  
-  const [hasSession, setHasSession] = useState<boolean | null>(() => {
-    if (typeof window !== 'undefined') {
-      const hasToken = localStorage.getItem('sb-mkzwqbgcfdzcqmkzwgy-auth-token');
-      return !!hasToken;
-    }
-    return null;
-  });
 
   // تحديد الصفحات التي لا تحتاج إلى dashboard layout
   const isAuthPage = pathname?.startsWith('/authentication') || 
@@ -49,9 +46,6 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   
   // تحديد صفحات الـ dashboard
   const isDashboardPage = pathname?.startsWith('/dashboard');
-
-  // 👮‍♂️ جميع الصفحات غير صفحات auth والصفحة الرئيسية تعتبر محمية وتتطلب جلسة Supabase
-  const isProtectedPage = !isAuthPage && !isHomePage;
 
   // Toggle sidebar function
   const toggleActive = () => {
@@ -74,67 +68,44 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   }, [pathname, isAuthPage, isHomePage]);
 
   useEffect(() => {
-    // منع التحقق المتكرر
-    if (authCheckDone.current) return;
-    
-    // التحقق من حالة المصادقة فقط للصفحات المحمية
-    if (isProtectedPage) {
+    // التحقق من حالة المصادقة فقط للصفحات المحمية (dashboard) وبعد تحميل supabase
+    if (isDashboardPage && supabase) {
       const checkAuth = async () => {
-        try {
-          // ✅ التحقق السريع - إذا كان لدينا جلسة مبدئية من localStorage، نعرض المحتوى فوراً
-          // ثم نتحقق في الخلفية
-          const { data: { session }, error } = await supabase.auth.getSession();
-
-          if (error) {
-            console.error('❌ خطأ في التحقق من الجلسة:', error);
-            setHasSession(false);
-            setAuthChecked(true);
-            router.push('/authentication/sign-in');
-            return;
-          }
-
-          setHasSession(!!session);
-          setAuthChecked(true);
-          authCheckDone.current = true;
+        const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-            console.log('⚠️ لا توجد جلسة - التوجيه إلى صفحة تسجيل الدخول');
-            router.push('/authentication/sign-in');
-          }
-        } catch (err) {
-          console.error('❌ خطأ غير متوقع في التحقق من الجلسة:', err);
-          setHasSession(false);
-          setAuthChecked(true);
           router.push('/authentication/sign-in');
         }
       };
 
-      // ✅ إذا كان لدينا جلسة مبدئية، نعرض المحتوى فوراً ونتحقق في الخلفية
-      if (hasSession) {
-        checkAuth();
-      } else {
       checkAuth();
-      }
 
-      // الاستماع لتغييرات المصادقة
+      // الاستماع لتغييرات المصادقة مع تحديد أنواع البيانات
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-        const isLoggedIn = !!session;
-        setHasSession(isLoggedIn);
-
-        if (event === 'SIGNED_OUT' || !isLoggedIn) {
-          setAuthChecked(true);
-          authCheckDone.current = false; // إعادة تعيين للسماح بالتحقق مرة أخرى
+        if (event === 'SIGNED_OUT') {
           router.push('/authentication/sign-in');
         }
       });
 
       return () => subscription.unsubscribe();
     }
-  }, [isProtectedPage, router]);
+  }, [isDashboardPage, router, supabase]);
 
   // إذا كانت صفحة مصادقة أو home page، عرض المحتوى بدون dashboard layout
   if (isAuthPage || isHomePage) {
     return <>{children}</>;
+  }
+
+  // عرض حالة التحميل للصفحات المحمية إذا لم يتم تحميل supabase بعد
+  if (isDashboardPage && !supabase) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-800 drop-shadow-md">جاري تحميل النظام...</p>
+        </div>
+      </div>
+    );
   }
 
   // التخطيط الكامل للصفحات المحمية (dashboard فقط)
