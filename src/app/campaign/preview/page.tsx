@@ -193,8 +193,11 @@ export default function CampaignPreviewPage() {
     const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
     const generatedContent = JSON.parse(generatedContentStr);
 
+    console.log('🌐 Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server');
     console.log('📦 Campaign Data:', campaignData);
     console.log('📦 Generated Content:', generatedContent);
+    console.log('📦 Headlines count:', generatedContent.headlines?.length || 0);
+    console.log('📦 Descriptions count:', generatedContent.descriptions?.length || 0);
 
     const url = campaignData.websiteUrl || '';
     setWebsiteUrl(url);
@@ -248,9 +251,17 @@ export default function CampaignPreviewPage() {
           const targetLanguage = campaignData.selectedLanguageCode || campaignData.detectedLanguageCode || 'ar';
           const keywords = generatedContent.keywords || [];
           
+          const apiUrl = getApiUrl('/api/ai-campaign/generate-campaign-content');
           console.log('🔄 Generating missing ad content...');
+          console.log('📡 API URL:', apiUrl);
+          console.log('📦 Request data:', {
+            website_url: url,
+            campaign_type: campaignData.campaignType || 'SEARCH',
+            keywords_count: keywords.length,
+            target_language: targetLanguage
+          });
           
-          const response = await fetch(getApiUrl('/api/ai-campaign/generate-campaign-content'), {
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
