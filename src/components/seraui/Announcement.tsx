@@ -23,7 +23,7 @@ const ArrowUpRightIcon = React.memo(({ className }: ArrowUpRightIconProps) => (
 
 ArrowUpRightIcon.displayName = 'ArrowUpRightIcon';
 
-type AnnouncementVariant = 'default' | 'success' | 'error' | 'warning' | 'info' | 'gradient';
+type AnnouncementVariant = 'default' | 'success' | 'error' | 'warning' | 'info' | 'gradient' | 'account-disabled';
 
 interface AnnouncementProps {
   variant?: AnnouncementVariant;
@@ -79,6 +79,8 @@ const Announcement = React.memo(
       info: 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100 focus:ring-blue-500 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-800/50 dark:hover:bg-blue-900/50 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900',
       gradient:
         'bg-gradient-to-r from-cyan-400 to-blue-500 text-white border-0 hover:shadow-lg focus:ring-cyan-300 focus:ring-offset-gray-100 dark:from-cyan-600 dark:to-blue-700 dark:focus:ring-cyan-400 dark:focus:ring-offset-gray-900 dark:hover:shadow-blue-700/50',
+      'account-disabled':
+        'bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white border-red-400/50 hover:from-red-500 hover:via-red-400 hover:to-red-500 hover:shadow-lg hover:shadow-red-500/30 focus:ring-red-400 focus:ring-offset-gray-900 shadow-lg shadow-red-500/20 font-semibold py-2.5 px-5',
     };
 
     const iconVariantClasses = {
@@ -88,6 +90,7 @@ const Announcement = React.memo(
       warning: 'text-yellow-600 dark:text-yellow-400',
       info: 'text-blue-600 dark:text-blue-400',
       gradient: 'text-white',
+      'account-disabled': 'text-white',
     };
 
     const handleKeyDown = useCallback(

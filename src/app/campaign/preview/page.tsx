@@ -56,7 +56,7 @@ export default function CampaignPreviewPage() {
   // Announcement notifications state
   const [announcement, setAnnouncement] = useState<{
     show: boolean;
-    variant: 'success' | 'error' | 'warning' | 'info';
+    variant: 'success' | 'error' | 'warning' | 'info' | 'account-disabled';
     message: string;
     href?: string;
   }>({
@@ -690,10 +690,15 @@ export default function CampaignPreviewPage() {
     // Check if selected account is enabled
     const selectedAccountData = connectedAccounts.find(acc => acc.customerId === selectedAccount);
     if (selectedAccountData?.status !== 'ACTIVE') {
+      // Show beautiful red notification for disabled/suspended account
+      setShowAccountModal(false); // Close the account selection modal
+      const cleanCustomerId = selectedAccount.replace(/-/g, '');
+      const formattedId = `${cleanCustomerId.slice(0, 3)}-${cleanCustomerId.slice(3, 6)}-${cleanCustomerId.slice(6)}`;
       setAnnouncement({
         show: true,
-        variant: 'warning',
-        message: '⚠️ الحساب المحدد غير مفعل. يرجى تفعيل الحساب أولاً قبل نشر الحملة'
+        variant: 'account-disabled',
+        message: `⚠️ Account ${formattedId} is not enabled - Click here to activate in Google Ads`,
+        href: `https://ads.google.com/aw/overview?__e=${cleanCustomerId}`
       });
       return;
     }
@@ -803,11 +808,13 @@ export default function CampaignPreviewPage() {
         
         // Check if it's an account not enabled error
         if (errorMessage.includes('غير مفعل') || errorMessage.includes('CUSTOMER_NOT_ENABLED') || errorMessage.includes('not yet enabled') || errorMessage.includes('ENABLED')) {
+          const cleanCustomerId = selectedAccount.replace(/-/g, '');
+          const formattedId = `${cleanCustomerId.slice(0, 3)}-${cleanCustomerId.slice(3, 6)}-${cleanCustomerId.slice(6)}`;
           setAnnouncement({
             show: true,
-            variant: 'warning',
-            message: `⚠️ الحساب غير مفعل - اضغط هنا لتفعيل الحساب في Google Ads`,
-            href: 'https://ads.google.com/aw/preferences'
+            variant: 'account-disabled',
+            message: `⚠️ Account ${formattedId} is not enabled - Click here to activate in Google Ads`,
+            href: `https://ads.google.com/aw/overview?__e=${cleanCustomerId}`
           });
         } else {
           setAnnouncement({
@@ -861,11 +868,13 @@ export default function CampaignPreviewPage() {
         
         // Check if it's an account not enabled error
         if (errorMsg.includes('غير مفعل') || errorMsg.includes('CUSTOMER_NOT_ENABLED') || errorMsg.includes('not yet enabled') || errorMsg.includes('ENABLED')) {
+          const cleanCustomerId = selectedAccount.replace(/-/g, '');
+          const formattedId = `${cleanCustomerId.slice(0, 3)}-${cleanCustomerId.slice(3, 6)}-${cleanCustomerId.slice(6)}`;
           setAnnouncement({
             show: true,
-            variant: 'warning',
-            message: `⚠️ الحساب غير مفعل - اضغط هنا لتفعيل الحساب في Google Ads`,
-            href: 'https://ads.google.com/aw/preferences'
+            variant: 'account-disabled',
+            message: `⚠️ Account ${formattedId} is not enabled - Click here to activate in Google Ads`,
+            href: `https://ads.google.com/aw/overview?__e=${cleanCustomerId}`
           });
         } else {
           setAnnouncement({
@@ -1021,23 +1030,24 @@ export default function CampaignPreviewPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        
-        {/* Announcement Notification */}
-        {announcement.show && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in slide-in-from-top duration-300">
-            <Announcement
-              variant={announcement.variant}
-              href={announcement.href}
-              onClick={() => setAnnouncement({ ...announcement, show: false })}
-            >
-              {announcement.message}
-            </Announcement>
-          </div>
-        )}
-        
-        {/* Header */}
+    <>
+      {/* Announcement Notification - Outside main container to prevent re-render issues */}
+      {announcement.show && (
+        <div className="fixed top-20 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-auto" dir="ltr">
+          <Announcement
+            variant={announcement.variant}
+            href={announcement.href}
+            onClick={() => setAnnouncement({ ...announcement, show: false })}
+          >
+            {announcement.message}
+          </Announcement>
+        </div>
+      )}
+
+      <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          
+          {/* Header */}
         <div className="mb-3 sm:mb-6 md:mb-8 text-center">
           <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2 md:mb-3 px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
@@ -1445,7 +1455,8 @@ export default function CampaignPreviewPage() {
           />
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
