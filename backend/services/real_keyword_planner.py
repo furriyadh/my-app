@@ -4,11 +4,14 @@ Google Keyword Planner الحقيقي
 """
 
 import os
+import sys
 import logging
 from typing import Dict, List, Any, Optional
-from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
 import time
+
+# Add parent directory to path for utils import
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 class RealKeywordPlanner:
     """مخطط الكلمات المفتاحية الحقيقي من Google"""
@@ -22,15 +25,9 @@ class RealKeywordPlanner:
     def _initialize_client(self):
         """تهيئة عميل Google Ads"""
         try:
-            # قراءة ملف التكوين
-            config_path = os.path.join(os.path.dirname(__file__), 'google_ads.yaml')
-            
-            if not os.path.exists(config_path):
-                self.logger.error(f"ملف التكوين غير موجود: {config_path}")
-                return False
-            
-            # إنشاء العميل
-            self.client = GoogleAdsClient.load_from_storage(config_path)
+            # استخدام الدالة المساعدة الموحدة
+            from utils.google_ads_helper import get_google_ads_client
+            self.client = get_google_ads_client()
             self.logger.info("✅ تم تهيئة Google Keyword Planner بنجاح")
             return True
             

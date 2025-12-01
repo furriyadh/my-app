@@ -915,12 +915,11 @@ def get_keyword_cpc_data():
                     # FALLBACK: Try to search for location by name using Google Ads API
                     elif 'name' in loc:
                         try:
-                            from google.ads.googleads.client import GoogleAdsClient
+                            from utils.google_ads_helper import get_google_ads_client
                             import os
                             
-                            # Initialize Google Ads client
-                            yaml_path = os.path.join(os.path.dirname(__file__), '../services/google_ads.yaml')
-                            client = GoogleAdsClient.load_from_storage(yaml_path)
+                            # Initialize Google Ads client using unified helper
+                            client = get_google_ads_client()
                             
                             # Search for location by name
                             location_name = loc.get('name', '')
@@ -1370,13 +1369,12 @@ def get_historical_metrics():
         
         # Call Google Ads API for historical metrics
         try:
-            from google.ads.googleads.client import GoogleAdsClient
+            from utils.google_ads_helper import get_google_ads_client
             from google.ads.googleads.v21.services.services.google_ads_service.client import GoogleAdsServiceClient
             from google.ads.googleads.v21.services.services.keyword_plan_idea_service.client import KeywordPlanIdeaServiceClient
             
-            # Initialize Google Ads client
-            yaml_path = os.path.join(os.path.dirname(__file__), '../services/google_ads.yaml')
-            client = GoogleAdsClient.load_from_storage(yaml_path)
+            # Initialize Google Ads client using unified helper
+            client = get_google_ads_client()
             client.use_proto_plus = True
             
             googleads_service = client.get_service("GoogleAdsService")
@@ -1702,10 +1700,10 @@ def generate_forecast_metrics():
                 GenerateKeywordForecastMetricsRequest,
             )
             from datetime import datetime, timedelta
+            from utils.google_ads_helper import get_google_ads_client
             
-            # Initialize Google Ads client
-            yaml_path = os.path.join(os.path.dirname(__file__), '../services/google_ads.yaml')
-            client = GoogleAdsClient.load_from_storage(yaml_path)
+            # Initialize Google Ads client using unified helper
+            client = get_google_ads_client()
             client.use_proto_plus = True
             
             googleads_service = client.get_service("GoogleAdsService")
@@ -1895,15 +1893,14 @@ def analyze_website_and_forecast():
         
         # Step 1: Generate keyword ideas from URL (EXACTLY like google-ads-official)
         try:
-            from google.ads.googleads.client import GoogleAdsClient
+            from utils.google_ads_helper import get_google_ads_client
             from google.ads.googleads.v21.services.services.google_ads_service.client import GoogleAdsServiceClient
             from google.ads.googleads.v21.services.services.keyword_plan_idea_service.client import KeywordPlanIdeaServiceClient
             from google.ads.googleads.v21.enums.types.keyword_plan_network import KeywordPlanNetworkEnum
             from datetime import datetime, timedelta
             
-            # Initialize Google Ads client
-            yaml_path = os.path.join(os.path.dirname(__file__), '../services/google_ads.yaml')
-            client = GoogleAdsClient.load_from_storage(yaml_path)
+            # Initialize Google Ads client using unified helper
+            client = get_google_ads_client()
             client.use_proto_plus = True
             
             googleads_service = client.get_service("GoogleAdsService")
@@ -2900,11 +2897,10 @@ def launch_campaign():
             
             # Import SearchCampaignCreator for direct campaign creation
             from campaign_types.search_campaign import SearchCampaignCreator
-            from google.ads.googleads.client import GoogleAdsClient
+            from utils.google_ads_helper import get_google_ads_client
             
-            # Initialize Google Ads client
-            yaml_path = os.path.join(os.path.dirname(__file__), '../services/google_ads.yaml')
-            client = GoogleAdsClient.load_from_storage(yaml_path)
+            # Initialize Google Ads client using unified helper
+            client = get_google_ads_client()
             
             # Verify account access and get currency
             logger.info(f"🔍 Verifying account {customer_id} access and fetching currency...")

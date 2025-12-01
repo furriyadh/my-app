@@ -1789,8 +1789,8 @@ def get_ai_recommendations():
         
         customer_id = customer_id.replace('-', '')
         
-        # إنشاء client
-        client = GoogleAdsClient.load_from_storage()
+        # إنشاء client باستخدام الدالة المساعدة الموحدة
+        client = get_google_ads_client()
         googleads_service = client.get_service("GoogleAdsService")
         
         # استعلام التوصيات
@@ -1885,8 +1885,8 @@ def get_audience_insights():
         
         customer_id = customer_id.replace('-', '')
         
-        # إنشاء client
-        client = GoogleAdsClient.load_from_storage()
+        # إنشاء client باستخدام الدالة المساعدة الموحدة
+        client = get_google_ads_client()
         googleads_service = client.get_service("GoogleAdsService")
         
         # استعلام بيانات الجمهور حسب العمر والجنس
@@ -1970,8 +1970,8 @@ def get_budget_impact():
         
         customer_id = customer_id.replace('-', '')
         
-        # إنشاء client
-        client = GoogleAdsClient.load_from_storage()
+        # إنشاء client باستخدام الدالة المساعدة الموحدة
+        client = get_google_ads_client()
         recommendation_service = client.get_service("RecommendationService")
         
         # إنشاء طلب توليد التوصيات

@@ -319,11 +319,10 @@ def create_campaign():
             }), 404
         
         try:
-            # Use load_from_storage to read from google_ads.yaml which includes use_proto_plus
-            import os
-            yaml_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'services', 'google_ads.yaml')
-            google_ads_client = GoogleAdsClient.load_from_storage(yaml_path)
-            logger.info("✅ Google Ads Client loaded successfully from google_ads.yaml")
+            # استخدام الدالة المساعدة الموحدة لتحميل Google Ads Client
+            from utils.google_ads_helper import get_google_ads_client
+            google_ads_client = get_google_ads_client()
+            logger.info("✅ Google Ads Client loaded successfully")
         except Exception as e:
             logger.error(f"Error loading Google Ads Client: {str(e)}")
             return jsonify({
@@ -1201,15 +1200,14 @@ def launch_campaign():
         if customer_id and customer_id.strip():
             try:
                 from campaign_types import create_campaign_instance, get_campaign_creator
-                from google_ads_lib.client import GoogleAdsClient
+                from utils.google_ads_helper import get_google_ads_client
                 
                 logger.info(f"Creating Google Ads campaign for customer: {customer_id}")
                 
-                # Load Google Ads client from google_ads.yaml
+                # استخدام الدالة المساعدة الموحدة لتحميل Google Ads Client
                 try:
-                    yaml_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'services', 'google_ads.yaml')
-                    google_ads_client = GoogleAdsClient.load_from_storage(yaml_path)
-                    logger.info("✅ Google Ads Client loaded successfully from google_ads.yaml")
+                    google_ads_client = get_google_ads_client()
+                    logger.info("✅ Google Ads Client loaded successfully")
                 except Exception as client_error:
                     logger.error(f"Failed to load Google Ads client: {str(client_error)}")
                     google_ads_client = None

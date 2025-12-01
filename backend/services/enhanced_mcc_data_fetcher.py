@@ -4,11 +4,14 @@ Enhanced MCC Data Fetcher - جالب بيانات MCC محسن
 """
 
 import os
+import sys
 import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-import yaml
+
+# Add parent directory to path for utils import
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # إعداد التسجيل
 logger = logging.getLogger(__name__)
@@ -19,59 +22,19 @@ class EnhancedMCCDataFetcher:
     def __init__(self):
         self.mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID')
         self.google_ads_client = None
-        self.config = self._load_config()
         
         # تهيئة العميل
         self._initialize_client()
     
-    def _load_config(self) -> Dict[str, Any]:
-        """تحميل الإعدادات"""
-        try:
-            # محاولة تحميل من ملف YAML
-            yaml_path = "services/google_ads.yaml"
-            if os.path.exists(yaml_path):
-                with open(yaml_path, 'r') as f:
-                    config = yaml.safe_load(f)
-                    logger.info(f"✅ تم تحميل الإعدادات من {yaml_path}")
-                    return config
-            
-            # محاولة تحميل من متغيرات البيئة
-            config = {
-                'developer_token': os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN'),
-                'client_id': os.getenv('GOOGLE_ADS_CLIENT_ID'),
-                'client_secret': os.getenv('GOOGLE_ADS_CLIENT_SECRET'),
-                'refresh_token': os.getenv('GOOGLE_ADS_REFRESH_TOKEN'),
-                'login_customer_id': self.mcc_customer_id,
-                'use_proto_plus': True
-            }
-            
-            logger.info("✅ تم تحميل الإعدادات من متغيرات البيئة")
-            return config
-            
-        except Exception as e:
-            logger.error(f"❌ خطأ في تحميل الإعدادات: {e}")
-            return {}
-    
     def _initialize_client(self):
-        """تهيئة عميل Google Ads"""
+        """تهيئة عميل Google Ads باستخدام الدالة المساعدة الموحدة"""
         try:
-            from google.ads.googleads.client import GoogleAdsClient
-            
-            if not all([
-                self.config.get('developer_token'),
-                self.config.get('client_id'),
-                self.config.get('client_secret'),
-                self.config.get('refresh_token'),
-                self.config.get('login_customer_id')
-            ]):
-                logger.warning("⚠️ إعدادات Google Ads غير مكتملة")
-                return
-            
-            self.google_ads_client = GoogleAdsClient.load_from_dict(self.config)
+            from utils.google_ads_helper import get_google_ads_client
+            self.google_ads_client = get_google_ads_client()
             logger.info("✅ تم تهيئة عميل Google Ads بنجاح")
             
-        except ImportError:
-            logger.error("❌ مكتبة google-ads غير مثبتة")
+        except ImportError as e:
+            logger.error(f"❌ خطأ في استيراد المكتبات: {e}")
         except Exception as e:
             logger.error(f"❌ خطأ في تهيئة عميل Google Ads: {e}")
     
