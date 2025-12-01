@@ -1218,6 +1218,7 @@ const GoogleAdsContent: React.FC = () => {
     try {
       setSyncing(true);
       console.log('🔄 بدء مزامنة الحالات من Google Ads API (يدوياً)...');
+      console.log(`📊 عدد الحسابات للمزامنة: ${accounts.length}`);
       
       // مزامنة كل حساب مرة واحدة فقط
       let syncedCount = 0;
@@ -1226,14 +1227,21 @@ const GoogleAdsContent: React.FC = () => {
       
       for (const account of accounts) {
         try {
+          const apiUrl = `/api/sync-account-status/${account.customerId}`;
           console.log(`🔄 مزامنة الحساب ${account.customerId}...`);
+          console.log(`📡 URL: ${apiUrl}`);
           
           // استدعاء sync-account-status مرة واحدة فقط لكل حساب
-          const syncResponse = await fetch(`/api/sync-account-status/${account.customerId}`, {
+          const syncResponse = await fetch(apiUrl, {
             method: 'POST',
             credentials: 'include',
-            signal: AbortSignal.timeout(15000) // 15 seconds timeout
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            signal: AbortSignal.timeout(30000) // 30 seconds timeout (increased)
           });
+          
+          console.log(`📡 Response status: ${syncResponse.status} ${syncResponse.statusText}`);
           
           if (syncResponse.ok) {
             const syncData = await syncResponse.json();
@@ -1302,11 +1310,20 @@ const GoogleAdsContent: React.FC = () => {
             }
           } else {
             errorCount++;
-            console.warn(`⚠️ فشل في مزامنة الحساب ${account.customerId}: ${syncResponse.status}`);
+            // محاولة قراءة تفاصيل الخطأ
+            let errorDetails = '';
+            try {
+              const errorData = await syncResponse.json();
+              errorDetails = JSON.stringify(errorData);
+            } catch {
+              errorDetails = await syncResponse.text();
+            }
+            console.warn(`⚠️ فشل في مزامنة الحساب ${account.customerId}: ${syncResponse.status} - ${errorDetails}`);
           }
         } catch (error) {
           errorCount++;
-          console.error(`❌ خطأ في مزامنة الحساب ${account.customerId}:`, error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`❌ خطأ في مزامنة الحساب ${account.customerId}:`, errorMessage, error);
         }
       }
       
