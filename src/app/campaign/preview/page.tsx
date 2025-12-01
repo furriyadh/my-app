@@ -272,8 +272,12 @@ export default function CampaignPreviewPage() {
             })
           });
           
+          console.log('📡 Response status:', response.status, response.statusText);
+          
           if (response.ok) {
             const result = await response.json();
+            console.log('📦 API Response:', result);
+            
             if (result.success && result.content) {
               const newContent = {
                 ...generatedContent,
@@ -283,7 +287,7 @@ export default function CampaignPreviewPage() {
               };
               
               localStorage.setItem('generatedContent', JSON.stringify(newContent));
-              console.log('✅ Generated and saved content');
+              console.log('✅ Generated and saved content:', newContent.headlines.length, 'headlines,', newContent.descriptions.length, 'descriptions');
               
               // Create variations from new content
               if (newContent.headlines.length > 0 && newContent.descriptions.length > 0) {
@@ -305,8 +309,16 @@ export default function CampaignPreviewPage() {
                   });
                 }
                 setAdVariations(newVariations);
+                console.log('✅ Created', newVariations.length, 'ad variations');
+              } else {
+                console.error('❌ No headlines or descriptions in API response');
               }
+            } else {
+              console.error('❌ API response not successful:', result);
             }
+          } else {
+            const errorText = await response.text();
+            console.error('❌ API request failed:', response.status, errorText);
           }
         } catch (error) {
           console.error('❌ Failed to generate content:', error);
