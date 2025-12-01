@@ -105,6 +105,8 @@ const DashboardPage: React.FC = () => {
     auction_insights: any[];
   } | null>(null);
   const [loadingAiInsights, setLoadingAiInsights] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const [availableCurrencies, setAvailableCurrencies] = useState<string[]>(['USD']);
   const campaignsPerPage = 10;
 
   // مفتاح الكاش في localStorage
@@ -872,21 +874,88 @@ const DashboardPage: React.FC = () => {
     return num.toLocaleString();
   };
 
-  // Get primary currency from campaigns
-  const getPrimaryCurrency = (): string => {
-    if (campaigns.length > 0 && campaigns[0].currency) {
-      return campaigns[0].currency;
+  // أسعار صرف العملات - يتم جلبها من API (Frankfurter)
+  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({
+    'USD': 1.0, 'SAR': 3.75, 'AED': 3.67, 'EGP': 49.0, 'EUR': 0.92,
+    'GBP': 0.79, 'INR': 83.12, 'BRL': 4.97, 'KWD': 0.31, 'QAR': 3.64,
+    'BHD': 0.38, 'OMR': 0.39, 'JOD': 0.71, 'CNY': 7.24
+  });
+  const [isLoadingRates, setIsLoadingRates] = useState(false);
+
+  // جلب أسعار الصرف الحية من Frankfurter API
+  const fetchExchangeRates = useCallback(async () => {
+    setIsLoadingRates(true);
+    try {
+      const response = await fetch('https://api.frankfurter.app/latest?from=USD');
+      const data = await response.json();
+      
+      if (data.rates) {
+        const rates: Record<string, number> = { 'USD': 1.0, ...data.rates };
+        setExchangeRates(rates);
+        console.log('💱 أسعار الصرف الحية:', rates);
+      }
+    } catch (error) {
+      console.error('❌ خطأ في جلب أسعار الصرف:', error);
+      // استخدام القيم الافتراضية في حالة فشل API
+    } finally {
+      setIsLoadingRates(false);
     }
-    return metrics?.currency || 'USD';
+  }, []);
+
+  // جلب أسعار الصرف عند تحميل الصفحة
+  useEffect(() => {
+    fetchExchangeRates();
+  }, [fetchExchangeRates]);
+
+  // تحديث العملات المتاحة عند تغيير الحملات
+  useEffect(() => {
+    const currencies = new Set<string>();
+    campaigns.forEach(c => {
+      if (c.currency) currencies.add(c.currency);
+    });
+    if (currencies.size > 0) {
+      setAvailableCurrencies(Array.from(currencies));
+      // اختر أول عملة كافتراضية
+      if (!currencies.has(selectedCurrency)) {
+        setSelectedCurrency(Array.from(currencies)[0]);
+      }
+    }
+  }, [campaigns]);
+
+  // تحويل المبلغ من عملة لأخرى
+  const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string): number => {
+    if (fromCurrency === toCurrency) return amount;
+    const fromRate = exchangeRates[fromCurrency] || 1;
+    const toRate = exchangeRates[toCurrency] || 1;
+    // تحويل إلى USD أولاً ثم إلى العملة المطلوبة
+    const usdAmount = amount / fromRate;
+    return usdAmount * toRate;
   };
 
-  // Format currency with English currency code (e.g., EGP 100, SAR 50, USD 25)
-  const formatCurrency = (num: number, currencyCode?: string): string => {
-    const code = currencyCode || getPrimaryCurrency() || 'USD';
-    if (!num || isNaN(num)) return `${code} 0`;
-    if (num >= 1000000) return `${code} ${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${code} ${(num / 1000).toFixed(1)}K`;
-    return `${code} ${num.toFixed(2)}`;
+  // Get primary currency from campaigns
+  const getPrimaryCurrency = (): string => {
+    return selectedCurrency || 'USD';
+  };
+
+  // العملة الأصلية من الـ API (عملة الحسابات المرتبطة)
+  const originalCurrency = metrics?.currency || (campaigns.length > 0 ? campaigns[0].currency : 'USD') || 'USD';
+
+  // Format currency with conversion
+  const formatCurrency = (num: number, sourceCurrency?: string): string => {
+    const displayCurrency = selectedCurrency || 'USD';
+    const fromCurrency = sourceCurrency || originalCurrency || 'USD';
+    
+    if (!num || isNaN(num)) return `${displayCurrency} 0`;
+    
+    // تحويل المبلغ من العملة الأصلية إلى العملة المختارة
+    let convertedAmount = num;
+    if (fromCurrency !== displayCurrency) {
+      convertedAmount = convertCurrency(num, fromCurrency, displayCurrency);
+    }
+    
+    if (convertedAmount >= 1000000) return `${displayCurrency} ${(convertedAmount / 1000000).toFixed(1)}M`;
+    if (convertedAmount >= 1000) return `${displayCurrency} ${(convertedAmount / 1000).toFixed(1)}K`;
+    return `${displayCurrency} ${convertedAmount.toFixed(2)}`;
   };
 
   // Format percentage
@@ -1982,6 +2051,24 @@ const DashboardPage: React.FC = () => {
             </div>
           
           <div className="flex items-center gap-3 flex-wrap">
+            {/* Currency Selector */}
+            {availableCurrencies.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-purple-900/20 border border-purple-900/30 rounded-lg">
+                <DollarSign className="w-4 h-4 text-green-400" />
+                <select
+                  value={selectedCurrency}
+                  onChange={(e) => setSelectedCurrency(e.target.value)}
+                  className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+                >
+                  {availableCurrencies.map(currency => (
+                    <option key={currency} value={currency} className="bg-gray-800 text-white">
+                      {currency}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
             {/* Date Range Picker */}
             <DateRangePicker 
               onDateRangeChange={handleDateRangeChange}
@@ -2087,7 +2174,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="stat-label">{isRTL ? 'الإيرادات' : 'Revenue'}</span>
-              <span className="stat-value">${formatLargeNumber(statsData.revenue)}</span>
+              <span className="stat-value">{formatCurrency(statsData.revenue)}</span>
               <span className={`stat-change ${statsData.revenueChange >= 0 ? 'positive' : 'negative'}`}>
                 {statsData.revenueChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {Math.abs(statsData.revenueChange)}%
@@ -2101,7 +2188,7 @@ const DashboardPage: React.FC = () => {
               </div>
             <div className="flex flex-col">
               <span className="stat-label">{isRTL ? 'الإنفاق' : 'Spend'}</span>
-              <span className="stat-value">${formatLargeNumber(statsData.spend)}</span>
+              <span className="stat-value">{formatCurrency(statsData.spend)}</span>
               <span className={`stat-change ${statsData.spendChange <= 0 ? 'positive' : 'negative'}`}>
                 {statsData.spendChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                 {Math.abs(statsData.spendChange)}%
@@ -2146,7 +2233,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="stat-label">CPC</span>
-              <span className="stat-value">${statsData.cpc}</span>
+              <span className="stat-value">{formatCurrency(parseFloat(statsData.cpc))}</span>
               <span className={`stat-change ${statsData.cpcChange <= 0 ? 'positive' : 'negative'}`}>
                 {statsData.cpcChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                 {Math.abs(statsData.cpcChange)}%
@@ -2319,7 +2406,7 @@ const DashboardPage: React.FC = () => {
             {/* 1. Performance Trends */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Activity className="w-5 h-5 text-purple-400" />
                 {isRTL ? 'اتجاهات الأداء' : 'Performance Trends'}
               </h3>
@@ -2366,7 +2453,7 @@ const DashboardPage: React.FC = () => {
             {/* 2. Revenue vs Spend */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <DollarSign className="w-5 h-5 text-green-400" />
                 {isRTL ? 'الإيرادات مقابل الإنفاق' : 'Revenue vs Spend'}
               </h3>
@@ -2416,7 +2503,7 @@ const DashboardPage: React.FC = () => {
             {/* 3. Conversion Funnel */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Filter className="w-5 h-5 text-purple-400" />
                 {isRTL ? 'قمع التحويل' : 'Conversion Funnel'}
               </h3>
@@ -2458,7 +2545,7 @@ const DashboardPage: React.FC = () => {
             {/* 4. ROAS Trend */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <TrendingUp className="w-5 h-5 text-green-400" />
                 {isRTL ? 'اتجاه ROAS' : 'ROAS Trend'}
               </h3>
@@ -2497,7 +2584,7 @@ const DashboardPage: React.FC = () => {
             {/* 📱 Device Performance Chart */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Smartphone className="w-5 h-5 text-green-400" />
                 {isRTL ? 'أداء الأجهزة' : 'Device Performance'}
               </h3>
@@ -2543,7 +2630,7 @@ const DashboardPage: React.FC = () => {
             {/* 👥 Audience Gender Chart */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Users className="w-5 h-5 text-pink-400" />
                 {isRTL ? 'توزيع الجمهور (الجنس)' : 'Audience by Gender'}
               </h3>
@@ -2593,7 +2680,7 @@ const DashboardPage: React.FC = () => {
             {/* 📊 Age Distribution Chart */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Users className="w-5 h-5 text-orange-400" />
                 {isRTL ? 'توزيع الجمهور (العمر)' : 'Audience by Age'}
               </h3>
@@ -2635,7 +2722,7 @@ const DashboardPage: React.FC = () => {
             {/* ⚔️ Competition Analysis Chart */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Target className="w-5 h-5 text-red-400" />
                 {isRTL ? 'تحليل المنافسة' : 'Competition Analysis'}
               </h3>
@@ -2692,7 +2779,7 @@ const DashboardPage: React.FC = () => {
             {/* ⏰ Hourly Performance */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Clock className="w-5 h-5 text-cyan-400" />
                 {isRTL ? 'الأداء حسب الساعة' : 'Hourly Performance'}
               </h3>
@@ -2747,7 +2834,7 @@ const DashboardPage: React.FC = () => {
             {/* 🔑 Keyword Performance */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Search className="w-5 h-5 text-violet-400" />
                 {isRTL ? 'أداء الكلمات المفتاحية' : 'Keyword Performance'}
               </h3>
@@ -2804,7 +2891,7 @@ const DashboardPage: React.FC = () => {
             {/* 🎯 AI Optimization Score */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Zap className="w-5 h-5 text-emerald-400" />
                 {isRTL ? 'نقاط التحسين AI' : 'AI Optimization Score'}
               </h3>
@@ -2852,7 +2939,7 @@ const DashboardPage: React.FC = () => {
             {/* 🔍 Search Terms Report */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Search className="w-5 h-5 text-blue-400" />
                 {isRTL ? 'مصطلحات البحث' : 'Search Terms'}
               </h3>
@@ -2899,7 +2986,7 @@ const DashboardPage: React.FC = () => {
             {/* 💪 Ad Strength Indicator */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Target className="w-5 h-5 text-yellow-400" />
                 {isRTL ? 'قوة الإعلانات' : 'Ad Strength'}
               </h3>
@@ -2945,7 +3032,7 @@ const DashboardPage: React.FC = () => {
             {/* 📱 Landing Page Experience */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Globe className="w-5 h-5 text-teal-400" />
                 {isRTL ? 'تجربة الصفحات' : 'Landing Pages'}
               </h3>
@@ -3005,7 +3092,7 @@ const DashboardPage: React.FC = () => {
             {/* 💰 Budget Recommendations */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <DollarSign className="w-5 h-5 text-green-400" />
                 {isRTL ? 'توصيات الميزانية' : 'Budget Recommendations'}
               </h3>
@@ -3044,7 +3131,7 @@ const DashboardPage: React.FC = () => {
             {/* 🏆 Auction Insights */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"></div>
-              <h3 className="flex items-center gap-2 mt-2">
+              <h3 className="flex items-center gap-2 mt-4">
                 <Trophy className="w-5 h-5 text-amber-400" />
                 {isRTL ? 'رؤى المزادات' : 'Auction Insights'}
               </h3>

@@ -17,16 +17,19 @@ const getSupabaseAdmin = () => {
 async function getConnectedAccounts(userId: string): Promise<string[]> {
   try {
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
+    // جلب جميع الحسابات للمستخدم
+    const { data: allData, error } = await supabase
       .from('client_requests')
       .select('customer_id, status')
-      .eq('user_id', userId)
-      .in('status', [
-        'connected', 'Connected', 'CONNECTED',
-        'approved', 'Approved', 'APPROVED', 
-        'LINKED', 'linked', 'Linked',
-        'ACTIVE', 'active', 'Active'
-      ]);
+      .eq('user_id', userId);
+    
+    if (error) return [];
+    
+    // فلترة الحسابات المرتبطة (Connected) - نفس المنطق في صفحة الحسابات
+    const connectedStatuses = ['ACTIVE', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED'];
+    const data = (allData || []).filter(row => 
+      row.customer_id && connectedStatuses.includes(row.status)
+    );
     
     if (error) return [];
     // إزالة التكرارات

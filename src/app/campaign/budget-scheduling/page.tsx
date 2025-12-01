@@ -82,17 +82,42 @@ const BudgetSchedulingPage: React.FC = () => {
     'BRL': 'R$'
   }), []);
   
-  // Conversion rates (base: USD) - معدلات تقريبية للعرض، سيتم استخدام الأسعار الحية عند الرفع
-  const conversionRates = useMemo(() => ({
+  // Conversion rates (base: USD) - يتم جلبها من Frankfurter API
+  const [conversionRates, setConversionRates] = useState<Record<string, number>>({
     'SAR': 3.75,
     'AED': 3.67,
     'USD': 1.0,
-    'EGP': 47.22,
+    'EGP': 49.0,
     'EUR': 0.92,
     'GBP': 0.79,
     'INR': 83.12,
     'BRL': 4.97
-  }), []);
+  });
+  const [isLoadingRates, setIsLoadingRates] = useState(false);
+
+  // جلب أسعار الصرف الحية من Frankfurter API
+  useEffect(() => {
+    const fetchExchangeRates = async () => {
+      setIsLoadingRates(true);
+      try {
+        const response = await fetch('https://api.frankfurter.app/latest?from=USD');
+        const data = await response.json();
+        
+        if (data.rates) {
+          const rates: Record<string, number> = { 'USD': 1.0, ...data.rates };
+          setConversionRates(rates);
+          console.log('💱 أسعار الصرف الحية (Budget Page):', rates);
+        }
+      } catch (error) {
+        console.error('❌ خطأ في جلب أسعار الصرف:', error);
+        // استخدام القيم الافتراضية في حالة فشل API
+      } finally {
+        setIsLoadingRates(false);
+      }
+    };
+    
+    fetchExchangeRates();
+  }, []);
   
   // Helper functions to get currency symbol and rate with fallback to USD
   const getCurrencySymbol = useCallback((curr: string) => {
@@ -100,7 +125,7 @@ const BudgetSchedulingPage: React.FC = () => {
   }, [currencySymbols]);
   
   const getConversionRate = useCallback((curr: string) => {
-    return conversionRates[curr as keyof typeof conversionRates] || 1.0;
+    return conversionRates[curr] || 1.0;
   }, [conversionRates]);
   
   // Budget options in USD with translations

@@ -57,17 +57,12 @@ export default function CampaignCreatingPage() {
     }
   ]);
 
-  // Load campaign data and language on mount
+  // Load campaign data on mount
   useEffect(() => {
     const data = localStorage.getItem('campaignData');
     if (data) {
       const parsed = JSON.parse(data);
       setCampaignData(parsed);
-      
-      // Detect language from campaign data
-      const lang = parsed.selectedLanguageCode || 'en';
-      setLanguage(lang as 'en' | 'ar');
-      setIsRTL(lang === 'ar');
     }
   }, []);
 

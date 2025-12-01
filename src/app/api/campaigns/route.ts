@@ -18,25 +18,33 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
   try {
     const supabase = getSupabaseAdmin();
     
-    // جلب الحسابات المرتبطة - جميع الحالات الممكنة للربط
-    const { data, error } = await supabase
-      .from('client_requests')
-      .select('customer_id, status')
-      .eq('user_id', userId)
-      .in('status', [
-        'connected', 'Connected', 'CONNECTED',
-        'approved', 'Approved', 'APPROVED', 
-        'LINKED', 'linked', 'Linked',
-        'ACTIVE', 'active', 'Active'
-      ]);
+    // جلب الحسابات المرتبطة (Connected) - نفس المنطق المستخدم في صفحة الحسابات
+    console.log(`🔍 البحث عن حسابات مرتبطة للمستخدم: ${userId}`);
     
-    if (error) {
-      console.error('❌ خطأ في جلب الحسابات المرتبطة:', error);
+    // جلب جميع الحسابات للمستخدم
+    const { data: allData, error: allError } = await supabase
+      .from('client_requests')
+      .select('customer_id, status, link_details')
+      .eq('user_id', userId);
+    
+    if (allError) {
+      console.error('❌ خطأ في جلب الحسابات:', allError);
       return [];
     }
     
+    console.log(`📋 جميع الحسابات للمستخدم:`, allData?.map(d => `${d.customer_id}: ${d.status}`));
+    
+    // فلترة الحسابات المرتبطة (Connected) - نفس المنطق في صفحة الحسابات
+    // الحسابات المرتبطة هي التي status = ACTIVE أو DISABLED أو SUSPENDED أو CUSTOMER_NOT_ENABLED
+    const connectedStatuses = ['ACTIVE', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED'];
+    const connectedAccounts = (allData || []).filter(row => 
+      row.customer_id && connectedStatuses.includes(row.status)
+    );
+    
+    console.log(`📋 الحسابات المرتبطة (Connected):`, connectedAccounts.map(d => `${d.customer_id}: ${d.status}`));
+    
     // إزالة التكرارات باستخدام Set
-    const uniqueIds = [...new Set((data || []).map(row => row.customer_id).filter(Boolean))];
+    const uniqueIds = [...new Set(connectedAccounts.map(row => row.customer_id))];
     console.log(`✅ تم العثور على ${uniqueIds.length} حساب مرتبط (فريد):`, uniqueIds);
     return uniqueIds;
   } catch (error) {
