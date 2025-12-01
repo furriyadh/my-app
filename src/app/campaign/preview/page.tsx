@@ -755,10 +755,10 @@ export default function CampaignPreviewPage() {
       let launchResponse: Response;
       try {
         launchResponse = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(completeCampaignData)
-        });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(completeCampaignData)
+      });
       } catch (fetchError) {
         console.error('❌ Fetch error details:', fetchError);
         console.error('❌ Error name:', (fetchError as Error).name);

@@ -968,16 +968,16 @@ const BudgetSchedulingPage: React.FC = () => {
         let histResponse: Response;
         try {
           histResponse = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              keywords,
-              website_url: campaignData.websiteUrl,
-              target_locations: targetLocations,
-              language_id: languageId
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keywords,
+            website_url: campaignData.websiteUrl,
+            target_locations: targetLocations,
+            language_id: languageId
             }),
             signal: controller.signal
-          });
+        });
           clearTimeout(timeoutId);
         } catch (fetchErr) {
           clearTimeout(timeoutId);
@@ -1573,27 +1573,27 @@ const BudgetSchedulingPage: React.FC = () => {
               const MIN_LOADER_TIME = 5000; // 5 seconds minimum
               
               try {
-                // Get real CPC from localStorage (calculated from real Google Ads data)
-                const realCPC = localStorage.getItem('realCPC');
-                const realCPCValue = realCPC ? parseFloat(realCPC) : null;
-                
-                const updatedData = {
-                  ...campaignData,
-                  dailyBudget: selectedBudget, // Display budget in selected currency
-                  dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
-                  currency: currency,
-                  realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
-                  maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
-                };
-                
-                console.log('💰 Campaign Data with Real CPC:', {
-                  dailyBudgetUSD: selectedBudgetUSD,
-                  realCPC: realCPCValue,
-                  maxCpcBid: realCPCValue
-                });
-                
-                localStorage.setItem('campaignData', JSON.stringify(updatedData));
-                
+              // Get real CPC from localStorage (calculated from real Google Ads data)
+              const realCPC = localStorage.getItem('realCPC');
+              const realCPCValue = realCPC ? parseFloat(realCPC) : null;
+              
+              const updatedData = {
+                ...campaignData,
+                dailyBudget: selectedBudget, // Display budget in selected currency
+                dailyBudgetUSD: selectedBudgetUSD, // Store budget in USD for calculations
+                currency: currency,
+                realCPC: realCPCValue, // Real CPC from Google Ads Historical Metrics
+                maxCpcBid: realCPCValue // Use real CPC as max bid for campaign creation
+              };
+              
+              console.log('💰 Campaign Data with Real CPC:', {
+                dailyBudgetUSD: selectedBudgetUSD,
+                realCPC: realCPCValue,
+                maxCpcBid: realCPCValue
+              });
+              
+              localStorage.setItem('campaignData', JSON.stringify(updatedData));
+              
                 // Get keywords from localStorage
                 const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
                 const generatedContent = JSON.parse(generatedContentStr);
@@ -1605,7 +1605,7 @@ const BudgetSchedulingPage: React.FC = () => {
                 const targetLanguage = latestCampaignData.selectedLanguageCode || latestCampaignData.detectedLanguageCode || 'ar';
                 
                 console.log('🌍 Target language for ad generation:', targetLanguage);
-                
+              
                 // Generate ad content (headlines and descriptions) for SEARCH campaigns
                 const needsContentGeneration = campaignData?.campaignType === 'SEARCH' && 
                   (!generatedContent.headlines || generatedContent.headlines.length === 0 || 
@@ -1657,7 +1657,7 @@ const BudgetSchedulingPage: React.FC = () => {
                 // Set flag and navigate
                 localStorage.setItem('creatingCampaign', 'true');
                 console.log('✅ Done! Navigating to preview...');
-                router.push('/campaign/preview');
+              router.push('/campaign/preview');
               } catch (error) {
                 console.error('❌ Error:', error);
                 localStorage.setItem('creatingCampaign', 'true');

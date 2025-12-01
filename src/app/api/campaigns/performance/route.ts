@@ -21,10 +21,17 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
       .from('client_requests')
       .select('customer_id, status')
       .eq('user_id', userId)
-      .in('status', ['connected', 'approved', 'LINKED']);
+      .in('status', [
+        'connected', 'Connected', 'CONNECTED',
+        'approved', 'Approved', 'APPROVED', 
+        'LINKED', 'linked', 'Linked',
+        'ACTIVE', 'active', 'Active'
+      ]);
     
     if (error) return [];
-    return (data || []).map(row => row.customer_id).filter(Boolean);
+    // إزالة التكرارات
+    const uniqueIds = [...new Set((data || []).map(row => row.customer_id).filter(Boolean))];
+    return uniqueIds;
   } catch (error) {
     return [];
   }
@@ -109,9 +116,12 @@ export async function GET(request: NextRequest) {
       } catch (e) {}
     }
     
-    // تجديد access token إذا لزم الأمر
-    if (!accessToken && refreshToken) {
-      accessToken = await refreshAccessToken(refreshToken) || undefined;
+    // تجديد access token دائماً للتأكد من صلاحيته
+    if (refreshToken) {
+      const newToken = await refreshAccessToken(refreshToken);
+      if (newToken) {
+        accessToken = newToken;
+      }
     }
     
     // إذا لم يوجد access token أو user ID - إرجاع بيانات فارغة (وليس mock)
@@ -138,13 +148,13 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // حساب التواريخ
+    // حساب التواريخ - GAQL يحتاج صيغة YYYY-MM-DD
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     
-    const startDateStr = startDate.toISOString().split('T')[0].replace(/-/g, '');
-    const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
     
     console.log(`🔗 جلب بيانات الأداء من ${connectedAccountIds.length} حساب مرتبط...`);
     
@@ -154,6 +164,11 @@ export async function GET(request: NextRequest) {
     );
     
     const allResults = await Promise.all(performancePromises);
+    
+    console.log(`📊 جلب ${allResults.length} مجموعة نتائج`);
+    for (let i = 0; i < allResults.length; i++) {
+      console.log(`   - حساب ${connectedAccountIds[i]}: ${allResults[i].length} سجل`);
+    }
     
     // تجميع البيانات حسب التاريخ
     const dailyDataMap = new Map<string, {
@@ -184,9 +199,10 @@ export async function GET(request: NextRequest) {
     const performanceData = Array.from(dailyDataMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, data]) => {
-        const dateObj = new Date(date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+        // التاريخ يأتي بصيغة YYYY-MM-DD من Google Ads API
+        const dateObj = new Date(date);
         return {
-          date: date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+          date: date,
           day: dateObj.toLocaleDateString('en-US', { weekday: 'short' }),
           impressions: data.impressions,
           clicks: data.clicks,

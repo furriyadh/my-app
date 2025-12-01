@@ -18,21 +18,27 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
   try {
     const supabase = getSupabaseAdmin();
     
-    // جلب الحسابات المرتبطة (status = 'connected' أو 'approved')
+    // جلب الحسابات المرتبطة - جميع الحالات الممكنة للربط
     const { data, error } = await supabase
       .from('client_requests')
       .select('customer_id, status')
       .eq('user_id', userId)
-      .in('status', ['connected', 'approved', 'LINKED']);
+      .in('status', [
+        'connected', 'Connected', 'CONNECTED',
+        'approved', 'Approved', 'APPROVED', 
+        'LINKED', 'linked', 'Linked',
+        'ACTIVE', 'active', 'Active'
+      ]);
     
     if (error) {
       console.error('❌ خطأ في جلب الحسابات المرتبطة:', error);
       return [];
     }
     
-    const connectedIds = (data || []).map(row => row.customer_id).filter(Boolean);
-    console.log(`✅ تم العثور على ${connectedIds.length} حساب مرتبط`);
-    return connectedIds;
+    // إزالة التكرارات باستخدام Set
+    const uniqueIds = [...new Set((data || []).map(row => row.customer_id).filter(Boolean))];
+    console.log(`✅ تم العثور على ${uniqueIds.length} حساب مرتبط (فريد):`, uniqueIds);
+    return uniqueIds;
   } catch (error) {
     console.error('❌ خطأ في getConnectedAccounts:', error);
     return [];
@@ -42,6 +48,7 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
 // دالة لتجديد access token
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
+    console.log('🔄 محاولة تجديد access token...');
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -54,11 +61,42 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
     });
     if (response.ok) {
       const data = await response.json();
+      console.log('✅ تم تجديد access token بنجاح');
       return data.access_token;
     }
+    console.error('❌ فشل تجديد token:', response.status);
     return null;
   } catch (error) {
+    console.error('❌ خطأ في تجديد token:', error);
     return null;
+  }
+}
+
+// دالة لجلب عملة الحساب
+async function getAccountCurrency(customerId: string, accessToken: string): Promise<string> {
+  try {
+    const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: `SELECT customer.currency_code FROM customer LIMIT 1`
+      }),
+      signal: AbortSignal.timeout(10000)
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const currency = data.results?.[0]?.customer?.currencyCode || 'USD';
+      console.log(`💱 عملة الحساب ${customerId}: ${currency}`);
+      return currency;
+    }
+    return 'USD';
+  } catch (error) {
+    return 'USD';
   }
 }
 
@@ -67,12 +105,16 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
   try {
     console.log(`📊 جلب حملات الحساب ${customerId}...`);
     
+    // جلب عملة الحساب أولاً
+    const currency = await getAccountCurrency(customerId, accessToken);
+    
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - parseInt(timeRange));
     
-    const startDateStr = startDate.toISOString().split('T')[0].replace(/-/g, '');
-    const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
+    // GAQL يحتاج صيغة YYYY-MM-DD
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
     
     const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
       method: 'POST',
@@ -91,7 +133,7 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
             metrics.average_cpm, metrics.cost_per_conversion
           FROM campaign
           WHERE segments.date BETWEEN '${startDateStr}' AND '${endDateStr}'
-            AND campaign.status != 'REMOVED'
+            AND campaign.status != REMOVED
           ORDER BY metrics.cost_micros DESC
           LIMIT 100
         `
@@ -124,6 +166,7 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
         type: typeMap[campaign.advertisingChannelType] || campaign.advertisingChannelType || 'UNKNOWN',
         status: campaign.status || 'UNKNOWN',
         customerId: customerId,
+        currency: currency,
         budget: budget.amountMicros ? budget.amountMicros / 1000000 : 0,
         impressions: parseInt(metrics.impressions) || 0,
         clicks: parseInt(metrics.clicks) || 0,
@@ -167,10 +210,13 @@ export async function GET(request: NextRequest) {
       } catch (e) {}
     }
     
-    // تجديد access token إذا لزم الأمر
-    if (!accessToken && refreshToken) {
-      console.log('🔄 تجديد access token...');
-      accessToken = await refreshAccessToken(refreshToken) || undefined;
+    // تجديد access token دائماً للتأكد من صلاحيته
+    if (refreshToken) {
+      console.log('🔄 تجديد access token للتأكد من صلاحيته...');
+      const newToken = await refreshAccessToken(refreshToken);
+      if (newToken) {
+        accessToken = newToken;
+      }
     }
     
     // إذا لم يوجد access token أو user ID - إرجاع بيانات فارغة (وليس mock)
@@ -253,6 +299,10 @@ export async function GET(request: NextRequest) {
     const totalCost = allCampaigns.reduce((sum, c) => sum + c.cost, 0);
     const totalConversionsValue = allCampaigns.reduce((sum, c) => sum + c.conversionsValue, 0);
     
+    // جلب العملة من أول حملة
+    const primaryCurrency = allCampaigns.length > 0 ? allCampaigns[0].currency : 'USD';
+    console.log(`💱 العملة الرئيسية: ${primaryCurrency}`);
+    
     return NextResponse.json({
       success: true,
       campaigns: allCampaigns,
@@ -272,6 +322,7 @@ export async function GET(request: NextRequest) {
         averageCpm: totalImpressions > 0 ? ((totalCost / totalImpressions) * 1000).toFixed(2) : '0',
         conversionRate: totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(2) : '0',
         costPerConversion: totalConversions > 0 ? (totalCost / totalConversions).toFixed(2) : '0',
+        currency: primaryCurrency,
         campaignTypes: {
           SEARCH: allCampaigns.filter(c => c.type === 'SEARCH').length,
           VIDEO: allCampaigns.filter(c => c.type === 'VIDEO').length,

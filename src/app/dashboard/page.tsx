@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { getApiUrl } from "@/lib/config";
 import { motion } from "motion/react";
 import MagicBentoWrapper from "@/components/Dashboard/MagicBentoWrapper";
 import AnimatedBackground from "@/components/Dashboard/AnimatedBackground";
@@ -33,7 +34,7 @@ import {
   PieChart as PieChartIcon, List, Edit, Play, Pause, CheckCircle,
   XCircle, Clock, Info, ChevronLeft, ChevronRight, Monitor, Star,
   Smartphone, Tablet, Laptop, Search, Video, ShoppingCart, Image as ImageIcon, Layers,
-  MapPin, Filter, Users, Percent, TrendingDown, AlertTriangle
+  MapPin, Filter, Users, Percent, TrendingDown, AlertTriangle, Trophy, Globe
 } from "lucide-react";
 
 // Types
@@ -42,6 +43,19 @@ interface Campaign {
   name: string;
   type: 'SEARCH' | 'VIDEO' | 'SHOPPING' | 'DISPLAY' | 'PERFORMANCE_MAX';
   status: 'ENABLED' | 'PAUSED' | 'REMOVED';
+  currency?: string;
+  cost?: number;
+  impressions?: number;
+  clicks?: number;
+  ctr?: number;
+  conversions?: number;
+  conversionsValue?: number;
+  averageCpc?: number;
+  averageCpm?: number;
+  costPerConversion?: number;
+  roas?: number;
+  customerId?: string;
+  budget?: number;
   [key: string]: any;
 }
 
@@ -77,6 +91,20 @@ const DashboardPage: React.FC = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(true);
   const [googleRecommendations, setGoogleRecommendations] = useState<any[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [aiInsights, setAiInsights] = useState<{
+    device_performance: any[];
+    audience_data: { age: any[]; gender: any[] };
+    competition_data: { impression_share: any[]; keywords: any[] };
+    location_data: any[];
+    hourly_data: any[];
+    optimization_score: number | null;
+    search_terms: any[];
+    ad_strength: { distribution: { excellent: number; good: number; average: number; poor: number }; details: any[] };
+    landing_pages: any[];
+    budget_recommendations: any[];
+    auction_insights: any[];
+  } | null>(null);
+  const [loadingAiInsights, setLoadingAiInsights] = useState(false);
   const campaignsPerPage = 10;
 
   // مفتاح الكاش في localStorage
@@ -125,20 +153,26 @@ const DashboardPage: React.FC = () => {
       // محاولة جلب البيانات من الكاش أولاً
       const cachedData = loadFromCache();
       
-      if (cachedData && isCacheValid(cachedData.timestamp, cachedData.timeRange)) {
-        // الكاش صالح - استخدامه مباشرة
-        console.log('📦 استخدام البيانات من الكاش (عمر الكاش:', Math.round((Date.now() - cachedData.timestamp) / 60000), 'دقيقة)');
-        setCampaigns(cachedData.campaigns || []);
+      // التحقق من أن الكاش يحتوي على حملات فعلية (وليس فارغ)
+      const hasCachedCampaigns = cachedData?.campaigns && cachedData.campaigns.length > 0;
+      
+      if (cachedData && hasCachedCampaigns) {
+        // الكاش يحتوي على بيانات - استخدامه مباشرة (حتى لو قديم)
+        console.log('📦 تحميل فوري من الكاش:', cachedData.campaigns.length, 'حملة');
+        setCampaigns(cachedData.campaigns);
         setMetrics(cachedData.metrics || {});
         setPerformanceData(cachedData.performanceData || []);
         setLastUpdated(new Date(cachedData.timestamp));
         setDataSource('cache');
         setIsLoading(false);
+        
+        // تحديث البيانات في الخلفية (بدون إظهار التحميل)
+        fetchAllData(false);
       } else {
-        // الكاش غير صالح أو غير موجود - جلب من API
-        console.log('🌐 جلب البيانات من API (الكاش منتهي أو غير موجود)');
+        // لا يوجد كاش - جلب من API مباشرة
+        console.log('🌐 جلب البيانات من API...');
         setDataSource('api');
-        await fetchAllData();
+        await fetchAllData(true);
       }
     };
     
@@ -300,17 +334,23 @@ const DashboardPage: React.FC = () => {
       intervals.forEach(interval => clearInterval(interval));
       intervals.clear();
     };
-  }, [campaigns, performanceData]);
+  }, [campaigns, performanceData, aiInsights]);
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (showLoading = false) => {
     try {
+      // فقط إظهار التحميل إذا لم توجد بيانات حالية
+      if (showLoading || campaigns.length === 0) {
       setIsLoading(true);
+      }
       setDataSource('api');
       
       const [campaignsResult, performanceResult] = await Promise.all([
         fetchCampaigns(),
         fetchPerformanceData()
       ]);
+      
+      // جلب AI Insights في الخلفية
+      fetchAiInsights();
       
       // حفظ البيانات في الكاش بعد الجلب الناجح
       if (campaignsResult || performanceResult) {
@@ -329,18 +369,78 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const fetchCampaigns = async (): Promise<{ campaigns: Campaign[], metrics: any } | null> => {
+  // جلب AI Insights من Google Ads API
+  const fetchAiInsights = async () => {
     try {
-      const response = await fetch(`/api/campaigns?timeRange=${timeRange}`);
+      setLoadingAiInsights(true);
+      const response = await fetch('/api/ai-insights');
       const data = await response.json();
       
       if (data.success) {
-        setCampaigns(data.campaigns || []);
-        setMetrics(data.metrics || {});
-        return { campaigns: data.campaigns || [], metrics: data.metrics || {} };
+        setAiInsights({
+          device_performance: data.device_performance || [],
+          audience_data: data.audience_data || { age: [], gender: [] },
+          competition_data: data.competition_data || { impression_share: [], keywords: [] },
+          location_data: data.location_data || [],
+          hourly_data: data.hourly_data || [],
+          optimization_score: data.optimization_score ?? null,
+          search_terms: data.search_terms || [],
+          ad_strength: data.ad_strength || { distribution: { excellent: 0, good: 0, average: 0, poor: 0 }, details: [] },
+          landing_pages: data.landing_pages || [],
+          budget_recommendations: data.budget_recommendations || [],
+          auction_insights: data.auction_insights || []
+        });
+        console.log('🤖 AI Insights loaded:', {
+          devices: data.device_performance?.length || 0,
+          age: data.audience_data?.age?.length || 0,
+          gender: data.audience_data?.gender?.length || 0,
+          competition: data.competition_data?.impression_share?.length || 0,
+          optimization_score: data.optimization_score,
+          search_terms: data.search_terms?.length || 0,
+          ad_strength: data.ad_strength?.details?.length || 0,
+          landing_pages: data.landing_pages?.length || 0,
+          budget_recommendations: data.budget_recommendations?.length || 0,
+          auction_insights: data.auction_insights?.length || 0
+        });
       }
     } catch (error) {
-      console.error('Error fetching campaigns:', error);
+      console.error('❌ خطأ في جلب AI Insights:', error);
+    } finally {
+      setLoadingAiInsights(false);
+    }
+  };
+
+  const fetchCampaigns = async (): Promise<{ campaigns: Campaign[], metrics: any } | null> => {
+    try {
+      // جلب الحملات من Next.js API (يستخدم Supabase لجلب حسابات المستخدم الحالي فقط)
+      console.log('📊 جلب الحملات...');
+      const response = await fetch(`/api/campaigns?timeRange=${timeRange}`);
+      const data = await response.json();
+      
+      console.log('📊 استجابة API:', {
+        success: data.success,
+        campaignsCount: data.campaigns?.length || 0,
+        accountsCount: data.accountsCount,
+        message: data.message
+      });
+      
+      if (data.success && data.campaigns && data.campaigns.length > 0) {
+        console.log('✅ تم جلب', data.campaigns.length, 'حملة');
+        setCampaigns(data.campaigns);
+        setMetrics(data.metrics || {});
+        return { campaigns: data.campaigns, metrics: data.metrics || {} };
+      }
+      
+      // إذا لم توجد حملات
+      console.log('⚠️ لا توجد حملات:', data.message);
+      setCampaigns([]);
+      setMetrics(data.metrics || {});
+      return { campaigns: [], metrics: data.metrics || {} };
+      
+    } catch (error) {
+      console.error('❌ Error fetching campaigns:', error);
+      setCampaigns([]);
+      setMetrics({});
     }
     return null;
   };
@@ -349,6 +449,13 @@ const DashboardPage: React.FC = () => {
     try {
       const response = await fetch(`/api/campaigns/performance?timeRange=${timeRange}`);
       const data = await response.json();
+      
+      console.log('📈 Performance API Response:', {
+        success: data.success,
+        dataLength: data.data?.length || 0,
+        accountsCount: data.accountsCount,
+        sampleData: data.data?.slice(0, 2)
+      });
       
       if (data.success) {
         setPerformanceData(data.data || []);
@@ -362,7 +469,8 @@ const DashboardPage: React.FC = () => {
 
   const handleRefresh = async () => {
     console.log('🔄 تحديث يدوي للبيانات...');
-    await fetchAllData();
+    // لا نظهر التحميل لأن البيانات الحالية ستبقى مرئية
+    await fetchAllData(false);
   };
 
   const handleDateRangeChange = async (range: any, comparison?: any) => {
@@ -376,21 +484,34 @@ const DashboardPage: React.FC = () => {
     // تحديث الفترة الزمنية
     setTimeRange(newTimeRange);
     
+    // مسح الكاش القديم عند تغيير الفترة
+    localStorage.removeItem(CACHE_KEY);
+    
     // جلب البيانات الجديدة مباشرة
     console.log(`📅 تغيير الفترة الزمنية إلى ${days} يوم`);
     
     try {
+      // لا نظهر التحميل إذا كانت هناك بيانات حالية
+      if (campaigns.length === 0) {
       setIsLoading(true);
+      }
       setDataSource('api');
       
       const [campaignsResult, performanceResult] = await Promise.all([
         fetch(`/api/campaigns?timeRange=${newTimeRange}`).then(res => res.json()),
-        fetch(`/api/campaigns/performance?days=${newTimeRange}`).then(res => res.json())
+        fetch(`/api/campaigns/performance?timeRange=${newTimeRange}`).then(res => res.json())
       ]);
       
       if (campaignsResult.success) {
         setCampaigns(campaignsResult.campaigns || []);
         setMetrics(campaignsResult.metrics || {});
+        
+        // حفظ البيانات الجديدة في الكاش
+        saveToCache({
+          campaigns: campaignsResult.campaigns || [],
+          metrics: campaignsResult.metrics || {},
+          performanceData: performanceResult.data || []
+        });
       }
       
       if (performanceResult.success) {
@@ -441,36 +562,6 @@ const DashboardPage: React.FC = () => {
   }, [campaigns]);
 
   // Check which campaign types exist
-  const hasSearchCampaigns = campaigns.some(c => c.type === 'SEARCH');
-  const hasVideoCampaigns = campaigns.some(c => c.type === 'VIDEO');
-  const hasShoppingCampaigns = campaigns.some(c => c.type === 'SHOPPING');
-  const hasDisplayCampaigns = campaigns.some(c => c.type === 'DISPLAY');
-
-  // Device performance data
-  const devicePerformanceData = useMemo(() => {
-    if (!campaigns.length) return [];
-    
-    const aggregated = campaigns.reduce((acc: any, campaign) => {
-      if (campaign.devicePerformance) {
-        Object.entries(campaign.devicePerformance).forEach(([device, data]: [string, any]) => {
-          if (!acc[device]) {
-            acc[device] = { device, impressions: 0, clicks: 0, conversions: 0, cost: 0 };
-          }
-          acc[device].impressions += data.impressions || 0;
-          acc[device].clicks += data.clicks || 0;
-          acc[device].conversions += data.conversions || 0;
-          acc[device].cost += data.cost || 0;
-        });
-      }
-      return acc;
-    }, {});
-    
-    return Object.values(aggregated).map((d: any) => ({
-      ...d,
-      device: d.device.charAt(0).toUpperCase() + d.device.slice(1)
-    }));
-  }, [campaigns]);
-
   // Filter campaigns
   const filteredCampaigns = useMemo(() => {
     let filtered = campaigns;
@@ -781,12 +872,21 @@ const DashboardPage: React.FC = () => {
     return num.toLocaleString();
   };
 
-  // Format currency
-  const formatCurrency = (num: number): string => {
-    if (!num || isNaN(num)) return '$0';
-    if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `$${(num / 1000).toFixed(1)}K`;
-    return `$${num.toFixed(0)}`;
+  // Get primary currency from campaigns
+  const getPrimaryCurrency = (): string => {
+    if (campaigns.length > 0 && campaigns[0].currency) {
+      return campaigns[0].currency;
+    }
+    return metrics?.currency || 'USD';
+  };
+
+  // Format currency with English currency code (e.g., EGP 100, SAR 50, USD 25)
+  const formatCurrency = (num: number, currencyCode?: string): string => {
+    const code = currencyCode || getPrimaryCurrency() || 'USD';
+    if (!num || isNaN(num)) return `${code} 0`;
+    if (num >= 1000000) return `${code} ${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${code} ${(num / 1000).toFixed(1)}K`;
+    return `${code} ${num.toFixed(2)}`;
   };
 
   // Format percentage
@@ -2074,7 +2174,7 @@ const DashboardPage: React.FC = () => {
                     </div>
             <div className="flex flex-col">
               <span className="stat-label">{isRTL ? 'تكلفة التحويل' : 'Cost/Conv.'}</span>
-              <span className="stat-value">${statsData.costPerConversion}</span>
+              <span className="stat-value">{formatCurrency(parseFloat(statsData.costPerConversion))}</span>
               <span className={`stat-change ${statsData.costPerConversionChange <= 0 ? 'positive' : 'negative'}`}>
                 {statsData.costPerConversionChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                 {Math.abs(statsData.costPerConversionChange)}%
@@ -2158,8 +2258,8 @@ const DashboardPage: React.FC = () => {
                   <DollarSign className="w-4 h-4 text-blue-400 flex-shrink-0" />
                   <p className="text-xs text-gray-300 truncate">
                     {isRTL 
-                      ? `الإنفاق: $${formatLargeNumber(metrics.totalSpend)} | CPA: $${metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions).toFixed(0) : '0'}`
-                      : `Spend: $${formatLargeNumber(metrics.totalSpend)} | CPA: $${metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions).toFixed(0) : '0'}`}
+                      ? `الإنفاق: ${formatCurrency(metrics.totalSpend)} | CPA: ${formatCurrency(metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions) : 0)}`
+                      : `Spend: ${formatCurrency(metrics.totalSpend)} | CPA: ${formatCurrency(metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions) : 0)}`}
                   </p>
                 </div>
               )}
@@ -2174,56 +2274,6 @@ const DashboardPage: React.FC = () => {
           )}
             </div>
             
-        {/* AI Recommendations Panel */}
-        {aiRecommendations.length > 0 && (
-          <div className="chart-card backdrop-blur-sm border border-solid p-4 mt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Zap className="w-4 h-4 text-white" />
-                </div>
-              <h3 className="text-lg font-bold text-white">
-                {isRTL ? 'توصيات الذكاء الاصطناعي' : 'AI Recommendations'}
-                </h3>
-              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-xs rounded-full">
-                {aiRecommendations.length} {isRTL ? 'توصيات' : 'suggestions'}
-              </span>
-            </div>
-            
-            <div className="space-y-3">
-              {aiRecommendations.map((rec, index) => (
-                <div 
-                  key={index}
-                  className={`p-3 rounded-lg border transition-all hover:scale-[1.01] ${
-                    rec.type === 'alert' 
-                      ? 'bg-red-500/10 border-red-500/30' 
-                      : rec.type === 'warning'
-                        ? 'bg-yellow-500/10 border-yellow-500/30'
-                        : 'bg-blue-500/10 border-blue-500/30'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        {rec.type === 'alert' ? (
-                          <XCircle className="w-4 h-4 text-red-400" />
-                        ) : rec.type === 'warning' ? (
-                          <Info className="w-4 h-4 text-yellow-400" />
-                        ) : (
-                          <CheckCircle className="w-4 h-4 text-blue-400" />
-                        )}
-                        <span className="font-semibold text-white text-sm">{rec.title}</span>
-                      </div>
-                      <p className="text-gray-400 text-xs leading-relaxed">{rec.description}</p>
-                    </div>
-                    <button className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors whitespace-nowrap">
-                      {rec.action}
-                </button>
-              </div>
-            </div>
-              ))}
-          </div>
-          </div>
-        )}
 
         {/* Charts Section */}
         <div className="space-y-6">
@@ -2262,603 +2312,787 @@ const DashboardPage: React.FC = () => {
             </div>
             </div>
 
-          {/* Essential Charts Row */}
+          {/* ===== OPTIMIZED CHARTS SECTION ===== */}
+          
+          {/* Row 1: Performance Trends & Revenue vs Spend */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Performance Trends - Line Chart */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <h3>Performance Trends</h3>
-              <p className="chart-description">Daily performance metrics overview</p>
-              <div className="flex justify-center items-center w-full">
+            {/* 1. Performance Trends */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Activity className="w-5 h-5 text-purple-400" />
+                {isRTL ? 'اتجاهات الأداء' : 'Performance Trends'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'نظرة عامة على المقاييس اليومية' : 'Daily metrics overview'}</p>
+              {performanceData.length > 0 ? (
               <ChartContainer
                 config={{
-                  impressions: { label: "Impressions", color: CHART_COLORS.primary },
-                  clicks: { label: "Clicks", color: CHART_COLORS.secondary },
-                  conversions: { label: "Conversions", color: CHART_COLORS.quaternary }
+                  impressions: { label: isRTL ? "المشاهدات" : "Impressions", color: CHART_COLORS.primary },
+                  clicks: { label: isRTL ? "النقرات" : "Clicks", color: CHART_COLORS.secondary }
                 }}
-                className="h-[320px]"
+                className="h-[250px]"
               >
-                <ResponsiveContainer width="100%" height="100%" style={{ margin: '0 auto' }}>
-                  <LineChart data={performanceData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0.1}/>
+                      <linearGradient id="impressionsGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="clicksGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => formatLargeNumber(value)} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
+                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} />
                     <Tooltip content={<CustomTooltip />} />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Line type="monotone" dataKey="impressions" stroke={CHART_COLORS.primary} strokeWidth={2} dot={{ fill: CHART_COLORS.primary, r: 3 }} activeDot={{ r: 5 }} />
-                    <Line type="monotone" dataKey="clicks" stroke={CHART_COLORS.secondary} strokeWidth={2} dot={{ fill: CHART_COLORS.secondary, r: 3 }} activeDot={{ r: 5 }} />
-                    <Line type="monotone" dataKey="conversions" stroke={CHART_COLORS.quaternary} strokeWidth={2} dot={{ fill: CHART_COLORS.quaternary, r: 3 }} activeDot={{ r: 5 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-                </div>
-            </div>
-            
-            {/* Revenue & Spend - Area Chart with Purple Theme */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <h3>Revenue vs Spend</h3>
-              <p className="chart-description">Financial performance comparison</p>
-              <ChartContainer
-                config={{
-                  cost: { label: "Spend", color: CHART_COLORS.secondary },
-                  conversionsValue: { label: "Revenue", color: CHART_COLORS.primary }
-                }}
-                className="h-[320px]"
-              >
-                <ResponsiveContainer width="100%" height="100%" style={{ margin: '0 auto' }}>
-                  <AreaChart data={performanceData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
-                      </linearGradient>
-                      <linearGradient id="pinkGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EC4899" stopOpacity={0.6}/>
-                        <stop offset="95%" stopColor="#EC4899" stopOpacity={0.1}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => formatCurrency(value)} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Area type="monotone" dataKey="cost" stroke={CHART_COLORS.secondary} strokeWidth={2} fillOpacity={1} fill="url(#pinkGradient)" />
-                    <Area type="monotone" dataKey="conversionsValue" stroke={CHART_COLORS.primary} strokeWidth={2} fillOpacity={1} fill="url(#purpleGradient)" />
+                    <Area type="monotone" dataKey="impressions" stroke="#8B5CF6" strokeWidth={2} fill="url(#impressionsGrad)" />
+                    <Area type="monotone" dataKey="clicks" stroke="#EC4899" strokeWidth={2} fill="url(#clicksGrad)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
-            </div>
-          </div>
-            
-          {/* Conditional Charts based on Campaign Types */}
-          {(hasSearchCampaigns || hasVideoCampaigns || hasShoppingCampaigns || hasDisplayCampaigns) && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Search Campaigns: Quality Score Radar */}
-              {hasSearchCampaigns && (
-                <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <Search className="w-4 h-4 text-blue-400 opacity-80" />
-                    <h3 className="!text-center">Quality Score Components</h3>
-                    </div>
-                  <p className="chart-description">Search campaign quality metrics</p>
-                  <ChartContainer
-                    config={{
-                      value: { label: "Score", color: CHART_COLORS.primary }
-                    }}
-                    className="h-[320px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart data={[
-                        { metric: 'Creative', value: 8 },
-                        { metric: 'Landing Page', value: 7 },
-                        { metric: 'CTR', value: 9 },
-                        { metric: 'Relevance', value: 8 },
-                        { metric: 'Mobile UX', value: 7 }
-                      ]}>
-                        <PolarGrid stroke="#4c3d6b" strokeWidth={1.5} />
-                        <PolarAngleAxis dataKey="metric" stroke="#9f8fd4" fontSize={11} fontWeight={500} />
-                        <PolarRadiusAxis angle={90} domain={[0, 10]} stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                        <Radar name="Quality Score" dataKey="value" stroke={CHART_COLORS.primary} strokeWidth={2} fill={CHART_COLORS.primary} fillOpacity={0.5} />
-                        <Tooltip content={<CustomTooltip />} />
-                      </RadarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                    </div>
-              )}
-
-              {/* Video Campaigns: Video Performance */}
-              {hasVideoCampaigns && (
-                <div className="chart-card backdrop-blur-sm border border-solid">
-                  <div className="flex items-center gap-2 justify-center mb-1">
-                    <Video className="w-4 h-4 text-red-400 opacity-80" />
-                    <h3 className="!text-center">Video Completion Rates</h3>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات أداء' : 'No performance data'}</p>
                   </div>
-                  <p className="chart-description">Video engagement by quartile</p>
-                  <ChartContainer
-                    config={{
-                      rate: { label: "Completion %", color: CHART_COLORS.quaternary }
-                    }}
-                    className="h-[320px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={[
-                        { stage: '25%', rate: 85 },
-                        { stage: '50%', rate: 65 },
-                        { stage: '75%', rate: 45 },
-                        { stage: '100%', rate: 30 }
-                      ]}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                        <XAxis dataKey="stage" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                        <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => `${value}%`} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="rate" fill={CHART_COLORS.quaternary} radius={[10, 10, 0, 0]}>
-                          <LabelList dataKey="rate" position="top" className="fill-white" fontSize={11} fontWeight={600} formatter={(value: number) => `${value}%`} />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                    </div>
-              )}
-
-              {/* Shopping Campaigns: E-commerce Metrics */}
-              {hasShoppingCampaigns && (
-                <div className="chart-card backdrop-blur-sm border border-solid">
-                  <div className="flex items-center gap-2 justify-center mb-1">
-                    <ShoppingCart className="w-4 h-4 text-green-400 opacity-80" />
-                    <h3 className="!text-center">E-commerce Metrics</h3>
-                  </div>
-                  <p className="chart-description">Shopping campaign financials</p>
-                  <ChartContainer
-                    config={{
-                      value: { label: "Amount", color: CHART_COLORS.secondary }
-                    }}
-                    className="h-[320px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={[
-                        { metric: 'Revenue', value: 61250 },
-                        { metric: 'Profit', value: 30625 },
-                        { metric: 'COGS', value: 30625 }
-                      ]}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                        <XAxis dataKey="metric" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                        <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => formatCurrency(value)} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="value" fill={CHART_COLORS.secondary} radius={[10, 10, 0, 0]}>
-                          <LabelList dataKey="value" position="top" className="fill-white" fontSize={11} fontWeight={600} formatter={(value: number) => formatCurrency(value)} />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                    </div>
-              )}
-
-              {/* Display Campaigns: Active View */}
-              {hasDisplayCampaigns && (
-                <div className="chart-card backdrop-blur-sm border border-solid">
-                  <div className="flex items-center gap-2 justify-center mb-1">
-                    <ImageIcon className="w-4 h-4 text-yellow-400 opacity-80" />
-                    <h3 className="!text-center">Active View Metrics</h3>
-                  </div>
-                  <p className="chart-description">Display ad viewability scores</p>
-                  <ChartContainer
-                    config={{
-                      percentage: { label: "Percentage", color: CHART_COLORS.tertiary }
-                    }}
-                    className="h-[320px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RadialBarChart 
-                        cx="50%" 
-                        cy="50%" 
-                        innerRadius="30%" 
-                        outerRadius="100%"
-                        data={[
-                          { name: 'Viewability', value: 90, fill: CHART_COLORS.secondary },
-                          { name: 'Measurability', value: 95, fill: CHART_COLORS.tertiary }
-                        ]}
-                      >
-                        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                        <RadialBar background dataKey="value" angleAxisId={0} label={{ position: 'insideStart', fill: '#fff', fontSize: 12, fontWeight: 600 }} />
-                        <Legend iconSize={12} layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '12px', fontWeight: 500 }} />
-                        <Tooltip content={<CustomTooltip />} />
-                      </RadialBarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
                 </div>
               )}
             </div>
-          )}
-
-          {/* Device Performance - Bar Chart */}
-          {devicePerformanceData.length > 0 && (
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <h3>Device Performance</h3>
-              <p className="chart-description">Metrics breakdown by device type</p>
-              <ChartContainer
-                config={{
-                  impressions: { label: "Impressions", color: CHART_COLORS.primary },
-                  clicks: { label: "Clicks", color: CHART_COLORS.secondary },
-                  conversions: { label: "Conversions", color: CHART_COLORS.quaternary }
-                }}
-                className="h-[320px]"
-              >
-                <ResponsiveContainer width="100%" height="100%" style={{ margin: '0 auto' }}>
-                  <BarChart data={devicePerformanceData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="device" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => formatLargeNumber(value)} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="impressions" fill={CHART_COLORS.primary} radius={[10, 10, 0, 0]} />
-                    <Bar dataKey="clicks" fill={CHART_COLORS.secondary} radius={[10, 10, 0, 0]} />
-                    <Bar dataKey="conversions" fill={CHART_COLORS.quaternary} radius={[10, 10, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+            {/* 2. Revenue vs Spend */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <DollarSign className="w-5 h-5 text-green-400" />
+                {isRTL ? 'الإيرادات مقابل الإنفاق' : 'Revenue vs Spend'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'مقارنة الأداء المالي' : 'Financial comparison'}</p>
+              {performanceData.length > 0 ? (
+                <ChartContainer
+                  config={{
+                    cost: { label: isRTL ? "الإنفاق" : "Spend", color: '#EC4899' },
+                    conversionsValue: { label: isRTL ? "الإيرادات" : "Revenue", color: '#10B981' }
+                  }}
+                  className="h-[250px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={performanceData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.6}/>
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
+                      <XAxis dataKey="day" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value)} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="conversionsValue" stroke="#10B981" strokeWidth={2} fill="url(#revenueGrad)" />
+                      <Area type="monotone" dataKey="cost" stroke="#EC4899" strokeWidth={2} fill="url(#spendGrad)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات مالية' : 'No financial data'}</p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Additional Advanced Charts */}
+          {/* Row 2: Conversion Funnel & ROAS Trend */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Conversion Funnel - Purple Gradient */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <Filter className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">Conversion Funnel</h3>
-              </div>
-              <p className="chart-description">User journey from impression to conversion</p>
-              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
+            {/* 3. Conversion Funnel */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Filter className="w-5 h-5 text-purple-400" />
+                {isRTL ? 'قمع التحويل' : 'Conversion Funnel'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'رحلة المستخدم للتحويل' : 'User journey'}</p>
               {metrics.impressions > 0 ? (
-              <ChartContainer
-                config={{
-                  value: { label: "Count", color: CHART_COLORS.primary }
-                }}
-                className="h-[320px]"
-              >
+              <ChartContainer config={{ value: { label: "Count", color: CHART_COLORS.primary } }} className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                     data={[
-                      { stage: 'Impressions', value: metrics.impressions || 0, percentage: 100 },
-                      { stage: 'Clicks', value: metrics.clicks || 0, percentage: metrics.impressions > 0 ? ((metrics.clicks || 0) / metrics.impressions * 100).toFixed(1) : 0 },
-                      { stage: 'Conversions', value: metrics.conversions || 0, percentage: metrics.clicks > 0 ? ((metrics.conversions || 0) / metrics.clicks * 100).toFixed(1) : 0 }
+                      { stage: isRTL ? 'المشاهدات' : 'Impressions', value: metrics.impressions || 0, fill: '#8B5CF6' },
+                      { stage: isRTL ? 'النقرات' : 'Clicks', value: metrics.clicks || 0, fill: '#A855F7' },
+                      { stage: isRTL ? 'التحويلات' : 'Conversions', value: metrics.conversions || 0, fill: '#10B981' }
                     ]}
                     layout="vertical"
+                    margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis type="number" stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => formatLargeNumber(value)} />
-                    <YAxis type="category" dataKey="stage" stroke="#9f8fd4" fontSize={12} fontWeight={500} width={120} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
+                    <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} />
+                    <YAxis type="category" dataKey="stage" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} width={80} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" radius={[0, 10, 10, 0]}>
-                      {[0, 1, 2].map((index) => (
-                        <Cell key={`cell-${index}`} fill={index === 0 ? '#8B5CF6' : index === 1 ? '#A855F7' : '#C084FC'} />
-                      ))}
+                    <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={35}>
+                      <Cell fill="#8B5CF6" />
+                      <Cell fill="#A855F7" />
+                      <Cell fill="#10B981" />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
               ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
-                    <Filter className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No funnel data available</p>
+                    <Filter className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات تحويل' : 'No funnel data'}</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* CTR vs CPC Trend - Purple/Cyan Theme */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <Percent className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">CTR vs CPC Trend</h3>
-          </div>
-              <p className="chart-description">Click rate vs cost per click correlation</p>
+            {/* 4. ROAS Trend */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <TrendingUp className="w-5 h-5 text-green-400" />
+                {isRTL ? 'اتجاه ROAS' : 'ROAS Trend'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'العائد على الإنفاق' : 'Return on ad spend'}</p>
               {performanceData.length > 0 ? (
-              <ChartContainer
-                config={{
-                  ctr: { label: "CTR %", color: CHART_COLORS.tertiary },
-                  cpc: { label: "CPC $", color: CHART_COLORS.secondary }
-                }}
-                className="h-[320px]"
-              >
+              <ChartContainer config={{ roas: { label: "ROAS", color: '#10B981' } }} className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={performanceData.slice(0, 15)}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis yAxisId="left" stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => `${value}%`} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => `$${value}`} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Line yAxisId="left" type="monotone" dataKey="ctr" stroke="#06B6D4" strokeWidth={2} dot={{ r: 3, fill: '#06B6D4' }} />
-                    <Bar yAxisId="right" dataKey="cpc" fill="#EC4899" radius={[6, 6, 0, 0]} opacity={0.8} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <Percent className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No CTR/CPC data available</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Impression Share Breakdown - Purple Gradient */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <TrendingUp className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">Impression Share Breakdown</h3>
-              </div>
-              <p className="chart-description">Lost opportunities analysis</p>
-              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
-              {metrics.impressionShare && parseFloat(metrics.impressionShare) > 0 ? (
-              <ChartContainer
-                config={{
-                  value: { label: "Percentage", color: CHART_COLORS.primary }
-                }}
-                className="h-[320px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={[
-                      { metric: 'Search IS', value: parseFloat(metrics.impressionShare) || 0 },
-                      { metric: 'Top IS', value: parseFloat(metrics.topImpressionShare) || 0 },
-                      { metric: 'Abs Top IS', value: parseFloat(metrics.absTopImpressionShare) || 0 },
-                      { metric: 'Lost (Budget)', value: parseFloat(metrics.budgetLostImpressionShare) || 0 },
-                      { metric: 'Lost (Rank)', value: parseFloat(metrics.rankLostImpressionShare) || 0 }
-                    ]}
-                    layout="vertical"
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis type="number" domain={[0, 100]} stroke="#9f8fd4" fontSize={12} fontWeight={500} tickFormatter={(value) => `${value}%`} />
-                    <YAxis type="category" dataKey="metric" stroke="#9f8fd4" fontSize={12} fontWeight={500} width={120} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" radius={[0, 10, 10, 0]}>
-                      {[0, 1, 2, 3, 4].map((index, i) => (
-                        <Cell key={`cell-${index}`} fill={
-                          i === 0 ? '#8B5CF6' :
-                          i === 1 ? '#A855F7' :
-                          i === 2 ? '#06B6D4' :
-                          i === 3 ? '#EC4899' : '#F472B6'
-                        } />
-                      ))}
-                      <LabelList dataKey="value" position="right" className="fill-white" fontSize={11} fontWeight={600} formatter={(value: number) => `${value}%`} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No impression share data available</p>
-                  </div>
-                </div>
-              )}
-                </div>
-
-            {/* Cost Analysis Over Time - Purple Theme */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <DollarSign className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">Cost Analysis</h3>
-              </div>
-              <p className="chart-description">Spending trends and optimization</p>
-              {performanceData.length > 0 ? (
-              <ChartContainer
-                config={{
-                  cpc: { label: "Avg CPC", color: '#8B5CF6' },
-                  cpm: { label: "Avg CPM", color: '#EC4899' },
-                  costPerConversion: { label: "Cost/Conv", color: '#06B6D4' }
-                }}
-                className="h-[320px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={performanceData.slice(0, 15).map(d => ({
-                    ...d,
-                    cpm: d.impressions > 0 ? (d.cost / d.impressions * 1000).toFixed(2) : 0,
-                    costPerConversion: d.conversions > 0 ? (d.cost / d.conversions).toFixed(2) : 0
-                  }))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Line type="monotone" dataKey="cpc" stroke="#8B5CF6" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="cpm" stroke="#EC4899" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="costPerConversion" stroke="#06B6D4" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No cost data available</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Geographic Performance - Cyan Gradient */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <MapPin className="w-4 h-4 text-cyan-400 opacity-80" />
-                <h3 className="!text-center">Top Locations</h3>
-          </div>
-              <p className="chart-description">Performance by geographic region</p>
-              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
-              {metrics.locationData && metrics.locationData.length > 0 ? (
-              <ChartContainer
-                config={{
-                  conversions: { label: "Conversions", color: '#06B6D4' }
-                }}
-                className="h-[320px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={metrics.locationData}
-                    layout="vertical"
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis type="number" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis type="category" dataKey="location" stroke="#9f8fd4" fontSize={12} fontWeight={500} width={80} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="conversions" radius={[0, 10, 10, 0]}>
-                      {(metrics.locationData || []).map((_: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={`rgba(6, 182, 212, ${1 - index * 0.15})`} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No location data available</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Budget Pacing - Purple/Pink Theme */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <TrendingDown className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">Budget Pacing</h3>
-              </div>
-              <p className="chart-description">Daily budget consumption rate</p>
-              {performanceData.length > 0 ? (
-              <ChartContainer
-                config={{
-                  actual: { label: "Actual Spend", color: '#EC4899' },
-                  planned: { label: "Planned Budget", color: '#8B5CF6' }
-                }}
-                className="h-[320px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={performanceData.slice(0, 15).map((d, i) => ({
-                    day: d.day,
-                    actual: d.cost * (i + 1),
-                    planned: (metrics.totalSpend || 0) / performanceData.length * (i + 1)
-                  }))}>
+                  <AreaChart data={performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EC4899" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#EC4899" stopOpacity={0.1}/>
-                      </linearGradient>
-                      <linearGradient id="plannedGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
+                      <linearGradient id="roasGradNew" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.5}/>
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
+                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}x`} />
                     <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Area type="monotone" dataKey="planned" stroke="#8B5CF6" fillOpacity={1} fill="url(#plannedGrad)" strokeDasharray="5 5" />
-                    <Area type="monotone" dataKey="actual" stroke="#EC4899" fillOpacity={1} fill="url(#actualGrad)" />
+                    <Area type="monotone" dataKey="roas" stroke="#10B981" strokeWidth={3} fill="url(#roasGradNew)" dot={{ fill: '#10B981', r: 4 }} activeDot={{ r: 6, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
               ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
-                    <TrendingDown className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No budget data available</p>
+                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات ROAS' : 'No ROAS data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 3: Device Performance & Audience Gender */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 📱 Device Performance Chart */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Smartphone className="w-5 h-5 text-green-400" />
+                {isRTL ? 'أداء الأجهزة' : 'Device Performance'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'توزيع الأداء حسب نوع الجهاز' : 'Performance by device type'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+              </div>
+              ) : aiInsights?.device_performance && aiInsights.device_performance.length > 0 ? (
+              <ChartContainer
+                config={{
+                    clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#10B981' },
+                    conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#8B5CF6' }
+                }}
+                  className="h-[250px]"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart 
+                      data={aiInsights.device_performance}
+                    layout="vertical"
+                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                  >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
+                      <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="device" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} width={80} />
+                    <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="clicks" fill="#10B981" radius={[0, 4, 4, 0]} barSize={16} name={isRTL ? "النقرات" : "Clicks"} />
+                      <Bar dataKey="conversions" fill="#8B5CF6" radius={[0, 4, 4, 0]} barSize={16} name={isRTL ? "التحويلات" : "Conversions"} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Smartphone className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات أجهزة' : 'No device data'}</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Audience Demographics - Purple/Pink Bars */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <Users className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">Audience Demographics</h3>
-          </div>
-              <p className="chart-description">Audience breakdown by age and gender</p>
-              {/* البيانات تأتي من API - إذا لم توجد بيانات يظهر رسالة */}
-              {metrics.demographicsData && metrics.demographicsData.length > 0 ? (
-              <ChartContainer
-                config={{
-                  male: { label: "Male", color: '#8B5CF6' },
-                  female: { label: "Female", color: '#EC4899' }
-                }}
-                className="h-[320px]"
-              >
+            {/* 👥 Audience Gender Chart */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Users className="w-5 h-5 text-pink-400" />
+                {isRTL ? 'توزيع الجمهور (الجنس)' : 'Audience by Gender'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'أداء الحملات حسب الجنس' : 'Campaign performance by gender'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-500"></div>
+                </div>
+              ) : aiInsights?.audience_data?.gender && aiInsights.audience_data.gender.length > 0 ? (
+                <ChartContainer config={{ impressions: { label: "Impressions", color: '#EC4899' } }} className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={metrics.demographicsData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="ageGroup" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} />
+                    <PieChart>
+                      <Pie
+                        data={aiInsights.audience_data.gender.map((g: any, i: number) => ({
+                          name: g.gender === 'MALE' ? (isRTL ? 'ذكور' : 'Male') : 
+                                g.gender === 'FEMALE' ? (isRTL ? 'إناث' : 'Female') : 
+                                (isRTL ? 'غير محدد' : 'Unknown'),
+                          value: g.impressions,
+                          fill: g.gender === 'MALE' ? '#3B82F6' : g.gender === 'FEMALE' ? '#EC4899' : '#6B7280'
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={90}
+                        paddingAngle={3}
+                        dataKey="value"
+                      />
                     <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="male" fill="#8B5CF6" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="female" fill="#EC4899" radius={[6, 6, 0, 0]} />
-                  </BarChart>
+                      <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
+                    </PieChart>
                 </ResponsiveContainer>
               </ChartContainer>
               ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
-                    <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No demographics data available</p>
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات جمهور' : 'No audience data'}</p>
                   </div>
                 </div>
               )}
             </div>
-            
-            {/* ROAS Trend - Purple Gradient */}
-            <div className="chart-card backdrop-blur-sm border border-solid">
-              <div className="flex items-center gap-2 justify-center mb-1">
-                <Activity className="w-4 h-4 text-purple-400 opacity-80" />
-                <h3 className="!text-center">ROAS Trend</h3>
+          </div>
+
+          {/* Row 4: Audience by Age & Competition Analysis */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 📊 Age Distribution Chart */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Users className="w-5 h-5 text-orange-400" />
+                {isRTL ? 'توزيع الجمهور (العمر)' : 'Audience by Age'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'أداء حسب الفئة العمرية' : 'Performance by age'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                </div>
+              ) : aiInsights?.audience_data?.age && aiInsights.audience_data.age.length > 0 ? (
+                <ChartContainer
+                  config={{
+                    clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#F59E0B' },
+                    conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#10B981' }
+                  }}
+                  className="h-[250px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={aiInsights.audience_data.age} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
+                      <XAxis dataKey="age" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="clicks" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
+                      <Bar dataKey="conversions" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات عمرية' : 'No age data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ⚔️ Competition Analysis Chart */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Target className="w-5 h-5 text-red-400" />
+                {isRTL ? 'تحليل المنافسة' : 'Competition Analysis'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'حصتك من ظهور الإعلانات مقارنة بالمنافسين' : 'Your impression share vs competitors'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
               </div>
-              <p className="chart-description">Return on ad spend over time</p>
-              {performanceData.length > 0 ? (
+              ) : aiInsights?.competition_data?.impression_share && aiInsights.competition_data.impression_share.length > 0 ? (
               <ChartContainer
                 config={{
-                  roas: { label: "ROAS", color: '#A855F7' }
+                    impressionShare: { label: isRTL ? "حصة الظهور" : "Impression Share", color: '#10B981' },
+                    budgetLost: { label: isRTL ? "فقدان الميزانية" : "Budget Lost", color: '#EF4444' },
+                    rankLost: { label: isRTL ? "فقدان الترتيب" : "Rank Lost", color: '#F59E0B' }
                 }}
-                className="h-[320px]"
+                  className="h-[250px]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={performanceData.slice(0, 15)}>
-                    <defs>
-                      <linearGradient id="roasGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#A855F7" stopOpacity={0.8}/>
-                        <stop offset="50%" stopColor="#EC4899" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#EC4899" stopOpacity={0.1}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={12} fontWeight={500} />
-                    <YAxis stroke="#9f8fd4" fontSize={12} fontWeight={500} />
+                    <BarChart 
+                      data={aiInsights.competition_data.impression_share.slice(0, 5).map((c: any) => ({
+                        campaign: c.campaign.length > 12 ? c.campaign.substring(0, 12) + '...' : c.campaign,
+                        impressionShare: Math.round(c.impressionShare),
+                        budgetLost: Math.round(c.budgetLost),
+                        rankLost: Math.round(c.rankLost)
+                      }))}
+                      layout="vertical"
+                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
+                      <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                      <YAxis type="category" dataKey="campaign" stroke="#9f8fd4" fontSize={9} tickLine={false} axisLine={false} width={90} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="roas" stroke="#A855F7" strokeWidth={2} fillOpacity={1} fill="url(#roasGradient)" />
-                  </AreaChart>
+                      <Bar dataKey="impressionShare" stackId="a" fill="#10B981" radius={[0, 0, 0, 0]} barSize={14} name={isRTL ? "حصة الظهور %" : "Impression Share %"} />
+                      <Bar dataKey="budgetLost" stackId="a" fill="#EF4444" radius={[0, 0, 0, 0]} barSize={14} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
+                      <Bar dataKey="rankLost" stackId="a" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={14} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
+                    </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
               ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
-                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No ROAS data available</p>
+                    <Target className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات منافسة' : 'No competition data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Row 5: Hourly Performance & Keyword Performance */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* ⏰ Hourly Performance */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Clock className="w-5 h-5 text-cyan-400" />
+                {isRTL ? 'الأداء حسب الساعة' : 'Hourly Performance'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'أفضل أوقات الإعلانات' : 'Best ad times'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
+                </div>
+              ) : aiInsights?.hourly_data && aiInsights.hourly_data.length > 0 ? (
+                <ChartContainer
+                  config={{
+                    clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#06B6D4' },
+                    conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#8B5CF6' }
+                  }}
+                  className="h-[250px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={aiInsights.hourly_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="hourlyClicksGrad2" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.5}/>
+                          <stop offset="95%" stopColor="#06B6D4" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
+                      <XAxis 
+                        dataKey="hour" 
+                        stroke="#9f8fd4" 
+                        fontSize={10} 
+                        tickLine={false} 
+                        axisLine={false}
+                        tickFormatter={(h) => `${h}:00`}
+                      />
+                      <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={2} fill="url(#hourlyClicksGrad2)" name={isRTL ? "النقرات" : "Clicks"} />
+                      <Line type="monotone" dataKey="conversions" stroke="#8B5CF6" strokeWidth={2} dot={{ fill: '#8B5CF6', r: 3 }} name={isRTL ? "التحويلات" : "Conversions"} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Clock className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات ساعية' : 'No hourly data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 🔑 Keyword Performance */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Search className="w-5 h-5 text-violet-400" />
+                {isRTL ? 'أداء الكلمات المفتاحية' : 'Keyword Performance'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'أفضل الكلمات المفتاحية' : 'Top keywords'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+              </div>
+              ) : aiInsights?.competition_data?.keywords && aiInsights.competition_data.keywords.length > 0 ? (
+                <div className="overflow-x-auto mt-2 h-[250px] overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-[#060010]">
+                      <tr className="text-gray-400 border-b border-white/10">
+                        <th className="text-left py-2 px-2">{isRTL ? 'الكلمة' : 'Keyword'}</th>
+                        <th className="text-center py-2 px-1">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-2 px-1">CPC</th>
+                        <th className="text-center py-2 px-1">{isRTL ? 'جودة' : 'QS'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aiInsights.competition_data.keywords.slice(0, 5).map((kw: any, i: number) => (
+                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="py-2 px-2 text-white font-medium">{kw.keyword.length > 15 ? kw.keyword.substring(0, 15) + '...' : kw.keyword}</td>
+                          <td className="text-center py-2 px-1 text-cyan-400">{formatLargeNumber(kw.clicks)}</td>
+                          <td className="text-center py-2 px-1 text-green-400">${kw.cpc.toFixed(2)}</td>
+                          <td className="text-center py-2 px-1">
+                            <span className={`font-bold ${
+                              kw.qualityScore >= 7 ? 'text-green-400' :
+                              kw.qualityScore >= 4 ? 'text-yellow-400' :
+                              'text-red-400'
+                            }`}>
+                              {kw.qualityScore || '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات كلمات مفتاحية' : 'No keyword data'}</p>
                   </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Row 6: AI Optimization Score & Search Terms */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 🎯 AI Optimization Score */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Zap className="w-5 h-5 text-emerald-400" />
+                {isRTL ? 'نقاط التحسين AI' : 'AI Optimization Score'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'مدى تحسين حملاتك' : 'Campaign optimization level'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
+                </div>
+              ) : aiInsights?.optimization_score !== null && aiInsights?.optimization_score !== undefined ? (
+                <div className="h-[250px] flex flex-col items-center justify-center">
+                  <div className="relative w-40 h-40">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle cx="80" cy="80" r="70" stroke="#1f2937" strokeWidth="12" fill="none" />
+                      <circle 
+                        cx="80" cy="80" r="70" 
+                        stroke={aiInsights.optimization_score >= 80 ? '#10B981' : aiInsights.optimization_score >= 50 ? '#F59E0B' : '#EF4444'}
+                        strokeWidth="12" 
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(aiInsights.optimization_score / 100) * 440} 440`}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-4xl font-bold text-white">{aiInsights.optimization_score}%</span>
+                      <span className="text-xs text-gray-400">{isRTL ? 'نقاط التحسين' : 'Optimization'}</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className={`text-sm font-medium ${aiInsights.optimization_score >= 80 ? 'text-emerald-400' : aiInsights.optimization_score >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                      {aiInsights.optimization_score >= 80 ? (isRTL ? 'ممتاز!' : 'Excellent!') : aiInsights.optimization_score >= 50 ? (isRTL ? 'جيد' : 'Good') : (isRTL ? 'يحتاج تحسين' : 'Needs Improvement')}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Zap className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات تحسين' : 'No optimization data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 🔍 Search Terms Report */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Search className="w-5 h-5 text-blue-400" />
+                {isRTL ? 'مصطلحات البحث' : 'Search Terms'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'ما يبحث عنه المستخدمون' : 'What users search for'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : aiInsights?.search_terms && aiInsights.search_terms.length > 0 ? (
+                <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-[#060010]">
+                      <tr className="text-gray-400 border-b border-white/10">
+                        <th className="text-left py-2 px-2">{isRTL ? 'المصطلح' : 'Term'}</th>
+                        <th className="text-center py-2 px-1">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-2 px-1">CTR</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aiInsights.search_terms.slice(0, 6).map((term: any, i: number) => (
+                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="py-2 px-2 text-white font-medium">{term.term.length > 20 ? term.term.substring(0, 20) + '...' : term.term}</td>
+                          <td className="text-center py-2 px-1 text-cyan-400">{formatLargeNumber(term.clicks)}</td>
+                          <td className="text-center py-2 px-1 text-green-400">{term.ctr.toFixed(1)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد مصطلحات بحث' : 'No search terms'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 7: Ad Strength & Landing Pages */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 💪 Ad Strength Indicator */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Target className="w-5 h-5 text-yellow-400" />
+                {isRTL ? 'قوة الإعلانات' : 'Ad Strength'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'جودة إعلاناتك' : 'Your ads quality'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
+                </div>
+              ) : aiInsights?.ad_strength?.distribution ? (
+                <div className="h-[250px] flex flex-col justify-center px-4">
+                  {[
+                    { label: isRTL ? 'ممتاز' : 'Excellent', value: aiInsights.ad_strength.distribution.excellent, color: '#10B981' },
+                    { label: isRTL ? 'جيد' : 'Good', value: aiInsights.ad_strength.distribution.good, color: '#3B82F6' },
+                    { label: isRTL ? 'متوسط' : 'Average', value: aiInsights.ad_strength.distribution.average, color: '#F59E0B' },
+                    { label: isRTL ? 'ضعيف' : 'Poor', value: aiInsights.ad_strength.distribution.poor, color: '#EF4444' }
+                  ].map((item, i) => {
+                    const total = aiInsights.ad_strength.distribution.excellent + aiInsights.ad_strength.distribution.good + aiInsights.ad_strength.distribution.average + aiInsights.ad_strength.distribution.poor;
+                    const pct = total > 0 ? (item.value / total) * 100 : 0;
+                    return (
+                      <div key={i} className="mb-3">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-400">{item.label}</span>
+                          <span className="text-white font-medium">{item.value} ({pct.toFixed(0)}%)</span>
+                        </div>
+                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: item.color }}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Target className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات قوة الإعلانات' : 'No ad strength data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 📱 Landing Page Experience */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Globe className="w-5 h-5 text-teal-400" />
+                {isRTL ? 'تجربة الصفحات' : 'Landing Pages'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'أداء صفحاتك المقصودة' : 'Landing page performance'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
+                </div>
+              ) : aiInsights?.landing_pages && aiInsights.landing_pages.length > 0 ? (
+                <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-[#060010]">
+                      <tr className="text-gray-400 border-b border-white/10">
+                        <th className="text-left py-2 px-2">{isRTL ? 'الصفحة' : 'Page'}</th>
+                        <th className="text-center py-2 px-1">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-2 px-1">{isRTL ? 'سرعة' : 'Speed'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aiInsights.landing_pages.slice(0, 5).map((page: any, i: number) => (
+                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="py-2 px-2 text-white font-medium">
+                            {(() => {
+                              try {
+                                const url = new URL(page.url);
+                                return url.pathname.length > 15 ? url.pathname.substring(0, 15) + '...' : url.pathname || '/';
+                              } catch {
+                                return page.url.substring(0, 15) + '...';
+                              }
+                            })()}
+                          </td>
+                          <td className="text-center py-2 px-1 text-cyan-400">{formatLargeNumber(page.clicks)}</td>
+                          <td className="text-center py-2 px-1">
+                            <span className={`font-bold ${page.speedScore >= 70 ? 'text-green-400' : page.speedScore >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              {page.speedScore || '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Globe className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد بيانات صفحات' : 'No landing page data'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 8: Budget Recommendations & Auction Insights */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 💰 Budget Recommendations */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <DollarSign className="w-5 h-5 text-green-400" />
+                {isRTL ? 'توصيات الميزانية' : 'Budget Recommendations'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'اقتراحات لتحسين الميزانية' : 'Budget optimization tips'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                </div>
+              ) : aiInsights?.budget_recommendations && aiInsights.budget_recommendations.length > 0 ? (
+                <div className="h-[220px] overflow-y-auto mt-2 space-y-2 px-1">
+                  {aiInsights.budget_recommendations.slice(0, 4).map((rec: any, i: number) => (
+                    <div key={i} className="p-3 bg-white/5 rounded-lg border border-white/10">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs text-gray-400 truncate max-w-[150px]">{rec.campaign}</span>
+                        <span className="text-xs text-green-400">+{rec.estimatedClicksChange} {isRTL ? 'نقرات' : 'clicks'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-300">${rec.currentBudget.toFixed(0)}</span>
+                        <span className="text-gray-500">→</span>
+                        <span className="text-sm text-green-400 font-bold">${rec.recommendedBudget.toFixed(0)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد توصيات ميزانية' : 'No budget recommendations'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 🏆 Auction Insights */}
+            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"></div>
+              <h3 className="flex items-center gap-2 mt-2">
+                <Trophy className="w-5 h-5 text-amber-400" />
+                {isRTL ? 'رؤى المزادات' : 'Auction Insights'}
+              </h3>
+              <p className="chart-description">{isRTL ? 'مقارنة مع المنافسين' : 'Compare with competitors'}</p>
+              
+              {loadingAiInsights ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-500"></div>
+                </div>
+              ) : aiInsights?.auction_insights && aiInsights.auction_insights.length > 0 ? (
+                <div className="h-[220px] flex flex-col justify-center px-4">
+                  {(() => {
+                    const avg = aiInsights.auction_insights.reduce((acc: any, curr: any) => ({
+                      impressionShare: acc.impressionShare + curr.impressionShare,
+                      topImpressionPct: acc.topImpressionPct + curr.topImpressionPct,
+                      absoluteTopPct: acc.absoluteTopPct + curr.absoluteTopPct,
+                      outrankingShare: acc.outrankingShare + curr.outrankingShare
+                    }), { impressionShare: 0, topImpressionPct: 0, absoluteTopPct: 0, outrankingShare: 0 });
+                    const count = aiInsights.auction_insights.length;
+                    return [
+                      { label: isRTL ? 'حصة الظهور' : 'Impression Share', value: avg.impressionShare / count, color: '#10B981' },
+                      { label: isRTL ? 'أعلى الصفحة' : 'Top of Page', value: avg.topImpressionPct / count, color: '#3B82F6' },
+                      { label: isRTL ? 'الأعلى تماماً' : 'Absolute Top', value: avg.absoluteTopPct / count, color: '#8B5CF6' },
+                      { label: isRTL ? 'التفوق' : 'Outranking', value: avg.outrankingShare / count, color: '#F59E0B' }
+                    ].map((item, i) => (
+                      <div key={i} className="mb-3">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-400">{item.label}</span>
+                          <span className="text-white font-medium">{item.value.toFixed(1)}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(item.value, 100)}%`, backgroundColor: item.color }}></div>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">{isRTL ? 'لا توجد رؤى مزادات' : 'No auction insights'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Campaigns Table */}
@@ -3022,7 +3256,7 @@ const DashboardPage: React.FC = () => {
                       {(campaign.conversions || 0).toLocaleString()}
                     </td>
                     <td className="py-4 px-4 text-right text-sm text-white">
-                      ${(campaign.cost || 0).toLocaleString()}
+                      {formatCurrency(campaign.cost || 0, campaign.currency)}
                     </td>
                     <td className="py-4 px-4 text-right">
                       <span className={`text-sm font-medium ${

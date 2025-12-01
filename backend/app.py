@@ -715,6 +715,160 @@ def get_account_stats(customer_id):
         }), 500
 
 
+@app.route('/api/all-campaigns', methods=['GET'])
+def get_all_campaigns():
+    """جلب الحملات من حساب محدد أو من جميع الحسابات المرتبطة بـ MCC"""
+    try:
+        # الحصول على customer_id من الـ query parameters (اختياري)
+        customer_id = request.args.get('customer_id')
+        
+        if customer_id:
+            logger.info(f"📊 طلب جلب حملات الحساب: {customer_id}")
+            account_ids = [customer_id]
+        else:
+            logger.info("📊 طلب جلب جميع الحملات من جميع الحسابات...")
+            
+            client = get_google_ads_client()
+            ga_service = client.get_service("GoogleAdsService")
+            
+            # جلب جميع الحسابات الفرعية من MCC باستخدام customer_client
+            accounts_query = """
+                SELECT
+                    customer_client.id,
+                    customer_client.descriptive_name,
+                    customer_client.manager,
+                    customer_client.status
+                FROM customer_client
+                WHERE customer_client.manager = false
+            """
+            
+            search_request = client.get_type("SearchGoogleAdsRequest")
+            search_request.customer_id = MCC_CUSTOMER_ID
+            search_request.query = accounts_query
+            
+            response = ga_service.search(request=search_request)
+            
+            account_ids = []
+            for row in response:
+                customer = row.customer_client
+                # فقط الحسابات غير المدير والنشطة
+                if customer.id and str(customer.id) != MCC_CUSTOMER_ID:
+                    account_ids.append(str(customer.id))
+                    logger.info(f"📌 حساب: {customer.id} - {customer.descriptive_name}")
+            
+            logger.info(f"✅ تم العثور على {len(account_ids)} حساب مرتبط")
+        
+        client = get_google_ads_client()
+        ga_service = client.get_service("GoogleAdsService")
+        
+        # جلب الحملات من كل حساب
+        all_campaigns = []
+        total_impressions = 0
+        total_clicks = 0
+        total_cost = 0
+        total_conversions = 0
+        
+        for account_id in account_ids:
+            try:
+                campaigns_query = """
+                    SELECT
+                        campaign.id,
+                        campaign.name,
+                        campaign.status,
+                        campaign.advertising_channel_type,
+                        campaign_budget.amount_micros,
+                        metrics.impressions,
+                        metrics.clicks,
+                        metrics.cost_micros,
+                        metrics.conversions
+                    FROM campaign
+                    WHERE campaign.status != REMOVED
+                    ORDER BY metrics.cost_micros DESC
+                    LIMIT 50
+                """
+                
+                campaign_request = client.get_type("SearchGoogleAdsRequest")
+                campaign_request.customer_id = account_id
+                campaign_request.query = campaigns_query
+                
+                campaign_response = ga_service.search(request=campaign_request)
+                
+                for row in campaign_response:
+                    campaign = row.campaign
+                    metrics = row.metrics
+                    budget = row.campaign_budget
+                    
+                    campaign_data = {
+                        'id': str(campaign.id),
+                        'name': campaign.name,
+                        'status': campaign.status.name if campaign.status else 'UNKNOWN',
+                        'type': campaign.advertising_channel_type.name if campaign.advertising_channel_type else 'UNKNOWN',
+                        'customerId': account_id,
+                        'budget': budget.amount_micros / 1000000 if budget.amount_micros else 0,
+                        'impressions': metrics.impressions or 0,
+                        'clicks': metrics.clicks or 0,
+                        'cost': metrics.cost_micros / 1000000 if metrics.cost_micros else 0,
+                        'conversions': metrics.conversions or 0
+                    }
+                    
+                    all_campaigns.append(campaign_data)
+                    total_impressions += metrics.impressions or 0
+                    total_clicks += metrics.clicks or 0
+                    total_cost += (metrics.cost_micros or 0) / 1000000
+                    total_conversions += metrics.conversions or 0
+                    
+                logger.info(f"✅ تم جلب حملات الحساب {account_id}")
+                
+            except Exception as account_error:
+                logger.warning(f"⚠️ خطأ في جلب حملات الحساب {account_id}: {account_error}")
+                continue
+        
+        logger.info(f"✅ تم جلب {len(all_campaigns)} حملة من {len(account_ids)} حساب")
+        
+        return jsonify({
+            'success': True,
+            'campaigns': all_campaigns,
+            'accounts': account_ids,
+            'accountsCount': len(account_ids),
+            'metrics': {
+                'totalCampaigns': len(all_campaigns),
+                'activeCampaigns': len([c for c in all_campaigns if c['status'] == 'ENABLED']),
+                'totalSpend': total_cost,
+                'impressions': total_impressions,
+                'clicks': total_clicks,
+                'conversions': total_conversions,
+                'ctr': f"{(total_clicks / total_impressions * 100):.2f}" if total_impressions > 0 else '0',
+                'averageCpc': f"{(total_cost / total_clicks):.2f}" if total_clicks > 0 else '0',
+                'campaignTypes': {
+                    'SEARCH': len([c for c in all_campaigns if c['type'] == 'SEARCH']),
+                    'DISPLAY': len([c for c in all_campaigns if c['type'] == 'DISPLAY']),
+                    'VIDEO': len([c for c in all_campaigns if c['type'] == 'VIDEO']),
+                    'SHOPPING': len([c for c in all_campaigns if c['type'] == 'SHOPPING']),
+                    'PERFORMANCE_MAX': len([c for c in all_campaigns if c['type'] == 'PERFORMANCE_MAX'])
+                }
+            },
+            'source': 'google_ads_mcc_all_accounts'
+        })
+        
+    except GoogleAdsException as e:
+        logger.error(f"❌ خطأ Google Ads API: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'campaigns': [],
+            'metrics': {}
+        }), 400
+        
+    except Exception as e:
+        logger.error(f"❌ خطأ عام: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'campaigns': [],
+            'metrics': {}
+        }), 500
+
+
 @app.route('/api/account-status-stream', methods=['GET'])
 def account_status_stream():
     """توفير SSE بسيط لحالة الحسابات (connected + heartbeat فقط حالياً)"""
@@ -1619,6 +1773,258 @@ def sync_all_statuses():
             'success': False,
             'error': str(e)
         }), 500
+
+# ==================== AI INSIGHTS ENDPOINTS ====================
+
+@app.route('/api/ai-insights/recommendations', methods=['GET', 'OPTIONS'])
+def get_ai_recommendations():
+    """جلب التوصيات الذكية من Google Ads API"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        customer_id = request.args.get('customer_id')
+        if not customer_id:
+            return jsonify({'success': False, 'error': 'customer_id is required'}), 400
+        
+        customer_id = customer_id.replace('-', '')
+        
+        # إنشاء client
+        client = GoogleAdsClient.load_from_storage()
+        googleads_service = client.get_service("GoogleAdsService")
+        
+        # استعلام التوصيات
+        query = """
+            SELECT
+              recommendation.resource_name,
+              recommendation.type,
+              recommendation.impact,
+              recommendation.campaign,
+              recommendation.ad_group
+            FROM recommendation
+            WHERE recommendation.type IN (
+              'KEYWORD', 'KEYWORD_MATCH_TYPE', 'CAMPAIGN_BUDGET', 
+              'TEXT_AD', 'RESPONSIVE_SEARCH_AD', 'SITELINK_ASSET',
+              'CALLOUT_ASSET', 'CALL_ASSET', 'TARGET_CPA_OPT_IN',
+              'TARGET_ROAS_OPT_IN', 'MAXIMIZE_CONVERSIONS_OPT_IN',
+              'ENHANCED_CPC_OPT_IN', 'SEARCH_PARTNERS_OPT_IN'
+            )
+            LIMIT 20
+        """
+        
+        response = googleads_service.search(customer_id=customer_id, query=query)
+        
+        recommendations = []
+        recommendation_types = {}
+        
+        for row in response:
+            rec = row.recommendation
+            rec_type = str(rec.type).replace('RecommendationType.', '')
+            
+            # تجميع حسب النوع
+            if rec_type not in recommendation_types:
+                recommendation_types[rec_type] = 0
+            recommendation_types[rec_type] += 1
+            
+            # معلومات التوصية
+            rec_data = {
+                'resource_name': rec.resource_name,
+                'type': rec_type,
+                'campaign': rec.campaign if rec.campaign else None,
+                'ad_group': rec.ad_group if rec.ad_group else None
+            }
+            
+            # إضافة معلومات التأثير إذا وجدت
+            if hasattr(rec, 'impact') and rec.impact:
+                impact = rec.impact
+                rec_data['impact'] = {
+                    'base_metrics': {
+                        'impressions': impact.base_metrics.impressions if hasattr(impact.base_metrics, 'impressions') else 0,
+                        'clicks': impact.base_metrics.clicks if hasattr(impact.base_metrics, 'clicks') else 0,
+                        'cost_micros': impact.base_metrics.cost_micros if hasattr(impact.base_metrics, 'cost_micros') else 0,
+                        'conversions': impact.base_metrics.conversions if hasattr(impact.base_metrics, 'conversions') else 0
+                    },
+                    'potential_metrics': {
+                        'impressions': impact.potential_metrics.impressions if hasattr(impact.potential_metrics, 'impressions') else 0,
+                        'clicks': impact.potential_metrics.clicks if hasattr(impact.potential_metrics, 'clicks') else 0,
+                        'cost_micros': impact.potential_metrics.cost_micros if hasattr(impact.potential_metrics, 'cost_micros') else 0,
+                        'conversions': impact.potential_metrics.conversions if hasattr(impact.potential_metrics, 'conversions') else 0
+                    }
+                }
+            
+            recommendations.append(rec_data)
+        
+        logger.info(f"✅ تم جلب {len(recommendations)} توصية للحساب {customer_id}")
+        
+        return jsonify({
+            'success': True,
+            'recommendations': recommendations,
+            'summary': recommendation_types,
+            'total_count': len(recommendations)
+        })
+        
+    except GoogleAdsException as ex:
+        error_message = f"Google Ads API Error: {ex.failure.errors[0].message if ex.failure.errors else str(ex)}"
+        logger.error(f"❌ {error_message}")
+        return jsonify({'success': False, 'error': error_message}), 400
+    except Exception as e:
+        logger.error(f"❌ خطأ في جلب التوصيات: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/ai-insights/audience', methods=['GET', 'OPTIONS'])
+def get_audience_insights():
+    """جلب تحليلات الجمهور من Google Ads API"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        customer_id = request.args.get('customer_id')
+        if not customer_id:
+            return jsonify({'success': False, 'error': 'customer_id is required'}), 400
+        
+        customer_id = customer_id.replace('-', '')
+        
+        # إنشاء client
+        client = GoogleAdsClient.load_from_storage()
+        googleads_service = client.get_service("GoogleAdsService")
+        
+        # استعلام بيانات الجمهور حسب العمر والجنس
+        age_gender_query = """
+            SELECT
+              ad_group_criterion.age_range.type,
+              ad_group_criterion.gender.type,
+              metrics.impressions,
+              metrics.clicks,
+              metrics.conversions,
+              metrics.cost_micros
+            FROM age_range_view
+            WHERE segments.date DURING LAST_30_DAYS
+        """
+        
+        # استعلام بيانات الأجهزة
+        device_query = """
+            SELECT
+              segments.device,
+              metrics.impressions,
+              metrics.clicks,
+              metrics.conversions,
+              metrics.cost_micros
+            FROM campaign
+            WHERE segments.date DURING LAST_30_DAYS
+              AND campaign.status = 'ENABLED'
+        """
+        
+        # جلب بيانات الأجهزة
+        device_data = {}
+        try:
+            device_response = googleads_service.search(customer_id=customer_id, query=device_query)
+            for row in device_response:
+                device = str(row.segments.device).replace('Device.', '')
+                if device not in device_data:
+                    device_data[device] = {'impressions': 0, 'clicks': 0, 'conversions': 0, 'cost': 0}
+                device_data[device]['impressions'] += row.metrics.impressions
+                device_data[device]['clicks'] += row.metrics.clicks
+                device_data[device]['conversions'] += row.metrics.conversions
+                device_data[device]['cost'] += row.metrics.cost_micros / 1000000
+        except Exception as e:
+            logger.warning(f"⚠️ لم يتم جلب بيانات الأجهزة: {e}")
+        
+        # تحويل البيانات للـ Frontend
+        device_breakdown = [
+            {'device': k, **v} for k, v in device_data.items()
+        ]
+        
+        logger.info(f"✅ تم جلب تحليلات الجمهور للحساب {customer_id}")
+        
+        return jsonify({
+            'success': True,
+            'audience_insights': {
+                'device_breakdown': device_breakdown,
+                'total_devices': len(device_breakdown)
+            }
+        })
+        
+    except GoogleAdsException as ex:
+        error_message = f"Google Ads API Error: {ex.failure.errors[0].message if ex.failure.errors else str(ex)}"
+        logger.error(f"❌ {error_message}")
+        return jsonify({'success': False, 'error': error_message}), 400
+    except Exception as e:
+        logger.error(f"❌ خطأ في جلب تحليلات الجمهور: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/ai-insights/budget-impact', methods=['POST', 'OPTIONS'])
+def get_budget_impact():
+    """جلب تأثير تغيير الميزانية على الأداء"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        data = request.get_json()
+        customer_id = data.get('customer_id')
+        budget_amount = data.get('budget_amount', 100)  # الميزانية بالدولار
+        
+        if not customer_id:
+            return jsonify({'success': False, 'error': 'customer_id is required'}), 400
+        
+        customer_id = customer_id.replace('-', '')
+        
+        # إنشاء client
+        client = GoogleAdsClient.load_from_storage()
+        recommendation_service = client.get_service("RecommendationService")
+        
+        # إنشاء طلب توليد التوصيات
+        request_obj = client.get_type("GenerateRecommendationsRequest")
+        request_obj.customer_id = customer_id
+        request_obj.recommendation_types = ["CAMPAIGN_BUDGET"]
+        request_obj.advertising_channel_type = client.enums.AdvertisingChannelTypeEnum.SEARCH
+        
+        # تحويل الميزانية إلى micros
+        request_obj.budget_info.current_budget = int(budget_amount * 1000000)
+        
+        try:
+            response = recommendation_service.generate_recommendations(request_obj)
+            
+            budget_options = []
+            for rec in response.recommendations:
+                if hasattr(rec, 'campaign_budget_recommendation'):
+                    budget_rec = rec.campaign_budget_recommendation
+                    for option in budget_rec.budget_options:
+                        if hasattr(option, 'impact') and option.impact:
+                            budget_options.append({
+                                'budget_amount': option.budget_amount_micros / 1000000,
+                                'potential_impressions': option.impact.potential_metrics.impressions if hasattr(option.impact.potential_metrics, 'impressions') else 0,
+                                'potential_clicks': option.impact.potential_metrics.clicks if hasattr(option.impact.potential_metrics, 'clicks') else 0,
+                                'potential_conversions': option.impact.potential_metrics.conversions if hasattr(option.impact.potential_metrics, 'conversions') else 0,
+                                'potential_cost': option.impact.potential_metrics.cost_micros / 1000000 if hasattr(option.impact.potential_metrics, 'cost_micros') else 0
+                            })
+            
+            logger.info(f"✅ تم جلب تأثير الميزانية للحساب {customer_id}")
+            
+            return jsonify({
+                'success': True,
+                'budget_impact': budget_options,
+                'requested_budget': budget_amount
+            })
+            
+        except Exception as api_error:
+            logger.warning(f"⚠️ لم يتم توليد توصيات الميزانية: {api_error}")
+            return jsonify({
+                'success': True,
+                'budget_impact': [],
+                'requested_budget': budget_amount,
+                'message': 'No budget recommendations available for this account'
+            })
+        
+    except GoogleAdsException as ex:
+        error_message = f"Google Ads API Error: {ex.failure.errors[0].message if ex.failure.errors else str(ex)}"
+        logger.error(f"❌ {error_message}")
+        return jsonify({'success': False, 'error': error_message}), 400
+    except Exception as e:
+        logger.error(f"❌ خطأ في جلب تأثير الميزانية: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     # استخدام المنفذ من متغير البيئة PORT (Railway) أو 5000 للتطوير المحلي

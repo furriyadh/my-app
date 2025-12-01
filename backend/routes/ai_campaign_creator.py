@@ -1944,7 +1944,7 @@ def analyze_website_and_forecast():
                         client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
                     )
                     
-                    # Use URL seed to generate keywords from website (EXACTLY like line 102 in example)
+                    # Use URL seed to generate keywords from website
                     keyword_ideas_request.url_seed.url = url_attempt
                     
                     logger.info(f"🚀 Step 1: Generating keyword ideas from URL: {url_attempt}")
@@ -2202,6 +2202,7 @@ def detect_website_language():
             urls_to_try.append(www_url)
         
         fetch_error_msg = None
+        response = None
         for url_attempt in urls_to_try:
             try:
                 logger.info(f"🔗 Fetching: {url_attempt}")
@@ -2740,7 +2741,7 @@ def launch_campaign():
                         if location_id not in location_ids:
                             location_ids.append(location_id)
                         logger.info(f"   ℹ️ Using country-level targeting as fallback for region: {location_name}")
-                
+                        
                 # CASE 3: CITY/NEIGHBORHOOD - Use proximity targeting for precise targeting
                 elif location_type in ['city', 'locality', 'neighborhood', 'sublocality', 'مدينة', 'حي', 'منطقة فرعية']:
                     if 'coordinates' in loc:
@@ -2753,12 +2754,12 @@ def launch_campaign():
                             'name': location_name
                         })
                         logger.info(f"✅ Using PROXIMITY targeting for city/neighborhood: {location_name} (radius: {radius}km)")
-                        
-                        # Also add country for Keyword Planner compatibility
-                        if country_code and country_code in country_map:
-                            location_id = country_map[country_code]
-                            if location_id not in location_ids:
-                                location_ids.append(location_id)
+                    
+                    # Also add country for Keyword Planner compatibility
+                    if country_code and country_code in country_map:
+                        location_id = country_map[country_code]
+                        if location_id not in location_ids:
+                            location_ids.append(location_id)
                 
                 # CASE 4: UNKNOWN TYPE - Check if it looks like a country, otherwise use proximity
                 else:
