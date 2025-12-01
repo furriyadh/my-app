@@ -2617,8 +2617,8 @@ const DashboardPage: React.FC = () => {
                     <YAxis stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} />
                     <Tooltip content={<CustomTooltip />} />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Area type="monotone" dataKey="impressions" stroke="#8B5CF6" strokeWidth={2} fill="url(#impressionsGrad)" />
-                    <Area type="monotone" dataKey="clicks" stroke="#EC4899" strokeWidth={2} fill="url(#clicksGrad)" />
+                    <Area type="monotone" dataKey="impressions" stroke="#8B5CF6" strokeWidth={3} fill="url(#impressionsGrad)" />
+                    <Area type="monotone" dataKey="clicks" stroke="#EC4899" strokeWidth={3} fill="url(#clicksGrad)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -2663,8 +2663,8 @@ const DashboardPage: React.FC = () => {
                       <XAxis dataKey="day" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
                       <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value)} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="conversionsValue" stroke="#10B981" strokeWidth={2} fill="url(#revenueGrad)" />
-                      <Area type="monotone" dataKey="cost" stroke="#EC4899" strokeWidth={2} fill="url(#spendGrad)" />
+                      <Area type="monotone" dataKey="conversionsValue" stroke="#10B981" strokeWidth={3} fill="url(#revenueGrad)" />
+                      <Area type="monotone" dataKey="cost" stroke="#EC4899" strokeWidth={3} fill="url(#spendGrad)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -2785,16 +2785,19 @@ const DashboardPage: React.FC = () => {
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
-                      data={effectiveDeviceData}
+                      data={effectiveDeviceData.map((d: any) => ({
+                        ...d,
+                        device: d.device === 'MOBILE' ? '📱 Mobile' : d.device === 'DESKTOP' ? '💻 Desktop' : d.device === 'TABLET' ? '📲 Tablet' : d.device
+                      }))}
                     layout="vertical"
                       margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
                   >
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
-                      <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis type="category" dataKey="device" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} width={80} />
+                      <XAxis type="number" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => formatLargeNumber(v)} />
+                      <YAxis type="category" dataKey="device" stroke="#e2e8f0" fontSize={12} tickLine={false} axisLine={false} width={100} />
                     <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="clicks" fill="#10B981" radius={[0, 4, 4, 0]} barSize={16} name={isRTL ? "النقرات" : "Clicks"} />
-                      <Bar dataKey="conversions" fill="#8B5CF6" radius={[0, 4, 4, 0]} barSize={16} name={isRTL ? "التحويلات" : "Conversions"} />
+                      <Bar dataKey="clicks" fill="#10B981" radius={[0, 6, 6, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
+                      <Bar dataKey="conversions" fill="#8B5CF6" radius={[0, 6, 6, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -2990,15 +2993,16 @@ const DashboardPage: React.FC = () => {
                       <XAxis 
                         dataKey="hour" 
                         stroke="#9f8fd4" 
-                        fontSize={10} 
+                        fontSize={9} 
                         tickLine={false} 
                         axisLine={false}
-                        tickFormatter={(h) => `${h}:00`}
+                        tickFormatter={(h) => `${h}h`}
+                        interval={2}
                       />
                       <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={2} fill="url(#hourlyClicksGrad2)" name={isRTL ? "النقرات" : "Clicks"} />
-                      <Line type="monotone" dataKey="conversions" stroke="#8B5CF6" strokeWidth={2} dot={{ fill: '#8B5CF6', r: 3 }} name={isRTL ? "التحويلات" : "Conversions"} />
+                      <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={3} fill="url(#hourlyClicksGrad2)" name={isRTL ? "النقرات" : "Clicks"} />
+                      <Line type="monotone" dataKey="conversions" stroke="#8B5CF6" strokeWidth={3} dot={{ fill: '#8B5CF6', r: 4 }} name={isRTL ? "التحويلات" : "Conversions"} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -3027,23 +3031,23 @@ const DashboardPage: React.FC = () => {
               </div>
               ) : effectiveKeywordData.length > 0 ? (
                 <div className="overflow-x-auto mt-2 h-[250px] overflow-y-auto">
-                  <table className="w-full text-xs">
+                  <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-[#060010]">
-                      <tr className="text-gray-400 border-b border-white/10">
-                        <th className="text-left py-2 px-2">{isRTL ? 'الكلمة' : 'Keyword'}</th>
-                        <th className="text-center py-2 px-1">{isRTL ? 'نقرات' : 'Clicks'}</th>
-                        <th className="text-center py-2 px-1">CPC</th>
-                        <th className="text-center py-2 px-1">{isRTL ? 'جودة' : 'QS'}</th>
+                      <tr className="text-gray-300 border-b border-white/10">
+                        <th className="text-left py-3 px-3 font-semibold">{isRTL ? 'الكلمة' : 'Keyword'}</th>
+                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-3 px-2 font-semibold">CPC</th>
+                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'جودة' : 'QS'}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {effectiveKeywordData.slice(0, 5).map((kw: any, i: number) => (
                         <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="py-2 px-2 text-white font-medium">{kw.keyword.length > 15 ? kw.keyword.substring(0, 15) + '...' : kw.keyword}</td>
-                          <td className="text-center py-2 px-1 text-cyan-400">{formatLargeNumber(kw.clicks)}</td>
-                          <td className="text-center py-2 px-1 text-green-400">${kw.cpc.toFixed(2)}</td>
-                          <td className="text-center py-2 px-1">
-                            <span className={`font-bold ${
+                          <td className="py-3 px-3 text-white font-medium">{kw.keyword.length > 18 ? kw.keyword.substring(0, 18) + '...' : kw.keyword}</td>
+                          <td className="text-center py-3 px-2 text-cyan-400 font-bold">{formatLargeNumber(kw.clicks)}</td>
+                          <td className="text-center py-3 px-2 text-green-400 font-bold">${typeof kw.cpc === 'number' ? kw.cpc.toFixed(2) : '0.00'}</td>
+                          <td className="text-center py-3 px-2">
+                            <span className={`font-bold text-lg ${
                               kw.qualityScore >= 7 ? 'text-green-400' :
                               kw.qualityScore >= 4 ? 'text-yellow-400' :
                               'text-red-400'
@@ -3132,20 +3136,20 @@ const DashboardPage: React.FC = () => {
                 </div>
               ) : effectiveSearchTerms.length > 0 ? (
                 <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
-                  <table className="w-full text-xs">
+                  <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-[#060010]">
-                      <tr className="text-gray-400 border-b border-white/10">
-                        <th className="text-left py-2 px-2">{isRTL ? 'المصطلح' : 'Term'}</th>
-                        <th className="text-center py-2 px-1">{isRTL ? 'نقرات' : 'Clicks'}</th>
-                        <th className="text-center py-2 px-1">CTR</th>
+                      <tr className="text-gray-300 border-b border-white/10">
+                        <th className="text-left py-3 px-3 font-semibold">{isRTL ? 'المصطلح' : 'Term'}</th>
+                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-3 px-2 font-semibold">CTR</th>
                       </tr>
                     </thead>
                     <tbody>
                       {effectiveSearchTerms.slice(0, 6).map((term: any, i: number) => (
                         <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="py-2 px-2 text-white font-medium">{term.term.length > 20 ? term.term.substring(0, 20) + '...' : term.term}</td>
-                          <td className="text-center py-2 px-1 text-cyan-400">{formatLargeNumber(term.clicks)}</td>
-                          <td className="text-center py-2 px-1 text-green-400">{term.ctr.toFixed(1)}%</td>
+                          <td className="py-3 px-3 text-white font-medium">{term.term?.length > 22 ? term.term.substring(0, 22) + '...' : term.term}</td>
+                          <td className="text-center py-3 px-2 text-cyan-400 font-bold">{formatLargeNumber(term.clicks || 0)}</td>
+                          <td className="text-center py-3 px-2 text-green-400 font-bold">{typeof term.ctr === 'number' ? term.ctr.toFixed(1) : '0.0'}%</td>
                         </tr>
                       ))}
                     </tbody>
@@ -3180,21 +3184,24 @@ const DashboardPage: React.FC = () => {
               ) : effectiveAdStrength?.distribution ? (
                 <div className="h-[250px] flex flex-col justify-center px-4">
                   {[
-                    { label: isRTL ? 'ممتاز' : 'Excellent', value: effectiveAdStrength.distribution.excellent, color: '#10B981' },
-                    { label: isRTL ? 'جيد' : 'Good', value: effectiveAdStrength.distribution.good, color: '#3B82F6' },
-                    { label: isRTL ? 'متوسط' : 'Average', value: effectiveAdStrength.distribution.average, color: '#F59E0B' },
-                    { label: isRTL ? 'ضعيف' : 'Poor', value: effectiveAdStrength.distribution.poor, color: '#EF4444' }
+                    { label: isRTL ? 'ممتاز' : 'Excellent', value: effectiveAdStrength.distribution.excellent, color: '#10B981', icon: '🌟' },
+                    { label: isRTL ? 'جيد' : 'Good', value: effectiveAdStrength.distribution.good, color: '#3B82F6', icon: '✓' },
+                    { label: isRTL ? 'متوسط' : 'Average', value: effectiveAdStrength.distribution.average, color: '#F59E0B', icon: '○' },
+                    { label: isRTL ? 'ضعيف' : 'Poor', value: effectiveAdStrength.distribution.poor, color: '#EF4444', icon: '✗' }
                   ].map((item, i) => {
                     const total = effectiveAdStrength.distribution.excellent + effectiveAdStrength.distribution.good + effectiveAdStrength.distribution.average + effectiveAdStrength.distribution.poor;
                     const pct = total > 0 ? (item.value / total) * 100 : 0;
                     return (
-                      <div key={i} className="mb-3">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-400">{item.label}</span>
-                          <span className="text-white font-medium">{item.value} ({pct.toFixed(0)}%)</span>
+                      <div key={i} className="mb-4">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-gray-300 flex items-center gap-2">
+                            <span>{item.icon}</span>
+                            <span className="font-medium">{item.label}</span>
+                          </span>
+                          <span className="text-white font-bold">{item.value} <span className="text-gray-400 font-normal">({pct.toFixed(0)}%)</span></span>
                         </div>
-                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: item.color }}></div>
+                        <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(pct, 5)}%`, backgroundColor: item.color }}></div>
                         </div>
                       </div>
                     );
@@ -3225,31 +3232,31 @@ const DashboardPage: React.FC = () => {
                 </div>
               ) : effectiveLandingPages.length > 0 ? (
                 <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
-                  <table className="w-full text-xs">
+                  <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-[#060010]">
-                      <tr className="text-gray-400 border-b border-white/10">
-                        <th className="text-left py-2 px-2">{isRTL ? 'الصفحة' : 'Page'}</th>
-                        <th className="text-center py-2 px-1">{isRTL ? 'نقرات' : 'Clicks'}</th>
-                        <th className="text-center py-2 px-1">{isRTL ? 'سرعة' : 'Speed'}</th>
+                      <tr className="text-gray-300 border-b border-white/10">
+                        <th className="text-left py-3 px-3 font-semibold">{isRTL ? 'الصفحة' : 'Page'}</th>
+                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'سرعة' : 'Speed'}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {effectiveLandingPages.slice(0, 5).map((page: any, i: number) => (
                         <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="py-2 px-2 text-white font-medium">
+                          <td className="py-3 px-3 text-white font-medium">
                             {(() => {
                               try {
                                 const url = new URL(page.url);
-                                return url.pathname.length > 15 ? url.pathname.substring(0, 15) + '...' : url.pathname || '/';
+                                return url.pathname.length > 18 ? url.pathname.substring(0, 18) + '...' : url.pathname || '/';
                               } catch {
-                                return page.url.substring(0, 15) + '...';
+                                return page.url?.substring(0, 18) + '...' || '/';
                               }
                             })()}
                           </td>
-                          <td className="text-center py-2 px-1 text-cyan-400">{formatLargeNumber(page.clicks)}</td>
-                          <td className="text-center py-2 px-1">
-                            <span className={`font-bold ${page.speedScore >= 70 ? 'text-green-400' : page.speedScore >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                              {page.speedScore || '-'}
+                          <td className="text-center py-3 px-2 text-cyan-400 font-bold">{formatLargeNumber(page.clicks || 0)}</td>
+                          <td className="text-center py-3 px-2">
+                            <span className={`font-bold text-lg ${page.speedScore >= 70 ? 'text-green-400' : page.speedScore >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              {typeof page.speedScore === 'number' ? Math.round(page.speedScore) : '-'}
                             </span>
                           </td>
                         </tr>
@@ -3333,18 +3340,21 @@ const DashboardPage: React.FC = () => {
                     }), { impressionShare: 0, topImpressionPct: 0, absoluteTopPct: 0, outrankingShare: 0 });
                     const count = effectiveAuctionInsights.length;
                     return [
-                      { label: isRTL ? 'حصة الظهور' : 'Impression Share', value: avg.impressionShare / count, color: '#10B981' },
-                      { label: isRTL ? 'أعلى الصفحة' : 'Top of Page', value: avg.topImpressionPct / count, color: '#3B82F6' },
-                      { label: isRTL ? 'الأعلى تماماً' : 'Absolute Top', value: avg.absoluteTopPct / count, color: '#8B5CF6' },
-                      { label: isRTL ? 'التفوق' : 'Outranking', value: avg.outrankingShare / count, color: '#F59E0B' }
+                      { label: isRTL ? 'حصة الظهور' : 'Impression Share', value: avg.impressionShare / count, color: '#10B981', icon: '👁️' },
+                      { label: isRTL ? 'أعلى الصفحة' : 'Top of Page', value: avg.topImpressionPct / count, color: '#3B82F6', icon: '⬆️' },
+                      { label: isRTL ? 'الأعلى تماماً' : 'Absolute Top', value: avg.absoluteTopPct / count, color: '#8B5CF6', icon: '🔝' },
+                      { label: isRTL ? 'التفوق' : 'Outranking', value: avg.outrankingShare / count, color: '#F59E0B', icon: '🏆' }
                     ].map((item, i) => (
-                      <div key={i} className="mb-3">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-400">{item.label}</span>
-                          <span className="text-white font-medium">{item.value.toFixed(1)}%</span>
+                      <div key={i} className="mb-4">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-gray-300 flex items-center gap-2">
+                            <span>{item.icon}</span>
+                            <span>{item.label}</span>
+                          </span>
+                          <span className="text-white font-bold">{item.value.toFixed(1)}%</span>
                         </div>
-                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(item.value, 100)}%`, backgroundColor: item.color }}></div>
+                        <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(Math.min(item.value, 100), 5)}%`, backgroundColor: item.color }}></div>
                         </div>
                       </div>
                     ));

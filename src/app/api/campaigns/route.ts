@@ -32,16 +32,36 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
       return [];
     }
     
-    console.log(`📋 جميع الحسابات للمستخدم:`, allData?.map(d => `${d.customer_id}: ${d.status}`));
+    console.log(`📋 جميع الحسابات للمستخدم (${allData?.length || 0}):`, allData?.map(d => `${d.customer_id}: ${d.status}`));
     
     // فلترة الحسابات المرتبطة (Connected) - نفس المنطق في صفحة الحسابات
-    // الحسابات المرتبطة هي التي status = ACTIVE أو DISABLED أو SUSPENDED أو CUSTOMER_NOT_ENABLED
+    // الحسابات المرتبطة هي:
+    // 1. status = ACTIVE أو DISABLED أو SUSPENDED أو CUSTOMER_NOT_ENABLED
+    // 2. أو link_details.link_status = ACTIVE
+    // 3. أو link_details.verified = true
     const connectedStatuses = ['ACTIVE', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED'];
-    const connectedAccounts = (allData || []).filter(row => 
-      row.customer_id && connectedStatuses.includes(row.status)
-    );
+    const connectedAccounts = (allData || []).filter(row => {
+      if (!row.customer_id) return false;
+      
+      // التحقق من الحالة المباشرة
+      if (connectedStatuses.includes(row.status)) {
+        return true;
+      }
+      
+      // التحقق من link_details
+      const linkDetails = row.link_details as any;
+      if (linkDetails) {
+        // إذا كان link_status = ACTIVE أو verified = true
+        if (linkDetails.link_status === 'ACTIVE' || linkDetails.verified === true) {
+          console.log(`✅ الحساب ${row.customer_id} مرتبط عبر link_details:`, linkDetails.link_status || 'verified');
+          return true;
+        }
+      }
+      
+      return false;
+    });
     
-    console.log(`📋 الحسابات المرتبطة (Connected):`, connectedAccounts.map(d => `${d.customer_id}: ${d.status}`));
+    console.log(`📋 الحسابات المرتبطة (Connected): ${connectedAccounts.length}`, connectedAccounts.map(d => `${d.customer_id}: ${d.status}`));
     
     // إزالة التكرارات باستخدام Set
     const uniqueIds = [...new Set(connectedAccounts.map(row => row.customer_id))];

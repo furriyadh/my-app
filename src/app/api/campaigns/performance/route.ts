@@ -20,20 +20,34 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
     // جلب جميع الحسابات للمستخدم
     const { data: allData, error } = await supabase
       .from('client_requests')
-      .select('customer_id, status')
+      .select('customer_id, status, link_details')
       .eq('user_id', userId);
     
     if (error) return [];
     
     // فلترة الحسابات المرتبطة (Connected) - نفس المنطق في صفحة الحسابات
     const connectedStatuses = ['ACTIVE', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED'];
-    const data = (allData || []).filter(row => 
-      row.customer_id && connectedStatuses.includes(row.status)
-    );
+    const connectedAccounts = (allData || []).filter(row => {
+      if (!row.customer_id) return false;
+      
+      // التحقق من الحالة المباشرة
+      if (connectedStatuses.includes(row.status)) {
+        return true;
+      }
+      
+      // التحقق من link_details
+      const linkDetails = row.link_details as any;
+      if (linkDetails) {
+        if (linkDetails.link_status === 'ACTIVE' || linkDetails.verified === true) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
     
-    if (error) return [];
     // إزالة التكرارات
-    const uniqueIds = [...new Set((data || []).map(row => row.customer_id).filter(Boolean))];
+    const uniqueIds = [...new Set(connectedAccounts.map(row => row.customer_id).filter(Boolean))];
     return uniqueIds;
   } catch (error) {
     return [];

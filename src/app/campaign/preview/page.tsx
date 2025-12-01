@@ -700,6 +700,8 @@ export default function CampaignPreviewPage() {
         message: `⚠️ Account ${formattedId} is not enabled - Click here to activate in Google Ads`,
         href: `https://ads.google.com/aw/overview?__e=${cleanCustomerId}`
       });
+      // Auto-hide after 5 seconds
+      setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
       return;
     }
     
@@ -816,12 +818,16 @@ export default function CampaignPreviewPage() {
             message: `⚠️ Account ${formattedId} is not enabled - Click here to activate in Google Ads`,
             href: `https://ads.google.com/aw/overview?__e=${cleanCustomerId}`
           });
+          // Auto-hide after 5 seconds
+          setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
         } else {
           setAnnouncement({
             show: true,
             variant: 'error',
             message: `❌ خطأ في نشر الحملة: ${errorMessage}`
           });
+          // Auto-hide after 5 seconds
+          setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
         }
         setIsLoading(false);
         setShowPublishingModal(false);
@@ -876,12 +882,16 @@ export default function CampaignPreviewPage() {
             message: `⚠️ Account ${formattedId} is not enabled - Click here to activate in Google Ads`,
             href: `https://ads.google.com/aw/overview?__e=${cleanCustomerId}`
           });
+          // Auto-hide after 5 seconds
+          setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
         } else {
           setAnnouncement({
             show: true,
             variant: 'error',
             message: `❌ خطأ في نشر الحملة: ${errorMsg}`
           });
+          // Auto-hide after 5 seconds
+          setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
         }
       }
     } catch (error) {
@@ -892,6 +902,8 @@ export default function CampaignPreviewPage() {
         variant: 'error',
         message: `❌ خطأ: ${errorMessage}`
       });
+      // Auto-hide after 5 seconds
+      setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
       // Close modal on error
       setShowPublishingModal(false);
     } finally {
