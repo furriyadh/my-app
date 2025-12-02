@@ -129,20 +129,31 @@ async function getAccountCurrency(customerId: string, accessToken: string): Prom
 }
 
 // دالة لجلب الحملات من حساب واحد
-async function fetchCampaignsFromAccount(customerId: string, accessToken: string, timeRange: string) {
+async function fetchCampaignsFromAccount(customerId: string, accessToken: string, timeRange: string, startDateParam?: string, endDateParam?: string) {
   try {
     console.log(`📊 جلب حملات الحساب ${customerId}...`);
     
     // جلب عملة الحساب أولاً
     const currency = await getAccountCurrency(customerId, accessToken);
     
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - parseInt(timeRange));
+    // استخدام التواريخ المرسلة من العميل إذا وجدت، وإلا حساب التواريخ
+    let startDateStr: string;
+    let endDateStr: string;
     
-    // GAQL يحتاج صيغة YYYY-MM-DD
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
+    if (startDateParam && endDateParam) {
+      // استخدام التواريخ المرسلة من العميل (بتوقيته المحلي)
+      startDateStr = startDateParam;
+      endDateStr = endDateParam;
+      console.log(`📅 استخدام تواريخ العميل: ${startDateStr} - ${endDateStr}`);
+    } else {
+      // حساب التواريخ على الخادم (للتوافق مع الطلبات القديمة)
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - parseInt(timeRange));
+      startDateStr = startDate.toISOString().split('T')[0];
+      endDateStr = endDate.toISOString().split('T')[0];
+      console.log(`📅 حساب التواريخ على الخادم: ${startDateStr} - ${endDateStr}`);
+    }
     
     const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
       method: 'POST',
@@ -221,6 +232,11 @@ export async function GET(request: NextRequest) {
     
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30';
+    // جلب التواريخ المرسلة من العميل (بتوقيته المحلي)
+    const startDateParam = searchParams.get('startDate') || undefined;
+    const endDateParam = searchParams.get('endDate') || undefined;
+    
+    console.log(`📅 الفترة الزمنية: ${timeRange} يوم، التواريخ: ${startDateParam || 'غير محدد'} - ${endDateParam || 'غير محدد'}`);
     
     // الحصول على معلومات المستخدم و tokens من cookies
     const cookieStore = await cookies();
@@ -293,7 +309,7 @@ export async function GET(request: NextRequest) {
     
     // جلب الحملات من جميع الحسابات المرتبطة بالتوازي
     const campaignsPromises = connectedAccountIds.map(customerId => 
-      fetchCampaignsFromAccount(customerId, accessToken!, timeRange)
+      fetchCampaignsFromAccount(customerId, accessToken!, timeRange, startDateParam, endDateParam)
     );
     
     const allCampaignsArrays = await Promise.all(campaignsPromises);

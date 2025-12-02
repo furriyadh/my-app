@@ -117,6 +117,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30';
     const days = parseInt(timeRange);
+    // جلب التواريخ المرسلة من العميل (بتوقيته المحلي)
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    
+    console.log(`📅 الفترة الزمنية: ${days} يوم، التواريخ: ${startDateParam || 'غير محدد'} - ${endDateParam || 'غير محدد'}`);
     
     // الحصول على معلومات المستخدم و tokens من cookies
     const cookieStore = await cookies();
@@ -165,13 +170,24 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // حساب التواريخ - GAQL يحتاج صيغة YYYY-MM-DD
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    // استخدام التواريخ المرسلة من العميل إذا وجدت، وإلا حساب التواريخ على الخادم
+    let startDateStr: string;
+    let endDateStr: string;
     
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
+    if (startDateParam && endDateParam) {
+      // استخدام التواريخ المرسلة من العميل (بتوقيته المحلي)
+      startDateStr = startDateParam;
+      endDateStr = endDateParam;
+      console.log(`📅 استخدام تواريخ العميل: ${startDateStr} - ${endDateStr}`);
+    } else {
+      // حساب التواريخ على الخادم (للتوافق مع الطلبات القديمة)
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      startDateStr = startDate.toISOString().split('T')[0];
+      endDateStr = endDate.toISOString().split('T')[0];
+      console.log(`📅 حساب التواريخ على الخادم: ${startDateStr} - ${endDateStr}`);
+    }
     
     console.log(`🔗 جلب بيانات الأداء من ${connectedAccountIds.length} حساب مرتبط...`);
     

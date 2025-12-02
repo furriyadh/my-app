@@ -68,7 +68,8 @@ const DashboardPage: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [metrics, setMetrics] = useState<any>({});
   const [performanceData, setPerformanceData] = useState<any[]>([]);
-  const [timeRange, setTimeRange] = useState('30');
+  // دائماً عند دخول الداشبورد يظهر تاريخ اليوم
+  const [timeRange, setTimeRange] = useState('1'); // اليوم دائماً
   const [dateRange, setDateRange] = useState<any>(null);
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -351,8 +352,15 @@ const DashboardPage: React.FC = () => {
         fetchPerformanceData()
       ]);
       
-      // جلب AI Insights في الخلفية
-      fetchAiInsights();
+      // جلب AI Insights في الخلفية مع تواريخ اليوم
+      const formatDateForAI = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      const todayStr = formatDateForAI(new Date());
+      fetchAiInsights(todayStr, todayStr);
       
       // حفظ البيانات في الكاش بعد الجلب الناجح
       if (campaignsResult || performanceResult) {
@@ -372,10 +380,28 @@ const DashboardPage: React.FC = () => {
   };
 
   // جلب AI Insights من Google Ads API
-  const fetchAiInsights = async () => {
+  const fetchAiInsights = async (startDate?: string, endDate?: string) => {
     try {
       setLoadingAiInsights(true);
-      const response = await fetch('/api/ai-insights');
+      
+      // بناء URL مع التواريخ
+      let url = '/api/ai-insights';
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      } else {
+        // استخدام تاريخ اليوم كافتراضي
+        const today = new Date();
+        const formatDate = (d: Date) => {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        const todayStr = formatDate(today);
+        url += `?startDate=${todayStr}&endDate=${todayStr}`;
+      }
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success) {
@@ -416,7 +442,32 @@ const DashboardPage: React.FC = () => {
     try {
       // جلب الحملات من Next.js API (يستخدم Supabase لجلب حسابات المستخدم الحالي فقط)
       console.log('📊 جلب الحملات...');
-      const response = await fetch(`/api/campaigns?timeRange=${timeRange}`);
+      
+      // بناء URL مع التواريخ إذا كانت متاحة
+      const formatDateForAPI = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      let url = `/api/campaigns?timeRange=${timeRange}`;
+      
+      // استخدام dateRange أو تاريخ اليوم كافتراضي
+      let effectiveDateRange = dateRange;
+      if (!effectiveDateRange) {
+        // افتراضي: تاريخ اليوم
+        effectiveDateRange = {
+          startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+          endDate: new Date(new Date().setHours(23, 59, 59, 999))
+        };
+      }
+      
+      url += `&startDate=${formatDateForAPI(effectiveDateRange.startDate)}&endDate=${formatDateForAPI(effectiveDateRange.endDate)}`;
+      
+      console.log('📊 جلب الحملات للفترة:', formatDateForAPI(effectiveDateRange.startDate), '-', formatDateForAPI(effectiveDateRange.endDate));
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       console.log('📊 استجابة API:', {
@@ -449,7 +500,29 @@ const DashboardPage: React.FC = () => {
 
   const fetchPerformanceData = async (): Promise<any[] | null> => {
     try {
-      const response = await fetch(`/api/campaigns/performance?timeRange=${timeRange}`);
+      // بناء URL مع التواريخ إذا كانت متاحة
+      const formatDateForAPI = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      let url = `/api/campaigns/performance?timeRange=${timeRange}`;
+      
+      // استخدام dateRange أو تاريخ اليوم كافتراضي
+      let effectiveDateRange = dateRange;
+      if (!effectiveDateRange) {
+        // افتراضي: تاريخ اليوم
+        effectiveDateRange = {
+          startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+          endDate: new Date(new Date().setHours(23, 59, 59, 999))
+        };
+      }
+      
+      url += `&startDate=${formatDateForAPI(effectiveDateRange.startDate)}&endDate=${formatDateForAPI(effectiveDateRange.endDate)}`;
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       console.log('📈 Performance API Response:', {
@@ -489,19 +562,29 @@ const DashboardPage: React.FC = () => {
     // مسح الكاش القديم عند تغيير الفترة
     localStorage.removeItem(CACHE_KEY);
     
+    // تحويل التواريخ إلى صيغة ISO مع التوقيت المحلي للعميل
+    const formatDateForAPI = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const startDateStr = formatDateForAPI(range.startDate);
+    const endDateStr = formatDateForAPI(range.endDate);
+    
     // جلب البيانات الجديدة مباشرة
-    console.log(`📅 تغيير الفترة الزمنية إلى ${days} يوم`);
+    console.log(`📅 تغيير الفترة الزمنية: ${startDateStr} إلى ${endDateStr} (${days} يوم)`);
     
     try {
-      // لا نظهر التحميل إذا كانت هناك بيانات حالية
-      if (campaigns.length === 0) {
+      // إظهار اللودنج عند تغيير الفترة الزمنية
       setIsLoading(true);
-      }
       setDataSource('api');
       
+      // إرسال التواريخ الفعلية بتوقيت العميل المحلي
       const [campaignsResult, performanceResult] = await Promise.all([
-        fetch(`/api/campaigns?timeRange=${newTimeRange}`).then(res => res.json()),
-        fetch(`/api/campaigns/performance?timeRange=${newTimeRange}`).then(res => res.json())
+        fetch(`/api/campaigns?timeRange=${newTimeRange}&startDate=${startDateStr}&endDate=${endDateStr}`).then(res => res.json()),
+        fetch(`/api/campaigns/performance?timeRange=${newTimeRange}&startDate=${startDateStr}&endDate=${endDateStr}`).then(res => res.json())
       ]);
       
       if (campaignsResult.success) {
@@ -519,6 +602,9 @@ const DashboardPage: React.FC = () => {
       if (performanceResult.success) {
         setPerformanceData(performanceResult.data || []);
       }
+      
+      // جلب AI Insights للفترة الجديدة
+      fetchAiInsights(startDateStr, endDateStr);
       
       setLastUpdated(new Date());
     } catch (error) {

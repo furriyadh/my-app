@@ -113,7 +113,7 @@ async function googleAdsQuery(customerId: string, accessToken: string, developer
 }
 
 // 1. جلب بيانات الأجهزة (Device Performance)
-async function fetchDevicePerformance(customerId: string, accessToken: string, developerToken: string) {
+async function fetchDevicePerformance(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       segments.device,
@@ -122,14 +122,14 @@ async function fetchDevicePerformance(customerId: string, accessToken: string, d
       metrics.conversions,
       metrics.cost_micros
     FROM campaign
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
       AND campaign.status = ENABLED
   `;
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
 
 // 2. جلب بيانات الجمهور (Age & Gender)
-async function fetchAudienceData(customerId: string, accessToken: string, developerToken: string) {
+async function fetchAudienceData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   // Age Range Data
   const ageQuery = `
     SELECT
@@ -139,7 +139,7 @@ async function fetchAudienceData(customerId: string, accessToken: string, develo
       metrics.conversions,
       metrics.cost_micros
     FROM age_range_view
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
   `;
   
   // Gender Data
@@ -151,7 +151,7 @@ async function fetchAudienceData(customerId: string, accessToken: string, develo
       metrics.conversions,
       metrics.cost_micros
     FROM gender_view
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
   `;
   
   const [ageResults, genderResults] = await Promise.all([
@@ -163,7 +163,7 @@ async function fetchAudienceData(customerId: string, accessToken: string, develo
 }
 
 // 3. جلب بيانات المنافسة (Competition/Auction Insights)
-async function fetchCompetitionData(customerId: string, accessToken: string, developerToken: string) {
+async function fetchCompetitionData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       campaign.name,
@@ -172,14 +172,14 @@ async function fetchCompetitionData(customerId: string, accessToken: string, dev
       metrics.conversions,
       metrics.cost_micros
     FROM campaign
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
       AND campaign.status = ENABLED
   `;
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
 
 // 4. جلب بيانات الكلمات المفتاحية للمنافسة
-async function fetchKeywordCompetition(customerId: string, accessToken: string, developerToken: string) {
+async function fetchKeywordCompetition(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       ad_group_criterion.keyword.text,
@@ -188,7 +188,7 @@ async function fetchKeywordCompetition(customerId: string, accessToken: string, 
       metrics.clicks,
       metrics.cost_micros
     FROM keyword_view
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.impressions DESC
     LIMIT 20
   `;
@@ -196,7 +196,7 @@ async function fetchKeywordCompetition(customerId: string, accessToken: string, 
 }
 
 // 5. جلب بيانات المواقع الجغرافية
-async function fetchLocationData(customerId: string, accessToken: string, developerToken: string) {
+async function fetchLocationData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       geographic_view.country_criterion_id,
@@ -206,7 +206,7 @@ async function fetchLocationData(customerId: string, accessToken: string, develo
       metrics.conversions,
       metrics.cost_micros
     FROM geographic_view
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.impressions DESC
     LIMIT 10
   `;
@@ -214,7 +214,7 @@ async function fetchLocationData(customerId: string, accessToken: string, develo
 }
 
 // 6. جلب بيانات الساعات (Hour of Day Performance)
-async function fetchHourlyData(customerId: string, accessToken: string, developerToken: string) {
+async function fetchHourlyData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_7_DAYS') {
   const query = `
     SELECT
       segments.hour,
@@ -223,14 +223,14 @@ async function fetchHourlyData(customerId: string, accessToken: string, develope
       metrics.conversions,
       metrics.cost_micros
     FROM campaign
-    WHERE segments.date DURING LAST_7_DAYS
+    WHERE ${dateCondition}
       AND campaign.status = ENABLED
   `;
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
 
 // 7. جلب نقاط التحسين (Optimization Score) - من أداء الحملات
-async function fetchOptimizationScore(customerId: string, accessToken: string, developerToken: string) {
+async function fetchOptimizationScore(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       campaign.name,
@@ -239,13 +239,13 @@ async function fetchOptimizationScore(customerId: string, accessToken: string, d
       metrics.conversions,
       metrics.cost_micros
     FROM campaign
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
   `;
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
 
 // 8. جلب تقرير مصطلحات البحث (Search Terms Report) - من الكلمات المفتاحية
-async function fetchSearchTerms(customerId: string, accessToken: string, developerToken: string) {
+async function fetchSearchTerms(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       ad_group_criterion.keyword.text,
@@ -254,7 +254,7 @@ async function fetchSearchTerms(customerId: string, accessToken: string, develop
       metrics.conversions,
       metrics.cost_micros
     FROM keyword_view
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.clicks DESC
     LIMIT 15
   `;
@@ -262,7 +262,7 @@ async function fetchSearchTerms(customerId: string, accessToken: string, develop
 }
 
 // 9. جلب قوة الإعلانات (Ad Strength) - من الإعلانات النشطة
-async function fetchAdStrength(customerId: string, accessToken: string, developerToken: string) {
+async function fetchAdStrength(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       ad_group_ad.ad.final_urls,
@@ -272,7 +272,7 @@ async function fetchAdStrength(customerId: string, accessToken: string, develope
       metrics.clicks,
       metrics.conversions
     FROM ad_group_ad
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.clicks DESC
     LIMIT 20
   `;
@@ -280,7 +280,7 @@ async function fetchAdStrength(customerId: string, accessToken: string, develope
 }
 
 // 10. جلب أداء الصفحات المقصودة (Landing Page Experience) - من final URLs
-async function fetchLandingPageExperience(customerId: string, accessToken: string, developerToken: string) {
+async function fetchLandingPageExperience(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       ad_group_ad.ad.final_urls,
@@ -290,7 +290,7 @@ async function fetchLandingPageExperience(customerId: string, accessToken: strin
       metrics.conversions,
       metrics.cost_micros
     FROM ad_group_ad
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.clicks DESC
     LIMIT 10
   `;
@@ -298,7 +298,7 @@ async function fetchLandingPageExperience(customerId: string, accessToken: strin
 }
 
 // 11. جلب توصيات الميزانية (Budget Recommendations) - من الحملات
-async function fetchBudgetRecommendations(customerId: string, accessToken: string, developerToken: string) {
+async function fetchBudgetRecommendations(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       campaign.name,
@@ -308,7 +308,7 @@ async function fetchBudgetRecommendations(customerId: string, accessToken: strin
       metrics.clicks,
       metrics.conversions
     FROM campaign
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.cost_micros DESC
     LIMIT 10
   `;
@@ -316,7 +316,7 @@ async function fetchBudgetRecommendations(customerId: string, accessToken: strin
 }
 
 // 12. جلب رؤى المزادات (Auction Insights) - من حملات البحث
-async function fetchAuctionInsights(customerId: string, accessToken: string, developerToken: string) {
+async function fetchAuctionInsights(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
       campaign.name,
@@ -325,7 +325,7 @@ async function fetchAuctionInsights(customerId: string, accessToken: string, dev
       metrics.conversions,
       metrics.cost_micros
     FROM campaign
-    WHERE segments.date DURING LAST_30_DAYS
+    WHERE ${dateCondition}
     ORDER BY metrics.impressions DESC
     LIMIT 10
   `;
@@ -334,6 +334,18 @@ async function fetchAuctionInsights(customerId: string, accessToken: string, dev
 
 export async function GET(request: NextRequest) {
   try {
+    // جلب التواريخ من الـ query parameters
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    
+    // بناء شرط التاريخ للـ query
+    let dateCondition = 'segments.date DURING LAST_30_DAYS';
+    if (startDate && endDate) {
+      dateCondition = `segments.date BETWEEN '${startDate}' AND '${endDate}'`;
+      console.log(`📅 AI Insights للفترة: ${startDate} إلى ${endDate}`);
+    }
+    
     // جلب userId من Supabase auth
     const cookieStore = await cookies();
     const supabaseAccessToken = cookieStore.get('sb-access-token')?.value;
@@ -415,7 +427,7 @@ export async function GET(request: NextRequest) {
       
       try {
         // 1. Device Performance
-        const devices = await fetchDevicePerformance(cleanId, accessToken, developerToken);
+        const devices = await fetchDevicePerformance(cleanId, accessToken, developerToken, dateCondition);
         for (const row of devices) {
           const device = row.segments?.device || 'UNKNOWN';
           if (!deviceData[device]) {
@@ -428,7 +440,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 2. Audience Data (Age & Gender)
-        const { ageResults, genderResults } = await fetchAudienceData(cleanId, accessToken, developerToken);
+        const { ageResults, genderResults } = await fetchAudienceData(cleanId, accessToken, developerToken, dateCondition);
         
         for (const row of ageResults) {
           const age = row.adGroupCriterion?.ageRange?.type || 'UNKNOWN';
@@ -453,7 +465,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 3. Competition Data - نحسبها من أداء الحملات
-        const competition = await fetchCompetitionData(cleanId, accessToken, developerToken);
+        const competition = await fetchCompetitionData(cleanId, accessToken, developerToken, dateCondition);
         for (const row of competition) {
           const impressions = row.metrics?.impressions || 0;
           const clicks = row.metrics?.clicks || 0;
@@ -470,7 +482,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 4. Keyword Competition
-        const keywords = await fetchKeywordCompetition(cleanId, accessToken, developerToken);
+        const keywords = await fetchKeywordCompetition(cleanId, accessToken, developerToken, dateCondition);
         for (const row of keywords) {
           const impressions = row.metrics?.impressions || 0;
           const clicks = row.metrics?.clicks || 0;
@@ -487,7 +499,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 5. Location Data
-        const locations = await fetchLocationData(cleanId, accessToken, developerToken);
+        const locations = await fetchLocationData(cleanId, accessToken, developerToken, dateCondition);
         for (const row of locations) {
           locationData.push({
             locationId: row.geographicView?.countryCriterionId || 'Unknown',
@@ -500,7 +512,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 6. Hourly Data
-        const hourly = await fetchHourlyData(cleanId, accessToken, developerToken);
+        const hourly = await fetchHourlyData(cleanId, accessToken, developerToken, dateCondition);
         for (const row of hourly) {
           const hour = row.segments?.hour || 0;
           if (!hourlyData[hour]) {
@@ -513,7 +525,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 7. Optimization Score - نحسبها من أداء الحملات
-        const optScore = await fetchOptimizationScore(cleanId, accessToken, developerToken);
+        const optScore = await fetchOptimizationScore(cleanId, accessToken, developerToken, dateCondition);
         console.log(`📊 Optimization Score data for ${customerId}:`, optScore.length, 'campaigns');
         let totalClicks = 0;
         let totalImpressions = 0;
@@ -533,7 +545,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 8. Search Terms (Keywords)
-        const searchTerms = await fetchSearchTerms(cleanId, accessToken, developerToken);
+        const searchTerms = await fetchSearchTerms(cleanId, accessToken, developerToken, dateCondition);
         console.log(`🔍 Search Terms data for ${customerId}:`, searchTerms.length, 'keywords');
         for (const row of searchTerms) {
           const keyword = row.adGroupCriterion?.keyword?.text;
@@ -554,7 +566,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 9. Ad Strength - نحسبها من الأداء
-        const adStrength = await fetchAdStrength(cleanId, accessToken, developerToken);
+        const adStrength = await fetchAdStrength(cleanId, accessToken, developerToken, dateCondition);
         console.log(`💪 Ad Strength data for ${customerId}:`, adStrength.length, 'ads');
         for (const row of adStrength) {
           const clicks = row.metrics?.clicks || 0;
@@ -580,7 +592,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 10. Landing Pages - من الإعلانات
-        const landingPages = await fetchLandingPageExperience(cleanId, accessToken, developerToken);
+        const landingPages = await fetchLandingPageExperience(cleanId, accessToken, developerToken, dateCondition);
         console.log(`📱 Landing Pages data for ${customerId}:`, landingPages.length, 'pages');
         for (const row of landingPages) {
           const url = row.adGroupAd?.ad?.finalUrls?.[0];
@@ -605,7 +617,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 11. Budget Recommendations - من الحملات
-        const budgetRecs = await fetchBudgetRecommendations(cleanId, accessToken, developerToken);
+        const budgetRecs = await fetchBudgetRecommendations(cleanId, accessToken, developerToken, dateCondition);
         console.log(`💰 Budget Recs data for ${customerId}:`, budgetRecs.length, 'campaigns');
         for (const row of budgetRecs) {
           const currentBudget = (row.campaignBudget?.amountMicros || 0) / 1000000;
@@ -631,7 +643,7 @@ export async function GET(request: NextRequest) {
         }
         
         // 12. Auction Insights - من أداء الحملات
-        const auctionInsights = await fetchAuctionInsights(cleanId, accessToken, developerToken);
+        const auctionInsights = await fetchAuctionInsights(cleanId, accessToken, developerToken, dateCondition);
         console.log(`🏆 Auction Insights data for ${customerId}:`, auctionInsights.length, 'campaigns');
         for (const row of auctionInsights) {
           const impressions = row.metrics?.impressions || 0;

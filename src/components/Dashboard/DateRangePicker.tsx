@@ -26,16 +26,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const { t, isRTL } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRange, setSelectedRange] = useState<DateRange>({
-    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-    endDate: new Date(),
-    label: 'Last 30 days'
-  });
-  const [compareEnabled, setCompareEnabled] = useState(false);
-  const [comparisonRange, setComparisonRange] = useState<ComparisonRange | undefined>();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Preset ranges
+  // Preset ranges - تعريفها أولاً قبل استخدامها
   const presets = [
     {
       label: 'Today',
@@ -151,6 +144,30 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   ];
 
+  // دائماً يبدأ بتاريخ اليوم عند دخول الداشبورد
+  const getTodayRange = (): DateRange => {
+    return {
+      startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+      endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+      label: 'Today'
+    };
+  };
+
+  const [selectedRange, setSelectedRange] = useState<DateRange>(getTodayRange);
+  const [compareEnabled, setCompareEnabled] = useState(false);
+  const [comparisonRange, setComparisonRange] = useState<ComparisonRange | undefined>();
+
+  // حفظ الاختيار في localStorage عند التغيير
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_date_range', JSON.stringify({
+        startDate: selectedRange.startDate.toISOString(),
+        endDate: selectedRange.endDate.toISOString(),
+        label: selectedRange.label
+      }));
+    }
+  }, [selectedRange]);
+
   // Calculate comparison range based on selected range
   const calculateComparisonRange = (range: DateRange): ComparisonRange => {
     const duration = range.endDate.getTime() - range.startDate.getTime();
@@ -204,6 +221,21 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     });
   };
 
+  // تحقق إذا كان نفس اليوم
+  const isSameDay = (date1: Date, date2: Date): boolean => {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  };
+
+  // عرض نطاق التاريخ بشكل ذكي
+  const formatDateRange = (): string => {
+    if (isSameDay(selectedRange.startDate, selectedRange.endDate)) {
+      return formatDate(selectedRange.startDate);
+    }
+    return `${formatDate(selectedRange.startDate)} - ${formatDate(selectedRange.endDate)}`;
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -224,10 +256,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         className="flex items-center gap-2 px-4 py-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-900/50 rounded-lg text-purple-200 text-sm transition-all backdrop-blur-sm"
       >
         <Calendar className="w-4 h-4" />
-        <span className="hidden sm:inline">
-          {formatDate(selectedRange.startDate)} - {formatDate(selectedRange.endDate)}
+        <span className="font-medium">{selectedRange.label}</span>
+        <span className="hidden md:inline text-purple-400 text-xs">
+          ({formatDateRange()})
         </span>
-        <span className="sm:hidden">{selectedRange.label}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
