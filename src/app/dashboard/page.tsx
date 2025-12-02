@@ -3110,8 +3110,8 @@ const DashboardPage: React.FC = () => {
                   <div className="text-center">
                     <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm">{isRTL ? 'لا توجد بيانات أداء' : 'No performance data'}</p>
-                  </div>
                 </div>
+            </div>
               )}
             </div>
             {/* 2. Revenue vs Spend */}
@@ -3123,34 +3123,34 @@ const DashboardPage: React.FC = () => {
               </h3>
               <p className="chart-description">{isRTL ? 'مقارنة الأداء المالي' : 'Financial comparison'}</p>
               {effectivePerformanceData.length > 0 ? (
-                <ChartContainer
-                  config={{
+              <ChartContainer
+                config={{
                     cost: { label: isRTL ? "الإنفاق" : "Spend", color: '#EC4899' },
                     conversionsValue: { label: isRTL ? "الإيرادات" : "Revenue", color: '#10B981' }
-                  }}
+                }}
                   className="h-[250px]"
-                >
+              >
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={effectivePerformanceData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                      <defs>
+                    <defs>
                         <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10B981" stopOpacity={0.6}/>
                           <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                        </linearGradient>
+                      </linearGradient>
                         <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4}/>
                           <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
+                      </linearGradient>
+                    </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
                       <XAxis dataKey="day" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
                       <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value)} />
-                      <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" dataKey="conversionsValue" stroke="#10B981" strokeWidth={3} fill="url(#revenueGrad)" />
                       <Area type="monotone" dataKey="cost" stroke="#EC4899" strokeWidth={3} fill="url(#spendGrad)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
@@ -3161,9 +3161,9 @@ const DashboardPage: React.FC = () => {
               )}
             </div>
           </div>
-
+            
           {/* Row 2: Conversion Funnel & ROAS Trend */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 3. Conversion Funnel */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500"></div>
@@ -3174,7 +3174,7 @@ const DashboardPage: React.FC = () => {
               <p className="chart-description">{isRTL ? 'رحلة المستخدم للتحويل' : 'User journey'}</p>
               {metrics.impressions > 0 ? (
               <ChartContainer config={{ value: { label: "Count", color: CHART_COLORS.primary } }} className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                     data={[
                       { stage: isRTL ? 'المشاهدات' : 'Impressions', value: metrics.impressions || 0, fill: '#8B5CF6' },
@@ -3187,24 +3187,24 @@ const DashboardPage: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
                     <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} />
                     <YAxis type="category" dataKey="stage" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} width={80} />
-                    <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={35}>
                       <Cell fill="#8B5CF6" />
                       <Cell fill="#A855F7" />
                       <Cell fill="#10B981" />
                     </Bar>
                   </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                    </ResponsiveContainer>
+                  </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <Filter className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm">{isRTL ? 'لا توجد بيانات تحويل' : 'No funnel data'}</p>
                   </div>
-                </div>
+                    </div>
               )}
-            </div>
+                  </div>
 
             {/* 4. ROAS Trend */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
@@ -3216,7 +3216,7 @@ const DashboardPage: React.FC = () => {
               <p className="chart-description">{isRTL ? 'العائد على الإنفاق' : 'Return on ad spend'}</p>
               {effectivePerformanceData.length > 0 ? (
               <ChartContainer config={{ roas: { label: "ROAS", color: '#10B981' } }} className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={effectivePerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="roasGradNew" x1="0" y1="0" x2="0" y2="1">
@@ -3227,18 +3227,18 @@ const DashboardPage: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
                     <XAxis dataKey="day" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} />
                     <YAxis stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}x`} />
-                    <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} />
                     <Area type="monotone" dataKey="roas" stroke="#10B981" strokeWidth={3} fill="url(#roasGradNew)" dot={{ fill: '#10B981', r: 4 }} activeDot={{ r: 6, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} />
                   </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                    </ResponsiveContainer>
+                  </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm">{isRTL ? 'لا توجد بيانات ROAS' : 'No ROAS data'}</p>
                   </div>
-                </div>
+                    </div>
               )}
             </div>
           </div>
@@ -3257,16 +3257,16 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-              </div>
+                  </div>
               ) : effectiveDeviceData.length > 0 ? (
-              <ChartContainer
-                config={{
+                  <ChartContainer
+                    config={{
                     clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#10B981' },
                     conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#8B5CF6' }
-                }}
+                    }}
                   className="h-[250px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                       data={effectiveDeviceData.map((d: any) => ({
                         ...d,
@@ -3278,19 +3278,19 @@ const DashboardPage: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
                       <XAxis type="number" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => formatLargeNumber(v)} />
                       <YAxis type="category" dataKey="device" stroke="#e2e8f0" fontSize={12} tickLine={false} axisLine={false} width={100} />
-                    <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} />
                       <Bar dataKey="clicks" fill="#10B981" radius={[0, 6, 6, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
                       <Bar dataKey="conversions" fill="#8B5CF6" radius={[0, 6, 6, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <Smartphone className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm">{isRTL ? 'لا توجد بيانات أجهزة' : 'No device data'}</p>
                   </div>
-                </div>
+                    </div>
               )}
             </div>
 
@@ -3306,10 +3306,10 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-500"></div>
-                </div>
+                  </div>
               ) : effectiveGenderData.length > 0 ? (
                 <ChartContainer config={{ impressions: { label: "Impressions", color: '#EC4899' } }} className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={effectiveGenderData.map((g: any, i: number) => ({
@@ -3319,26 +3319,26 @@ const DashboardPage: React.FC = () => {
                           value: g.impressions,
                           fill: g.gender === 'MALE' ? '#3B82F6' : g.gender === 'FEMALE' ? '#EC4899' : '#6B7280'
                         }))}
-                        cx="50%"
-                        cy="50%"
+                        cx="50%" 
+                        cy="50%" 
                         innerRadius={50}
                         outerRadius={90}
                         paddingAngle={3}
                         dataKey="value"
                       />
-                    <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} />
                       <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
                     </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                    </ResponsiveContainer>
+                  </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm">{isRTL ? 'لا توجد بيانات جمهور' : 'No audience data'}</p>
-                  </div>
                 </div>
-              )}
+            </div>
+          )}
             </div>
           </div>
 
@@ -3358,8 +3358,8 @@ const DashboardPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
                 </div>
               ) : effectiveAgeData.length > 0 ? (
-                <ChartContainer
-                  config={{
+              <ChartContainer
+                config={{
                     clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#F59E0B' },
                     conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#10B981' }
                   }}
@@ -3370,20 +3370,20 @@ const DashboardPage: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
                       <XAxis dataKey="age" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
                       <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
-                      <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} />
                       <Bar dataKey="clicks" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
                       <Bar dataKey="conversions" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     <p className="text-sm">{isRTL ? 'لا توجد بيانات عمرية' : 'No age data'}</p>
                   </div>
-                </div>
-              )}
+            </div>
+          )}
             </div>
 
             {/* ⚔️ Competition Analysis Chart */}
@@ -3409,14 +3409,14 @@ const DashboardPage: React.FC = () => {
                   className="h-[250px]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart 
+                  <BarChart 
                       data={effectiveCompetitionData.slice(0, 5).map((c: any) => ({
                         campaign: c.campaign.length > 12 ? c.campaign.substring(0, 12) + '...' : c.campaign,
                         impressionShare: Math.round(c.impressionShare),
                         budgetLost: Math.round(c.budgetLost),
                         rankLost: Math.round(c.rankLost)
                       }))}
-                      layout="vertical"
+                    layout="vertical"
                       margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
@@ -3426,7 +3426,7 @@ const DashboardPage: React.FC = () => {
                       <Bar dataKey="impressionShare" stackId="a" fill="#10B981" radius={[0, 0, 0, 0]} barSize={14} name={isRTL ? "حصة الظهور %" : "Impression Share %"} />
                       <Bar dataKey="budgetLost" stackId="a" fill="#EF4444" radius={[0, 0, 0, 0]} barSize={14} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
                       <Bar dataKey="rankLost" stackId="a" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={14} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
-                    </BarChart>
+                  </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
               ) : (
@@ -3457,14 +3457,14 @@ const DashboardPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
                 </div>
               ) : effectiveHourlyData.length > 0 ? (
-                <ChartContainer
-                  config={{
+              <ChartContainer
+                config={{
                     clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#06B6D4' },
                     conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#8B5CF6' }
-                  }}
+                }}
                   className="h-[250px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
+              >
+                <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={effectiveHourlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="hourlyClicksGrad2" x1="0" y1="0" x2="0" y2="1">
@@ -3483,12 +3483,12 @@ const DashboardPage: React.FC = () => {
                         interval={2}
                       />
                       <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
-                      <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={3} fill="url(#hourlyClicksGrad2)" name={isRTL ? "النقرات" : "Clicks"} />
                       <Line type="monotone" dataKey="conversions" stroke="#8B5CF6" strokeWidth={3} dot={{ fill: '#8B5CF6', r: 4 }} name={isRTL ? "التحويلات" : "Conversions"} />
                     </AreaChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                </ResponsiveContainer>
+              </ChartContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
@@ -3498,7 +3498,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
             </div>
-
+            
             {/* 🔑 Keyword Performance */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"></div>
@@ -3552,7 +3552,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
+                </div>
 
           {/* Row 6: AI Optimization Score & Search Terms */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -3568,7 +3568,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-                </div>
+              </div>
               ) : effectiveOptimizationScore !== null && effectiveOptimizationScore !== undefined ? (
                 <div className="h-[250px] flex flex-col items-center justify-center">
                   <div className="relative w-40 h-40">
@@ -3616,7 +3616,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
+          </div>
               ) : effectiveSearchTerms.length > 0 ? (
                 <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
                   <table className="w-full text-sm">
@@ -3647,8 +3647,8 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
-
+            </div>
+            
           {/* Row 7: Ad Strength & Landing Pages */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 💪 Ad Strength Indicator */}
@@ -3663,7 +3663,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
-                </div>
+              </div>
               ) : effectiveAdStrength?.distribution ? (
                 <div className="h-[250px] flex flex-col justify-center px-4">
                   {[
@@ -3712,7 +3712,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
-                </div>
+          </div>
               ) : effectiveLandingPages.length > 0 ? (
                 <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
                   <table className="w-full text-sm">
@@ -3756,8 +3756,8 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
-
+            </div>
+            
           {/* Row 8: Budget Recommendations & Auction Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 💰 Budget Recommendations */}
@@ -3772,7 +3772,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-                </div>
+              </div>
               ) : effectiveBudgetRecs.length > 0 ? (
                 <div className="h-[220px] overflow-y-auto mt-2 space-y-2 px-1">
                   {effectiveBudgetRecs.slice(0, 4).map((rec: any, i: number) => (
@@ -3780,12 +3780,12 @@ const DashboardPage: React.FC = () => {
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-xs text-gray-400 truncate max-w-[150px]">{rec.campaign}</span>
                         <span className="text-xs text-green-400">+{rec.estimatedClicksChange} {isRTL ? 'نقرات' : 'clicks'}</span>
-                      </div>
+            </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-300">${rec.currentBudget.toFixed(0)}</span>
                         <span className="text-gray-500">→</span>
                         <span className="text-sm text-green-400 font-bold">${rec.recommendedBudget.toFixed(0)}</span>
-                      </div>
+          </div>
                     </div>
                   ))}
                 </div>
