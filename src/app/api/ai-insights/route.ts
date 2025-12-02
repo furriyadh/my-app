@@ -282,6 +282,7 @@ async function googleAdsQuery(customerId: string, accessToken: string, developer
 
 // 1. جلب بيانات الأجهزة (Device Performance)
 async function fetchDevicePerformance(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
+  // نجلب كل الحملات بغض النظر عن حالتها للحصول على البيانات التاريخية
   const query = `
     SELECT
       segments.device,
@@ -291,9 +292,11 @@ async function fetchDevicePerformance(customerId: string, accessToken: string, d
       metrics.cost_micros
     FROM campaign
     WHERE ${dateCondition}
-      AND campaign.status = ENABLED
   `;
-  return googleAdsQuery(customerId, accessToken, developerToken, query);
+  console.log(`📱 Device Performance Query for ${customerId}:`, query.replace(/\s+/g, ' ').trim());
+  const results = await googleAdsQuery(customerId, accessToken, developerToken, query);
+  console.log(`📱 Device Performance Results for ${customerId}:`, JSON.stringify(results).slice(0, 500));
+  return results;
 }
 
 // 2. جلب بيانات الجمهور (Age & Gender)
@@ -332,6 +335,7 @@ async function fetchAudienceData(customerId: string, accessToken: string, develo
 
 // 3. جلب بيانات المنافسة (Competition/Auction Insights)
 async function fetchCompetitionData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
+  // نجلب كل الحملات للحصول على البيانات التاريخية
   const query = `
     SELECT
       campaign.name,
@@ -341,7 +345,6 @@ async function fetchCompetitionData(customerId: string, accessToken: string, dev
       metrics.cost_micros
     FROM campaign
     WHERE ${dateCondition}
-      AND campaign.status = ENABLED
   `;
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
@@ -586,17 +589,54 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // تجديد التوكن إذا لزم الأمر
-    let accessToken = oauthAccessToken;
-    if (oauthRefreshToken) {
-      const newToken = await refreshAccessToken(oauthRefreshToken);
+    // ==================== استخدام MCC credentials بدلاً من user OAuth ====================
+    // المستخدم قد يملك OAuth token لكن بدون صلاحيات MCC
+    // لذلك نستخدم MCC refresh token من environment variables للوصول للبيانات
+    const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+    const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN!;
+    
+    let accessToken: string | null = null;
+    
+    // أولاً: نحاول استخدام MCC refresh token (الأفضل للوصول لجميع الحسابات)
+    if (mccRefreshToken) {
+      console.log('🔑 Using MCC refresh token for API access...');
+      const newToken = await refreshAccessToken(mccRefreshToken);
       if (newToken) {
         accessToken = newToken;
-        console.log('✅ Token refreshed successfully');
+        console.log('✅ MCC Token refreshed successfully');
       }
     }
     
-    const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN!;
+    // إذا فشل MCC token، نحاول user OAuth token كـ fallback
+    if (!accessToken && oauthRefreshToken) {
+      console.log('🔑 Falling back to user OAuth token...');
+      const newToken = await refreshAccessToken(oauthRefreshToken);
+      if (newToken) {
+        accessToken = newToken;
+        console.log('✅ User OAuth Token refreshed successfully');
+      }
+    }
+    
+    // إذا لم نحصل على أي token
+    if (!accessToken) {
+      console.error('❌ No valid access token available');
+      return NextResponse.json({
+        success: false,
+        error: 'No valid access token',
+        device_performance: [],
+        audience_data: { age: [], gender: [] },
+        competition_data: { impression_share: [], keywords: [] },
+        location_data: [],
+        hourly_data: [],
+        optimization_score: null,
+        search_terms: [],
+        ad_strength: { distribution: { excellent: 0, good: 0, average: 0, poor: 0 }, details: [] },
+        landing_pages: [],
+        budget_recommendations: [],
+        auction_insights: []
+      });
+    }
+    // ==================== نهاية إعداد التوكن ====================
     
     // Initialize data containers
     const deviceData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number; ctr: number }> = {};
@@ -631,10 +671,11 @@ export async function GET(request: NextRequest) {
           if (!deviceData[device]) {
             deviceData[device] = { impressions: 0, clicks: 0, conversions: 0, cost: 0, ctr: 0 };
           }
-          deviceData[device].impressions += row.metrics?.impressions || 0;
-          deviceData[device].clicks += row.metrics?.clicks || 0;
-          deviceData[device].conversions += row.metrics?.conversions || 0;
-          deviceData[device].cost += (row.metrics?.costMicros || 0) / 1000000;
+          // تحويل القيم لأرقام صحيحة (Google Ads API يُرجع strings أحياناً)
+          deviceData[device].impressions += parseInt(String(row.metrics?.impressions || 0), 10);
+          deviceData[device].clicks += parseInt(String(row.metrics?.clicks || 0), 10);
+          deviceData[device].conversions += parseFloat(String(row.metrics?.conversions || 0));
+          deviceData[device].cost += parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
         }
         
         // 2. Audience Data (Age & Gender)
@@ -645,10 +686,10 @@ export async function GET(request: NextRequest) {
           if (!ageData[age]) {
             ageData[age] = { impressions: 0, clicks: 0, conversions: 0, cost: 0 };
           }
-          ageData[age].impressions += row.metrics?.impressions || 0;
-          ageData[age].clicks += row.metrics?.clicks || 0;
-          ageData[age].conversions += row.metrics?.conversions || 0;
-          ageData[age].cost += (row.metrics?.costMicros || 0) / 1000000;
+          ageData[age].impressions += parseInt(String(row.metrics?.impressions || 0), 10);
+          ageData[age].clicks += parseInt(String(row.metrics?.clicks || 0), 10);
+          ageData[age].conversions += parseFloat(String(row.metrics?.conversions || 0));
+          ageData[age].cost += parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
         }
         
         for (const row of genderResults) {
@@ -656,17 +697,17 @@ export async function GET(request: NextRequest) {
           if (!genderData[gender]) {
             genderData[gender] = { impressions: 0, clicks: 0, conversions: 0, cost: 0 };
           }
-          genderData[gender].impressions += row.metrics?.impressions || 0;
-          genderData[gender].clicks += row.metrics?.clicks || 0;
-          genderData[gender].conversions += row.metrics?.conversions || 0;
-          genderData[gender].cost += (row.metrics?.costMicros || 0) / 1000000;
+          genderData[gender].impressions += parseInt(String(row.metrics?.impressions || 0), 10);
+          genderData[gender].clicks += parseInt(String(row.metrics?.clicks || 0), 10);
+          genderData[gender].conversions += parseFloat(String(row.metrics?.conversions || 0));
+          genderData[gender].cost += parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
         }
         
         // 3. Competition Data - نحسبها من أداء الحملات
         const competition = await fetchCompetitionData(cleanId, accessToken, developerToken, dateCondition);
         for (const row of competition) {
-          const impressions = row.metrics?.impressions || 0;
-          const clicks = row.metrics?.clicks || 0;
+          const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
+          const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
           const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
           // نحسب مقاييس المنافسة التقريبية من الأداء
           competitionData.push({
@@ -682,9 +723,9 @@ export async function GET(request: NextRequest) {
         // 4. Keyword Competition
         const keywords = await fetchKeywordCompetition(cleanId, accessToken, developerToken, dateCondition);
         for (const row of keywords) {
-          const impressions = row.metrics?.impressions || 0;
-          const clicks = row.metrics?.clicks || 0;
-          const cost = (row.metrics?.costMicros || 0) / 1000000;
+          const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
+          const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
+          const cost = parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
           keywordCompetition.push({
             keyword: row.adGroupCriterion?.keyword?.text || 'Unknown',
             matchType: row.adGroupCriterion?.keyword?.matchType || 'UNKNOWN',
@@ -702,24 +743,24 @@ export async function GET(request: NextRequest) {
           locationData.push({
             locationId: row.geographicView?.countryCriterionId || 'Unknown',
             type: row.geographicView?.locationType || 'UNKNOWN',
-            impressions: row.metrics?.impressions || 0,
-            clicks: row.metrics?.clicks || 0,
-            conversions: row.metrics?.conversions || 0,
-            cost: (row.metrics?.costMicros || 0) / 1000000
+            impressions: parseInt(String(row.metrics?.impressions || 0), 10),
+            clicks: parseInt(String(row.metrics?.clicks || 0), 10),
+            conversions: parseFloat(String(row.metrics?.conversions || 0)),
+            cost: parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000
           });
         }
         
         // 6. Hourly Data
         const hourly = await fetchHourlyData(cleanId, accessToken, developerToken, dateCondition);
         for (const row of hourly) {
-          const hour = row.segments?.hour || 0;
+          const hour = parseInt(String(row.segments?.hour || 0), 10);
           if (!hourlyData[hour]) {
             hourlyData[hour] = { impressions: 0, clicks: 0, conversions: 0, cost: 0 };
           }
-          hourlyData[hour].impressions += row.metrics?.impressions || 0;
-          hourlyData[hour].clicks += row.metrics?.clicks || 0;
-          hourlyData[hour].conversions += row.metrics?.conversions || 0;
-          hourlyData[hour].cost += (row.metrics?.costMicros || 0) / 1000000;
+          hourlyData[hour].impressions += parseInt(String(row.metrics?.impressions || 0), 10);
+          hourlyData[hour].clicks += parseInt(String(row.metrics?.clicks || 0), 10);
+          hourlyData[hour].conversions += parseFloat(String(row.metrics?.conversions || 0));
+          hourlyData[hour].cost += parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
         }
         
         // 7. Optimization Score - نحسبها من أداء الحملات
@@ -729,9 +770,9 @@ export async function GET(request: NextRequest) {
         let totalImpressions = 0;
         let totalConversions = 0;
         for (const row of optScore) {
-          totalClicks += row.metrics?.clicks || 0;
-          totalImpressions += row.metrics?.impressions || 0;
-          totalConversions += row.metrics?.conversions || 0;
+          totalClicks += parseInt(String(row.metrics?.clicks || 0), 10);
+          totalImpressions += parseInt(String(row.metrics?.impressions || 0), 10);
+          totalConversions += parseFloat(String(row.metrics?.conversions || 0));
         }
         if (totalImpressions > 0) {
           const ctr = (totalClicks / totalImpressions) * 100;
@@ -748,16 +789,16 @@ export async function GET(request: NextRequest) {
         for (const row of searchTerms) {
           const keyword = row.adGroupCriterion?.keyword?.text;
           if (keyword) {
-            const clicks = row.metrics?.clicks || 0;
-            const impressions = row.metrics?.impressions || 0;
+            const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
+            const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
             const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
             searchTermsData.push({
               term: keyword,
               status: 'ENABLED',
               impressions,
               clicks,
-              conversions: row.metrics?.conversions || 0,
-              cost: (row.metrics?.costMicros || 0) / 1000000,
+              conversions: parseFloat(String(row.metrics?.conversions || 0)),
+              cost: parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000,
               ctr
             });
           }
@@ -767,9 +808,9 @@ export async function GET(request: NextRequest) {
         const adStrength = await fetchAdStrength(cleanId, accessToken, developerToken, dateCondition);
         console.log(`💪 Ad Strength data for ${customerId}:`, adStrength.length, 'ads');
         for (const row of adStrength) {
-          const clicks = row.metrics?.clicks || 0;
-          const impressions = row.metrics?.impressions || 0;
-          const conversions = row.metrics?.conversions || 0;
+          const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
+          const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
+          const conversions = parseFloat(String(row.metrics?.conversions || 0));
           const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
           // نحسب قوة الإعلان بناءً على الأداء
           let strength = 'POOR';
@@ -795,9 +836,9 @@ export async function GET(request: NextRequest) {
         for (const row of landingPages) {
           const url = row.adGroupAd?.ad?.finalUrls?.[0];
           if (url) {
-            const clicks = row.metrics?.clicks || 0;
-            const impressions = row.metrics?.impressions || 0;
-            const conversions = row.metrics?.conversions || 0;
+            const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
+            const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
+            const conversions = parseFloat(String(row.metrics?.conversions || 0));
             const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
             // نحسب نقاط السرعة بناءً على الأداء
             const convRate = clicks > 0 ? (conversions / clicks) * 100 : 0;
@@ -807,7 +848,7 @@ export async function GET(request: NextRequest) {
               impressions,
               clicks,
               conversions,
-              cost: (row.metrics?.costMicros || 0) / 1000000,
+              cost: parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000,
               mobileScore: 0,
               speedScore
             });
@@ -818,10 +859,10 @@ export async function GET(request: NextRequest) {
         const budgetRecs = await fetchBudgetRecommendations(cleanId, accessToken, developerToken, dateCondition);
         console.log(`💰 Budget Recs data for ${customerId}:`, budgetRecs.length, 'campaigns');
         for (const row of budgetRecs) {
-          const currentBudget = (row.campaignBudget?.amountMicros || 0) / 1000000;
-          const cost = (row.metrics?.costMicros || 0) / 1000000;
-          const clicks = row.metrics?.clicks || 0;
-          const impressions = row.metrics?.impressions || 0;
+          const currentBudget = parseInt(String(row.campaignBudget?.amountMicros || 0), 10) / 1000000;
+          const cost = parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
+          const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
+          const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
           const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
           
           // نقترح زيادة الميزانية بناءً على الأداء
@@ -844,9 +885,9 @@ export async function GET(request: NextRequest) {
         const auctionInsights = await fetchAuctionInsights(cleanId, accessToken, developerToken, dateCondition);
         console.log(`🏆 Auction Insights data for ${customerId}:`, auctionInsights.length, 'campaigns');
         for (const row of auctionInsights) {
-          const impressions = row.metrics?.impressions || 0;
-          const clicks = row.metrics?.clicks || 0;
-          const conversions = row.metrics?.conversions || 0;
+          const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
+          const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
+          const conversions = parseFloat(String(row.metrics?.conversions || 0));
           const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
           
           // نحسب مقاييس المنافسة بناءً على الأداء
@@ -888,10 +929,12 @@ export async function GET(request: NextRequest) {
     }
     
     // Convert to arrays
+    console.log('📊 Raw deviceData before conversion:', JSON.stringify(deviceData));
     const devicePerformance = Object.entries(deviceData).map(([device, data]) => ({
       device: device.replace('DEVICE_', ''),
       ...data
     }));
+    console.log('📊 devicePerformance after conversion:', JSON.stringify(devicePerformance));
     
     const ageBreakdown = Object.entries(ageData).map(([age, data]) => ({
       age: age.replace('AGE_RANGE_', '').replace('_', '-'),
