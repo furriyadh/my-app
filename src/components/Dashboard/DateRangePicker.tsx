@@ -94,38 +94,64 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // الـ label المعروض على الزر
-  const [displayLabel, setDisplayLabel] = useState('Today');
-  const [selectedDates, setSelectedDates] = useState<{ startDate: Date; endDate: Date }>(() => getPresetDates(PRESETS[0]));
-  const [compareEnabled, setCompareEnabled] = useState(false);
-
-  // تحميل الفترة المحفوظة من localStorage عند التحميل
-  useEffect(() => {
-    const saved = localStorage.getItem('dashboard_date_range');
-    if (saved) {
-      try {
+  // قراءة القيمة المحفوظة مباشرة (client-side)
+  const getSavedLabel = (): string => {
+    if (typeof window === 'undefined') return 'Today';
+    try {
+      const saved = localStorage.getItem('dashboard_date_range');
+      if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.label) {
           const preset = PRESETS.find(p => p.label === parsed.label);
           if (preset) {
-            const dates = getPresetDates(preset);
-            setSelectedDates(dates);
-            setDisplayLabel(isRTL ? preset.labelAr : preset.label);
+            return isRTL ? preset.labelAr : preset.label;
           }
         }
-      } catch (e) {
-        console.warn('Failed to parse saved date range');
       }
-    }
-  }, []); // يُنفذ مرة واحدة فقط
-
+    } catch (e) {}
+    return isRTL ? 'اليوم' : 'Today';
+  };
+  
+  const getSavedDates = (): { startDate: Date; endDate: Date } => {
+    if (typeof window === 'undefined') return getPresetDates(PRESETS[0]);
+    try {
+      const saved = localStorage.getItem('dashboard_date_range');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.label) {
+          const preset = PRESETS.find(p => p.label === parsed.label);
+          if (preset) {
+            return getPresetDates(preset);
+          }
+        }
+      }
+    } catch (e) {}
+    return getPresetDates(PRESETS[0]);
+  };
+  
+  // الـ state
+  const [displayLabel, setDisplayLabel] = useState<string>(getSavedLabel);
+  const [selectedDates, setSelectedDates] = useState<{ startDate: Date; endDate: Date }>(getSavedDates);
+  const [compareEnabled, setCompareEnabled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  // تحديث بعد mount للتأكد من قراءة localStorage
+  useEffect(() => {
+    setMounted(true);
+    const label = getSavedLabel();
+    const dates = getSavedDates();
+    setDisplayLabel(label);
+    setSelectedDates(dates);
+  }, []);
+  
   // تحديث الـ label عند تغيير اللغة
   useEffect(() => {
+    if (!mounted) return;
     const preset = PRESETS.find(p => p.label === displayLabel || p.labelAr === displayLabel);
     if (preset) {
       setDisplayLabel(isRTL ? preset.labelAr : preset.label);
     }
-  }, [isRTL]);
+  }, [isRTL, mounted]);
 
   // Handle preset selection
   const handlePresetSelect = (preset: typeof PRESETS[0]) => {
