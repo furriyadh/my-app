@@ -68,9 +68,28 @@ const DashboardPage: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [metrics, setMetrics] = useState<any>({});
   const [performanceData, setPerformanceData] = useState<any[]>([]);
-  // دائماً عند دخول الداشبورد يظهر تاريخ اليوم
-  const [timeRange, setTimeRange] = useState('1'); // اليوم دائماً
-  const [dateRange, setDateRange] = useState<string>('Today'); // القيمة الافتراضية: اليوم
+  
+  // تحميل الفترة المحفوظة من localStorage عند التهيئة
+  const getInitialDateRange = (): string => {
+    if (typeof window !== 'undefined') {
+      const savedRange = localStorage.getItem('dashboard_date_range');
+      if (savedRange) {
+        try {
+          const parsed = JSON.parse(savedRange);
+          if (parsed.label) {
+            console.log('📅 تهيئة الفترة من localStorage:', parsed.label);
+            return parsed.label;
+          }
+        } catch (e) {
+          console.warn('⚠️ فشل في قراءة الفترة المحفوظة');
+        }
+      }
+    }
+    return 'Today';
+  };
+  
+  const [timeRange, setTimeRange] = useState('1');
+  const [dateRange, setDateRange] = useState<string>(() => getInitialDateRange());
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCampaignType, setSelectedCampaignType] = useState<string>('all');
@@ -149,24 +168,6 @@ const DashboardPage: React.FC = () => {
     const age = now - cacheTimestamp;
     return age < CACHE_EXPIRY_MS && cacheTimeRange === timeRange;
   };
-
-  // تحميل الفترة الزمنية المحفوظة من localStorage عند بدء التشغيل
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedRange = localStorage.getItem('dashboard_date_range');
-      if (savedRange) {
-        try {
-          const parsed = JSON.parse(savedRange);
-          if (parsed.label) {
-            console.log('📅 تحميل الفترة المحفوظة:', parsed.label);
-            setDateRange(parsed.label);
-          }
-        } catch (e) {
-          console.warn('⚠️ فشل في قراءة الفترة المحفوظة');
-        }
-      }
-    }
-  }, []);
 
   // جلب البيانات مع دعم الكاش
   useEffect(() => {
@@ -370,15 +371,92 @@ const DashboardPage: React.FC = () => {
         fetchPerformanceData()
       ]);
       
-      // جلب AI Insights في الخلفية مع تواريخ اليوم
+      // جلب AI Insights في الخلفية مع التواريخ الصحيحة بناءً على الفترة المختارة
       const formatDateForAI = (d: Date) => {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
       };
-      const todayStr = formatDateForAI(new Date());
-      fetchAiInsights(todayStr, todayStr);
+      
+      // حساب التواريخ بناءً على الـ label
+      const getDateRangeFromLabel = (label: string): { startDate: Date, endDate: Date } => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endDate = new Date(today);
+        endDate.setHours(23, 59, 59, 999);
+        
+        switch (label) {
+          case 'Today':
+            return { startDate: today, endDate };
+          case 'Yesterday': {
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            return { startDate: yesterday, endDate: yesterday };
+          }
+          case 'Last 7 days': {
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return { startDate: weekAgo, endDate };
+          }
+          case 'Last 30 days': {
+            const monthAgo = new Date(today);
+            monthAgo.setDate(monthAgo.getDate() - 30);
+            return { startDate: monthAgo, endDate };
+          }
+          case 'Last 60 days': {
+            const twoMonthsAgo = new Date(today);
+            twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
+            return { startDate: twoMonthsAgo, endDate };
+          }
+          case 'Last 90 days': {
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+            return { startDate: threeMonthsAgo, endDate };
+          }
+          case 'This Month': {
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            return { startDate: firstDay, endDate };
+          }
+          case 'Last Month': {
+            const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            return { startDate: firstDayLastMonth, endDate: lastDayLastMonth };
+          }
+          case 'This Quarter': {
+            const quarter = Math.floor(today.getMonth() / 3);
+            const firstDayQuarter = new Date(today.getFullYear(), quarter * 3, 1);
+            return { startDate: firstDayQuarter, endDate };
+          }
+          case 'Last Quarter': {
+            const currentQuarter = Math.floor(today.getMonth() / 3);
+            const lastQuarter = currentQuarter - 1;
+            const year = lastQuarter < 0 ? today.getFullYear() - 1 : today.getFullYear();
+            const adjustedQuarter = lastQuarter < 0 ? 3 : lastQuarter;
+            const firstDayLastQuarter = new Date(year, adjustedQuarter * 3, 1);
+            const lastDayLastQuarter = new Date(year, adjustedQuarter * 3 + 3, 0);
+            return { startDate: firstDayLastQuarter, endDate: lastDayLastQuarter };
+          }
+          case 'This Year': {
+            const firstDayYear = new Date(today.getFullYear(), 0, 1);
+            return { startDate: firstDayYear, endDate };
+          }
+          case 'Last Year': {
+            const firstDayLastYear = new Date(today.getFullYear() - 1, 0, 1);
+            const lastDayLastYear = new Date(today.getFullYear() - 1, 11, 31);
+            return { startDate: firstDayLastYear, endDate: lastDayLastYear };
+          }
+          default:
+            return { startDate: today, endDate };
+        }
+      };
+      
+      const effectiveDates = getDateRangeFromLabel(dateRange || 'Today');
+      const startDateStr = formatDateForAI(effectiveDates.startDate);
+      const endDateStr = formatDateForAI(effectiveDates.endDate);
+      
+      console.log(`📅 fetchAllData - جلب AI Insights للفترة: ${dateRange} (${startDateStr} إلى ${endDateStr})`);
+      fetchAiInsights(startDateStr, endDateStr);
       
       // حفظ البيانات في الكاش بعد الجلب الناجح
       if (campaignsResult || performanceResult) {

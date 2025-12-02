@@ -144,46 +144,67 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   ];
 
-  // استرجاع الفترة المحفوظة أو استخدام اليوم كافتراضي
-  const getInitialRange = (): DateRange => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('dashboard_date_range');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          // إعادة حساب التواريخ بناءً على الـ label المحفوظ
-          const preset = presets.find(p => p.label === parsed.label || p.labelAr === parsed.label);
-          if (preset) {
-            const freshRange = preset.getValue();
-            return {
-              ...freshRange,
-              label: parsed.label
-            };
-          }
-        } catch (e) {
-          console.warn('Failed to parse saved date range');
-        }
-      }
-    }
-    // افتراضي: اليوم
-    return {
-      startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-      endDate: new Date(new Date().setHours(23, 59, 59, 999)),
-      label: 'Today'
-    };
-  };
+  // القيمة الافتراضية (اليوم)
+  const getDefaultRange = (): DateRange => ({
+    startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+    endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+    label: isRTL ? 'اليوم' : 'Today'
+  });
 
-  const [selectedRange, setSelectedRange] = useState<DateRange>(getInitialRange);
+  const [selectedRange, setSelectedRange] = useState<DateRange>(getDefaultRange);
   const [compareEnabled, setCompareEnabled] = useState(false);
   const [comparisonRange, setComparisonRange] = useState<ComparisonRange | undefined>();
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // تحميل الفترة المحفوظة من localStorage بعد mount (client-side فقط)
+  useEffect(() => {
+    if (isInitialized) return; // تجنب التكرار
+    
+    const saved = localStorage.getItem('dashboard_date_range');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const preset = presets.find(p => p.label === parsed.label || p.labelAr === parsed.label);
+        if (preset) {
+          const freshRange = preset.getValue();
+          const newRange: DateRange = {
+            ...freshRange,
+            label: isRTL ? preset.labelAr : preset.label
+          };
+          console.log('📅 DateRangePicker - تحميل الفترة المحفوظة:', newRange.label);
+          setSelectedRange(newRange);
+        }
+      } catch (e) {
+        console.warn('Failed to parse saved date range');
+      }
+    }
+    setIsInitialized(true);
+  }, [isRTL, isInitialized]);
+  
+  // تحديث الـ label عند تغيير اللغة
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const preset = presets.find(p => p.label === selectedRange.label || p.labelAr === selectedRange.label);
+    if (preset) {
+      const correctLabel = isRTL ? preset.labelAr : preset.label;
+      if (selectedRange.label !== correctLabel) {
+        setSelectedRange(prev => ({ ...prev, label: correctLabel }));
+      }
+    }
+  }, [isRTL, isInitialized]);
 
-  // حفظ الاختيار في localStorage عند التغيير
+  // حفظ الاختيار في localStorage عند التغيير (نحفظ الـ label بالإنجليزي دائماً للتوافق)
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // نبحث عن الـ preset للحصول على الـ label بالإنجليزي
+      const preset = presets.find(p => p.label === selectedRange.label || p.labelAr === selectedRange.label);
+      const labelToSave = preset ? preset.label : selectedRange.label; // نحفظ بالإنجليزي دائماً
+      
       localStorage.setItem('dashboard_date_range', JSON.stringify({
         startDate: selectedRange.startDate.toISOString(),
         endDate: selectedRange.endDate.toISOString(),
-        label: selectedRange.label
+        label: labelToSave // نحفظ بالإنجليزي دائماً
       }));
     }
   }, [selectedRange]);
@@ -200,10 +221,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   // Handle preset selection
   const handlePresetSelect = (preset: typeof presets[0]) => {
     const range = preset.getValue();
+    const newLabel = isRTL ? preset.labelAr : preset.label;
     const newRange: DateRange = {
       ...range,
-      label: isRTL ? preset.labelAr : preset.label
+      label: newLabel
     };
+    
     setSelectedRange(newRange);
     
     if (compareEnabled) {
