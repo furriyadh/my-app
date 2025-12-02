@@ -926,7 +926,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleDateRangeChange = async (range: any, comparison?: any) => {
+  const handleDateRangeChange = useCallback(async (range: any, comparison?: any) => {
     // حفظ الـ label للفترة الزمنية
     const rangeLabel = range.label || 'Custom';
     setDateRange(rangeLabel);
@@ -992,7 +992,7 @@ const DashboardPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dateRange]);
 
   const toggleCampaignStatus = async (campaignId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'ENABLED' ? 'PAUSED' : 'ENABLED';

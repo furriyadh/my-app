@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, ChevronDown, X, TrendingUp, TrendingDown } from 'lucide-react';
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { Calendar, ChevronDown, X } from 'lucide-react';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 
 interface DateRange {
@@ -20,6 +20,72 @@ interface DateRangePickerProps {
   enableComparison?: boolean;
 }
 
+// Preset ranges - خارج الـ component لتجنب إعادة الإنشاء
+const PRESETS = [
+  { label: 'Today', labelAr: 'اليوم', days: 0 },
+  { label: 'Yesterday', labelAr: 'أمس', days: -1 },
+  { label: 'Last 7 days', labelAr: 'آخر 7 أيام', days: 7 },
+  { label: 'Last 30 days', labelAr: 'آخر 30 يوم', days: 30 },
+  { label: 'Last 60 days', labelAr: 'آخر 60 يوم', days: 60 },
+  { label: 'Last 90 days', labelAr: 'آخر 90 يوم', days: 90 },
+  { label: 'This Month', labelAr: 'هذا الشهر', type: 'thisMonth' },
+  { label: 'Last Month', labelAr: 'الشهر الماضي', type: 'lastMonth' },
+  { label: 'This Quarter', labelAr: 'هذا الربع', type: 'thisQuarter' },
+  { label: 'Last Quarter', labelAr: 'الربع الماضي', type: 'lastQuarter' },
+  { label: 'This Year', labelAr: 'هذا العام', type: 'thisYear' },
+  { label: 'Last Year', labelAr: 'العام الماضي', type: 'lastYear' }
+];
+
+const getPresetDates = (preset: typeof PRESETS[0]): { startDate: Date; endDate: Date } => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfToday = new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1);
+  
+  if (preset.days !== undefined) {
+    if (preset.days === 0) {
+      return { startDate: today, endDate: endOfToday };
+    } else if (preset.days === -1) {
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      return { startDate: yesterday, endDate: new Date(yesterday.getTime() + 24 * 60 * 60 * 1000 - 1) };
+    } else {
+      const startDate = new Date(today.getTime() - preset.days * 24 * 60 * 60 * 1000);
+      return { startDate, endDate: endOfToday };
+    }
+  }
+  
+  switch (preset.type) {
+    case 'thisMonth':
+      return { startDate: new Date(now.getFullYear(), now.getMonth(), 1), endDate: endOfToday };
+    case 'lastMonth': {
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      return { startDate: firstDay, endDate: lastDay };
+    }
+    case 'thisQuarter': {
+      const quarter = Math.floor(now.getMonth() / 3);
+      return { startDate: new Date(now.getFullYear(), quarter * 3, 1), endDate: endOfToday };
+    }
+    case 'lastQuarter': {
+      const currentQuarter = Math.floor(now.getMonth() / 3);
+      const lastQuarter = currentQuarter === 0 ? 3 : currentQuarter - 1;
+      const year = currentQuarter === 0 ? now.getFullYear() - 1 : now.getFullYear();
+      return { 
+        startDate: new Date(year, lastQuarter * 3, 1), 
+        endDate: new Date(year, lastQuarter * 3 + 3, 0, 23, 59, 59, 999) 
+      };
+    }
+    case 'thisYear':
+      return { startDate: new Date(now.getFullYear(), 0, 1), endDate: endOfToday };
+    case 'lastYear':
+      return { 
+        startDate: new Date(now.getFullYear() - 1, 0, 1), 
+        endDate: new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999) 
+      };
+    default:
+      return { startDate: today, endDate: endOfToday };
+  }
+};
+
 const DateRangePicker: React.FC<DateRangePickerProps> = ({
   onDateRangeChange,
   enableComparison = true
@@ -27,214 +93,69 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const { t, isRTL } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Preset ranges - تعريفها أولاً قبل استخدامها
-  const presets = [
-    {
-      label: 'Today',
-      labelAr: 'اليوم',
-      getValue: () => ({
-        startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-        endDate: new Date(new Date().setHours(23, 59, 59, 999))
-      })
-    },
-    {
-      label: 'Yesterday',
-      labelAr: 'أمس',
-      getValue: () => {
-        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        return {
-          startDate: new Date(yesterday.setHours(0, 0, 0, 0)),
-          endDate: new Date(yesterday.setHours(23, 59, 59, 999))
-        };
-      }
-    },
-    {
-      label: 'Last 7 days',
-      labelAr: 'آخر 7 أيام',
-      getValue: () => ({
-        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        endDate: new Date()
-      })
-    },
-    {
-      label: 'Last 30 days',
-      labelAr: 'آخر 30 يوم',
-      getValue: () => ({
-        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        endDate: new Date()
-      })
-    },
-    {
-      label: 'Last 60 days',
-      labelAr: 'آخر 60 يوم',
-      getValue: () => ({
-        startDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-        endDate: new Date()
-      })
-    },
-    {
-      label: 'Last 90 days',
-      labelAr: 'آخر 90 يوم',
-      getValue: () => ({
-        startDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-        endDate: new Date()
-      })
-    },
-    {
-      label: 'This Month',
-      labelAr: 'هذا الشهر',
-      getValue: () => ({
-        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        endDate: new Date()
-      })
-    },
-    {
-      label: 'Last Month',
-      labelAr: 'الشهر الماضي',
-      getValue: () => {
-        const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1));
-        return {
-          startDate: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1),
-          endDate: new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0)
-        };
-      }
-    },
-    {
-      label: 'This Quarter',
-      labelAr: 'هذا الربع',
-      getValue: () => {
-        const now = new Date();
-        const quarter = Math.floor(now.getMonth() / 3);
-        return {
-          startDate: new Date(now.getFullYear(), quarter * 3, 1),
-          endDate: new Date()
-        };
-      }
-    },
-    {
-      label: 'Last Quarter',
-      labelAr: 'الربع الماضي',
-      getValue: () => {
-        const now = new Date();
-        const quarter = Math.floor(now.getMonth() / 3);
-        const lastQuarter = quarter === 0 ? 3 : quarter - 1;
-        const year = quarter === 0 ? now.getFullYear() - 1 : now.getFullYear();
-        return {
-          startDate: new Date(year, lastQuarter * 3, 1),
-          endDate: new Date(year, lastQuarter * 3 + 3, 0)
-        };
-      }
-    },
-    {
-      label: 'This Year',
-      labelAr: 'هذا العام',
-      getValue: () => ({
-        startDate: new Date(new Date().getFullYear(), 0, 1),
-        endDate: new Date()
-      })
-    },
-    {
-      label: 'Last Year',
-      labelAr: 'العام الماضي',
-      getValue: () => ({
-        startDate: new Date(new Date().getFullYear() - 1, 0, 1),
-        endDate: new Date(new Date().getFullYear() - 1, 11, 31)
-      })
-    }
-  ];
-
-  // القيمة الافتراضية (اليوم)
-  const getDefaultRange = (): DateRange => ({
-    startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-    endDate: new Date(new Date().setHours(23, 59, 59, 999)),
-    label: isRTL ? 'اليوم' : 'Today'
-  });
-
-  const [selectedRange, setSelectedRange] = useState<DateRange>(getDefaultRange);
-  const [compareEnabled, setCompareEnabled] = useState(false);
-  const [comparisonRange, setComparisonRange] = useState<ComparisonRange | undefined>();
-  const [isInitialized, setIsInitialized] = useState(false);
   
-  // تحميل الفترة المحفوظة من localStorage بعد mount (client-side فقط)
+  // الـ label المعروض على الزر
+  const [displayLabel, setDisplayLabel] = useState('Today');
+  const [selectedDates, setSelectedDates] = useState<{ startDate: Date; endDate: Date }>(() => getPresetDates(PRESETS[0]));
+  const [compareEnabled, setCompareEnabled] = useState(false);
+
+  // تحميل الفترة المحفوظة من localStorage عند التحميل
   useEffect(() => {
-    if (isInitialized) return; // تجنب التكرار
-    
     const saved = localStorage.getItem('dashboard_date_range');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        const preset = presets.find(p => p.label === parsed.label || p.labelAr === parsed.label);
-        if (preset) {
-          const freshRange = preset.getValue();
-          const newRange: DateRange = {
-            ...freshRange,
-            label: isRTL ? preset.labelAr : preset.label
-          };
-          console.log('📅 DateRangePicker - تحميل الفترة المحفوظة:', newRange.label);
-          setSelectedRange(newRange);
+        if (parsed.label) {
+          const preset = PRESETS.find(p => p.label === parsed.label);
+          if (preset) {
+            const dates = getPresetDates(preset);
+            setSelectedDates(dates);
+            setDisplayLabel(isRTL ? preset.labelAr : preset.label);
+          }
         }
       } catch (e) {
         console.warn('Failed to parse saved date range');
       }
     }
-    setIsInitialized(true);
-  }, [isRTL, isInitialized]);
-  
+  }, []); // يُنفذ مرة واحدة فقط
+
   // تحديث الـ label عند تغيير اللغة
   useEffect(() => {
-    if (!isInitialized) return;
-    
-    const preset = presets.find(p => p.label === selectedRange.label || p.labelAr === selectedRange.label);
+    const preset = PRESETS.find(p => p.label === displayLabel || p.labelAr === displayLabel);
     if (preset) {
-      const correctLabel = isRTL ? preset.labelAr : preset.label;
-      if (selectedRange.label !== correctLabel) {
-        setSelectedRange(prev => ({ ...prev, label: correctLabel }));
-      }
+      setDisplayLabel(isRTL ? preset.labelAr : preset.label);
     }
-  }, [isRTL, isInitialized]);
-
-  // حفظ الاختيار في localStorage عند التغيير (نحفظ الـ label بالإنجليزي دائماً للتوافق)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // نبحث عن الـ preset للحصول على الـ label بالإنجليزي
-      const preset = presets.find(p => p.label === selectedRange.label || p.labelAr === selectedRange.label);
-      const labelToSave = preset ? preset.label : selectedRange.label; // نحفظ بالإنجليزي دائماً
-      
-      localStorage.setItem('dashboard_date_range', JSON.stringify({
-        startDate: selectedRange.startDate.toISOString(),
-        endDate: selectedRange.endDate.toISOString(),
-        label: labelToSave // نحفظ بالإنجليزي دائماً
-      }));
-    }
-  }, [selectedRange]);
-
-  // Calculate comparison range based on selected range
-  const calculateComparisonRange = (range: DateRange): ComparisonRange => {
-    const duration = range.endDate.getTime() - range.startDate.getTime();
-    return {
-      startDate: new Date(range.startDate.getTime() - duration),
-      endDate: new Date(range.startDate.getTime() - 1)
-    };
-  };
+  }, [isRTL]);
 
   // Handle preset selection
-  const handlePresetSelect = (preset: typeof presets[0]) => {
-    const range = preset.getValue();
+  const handlePresetSelect = (preset: typeof PRESETS[0]) => {
+    const dates = getPresetDates(preset);
     const newLabel = isRTL ? preset.labelAr : preset.label;
-    const newRange: DateRange = {
-      ...range,
-      label: newLabel
-    };
     
-    setSelectedRange(newRange);
+    console.log('🔄 تغيير الفترة إلى:', newLabel);
     
+    // تحديث الـ state فوراً
+    setDisplayLabel(newLabel);
+    setSelectedDates(dates);
+    
+    // حفظ في localStorage (بالإنجليزي دائماً)
+    localStorage.setItem('dashboard_date_range', JSON.stringify({
+      label: preset.label, // نحفظ بالإنجليزي
+      startDate: dates.startDate.toISOString(),
+      endDate: dates.endDate.toISOString()
+    }));
+    
+    // إرسال التغيير للـ parent
+    const range: DateRange = { ...dates, label: newLabel };
     if (compareEnabled) {
-      const comparison = calculateComparisonRange(newRange);
-      setComparisonRange(comparison);
-      onDateRangeChange(newRange, comparison);
+      const duration = dates.endDate.getTime() - dates.startDate.getTime();
+      const comparison: ComparisonRange = {
+        startDate: new Date(dates.startDate.getTime() - duration),
+        endDate: new Date(dates.startDate.getTime() - 1)
+      };
+      onDateRangeChange(range, comparison);
     } else {
-      onDateRangeChange(newRange);
+      onDateRangeChange(range);
     }
     
     setIsOpen(false);
@@ -245,13 +166,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     const newCompareEnabled = !compareEnabled;
     setCompareEnabled(newCompareEnabled);
     
+    const range: DateRange = { ...selectedDates, label: displayLabel };
     if (newCompareEnabled) {
-      const comparison = calculateComparisonRange(selectedRange);
-      setComparisonRange(comparison);
-      onDateRangeChange(selectedRange, comparison);
+      const duration = selectedDates.endDate.getTime() - selectedDates.startDate.getTime();
+      const comparison: ComparisonRange = {
+        startDate: new Date(selectedDates.startDate.getTime() - duration),
+        endDate: new Date(selectedDates.startDate.getTime() - 1)
+      };
+      onDateRangeChange(range, comparison);
     } else {
-      setComparisonRange(undefined);
-      onDateRangeChange(selectedRange);
+      onDateRangeChange(range);
     }
   };
 
@@ -273,10 +197,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   // عرض نطاق التاريخ بشكل ذكي
   const formatDateRange = (): string => {
-    if (isSameDay(selectedRange.startDate, selectedRange.endDate)) {
-      return formatDate(selectedRange.startDate);
+    if (isSameDay(selectedDates.startDate, selectedDates.endDate)) {
+      return formatDate(selectedDates.startDate);
     }
-    return `${formatDate(selectedRange.startDate)} - ${formatDate(selectedRange.endDate)}`;
+    return `${formatDate(selectedDates.startDate)} - ${formatDate(selectedDates.endDate)}`;
   };
 
   // Close dropdown when clicking outside
@@ -299,8 +223,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         className="flex items-center gap-2 px-4 py-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-900/50 rounded-lg text-purple-200 text-sm transition-all backdrop-blur-sm"
       >
         <Calendar className="w-4 h-4" />
-        <span className="font-medium">{selectedRange.label}</span>
-        <span className="hidden md:inline text-purple-400 text-xs">
+        <span className="font-medium">{displayLabel}</span>
+        <span className="text-purple-400 text-xs">
           ({formatDateRange()})
         </span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -329,19 +253,24 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           {/* Presets */}
           <div className="p-4 max-h-96 overflow-y-auto custom-scrollbar">
             <div className="space-y-1">
-              {presets.map((preset, index) => (
-                <button
-                  key={index}
-                  onClick={() => handlePresetSelect(preset)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
-                    selectedRange.label === (isRTL ? preset.labelAr : preset.label)
-                      ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-                      : 'text-gray-300 hover:bg-purple-900/20 hover:text-white'
-                  }`}
-                >
-                  {isRTL ? preset.labelAr : preset.label}
-                </button>
-              ))}
+              {PRESETS.map((preset, index) => {
+                const presetLabel = isRTL ? preset.labelAr : preset.label;
+                const isSelected = displayLabel === presetLabel || displayLabel === preset.label || displayLabel === preset.labelAr;
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handlePresetSelect(preset)}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                      isSelected
+                        ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+                        : 'text-gray-300 hover:bg-purple-900/20 hover:text-white'
+                    }`}
+                  >
+                    {presetLabel}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -354,49 +283,26 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     type="checkbox"
                     checked={compareEnabled}
                     onChange={handleComparisonToggle}
-                    className="sr-only peer"
+                    className="sr-only"
                   />
-                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-white text-sm font-medium">
-                    {isRTL ? 'مقارنة مع الفترة السابقة' : 'Compare to previous period'}
+                  <div className={`w-10 h-5 rounded-full transition-colors ${
+                    compareEnabled ? 'bg-purple-600' : 'bg-gray-700'
+                  }`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                      compareEnabled ? 'translate-x-5' : 'translate-x-0'
+                    }`} />
                   </div>
-                  {compareEnabled && comparisonRange && (
-                    <div className="text-xs text-gray-400 mt-1">
-                      {formatDate(comparisonRange.startDate)} - {formatDate(comparisonRange.endDate)}
-                    </div>
-                  )}
                 </div>
+                <span className="text-gray-300 text-sm">
+                  {isRTL ? 'مقارنة بالفترة السابقة' : 'Compare to previous period'}
+                </span>
               </label>
             </div>
           )}
         </div>
       )}
-
-      {/* Custom Scrollbar Styles */}
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(139, 92, 246, 0.1);
-          border-radius: 3px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(139, 92, 246, 0.5);
-          border-radius: 3px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(139, 92, 246, 0.7);
-        }
-      `}</style>
     </div>
   );
 };
 
-export default DateRangePicker;
-
+export default memo(DateRangePicker);
