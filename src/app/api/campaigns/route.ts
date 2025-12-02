@@ -39,12 +39,16 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
     // 1. status = ACTIVE أو DISABLED أو SUSPENDED أو CUSTOMER_NOT_ENABLED
     // 2. أو link_details.link_status = ACTIVE
     // 3. أو link_details.verified = true
-    const connectedStatuses = ['ACTIVE', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED'];
+    // نضيف ENABLED لأن بعض الحسابات تُحفظ بهذه الحالة من Google Ads API
+    const connectedStatuses = ['ACTIVE', 'ENABLED', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED', 'PENDING'];
     const connectedAccounts = (allData || []).filter(row => {
       if (!row.customer_id) return false;
       
+      console.log(`🔍 Checking account ${row.customer_id}: status=${row.status}`);
+      
       // التحقق من الحالة المباشرة
       if (connectedStatuses.includes(row.status)) {
+        console.log(`✅ Account ${row.customer_id} connected via status: ${row.status}`);
         return true;
       }
       
@@ -52,10 +56,16 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
       const linkDetails = row.link_details as any;
       if (linkDetails) {
         // إذا كان link_status = ACTIVE أو verified = true
-        if (linkDetails.link_status === 'ACTIVE' || linkDetails.verified === true) {
+        if (linkDetails.link_status === 'ACTIVE' || linkDetails.verified === true || linkDetails.status === 'ACTIVE') {
           console.log(`✅ الحساب ${row.customer_id} مرتبط عبر link_details:`, linkDetails.link_status || 'verified');
           return true;
         }
+      }
+      
+      // إذا لم يكن هناك status محدد لكن الحساب موجود، نعتبره متصل
+      if (!row.status && row.customer_id) {
+        console.log(`✅ Account ${row.customer_id} connected (no status, assuming connected)`);
+        return true;
       }
       
       return false;

@@ -70,7 +70,7 @@ const DashboardPage: React.FC = () => {
   const [performanceData, setPerformanceData] = useState<any[]>([]);
   // دائماً عند دخول الداشبورد يظهر تاريخ اليوم
   const [timeRange, setTimeRange] = useState('1'); // اليوم دائماً
-  const [dateRange, setDateRange] = useState<any>(null);
+  const [dateRange, setDateRange] = useState<string>('Today'); // القيمة الافتراضية: اليوم
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCampaignType, setSelectedCampaignType] = useState<string>('all');
@@ -149,6 +149,24 @@ const DashboardPage: React.FC = () => {
     const age = now - cacheTimestamp;
     return age < CACHE_EXPIRY_MS && cacheTimeRange === timeRange;
   };
+
+  // تحميل الفترة الزمنية المحفوظة من localStorage عند بدء التشغيل
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedRange = localStorage.getItem('dashboard_date_range');
+      if (savedRange) {
+        try {
+          const parsed = JSON.parse(savedRange);
+          if (parsed.label) {
+            console.log('📅 تحميل الفترة المحفوظة:', parsed.label);
+            setDateRange(parsed.label);
+          }
+        } catch (e) {
+          console.warn('⚠️ فشل في قراءة الفترة المحفوظة');
+        }
+      }
+    }
+  }, []);
 
   // جلب البيانات مع دعم الكاش
   useEffect(() => {
@@ -380,14 +398,18 @@ const DashboardPage: React.FC = () => {
   };
 
   // جلب AI Insights من Google Ads API
-  const fetchAiInsights = async (startDate?: string, endDate?: string) => {
+  // جلب AI Insights - يدعم الـ cache والتحديث من Google Ads
+  const fetchAiInsights = async (startDate?: string, endDate?: string, forceRefresh: boolean = false) => {
     try {
       setLoadingAiInsights(true);
       
       // بناء URL مع التواريخ
       let url = '/api/ai-insights';
+      const params = new URLSearchParams();
+      
       if (startDate && endDate) {
-        url += `?startDate=${startDate}&endDate=${endDate}`;
+        params.set('startDate', startDate);
+        params.set('endDate', endDate);
       } else {
         // استخدام تاريخ اليوم كافتراضي
         const today = new Date();
@@ -398,11 +420,32 @@ const DashboardPage: React.FC = () => {
           return `${year}-${month}-${day}`;
         };
         const todayStr = formatDate(today);
-        url += `?startDate=${todayStr}&endDate=${todayStr}`;
+        params.set('startDate', todayStr);
+        params.set('endDate', todayStr);
       }
       
+      // إضافة الـ label للفترة الزمنية
+      params.set('label', dateRange || 'Today');
+      
+      // إجبار التحديث من Google Ads إذا طُلب
+      if (forceRefresh) {
+        params.set('refresh', 'true');
+      }
+      
+      url += `?${params.toString()}`;
+      
+      console.log('📡 Fetching AI Insights from:', url, forceRefresh ? '(force refresh)' : '(from cache if available)');
       const response = await fetch(url);
       const data = await response.json();
+      
+      console.log('📥 AI Insights Response:', {
+        success: data.success,
+        fromCache: data.fromCache,
+        lastSyncedAt: data.lastSyncedAt,
+        error: data.error,
+        message: data.message,
+        status: response.status
+      });
       
       if (data.success) {
         setAiInsights({
@@ -418,11 +461,20 @@ const DashboardPage: React.FC = () => {
           budget_recommendations: data.budget_recommendations || [],
           auction_insights: data.auction_insights || []
         });
+        
+        // تحديث وقت آخر تحديث
+        if (data.lastSyncedAt) {
+          setLastUpdated(new Date(data.lastSyncedAt));
+        }
+        
         console.log('🤖 AI Insights loaded:', {
+          fromCache: data.fromCache,
           devices: data.device_performance?.length || 0,
           age: data.audience_data?.age?.length || 0,
           gender: data.audience_data?.gender?.length || 0,
           competition: data.competition_data?.impression_share?.length || 0,
+          hourly: data.hourly_data?.length || 0,
+          keywords: data.competition_data?.keywords?.length || 0,
           optimization_score: data.optimization_score,
           search_terms: data.search_terms?.length || 0,
           ad_strength: data.ad_strength?.details?.length || 0,
@@ -430,12 +482,107 @@ const DashboardPage: React.FC = () => {
           budget_recommendations: data.budget_recommendations?.length || 0,
           auction_insights: data.auction_insights?.length || 0
         });
+      } else {
+        console.error('❌ AI Insights failed:', data.error || data.message);
       }
     } catch (error) {
       console.error('❌ خطأ في جلب AI Insights:', error);
     } finally {
       setLoadingAiInsights(false);
     }
+  };
+  
+  // تحديث البيانات من Google Ads مباشرة (إجبار التحديث)
+  const refreshAiInsightsFromGoogleAds = async () => {
+    const formatDate = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    // حساب التواريخ بناءً على الـ label
+    const getDateRangeFromLabel = (label: string): { startDate: Date, endDate: Date } => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endDate = new Date(today);
+      endDate.setHours(23, 59, 59, 999);
+      
+      switch (label) {
+        case 'Today':
+          return { startDate: today, endDate };
+        case 'Yesterday': {
+          const yesterday = new Date(today);
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayEnd = new Date(yesterday);
+          yesterdayEnd.setHours(23, 59, 59, 999);
+          return { startDate: yesterday, endDate: yesterdayEnd };
+        }
+        case 'Last 7 days': {
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return { startDate: weekAgo, endDate };
+        }
+        case 'Last 30 days': {
+          const monthAgo = new Date(today);
+          monthAgo.setDate(monthAgo.getDate() - 30);
+          return { startDate: monthAgo, endDate };
+        }
+        case 'Last 60 days': {
+          const twoMonthsAgo = new Date(today);
+          twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
+          return { startDate: twoMonthsAgo, endDate };
+        }
+        case 'Last 90 days': {
+          const threeMonthsAgo = new Date(today);
+          threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+          return { startDate: threeMonthsAgo, endDate };
+        }
+        case 'This Month': {
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          return { startDate: firstDay, endDate };
+        }
+        case 'Last Month': {
+          const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+          lastDayLastMonth.setHours(23, 59, 59, 999);
+          return { startDate: firstDayLastMonth, endDate: lastDayLastMonth };
+        }
+        case 'This Quarter': {
+          const quarter = Math.floor(today.getMonth() / 3);
+          const firstDayQuarter = new Date(today.getFullYear(), quarter * 3, 1);
+          return { startDate: firstDayQuarter, endDate };
+        }
+        case 'Last Quarter': {
+          const currentQuarter = Math.floor(today.getMonth() / 3);
+          const lastQuarter = currentQuarter - 1;
+          const year = lastQuarter < 0 ? today.getFullYear() - 1 : today.getFullYear();
+          const adjustedQuarter = lastQuarter < 0 ? 3 : lastQuarter;
+          const firstDayLastQuarter = new Date(year, adjustedQuarter * 3, 1);
+          const lastDayLastQuarter = new Date(year, adjustedQuarter * 3 + 3, 0);
+          lastDayLastQuarter.setHours(23, 59, 59, 999);
+          return { startDate: firstDayLastQuarter, endDate: lastDayLastQuarter };
+        }
+        case 'This Year': {
+          const firstDayYear = new Date(today.getFullYear(), 0, 1);
+          return { startDate: firstDayYear, endDate };
+        }
+        case 'Last Year': {
+          const firstDayLastYear = new Date(today.getFullYear() - 1, 0, 1);
+          const lastDayLastYear = new Date(today.getFullYear() - 1, 11, 31);
+          lastDayLastYear.setHours(23, 59, 59, 999);
+          return { startDate: firstDayLastYear, endDate: lastDayLastYear };
+        }
+        default:
+          return { startDate: today, endDate };
+      }
+    };
+    
+    const effectiveDateRange = getDateRangeFromLabel(dateRange || 'Today');
+    const startDateStr = formatDate(effectiveDateRange.startDate);
+    const endDateStr = formatDate(effectiveDateRange.endDate);
+    
+    await fetchAiInsights(startDateStr, endDateStr, true);
   };
 
   const fetchCampaigns = async (): Promise<{ campaigns: Campaign[], metrics: any } | null> => {
@@ -451,21 +598,91 @@ const DashboardPage: React.FC = () => {
         return `${year}-${month}-${day}`;
       };
       
+      // حساب التواريخ بناءً على الـ label
+      const getDateRangeFromLabel = (label: string): { startDate: Date, endDate: Date } => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endDate = new Date(today);
+        endDate.setHours(23, 59, 59, 999);
+        
+        switch (label) {
+          case 'Today':
+            return { startDate: today, endDate };
+          case 'Yesterday': {
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayEnd = new Date(yesterday);
+            yesterdayEnd.setHours(23, 59, 59, 999);
+            return { startDate: yesterday, endDate: yesterdayEnd };
+          }
+          case 'Last 7 days': {
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return { startDate: weekAgo, endDate };
+          }
+          case 'Last 30 days': {
+            const monthAgo = new Date(today);
+            monthAgo.setDate(monthAgo.getDate() - 30);
+            return { startDate: monthAgo, endDate };
+          }
+          case 'Last 60 days': {
+            const twoMonthsAgo = new Date(today);
+            twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
+            return { startDate: twoMonthsAgo, endDate };
+          }
+          case 'Last 90 days': {
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+            return { startDate: threeMonthsAgo, endDate };
+          }
+          case 'This Month': {
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            return { startDate: firstDay, endDate };
+          }
+          case 'Last Month': {
+            const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            lastDayLastMonth.setHours(23, 59, 59, 999);
+            return { startDate: firstDayLastMonth, endDate: lastDayLastMonth };
+          }
+          case 'This Quarter': {
+            const quarter = Math.floor(today.getMonth() / 3);
+            const firstDayQuarter = new Date(today.getFullYear(), quarter * 3, 1);
+            return { startDate: firstDayQuarter, endDate };
+          }
+          case 'Last Quarter': {
+            const currentQuarter = Math.floor(today.getMonth() / 3);
+            const lastQuarter = currentQuarter - 1;
+            const year = lastQuarter < 0 ? today.getFullYear() - 1 : today.getFullYear();
+            const adjustedQuarter = lastQuarter < 0 ? 3 : lastQuarter;
+            const firstDayLastQuarter = new Date(year, adjustedQuarter * 3, 1);
+            const lastDayLastQuarter = new Date(year, adjustedQuarter * 3 + 3, 0);
+            lastDayLastQuarter.setHours(23, 59, 59, 999);
+            return { startDate: firstDayLastQuarter, endDate: lastDayLastQuarter };
+          }
+          case 'This Year': {
+            const firstDayYear = new Date(today.getFullYear(), 0, 1);
+            return { startDate: firstDayYear, endDate };
+          }
+          case 'Last Year': {
+            const firstDayLastYear = new Date(today.getFullYear() - 1, 0, 1);
+            const lastDayLastYear = new Date(today.getFullYear() - 1, 11, 31);
+            lastDayLastYear.setHours(23, 59, 59, 999);
+            return { startDate: firstDayLastYear, endDate: lastDayLastYear };
+          }
+          default:
+            return { startDate: today, endDate };
+        }
+      };
+      
       let url = `/api/campaigns?timeRange=${timeRange}`;
       
-      // استخدام dateRange أو تاريخ اليوم كافتراضي
-      let effectiveDateRange = dateRange;
-      if (!effectiveDateRange) {
-        // افتراضي: تاريخ اليوم
-        effectiveDateRange = {
-          startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-          endDate: new Date(new Date().setHours(23, 59, 59, 999))
-        };
-      }
+      // حساب التواريخ من الـ label
+      const effectiveDateRange = getDateRangeFromLabel(dateRange || 'Today');
       
       url += `&startDate=${formatDateForAPI(effectiveDateRange.startDate)}&endDate=${formatDateForAPI(effectiveDateRange.endDate)}`;
       
-      console.log('📊 جلب الحملات للفترة:', formatDateForAPI(effectiveDateRange.startDate), '-', formatDateForAPI(effectiveDateRange.endDate));
+      console.log('📊 جلب الحملات للفترة:', dateRange, '-', formatDateForAPI(effectiveDateRange.startDate), 'إلى', formatDateForAPI(effectiveDateRange.endDate));
       
       const response = await fetch(url);
       const data = await response.json();
@@ -508,17 +725,87 @@ const DashboardPage: React.FC = () => {
         return `${year}-${month}-${day}`;
       };
       
+      // حساب التواريخ بناءً على الـ label
+      const getDateRangeFromLabel = (label: string): { startDate: Date, endDate: Date } => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endDate = new Date(today);
+        endDate.setHours(23, 59, 59, 999);
+        
+        switch (label) {
+          case 'Today':
+            return { startDate: today, endDate };
+          case 'Yesterday': {
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayEnd = new Date(yesterday);
+            yesterdayEnd.setHours(23, 59, 59, 999);
+            return { startDate: yesterday, endDate: yesterdayEnd };
+          }
+          case 'Last 7 days': {
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return { startDate: weekAgo, endDate };
+          }
+          case 'Last 30 days': {
+            const monthAgo = new Date(today);
+            monthAgo.setDate(monthAgo.getDate() - 30);
+            return { startDate: monthAgo, endDate };
+          }
+          case 'Last 60 days': {
+            const twoMonthsAgo = new Date(today);
+            twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
+            return { startDate: twoMonthsAgo, endDate };
+          }
+          case 'Last 90 days': {
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+            return { startDate: threeMonthsAgo, endDate };
+          }
+          case 'This Month': {
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            return { startDate: firstDay, endDate };
+          }
+          case 'Last Month': {
+            const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            lastDayLastMonth.setHours(23, 59, 59, 999);
+            return { startDate: firstDayLastMonth, endDate: lastDayLastMonth };
+          }
+          case 'This Quarter': {
+            const quarter = Math.floor(today.getMonth() / 3);
+            const firstDayQuarter = new Date(today.getFullYear(), quarter * 3, 1);
+            return { startDate: firstDayQuarter, endDate };
+          }
+          case 'Last Quarter': {
+            const currentQuarter = Math.floor(today.getMonth() / 3);
+            const lastQuarter = currentQuarter - 1;
+            const year = lastQuarter < 0 ? today.getFullYear() - 1 : today.getFullYear();
+            const adjustedQuarter = lastQuarter < 0 ? 3 : lastQuarter;
+            const firstDayLastQuarter = new Date(year, adjustedQuarter * 3, 1);
+            const lastDayLastQuarter = new Date(year, adjustedQuarter * 3 + 3, 0);
+            lastDayLastQuarter.setHours(23, 59, 59, 999);
+            return { startDate: firstDayLastQuarter, endDate: lastDayLastQuarter };
+          }
+          case 'This Year': {
+            const firstDayYear = new Date(today.getFullYear(), 0, 1);
+            return { startDate: firstDayYear, endDate };
+          }
+          case 'Last Year': {
+            const firstDayLastYear = new Date(today.getFullYear() - 1, 0, 1);
+            const lastDayLastYear = new Date(today.getFullYear() - 1, 11, 31);
+            lastDayLastYear.setHours(23, 59, 59, 999);
+            return { startDate: firstDayLastYear, endDate: lastDayLastYear };
+          }
+          default:
+            return { startDate: today, endDate };
+        }
+      };
+      
       let url = `/api/campaigns/performance?timeRange=${timeRange}`;
       
-      // استخدام dateRange أو تاريخ اليوم كافتراضي
-      let effectiveDateRange = dateRange;
-      if (!effectiveDateRange) {
-        // افتراضي: تاريخ اليوم
-        effectiveDateRange = {
-          startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-          endDate: new Date(new Date().setHours(23, 59, 59, 999))
-        };
-      }
+      // حساب التواريخ من الـ label
+      const effectiveDateRange = getDateRangeFromLabel(dateRange || 'Today');
       
       url += `&startDate=${formatDateForAPI(effectiveDateRange.startDate)}&endDate=${formatDateForAPI(effectiveDateRange.endDate)}`;
       
@@ -543,13 +830,28 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleRefresh = async () => {
-    console.log('🔄 تحديث يدوي للبيانات...');
-    // لا نظهر التحميل لأن البيانات الحالية ستبقى مرئية
-    await fetchAllData(false);
+    console.log('🔄 تحديث يدوي للبيانات من Google Ads...');
+    setIsLoading(true);
+    
+    try {
+      // تحديث الحملات والأداء
+      await fetchAllData(false);
+      
+      // تحديث AI Insights من Google Ads مباشرة (إجبار التحديث)
+      await refreshAiInsightsFromGoogleAds();
+      
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('❌ خطأ في التحديث:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDateRangeChange = async (range: any, comparison?: any) => {
-    setDateRange(range);
+    // حفظ الـ label للفترة الزمنية
+    const rangeLabel = range.label || 'Custom';
+    setDateRange(rangeLabel);
     setComparisonData(comparison);
     
     // Calculate days difference
@@ -574,7 +876,7 @@ const DashboardPage: React.FC = () => {
     const endDateStr = formatDateForAPI(range.endDate);
     
     // جلب البيانات الجديدة مباشرة
-    console.log(`📅 تغيير الفترة الزمنية: ${startDateStr} إلى ${endDateStr} (${days} يوم)`);
+    console.log(`📅 تغيير الفترة الزمنية: ${rangeLabel} (${startDateStr} إلى ${endDateStr})`);
     
     try {
       // إظهار اللودنج عند تغيير الفترة الزمنية
@@ -603,8 +905,8 @@ const DashboardPage: React.FC = () => {
         setPerformanceData(performanceResult.data || []);
       }
       
-      // جلب AI Insights للفترة الجديدة
-      fetchAiInsights(startDateStr, endDateStr);
+      // جلب AI Insights للفترة الجديدة (من الـ Cache أو Google Ads)
+      await fetchAiInsights(startDateStr, endDateStr);
       
       setLastUpdated(new Date());
     } catch (error) {
@@ -949,20 +1251,37 @@ const DashboardPage: React.FC = () => {
     };
   }, [campaigns]);
 
-  // استخدام البيانات من الحملات إذا لم تتوفر من API
-  const effectivePerformanceData = performanceData.length > 0 ? performanceData : campaignBasedChartData.performanceTrends;
-  const effectiveDeviceData = aiInsights?.device_performance?.length > 0 ? aiInsights.device_performance : campaignBasedChartData.devicePerformance;
-  const effectiveGenderData = aiInsights?.audience_data?.gender?.length > 0 ? aiInsights.audience_data.gender : campaignBasedChartData.genderData;
-  const effectiveAgeData = aiInsights?.audience_data?.age?.length > 0 ? aiInsights.audience_data.age : campaignBasedChartData.ageData;
-  const effectiveCompetitionData = aiInsights?.competition_data?.impression_share?.length > 0 ? aiInsights.competition_data.impression_share : campaignBasedChartData.competitionData;
-  const effectiveHourlyData = aiInsights?.hourly_data?.length > 0 ? aiInsights.hourly_data : campaignBasedChartData.hourlyData;
-  const effectiveKeywordData = aiInsights?.competition_data?.keywords?.length > 0 ? aiInsights.competition_data.keywords : campaignBasedChartData.keywordData;
-  const effectiveOptimizationScore = aiInsights?.optimization_score ?? campaignBasedChartData.optimizationScore;
-  const effectiveSearchTerms = aiInsights?.search_terms?.length > 0 ? aiInsights.search_terms : campaignBasedChartData.searchTerms;
-  const effectiveAdStrength = aiInsights?.ad_strength?.details?.length > 0 ? aiInsights.ad_strength : campaignBasedChartData.adStrength;
-  const effectiveLandingPages = aiInsights?.landing_pages?.length > 0 ? aiInsights.landing_pages : campaignBasedChartData.landingPages;
-  const effectiveBudgetRecs = aiInsights?.budget_recommendations?.length > 0 ? aiInsights.budget_recommendations : campaignBasedChartData.budgetRecommendations;
-  const effectiveAuctionInsights = aiInsights?.auction_insights?.length > 0 ? aiInsights.auction_insights : campaignBasedChartData.auctionInsights;
+  // ✅ استخدام البيانات الحقيقية فقط من API - لا بيانات وهمية
+  // إذا لم تتوفر بيانات من API، نعرض مصفوفة فارغة (No data)
+  const effectivePerformanceData = performanceData.length > 0 ? performanceData : [];
+  const effectiveDeviceData = aiInsights?.device_performance || [];
+  const effectiveGenderData = aiInsights?.audience_data?.gender || [];
+  const effectiveAgeData = aiInsights?.audience_data?.age || [];
+  const effectiveCompetitionData = aiInsights?.competition_data?.impression_share || [];
+  const effectiveHourlyData = aiInsights?.hourly_data || [];
+  const effectiveKeywordData = aiInsights?.competition_data?.keywords || [];
+  const effectiveOptimizationScore = aiInsights?.optimization_score ?? null;
+  const effectiveSearchTerms = aiInsights?.search_terms || [];
+  const effectiveAdStrength = aiInsights?.ad_strength || { distribution: { excellent: 0, good: 0, average: 0, poor: 0 }, details: [] };
+  const effectiveLandingPages = aiInsights?.landing_pages || [];
+  const effectiveBudgetRecs = aiInsights?.budget_recommendations || [];
+  const effectiveAuctionInsights = aiInsights?.auction_insights || [];
+  
+  // Debug logging
+  console.log('📊 Effective Data:', {
+    devices: effectiveDeviceData.length,
+    gender: effectiveGenderData.length,
+    age: effectiveAgeData.length,
+    competition: effectiveCompetitionData.length,
+    hourly: effectiveHourlyData.length,
+    keywords: effectiveKeywordData.length,
+    optimizationScore: effectiveOptimizationScore,
+    searchTerms: effectiveSearchTerms.length,
+    adStrength: effectiveAdStrength.details?.length || 0,
+    landingPages: effectiveLandingPages.length,
+    budgetRecs: effectiveBudgetRecs.length,
+    auctionInsights: effectiveAuctionInsights.length
+  });
 
   // Campaign Health Score Calculator
   const calculateHealthScore = (campaign: Campaign): number => {

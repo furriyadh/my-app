@@ -144,8 +144,28 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   ];
 
-  // دائماً يبدأ بتاريخ اليوم عند دخول الداشبورد
-  const getTodayRange = (): DateRange => {
+  // استرجاع الفترة المحفوظة أو استخدام اليوم كافتراضي
+  const getInitialRange = (): DateRange => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('dashboard_date_range');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // إعادة حساب التواريخ بناءً على الـ label المحفوظ
+          const preset = presets.find(p => p.label === parsed.label || p.labelAr === parsed.label);
+          if (preset) {
+            const freshRange = preset.getValue();
+            return {
+              ...freshRange,
+              label: parsed.label
+            };
+          }
+        } catch (e) {
+          console.warn('Failed to parse saved date range');
+        }
+      }
+    }
+    // افتراضي: اليوم
     return {
       startDate: new Date(new Date().setHours(0, 0, 0, 0)),
       endDate: new Date(new Date().setHours(23, 59, 59, 999)),
@@ -153,7 +173,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     };
   };
 
-  const [selectedRange, setSelectedRange] = useState<DateRange>(getTodayRange);
+  const [selectedRange, setSelectedRange] = useState<DateRange>(getInitialRange);
   const [compareEnabled, setCompareEnabled] = useState(false);
   const [comparisonRange, setComparisonRange] = useState<ComparisonRange | undefined>();
 

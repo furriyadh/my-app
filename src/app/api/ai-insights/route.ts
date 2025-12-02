@@ -1,4 +1,5 @@
 // API to fetch AI Insights from Google Ads (Devices, Audience, Competition, Budget Simulator)
+// يدعم التخزين في Supabase لتقليل استدعاءات API وتسريع العرض
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
@@ -12,44 +13,198 @@ const getSupabaseAdmin = () => {
   });
 };
 
-// دالة لجلب الحسابات المرتبطة من Supabase
-async function getConnectedAccounts(userId: string): Promise<string[]> {
+// ==================== دوال التخزين في Supabase ====================
+
+// جلب البيانات المخزنة من Supabase
+async function getCachedInsights(userId: string, startDate: string, endDate: string) {
   try {
     const supabase = getSupabaseAdmin();
     
-    // جلب جميع الحسابات للمستخدم
-    const { data: allData, error } = await supabase
+    const { data, error } = await supabase
+      .from('dashboard_aggregated')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('start_date', startDate)
+      .eq('end_date', endDate)
+      .single();
+    
+    if (error || !data) {
+      console.log(`📭 No cached data for ${userId} (${startDate} to ${endDate})`);
+      return null;
+    }
+    
+    // التحقق من أن البيانات ليست قديمة جداً (أقل من 6 ساعات)
+    const lastSynced = new Date(data.last_synced_at);
+    const now = new Date();
+    const hoursSinceSync = (now.getTime() - lastSynced.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursSinceSync > 6) {
+      console.log(`⏰ Cached data is stale (${hoursSinceSync.toFixed(1)} hours old)`);
+      return null;
+    }
+    
+    console.log(`✅ Found cached data for ${userId} (synced ${hoursSinceSync.toFixed(1)} hours ago)`);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching cached insights:', error);
+    return null;
+  }
+}
+
+// حفظ البيانات في Supabase
+async function saveInsightsToCache(
+  userId: string,
+  userEmail: string,
+  startDate: string,
+  endDate: string,
+  dateRangeLabel: string,
+  insights: any,
+  connectedAccountsCount: number
+) {
+  try {
+    const supabase = getSupabaseAdmin();
+    
+    const dataToSave = {
+      user_id: userId,
+      user_email: userEmail,
+      start_date: startDate,
+      end_date: endDate,
+      date_range_label: dateRangeLabel,
+      device_performance: insights.device_performance || [],
+      audience_gender: insights.audience_data?.gender || [],
+      audience_age: insights.audience_data?.age || [],
+      competition_data: insights.competition_data?.impression_share || [],
+      keyword_performance: insights.competition_data?.keywords || [],
+      hourly_performance: insights.hourly_data || [],
+      optimization_score: insights.optimization_score,
+      search_terms: insights.search_terms || [],
+      ad_strength: insights.ad_strength || { distribution: { excellent: 0, good: 0, average: 0, poor: 0 }, details: [] },
+      landing_pages: insights.landing_pages || [],
+      budget_recommendations: insights.budget_recommendations || [],
+      auction_insights: insights.auction_insights || [],
+      location_data: insights.location_data || [],
+      connected_accounts_count: connectedAccountsCount,
+      last_synced_at: new Date().toISOString()
+    };
+    
+    // Upsert - إدراج أو تحديث
+    const { error } = await supabase
+      .from('dashboard_aggregated')
+      .upsert(dataToSave, {
+        onConflict: 'user_id,start_date,end_date'
+      });
+    
+    if (error) {
+      console.error('❌ Error saving insights to cache:', error);
+      return false;
+    }
+    
+    console.log(`💾 Saved insights to cache for ${userId} (${startDate} to ${endDate})`);
+    return true;
+  } catch (error) {
+    console.error('❌ Exception saving insights:', error);
+    return false;
+  }
+}
+
+// تحويل البيانات المخزنة إلى صيغة الـ API response
+function formatCachedData(cachedData: any) {
+  return {
+    success: true,
+    fromCache: true,
+    lastSyncedAt: cachedData.last_synced_at,
+    device_performance: cachedData.device_performance || [],
+    audience_data: {
+      age: cachedData.audience_age || [],
+      gender: cachedData.audience_gender || []
+    },
+    competition_data: {
+      impression_share: cachedData.competition_data || [],
+      keywords: cachedData.keyword_performance || []
+    },
+    location_data: cachedData.location_data || [],
+    hourly_data: cachedData.hourly_performance || [],
+    optimization_score: cachedData.optimization_score,
+    search_terms: cachedData.search_terms || [],
+    ad_strength: cachedData.ad_strength || { distribution: { excellent: 0, good: 0, average: 0, poor: 0 }, details: [] },
+    landing_pages: cachedData.landing_pages || [],
+    budget_recommendations: cachedData.budget_recommendations || [],
+    auction_insights: cachedData.auction_insights || []
+  };
+}
+
+// ==================== نهاية دوال التخزين ====================
+
+// دالة لجلب الحسابات المرتبطة من Supabase
+async function getConnectedAccounts(userId: string, userEmail?: string): Promise<string[]> {
+  try {
+    const supabase = getSupabaseAdmin();
+    
+    console.log(`🔍 Searching connected accounts: userId=${userId}, email=${userEmail}`);
+    
+    // جلب جميع الحسابات للمستخدم بالـ user_id أولاً
+    let { data: allData, error } = await supabase
       .from('client_requests')
-      .select('customer_id, status, link_details')
+      .select('customer_id, status, link_details, user_email')
       .eq('user_id', userId);
     
     if (error) {
-      console.error('❌ خطأ في جلب الحسابات:', error);
+      console.error('❌ خطأ في جلب الحسابات بالـ user_id:', error);
+    }
+    
+    // إذا لم نجد بالـ user_id، نبحث بالـ email
+    if ((!allData || allData.length === 0) && userEmail) {
+      console.log(`🔍 No accounts by user_id, trying email: ${userEmail}`);
+      const { data: emailData, error: emailError } = await supabase
+        .from('client_requests')
+        .select('customer_id, status, link_details, user_email')
+        .eq('user_email', userEmail);
+      
+      if (!emailError && emailData) {
+        allData = emailData;
+      }
+    }
+    
+    console.log(`📊 Total accounts in DB: ${allData?.length || 0}`);
+    
+    if (!allData || allData.length === 0) {
       return [];
     }
     
     // فلترة الحسابات المرتبطة (Connected) - نفس المنطق في صفحة الحسابات
-    const connectedStatuses = ['ACTIVE', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED'];
-    const connectedAccounts = (allData || []).filter(row => {
+    // نضيف ENABLED لأن بعض الحسابات تُحفظ بهذه الحالة من Google Ads API
+    const connectedStatuses = ['ACTIVE', 'ENABLED', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED', 'PENDING'];
+    const connectedAccounts = allData.filter(row => {
       if (!row.customer_id) return false;
+      
+      console.log(`🔍 Checking account ${row.customer_id}: status=${row.status}, link_details=${JSON.stringify(row.link_details)}`);
       
       // التحقق من الحالة المباشرة
       if (connectedStatuses.includes(row.status)) {
+        console.log(`✅ Account ${row.customer_id} connected via status: ${row.status}`);
         return true;
       }
       
       // التحقق من link_details
       const linkDetails = row.link_details as any;
       if (linkDetails) {
-        if (linkDetails.link_status === 'ACTIVE' || linkDetails.verified === true) {
+        if (linkDetails.link_status === 'ACTIVE' || linkDetails.verified === true || linkDetails.status === 'ACTIVE') {
+          console.log(`✅ Account ${row.customer_id} connected via link_details`);
           return true;
         }
+      }
+      
+      // إذا لم يكن هناك status محدد لكن الحساب موجود، نعتبره متصل
+      if (!row.status && row.customer_id) {
+        console.log(`✅ Account ${row.customer_id} connected (no status, assuming connected)`);
+        return true;
       }
       
       return false;
     });
     
     const uniqueIds = [...new Set(connectedAccounts.map(row => row.customer_id).filter(Boolean))];
+    console.log(`✅ Connected accounts: ${uniqueIds.length}`, uniqueIds);
     return uniqueIds;
   } catch (error) {
     console.error('❌ خطأ في getConnectedAccounts:', error);
@@ -60,19 +215,32 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
 // دالة لتجديد access token
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
+    const clientId = process.env.GOOGLE_ADS_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+    
+    if (!clientId || !clientSecret) {
+      console.error('❌ Missing OAuth credentials for token refresh');
+      return null;
+    }
+    
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+        client_id: clientId,
+        client_secret: clientSecret,
         refresh_token: refreshToken,
         grant_type: 'refresh_token'
       })
     });
     
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Token refresh failed:', response.status, errorText);
+      return null;
+    }
     const data = await response.json();
+    console.log('✅ Token refreshed successfully');
     return data.access_token;
   } catch (error) {
     console.error('❌ خطأ في تجديد التوكن:', error);
@@ -91,7 +259,7 @@ async function googleAdsQuery(customerId: string, accessToken: string, developer
           'Authorization': `Bearer ${accessToken}`,
           'developer-token': developerToken,
           'Content-Type': 'application/json',
-          'login-customer-id': process.env.GOOGLE_ADS_MCC_ID?.replace(/-/g, '') || ''
+          'login-customer-id': (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '')
         },
         body: JSON.stringify({ query })
       }
@@ -333,11 +501,53 @@ async function fetchAuctionInsights(customerId: string, accessToken: string, dev
 }
 
 export async function GET(request: NextRequest) {
+  console.log('🚀 AI Insights API called');
+  
   try {
     // جلب التواريخ من الـ query parameters
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+    const forceRefresh = searchParams.get('refresh') === 'true'; // إجبار التحديث من Google Ads
+    const dateRangeLabel = searchParams.get('label') || 'Custom';
+    
+    console.log(`📅 AI Insights Request: startDate=${startDate}, endDate=${endDate}, forceRefresh=${forceRefresh}`);
+    
+    // جلب معلومات المستخدم و OAuth tokens من cookies (Google OAuth)
+    const cookieStore = await cookies();
+    const oauthUserInfoCookie = cookieStore.get('oauth_user_info')?.value;
+    const oauthAccessToken = cookieStore.get('oauth_access_token')?.value;
+    const oauthRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    
+    console.log('🔑 Cookies check:', {
+      hasUserInfo: !!oauthUserInfoCookie,
+      hasAccessToken: !!oauthAccessToken,
+      hasRefreshToken: !!oauthRefreshToken
+    });
+    
+    // استخراج معلومات المستخدم أولاً للتحقق من الـ cache
+    let userId = '';
+    let userEmail = '';
+    
+    if (oauthUserInfoCookie) {
+      try {
+        const userInfo = JSON.parse(decodeURIComponent(oauthUserInfoCookie));
+        userId = userInfo.id || '';
+        userEmail = userInfo.email || '';
+      } catch (e) {
+        console.error('❌ Error parsing oauth_user_info:', e);
+      }
+    }
+    
+    // ==================== جلب من الـ Cache أولاً ====================
+    if (userId && startDate && endDate && !forceRefresh) {
+      const cachedData = await getCachedInsights(userId, startDate, endDate);
+      if (cachedData) {
+        console.log('📦 Returning cached data');
+        return NextResponse.json(formatCachedData(cachedData));
+      }
+    }
+    // ==================== نهاية جلب الـ Cache ====================
     
     // بناء شرط التاريخ للـ query
     let dateCondition = 'segments.date DURING LAST_30_DAYS';
@@ -346,25 +556,19 @@ export async function GET(request: NextRequest) {
       console.log(`📅 AI Insights للفترة: ${startDate} إلى ${endDate}`);
     }
     
-    // جلب userId من Supabase auth
-    const cookieStore = await cookies();
-    const supabaseAccessToken = cookieStore.get('sb-access-token')?.value;
+    console.log('👤 AI Insights - User:', { userId, userEmail });
     
-    if (!supabaseAccessToken) {
+    if (!userId || !oauthAccessToken) {
+      console.log('❌ Not authenticated - missing userId or access token');
       return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
     }
     
-    const supabase = getSupabaseAdmin();
-    const { data: { user }, error: authError } = await supabase.auth.getUser(supabaseAccessToken);
-    
-    if (authError || !user) {
-      return NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 });
-    }
-    
-    // جلب الحسابات المرتبطة
-    const connectedAccounts = await getConnectedAccounts(user.id);
+    // جلب الحسابات المرتبطة من Supabase (بالـ user_id أو email)
+    const connectedAccounts = await getConnectedAccounts(userId, userEmail);
+    console.log(`📊 Found ${connectedAccounts.length} connected accounts:`, connectedAccounts);
     
     if (connectedAccounts.length === 0) {
+      console.log('⚠️ No connected accounts found for AI Insights');
       return NextResponse.json({
         success: true,
         device_performance: [],
@@ -382,23 +586,14 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // جلب OAuth tokens
-    const { data: tokenData } = await supabase
-      .from('oauth_tokens')
-      .select('access_token, refresh_token')
-      .eq('user_id', user.id)
-      .eq('provider', 'google')
-      .single();
-    
-    if (!tokenData) {
-      return NextResponse.json({ success: false, error: 'No OAuth tokens found' }, { status: 401 });
-    }
-    
-    // تجديد التوكن
-    let accessToken = tokenData.access_token;
-    const newToken = await refreshAccessToken(tokenData.refresh_token);
-    if (newToken) {
-      accessToken = newToken;
+    // تجديد التوكن إذا لزم الأمر
+    let accessToken = oauthAccessToken;
+    if (oauthRefreshToken) {
+      const newToken = await refreshAccessToken(oauthRefreshToken);
+      if (newToken) {
+        accessToken = newToken;
+        console.log('✅ Token refreshed successfully');
+      }
     }
     
     const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN!;
@@ -426,8 +621,11 @@ export async function GET(request: NextRequest) {
       const cleanId = customerId.replace(/-/g, '');
       
       try {
+        console.log(`🔄 Fetching data for account ${cleanId}...`);
+        
         // 1. Device Performance
         const devices = await fetchDevicePerformance(cleanId, accessToken, developerToken, dateCondition);
+        console.log(`📱 Device data for ${cleanId}: ${devices.length} rows`);
         for (const row of devices) {
           const device = row.segments?.device || 'UNKNOWN';
           if (!deviceData[device]) {
@@ -712,8 +910,11 @@ export async function GET(request: NextRequest) {
       }))
       .sort((a, b) => a.hour - b.hour);
     
-    return NextResponse.json({
+    // بناء الـ response object
+    const responseData = {
       success: true,
+      fromCache: false,
+      lastSyncedAt: new Date().toISOString(),
       device_performance: devicePerformance,
       audience_data: {
         age: ageBreakdown,
@@ -725,7 +926,6 @@ export async function GET(request: NextRequest) {
       },
       location_data: locationData,
       hourly_data: hourlyBreakdown,
-      // New data
       optimization_score: optimizationScoreCount > 0 ? Math.round(optimizationScoreTotal / optimizationScoreCount) : null,
       search_terms: searchTermsData.slice(0, 15),
       ad_strength: {
@@ -740,7 +940,24 @@ export async function GET(request: NextRequest) {
       landing_pages: landingPagesData.slice(0, 8),
       budget_recommendations: budgetRecsData.slice(0, 5),
       auction_insights: auctionInsightsData.slice(0, 5)
-    });
+    };
+    
+    // ==================== حفظ البيانات في الـ Cache ====================
+    if (startDate && endDate) {
+      // حفظ في الخلفية بدون انتظار
+      saveInsightsToCache(
+        userId,
+        userEmail,
+        startDate,
+        endDate,
+        dateRangeLabel,
+        responseData,
+        connectedAccounts.length
+      ).catch(err => console.error('❌ Background cache save failed:', err));
+    }
+    // ==================== نهاية حفظ الـ Cache ====================
+    
+    return NextResponse.json(responseData);
     
   } catch (error) {
     console.error('❌ خطأ في AI Insights API:', error);
