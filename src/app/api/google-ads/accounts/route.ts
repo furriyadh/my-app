@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBackendUrl } from '@/lib/config';
+import { cookies } from 'next/headers';
 
 /**
  * Google Ads Accounts API - يتبع الممارسات الرسمية من Google Ads API Documentation
@@ -22,192 +22,230 @@ interface GoogleAdsAccount {
   resourceName?: string;
 }
 
+// دالة لتجديد access token
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+  try {
+    console.log('🔄 محاولة تجديد access token...');
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID || '',
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET || '',
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token'
+      })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ تم تجديد access token بنجاح');
+      return data.access_token;
+    }
+    console.error('❌ فشل تجديد token:', response.status);
+    return null;
+  } catch (error) {
+    console.error('❌ خطأ في تجديد token:', error);
+    return null;
+  }
+}
+
+// دالة للحصول على Access Token - تستخدم MCC Token أولاً
+async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
+  // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
+  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+  
+  if (mccRefreshToken) {
+    console.log('🔑 محاولة استخدام MCC Token من البيئة...');
+    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
+    if (mccAccessToken) {
+      console.log('✅ تم الحصول على MCC Access Token بنجاح');
+      return mccAccessToken;
+    }
+    console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
+  }
+  
+  // 2. ثانياً: نحاول User OAuth Token كـ fallback
+  if (userRefreshToken) {
+    console.log('🔑 محاولة استخدام User OAuth Token...');
+    const userAccessToken = await refreshAccessToken(userRefreshToken);
+    if (userAccessToken) {
+      console.log('✅ تم الحصول على User Access Token بنجاح');
+      return userAccessToken;
+    }
+  }
+  
+  console.error('❌ فشل الحصول على أي Access Token صالح');
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Fetching Google Ads accounts (حسب Google Ads API Documentation)...');
     
-    // الحصول على access token من Authorization header (حسب Google Identity Platform)
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('❌ Missing or invalid authorization header');
-      console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2');
+    // الحصول على refresh token من cookies
+    const cookieStore = await cookies();
+    const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    
+    // 🔑 الحصول على Access Token - MCC أولاً
+    const accessToken = await getValidAccessToken(userRefreshToken);
+    
+    if (!accessToken) {
+      console.error('❌ No valid access token available');
       return NextResponse.json({
         success: false,
-        error: 'Missing or invalid authorization header',
-        message: 'Access token is required - راجع المصادر الرسمية',
-        docs: 'https://developers.google.com/identity/protocols/oauth2'
+        error: 'No valid access token',
+        message: 'لم يتم العثور على رمز وصول صالح',
+        accounts: []
       }, { status: 401 });
     }
-
-    const accessToken = authHeader.replace('Bearer ', '');
-    console.log('🔍 Fetching Google Ads accounts with access token...');
 
     // التحقق من وجود developer token (مطلوب حسب Google Ads API Documentation)
     const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
     if (!developerToken) {
       console.error('❌ GOOGLE_ADS_DEVELOPER_TOKEN غير محدد');
-      console.error('📋 راجع: https://developers.google.com/google-ads/api/docs/oauth/overview');
       return NextResponse.json({
         success: false,
         error: 'Developer token not configured',
-        message: 'Developer token مطلوب - راجع المصادر الرسمية',
-        docs: 'https://developers.google.com/google-ads/api/docs/oauth/overview'
+        message: 'Developer token مطلوب',
+        accounts: []
       }, { status: 500 });
     }
 
-    // الحصول على حسابات Google Ads باستخدام Google Ads API (حسب Google Ads API Documentation)
+    // الحصول على حسابات Google Ads باستخدام Google Ads API
     const accounts = await getGoogleAdsAccounts(accessToken, developerToken);
     
-    console.log(`✅ Found ${accounts.length} Google Ads accounts (حسب Google Ads API Documentation)`);
+    console.log(`✅ Found ${accounts.length} Google Ads accounts`);
     
     return NextResponse.json({
       success: true,
       accounts: accounts,
-      count: accounts.length,
-      docs: 'https://developers.google.com/google-ads/api/docs/reference/rest/v20/customers/listAccessibleCustomers'
+      count: accounts.length
     });
 
   } catch (error) {
     console.error('❌ Error fetching Google Ads accounts:', error);
-    console.error('📋 راجع: https://developers.google.com/google-ads/api/docs/oauth/overview');
     return NextResponse.json({
       success: false,
       error: 'Failed to fetch Google Ads accounts',
-      message: error instanceof Error ? error.message : 'Unknown error - راجع المصادر الرسمية',
-      docs: 'https://developers.google.com/google-ads/api/docs/oauth/overview',
+      message: error instanceof Error ? error.message : 'Unknown error',
       accounts: []
     }, { status: 500 });
   }
 }
 
-// دالة للحصول على حسابات Google Ads (حسب Google Ads API Documentation)
+// دالة للحصول على حسابات Google Ads مباشرة من API
 async function getGoogleAdsAccounts(accessToken: string, developerToken: string): Promise<GoogleAdsAccount[]> {
   try {
-    console.log('📊 استدعاء الباك اند للحصول على الحسابات باستخدام Google Ads API Client Library...');
+    console.log('📊 جلب الحسابات مباشرة من Google Ads API...');
     
-    // استدعاء الباك اند الذي يستخدم Google Ads API Client Library (الطريقة الرسمية)
-    const response = await fetch(`${getBackendUrl()}/api/user/accounts`, {
+    const loginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '');
+    
+    // جلب قائمة الحسابات المتاحة
+    const listResponse = await fetch('https://googleads.googleapis.com/v21/customers:listAccessibleCustomers', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
+        'developer-token': developerToken,
         'Content-Type': 'application/json'
       },
-      credentials: 'include' // إرسال HttpOnly cookies
+      signal: AbortSignal.timeout(15000)
     });
 
-    if (!response.ok) {
-      console.warn(`Backend API error: ${response.status} ${response.statusText}`);
-      console.warn('📋 استدعاء الباك اند فشل، محاولة الحصول على الحسابات من OAuth...');
+    if (!listResponse.ok) {
+      console.error('❌ فشل في جلب قائمة الحسابات:', listResponse.status);
+      return [];
+    }
+
+    const listData = await listResponse.json();
+    const resourceNames = listData.resourceNames || [];
+    console.log(`📋 عدد الحسابات المتاحة: ${resourceNames.length}`);
+    
+    const accounts: GoogleAdsAccount[] = [];
+    
+    for (const resourceName of resourceNames) {
+      const customerId = resourceName.split('/').pop();
       
-      // إذا فشل استدعاء الباك اند، نحاول الحصول على الحسابات من Google OAuth
-      return await getAccountsFromOAuth(accessToken);
-    }
-
-    const data = await response.json();
-    console.log('Backend API response:', data);
-    
-    if (!data.success || !data.accounts || data.accounts.length === 0) {
-      console.log('No Google Ads accounts found via backend, trying OAuth method...');
-      return await getAccountsFromOAuth(accessToken);
-    }
-
-    // تحويل البيانات من الباك اند إلى التنسيق المطلوب
-    const accounts: GoogleAdsAccount[] = data.accounts.map((account: any) => ({
-      customerId: account.customerId || account.customer_id,
-      descriptiveName: account.customerName || account.descriptive_name || `Account ${account.customerId || account.customer_id}`,
-      currencyCode: account.currencyCode || account.currency_code || 'USD',
-      timeZone: account.timeZone || account.time_zone || 'America/New_York',
-      manager: account.manager || false,
-      testAccount: account.testAccount || account.test_account || false,
-      status: account.status || 'ENABLED',
-      resourceName: account.resourceName || `customers/${account.customerId || account.customer_id}`
-    }));
-
-    return accounts;
-
-  } catch (error) {
-    console.error('Error in getGoogleAdsAccounts:', error);
-    console.error('📋 راجع: https://developers.google.com/google-ads/api/docs/oauth/overview');
-    
-    // محاولة الحصول من OAuth كبديل (حسب الممارسات الرسمية)
-    return await getAccountsFromOAuth(accessToken);
-  }
-}
-
-// دالة للحصول على تفاصيل الحساب (حسب Google Ads API Documentation)
-async function getAccountDetails(customerId: string, accessToken: string, developerToken: string): Promise<GoogleAdsAccount> {
-  console.log(`📊 Getting details for account ${customerId} (حسب Google Ads API Documentation)...`);
-  
-  const response = await fetch(`https://googleads.googleapis.com/v20/customers/${customerId}`, {
-    method: 'GET',
+      try {
+        // جلب تفاصيل كل حساب
+        const detailsResponse = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
+          method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'developer-token': developerToken,
+            'login-customer-id': loginCustomerId,
       'Content-Type': 'application/json'
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to get account details: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  console.log(`Account details for ${customerId}:`, data);
-
-  return {
-    customerId: data.id || customerId,
-    descriptiveName: data.descriptiveName || `Account ${customerId}`,
-    currencyCode: data.currencyCode || 'USD',
-    timeZone: data.timeZone || 'America/New_York',
-    manager: data.manager || false,
-    testAccount: data.testAccount || false,
-    status: data.status || 'ENABLED',
-    resourceName: data.resourceName || `customers/${customerId}`
-  };
+          },
+          body: JSON.stringify({
+            query: `
+              SELECT 
+                customer.id,
+                customer.descriptive_name,
+                customer.currency_code,
+                customer.time_zone,
+                customer.status,
+                customer.manager,
+                customer.test_account
+              FROM customer
+              LIMIT 1
+            `
+          }),
+          signal: AbortSignal.timeout(10000)
+        });
+        
+        if (detailsResponse.ok) {
+          const detailsData = await detailsResponse.json();
+          const results = detailsData.results || [];
+          
+          if (results.length > 0) {
+            const customer = results[0].customer;
+            accounts.push({
+              customerId: customerId,
+              descriptiveName: customer.descriptiveName || `Account ${customerId}`,
+              currencyCode: customer.currencyCode || 'USD',
+              timeZone: customer.timeZone || 'UTC',
+              manager: customer.manager || false,
+              testAccount: customer.testAccount || false,
+              status: customer.status || 'ENABLED',
+              resourceName: resourceName
+            });
 }
-
-// دالة بديلة للحصول على الحسابات من OAuth (حسب الممارسات الرسمية)
-async function getAccountsFromOAuth(accessToken: string): Promise<GoogleAdsAccount[]> {
-  console.log('📊 Trying to get accounts from OAuth (حسب الممارسات الرسمية)...');
-  
-  try {
-    // محاولة الحصول على معلومات المستخدم من Google Identity Platform
-    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    if (userInfoResponse.ok) {
-      const userInfo = await userInfoResponse.json();
-      console.log('User info from OAuth:', userInfo);
-      
-      // إنشاء حساب افتراضي بناءً على معلومات المستخدم
-      return [{
-        customerId: 'default',
-        descriptiveName: userInfo.name || userInfo.email || 'Default Account',
+        } else {
+          // إضافة الحساب حتى لو فشل جلب التفاصيل
+          accounts.push({
+            customerId: customerId,
+            descriptiveName: `Account ${customerId}`,
+            currencyCode: 'USD',
+            timeZone: 'UTC',
+            manager: false,
+            testAccount: false,
+            status: 'ENABLED',
+            resourceName: resourceName
+          });
+        }
+      } catch (error) {
+        console.warn(`⚠️ فشل في جلب تفاصيل الحساب ${customerId}:`, error);
+        accounts.push({
+          customerId: customerId,
+          descriptiveName: `Account ${customerId}`,
         currencyCode: 'USD',
-        timeZone: 'America/New_York',
+          timeZone: 'UTC',
         manager: false,
         testAccount: false,
-        status: 'ENABLED'
-      }];
+          status: 'ENABLED',
+          resourceName: resourceName
+        });
     }
-  } catch (error) {
-    console.warn('Failed to get user info from OAuth:', error);
-  }
+    }
+    
+    console.log(`✅ تم جلب ${accounts.length} حساب`);
+    return accounts;
 
-  // إرجاع حساب افتراضي إذا فشل كل شيء
-  return [{
-    customerId: 'default',
-    descriptiveName: 'Default Google Ads Account',
-    currencyCode: 'USD',
-    timeZone: 'America/New_York',
-    manager: false,
-    testAccount: false,
-    status: 'ENABLED'
-  }];
+  } catch (error) {
+    console.error('❌ Error in getGoogleAdsAccounts:', error);
+    return [];
 }
+}
+
 
 export async function POST(request: NextRequest) {
   return NextResponse.json(

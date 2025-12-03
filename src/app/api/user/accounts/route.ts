@@ -5,6 +5,68 @@ import { cookies } from 'next/headers';
 const accountsCache = new Map<string, { data: any, timestamp: number }>();
 const CACHE_DURATION = 30000; // 30 ثانية
 
+// دالة لتجديد access token باستخدام أي refresh token
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+  try {
+    console.log('🔄 محاولة تجديد access token...');
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID || '',
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET || '',
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token'
+      })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ تم تجديد access token بنجاح');
+      return data.access_token;
+    }
+    console.error('❌ فشل تجديد token:', response.status);
+    return null;
+  } catch (error) {
+    console.error('❌ خطأ في تجديد token:', error);
+    return null;
+  }
+}
+
+// دالة للحصول على Access Token - تستخدم MCC Token أولاً ثم User Token كـ fallback
+async function getValidAccessToken(userAccessToken?: string, userRefreshToken?: string): Promise<string | null> {
+  // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
+  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+  
+  if (mccRefreshToken) {
+    console.log('🔑 محاولة استخدام MCC Token من البيئة...');
+    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
+    if (mccAccessToken) {
+      console.log('✅ تم الحصول على MCC Access Token بنجاح');
+      return mccAccessToken;
+    }
+    console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
+  }
+  
+  // 2. ثانياً: نحاول User Access Token الموجود
+  if (userAccessToken) {
+    console.log('🔑 استخدام User Access Token الموجود...');
+    return userAccessToken;
+  }
+  
+  // 3. ثالثاً: نحاول تجديد User OAuth Token
+  if (userRefreshToken) {
+    console.log('🔑 محاولة تجديد User OAuth Token...');
+    const newUserToken = await refreshAccessToken(userRefreshToken);
+    if (newUserToken) {
+      console.log('✅ تم الحصول على User Access Token بنجاح');
+      return newUserToken;
+    }
+  }
+  
+  console.error('❌ فشل الحصول على أي Access Token صالح');
+  return null;
+}
+
 // دالة للحصول على حسابات العميل الفعلية فقط (وليس MCC accounts)
 async function getRealCustomerAccounts(accessToken: string) {
   try {
@@ -214,15 +276,15 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // ✅ استخدام access token المستخدم الحالي مباشرة مع Google API
-    // ❌ لا نستدعي Flask Backend لأنه يجلب جميع حسابات MCC
-    console.log('🔄 جلب حسابات المستخدم الحالي مباشرة من Google Ads API...');
+    // 🔑 الحصول على Access Token - MCC أولاً ثم User Token
+    console.log('🔑 جلب Access Token (MCC أولاً)...');
+    const validAccessToken = await getValidAccessToken(accessToken, refreshToken);
     
-    if (accessToken) {
-      console.log('✅ استخدام access token المستخدم الحالي مباشرة مع Google API');
+    if (validAccessToken) {
+      console.log('✅ استخدام Access Token صالح مع Google API');
       
-      // جلب الحسابات مباشرة من Google API باستخدام access token المستخدم
-      const directAccounts = await getRealCustomerAccounts(accessToken);
+      // جلب الحسابات مباشرة من Google API باستخدام access token
+      const directAccounts = await getRealCustomerAccounts(validAccessToken);
       
       console.log(`📊 تم جلب ${directAccounts.length} حساب للمستخدم ${currentUserEmail}`);
       
@@ -249,84 +311,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(formattedAccounts);
     }
     
-    // إذا لم يوجد access token، جرب استخدام refresh token
-    console.log('⚠️ لا يوجد access token - محاولة استخدام refresh token:', refreshToken ? 'موجود' : 'غير موجود');
-    
-    if (refreshToken) {
-      try {
-        // محاولة تجديد access token
-        console.log('🔄 محاولة تجديد access token باستخدام refresh token...');
-        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            client_id: process.env.GOOGLE_ADS_CLIENT_ID || '',
-            client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET || '',
-            refresh_token: refreshToken,
-            grant_type: 'refresh_token'
-          })
-        });
-
-        if (tokenResponse.ok) {
-          const tokenData = await tokenResponse.json();
-          console.log('✅ تم تجديد access token بنجاح');
-          
-          // استخدام الـ access token الجديد مباشرة مع Google API
-          const newAccessToken = tokenData.access_token;
-          const directAccounts = await getRealCustomerAccounts(newAccessToken);
-          
-          console.log(`📊 تم جلب ${directAccounts.length} حساب للمستخدم ${currentUserEmail} (بعد تجديد التوكن)`);
-          
-          const formattedAccounts = {
-            google_ads: directAccounts,
-            merchant_center: [],
-            youtube: [],
-            analytics: [],
-            business: [],
-            user: {
-              id: currentUserId,
-              email: currentUserEmail
-            }
-          };
-          
-          // 📱 حفظ الـ access token الجديد في cookies للحفاظ على الجلسة
-          const response = NextResponse.json(formattedAccounts, { 
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          // 📱 حفظ access token الجديد - مدة طويلة للحفاظ على الجلسة على جميع الأجهزة
-          response.cookies.set('oauth_access_token', newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 3600, // 📱 7 أيام
-            path: '/'
-          });
-          
-          // 📱 تجديد حالة الاتصال
-          response.cookies.set('google_ads_connected', 'true', {
-            httpOnly: false,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 365 * 24 * 3600, // 📱 سنة كاملة
-            path: '/'
-          });
-          
-          console.log('💾 تم حفظ access token الجديد في cookies');
-          return response;
-        } else {
-          const errorText = await tokenResponse.text();
-          console.error('❌ فشل تجديد access token:', tokenResponse.status, errorText);
-        }
-      } catch (error) {
-        console.error('❌ خطأ في تجديد access token:', error);
-      }
-    }
+    // إذا لم يوجد access token صالح
+    console.log('⚠️ لا يوجد access token صالح');
     
     // إذا فشل كل شيء، إرجاع بيانات فارغة
     console.log('⚠️ لا يمكن الحصول على access token - إرجاع بيانات فارغة');

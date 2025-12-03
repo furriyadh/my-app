@@ -83,7 +83,7 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
   }
 }
 
-// دالة لتجديد access token
+// دالة لتجديد access token باستخدام أي refresh token
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
     console.log('🔄 محاولة تجديد access token...');
@@ -110,14 +110,45 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   }
 }
 
+// دالة للحصول على Access Token - تستخدم MCC Token أولاً ثم User Token كـ fallback
+async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
+  // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
+  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+  
+  if (mccRefreshToken) {
+    console.log('🔑 محاولة استخدام MCC Token من البيئة...');
+    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
+    if (mccAccessToken) {
+      console.log('✅ تم الحصول على MCC Access Token بنجاح');
+      return mccAccessToken;
+    }
+    console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
+  }
+  
+  // 2. ثانياً: نحاول User OAuth Token كـ fallback
+  if (userRefreshToken) {
+    console.log('🔑 محاولة استخدام User OAuth Token...');
+    const userAccessToken = await refreshAccessToken(userRefreshToken);
+    if (userAccessToken) {
+      console.log('✅ تم الحصول على User Access Token بنجاح');
+      return userAccessToken;
+    }
+  }
+  
+  console.error('❌ فشل الحصول على أي Access Token صالح');
+  return null;
+}
+
 // دالة لجلب عملة الحساب
 async function getAccountCurrency(customerId: string, accessToken: string): Promise<string> {
   try {
+    const loginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '');
     const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
+        'login-customer-id': loginCustomerId,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -165,11 +196,13 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
       console.log(`📅 حساب التواريخ على الخادم: ${startDateStr} - ${endDateStr}`);
     }
     
+    const loginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '');
     const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
+        'login-customer-id': loginCustomerId,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -250,8 +283,7 @@ export async function GET(request: NextRequest) {
     
     // الحصول على معلومات المستخدم و tokens من cookies
     const cookieStore = await cookies();
-    let accessToken = cookieStore.get('oauth_access_token')?.value;
-    const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
     const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
     
     // استخراج user ID
@@ -264,14 +296,9 @@ export async function GET(request: NextRequest) {
       } catch (e) {}
     }
     
-    // تجديد access token دائماً للتأكد من صلاحيته
-    if (refreshToken) {
-      console.log('🔄 تجديد access token للتأكد من صلاحيته...');
-      const newToken = await refreshAccessToken(refreshToken);
-      if (newToken) {
-        accessToken = newToken;
-      }
-    }
+    // 🔑 الحصول على Access Token - MCC أولاً ثم User Token
+    console.log('🔑 جلب Access Token (MCC أولاً)...');
+    const accessToken = await getValidAccessToken(userRefreshToken);
     
     // إذا لم يوجد access token أو user ID - إرجاع بيانات فارغة (وليس mock)
     if (!accessToken || !userId) {
