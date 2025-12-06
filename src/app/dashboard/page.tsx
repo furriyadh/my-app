@@ -1744,18 +1744,20 @@ const DashboardPage: React.FC = () => {
           --glow-x: 50%;
           --glow-y: 50%;
           --glow-intensity: 0;
-          --glow-radius: 200px;
+          --glow-radius: 250px;
           --glow-color: 132, 0, 255;
           --border-color: #4c3d6b;
           --background-dark: #060010;
           --white: hsl(0, 0%, 100%);
           --purple-primary: rgba(132, 0, 255, 1);
-          --purple-glow: rgba(132, 0, 255, 0.2);
-          --purple-border: rgba(132, 0, 255, 0.8);
+          --purple-glow: rgba(132, 0, 255, 0.25);
+          --purple-border: rgba(132, 0, 255, 0.9);
           --text-primary: #ffffff;
           --text-secondary: #c4b5fd;
           --text-muted: #a78bfa;
           --grid-color: #4c3d6b;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(132, 0, 255, 0.1);
           --axis-color: #9f8fd4;
           
           background-color: var(--background-dark);
@@ -1829,11 +1831,13 @@ const DashboardPage: React.FC = () => {
         .chart-card:hover {
           border-color: var(--purple-border) !important;
           box-shadow: 
-            0 4px 20px rgba(46, 24, 78, 0.6), 
-            0 0 40px rgba(132, 0, 255, 0.4),
-            0 0 60px rgba(132, 0, 255, 0.3),
-            0 0 80px rgba(132, 0, 255, 0.2) !important;
-          transform: translateY(-2px);
+            0 8px 32px rgba(46, 24, 78, 0.8), 
+            0 0 60px rgba(132, 0, 255, 0.5),
+            0 0 90px rgba(132, 0, 255, 0.4),
+            0 0 120px rgba(132, 0, 255, 0.3),
+            inset 0 0 40px rgba(132, 0, 255, 0.1) !important;
+          transform: translateY(-4px) scale(1.01);
+          background: linear-gradient(135deg, rgba(6, 0, 16, 0.95) 0%, rgba(30, 10, 50, 0.95) 100%);
         }
         
         .chart-card:hover::after {
@@ -1863,28 +1867,41 @@ const DashboardPage: React.FC = () => {
           }
         }
         
-        /* Chart titles styling - Compact */
+        /* Chart titles styling - Enhanced */
         .chart-card h3 {
           font-weight: 700;
-          font-size: 1.125rem;
-          margin: 0 0 0.75rem 0;
+          font-size: 1.25rem;
+          margin: 0 0 0.5rem 0;
           padding: 0;
           color: var(--text-primary);
           position: relative;
           z-index: 2;
-          letter-spacing: 0.025em;
+          letter-spacing: 0.03em;
           text-align: center;
-          line-height: 1.4;
+          line-height: 1.5;
+          text-shadow: 0 2px 8px rgba(132, 0, 255, 0.3);
+          transition: all 0.3s ease;
         }
         
-        /* Chart subtitle/description - Compact */
+        .chart-card:hover h3 {
+          color: #c4b5fd;
+          text-shadow: 0 2px 12px rgba(132, 0, 255, 0.5);
+        }
+        
+        /* Chart subtitle/description - Enhanced */
         .chart-card .chart-description {
-          font-size: 0.75rem;
+          font-size: 0.875rem;
           color: var(--text-muted);
           text-align: center;
-          margin-bottom: 0.75rem;
+          margin-bottom: 1rem;
           padding: 0;
-          line-height: 1.3;
+          line-height: 1.4;
+          opacity: 0.85;
+          transition: opacity 0.3s ease;
+        }
+        
+        .chart-card:hover .chart-description {
+          opacity: 1;
         }
         
         /* Chart container relative positioning */
@@ -1978,6 +1995,33 @@ const DashboardPage: React.FC = () => {
           border-radius: 12px !important;
           box-shadow: 0 10px 40px rgba(132, 0, 255, 0.3) !important;
           padding: 12px !important;
+        }
+        
+        /* Custom Scrollbar Styling */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(76, 61, 107, 0.2);
+          border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #8B5CF6 0%, #6D28D9 100%);
+          border-radius: 10px;
+          border: 2px solid rgba(76, 61, 107, 0.2);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #A855F7 0%, #7C3AED 100%);
+        }
+        
+        /* Firefox scrollbar */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #8B5CF6 rgba(76, 61, 107, 0.2);
         }
         
         /* Enhanced text styling - Compact */
@@ -3065,108 +3109,11 @@ const DashboardPage: React.FC = () => {
 
           {/* ===== OPTIMIZED CHARTS SECTION ===== */}
           
-          {/* Row 1: Performance Trends & Revenue vs Spend */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 1. Performance Trends */}
-            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500"></div>
-              <h3 className="flex items-center gap-2 mt-8">
-                <Activity className="w-5 h-5 text-purple-400" />
-                {isRTL ? 'اتجاهات الأداء' : 'Performance Trends'}
-              </h3>
-              <p className="chart-description">{isRTL ? 'نظرة عامة على المقاييس اليومية' : 'Daily metrics overview'}</p>
-              {effectivePerformanceData.length > 0 ? (
-              <ChartContainer
-                config={{
-                  impressions: { label: isRTL ? "المشاهدات" : "Impressions", color: CHART_COLORS.primary },
-                  clicks: { label: isRTL ? "النقرات" : "Clicks", color: CHART_COLORS.secondary }
-                }}
-                className="h-[250px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={effectivePerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="impressionsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="clicksGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Area type="monotone" dataKey="impressions" stroke="#8B5CF6" strokeWidth={3} fill="url(#impressionsGrad)" />
-                    <Area type="monotone" dataKey="clicks" stroke="#EC4899" strokeWidth={3} fill="url(#clicksGrad)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
-                <div className="h-[250px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <p className="text-sm">{isRTL ? 'لا توجد بيانات أداء' : 'No performance data'}</p>
-                </div>
-            </div>
-              )}
-            </div>
-            {/* 2. Revenue vs Spend */}
-            <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500"></div>
-              <h3 className="flex items-center gap-2 mt-8">
-                <DollarSign className="w-5 h-5 text-green-400" />
-                {isRTL ? 'الإيرادات مقابل الإنفاق' : 'Revenue vs Spend'}
-              </h3>
-              <p className="chart-description">{isRTL ? 'مقارنة الأداء المالي' : 'Financial comparison'}</p>
-              {effectivePerformanceData.length > 0 ? (
-              <ChartContainer
-                config={{
-                    cost: { label: isRTL ? "الإنفاق" : "Spend", color: '#EC4899' },
-                    conversionsValue: { label: isRTL ? "الإيرادات" : "Revenue", color: '#10B981' }
-                }}
-                  className="h-[250px]"
-              >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={effectivePerformanceData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                        <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.6}/>
-                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                      </linearGradient>
-                        <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#EC4899" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
-                      <XAxis dataKey="day" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(value)} />
-                    <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="conversionsValue" stroke="#10B981" strokeWidth={3} fill="url(#revenueGrad)" />
-                      <Area type="monotone" dataKey="cost" stroke="#EC4899" strokeWidth={3} fill="url(#spendGrad)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
-                <div className="h-[250px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <p className="text-sm">{isRTL ? 'لا توجد بيانات مالية' : 'No financial data'}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-            
-          {/* Row 2: Conversion Funnel & ROAS Trend */}
+           {/* Row 1: Conversion Funnel & ROAS Trend */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 3. Conversion Funnel */}
+            {/* 3. Conversion Funnel - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Filter className="w-5 h-5 text-purple-400" />
                 {isRTL ? 'قمع التحويل' : 'Conversion Funnel'}
@@ -3182,16 +3129,30 @@ const DashboardPage: React.FC = () => {
                       { stage: isRTL ? 'التحويلات' : 'Conversions', value: metrics.conversions || 0, fill: '#10B981' }
                     ]}
                     layout="vertical"
-                    margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                    margin={{ top: 15, right: 40, left: 15, bottom: 15 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
-                    <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} />
-                    <YAxis type="category" dataKey="stage" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} width={80} />
+                    <defs>
+                      <linearGradient id="impressionsFunnelGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#6D28D9" stopOpacity={0.7}/>
+                      </linearGradient>
+                      <linearGradient id="clicksFunnelGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#A855F7" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#9333EA" stopOpacity={0.7}/>
+                      </linearGradient>
+                      <linearGradient id="conversionsFunnelGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#10B981" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#059669" stopOpacity={0.7}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} opacity={0.5} />
+                    <XAxis type="number" stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatLargeNumber(value)} fontWeight={500} />
+                    <YAxis type="category" dataKey="stage" stroke="#e2e8f0" fontSize={13} tickLine={false} axisLine={false} width={90} fontWeight={600} />
                         <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={35}>
-                      <Cell fill="#8B5CF6" />
-                      <Cell fill="#A855F7" />
-                      <Cell fill="#10B981" />
+                    <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={40}>
+                      <Cell fill="url(#impressionsFunnelGrad)" />
+                      <Cell fill="url(#clicksFunnelGrad)" />
+                      <Cell fill="url(#conversionsFunnelGrad)" />
                     </Bar>
                   </BarChart>
                     </ResponsiveContainer>
@@ -3206,9 +3167,9 @@ const DashboardPage: React.FC = () => {
               )}
                   </div>
 
-            {/* 4. ROAS Trend */}
+            {/* 4. ROAS Trend - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <TrendingUp className="w-5 h-5 text-green-400" />
                 {isRTL ? 'اتجاه ROAS' : 'ROAS Trend'}
@@ -3217,18 +3178,19 @@ const DashboardPage: React.FC = () => {
               {effectivePerformanceData.length > 0 ? (
               <ChartContainer config={{ roas: { label: "ROAS", color: '#10B981' } }} className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={effectivePerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <AreaChart data={effectivePerformanceData} margin={{ top: 15, right: 30, left: 10, bottom: 10 }}>
                     <defs>
                       <linearGradient id="roasGradNew" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.5}/>
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                        <stop offset="0%" stopColor="#10B981" stopOpacity={0.7}/>
+                        <stop offset="50%" stopColor="#10B981" stopOpacity={0.4}/>
+                        <stop offset="100%" stopColor="#10B981" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
-                    <XAxis dataKey="day" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}x`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} opacity={0.5} />
+                    <XAxis dataKey="day" stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} fontWeight={500} />
+                    <YAxis stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}x`} fontWeight={500} />
                         <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="roas" stroke="#10B981" strokeWidth={3} fill="url(#roasGradNew)" dot={{ fill: '#10B981', r: 4 }} activeDot={{ r: 6, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} />
+                    <Area type="monotone" dataKey="roas" stroke="#10B981" strokeWidth={4} fill="url(#roasGradNew)" dot={{ fill: '#10B981', r: 5, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8, fill: '#10B981', stroke: '#fff', strokeWidth: 3 }} />
                   </AreaChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -3245,9 +3207,9 @@ const DashboardPage: React.FC = () => {
 
           {/* Row 3: Device Performance & Audience Gender */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 📱 Device Performance Chart */}
+            {/* 📱 Device Performance Chart - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Smartphone className="w-5 h-5 text-green-400" />
                 {isRTL ? 'أداء الأجهزة' : 'Device Performance'}
@@ -3273,14 +3235,24 @@ const DashboardPage: React.FC = () => {
                         device: d.device === 'MOBILE' ? '📱 Mobile' : d.device === 'DESKTOP' ? '💻 Desktop' : d.device === 'TABLET' ? '📲 Tablet' : d.device
                       }))}
                     layout="vertical"
-                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                      margin={{ top: 15, right: 40, left: 15, bottom: 15 }}
                   >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
-                      <XAxis type="number" stroke="#9f8fd4" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => formatLargeNumber(v)} />
-                      <YAxis type="category" dataKey="device" stroke="#e2e8f0" fontSize={12} tickLine={false} axisLine={false} width={100} />
+                      <defs>
+                        <linearGradient id="clicksDeviceGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#10B981" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.75}/>
+                        </linearGradient>
+                        <linearGradient id="conversionsDeviceGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.75}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} opacity={0.5} />
+                      <XAxis type="number" stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => formatLargeNumber(v)} fontWeight={500} />
+                      <YAxis type="category" dataKey="device" stroke="#e2e8f0" fontSize={13} tickLine={false} axisLine={false} width={110} fontWeight={600} />
                         <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="clicks" fill="#10B981" radius={[0, 6, 6, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
-                      <Bar dataKey="conversions" fill="#8B5CF6" radius={[0, 6, 6, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
+                      <Bar dataKey="clicks" fill="url(#clicksDeviceGrad)" radius={[0, 8, 8, 0]} barSize={25} name={isRTL ? "النقرات" : "Clicks"} />
+                      <Bar dataKey="conversions" fill="url(#conversionsDeviceGrad)" radius={[0, 8, 8, 0]} barSize={25} name={isRTL ? "التحويلات" : "Conversions"} />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -3294,9 +3266,9 @@ const DashboardPage: React.FC = () => {
               )}
             </div>
 
-            {/* 👥 Audience Gender Chart */}
+            {/* 👥 Audience Gender Chart - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Users className="w-5 h-5 text-pink-400" />
                 {isRTL ? 'توزيع الجمهور (الجنس)' : 'Audience by Gender'}
@@ -3311,23 +3283,39 @@ const DashboardPage: React.FC = () => {
                 <ChartContainer config={{ impressions: { label: "Impressions", color: '#EC4899' } }} className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
+                      <defs>
+                        <linearGradient id="maleGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3B82F6" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#2563EB" stopOpacity={0.8}/>
+                        </linearGradient>
+                        <linearGradient id="femaleGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#EC4899" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#DB2777" stopOpacity={0.8}/>
+                        </linearGradient>
+                        <linearGradient id="unknownGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6B7280" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#4B5563" stopOpacity={0.8}/>
+                        </linearGradient>
+                      </defs>
                       <Pie
                         data={effectiveGenderData.map((g: any, i: number) => ({
                           name: g.gender === 'MALE' ? (isRTL ? 'ذكور' : 'Male') : 
                                 g.gender === 'FEMALE' ? (isRTL ? 'إناث' : 'Female') : 
                                 (isRTL ? 'غير محدد' : 'Unknown'),
                           value: g.impressions,
-                          fill: g.gender === 'MALE' ? '#3B82F6' : g.gender === 'FEMALE' ? '#EC4899' : '#6B7280'
+                          fill: g.gender === 'MALE' ? 'url(#maleGrad)' : g.gender === 'FEMALE' ? 'url(#femaleGrad)' : 'url(#unknownGrad)'
                         }))}
                         cx="50%" 
                         cy="50%" 
-                        innerRadius={50}
-                        outerRadius={90}
-                        paddingAngle={3}
+                        innerRadius={55}
+                        outerRadius={95}
+                        paddingAngle={4}
                         dataKey="value"
+                        stroke="#060010"
+                        strokeWidth={2}
                       />
                         <Tooltip content={<CustomTooltip />} />
-                      <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
+                      <Legend iconType="circle" iconSize={12} wrapperStyle={{ fontSize: '13px', fontWeight: '500' }} />
                     </PieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -3344,9 +3332,9 @@ const DashboardPage: React.FC = () => {
 
           {/* Row 4: Audience by Age & Competition Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 📊 Age Distribution Chart */}
+            {/* 📊 Age Distribution Chart - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Users className="w-5 h-5 text-orange-400" />
                 {isRTL ? 'توزيع الجمهور (العمر)' : 'Audience by Age'}
@@ -3366,13 +3354,23 @@ const DashboardPage: React.FC = () => {
                   className="h-[250px]"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={effectiveAgeData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
-                      <XAxis dataKey="age" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                    <BarChart data={effectiveAgeData} margin={{ top: 15, right: 30, left: 10, bottom: 10 }}>
+                      <defs>
+                        <linearGradient id="clicksAgeGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#D97706" stopOpacity={0.75}/>
+                        </linearGradient>
+                        <linearGradient id="conversionsAgeGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10B981" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.75}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} opacity={0.5} />
+                      <XAxis dataKey="age" stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} fontWeight={500} />
+                      <YAxis stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} fontWeight={500} />
                     <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="clicks" fill="#F59E0B" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
-                      <Bar dataKey="conversions" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
+                      <Bar dataKey="clicks" fill="url(#clicksAgeGrad)" radius={[6, 6, 0, 0]} barSize={25} name={isRTL ? "النقرات" : "Clicks"} />
+                      <Bar dataKey="conversions" fill="url(#conversionsAgeGrad)" radius={[6, 6, 0, 0]} barSize={25} name={isRTL ? "التحويلات" : "Conversions"} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -3386,9 +3384,9 @@ const DashboardPage: React.FC = () => {
           )}
             </div>
 
-            {/* ⚔️ Competition Analysis Chart */}
+            {/* ⚔️ Competition Analysis Chart - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Target className="w-5 h-5 text-red-400" />
                 {isRTL ? 'تحليل المنافسة' : 'Competition Analysis'}
@@ -3411,21 +3409,35 @@ const DashboardPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                       data={effectiveCompetitionData.slice(0, 5).map((c: any) => ({
-                        campaign: c.campaign.length > 12 ? c.campaign.substring(0, 12) + '...' : c.campaign,
+                        campaign: c.campaign.length > 15 ? c.campaign.substring(0, 15) + '...' : c.campaign,
                         impressionShare: Math.round(c.impressionShare),
                         budgetLost: Math.round(c.budgetLost),
                         rankLost: Math.round(c.rankLost)
                       }))}
                     layout="vertical"
-                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                      margin={{ top: 15, right: 40, left: 15, bottom: 15 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} />
-                      <XAxis type="number" stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                      <YAxis type="category" dataKey="campaign" stroke="#9f8fd4" fontSize={9} tickLine={false} axisLine={false} width={90} />
+                      <defs>
+                        <linearGradient id="impressionShareGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#10B981" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.75}/>
+                        </linearGradient>
+                        <linearGradient id="budgetLostGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#EF4444" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#DC2626" stopOpacity={0.75}/>
+                        </linearGradient>
+                        <linearGradient id="rankLostGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.95}/>
+                          <stop offset="100%" stopColor="#D97706" stopOpacity={0.75}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} opacity={0.5} />
+                      <XAxis type="number" stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontWeight={500} />
+                      <YAxis type="category" dataKey="campaign" stroke="#e2e8f0" fontSize={11} tickLine={false} axisLine={false} width={100} fontWeight={600} />
                     <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="impressionShare" stackId="a" fill="#10B981" radius={[0, 0, 0, 0]} barSize={14} name={isRTL ? "حصة الظهور %" : "Impression Share %"} />
-                      <Bar dataKey="budgetLost" stackId="a" fill="#EF4444" radius={[0, 0, 0, 0]} barSize={14} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
-                      <Bar dataKey="rankLost" stackId="a" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={14} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
+                      <Bar dataKey="impressionShare" stackId="a" fill="url(#impressionShareGrad)" radius={[0, 0, 0, 0]} barSize={18} name={isRTL ? "حصة الظهور %" : "Impression Share %"} />
+                      <Bar dataKey="budgetLost" stackId="a" fill="url(#budgetLostGrad)" radius={[0, 0, 0, 0]} barSize={18} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
+                      <Bar dataKey="rankLost" stackId="a" fill="url(#rankLostGrad)" radius={[0, 8, 8, 0]} barSize={18} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -3443,9 +3455,9 @@ const DashboardPage: React.FC = () => {
 
           {/* Row 5: Hourly Performance & Keyword Performance */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* ⏰ Hourly Performance */}
+            {/* ⏰ Hourly Performance - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Clock className="w-5 h-5 text-cyan-400" />
                 {isRTL ? 'الأداء حسب الساعة' : 'Hourly Performance'}
@@ -3465,27 +3477,29 @@ const DashboardPage: React.FC = () => {
                   className="h-[250px]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={effectiveHourlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart data={effectiveHourlyData} margin={{ top: 15, right: 30, left: 10, bottom: 10 }}>
                       <defs>
                         <linearGradient id="hourlyClicksGrad2" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.5}/>
-                          <stop offset="95%" stopColor="#06B6D4" stopOpacity={0}/>
+                          <stop offset="0%" stopColor="#06B6D4" stopOpacity={0.7}/>
+                          <stop offset="50%" stopColor="#06B6D4" stopOpacity={0.4}/>
+                          <stop offset="100%" stopColor="#06B6D4" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} opacity={0.5} />
                       <XAxis 
                         dataKey="hour" 
-                        stroke="#9f8fd4" 
-                        fontSize={9} 
+                        stroke="#c4b5fd" 
+                        fontSize={11} 
                         tickLine={false} 
                         axisLine={false}
                         tickFormatter={(h) => `${h}h`}
                         interval={2}
+                        fontWeight={500}
                       />
-                      <YAxis stroke="#9f8fd4" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} fontWeight={500} />
                     <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={3} fill="url(#hourlyClicksGrad2)" name={isRTL ? "النقرات" : "Clicks"} />
-                      <Line type="monotone" dataKey="conversions" stroke="#8B5CF6" strokeWidth={3} dot={{ fill: '#8B5CF6', r: 4 }} name={isRTL ? "التحويلات" : "Conversions"} />
+                      <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={4} fill="url(#hourlyClicksGrad2)" name={isRTL ? "النقرات" : "Clicks"} />
+                      <Line type="monotone" dataKey="conversions" stroke="#8B5CF6" strokeWidth={4} dot={{ fill: '#8B5CF6', r: 5, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7, fill: '#8B5CF6', stroke: '#fff', strokeWidth: 3 }} name={isRTL ? "التحويلات" : "Conversions"} />
                     </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -3499,9 +3513,9 @@ const DashboardPage: React.FC = () => {
               )}
             </div>
             
-            {/* 🔑 Keyword Performance */}
+            {/* 🔑 Keyword Performance - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Search className="w-5 h-5 text-violet-400" />
                 {isRTL ? 'أداء الكلمات المفتاحية' : 'Keyword Performance'}
@@ -3513,28 +3527,28 @@ const DashboardPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
               </div>
               ) : effectiveKeywordData.length > 0 ? (
-                <div className="overflow-x-auto mt-2 h-[250px] overflow-y-auto">
+                <div className="overflow-x-auto mt-2 h-[250px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-[#060010]">
-                      <tr className="text-gray-300 border-b border-white/10">
-                        <th className="text-left py-3 px-3 font-semibold">{isRTL ? 'الكلمة' : 'Keyword'}</th>
-                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'نقرات' : 'Clicks'}</th>
-                        <th className="text-center py-3 px-2 font-semibold">CPC</th>
-                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'جودة' : 'QS'}</th>
+                    <thead className="sticky top-0 bg-gradient-to-b from-[#060010] to-[#0a0018] z-10 backdrop-blur-sm">
+                      <tr className="text-gray-200 border-b border-purple-500/30">
+                        <th className="text-left py-4 px-4 font-bold text-base">{isRTL ? 'الكلمة' : 'Keyword'}</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">CPC</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">{isRTL ? 'جودة' : 'QS'}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {effectiveKeywordData.slice(0, 5).map((kw: any, i: number) => (
-                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="py-3 px-3 text-white font-medium">{kw.keyword.length > 18 ? kw.keyword.substring(0, 18) + '...' : kw.keyword}</td>
-                          <td className="text-center py-3 px-2 text-cyan-400 font-bold">{formatLargeNumber(kw.clicks)}</td>
-                          <td className="text-center py-3 px-2 text-green-400 font-bold">${typeof kw.cpc === 'number' ? kw.cpc.toFixed(2) : '0.00'}</td>
-                          <td className="text-center py-3 px-2">
-                            <span className={`font-bold text-lg ${
-                              kw.qualityScore >= 7 ? 'text-green-400' :
-                              kw.qualityScore >= 4 ? 'text-yellow-400' :
-                              'text-red-400'
-                            }`}>
+                        <tr key={i} className="border-b border-white/5 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-violet-500/10 transition-all duration-300 hover:border-purple-500/30 group">
+                          <td className="py-4 px-4 text-white font-semibold group-hover:text-purple-300 transition-colors">{kw.keyword.length > 20 ? kw.keyword.substring(0, 20) + '...' : kw.keyword}</td>
+                          <td className="text-center py-4 px-3 text-cyan-400 font-bold text-base group-hover:text-cyan-300 transition-colors">{formatLargeNumber(kw.clicks)}</td>
+                          <td className="text-center py-4 px-3 text-green-400 font-bold text-base group-hover:text-green-300 transition-colors">${typeof kw.cpc === 'number' ? kw.cpc.toFixed(2) : '0.00'}</td>
+                          <td className="text-center py-4 px-3">
+                            <span className={`font-bold text-xl ${
+                              kw.qualityScore >= 7 ? 'text-green-400 group-hover:text-green-300' :
+                              kw.qualityScore >= 4 ? 'text-yellow-400 group-hover:text-yellow-300' :
+                              'text-red-400 group-hover:text-red-300'
+                            } transition-colors`}>
                               {kw.qualityScore || '-'}
                             </span>
                           </td>
@@ -3558,7 +3572,7 @@ const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 🎯 AI Optimization Score */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Zap className="w-5 h-5 text-emerald-400" />
                 {isRTL ? 'نقاط التحسين AI' : 'AI Optimization Score'}
@@ -3604,9 +3618,9 @@ const DashboardPage: React.FC = () => {
               )}
             </div>
 
-            {/* 🔍 Search Terms Report */}
+            {/* 🔍 Search Terms Report - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Search className="w-5 h-5 text-blue-400" />
                 {isRTL ? 'مصطلحات البحث' : 'Search Terms'}
@@ -3618,21 +3632,21 @@ const DashboardPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
           </div>
               ) : effectiveSearchTerms.length > 0 ? (
-                <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
+                <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-[#060010]">
-                      <tr className="text-gray-300 border-b border-white/10">
-                        <th className="text-left py-3 px-3 font-semibold">{isRTL ? 'المصطلح' : 'Term'}</th>
-                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'نقرات' : 'Clicks'}</th>
-                        <th className="text-center py-3 px-2 font-semibold">CTR</th>
+                    <thead className="sticky top-0 bg-gradient-to-b from-[#060010] to-[#0a0018] z-10 backdrop-blur-sm">
+                      <tr className="text-gray-200 border-b border-blue-500/30">
+                        <th className="text-left py-4 px-4 font-bold text-base">{isRTL ? 'المصطلح' : 'Term'}</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">CTR</th>
                       </tr>
                     </thead>
                     <tbody>
                       {effectiveSearchTerms.slice(0, 6).map((term: any, i: number) => (
-                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="py-3 px-3 text-white font-medium">{term.term?.length > 22 ? term.term.substring(0, 22) + '...' : term.term}</td>
-                          <td className="text-center py-3 px-2 text-cyan-400 font-bold">{formatLargeNumber(term.clicks || 0)}</td>
-                          <td className="text-center py-3 px-2 text-green-400 font-bold">{typeof term.ctr === 'number' ? term.ctr.toFixed(1) : '0.0'}%</td>
+                        <tr key={i} className="border-b border-white/5 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-indigo-500/10 transition-all duration-300 hover:border-blue-500/30 group">
+                          <td className="py-4 px-4 text-white font-semibold group-hover:text-blue-300 transition-colors">{term.term?.length > 24 ? term.term.substring(0, 24) + '...' : term.term}</td>
+                          <td className="text-center py-4 px-3 text-cyan-400 font-bold text-base group-hover:text-cyan-300 transition-colors">{formatLargeNumber(term.clicks || 0)}</td>
+                          <td className="text-center py-4 px-3 text-green-400 font-bold text-base group-hover:text-green-300 transition-colors">{typeof term.ctr === 'number' ? term.ctr.toFixed(1) : '0.0'}%</td>
                         </tr>
                       ))}
                     </tbody>
@@ -3653,7 +3667,7 @@ const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 💪 Ad Strength Indicator */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Target className="w-5 h-5 text-yellow-400" />
                 {isRTL ? 'قوة الإعلانات' : 'Ad Strength'}
@@ -3700,9 +3714,9 @@ const DashboardPage: React.FC = () => {
               )}
             </div>
 
-            {/* 📱 Landing Page Experience */}
+            {/* 📱 Landing Page Experience - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Globe className="w-5 h-5 text-teal-400" />
                 {isRTL ? 'تجربة الصفحات' : 'Landing Pages'}
@@ -3714,31 +3728,31 @@ const DashboardPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
           </div>
               ) : effectiveLandingPages.length > 0 ? (
-                <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto">
+                <div className="overflow-x-auto mt-2 h-[220px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-[#060010]">
-                      <tr className="text-gray-300 border-b border-white/10">
-                        <th className="text-left py-3 px-3 font-semibold">{isRTL ? 'الصفحة' : 'Page'}</th>
-                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'نقرات' : 'Clicks'}</th>
-                        <th className="text-center py-3 px-2 font-semibold">{isRTL ? 'سرعة' : 'Speed'}</th>
+                    <thead className="sticky top-0 bg-gradient-to-b from-[#060010] to-[#0a0018] z-10 backdrop-blur-sm">
+                      <tr className="text-gray-200 border-b border-teal-500/30">
+                        <th className="text-left py-4 px-4 font-bold text-base">{isRTL ? 'الصفحة' : 'Page'}</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">{isRTL ? 'نقرات' : 'Clicks'}</th>
+                        <th className="text-center py-4 px-3 font-bold text-base">{isRTL ? 'سرعة' : 'Speed'}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {effectiveLandingPages.slice(0, 5).map((page: any, i: number) => (
-                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="py-3 px-3 text-white font-medium">
+                        <tr key={i} className="border-b border-white/5 hover:bg-gradient-to-r hover:from-teal-500/10 hover:to-cyan-500/10 transition-all duration-300 hover:border-teal-500/30 group">
+                          <td className="py-4 px-4 text-white font-semibold group-hover:text-teal-300 transition-colors">
                             {(() => {
                               try {
                                 const url = new URL(page.url);
-                                return url.pathname.length > 18 ? url.pathname.substring(0, 18) + '...' : url.pathname || '/';
+                                return url.pathname.length > 20 ? url.pathname.substring(0, 20) + '...' : url.pathname || '/';
                               } catch {
-                                return page.url?.substring(0, 18) + '...' || '/';
+                                return page.url?.substring(0, 20) + '...' || '/';
                               }
                             })()}
                           </td>
-                          <td className="text-center py-3 px-2 text-cyan-400 font-bold">{formatLargeNumber(page.clicks || 0)}</td>
-                          <td className="text-center py-3 px-2">
-                            <span className={`font-bold text-lg ${page.speedScore >= 70 ? 'text-green-400' : page.speedScore >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          <td className="text-center py-4 px-3 text-cyan-400 font-bold text-base group-hover:text-cyan-300 transition-colors">{formatLargeNumber(page.clicks || 0)}</td>
+                          <td className="text-center py-4 px-3">
+                            <span className={`font-bold text-xl transition-colors ${page.speedScore >= 70 ? 'text-green-400 group-hover:text-green-300' : page.speedScore >= 40 ? 'text-yellow-400 group-hover:text-yellow-300' : 'text-red-400 group-hover:text-red-300'}`}>
                               {typeof page.speedScore === 'number' ? Math.round(page.speedScore) : '-'}
                             </span>
                           </td>
@@ -3762,7 +3776,7 @@ const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 💰 Budget Recommendations */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <DollarSign className="w-5 h-5 text-green-400" />
                 {isRTL ? 'توصيات الميزانية' : 'Budget Recommendations'}
@@ -3801,7 +3815,7 @@ const DashboardPage: React.FC = () => {
 
             {/* 🏆 Auction Insights */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"></div>
               <h3 className="flex items-center gap-2 mt-8">
                 <Trophy className="w-5 h-5 text-amber-400" />
                 {isRTL ? 'رؤى المزادات' : 'Auction Insights'}
