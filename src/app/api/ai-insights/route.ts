@@ -436,18 +436,26 @@ async function fetchSearchTerms(customerId: string, accessToken: string, develop
 async function fetchAdStrength(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS') {
   const query = `
     SELECT
+      segments.date,
+      ad_group_ad.ad.responsive_search_ad.strength,
+      ad_group_ad.ad.expanded_text_ad.strength,
       ad_group_ad.ad.final_urls,
+      ad_group_ad.ad.type,
       ad_group.name,
       campaign.name,
       metrics.impressions,
       metrics.clicks,
-      metrics.conversions
+      metrics.conversions,
+      metrics.cost_micros
     FROM ad_group_ad
-    WHERE ${dateCondition}
-    ORDER BY metrics.clicks DESC
-    LIMIT 20
+    WHERE ad_group_ad.status = ENABLED
+      AND campaign.status = ENABLED
+      AND ${dateCondition}
   `;
-  return googleAdsQuery(customerId, accessToken, developerToken, query);
+  console.log(`💪 Ad Strength Query for ${customerId}:`, query.replace(/\s+/g, ' ').trim());
+  const results = await googleAdsQuery(customerId, accessToken, developerToken, query);
+  console.log(`💪 Ad Strength Results for ${customerId}:`, results.length, 'rows');
+  return results;
 }
 
 // 10. جلب أداء الصفحات المقصودة (Landing Page Experience) - من final URLs
@@ -804,23 +812,55 @@ export async function GET(request: NextRequest) {
           }
         }
         
-        // 9. Ad Strength - نحسبها من الأداء
+        // 9. Ad Strength - من Google Ads API الفعلي (نفس طريقة باقي الكروت)
         const adStrength = await fetchAdStrength(cleanId, accessToken, developerToken, dateCondition);
-        console.log(`💪 Ad Strength data for ${customerId}:`, adStrength.length, 'ads');
+        console.log(`💪 Ad Strength data for ${customerId}:`, adStrength.length, 'rows');
+        if (adStrength.length > 0) {
+          console.log('💪 Sample Ad Strength row:', JSON.stringify(adStrength[0], null, 2));
+        }
+        
+        // تجميع البيانات حسب Ad Strength (مثل Device Performance)
+        const adStrengthMap: Record<string, { count: number; impressions: number; clicks: number; conversions: number }> = {};
+        
         for (const row of adStrength) {
           const clicks = parseInt(String(row.metrics?.clicks || 0), 10);
           const impressions = parseInt(String(row.metrics?.impressions || 0), 10);
           const conversions = parseFloat(String(row.metrics?.conversions || 0));
-          const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
-          // نحسب قوة الإعلان بناءً على الأداء
-          let strength = 'POOR';
-          if (clicks > 5 && ctr > 3) strength = 'EXCELLENT';
-          else if (clicks > 2 && ctr > 1) strength = 'GOOD';
-          else if (clicks > 0) strength = 'AVERAGE';
           
+          // جلب Ad Strength الفعلي من Google Ads API
+          // القيم الممكنة: UNKNOWN, NONE, POOR, AVERAGE, GOOD, EXCELLENT
+          let strength = row.adGroupAd?.ad?.responsiveSearchAd?.strength || 
+                        row.adGroupAd?.ad?.expandedTextAd?.strength ||
+                        'UNKNOWN';
+          
+          // إذا لم يكن متوفراً، نستخدم fallback بناءً على الأداء
+          if (!strength || strength === 'UNKNOWN' || strength === 'NONE') {
+            const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+            if (clicks > 5 && ctr > 3) strength = 'EXCELLENT';
+            else if (clicks > 2 && ctr > 1) strength = 'GOOD';
+            else if (clicks > 0) strength = 'AVERAGE';
+            else strength = 'POOR';
+          }
+          
+          // تحويل NONE إلى POOR
+          if (strength === 'NONE') strength = 'POOR';
+          
+          const strengthKey = strength.toUpperCase();
+          
+          // تجميع البيانات
+          if (!adStrengthMap[strengthKey]) {
+            adStrengthMap[strengthKey] = { count: 0, impressions: 0, clicks: 0, conversions: 0 };
+          }
+          adStrengthMap[strengthKey].count += 1;
+          adStrengthMap[strengthKey].impressions += impressions;
+          adStrengthMap[strengthKey].clicks += clicks;
+          adStrengthMap[strengthKey].conversions += conversions;
+          
+          // حفظ التفاصيل أيضاً
+          const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
           adStrengthData.push({
-            strength,
-            adType: 'RESPONSIVE_SEARCH_AD',
+            strength: strengthKey,
+            adType: row.adGroupAd?.ad?.type || 'RESPONSIVE_SEARCH_AD',
             url: row.adGroupAd?.ad?.finalUrls?.[0] || '',
             adGroup: row.adGroup?.name || 'Unknown',
             campaign: row.campaign?.name || 'Unknown',
@@ -829,6 +869,8 @@ export async function GET(request: NextRequest) {
             ctr
           });
         }
+        
+        console.log(`💪 Ad Strength Map for ${customerId}:`, adStrengthMap);
         
         // 10. Landing Pages - من الإعلانات
         const landingPages = await fetchLandingPageExperience(cleanId, accessToken, developerToken, dateCondition);
@@ -976,7 +1018,7 @@ export async function GET(request: NextRequest) {
           excellent: adStrengthData.filter(a => a.strength === 'EXCELLENT').length,
           good: adStrengthData.filter(a => a.strength === 'GOOD').length,
           average: adStrengthData.filter(a => a.strength === 'AVERAGE').length,
-          poor: adStrengthData.filter(a => a.strength === 'POOR' || a.strength === 'UNSPECIFIED' || a.strength === 'UNKNOWN').length
+          poor: adStrengthData.filter(a => a.strength === 'POOR' || a.strength === 'UNSPECIFIED' || a.strength === 'UNKNOWN' || a.strength === 'NONE').length
         },
         details: adStrengthData.slice(0, 10)
       },
