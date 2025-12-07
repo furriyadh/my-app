@@ -997,15 +997,52 @@ const DashboardPage: React.FC = () => {
     }
   }, [dateRange]);
 
-  const toggleCampaignStatus = async (campaignId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'ENABLED' ? 'PAUSED' : 'ENABLED';
+  const toggleCampaignStatus = async (campaignId: string, currentStatus: Campaign['status'], customerId?: string) => {
+    const newStatus: Campaign['status'] = currentStatus === 'ENABLED' ? 'PAUSED' : 'ENABLED';
+    
     // Update locally first for instant feedback
     setCampaigns(prev => prev.map(c => 
       c.id === campaignId ? { ...c, status: newStatus } : c
     ));
     
-    // TODO: Call backend API to update campaign status
-    console.log(`Toggle campaign ${campaignId} to ${newStatus}`);
+    try {
+      // Call backend API to update campaign status
+      const response = await fetch('/api/campaigns', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          campaignId,
+          customerId,
+          status: newStatus
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        // Revert on error
+        console.error('❌ Failed to update campaign status:', result);
+        setCampaigns(prev => prev.map(c => 
+          c.id === campaignId ? { ...c, status: currentStatus as Campaign['status'] } : c
+        ));
+        // عرض رسالة الخطأ التفصيلية
+        const errorMsg = result?.error || (isRTL ? 'فشل في تحديث حالة الحملة' : 'Failed to update campaign status');
+        console.error('Error details:', result?.details);
+        alert(errorMsg);
+      } else {
+        console.log(`✅ Campaign ${campaignId} updated to ${newStatus}`);
+        // تحديث ناجح - لا حاجة لـ alert
+      }
+    } catch (error) {
+      console.error('❌ Error toggling campaign status:', error);
+      // Revert on error
+      setCampaigns(prev => prev.map(c => 
+        c.id === campaignId ? { ...c, status: currentStatus as Campaign['status'] } : c
+      ));
+      alert(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error');
+    }
   };
 
   // Calculate campaign types distribution
@@ -1365,29 +1402,53 @@ const DashboardPage: React.FC = () => {
     auctionInsights: effectiveAuctionInsights.length
   });
 
-  // Campaign Health Score Calculator
+  // Campaign Health Score Calculator - بناءً على البيانات الفعلية
   const calculateHealthScore = (campaign: Campaign): number => {
-    let score = 50; // Base score
+    let score = 0;
+    let factors = 0;
     
-    // Quality Score contribution (0-30 points)
-    const qualityScore = campaign.qualityScore || 5;
-    score += (qualityScore / 10) * 30;
+    // 1. حالة الحملة (20 نقطة)
+    if (campaign.status === 'ENABLED') {
+      score += 20;
+    } else if (campaign.status === 'PAUSED') {
+      score += 5;
+    }
+    factors++;
     
-    // CTR contribution (0-20 points)
+    // 2. مرات الظهور (20 نقطة) - إذا كانت هناك مرات ظهور
+    const impressions = campaign.impressions || 0;
+    if (impressions > 1000) score += 20;
+    else if (impressions > 500) score += 15;
+    else if (impressions > 100) score += 10;
+    else if (impressions > 0) score += 5;
+    factors++;
+    
+    // 3. CTR - معدل النقر (20 نقطة)
     const ctr = campaign.ctr || 0;
     if (ctr > 5) score += 20;
     else if (ctr > 3) score += 15;
     else if (ctr > 1) score += 10;
-    else score += 5;
+    else if (ctr > 0) score += 5;
+    factors++;
     
-    // ROAS contribution (0-20 points)
+    // 4. التحويلات (20 نقطة)
+    const conversions = campaign.conversions || 0;
+    if (conversions > 10) score += 20;
+    else if (conversions > 5) score += 15;
+    else if (conversions > 1) score += 10;
+    else if (conversions > 0) score += 5;
+    factors++;
+    
+    // 5. ROAS - العائد على الإنفاق الإعلاني (20 نقطة)
     const roas = campaign.roas || 0;
     if (roas > 4) score += 20;
     else if (roas > 2) score += 15;
     else if (roas > 1) score += 10;
-    else score += 0;
+    else if (roas > 0) score += 5;
+    factors++;
     
-    return Math.min(100, Math.round(score));
+    // الحد الأدنى 10 إذا كانت الحملة موجودة
+    return Math.max(10, Math.min(100, Math.round(score)));
   };
 
   // Get health score color
@@ -3219,28 +3280,28 @@ const DashboardPage: React.FC = () => {
                 const avgCtrPercent = trendData.reduce((sum, d) => sum + d.ctr, 0) / 12;
 
                 return (
-                  <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full justify-center items-center px-1 sm:px-2">
                     <ChartContainer
                       config={{
                         ctr: { label: "CTR", color: '#3B82F6' },
                         conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#EC4899' },
                         cost: { label: isRTL ? "التكلفة" : "Cost", color: '#F97316' }
                       }}
-                      className="h-[200px] sm:h-[220px] md:h-[240px]"
+                      className="h-[160px] sm:h-[180px] md:h-[200px] w-full max-w-[98%] mx-auto"
                     >
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart
                           data={trendData}
-                          margin={{ top: 15, right: 20, left: 35, bottom: 5 }}
+                          margin={{ top: 10, right: 10, left: 25, bottom: 5 }}
                         >
                           <CartesianGrid strokeDasharray="4 4" stroke="#374151" horizontal={true} vertical={false} opacity={0.4} />
                           <XAxis 
                             dataKey="month" 
                             stroke="#9CA3AF" 
-                            fontSize={9} 
+                            fontSize={8} 
                             tickLine={false} 
                             axisLine={false}
-                            interval={0}
+                            interval={1}
                           />
                           <YAxis 
                             stroke="#9CA3AF" 
@@ -3316,27 +3377,27 @@ const DashboardPage: React.FC = () => {
                     </ChartContainer>
                     
                     {/* Legend مع الإحصائيات الحقيقية */}
-                    <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-8 mt-3 pt-3 border-t border-gray-700/50">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-orange-500 shadow-lg shadow-orange-500/30"></div>
-                        <div className="text-center">
-                          <span className="text-xs text-gray-400 block">{isRTL ? 'التكلفة' : 'Cost'}</span>
-                          <span className="text-sm font-bold text-orange-400">{formatCurrency(totalCost)}</span>
+                    <div className="flex flex-row items-center justify-center gap-6 sm:gap-10 mt-3 pt-3 border-t border-gray-700/50 px-2">
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></div>
+                          <span className="text-[10px] sm:text-xs text-gray-400">{isRTL ? 'التكلفة' : 'Cost'}</span>
                         </div>
+                        <span className="text-xs sm:text-sm font-bold text-orange-400">{formatCurrency(totalCost)}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-pink-500 shadow-lg shadow-pink-500/30"></div>
-                        <div className="text-center">
-                          <span className="text-xs text-gray-400 block">{isRTL ? 'التحويلات' : 'Conversions'}</span>
-                          <span className="text-sm font-bold text-pink-400">{totalConversions}</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-pink-500 flex-shrink-0"></div>
+                          <span className="text-[10px] sm:text-xs text-gray-400">{isRTL ? 'التحويلات' : 'Conv'}</span>
                         </div>
+                        <span className="text-xs sm:text-sm font-bold text-pink-400">{totalConversions}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-blue-500 shadow-lg shadow-blue-500/30"></div>
-                        <div className="text-center">
-                          <span className="text-xs text-gray-400 block">CTR</span>
-                          <span className="text-sm font-bold text-blue-400">{Number(avgCtr || 0).toFixed(2)}%</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                          <span className="text-[10px] sm:text-xs text-gray-400">CTR</span>
                         </div>
+                        <span className="text-xs sm:text-sm font-bold text-blue-400">{Number(avgCtr || 0).toFixed(2)}%</span>
                       </div>
                     </div>
                   </div>
@@ -3505,27 +3566,7 @@ const DashboardPage: React.FC = () => {
                               }).filter((d: any) => d.value > 0 && d.country !== 'xx');
                             }
                             
-                            // بيانات افتراضية بناءً على metrics الحقيقية
-                            const totalClicks = metrics.clicks || 0;
-                            const totalImpressions = metrics.impressions || 0;
-                            
-                            if (totalClicks > 0 || totalImpressions > 0) {
-                              const baseValue = totalClicks > 0 ? totalClicks : totalImpressions;
-                              return [
-                                { country: "us", value: Math.round(baseValue * 0.30) },
-                                { country: "gb", value: Math.round(baseValue * 0.15) },
-                                { country: "de", value: Math.round(baseValue * 0.12) },
-                                { country: "fr", value: Math.round(baseValue * 0.10) },
-                                { country: "ca", value: Math.round(baseValue * 0.08) },
-                                { country: "au", value: Math.round(baseValue * 0.07) },
-                                { country: "br", value: Math.round(baseValue * 0.06) },
-                                { country: "in", value: Math.round(baseValue * 0.05) },
-                                { country: "jp", value: Math.round(baseValue * 0.04) },
-                                { country: "sa", value: Math.round(baseValue * 0.03) },
-                              ].filter(d => d.value > 0);
-                            }
-                            
-                            // لا توجد بيانات
+                            // لا نعرض بيانات وهمية - فقط البيانات الحقيقية من Google Ads
                             return [];
                           })()}
                           styleFunction={(context: any) => {
@@ -3567,20 +3608,8 @@ const DashboardPage: React.FC = () => {
                             }).filter((loc: any) => loc.code !== 'XX');
                           }
                           
-                          // إذا لم توجد بيانات حقيقية، استخدم البيانات الافتراضية
-                          if (locationList.length === 0 && (metrics.clicks > 0 || metrics.impressions > 0)) {
-                            const baseClicks = metrics.clicks || 0;
-                            const baseImpressions = metrics.impressions || 0;
-                            const baseConversions = metrics.conversions || 0;
-                            locationList = [
-                              { country: isRTL ? 'الولايات المتحدة' : 'United States', code: 'US', clicks: Math.round(baseClicks * 0.30), impressions: Math.round(baseImpressions * 0.30), conversions: Math.round(baseConversions * 0.30) },
-                              { country: isRTL ? 'المملكة المتحدة' : 'United Kingdom', code: 'GB', clicks: Math.round(baseClicks * 0.15), impressions: Math.round(baseImpressions * 0.15), conversions: Math.round(baseConversions * 0.15) },
-                              { country: isRTL ? 'ألمانيا' : 'Germany', code: 'DE', clicks: Math.round(baseClicks * 0.12), impressions: Math.round(baseImpressions * 0.12), conversions: Math.round(baseConversions * 0.12) },
-                              { country: isRTL ? 'فرنسا' : 'France', code: 'FR', clicks: Math.round(baseClicks * 0.10), impressions: Math.round(baseImpressions * 0.10), conversions: Math.round(baseConversions * 0.10) },
-                              { country: isRTL ? 'كندا' : 'Canada', code: 'CA', clicks: Math.round(baseClicks * 0.08), impressions: Math.round(baseImpressions * 0.08), conversions: Math.round(baseConversions * 0.08) },
-                              { country: isRTL ? 'أستراليا' : 'Australia', code: 'AU', clicks: Math.round(baseClicks * 0.07), impressions: Math.round(baseImpressions * 0.07), conversions: Math.round(baseConversions * 0.07) },
-                            ];
-                          }
+                          // لا نعرض بيانات وهمية - فقط البيانات الحقيقية من Google Ads
+                          // إذا لم توجد بيانات حقيقية، نترك القائمة فارغة
                           
                           const totalClicks = locationList.reduce((sum, loc) => sum + (loc.clicks || 0), 0) || 1;
                       
@@ -3871,17 +3900,18 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
-          </div>
+                </div>
               ) : effectiveAgeData.length > 0 ? (
+              <div className="flex justify-center items-center px-2 sm:px-4">
               <ChartContainer
                 config={{
                     clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#F59E0B' },
                     conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#10B981' }
                 }}
-                  className="h-[250px] sm:h-[280px] md:h-[300px]"
+                  className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={effectiveAgeData} margin={{ top: 15, right: 30, left: 10, bottom: 10 }}>
+                    <BarChart data={effectiveAgeData} margin={{ top: 15, right: 15, left: 5, bottom: 10 }}>
                       <defs>
                         <linearGradient id="clicksAgeGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.95}/>
@@ -3893,14 +3923,15 @@ const DashboardPage: React.FC = () => {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} opacity={0.5} />
-                      <XAxis dataKey="age" stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} fontWeight={500} />
-                      <YAxis stroke="#c4b5fd" fontSize={12} tickLine={false} axisLine={false} fontWeight={500} />
+                      <XAxis dataKey="age" stroke="#c4b5fd" fontSize={10} tickLine={false} axisLine={false} fontWeight={500} />
+                      <YAxis stroke="#c4b5fd" fontSize={10} tickLine={false} axisLine={false} fontWeight={500} />
                     <Tooltip content={(props: any) => <CustomTooltip {...props} color="#F59E0B" />} />
-                      <Bar dataKey="clicks" fill="url(#clicksAgeGrad)" radius={[6, 6, 0, 0]} barSize={25} name={isRTL ? "النقرات" : "Clicks"} />
-                      <Bar dataKey="conversions" fill="url(#conversionsAgeGrad)" radius={[6, 6, 0, 0]} barSize={25} name={isRTL ? "التحويلات" : "Conversions"} />
+                      <Bar dataKey="clicks" fill="url(#clicksAgeGrad)" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
+                      <Bar dataKey="conversions" fill="url(#conversionsAgeGrad)" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "التحويلات" : "Conversions"} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
               ) : (
                 <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
@@ -3923,27 +3954,28 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
-              </div>
+                </div>
               ) : effectiveCompetitionData.length > 0 ? (
+              <div className="flex justify-center items-center px-1 sm:px-2">
               <ChartContainer
                 config={{
                     impressionShare: { label: isRTL ? "حصة الظهور" : "Impression Share", color: '#10B981' },
                     budgetLost: { label: isRTL ? "فقدان الميزانية" : "Budget Lost", color: '#EF4444' },
                     rankLost: { label: isRTL ? "فقدان الترتيب" : "Rank Lost", color: '#F59E0B' }
                 }}
-                  className="h-[250px] sm:h-[280px] md:h-[300px]"
+                  className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart 
                       data={effectiveCompetitionData.slice(0, 5).map((c: any) => ({
                         campaign: c.campaign,
-                        campaignShort: c.campaign.length > 25 ? c.campaign.substring(0, 25) + '...' : c.campaign,
+                        campaignShort: c.campaign.length > 18 ? c.campaign.substring(0, 18) + '...' : c.campaign,
                         impressionShare: Math.round(c.impressionShare),
                         budgetLost: Math.round(c.budgetLost),
                         rankLost: Math.round(c.rankLost)
                       }))}
                     layout="vertical"
-                      margin={{ top: 15, right: 30, left: 10, bottom: 15 }}
+                      margin={{ top: 10, right: 15, left: 5, bottom: 10 }}
                   >
                       <defs>
                         <linearGradient id="impressionShareGrad" x1="0" y1="0" x2="1" y2="0">
@@ -3960,15 +3992,15 @@ const DashboardPage: React.FC = () => {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" horizontal={false} opacity={0.5} />
-                      <XAxis type="number" stroke="#c4b5fd" fontSize={11} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontWeight={500} />
+                      <XAxis type="number" stroke="#c4b5fd" fontSize={9} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontWeight={500} />
                       <YAxis 
                         type="category" 
                         dataKey="campaignShort" 
                         stroke="#e2e8f0" 
-                        fontSize={10} 
+                        fontSize={8} 
                         tickLine={false} 
                         axisLine={false} 
-                        width={140}
+                        width={100}
                         fontWeight={600}
                         tick={{ fill: '#e2e8f0' }}
                       />
@@ -3988,12 +4020,13 @@ const DashboardPage: React.FC = () => {
                         );
                       }}
                     />
-                      <Bar dataKey="impressionShare" stackId="a" fill="url(#impressionShareGrad)" radius={[0, 0, 0, 0]} barSize={20} name={isRTL ? "حصة الظهور %" : "Impression Share %"} />
-                      <Bar dataKey="budgetLost" stackId="a" fill="url(#budgetLostGrad)" radius={[0, 0, 0, 0]} barSize={20} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
-                      <Bar dataKey="rankLost" stackId="a" fill="url(#rankLostGrad)" radius={[0, 8, 8, 0]} barSize={20} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
+                      <Bar dataKey="impressionShare" stackId="a" fill="url(#impressionShareGrad)" radius={[0, 0, 0, 0]} barSize={16} name={isRTL ? "حصة الظهور %" : "Impression Share %"} />
+                      <Bar dataKey="budgetLost" stackId="a" fill="url(#budgetLostGrad)" radius={[0, 0, 0, 0]} barSize={16} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
+                      <Bar dataKey="rankLost" stackId="a" fill="url(#rankLostGrad)" radius={[0, 6, 6, 0]} barSize={16} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
               ) : (
                 <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
                   <div className="text-center">
@@ -4022,13 +4055,14 @@ const DashboardPage: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
                 </div>
               ) : (
+              <div className="flex justify-center items-center px-2 sm:px-4">
               <ChartContainer
                 config={{
                     impressions: { label: isRTL ? "مرات الظهور" : "Impressions", color: '#8B5CF6' },
                     clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#A855F7' },
                     conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#3B82F6' }
                 }}
-                  className="h-[250px] sm:h-[280px] md:h-[300px]"
+                  className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
               >
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart 
@@ -4075,9 +4109,9 @@ const DashboardPage: React.FC = () => {
                           conversions: Math.round((baseConversions / 7) * multipliers[i])
                         }));
                       })()} 
-                      margin={{ top: 20, right: 20, left: 10, bottom: 15 }}
-                      barGap={4}
-                      barCategoryGap="20%"
+                      margin={{ top: 15, right: 10, left: 5, bottom: 10 }}
+                      barGap={2}
+                      barCategoryGap="15%"
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#4c3d6b" vertical={false} opacity={0.3} />
                       <XAxis 
@@ -4147,6 +4181,7 @@ const DashboardPage: React.FC = () => {
                     </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
               )}
             </div>
 
@@ -4312,6 +4347,17 @@ const DashboardPage: React.FC = () => {
                                effectiveAdStrength.distribution.good + 
                                effectiveAdStrength.distribution.average + 
                                effectiveAdStrength.distribution.poor;
+                  
+                  // إذا كانت جميع القيم صفر، نعرض رسالة
+                  if (total === 0) {
+                    return (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <Target className="w-12 h-12 mb-3 opacity-20" />
+                        <p className="text-sm text-center">{isRTL ? 'لا توجد بيانات قوة إعلانات حالياً' : 'No ad strength data available'}</p>
+                        <p className="text-xs text-gray-600 mt-2 text-center">{isRTL ? 'تأكد من وجود إعلانات نشطة' : 'Make sure you have active ads'}</p>
+                      </div>
+                    );
+                  }
                   const data = [
                     {
                       name: isRTL ? 'ممتاز' : 'Excellent',
@@ -4655,7 +4701,7 @@ const DashboardPage: React.FC = () => {
                   <th className="text-right py-4 px-4 text-sm font-semibold text-white/70">Spend</th>
                   <th className="text-right py-4 px-4 text-sm font-semibold text-white/70">ROAS</th>
                   <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">{isRTL ? 'الصحة' : 'Health'}</th>
-                  <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">Actions</th>
+                  <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">{isRTL ? 'تعديل' : 'Edit'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -4676,7 +4722,7 @@ const DashboardPage: React.FC = () => {
                     </td>
                     <td className="py-4 px-4">
                       <button
-                        onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
+                        onClick={() => toggleCampaignStatus(campaign.id, campaign.status, campaign.customerId)}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           campaign.status === 'ENABLED' ? 'bg-green-600' : 'bg-gray-700'
                         }`}
@@ -4710,7 +4756,7 @@ const DashboardPage: React.FC = () => {
                       {(campaign.conversions || 0).toLocaleString()}
                     </td>
                     <td className="py-4 px-4 text-right text-sm text-white">
-                      {formatCurrency(campaign.cost || 0, campaign.currency)}
+                      {campaign.currency || 'USD'} {(campaign.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-4 px-4 text-right">
                       <span className={`text-sm font-medium ${
@@ -4737,27 +4783,14 @@ const DashboardPage: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => router.push(`/campaign/edit-ads?campaignId=${campaign.id}`)}
-                          className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-                          title="Edit campaign"
-                        >
-                          <Edit className="w-4 h-4 text-gray-400" />
-                        </button>
-                        <button
-                          onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
-                          className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-                          title={campaign.status === 'ENABLED' ? 'Pause' : 'Resume'}
-                        >
-                          {campaign.status === 'ENABLED' ? (
-                            <Pause className="w-4 h-4 text-gray-400" />
-                          ) : (
-                            <Play className="w-4 h-4 text-gray-400" />
-                          )}
-                        </button>
-                      </div>
+                    <td className="py-4 px-4 text-center">
+                      <button
+                        onClick={() => router.push(`/campaign/edit-ads?campaignId=${campaign.id}&customerId=${campaign.customerId || ''}`)}
+                        className="p-2 hover:bg-purple-900/50 rounded-lg transition-colors border border-purple-500/30 hover:border-purple-500/60"
+                        title={isRTL ? 'تعديل الحملة' : 'Edit Campaign'}
+                      >
+                        <Edit className="w-4 h-4 text-purple-400" />
+                      </button>
                     </td>
                   </tr>
                 ))}

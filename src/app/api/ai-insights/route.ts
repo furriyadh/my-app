@@ -1013,15 +1013,20 @@ export async function GET(request: NextRequest) {
       hourly_data: hourlyBreakdown,
       optimization_score: optimizationScoreCount > 0 ? Math.round(optimizationScoreTotal / optimizationScoreCount) : null,
       search_terms: searchTermsData.slice(0, 15),
-      ad_strength: {
-        distribution: {
-          excellent: adStrengthData.filter(a => a.strength === 'EXCELLENT').length,
-          good: adStrengthData.filter(a => a.strength === 'GOOD').length,
-          average: adStrengthData.filter(a => a.strength === 'AVERAGE').length,
-          poor: adStrengthData.filter(a => a.strength === 'POOR' || a.strength === 'UNSPECIFIED' || a.strength === 'UNKNOWN' || a.strength === 'NONE').length
-        },
-        details: adStrengthData.slice(0, 10)
-      },
+      ad_strength: (() => {
+        // حساب التوزيع من البيانات المجمعة
+        const excellent = adStrengthData.filter(a => a.strength === 'EXCELLENT').length;
+        const good = adStrengthData.filter(a => a.strength === 'GOOD').length;
+        const average = adStrengthData.filter(a => a.strength === 'AVERAGE').length;
+        const poor = adStrengthData.filter(a => a.strength === 'POOR' || a.strength === 'UNSPECIFIED' || a.strength === 'UNKNOWN' || a.strength === 'NONE').length;
+        
+        console.log(`💪 Ad Strength Distribution: Excellent=${excellent}, Good=${good}, Average=${average}, Poor=${poor}, Total=${adStrengthData.length}`);
+        
+        return {
+          distribution: { excellent, good, average, poor },
+          details: adStrengthData.slice(0, 10)
+        };
+      })(),
       landing_pages: landingPagesData.slice(0, 8),
       budget_recommendations: budgetRecsData.slice(0, 5),
       auction_insights: auctionInsightsData.slice(0, 5)

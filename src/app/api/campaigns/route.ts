@@ -441,3 +441,160 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
 }
 
+// PATCH - تحديث حالة الحملة (تشغيل/إيقاف)
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { campaignId, customerId, status } = body;
+    
+    console.log('📥 PATCH Request received:', { campaignId, customerId, status });
+    
+    if (!campaignId || !status) {
+      return NextResponse.json({ error: 'Missing campaignId or status' }, { status: 400 });
+    }
+    
+    // التحقق من المستخدم - استخدام نفس طريقة GET
+    const cookieStore = await cookies();
+    const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
+    
+    if (!userInfoCookie) {
+      console.error('❌ No oauth_user_info found');
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    
+    // استخراج user ID
+    let userId = null;
+    try {
+      const userInfo = JSON.parse(userInfoCookie);
+      userId = userInfo.id || userInfo.sub;
+      console.log('👤 User ID:', userId);
+    } catch (e) {
+      console.error('❌ Error parsing user info:', e);
+    }
+    
+    // استخدام MCC refresh token للتحديث
+    const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+    const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN!;
+    // استخدام نفس الطريقة المستخدمة في باقي الـ API endpoints
+    const mccLoginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '');
+    
+    if (!mccRefreshToken) {
+      console.error('❌ MCC refresh token not configured');
+      return NextResponse.json({ error: 'MCC credentials not configured' }, { status: 500 });
+    }
+    
+    // تجديد access token
+    const newAccessToken = await refreshAccessToken(mccRefreshToken);
+    if (!newAccessToken) {
+      console.error('❌ Failed to refresh access token');
+      return NextResponse.json({ error: 'Failed to refresh access token' }, { status: 500 });
+    }
+    
+    // تحديد الحساب
+    let targetCustomerId = customerId;
+    if (!targetCustomerId && userId) {
+      const connectedAccounts = await getConnectedAccounts(userId);
+      console.log('📋 Connected accounts:', connectedAccounts);
+      if (connectedAccounts.length > 0) {
+        targetCustomerId = connectedAccounts[0];
+      }
+    }
+    
+    if (!targetCustomerId) {
+      console.error('❌ No connected account found');
+      return NextResponse.json({ error: 'No connected account found' }, { status: 400 });
+    }
+    
+    const cleanCustomerId = targetCustomerId.toString().replace(/-/g, '');
+    const cleanCampaignId = campaignId.toString().replace(/-/g, '');
+    
+    console.log(`🔄 Updating campaign ${cleanCampaignId} in account ${cleanCustomerId} to ${status}...`);
+    
+    // استخدام Google Ads API عبر googleads.googleapis.com (v21 مثل باقي الـ endpoints)
+    const mutateUrl = `https://googleads.googleapis.com/v21/customers/${cleanCustomerId}/campaigns:mutate`;
+    
+    // الصيغة الصحيحة لـ Google Ads REST API
+    const mutateBody = {
+      operations: [{
+        update: {
+          resourceName: `customers/${cleanCustomerId}/campaigns/${cleanCampaignId}`,
+          status: status
+        },
+        updateMask: "status"
+      }]
+    };
+    
+    // يجب استخدام MCC ID كـ login-customer-id (مهم جداً!)
+    // إذا لم يكن MCC ID متاحاً، نستخدم الـ client ID
+    const loginCustomerId = mccLoginCustomerId || cleanCustomerId;
+    
+    console.log('📤 API URL:', mutateUrl);
+    console.log('📤 MCC Login Customer ID:', mccLoginCustomerId);
+    console.log('📤 Using Login Customer ID:', loginCustomerId);
+    console.log('📤 Target Customer ID:', cleanCustomerId);
+    console.log('📤 Developer Token:', developerToken ? 'Present' : 'Missing');
+    console.log('📤 Request body:', JSON.stringify(mutateBody, null, 2));
+    
+    // إنشاء headers - نفس الطريقة المستخدمة في fetchCampaignsFromAccount
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${newAccessToken}`,
+      'developer-token': developerToken,
+      'Content-Type': 'application/json',
+      'login-customer-id': mccLoginCustomerId // يجب دائماً استخدام MCC ID
+    };
+    
+    console.log('📤 Using login-customer-id:', mccLoginCustomerId);
+    
+    const response = await fetch(mutateUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(mutateBody)
+    });
+    
+    const responseText = await response.text();
+    console.log(`📥 Response status: ${response.status}`);
+    console.log(`📥 Response body: ${responseText}`);
+    
+    if (!response.ok) {
+      console.error('❌ Error updating campaign:', responseText);
+      
+      let errorMessage = 'Failed to update campaign status';
+      let errorDetails = responseText;
+      
+      try {
+        const errorData = JSON.parse(responseText);
+        if (errorData.error?.message) {
+          errorMessage = errorData.error.message;
+        }
+        if (errorData.error?.details) {
+          errorDetails = JSON.stringify(errorData.error.details);
+        }
+      } catch (e) {}
+      
+      return NextResponse.json({ 
+        error: errorMessage,
+        details: errorDetails,
+        statusCode: response.status
+      }, { status: response.status });
+    }
+    
+    const result = JSON.parse(responseText);
+    console.log(`✅ Campaign ${cleanCampaignId} updated to ${status} successfully!`);
+    
+    return NextResponse.json({
+      success: true,
+      campaignId: cleanCampaignId,
+      newStatus: status,
+      result
+    });
+    
+  } catch (error) {
+    console.error('❌ Error in PATCH /api/campaigns:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}
+
