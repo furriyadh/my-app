@@ -20,14 +20,16 @@ import { GlobeSection } from "@/components/Globe/GlobeSection";
 import CardSwap, { Card } from "@/components/ui/card-swap";
 import { CountUp } from "@/components/lightswind/count-up";
 import AnimatedNotification from "@/components/ui/animated-notification";
+import ModernLoader from "@/components/ui/modern-loader";
 import dynamic from "next/dynamic";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip
 } from "recharts";
 
-// Dynamic import for LaserFlow to avoid SSR issues with Three.js
+// Dynamic imports to avoid SSR issues
 const LaserFlow = dynamic(() => import("@/components/ui/laser-flow"), { ssr: false });
+const ThreeDCarousel = dynamic(() => import("@/components/ui/3d-carousel"), { ssr: false });
 
 // Animation variants
 const fadeInUp = {
@@ -91,28 +93,52 @@ const TypewriterText = ({ texts, className }: { texts: string[], className?: str
   );
 };
 
-// Floating Particles Component
+// Floating Particles Component - Fixed for SSR
 const FloatingParticles = () => {
+  const [particles, setParticles] = useState<Array<{
+    x: number;
+    y: number;
+    scale: number;
+    animateY: number;
+    duration: number;
+    delay: number;
+  }>>([]);
+
+  useEffect(() => {
+    // Generate particles only on client side
+    const newParticles = [...Array(50)].map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * 800,
+      scale: Math.random() * 0.5 + 0.5,
+      animateY: Math.random() * -200 - 100,
+      duration: Math.random() * 10 + 10,
+      delay: Math.random() * 5,
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  if (particles.length === 0) return null;
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(50)].map((_, i) => (
+      {particles.map((particle, i) => (
         <motion.div
           key={i}
           className="absolute w-1 h-1 bg-purple-500/30 rounded-full"
           initial={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-            y: Math.random() * 800,
-            scale: Math.random() * 0.5 + 0.5,
+            x: particle.x,
+            y: particle.y,
+            scale: particle.scale,
           }}
           animate={{
-            y: [null, Math.random() * -200 - 100],
+            y: [null, particle.animateY],
             opacity: [0, 1, 0],
           }}
           transition={{
-            duration: Math.random() * 10 + 10,
+            duration: particle.duration,
             repeat: Infinity,
             ease: "linear",
-            delay: Math.random() * 5,
+            delay: particle.delay,
           }}
         />
       ))}
@@ -825,179 +851,341 @@ export default function Home() {
           </section>
 
           {/* ============================================ */}
-          {/* FEATURES SECTION - Enhanced Bento Grid */}
+          {/* FEATURES SECTION - Ultimate AI Showcase */}
           {/* ============================================ */}
           <section className="py-24 px-4 border-t border-white/10 relative overflow-hidden">
-            {/* Background */}
+            {/* Animated Background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/10 to-black"></div>
             <div className="absolute inset-0">
-              <div className="absolute w-[600px] h-[600px] top-0 right-0 bg-purple-600/5 rounded-full blur-[200px]"></div>
-              <div className="absolute w-[400px] h-[400px] bottom-0 left-0 bg-blue-600/5 rounded-full blur-[150px]"></div>
+              <div className="absolute w-[800px] h-[800px] top-0 right-0 bg-purple-600/10 rounded-full blur-[200px] animate-pulse"></div>
+              <div className="absolute w-[600px] h-[600px] bottom-0 left-0 bg-blue-600/10 rounded-full blur-[200px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+              {/* Floating Particles - Fixed positions */}
+              <div className="absolute inset-0 overflow-hidden">
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
+                    style={{
+                      left: `${(i * 5) % 100}%`,
+                      top: `${(i * 7) % 100}%`,
+                    }}
+                    animate={{
+                      y: [0, -100, 0],
+                      opacity: [0, 1, 0],
+                    }}
+                    transition={{
+                      duration: 3 + (i % 3),
+                      repeat: Infinity,
+                      delay: i * 0.2,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
             <div className="container mx-auto max-w-7xl relative z-10">
+              {/* Header */}
               <motion.div 
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeInUp}
-                className="text-center mb-16"
+                className="text-center mb-20"
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span className="text-sm text-purple-300">Powerful Features</span>
-                </div>
+                <motion.div 
+                  className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 border border-purple-500/30 rounded-full mb-8"
+                  animate={{ boxShadow: ['0 0 20px rgba(139, 92, 246, 0.2)', '0 0 40px rgba(139, 92, 246, 0.4)', '0 0 20px rgba(139, 92, 246, 0.2)'] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <div className="relative">
+                    <Cpu className="w-5 h-5 text-purple-400" />
+                    <motion.div 
+                      className="absolute inset-0 bg-purple-400 rounded-full blur-sm"
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  </div>
+                  <span className="text-purple-300 font-medium">Next-Gen AI Technology</span>
+                </motion.div>
+
                 <h2 className="text-4xl md:text-6xl font-bold mb-6">
                   <span className="text-white">Why Choose </span>
-                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
                     Our Platform?
                   </span>
                 </h2>
-                <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                  Everything you need to dominate Google Ads with the power of AI
+                <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                  The most advanced AI-powered advertising platform trusted by 10,000+ businesses worldwide
                 </p>
               </motion.div>
 
-              {/* Bento Grid Layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Feature 1 - Large Card */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="lg:col-span-2 bg-gradient-to-br from-purple-900/40 via-gray-900 to-gray-900 backdrop-blur-sm border border-purple-500/20 rounded-3xl p-8 relative overflow-hidden group hover:border-purple-500/40 transition-all duration-500"
-                >
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/20 rounded-full blur-[100px] group-hover:bg-purple-600/30 transition-colors"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center">
-                        <Brain className="w-8 h-8 text-white" />
+              {/* Main Feature - AI Brain Visualization */}
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mb-12"
+              >
+                <div className="bg-gradient-to-br from-purple-900/40 via-gray-900 to-blue-900/40 backdrop-blur-xl rounded-[2.5rem] p-10 border border-purple-500/20 relative overflow-hidden group hover:border-purple-500/40 transition-all duration-500">
+                  {/* Animated Background Pattern */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute inset-0" style={{
+                      backgroundImage: `radial-gradient(circle at 2px 2px, rgba(139, 92, 246, 0.4) 1px, transparent 0)`,
+                      backgroundSize: '32px 32px'
+                    }}></div>
+                  </div>
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-full blur-[150px] group-hover:scale-110 transition-transform duration-700"></div>
+                  
+                  <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    {/* Left - AI Brain Animation */}
+                    <div className="relative">
+                      <div className="relative w-full aspect-square max-w-md mx-auto">
+                        {/* Central Brain */}
+                        <motion.div 
+                          className="absolute inset-0 flex items-center justify-center"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div className="w-48 h-48 rounded-full border border-purple-500/30 border-dashed"></div>
+                        </motion.div>
+                        <motion.div 
+                          className="absolute inset-0 flex items-center justify-center"
+                          animate={{ rotate: -360 }}
+                          transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div className="w-64 h-64 rounded-full border border-blue-500/20 border-dashed"></div>
+                        </motion.div>
+                        <motion.div 
+                          className="absolute inset-0 flex items-center justify-center"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div className="w-80 h-80 rounded-full border border-cyan-500/10 border-dashed"></div>
+                        </motion.div>
+                        
+                        {/* Center Brain Icon */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <motion.div 
+                            className="w-32 h-32 bg-gradient-to-br from-purple-600 to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/50"
+                            animate={{ 
+                              boxShadow: ['0 0 40px rgba(139, 92, 246, 0.5)', '0 0 80px rgba(139, 92, 246, 0.8)', '0 0 40px rgba(139, 92, 246, 0.5)']
+                            }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            <Brain className="w-16 h-16 text-white" />
+                          </motion.div>
+                        </div>
+
+                        {/* Orbiting Features */}
+                        {[
+                          { icon: <Target className="w-5 h-5" />, label: "Targeting", angle: 0, color: "from-blue-500 to-cyan-500" },
+                          { icon: <TrendingUp className="w-5 h-5" />, label: "Growth", angle: 60, color: "from-green-500 to-emerald-500" },
+                          { icon: <Zap className="w-5 h-5" />, label: "Speed", angle: 120, color: "from-yellow-500 to-orange-500" },
+                          { icon: <Shield className="w-5 h-5" />, label: "Security", angle: 180, color: "from-cyan-500 to-blue-500" },
+                          { icon: <BarChart3 className="w-5 h-5" />, label: "Analytics", angle: 240, color: "from-purple-500 to-pink-500" },
+                          { icon: <Sparkles className="w-5 h-5" />, label: "AI Magic", angle: 300, color: "from-pink-500 to-red-500" },
+                        ].map((item, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute"
+                            style={{
+                              left: '50%',
+                              top: '50%',
+                              transform: `rotate(${item.angle}deg) translateX(140px) rotate(-${item.angle}deg)`,
+                            }}
+                            initial={{ opacity: 0, scale: 0 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 * i }}
+                          >
+                            <motion.div 
+                              className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-white shadow-lg -ml-7 -mt-7`}
+                              whileHover={{ scale: 1.2 }}
+                              animate={{ y: [0, -5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+                            >
+                              {item.icon}
+                            </motion.div>
+                          </motion.div>
+                        ))}
+
+                        {/* Connection Lines */}
+                        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 400">
+                          {[0, 60, 120, 180, 240, 300].map((angle, i) => {
+                            const rad = (angle * Math.PI) / 180;
+                            const x2 = 200 + Math.cos(rad) * 140;
+                            const y2 = 200 + Math.sin(rad) * 140;
+                            return (
+                              <motion.line
+                                key={i}
+                                x1="200"
+                                y1="200"
+                                x2={x2}
+                                y2={y2}
+                                stroke="url(#lineGradient)"
+                                strokeWidth="1"
+                                strokeDasharray="5,5"
+                                initial={{ pathLength: 0 }}
+                                whileInView={{ pathLength: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1, delay: 0.1 * i }}
+                              />
+                            );
+                          })}
+                          <defs>
+                            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="rgba(139, 92, 246, 0.5)" />
+                              <stop offset="100%" stopColor="rgba(59, 130, 246, 0.5)" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
                       </div>
-                      <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">Core Feature</span>
                     </div>
-                    <h3 className="text-3xl font-bold text-white mb-4">AI-Powered Optimization</h3>
-                    <p className="text-gray-400 text-lg mb-6 max-w-lg">
-                      Our neural network analyzes millions of data points to optimize your campaigns in real-time, 24/7.
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      {['Auto Bidding', 'Smart Targeting', 'A/B Testing', 'Budget Allocation'].map((tag, i) => (
-                        <span key={i} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-300">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
 
-                {/* Feature 2 */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-green-900/30 via-gray-900 to-gray-900 backdrop-blur-sm border border-green-500/20 rounded-3xl p-6 relative overflow-hidden group hover:border-green-500/40 transition-all duration-500"
-                >
-                  <div className="absolute bottom-0 right-0 w-32 h-32 bg-green-600/20 rounded-full blur-[80px]"></div>
-                  <div className="relative z-10">
-                    <div className="w-14 h-14 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mb-4">
-                      <TrendingUp className="w-7 h-7 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Real-Time Analytics</h3>
-                    <p className="text-gray-400 text-sm">
-                      Track performance metrics instantly with live dashboards and detailed reports.
-                    </p>
-                    <div className="mt-4 flex items-center gap-2 text-green-400 text-sm font-medium">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      Live Data
-                    </div>
-                  </div>
-                </motion.div>
+                    {/* Right - Features List */}
+                    <div className="space-y-6">
+                      <div>
+                        <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full font-medium">Core AI Engine</span>
+                        <h3 className="text-3xl md:text-4xl font-bold text-white mt-4 mb-4">
+                          Neural Network Optimization
+                        </h3>
+                        <p className="text-gray-400 text-lg">
+                          Our proprietary AI analyzes billions of data points across thousands of campaigns to deliver unprecedented optimization results.
+                        </p>
+                      </div>
 
-                {/* Feature 3 */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-blue-900/30 via-gray-900 to-gray-900 backdrop-blur-sm border border-blue-500/20 rounded-3xl p-6 relative overflow-hidden group hover:border-blue-500/40 transition-all duration-500"
-                >
-                  <div className="absolute top-0 left-0 w-32 h-32 bg-blue-600/20 rounded-full blur-[80px]"></div>
-                  <div className="relative z-10">
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4">
-                      <Target className="w-7 h-7 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Smart Targeting</h3>
-                    <p className="text-gray-400 text-sm">
-                      AI identifies your ideal audience and optimizes targeting automatically.
-                    </p>
-                    <div className="mt-4 text-blue-400 text-2xl font-bold">98%</div>
-                    <p className="text-gray-500 text-xs">Targeting Accuracy</p>
-                  </div>
-                </motion.div>
+                      {/* Feature Stats */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { value: "2.5B+", label: "Data Points Analyzed Daily", icon: <BarChart3 className="w-5 h-5" /> },
+                          { value: "50ms", label: "Real-time Optimization", icon: <Zap className="w-5 h-5" /> },
+                          { value: "99.9%", label: "Uptime Guarantee", icon: <Shield className="w-5 h-5" /> },
+                          { value: "24/7", label: "Autonomous Operation", icon: <Brain className="w-5 h-5" /> },
+                        ].map((stat, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 * i }}
+                            className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors"
+                          >
+                            <div className="text-purple-400 mb-2">{stat.icon}</div>
+                            <p className="text-2xl font-bold text-white">{stat.value}</p>
+                            <p className="text-xs text-gray-400">{stat.label}</p>
+                          </motion.div>
+                        ))}
+                      </div>
 
-                {/* Feature 4 */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-gradient-to-br from-orange-900/30 via-gray-900 to-gray-900 backdrop-blur-sm border border-orange-500/20 rounded-3xl p-6 relative overflow-hidden group hover:border-orange-500/40 transition-all duration-500"
-                >
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-600/20 rounded-full blur-[80px]"></div>
-                  <div className="relative z-10">
-                    <div className="w-14 h-14 bg-gradient-to-br from-orange-600 to-red-600 rounded-xl flex items-center justify-center mb-4">
-                      <Zap className="w-7 h-7 text-white" />
+                      {/* AI Capabilities */}
+                      <div className="flex flex-wrap gap-2">
+                        {['Auto Bidding', 'Smart Targeting', 'A/B Testing', 'Budget Allocation', 'Keyword Discovery', 'Ad Copy Generation'].map((tag, i) => (
+                          <motion.span 
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.05 * i }}
+                            className="px-4 py-2 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-full text-sm text-gray-300 hover:border-purple-500/40 transition-colors cursor-default"
+                          >
+                            {tag}
+                          </motion.span>
+                        ))}
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Instant Setup</h3>
-                    <p className="text-gray-400 text-sm">
-                      Connect your Google Ads account and start optimizing in under 5 minutes.
-                    </p>
-                    <div className="mt-4 text-orange-400 text-2xl font-bold">5 min</div>
-                    <p className="text-gray-500 text-xs">Setup Time</p>
                   </div>
-                </motion.div>
+                </div>
+              </motion.div>
 
-                {/* Feature 5 - Wide Card */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                  className="lg:col-span-2 bg-gradient-to-br from-cyan-900/30 via-gray-900 to-gray-900 backdrop-blur-sm border border-cyan-500/20 rounded-3xl p-6 relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-500"
-                >
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-600/20 rounded-full blur-[100px]"></div>
-                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
-                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Shield className="w-7 h-7 text-white" />
+              {/* Secondary Features Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { 
+                    icon: <TrendingUp className="w-7 h-7" />, 
+                    title: "Real-Time Analytics", 
+                    desc: "Live dashboards with instant performance insights",
+                    stat: "Live",
+                    statColor: "text-green-400",
+                    gradient: "from-green-600 to-emerald-600",
+                    border: "border-green-500/20 hover:border-green-500/40"
+                  },
+                  { 
+                    icon: <Target className="w-7 h-7" />, 
+                    title: "Smart Targeting", 
+                    desc: "AI identifies your ideal audience automatically",
+                    stat: "98%",
+                    statColor: "text-blue-400",
+                    gradient: "from-blue-600 to-cyan-600",
+                    border: "border-blue-500/20 hover:border-blue-500/40"
+                  },
+                  { 
+                    icon: <Zap className="w-7 h-7" />, 
+                    title: "Instant Setup", 
+                    desc: "Connect and start optimizing in minutes",
+                    stat: "5 min",
+                    statColor: "text-orange-400",
+                    gradient: "from-orange-600 to-red-600",
+                    border: "border-orange-500/20 hover:border-orange-500/40"
+                  },
+                  { 
+                    icon: <Shield className="w-7 h-7" />, 
+                    title: "Enterprise Security", 
+                    desc: "Bank-level encryption & SOC 2 compliance",
+                    stat: "SOC 2",
+                    statColor: "text-cyan-400",
+                    gradient: "from-cyan-600 to-blue-600",
+                    border: "border-cyan-500/20 hover:border-cyan-500/40"
+                  },
+                ].map((feature, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 backdrop-blur-sm border ${feature.border} rounded-2xl p-6 relative overflow-hidden group transition-all duration-500`}
+                  >
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500"></div>
+                    <div className="relative z-10">
+                      <div className={`w-14 h-14 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-4 text-white shadow-lg`}>
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
+                      <p className="text-gray-400 text-sm mb-4">{feature.desc}</p>
+                      <div className={`${feature.statColor} text-2xl font-bold`}>{feature.stat}</div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">Enterprise-Grade Security</h3>
-                      <p className="text-gray-400 text-sm">
-                        Bank-level encryption, SOC 2 compliance, and secure API connections to protect your data.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      {['SSL', 'SOC 2', 'GDPR'].map((badge, i) => (
-                        <span key={i} className="px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full font-medium">
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </section>
 
           {/* ============================================ */}
-          {/* AI-POWERED AD EXAMPLES - Enhanced Design */}
+          {/* AI-POWERED AD EXAMPLES - Ultimate Showcase */}
           {/* ============================================ */}
           <section className="py-24 px-4 border-t border-white/10 relative overflow-hidden">
             {/* Animated Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/20 to-black"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-green-950/10 to-black"></div>
             <div className="absolute inset-0">
-              <div className="absolute w-[800px] h-[800px] top-0 left-1/4 bg-blue-600/10 rounded-full blur-[200px] animate-pulse"></div>
-              <div className="absolute w-[600px] h-[600px] bottom-0 right-1/4 bg-purple-600/10 rounded-full blur-[200px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-              <div className="absolute w-[400px] h-[400px] top-1/2 right-0 bg-green-600/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+              <div className="absolute w-[800px] h-[800px] top-0 left-1/4 bg-green-600/10 rounded-full blur-[200px] animate-pulse"></div>
+              <div className="absolute w-[600px] h-[600px] bottom-0 right-1/4 bg-blue-600/10 rounded-full blur-[200px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute w-[400px] h-[400px] top-1/2 right-0 bg-purple-600/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+              {/* Matrix-like falling code effect */}
+              <div className="absolute inset-0 overflow-hidden opacity-10">
+                {[...Array(15)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute text-green-400 text-xs font-mono"
+                    style={{ left: `${i * 7}%` }}
+                    animate={{ y: ['-100%', '100vh'] }}
+                    transition={{ duration: 5 + (i % 5), repeat: Infinity, delay: i * 0.3 }}
+                  >
+                    {['01', '10', 'AI', '→', '◆', '∞', '⚡'].map((char, j) => (
+                      <div key={j} className="my-4">{char}</div>
+                    ))}
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
             <div className="container mx-auto max-w-7xl relative z-10">
@@ -1009,53 +1197,72 @@ export default function Home() {
                 variants={fadeInUp}
                 className="text-center mb-16"
               >
-                {/* AI Status Badge */}
+                {/* AI Status Badge - Enhanced */}
                 <motion.div 
-                  className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600/20 via-blue-600/20 to-purple-600/20 border border-green-500/30 rounded-full mb-8"
-                  animate={{ boxShadow: ['0 0 20px rgba(34, 197, 94, 0.2)', '0 0 40px rgba(34, 197, 94, 0.4)', '0 0 20px rgba(34, 197, 94, 0.2)'] }}
+                  className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 border border-green-500/30 rounded-full mb-8 backdrop-blur-xl"
+                  animate={{ 
+                    boxShadow: ['0 0 30px rgba(34, 197, 94, 0.3)', '0 0 60px rgba(34, 197, 94, 0.5)', '0 0 30px rgba(34, 197, 94, 0.3)'],
+                    borderColor: ['rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.6)', 'rgba(34, 197, 94, 0.3)']
+                  }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <div className="relative">
-                    <Brain className="w-5 h-5 text-green-400" />
                     <motion.div 
-                      className="absolute inset-0 bg-green-400 rounded-full blur-sm"
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center"
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Brain className="w-5 h-5 text-white" />
+                    </motion.div>
+                    <motion.div 
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full"
+                      animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
                     />
                   </div>
-                  <span className="text-green-300 font-medium">AI Engine Active</span>
-                  <div className="flex gap-1">
-                    <motion.div className="w-2 h-2 bg-green-400 rounded-full" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.5, repeat: Infinity }} />
-                    <motion.div className="w-2 h-2 bg-green-400 rounded-full" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.5, repeat: Infinity, delay: 0.1 }} />
-                    <motion.div className="w-2 h-2 bg-green-400 rounded-full" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }} />
+                  <div className="text-left">
+                    <p className="text-green-300 font-bold text-sm">AI Engine Active</p>
+                    <p className="text-green-400/60 text-xs">Processing 2,847 campaigns</p>
+                  </div>
+                  <div className="h-8 w-px bg-green-500/30"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400 text-xs font-mono">LIVE</span>
+                    <motion.div 
+                      className="w-2 h-2 bg-green-400 rounded-full"
+                      animate={{ opacity: [1, 0.3, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
                   </div>
                 </motion.div>
 
-                <h2 className="text-4xl md:text-6xl font-bold mb-6">
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
                   <span className="text-white">Watch AI Create </span>
-                  <span className="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <br className="hidden md:block" />
+                  <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                     Winning Campaigns
                   </span>
                 </h2>
-                <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
-                  Our AI analyzes your business, competitors, and market trends to generate high-converting ads automatically
+                <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-10">
+                  See our AI analyze, create, and optimize ads in real-time. From competitor analysis to launch in seconds.
                 </p>
 
-                {/* AI Capabilities Pills */}
-                <div className="flex flex-wrap justify-center gap-3">
+                {/* AI Capabilities - Enhanced Pills */}
+                <div className="flex flex-wrap justify-center gap-4">
                   {[
-                    { icon: <Sparkles className="w-4 h-4" />, text: "Auto Headlines" },
-                    { icon: <Target className="w-4 h-4" />, text: "Smart Targeting" },
-                    { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding" },
-                    { icon: <BarChart3 className="w-4 h-4" />, text: "Performance Prediction" },
+                    { icon: <Wand2 className="w-4 h-4" />, text: "Auto Copy Generation", color: "from-purple-500/20 to-pink-500/20 border-purple-500/30" },
+                    { icon: <Target className="w-4 h-4" />, text: "Smart Audience AI", color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30" },
+                    { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding", color: "from-yellow-500/20 to-orange-500/20 border-yellow-500/30" },
+                    { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics", color: "from-green-500/20 to-emerald-500/20 border-green-500/30" },
+                    { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization", color: "from-pink-500/20 to-red-500/20 border-pink-500/30" },
                   ].map((item, i) => (
                     <motion.div
                       key={i}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-300"
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${item.color} border rounded-full text-sm text-white/90 backdrop-blur-sm cursor-default`}
                     >
                       {item.icon}
                       {item.text}
@@ -1064,276 +1271,486 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Main Content - Split Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+              {/* Main Content - AI Command Center Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
-                {/* Left Side - AI Process Visualization */}
+                {/* Left Side - AI Code Generator with Modern Loader */}
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="lg:col-span-5 space-y-6"
                 >
-                  {/* AI Process Card */}
-                  <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/30 rounded-3xl p-8 border border-white/10 relative overflow-hidden">
-                    {/* Animated Grid Background */}
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.3) 1px, transparent 1px)`,
-                        backgroundSize: '20px 20px'
-                      }}></div>
-                    </div>
-
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-                          <Brain className="w-7 h-7 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-white">AI Campaign Generator</h3>
-                          <p className="text-gray-400 text-sm">Processing your business data...</p>
-                        </div>
-                      </div>
-
-                      {/* AI Processing Steps */}
-                      <div className="space-y-4">
-                        {[
-                          { step: 1, text: "Analyzing competitor ads", status: "complete", time: "0.3s" },
-                          { step: 2, text: "Generating headlines & descriptions", status: "complete", time: "0.8s" },
-                          { step: 3, text: "Optimizing bid strategy", status: "complete", time: "0.2s" },
-                          { step: 4, text: "Selecting target audience", status: "active", time: "..." },
-                        ].map((item, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.2 }}
-                            className={`flex items-center gap-4 p-4 rounded-xl ${item.status === 'active' ? 'bg-purple-500/20 border border-purple-500/30' : 'bg-white/5'}`}
-                          >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${item.status === 'complete' ? 'bg-green-500 text-white' : 'bg-purple-500 text-white'}`}>
-                              {item.status === 'complete' ? <CheckCircle className="w-5 h-5" /> : item.step}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-white font-medium">{item.text}</p>
-                            </div>
-                            <span className={`text-xs ${item.status === 'active' ? 'text-purple-400' : 'text-gray-500'}`}>{item.time}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="mt-6">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-gray-400">Campaign Generation</span>
-                          <span className="text-purple-400">75%</span>
-                        </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"
-                            initial={{ width: 0 }}
-                            whileInView={{ width: '75%' }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* AI Generated Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { value: "50+", label: "Headlines Generated", icon: <Sparkles className="w-5 h-5 text-yellow-400" /> },
-                      { value: "12", label: "Ad Variations", icon: <Layers className="w-5 h-5 text-blue-400" /> },
-                      { value: "98%", label: "Quality Score", icon: <Target className="w-5 h-5 text-green-400" /> },
-                      { value: "4.2x", label: "Predicted ROAS", icon: <TrendingUp className="w-5 h-5 text-purple-400" /> },
-                    ].map((stat, i) => (
+                  {/* Modern AI Loader Card */}
+                  <div className="relative h-full flex flex-col justify-center">
+                    {/* Floating Status Badge */}
+                    <motion.div 
+                      className="absolute -top-4 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full shadow-lg shadow-green-500/30"
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
                       <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.3 + i * 0.1 }}
-                        className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:bg-white/10 transition-colors"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                       >
-                        <div className="flex justify-center mb-2">{stat.icon}</div>
-                        <p className="text-2xl font-bold text-white">{stat.value}</p>
-                        <p className="text-xs text-gray-400">{stat.label}</p>
+                        <Brain className="w-4 h-4 text-white" />
                       </motion.div>
-                    ))}
+                      <span className="text-white text-xs font-bold">AI Campaign Generator</span>
+                      <motion.div 
+                        className="w-2 h-2 bg-white rounded-full"
+                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                    </motion.div>
+
+                    {/* Glow Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 rounded-3xl blur-xl"></div>
+                    
+                    {/* Modern Loader Container */}
+                    <div className="relative bg-gray-950/90 backdrop-blur-xl rounded-3xl border border-green-500/30 overflow-hidden shadow-2xl shadow-green-500/20">
+                      <ModernLoader 
+                        words={[
+                          "Analyzing competitor ads...",
+                          "Generating AI headlines...",
+                          "Optimizing bid strategy...",
+                          "Predicting CTR scores...",
+                          "Creating ad variations...",
+                          "Targeting ideal audience...",
+                          "Calculating optimal budget...",
+                          "Refining ad copy...",
+                          "Building campaign structure...",
+                          "Maximizing ROAS potential...",
+                        ]}
+                      />
+                    </div>
                   </div>
                 </motion.div>
 
-                {/* Right Side - Ad Examples Showcase */}
+                {/* Right Side - 3D Carousel Ad Preview */}
                 <motion.div
                   initial={{ opacity: 0, x: 50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="lg:col-span-7"
                 >
-                  {/* Search Ad Preview */}
+                  {/* 3D Carousel Container */}
                   <div className="relative">
-                    <div className="absolute -top-3 -left-3 px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-xs text-white font-medium flex items-center gap-1 z-10">
-                      <Sparkles className="w-3 h-3" />
-                      AI Generated
+                    {/* Floating AI Badge */}
+                    <motion.div 
+                      className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 rounded-full shadow-2xl shadow-green-500/40"
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Brain className="w-5 h-5 text-white" />
+                      </motion.div>
+                      <span className="text-white font-bold">AI Generated Ads • Drag to Explore</span>
+                      <motion.div
+                        className="flex gap-1"
+                      >
+                        <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.6, repeat: Infinity }} />
+                        <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
+                        <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+                      </motion.div>
+                    </motion.div>
+
+                    {/* Glow Effect Behind Carousel */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <motion.div 
+                        className="w-[500px] h-[500px] bg-gradient-to-r from-green-600/30 via-blue-600/30 to-purple-600/30 rounded-full blur-[100px]"
+                        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                      />
                     </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                        <span className="font-semibold">Sponsored</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center">
-                          <span className="text-white text-sm font-bold">F</span>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-800 font-medium">furriyadh.com</p>
-                          <p className="text-xs text-gray-500">www.furriyadh.com/ai-marketing</p>
-                        </div>
-                      </div>
-                      <h3 className="text-blue-600 text-xl font-medium mb-2 hover:underline cursor-pointer">
-                        AI-Powered Google Ads | 10x Your ROAS in 30 Days
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4">
-                        Let our AI manage your campaigns 24/7. Reduce CPA by 65%, increase conversions by 340%. Free trial available.
-                      </p>
-                      <div className="flex flex-wrap gap-3 text-blue-600 text-sm border-t pt-3">
-                        <span className="hover:underline cursor-pointer flex items-center gap-1">
-                          <Star className="w-3 h-3" /> 4.9 Rating
-                        </span>
-                        <span>·</span>
-                        <span className="hover:underline cursor-pointer">Free Trial</span>
-                        <span>·</span>
-                        <span className="hover:underline cursor-pointer">Case Studies</span>
-                        <span>·</span>
-                        <span className="hover:underline cursor-pointer">Pricing</span>
-                      </div>
+
+                    {/* 3D Carousel */}
+                    <div className="h-[500px] relative z-10">
+                      <ThreeDCarousel 
+                        radius={280}
+                        cardW={200}
+                        cardH={280}
+                        items={[
+                          // Google Pixel Search Ad
+                          <div key="pixel" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2.5 flex-1 flex flex-col pb-8">
+                              <span className="text-[9px] text-gray-500 font-bold">Sponsored</span>
+                              <div className="flex items-center gap-1.5 mt-1 mb-1.5">
+                                <div className="w-5 h-5 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-blue-500 font-bold text-[9px]">G</span>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-gray-800 font-medium text-[10px] truncate">pixel.google</p>
+                                </div>
+                              </div>
+                              <h3 className="text-blue-700 font-medium text-xs mb-1 leading-tight line-clamp-2">
+                                Google Pixel Smartphone - Meet Pixel Phones
+                              </h3>
+                              <p className="text-gray-600 text-[9px] flex-1 line-clamp-3">
+                                Pixel provides productivity, security, and support for your business.
+                              </p>
+                              <div className="space-y-1 border-t pt-1.5 mt-1">
+                                <p className="text-blue-700 text-[9px] truncate">Find the Right Pixel</p>
+                                <p className="text-blue-700 text-[9px] truncate">Google Phones Info</p>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +340%
+                                </span>
+                                <span className="flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Google Play Ad
+                          <div key="play" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2.5 flex-1 flex flex-col pb-8">
+                              <span className="text-[9px] text-gray-500 font-bold">Sponsored</span>
+                              <div className="flex items-center gap-1.5 mt-1 mb-1.5">
+                                <div className="w-5 h-5 flex-shrink-0">
+                                  <svg viewBox="0 0 24 24" className="w-full h-full">
+                                    <path fill="#EA4335" d="M3.5 20.5l9.5-9.5-9.5-9.5v19z"/>
+                                    <path fill="#FBBC04" d="M3.5 20.5l12-7-2.5-2.5-9.5 9.5z"/>
+                                    <path fill="#34A853" d="M15.5 13.5l5-3-5-3v6z"/>
+                                    <path fill="#4285F4" d="M3.5 1.5l12 7-2.5 2.5-9.5-9.5z"/>
+                                  </svg>
+                                </div>
+                                <p className="text-gray-800 font-medium text-[10px] truncate">Google Play</p>
+                              </div>
+                              <h3 className="text-blue-700 font-medium text-xs mb-1 leading-tight line-clamp-2">
+                                Shop popular brands - Gift cards
+                              </h3>
+                              <p className="text-gray-600 text-[9px] flex-1 line-clamp-4">
+                                Google Play is the secure, simple way to shop and send gift cards.
+                              </p>
+                              <div className="flex items-center gap-1 text-[8px] text-gray-500 mt-1">
+                                <Star className="w-2.5 h-2.5 text-yellow-500" fill="#eab308" />
+                                <span>4.8 • 100M+</span>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-cyan-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +280%
+                                </span>
+                                <span className="flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Google Cloud Ad
+                          <div key="cloud" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2.5 flex-1 flex flex-col pb-8">
+                              <span className="text-[9px] text-gray-500 font-bold">Sponsored</span>
+                              <div className="flex items-center gap-1.5 mt-1 mb-1.5">
+                                <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center p-0.5 flex-shrink-0">
+                                  <svg viewBox="0 0 24 24" className="w-full h-full">
+                                    <path fill="#4285F4" d="M12 7.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5-4.5-2-4.5-4.5 2-4.5 4.5-4.5z"/>
+                                    <path fill="#EA4335" d="M19.5 12c0-1.4-.4-2.7-1-3.8l-3 3c.3.5.5 1.1.5 1.8h3.5z"/>
+                                  </svg>
+                                </div>
+                                <p className="text-gray-800 font-medium text-[10px] truncate">Google Cloud</p>
+                              </div>
+                              <h3 className="text-blue-700 font-medium text-xs mb-1 leading-tight line-clamp-2">
+                                Google Cloud Built for AI
+                              </h3>
+                              <p className="text-gray-600 text-[9px] flex-1 line-clamp-4">
+                                Code using any language. Deploy as container. $300 free credits.
+                              </p>
+                              <div className="border-t pt-1 mt-1 space-y-0.5">
+                                <p className="text-blue-700 text-[9px] truncate">Start Free Trial</p>
+                                <p className="text-blue-700 text-[9px] truncate">View Pricing</p>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +420%
+                                </span>
+                                <span className="flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Shopping Ad
+                          <div key="shopping" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2 flex-1 flex flex-col pb-8">
+                              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded mb-2">
+                                <img 
+                                  src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=200&h=150&fit=crop" 
+                                  alt="Pixel Phone" 
+                                  className="w-full h-28 object-contain"
+                                />
+                              </div>
+                              <h4 className="text-blue-700 font-medium text-[10px] mb-0.5 line-clamp-2">
+                                Pixel 10 Pro Fold 256GB
+                              </h4>
+                              <p className="text-gray-800 font-bold text-sm">$1,799</p>
+                              <p className="text-gray-500 text-[9px]">Google Store</p>
+                              <div className="flex items-center gap-0.5 mt-1">
+                                <div className="flex text-yellow-400 text-[8px]">★★★★★</div>
+                                <span className="text-gray-500 text-[8px]">(2.8k)</span>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +520%
+                                </span>
+                                <span>Shopping</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Display Ad
+                          <div key="display" className="w-full h-full bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="flex-1 flex flex-col items-center justify-center px-3 text-center pb-8">
+                              <h3 className="text-gray-800 text-sm font-medium mb-0.5">Google Pixel 10</h3>
+                              <p className="text-gray-500 text-[9px] mb-2">with Gemini</p>
+                              <img 
+                                src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=150&h=100&fit=crop" 
+                                alt="Pixel 10" 
+                                className="w-20 h-14 object-contain mx-auto mb-2"
+                              />
+                              <h4 className="text-gray-800 font-semibold text-xs mb-0.5">Feel the difference</h4>
+                              <p className="text-gray-600 text-[9px] mb-2 line-clamp-2">
+                                Smart Android experience on Pixel 10 Pro.
+                              </p>
+                              <button className="bg-blue-600 text-white px-4 py-1.5 rounded-full font-medium text-[10px]">
+                                Shop Now
+                              </button>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-500 to-blue-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +250%
+                                </span>
+                                <span>Display</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // App Ad
+                          <div key="app" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2 flex-1 flex flex-col pb-8">
+                              <div className="flex items-start gap-2 mb-2">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-green-500 to-yellow-500 flex items-center justify-center shadow flex-shrink-0">
+                                  <svg viewBox="0 0 24 24" className="w-6 h-6">
+                                    <path fill="#fff" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                  </svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-gray-800 font-bold text-[11px]">Google Pay</h4>
+                                  <p className="text-gray-500 text-[9px]">Online shopping</p>
+                                </div>
+                              </div>
+                              <div className="flex justify-between text-center border-y py-1.5 mb-2 text-[8px]">
+                                <div className="flex-1">
+                                  <p className="text-gray-500">DL</p>
+                                  <p className="text-gray-800 font-medium">100M+</p>
+                                </div>
+                                <div className="flex-1 border-x">
+                                  <p className="text-gray-500">CAT</p>
+                                  <p className="text-gray-800 font-medium">Finance</p>
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-gray-500">DEV</p>
+                                  <p className="text-gray-800 font-medium">Google</p>
+                                </div>
+                              </div>
+                              <img 
+                                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=200&h=80&fit=crop" 
+                                alt="App" 
+                                className="w-full h-16 object-cover rounded mb-2"
+                              />
+                              <button className="w-full bg-blue-600 text-white py-1.5 rounded-full font-bold text-[10px]">
+                                Install
+                              </button>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-green-500 to-teal-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +680%
+                                </span>
+                                <span>App</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Video Ad
+                          <div key="video" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="flex items-center gap-1.5 p-2">
+                              <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                                <span className="text-purple-600 font-bold text-[9px]">S</span>
+                              </div>
+                              <span className="text-gray-600 text-[9px]">Sponsored</span>
+                            </div>
+                            <div className="relative flex-shrink-0">
+                              <img 
+                                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=120&fit=crop" 
+                                alt="Google Nest" 
+                                className="w-full h-28 object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center">
+                                  <Play className="w-4 h-4 text-gray-800 ml-0.5" fill="currentColor" />
+                                </div>
+                              </div>
+                              <div className="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-white text-[8px]">
+                                0:30
+                              </div>
+                            </div>
+                            <div className="p-2 flex-1 flex flex-col pb-8">
+                              <p className="text-gray-800 text-[9px] leading-snug line-clamp-3">
+                                Nest Learning Thermostat. Stay up-to-date on your home...
+                              </p>
+                              <div className="flex items-center gap-2 mt-auto pt-1 text-gray-400 text-sm">
+                                <span>♡</span>
+                                <span>↗</span>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-red-500 to-orange-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +320%
+                                </span>
+                                <span>Video</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Search Ad
+                          <div key="search" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2.5 flex-1 flex flex-col pb-8">
+                              <span className="text-[9px] text-gray-500 font-bold">Sponsored</span>
+                              <div className="flex items-center gap-1.5 mt-1 mb-1.5">
+                                <div className="w-5 h-5 flex-shrink-0">
+                                  <svg viewBox="0 0 24 24" className="w-full h-full">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                  </svg>
+                                </div>
+                                <p className="text-gray-800 font-medium text-[10px] truncate">google.com</p>
+                              </div>
+                              <h3 className="text-blue-700 font-medium text-xs mb-1 leading-tight line-clamp-2">
+                                How Google Search works
+                              </h3>
+                              <p className="text-gray-600 text-[9px] mb-1.5 line-clamp-2">
+                                Learn how Google provides helpful information.
+                              </p>
+                              <div className="space-y-0.5 border-t pt-1 flex-1">
+                                <p className="text-blue-700 text-[9px] truncate">Learn Search</p>
+                                <p className="text-blue-700 text-[9px] truncate">Detecting Spam</p>
+                                <p className="text-blue-700 text-[9px] truncate">Search Features</p>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-indigo-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +380%
+                                </span>
+                                <span className="flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                              </div>
+                            </div>
+                          </div>,
+
+                          // Fi Ad
+                          <div key="fi" className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2.5 flex-1 flex flex-col pb-8">
+                              <span className="text-[9px] text-gray-500 font-bold">Sponsored</span>
+                              <div className="flex items-center gap-1.5 mt-1 mb-1.5">
+                                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 via-green-400 to-yellow-400 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-white font-bold text-[8px]">Fi</span>
+                                </div>
+                                <p className="text-gray-800 font-medium text-[10px] truncate">Google Fi</p>
+                              </div>
+                              <h3 className="text-blue-700 font-medium text-xs mb-1 leading-tight line-clamp-2">
+                                Try Fi for free - Start trial
+                              </h3>
+                              <p className="text-gray-600 text-[9px] flex-1 line-clamp-3">
+                                Test Google Fi coverage. $50/mo. Cancel anytime.
+                              </p>
+                              <div className="space-y-0.5 border-t pt-1 mt-1">
+                                <p className="text-blue-700 text-[9px] truncate">Try Fi Free</p>
+                                <p className="text-blue-700 text-[9px] truncate">7 days trial</p>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-green-500 to-teal-500 px-2 py-1.5">
+                              <div className="flex items-center justify-between text-white text-[8px]">
+                                <span className="flex items-center gap-0.5 font-bold">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +190%
+                                </span>
+                                <span className="flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                              </div>
+                            </div>
+                          </div>,
+                        ]}
+                      />
                     </div>
-                    <div className="mt-3 flex items-center justify-between px-2">
-                      <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+
+                    {/* Bottom Stats Bar */}
+                    <motion.div 
+                      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 px-6 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-white/10"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-gray-400 text-sm">9 Ad Types</span>
+                      </div>
+                      <div className="h-4 w-px bg-white/20"></div>
+                      <div className="flex items-center gap-2 text-green-400 text-sm font-bold">
                         <TrendingUp className="w-4 h-4" />
-                        <span>+340% CTR vs Industry Avg</span>
+                        <span>Avg +365% Performance</span>
                       </div>
-                      <span className="text-xs text-gray-500">Search Campaign</span>
-                    </div>
-                  </div>
-
-                  {/* Shopping & Display Ads Row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Shopping Ad */}
-                    <div className="relative">
-                      <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-green-500 rounded-full text-xs text-white font-medium z-10">
-                        Best Seller
-                      </div>
-                      <div className="bg-white rounded-xl p-4 shadow-xl h-full">
-                        <img 
-                          src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=150&fit=crop" 
-                          alt="Smart Watch" 
-                          className="w-full h-28 object-contain bg-gray-50 rounded-lg mb-3"
-                        />
-                        <h4 className="text-blue-600 font-medium text-sm mb-1">Smart Watch Pro X</h4>
-                        <p className="text-gray-500 text-xs mb-2">TechStore.sa</p>
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-800 font-bold">$199</span>
-                          <span className="text-gray-400 line-through text-xs">$285</span>
-                          <span className="text-red-500 text-xs font-medium">-30%</span>
-                        </div>
-                        <div className="flex items-center gap-1 mt-2">
-                          <div className="flex text-yellow-400 text-xs">★★★★★</div>
-                          <span className="text-gray-500 text-xs">(2.8K)</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-center">
-                        <span className="text-green-400 text-xs font-medium">+420% Sales</span>
-                      </div>
-                    </div>
-
-                    {/* Display Ad */}
-                    <div className="relative">
-                      <div className="bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-xl p-4 shadow-xl h-full text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                        <div className="relative z-10">
-                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3">
-                            <Rocket className="w-5 h-5" />
-                          </div>
-                          <h4 className="text-lg font-bold mb-1">Scale Fast</h4>
-                          <p className="text-white/80 text-xs mb-3">AI marketing that delivers</p>
-                          <button className="bg-white text-purple-600 px-4 py-1.5 rounded-full font-semibold text-xs">
-                            Start Free
-                          </button>
-                        </div>
-                        <p className="absolute bottom-1 right-2 text-white/40 text-[10px]">Ad</p>
-                      </div>
-                      <div className="mt-2 text-center">
-                        <span className="text-green-400 text-xs font-medium">+180% Reach</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Video & App Ads Row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Video Ad */}
-                    <div className="bg-white rounded-xl overflow-hidden shadow-xl">
-                      <div className="relative">
-                        <img 
-                          src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=200&h=100&fit=crop" 
-                          alt="Video" 
-                          className="w-full h-24 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                            <Play className="w-4 h-4 text-white ml-0.5" fill="white" />
-                          </div>
-                        </div>
-                        <div className="absolute top-1 left-1 bg-red-600 px-1.5 py-0.5 rounded text-white text-[10px] font-bold flex items-center gap-0.5">
-                          <Play className="w-2 h-2" fill="white" />
-                          YouTube
-                        </div>
-                        <div className="absolute bottom-1 right-1 bg-black/70 px-1.5 py-0.5 rounded text-white text-[10px]">
-                          0:30
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        <h4 className="text-gray-800 font-medium text-xs mb-1 line-clamp-1">Smart Home Technology</h4>
-                        <p className="text-gray-500 text-[10px]">Ad • techstore.sa</p>
-                      </div>
-                    </div>
-
-                    {/* App Ad */}
-                    <div className="bg-white rounded-xl p-4 shadow-xl">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Zap className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-gray-800 font-semibold text-sm">FastPay</h4>
-                          <p className="text-gray-500 text-xs">4.9 ★ • Free</p>
-                        </div>
-                      </div>
-                      <button className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold text-sm">
-                        Install
-                      </button>
-                    </div>
+                    </motion.div>
                   </div>
                 </motion.div>
               </div>
 
-              {/* Bottom CTA */}
+              {/* Bottom CTA - Enhanced */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-center mt-16"
+                className="text-center mt-20"
               >
-                <Link
-                  href="/authentication/sign-up"
-                  className="group inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 hover:from-green-500 hover:via-blue-500 hover:to-purple-500 text-white rounded-2xl font-semibold text-lg transition-all duration-300 shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
-                >
-                  <Brain className="w-6 h-6" />
-                  Start Creating AI-Powered Ads
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <p className="text-gray-500 text-sm mt-4">No credit card required • 14-day free trial</p>
+                <div className="inline-block">
+                  <Link
+                    href="/authentication/sign-up"
+                    className="group relative inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 text-white rounded-2xl font-bold text-xl transition-all duration-300 shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 overflow-hidden"
+                  >
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    />
+                    <Brain className="w-7 h-7 relative z-10" />
+                    <span className="relative z-10">Start Creating AI-Powered Ads</span>
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform relative z-10" />
+                  </Link>
+                </div>
+                <p className="text-gray-500 mt-6 flex items-center justify-center gap-4">
+                  <span className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    No credit card required
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    14-day free trial
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Cancel anytime
+                  </span>
+                </p>
               </motion.div>
             </div>
           </section>
