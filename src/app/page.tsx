@@ -1369,7 +1369,7 @@ export default function Home() {
                     {/* 3D Carousel */}
                     <div className="h-[500px] relative z-10">
                       <ThreeDCarousel 
-                        radius={280}
+                        radius={320}
                         cardW={200}
                         cardH={280}
                         items={[
@@ -1506,25 +1506,27 @@ export default function Home() {
                             </div>
                           </div>,
 
-                          // Display Ad
-                          <div key="display" className="w-full h-full bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-xl overflow-hidden flex flex-col">
-                            <div className="flex-1 flex flex-col items-center justify-center px-3 text-center pb-8">
-                              <h3 className="text-gray-800 text-sm font-medium mb-0.5">Google Pixel 10</h3>
-                              <p className="text-gray-500 text-[9px] mb-2">with Gemini</p>
-                              <img 
-                                src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=150&h=100&fit=crop" 
-                                alt="Pixel 10" 
-                                className="w-20 h-14 object-contain mx-auto mb-2"
-                              />
-                              <h4 className="text-gray-800 font-semibold text-xs mb-0.5">Feel the difference</h4>
-                              <p className="text-gray-600 text-[9px] mb-2 line-clamp-2">
-                                Smart Android experience on Pixel 10 Pro.
+                          // Display Ad - Dark Theme
+                          <div key="display" className="w-full h-full bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 rounded-lg shadow-xl overflow-hidden flex flex-col">
+                            <div className="p-2.5 flex-1 flex flex-col pb-8">
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <span className="text-[9px] text-gray-400">Ad</span>
+                                <span className="text-[9px] text-purple-400 flex items-center gap-0.5">
+                                  <Sparkles className="w-2.5 h-2.5" /> AI Generated
+                                </span>
+                              </div>
+                              <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center mb-2">
+                                <Rocket className="w-5 h-5 text-purple-400" />
+                              </div>
+                              <h3 className="text-white text-sm font-bold mb-1">Scale Your Business</h3>
+                              <p className="text-gray-400 text-[9px] flex-1 line-clamp-3">
+                                AI-powered marketing that delivers real results. Start free today.
                               </p>
-                              <button className="bg-blue-600 text-white px-4 py-1.5 rounded-full font-medium text-[10px]">
-                                Shop Now
+                              <button className="w-full bg-white text-purple-700 py-1.5 rounded-full font-bold text-[10px] mt-2">
+                                Start Free Trial →
                               </button>
                             </div>
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-500 to-blue-500 px-2 py-1.5">
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 px-2 py-1.5">
                               <div className="flex items-center justify-between text-white text-[8px]">
                                 <span className="flex items-center gap-0.5 font-bold">
                                   <TrendingUp className="w-2.5 h-2.5" /> +250%
