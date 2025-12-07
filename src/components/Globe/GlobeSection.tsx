@@ -398,8 +398,9 @@ export function GlobeSection() {
   ];
 
   return (
-    <div className="flex flex-row items-center justify-center py-20 h-screen md:h-auto dark:bg-black bg-black relative w-full">
-      <div className="max-w-7xl mx-auto w-full relative overflow-hidden h-full md:h-[40rem] px-4">
+    <div className="flex flex-col items-center justify-center py-12 md:py-20 min-h-[600px] md:min-h-[700px] dark:bg-black bg-black relative w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full relative px-4">
+        {/* Text Content - Always on top */}
         <motion.div
           initial={{
             opacity: 0,
@@ -412,17 +413,23 @@ export function GlobeSection() {
           transition={{
             duration: 1,
           }}
-          className="div"
+          className="relative z-20 text-center mb-8 md:mb-0"
         >
-          <h2 className="text-center text-xl md:text-4xl font-bold text-white">
-            ذكاء اصطناعي يربط إعلاناتك بالعالم
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+            AI Connects Your Ads to the World
           </h2>
-          <p className="text-center text-base md:text-lg font-normal text-neutral-200 max-w-2xl mt-2 mx-auto">
-            أدِر حملاتك الإعلانية في أكثر من 190 دولة حول العالم بذكاء اصطناعي متقدم. منصتنا تربطك بملايين العملاء المحتملين في كل قارة.
+          <p className="text-sm sm:text-base md:text-lg font-normal text-neutral-200 max-w-2xl mx-auto">
+            Manage your ad campaigns in 190+ countries with advanced AI. Our platform connects you with millions of potential customers on every continent.
           </p>
         </motion.div>
-        <div className="absolute w-full -bottom-20 h-72 md:h-full z-10">
-          <World data={sampleArcs} globeConfig={globeConfig} />
+        
+        {/* Globe Container - Responsive positioning */}
+        <div className="relative w-full h-[350px] sm:h-[400px] md:h-[500px] lg:h-[550px] mt-4 md:mt-0">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-full h-full max-w-[600px] md:max-w-none">
+              <World data={sampleArcs} globeConfig={globeConfig} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

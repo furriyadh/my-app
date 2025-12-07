@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, ChevronDown, Mic, ArrowUp, Sparkles, TrendingUp, Target, Zap, 
   BarChart3, Users, Globe, CheckCircle, ArrowRight, Brain, Rocket, Shield,
-  Play, Star, Check, Crown, Cpu, LineChart as LineChartIcon, PieChart as PieChartIcon
+  Play, Star, Check, Crown, Cpu, LineChart as LineChartIcon, PieChart as PieChartIcon,
+  MessageCircle, X, Send, ChevronUp, Wand2, MousePointer, LayoutDashboard,
+  ArrowDownRight, ArrowUpRight, Mail, Phone, HelpCircle
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,20 +18,31 @@ import { LogoStepper } from "@/components/ui/logo-stepper";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { GlobeSection } from "@/components/Globe/GlobeSection";
 import CardSwap, { Card } from "@/components/ui/card-swap";
+import { CountUp } from "@/components/lightswind/count-up";
+import AnimatedNotification from "@/components/ui/animated-notification";
+import dynamic from "next/dynamic";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip
 } from "recharts";
 
+// Dynamic import for LaserFlow to avoid SSR issues with Three.js
+const LaserFlow = dynamic(() => import("@/components/ui/laser-flow"), { ssr: false });
+
 // Animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
 };
 
 // Sample chart data for AI Performance
@@ -42,22 +55,258 @@ const aiPerformanceData = [
   { month: "Jun", manual: 52, ai: 145, cost: 60, conversions: 156 },
 ];
 
-const conversionData = [
-  { name: "Week 1", value: 2400 },
-  { name: "Week 2", value: 3200 },
-  { name: "Week 3", value: 4100 },
-  { name: "Week 4", value: 5800 },
-];
+// Typewriter Component
+const TypewriterText = ({ texts, className }: { texts: string[], className?: string }) => {
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [currentText, setCurrentText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const text = texts[currentTextIndex];
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        if (currentText.length < text.length) {
+          setCurrentText(text.slice(0, currentText.length + 1));
+        } else {
+          setTimeout(() => setIsDeleting(true), 2000);
+        }
+      } else {
+        if (currentText.length > 0) {
+          setCurrentText(text.slice(0, currentText.length - 1));
+        } else {
+          setIsDeleting(false);
+          setCurrentTextIndex((prev) => (prev + 1) % texts.length);
+        }
+      }
+    }, isDeleting ? 50 : 100);
+
+    return () => clearTimeout(timeout);
+  }, [currentText, isDeleting, currentTextIndex, texts]);
+
+  return (
+    <span className={className}>
+      {currentText}
+      <span className="animate-pulse">|</span>
+    </span>
+  );
+};
+
+// Floating Particles Component
+const FloatingParticles = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(50)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-purple-500/30 rounded-full"
+          initial={{
+            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
+            y: Math.random() * 800,
+            scale: Math.random() * 0.5 + 0.5,
+          }}
+          animate={{
+            y: [null, Math.random() * -200 - 100],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: Math.random() * 10 + 10,
+            repeat: Infinity,
+            ease: "linear",
+            delay: Math.random() * 5,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Aurora Background Component
+const AuroraBackground = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute w-full h-full">
+        {/* Aurora Layers */}
+        <motion.div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: 'radial-gradient(ellipse at 30% 70%, rgba(59, 130, 246, 0.4) 0%, transparent 50%)',
+          }}
+          animate={{
+            scale: [1.2, 1, 1.2],
+            x: [0, -100, 0],
+            y: [0, 50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: 'radial-gradient(ellipse at 70% 30%, rgba(236, 72, 153, 0.3) 0%, transparent 50%)',
+          }}
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, 50, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Floating Chat Widget Component
+const FloatingChatWidget = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState('');
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="absolute bottom-20 right-0 w-80 bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold">Need Help?</h4>
+                  <p className="text-white/70 text-sm">We typically reply in minutes</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Messages */}
+            <div className="p-4 h-48 overflow-y-auto">
+              <div className="bg-white/10 rounded-2xl rounded-tl-none p-3 mb-3">
+                <p className="text-gray-300 text-sm">👋 Hi! How can we help you today?</p>
+              </div>
+            </div>
+            
+            {/* Input */}
+            <div className="p-4 border-t border-white/10">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Type your message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                />
+                <button className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity">
+                  <Send className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toggle Button */}
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transition-all"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        {isOpen ? (
+          <X className="w-6 h-6 text-white" />
+        ) : (
+          <MessageCircle className="w-6 h-6 text-white" />
+        )}
+      </motion.button>
+    </div>
+  );
+};
+
+// FAQ Accordion Component
+const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answer: string; isOpen: boolean; onClick: () => void }) => {
+  return (
+    <motion.div 
+      className="border border-white/10 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-all"
+      layout
+    >
+      <button
+        onClick={onClick}
+        className="w-full p-6 flex items-center justify-between text-left"
+      >
+        <span className="text-lg font-semibold text-white pr-4">{question}</span>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex-shrink-0"
+        >
+          <ChevronDown className="w-5 h-5 text-purple-400" />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="px-6 pb-6 text-gray-400 leading-relaxed">
+              {answer}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
 
 export default function Home() {
   const [prompt, setPrompt] = useState('');
   const [isAddPopupOpen, setAddPopupOpen] = useState(false);
   const [isModelOpen, setModelOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState('GPT-4 Turbo');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
+  const [isTyping, setIsTyping] = useState(false);
   const models = ['GPT-4 Turbo', 'Claude 3 Opus', 'Gemini Pro'];
   
   const addPopupRef = useRef<HTMLDivElement>(null);
   const modelRef = useRef<HTMLDivElement>(null);
+
+  const typewriterTexts = [
+    "Create a campaign for my restaurant in NYC...",
+    "How to target customers in California?",
+    "Best keywords for my e-commerce store?",
+    "Optimize my Google Ads budget...",
+  ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -95,10 +344,10 @@ export default function Home() {
   ];
 
   const stats = [
-    { icon: <Rocket className="w-8 h-8" />, number: "5,000+", label: "Successful Campaigns" },
-    { icon: <TrendingUp className="w-8 h-8" />, number: "90%", label: "Conversion Increase" },
-    { icon: <Users className="w-8 h-8" />, number: "1,000+", label: "Happy Clients" },
-    { icon: <Zap className="w-8 h-8" />, number: "24/7", label: "AI Support" }
+    { icon: <Rocket className="w-6 h-6" />, number: 5000, suffix: "+", label: "Successful Campaigns" },
+    { icon: <TrendingUp className="w-6 h-6" />, number: 90, suffix: "%", label: "Conversion Increase" },
+    { icon: <Users className="w-6 h-6" />, number: 1000, suffix: "+", label: "Happy Clients" },
+    { icon: <Zap className="w-6 h-6" />, number: 24, suffix: "/7", label: "AI Support" }
   ];
 
   const features = [
@@ -132,6 +381,53 @@ export default function Home() {
       title: "Security & Reliability",
       description: "Your data is protected with the highest global security standards"
     }
+  ];
+
+  const howItWorks = [
+    {
+      step: "01",
+      icon: <Wand2 className="w-8 h-8" />,
+      title: "Describe Your Goal",
+      description: "Tell our AI about your business, target audience, and campaign objectives in plain language."
+    },
+    {
+      step: "02",
+      icon: <Brain className="w-8 h-8" />,
+      title: "AI Creates Magic",
+      description: "Our advanced AI analyzes your input and generates optimized campaigns with perfect targeting."
+    },
+    {
+      step: "03",
+      icon: <Rocket className="w-8 h-8" />,
+      title: "Launch & Grow",
+      description: "Review, approve, and launch. Watch your business grow with continuous AI optimization."
+    }
+  ];
+
+  const beforeAfterData = [
+    { metric: "Cost Per Acquisition", before: "$150", after: "$45", improvement: "-70%" },
+    { metric: "Click-Through Rate", before: "1.2%", after: "4.8%", improvement: "+300%" },
+    { metric: "Conversion Rate", before: "2.1%", after: "8.7%", improvement: "+314%" },
+    { metric: "Return on Ad Spend", before: "1.5x", after: "5.2x", improvement: "+247%" },
+  ];
+
+  const faqData = [
+    {
+      question: "How does the AI create campaigns?",
+      answer: "Our AI analyzes your business description, target audience, and goals to generate optimized campaigns. It uses machine learning trained on millions of successful campaigns to create ad copy, select keywords, and set up targeting that maximizes your ROI."
+    },
+    {
+      question: "Do I need any technical experience?",
+      answer: "Not at all! Our platform is designed for everyone. Simply describe what you want in plain language, and our AI handles all the technical aspects. You can launch professional campaigns in minutes without any prior advertising experience."
+    },
+    {
+      question: "What's included in the 'Work on Our Accounts' plan?",
+      answer: "This premium plan gives you access to our verified, high-trust ad accounts that have excellent standing with Google. This means no suspension risks, instant approval for ads, and higher ad limits. Perfect for businesses that need reliable, hassle-free advertising."
+    },
+    {
+      question: "Can I cancel my subscription anytime?",
+      answer: "Yes! We offer flexible monthly billing with no long-term contracts. You can cancel anytime directly from your dashboard. If you choose annual billing, you'll save 20% and can still cancel with a prorated refund."
+    },
   ];
 
   const testimonials = [
@@ -185,6 +481,11 @@ export default function Home() {
     },
   ];
 
+  const pricing = {
+    monthly: { basic: 99, premium: 199 },
+    yearly: { basic: 79, premium: 159 }
+  };
+
   return (
     <>
       <div className="front-page-body overflow-hidden bg-black min-h-screen text-white" dir="ltr">
@@ -194,13 +495,21 @@ export default function Home() {
           {/* ============================================ */}
           {/* HERO SECTION - AI Chat Interface */}
           {/* ============================================ */}
-          <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute w-[600px] h-[600px] -top-48 -left-48 bg-purple-600/30 rounded-full blur-[120px] animate-pulse"></div>
-              <div className="absolute w-[600px] h-[600px] -bottom-48 -right-48 bg-blue-600/30 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-              <div className="absolute w-[400px] h-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-cyan-600/20 rounded-full blur-[100px] animate-pulse delay-500"></div>
-            </div>
+          <section className="relative pt-32 pb-20 px-4 overflow-hidden min-h-screen flex items-center">
+            {/* Aurora Animated Background */}
+            <AuroraBackground />
+            
+            {/* Floating Particles */}
+            <FloatingParticles />
+
+            {/* Grid Pattern Overlay */}
+            <div 
+              className="absolute inset-0 opacity-[0.02]"
+              style={{
+                backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+                backgroundSize: '50px 50px'
+              }}
+            />
 
             <motion.div 
               initial="hidden"
@@ -210,13 +519,21 @@ export default function Home() {
             >
               {/* Hero Text */}
               <motion.div variants={fadeInUp} className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm">
+                <motion.div 
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm"
+                  animate={{ 
+                    boxShadow: ['0 0 20px rgba(139, 92, 246, 0)', '0 0 20px rgba(139, 92, 246, 0.3)', '0 0 20px rgba(139, 92, 246, 0)']
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
                   <Sparkles className="w-4 h-4 text-purple-400" />
                   <span className="text-sm text-purple-300">Powered by Advanced AI</span>
-                </div>
+                </motion.div>
                 
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent leading-tight">
-                  Launch Your Ad Campaigns
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+                  <span className="bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
+                    Launch Your Ad Campaigns
+                  </span>
                   <br />
                   <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                     with AI Power
@@ -228,93 +545,121 @@ export default function Home() {
                 </p>
               </motion.div>
 
-              {/* AI Chatbot Component */}
+              {/* AI Chatbot Component with Glow Effect */}
               <motion.div variants={fadeInUp} className="max-w-3xl mx-auto mb-8">
-                <div className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-6 transition-all duration-300 hover:shadow-purple-500/20 hover:shadow-3xl hover:border-purple-500/30">
-                  <textarea
-                    className="w-full p-4 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-lg leading-relaxed"
-                    rows={3}
-                    placeholder="How can I help you with your ad campaign?"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                  />
+                <motion.div 
+                  className="relative"
+                  animate={isTyping ? { 
+                    boxShadow: ['0 0 30px rgba(139, 92, 246, 0.3)', '0 0 60px rgba(139, 92, 246, 0.5)', '0 0 30px rgba(139, 92, 246, 0.3)']
+                  } : {}}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 rounded-3xl blur-xl opacity-50"></div>
                   
-                  <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-4">
-                    {/* Left Controls */}
-                    <div className="flex items-center gap-3">
-                      <div className="relative" ref={addPopupRef}>
-                        <button 
-                          onClick={() => setAddPopupOpen(!isAddPopupOpen)}
-                          className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all duration-200 border border-white/10"
-                        >
-                          <Plus size={22} />
-                        </button>
-                        {isAddPopupOpen && (
-                          <div className="absolute bottom-full left-0 mb-3 w-64 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
-                            <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
-                              <span className="text-gray-300">Add Images</span>
-                            </button>
-                            <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
-                              <span className="text-gray-300">Add Files</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="relative" ref={modelRef}>
-                        <button 
-                          onClick={() => setModelOpen(!isModelOpen)} 
-                          className="flex items-center gap-2 h-12 px-4 bg-purple-600/20 hover:bg-purple-600/30 text-white rounded-2xl transition-all duration-200 border border-purple-500/30"
-                        >
-                          <Brain size={18} className="text-purple-400" />
-                          <span className="font-medium hidden md:block">{selectedModel}</span>
-                          <ChevronDown size={16} />
-                        </button>
-                        {isModelOpen && (
-                          <div className="absolute bottom-full left-0 mb-3 w-48 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
-                            {models.map((model) => (
-                              <button
-                                key={model}
-                                onClick={() => handleModelSelect(model)}
-                                className="w-full p-3 hover:bg-white/10 rounded-xl transition-colors text-left text-gray-300"
-                              >
-                                {model}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                  <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-6 transition-all duration-300 hover:border-purple-500/30">
+                    {/* Typewriter Placeholder */}
+                    <div className="relative">
+                      <textarea
+                        className="w-full p-4 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-lg leading-relaxed"
+                        rows={3}
+                        placeholder=""
+                        value={prompt}
+                        onChange={(e) => {
+                          setPrompt(e.target.value);
+                          setIsTyping(e.target.value.length > 0);
+                        }}
+                        onFocus={() => setIsTyping(true)}
+                        onBlur={() => setIsTyping(prompt.length > 0)}
+                      />
+                      {!prompt && (
+                        <div className="absolute top-4 left-4 text-gray-500 text-lg pointer-events-none">
+                          <TypewriterText texts={typewriterTexts} />
+                        </div>
+                      )}
                     </div>
+                    
+                    <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-4">
+                      {/* Left Controls */}
+                      <div className="flex items-center gap-3">
+                        <div className="relative" ref={addPopupRef}>
+                          <button 
+                            onClick={() => setAddPopupOpen(!isAddPopupOpen)}
+                            className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all duration-200 border border-white/10"
+                          >
+                            <Plus size={22} />
+                          </button>
+                          {isAddPopupOpen && (
+                            <div className="absolute bottom-full left-0 mb-3 w-64 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
+                              <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
+                                <span className="text-gray-300">Add Images</span>
+                              </button>
+                              <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
+                                <span className="text-gray-300">Add Files</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="relative" ref={modelRef}>
+                          <button 
+                            onClick={() => setModelOpen(!isModelOpen)} 
+                            className="flex items-center gap-2 h-12 px-4 bg-purple-600/20 hover:bg-purple-600/30 text-white rounded-2xl transition-all duration-200 border border-purple-500/30"
+                          >
+                            <Brain size={18} className="text-purple-400" />
+                            <span className="font-medium hidden md:block">{selectedModel}</span>
+                            <ChevronDown size={16} />
+                          </button>
+                          {isModelOpen && (
+                            <div className="absolute bottom-full left-0 mb-3 w-48 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
+                              {models.map((model) => (
+                                <button
+                                  key={model}
+                                  onClick={() => handleModelSelect(model)}
+                                  className="w-full p-3 hover:bg-white/10 rounded-xl transition-colors text-left text-gray-300"
+                                >
+                                  {model}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-                    {/* Right Controls */}
-                    <div className="flex items-center gap-3">
-                      <button className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all duration-200 border border-white/10">
-                        <Mic size={22} />
-                      </button>
-                      <button 
-                        onClick={handleSend}
-                        className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 ${
-                          prompt.trim() 
-                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/50' 
-                            : 'bg-white/10 text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
-                        <ArrowUp size={22} />
-                      </button>
+                      {/* Right Controls */}
+                      <div className="flex items-center gap-3">
+                        <button className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all duration-200 border border-white/10">
+                          <Mic size={22} />
+                        </button>
+                        <motion.button 
+                          onClick={handleSend}
+                          className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 ${
+                            prompt.trim() 
+                              ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/50' 
+                              : 'bg-white/10 text-gray-500 cursor-not-allowed'
+                          }`}
+                          whileHover={prompt.trim() ? { scale: 1.1 } : {}}
+                          whileTap={prompt.trim() ? { scale: 0.95 } : {}}
+                        >
+                          <ArrowUp size={22} />
+                        </motion.button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Example Prompts */}
                 <div className="flex flex-wrap gap-3 mt-6 justify-center">
                   {examplePrompts.map((example, index) => (
-                    <button
+                    <motion.button
                       key={index}
                       onClick={() => setPrompt(example)}
                       className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 transition-all duration-200 hover:border-purple-500/50"
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       {example}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </motion.div>
@@ -347,10 +692,10 @@ export default function Home() {
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
                 <Link
                   href="/authentication/sign-up"
-                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
+                  className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
                 >
                   Start Free Now
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   href="/dashboard"
@@ -361,6 +706,43 @@ export default function Home() {
                 </Link>
               </motion.div>
             </motion.div>
+          </section>
+
+          {/* ============================================ */}
+          {/* STATS SECTION with Counter Animation */}
+          {/* ============================================ */}
+          <section className="py-20 px-4 border-t border-white/10">
+            <div className="container mx-auto max-w-6xl">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={staggerContainer}
+                className="grid grid-cols-2 md:grid-cols-4 gap-6"
+              >
+                {stats.map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    variants={scaleIn}
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300 group"
+                  >
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl mb-4 text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                      {stat.icon}
+                    </div>
+                    <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                      <CountUp 
+                        value={stat.number} 
+                        duration={2.5} 
+                        suffix={stat.suffix}
+                        className="text-4xl font-bold"
+                        colorScheme="gradient"
+                      />
+                    </div>
+                    <div className="text-gray-400">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
           </section>
 
           {/* ============================================ */}
@@ -388,6 +770,79 @@ export default function Home() {
                 className="w-full"
                 cardClassName="bg-gray-800/50 backdrop-blur-sm border-gray-700"
               />
+            </div>
+          </section>
+
+          {/* ============================================ */}
+          {/* HOW IT WORKS SECTION */}
+          {/* ============================================ */}
+          <section className="py-20 px-4 border-t border-white/10 relative overflow-hidden">
+            {/* Background */}
+            <div className="absolute inset-0">
+              <div className="absolute w-[600px] h-[600px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-600/10 rounded-full blur-[200px]"></div>
+            </div>
+
+            <div className="container mx-auto max-w-6xl relative z-10">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                className="text-center mb-16"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full mb-6">
+                  <Wand2 className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm text-blue-300">Simple Process</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                  How It Works
+                </h2>
+                <p className="text-xl text-gray-400">
+                  Three simple steps to launch your AI-powered campaigns
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                {/* Connection Lines */}
+                <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-purple-600/50 via-pink-600/50 to-blue-600/50 -translate-y-1/2"></div>
+
+                {howItWorks.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeInUp}
+                    transition={{ delay: index * 0.2 }}
+                    className="relative"
+                  >
+                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 text-center group">
+                      {/* Step Number */}
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                          {item.step}
+                        </div>
+                      </div>
+
+                      {/* Icon */}
+                      <motion.div 
+                        className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl mb-6 text-purple-400 mx-auto"
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {item.icon}
+                      </motion.div>
+
+                      <h3 className="text-2xl font-bold mb-3 text-white">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-400 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -541,31 +996,68 @@ export default function Home() {
                   </div>
                 </motion.div>
               </div>
+            </div>
+          </section>
 
-              {/* Additional Stats */}
+          {/* ============================================ */}
+          {/* BEFORE & AFTER COMPARISON SECTION */}
+          {/* ============================================ */}
+          <section className="py-20 px-4 border-t border-white/10">
+            <div className="container mx-auto max-w-4xl">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                className="text-center mb-16"
+              >
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                  Before & After
+                </h2>
+                <p className="text-xl text-gray-400">
+                  Real results from businesses using our AI platform
+                </p>
+              </motion.div>
+
               <motion.div 
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={staggerContainer}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8"
+                className="space-y-4"
               >
-                {[
-                  { label: "Avg. ROAS", value: "320%", icon: <TrendingUp className="w-5 h-5" />, color: "text-green-400" },
-                  { label: "Time Saved", value: "15hrs/week", icon: <Zap className="w-5 h-5" />, color: "text-yellow-400" },
-                  { label: "CTR Increase", value: "+45%", icon: <Target className="w-5 h-5" />, color: "text-blue-400" },
-                  { label: "Campaigns Optimized", value: "10K+", icon: <BarChart3 className="w-5 h-5" />, color: "text-purple-400" },
-                ].map((stat, index) => (
-                  <motion.div 
+                {beforeAfterData.map((item, index) => (
+                  <motion.div
                     key={index}
                     variants={fadeInUp}
-                    className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center hover:border-white/20 transition-all"
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/30 transition-all duration-300"
                   >
-                    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 mb-3 ${stat.color}`}>
-                      {stat.icon}
+                    <div className="grid grid-cols-4 gap-4 items-center">
+                      <div className="col-span-1">
+                        <p className="text-gray-400 text-sm mb-1">Metric</p>
+                        <p className="text-white font-semibold">{item.metric}</p>
+                      </div>
+                      <div className="col-span-1 text-center">
+                        <p className="text-gray-400 text-sm mb-1">Before</p>
+                        <div className="flex items-center justify-center gap-2">
+                          <ArrowDownRight className="w-4 h-4 text-red-400" />
+                          <p className="text-red-400 font-bold text-xl">{item.before}</p>
+                        </div>
+                      </div>
+                      <div className="col-span-1 text-center">
+                        <p className="text-gray-400 text-sm mb-1">After</p>
+                        <div className="flex items-center justify-center gap-2">
+                          <ArrowUpRight className="w-4 h-4 text-green-400" />
+                          <p className="text-green-400 font-bold text-xl">{item.after}</p>
+                        </div>
+                      </div>
+                      <div className="col-span-1 text-right">
+                        <p className="text-gray-400 text-sm mb-1">Improvement</p>
+                        <span className="inline-block px-3 py-1 bg-green-500/20 text-green-400 rounded-full font-bold">
+                          {item.improvement}
+                        </span>
+                      </div>
                     </div>
-                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                    <p className="text-sm text-gray-400">{stat.label}</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -589,6 +1081,10 @@ export default function Home() {
                 variants={fadeInUp}
                 className="text-center mb-16"
               >
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
+                  <LayoutDashboard className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm text-purple-300">Powerful Interface</span>
+                </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
                   Powerful Dashboard
                 </h2>
@@ -683,6 +1179,251 @@ export default function Home() {
                     </div>
                   </div>
                 </motion.div>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* ============================================ */}
+          {/* CAMPAIGN TYPES SECTION - Google Ads Style */}
+          {/* ============================================ */}
+          <section className="py-24 px-4 border-t border-white/10 bg-gradient-to-b from-black via-gray-950 to-black relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute inset-0" style={{
+                backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+                backgroundSize: '40px 40px'
+              }}></div>
+            </div>
+
+            <div className="container mx-auto max-w-7xl relative z-10">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                className="text-center mb-16"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-full mb-6">
+                  <Sparkles className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm text-blue-300">AI-Powered Campaign Types</span>
+                </div>
+                <h2 className="text-4xl md:text-6xl font-bold mb-6">
+                  <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+                    Multiple Ways to Showcase
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Your Business
+                  </span>
+                </h2>
+                <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                  Our AI platform supports all Google Ads campaign types, automatically optimizing each for maximum ROI
+                </p>
+              </motion.div>
+
+              {/* Campaign Types Interactive Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                {/* Left Side - Campaign Selector */}
+                <div className="lg:col-span-4 space-y-4">
+                  {[
+                    { 
+                      id: 'search', 
+                      icon: <Target className="w-5 h-5" />, 
+                      title: 'Search Campaigns',
+                      desc: 'Reach customers actively searching for your products',
+                      color: 'from-blue-500 to-cyan-500',
+                      stats: '+340% CTR'
+                    },
+                    { 
+                      id: 'display', 
+                      icon: <PieChartIcon className="w-5 h-5" />, 
+                      title: 'Display Network',
+                      desc: 'Visual ads across millions of websites',
+                      color: 'from-purple-500 to-pink-500',
+                      stats: '+280% Reach'
+                    },
+                    { 
+                      id: 'shopping', 
+                      icon: <BarChart3 className="w-5 h-5" />, 
+                      title: 'Shopping Campaigns',
+                      desc: 'Showcase your products with rich visuals',
+                      color: 'from-green-500 to-emerald-500',
+                      stats: '+420% Sales'
+                    },
+                    { 
+                      id: 'video', 
+                      icon: <Play className="w-5 h-5" />, 
+                      title: 'Video Campaigns',
+                      desc: 'Engage audiences on YouTube',
+                      color: 'from-red-500 to-orange-500',
+                      stats: '+190% Views'
+                    },
+                    { 
+                      id: 'app', 
+                      icon: <Rocket className="w-5 h-5" />, 
+                      title: 'App Campaigns',
+                      desc: 'Drive app installs and engagement',
+                      color: 'from-indigo-500 to-violet-500',
+                      stats: '+560% Installs'
+                    },
+                  ].map((campaign, index) => (
+                    <motion.div
+                      key={campaign.id}
+                      initial={{ opacity: 0, x: -30 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="group relative"
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-r ${campaign.color} rounded-2xl opacity-0 group-hover:opacity-20 transition-all duration-500 blur-xl`}></div>
+                      <div className="relative bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 hover:border-white/20 rounded-2xl p-5 cursor-pointer transition-all duration-300 group-hover:scale-[1.02]">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${campaign.color} flex items-center justify-center text-white shadow-lg`}>
+                            {campaign.icon}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-white font-semibold text-lg group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-white group-hover:to-gray-300 transition-all">
+                              {campaign.title}
+                            </h3>
+                            <p className="text-gray-400 text-sm">{campaign.desc}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`inline-block px-3 py-1 bg-gradient-to-r ${campaign.color} bg-opacity-20 rounded-full text-xs font-bold text-white`}>
+                              {campaign.stats}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Right Side - Visual Preview */}
+                <div className="lg:col-span-8">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="relative"
+                  >
+                    {/* Main Preview Card */}
+                    <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950 rounded-3xl p-8 border border-white/10 shadow-2xl">
+                      {/* AI Status Bar */}
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                          </div>
+                          <span className="text-green-400 text-sm font-medium">AI Actively Optimizing</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 rounded-full">
+                          <Brain className="w-4 h-4 text-purple-400" />
+                          <span className="text-purple-300 text-sm">Neural Engine v3.0</span>
+                        </div>
+                      </div>
+
+                      {/* Campaign Performance Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {[
+                          { label: 'Active Campaigns', value: '24', change: '+8', color: 'text-blue-400' },
+                          { label: 'Total Impressions', value: '2.4M', change: '+156%', color: 'text-green-400' },
+                          { label: 'Conversions', value: '12,847', change: '+89%', color: 'text-purple-400' },
+                          { label: 'ROAS', value: '4.8x', change: '+2.1x', color: 'text-yellow-400' },
+                        ].map((stat, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 + index * 0.1 }}
+                            className="bg-white/5 rounded-2xl p-4 border border-white/5"
+                          >
+                            <p className="text-gray-400 text-xs mb-2">{stat.label}</p>
+                            <p className="text-white text-2xl font-bold">{stat.value}</p>
+                            <p className={`text-xs ${stat.color} mt-1`}>{stat.change}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* AI Optimization Preview */}
+                      <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-2xl p-6 border border-purple-500/20">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center flex-shrink-0">
+                            <Cpu className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-white font-semibold mb-2">Real-Time AI Optimization</h4>
+                            <p className="text-gray-400 text-sm mb-4">
+                              Our AI analyzes 50+ signals per second to optimize your campaigns automatically
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {['Bid Adjustment', 'Audience Targeting', 'Ad Scheduling', 'Budget Allocation'].map((tag, i) => (
+                                <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-xs text-gray-300">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Floating Stats */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.5 }}
+                      className="absolute -bottom-6 -left-6 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 border border-green-500/30 shadow-xl hidden md:block"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                          <TrendingUp className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-white font-bold">$2.4M</p>
+                          <p className="text-xs text-gray-400">Revenue Generated</p>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.6 }}
+                      className="absolute -top-4 -right-4 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 border border-purple-500/30 shadow-xl hidden md:block"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                          <Zap className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-white font-bold">50ms</p>
+                          <p className="text-xs text-gray-400">Optimization Speed</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Bottom CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-center mt-16"
+              >
+                <Link
+                  href="/authentication/sign-up"
+                  className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white rounded-2xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Start AI-Powered Campaigns
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </motion.div>
             </div>
           </section>
@@ -831,9 +1572,13 @@ export default function Home() {
                     variants={fadeInUp}
                     className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 group"
                   >
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl mb-6 text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                    <motion.div 
+                      className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl mb-6 text-purple-400"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
                       {feature.icon}
-                    </div>
+                    </motion.div>
                     <h3 className="text-2xl font-bold mb-3 text-white">
                       {feature.title}
                     </h3>
@@ -852,7 +1597,7 @@ export default function Home() {
           <GlobeSection />
 
           {/* ============================================ */}
-          {/* PRICING SECTION */}
+          {/* PRICING SECTION with Toggle */}
           {/* ============================================ */}
           <section className="py-20 px-4 border-t border-white/10 relative overflow-hidden">
             {/* Background */}
@@ -867,7 +1612,7 @@ export default function Home() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeInUp}
-                className="text-center mb-16"
+                className="text-center mb-12"
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
                   <Crown className="w-4 h-4 text-purple-400" />
@@ -876,9 +1621,34 @@ export default function Home() {
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
                   Choose Your Plan
                 </h2>
-                <p className="text-xl text-gray-400">
+                <p className="text-xl text-gray-400 mb-8">
                   Two simple options to get started with AI-powered advertising
                 </p>
+
+                {/* Billing Toggle */}
+                <div className="inline-flex items-center gap-4 p-1 bg-white/5 rounded-full border border-white/10">
+                  <button
+                    onClick={() => setBillingCycle('monthly')}
+                    className={`px-6 py-2 rounded-full font-medium transition-all ${
+                      billingCycle === 'monthly' 
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setBillingCycle('yearly')}
+                    className={`px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${
+                      billingCycle === 'yearly' 
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Yearly
+                    <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">-20%</span>
+                  </button>
+                </div>
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -896,8 +1666,13 @@ export default function Home() {
                   </div>
                   
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-white">$99</span>
+                    <span className="text-5xl font-bold text-white">
+                      ${billingCycle === 'monthly' ? pricing.monthly.basic : pricing.yearly.basic}
+                    </span>
                     <span className="text-gray-400">/month</span>
+                    {billingCycle === 'yearly' && (
+                      <p className="text-green-400 text-sm mt-1">Billed annually (Save $240/year)</p>
+                    )}
                   </div>
 
                   <ul className="space-y-4 mb-8">
@@ -933,7 +1708,7 @@ export default function Home() {
                   className="relative"
                 >
                   {/* Gradient Border Effect */}
-                  <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 rounded-3xl blur-sm opacity-75"></div>
+                  <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 rounded-3xl blur-sm opacity-75 animate-pulse"></div>
                   
                   <div className="relative bg-gray-900 rounded-3xl p-8 border border-purple-500/50">
                     {/* Popular Badge */}
@@ -950,8 +1725,13 @@ export default function Home() {
                     </div>
                     
                     <div className="mb-6">
-                      <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">$199</span>
+                      <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        ${billingCycle === 'monthly' ? pricing.monthly.premium : pricing.yearly.premium}
+                      </span>
                       <span className="text-gray-400">/month</span>
+                      {billingCycle === 'yearly' && (
+                        <p className="text-green-400 text-sm mt-1">Billed annually (Save $480/year)</p>
+                      )}
                     </div>
 
                     <ul className="space-y-4 mb-8">
@@ -977,9 +1757,152 @@ export default function Home() {
                     >
                       Start Premium
                     </Link>
+
+                    {/* Money-back Guarantee */}
+                    <p className="text-center text-gray-400 text-sm mt-4 flex items-center justify-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      30-day money-back guarantee
+                    </p>
                   </div>
                 </motion.div>
               </div>
+            </div>
+          </section>
+
+          {/* ============================================ */}
+          {/* LASER FLOW SECTION - Visual Effect */}
+          {/* ============================================ */}
+          <section className="relative py-32 px-4 border-t border-white/10 overflow-hidden">
+            {/* LaserFlow Background */}
+            <div className="absolute inset-0 z-0">
+              <LaserFlow
+                color="#8B5CF6"
+                horizontalBeamOffset={0.0}
+                verticalBeamOffset={-0.1}
+                verticalSizing={2.5}
+                horizontalSizing={0.6}
+                fogIntensity={0.5}
+                wispIntensity={4}
+              />
+            </div>
+
+            <div className="container mx-auto max-w-4xl relative z-10">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                className="text-center"
+              >
+                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
+                  Powered by Advanced AI
+                </h2>
+                <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                  Our cutting-edge artificial intelligence analyzes millions of data points to optimize your campaigns in real-time
+                </p>
+                
+                {/* Feature Highlights */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                  {[
+                    { icon: <Brain className="w-8 h-8" />, title: "Neural Networks", desc: "Deep learning models trained on billions of ad interactions" },
+                    { icon: <Zap className="w-8 h-8" />, title: "Real-time Processing", desc: "Instant optimization decisions every millisecond" },
+                    { icon: <Target className="w-8 h-8" />, title: "Predictive Targeting", desc: "AI predicts user behavior before they act" },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      variants={fadeInUp}
+                      className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-purple-500/20"
+                    >
+                      <div className="inline-flex items-center justify-center w-14 h-14 bg-purple-600/20 rounded-xl mb-4 text-purple-400">
+                        {item.icon}
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
+                      <p className="text-gray-400 text-sm">{item.desc}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* ============================================ */}
+          {/* FAQ SECTION */}
+          {/* ============================================ */}
+          <section className="py-20 px-4 border-t border-white/10">
+            <div className="container mx-auto max-w-3xl">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                className="text-center mb-12"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full mb-6">
+                  <HelpCircle className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm text-blue-300">FAQ</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-xl text-gray-400">
+                  Got questions? We've got answers
+                </p>
+              </motion.div>
+
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={staggerContainer}
+                className="space-y-4"
+              >
+                {faqData.map((faq, index) => (
+                  <motion.div key={index} variants={fadeInUp}>
+                    <FAQItem
+                      question={faq.question}
+                      answer={faq.answer}
+                      isOpen={openFAQ === index}
+                      onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </section>
+
+          {/* ============================================ */}
+          {/* NEWSLETTER SECTION */}
+          {/* ============================================ */}
+          <section className="py-20 px-4 border-t border-white/10">
+            <div className="container mx-auto max-w-2xl">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeInUp}
+                className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 backdrop-blur-sm border border-white/10 rounded-3xl p-8 md:p-12 text-center"
+              >
+                <Mail className="w-12 h-12 mx-auto mb-6 text-purple-400" />
+                <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">
+                  Get Weekly AI Marketing Tips
+                </h3>
+                <p className="text-gray-400 mb-8">
+                  Join 10,000+ marketers getting actionable insights every week
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="flex-1 px-6 py-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                  />
+                  <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 whitespace-nowrap">
+                    Subscribe
+                  </button>
+                </div>
+                <p className="text-gray-500 text-sm mt-4">
+                  No spam. Unsubscribe anytime.
+                </p>
+              </motion.div>
             </div>
           </section>
 
@@ -1005,15 +1928,16 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
                     href="/authentication/sign-up"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 hover:scale-105"
+                    className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 hover:scale-105"
                   >
                     Start Free Trial
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <Link
                     href="/front-pages/contact"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-2xl font-semibold transition-all duration-200"
                   >
+                    <Phone className="w-5 h-5" />
                     Contact Sales
                   </Link>
                 </div>
@@ -1023,6 +1947,29 @@ export default function Home() {
         </main>
 
         <Footer />
+        
+        {/* Floating Chat Widget */}
+        <FloatingChatWidget />
+
+        {/* Animated Notifications - Shows AI activity (Slow with auto-dismiss) */}
+        <AnimatedNotification
+          autoGenerate={true}
+          maxNotifications={1}
+          autoInterval={20000}
+          autoDismissTimeout={8000}
+          animationDuration={1000}
+          variant="glass"
+          position="bottom-left"
+          showAvatars={true}
+          allowDismiss={true}
+          customMessages={[
+            "Campaign optimized! ROI +45% 📈",
+            "AI adjusted bidding strategy 🤖",
+            "Budget allocation optimized 💰",
+            "Performance report ready 📊",
+            "Quality score improved! ⭐"
+          ]}
+        />
       </div>
     </>
   );

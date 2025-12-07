@@ -64,6 +64,7 @@
     "react-chartjs-2": "^5.3.0",
     "react-country-flag": "^3.1.0",
     "react-dom": "^19.1.0",
+    "react-flip-toolkit": "^7.2.4",
     "react-i18next": "^15.5.3",
     "react-simple-wysiwyg": "^3.2.2",
     "react-spring": "^10.0.1",
