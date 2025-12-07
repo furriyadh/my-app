@@ -63,7 +63,7 @@ const Avatar: React.FC<{
 
   return (
     <div
-      className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/40 flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm"
+      className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/40 flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
       style={{ backgroundColor: user.color }}
     >
       {user.avatarUrl ? (
@@ -74,7 +74,7 @@ const Avatar: React.FC<{
           loading="lazy"
         />
       ) : (
-        <span className="text-xs font-bold text-white drop-shadow-sm">
+        <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-white drop-shadow-sm">
           {user.initials || user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
         </span>
       )}
@@ -128,28 +128,29 @@ const Notification: React.FC<{
   return (
     <div
       className={cn(
-        "group relative transition-all duration-500 ease-out transform hover:scale-[1.02] hover:-translate-y-1",
-        "rounded-xl p-4 flex items-start gap-3 w-80 max-w-80 cursor-pointer",
+        "group relative transition-all duration-500 ease-out transform",
+        "rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 flex items-start gap-2 sm:gap-2.5 md:gap-3",
+        "w-[220px] sm:w-[260px] md:w-[300px] max-w-[calc(100vw-1.5rem)] cursor-pointer",
         getVariantStyles(),
         getPriorityStyles(),
         notification.fadingOut && "animate-pulse"
       )}
       onClick={onClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg sm:rounded-xl pointer-events-none" />
       <Avatar user={notification.user} showAvatar={showAvatars} />
-      <div className="flex-1 min-w-0 space-y-1">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-white/90 truncate">
+      <div className="flex-1 min-w-0 space-y-0.5">
+        <div className="flex items-center justify-between gap-1">
+          <h3 className="font-semibold text-[11px] sm:text-xs md:text-sm text-white/90 truncate">
             {notification.user.name}
           </h3>
           {showTimestamps && notification.timestamp && (
-            <span className="text-xs text-gray-400/70 font-mono">
+            <span className="text-[9px] sm:text-[10px] md:text-xs text-gray-400/70 font-mono hidden md:block flex-shrink-0">
               {notification.timestamp}
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-300/80 line-clamp-2 leading-relaxed">
+        <p className="text-[10px] sm:text-xs md:text-sm text-gray-300/80 line-clamp-2 leading-snug sm:leading-relaxed">
           {notification.message}
         </p>
       </div>
@@ -159,9 +160,9 @@ const Notification: React.FC<{
             e.stopPropagation();
             onDismiss?.();
           }}
-          className="flex-shrink-0 w-5 h-5 text-gray-400/50 hover:text-gray-300 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+          className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 text-gray-400/50 hover:text-gray-300 transition-all duration-200 opacity-70 sm:opacity-0 group-hover:opacity-100"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
       )}
     </div>
@@ -312,15 +313,15 @@ const AnimatedNotification: React.FC<AnimatedNotificationProps> = ({
   const getPositionStyles = () => {
     switch (position) {
       case 'top-left':
-        return 'fixed top-6 left-6 z-50';
+        return 'fixed top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 z-50';
       case 'top-right':
-        return 'fixed top-6 right-6 z-50';
+        return 'fixed top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-50';
       case 'bottom-left':
-        return 'fixed bottom-6 left-6 z-50';
+        return 'fixed bottom-3 left-3 sm:bottom-4 sm:left-4 md:bottom-6 md:left-6 z-50';
       case 'bottom-right':
-        return 'fixed bottom-6 right-6 z-50';
+        return 'fixed bottom-3 right-3 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 z-50';
       default:
-        return 'flex items-center justify-center min-h-auto p-6';
+        return 'flex items-center justify-center min-h-auto p-4 sm:p-6';
     }
   };
 
@@ -362,7 +363,7 @@ const AnimatedNotification: React.FC<AnimatedNotificationProps> = ({
       }} />
       <div className={cn(getPositionStyles(), className)}>
         <Flipper flipKey={notes.map((note) => note.id).join("")}>
-          <div className="flex flex-col gap-4 items-center" style={{ width }}>
+          <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 items-center w-auto">
             {notes.map((note) => (
               <Flipped key={note.id} flipId={note.id}>
                 <div
