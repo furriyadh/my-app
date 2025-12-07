@@ -10,14 +10,14 @@ const FALLBACK =
   ' text-anchor="middle" fill="%234a5568" font-size="18">Image</text></svg>';
 
 /* 2️⃣  Config ————————————————————————— */
-const CARD_W = 280;
-const CARD_H = 360;
-const RADIUS = 320;
-const TILT_SENSITIVITY = 8;
-const DRAG_SENSITIVITY = 0.4;
+const CARD_W = 180;
+const CARD_H = 240;
+const RADIUS = 240;
+const TILT_SENSITIVITY = 10;
+const DRAG_SENSITIVITY = 0.5;
 const INERTIA_FRICTION = 0.95;
-const AUTOSPIN_SPEED = 0.15;
-const IDLE_TIMEOUT = 1500;
+const AUTOSPIN_SPEED = 0.08;
+const IDLE_TIMEOUT = 2000;
 
 /* 3️⃣  Card Component (Memoized for Performance) ——— */
 interface CardProps {
@@ -39,8 +39,10 @@ const Card = React.memo(({ children, transform, cardW, cardH }: CardProps) => (
     }}
   >
     <div
-      className="w-full h-full rounded-2xl overflow-hidden 
-                 transition-transform duration-300 hover:scale-105 hover:z-10"
+      className="w-full h-full rounded-2xl overflow-hidden bg-white dark:bg-gray-800
+                 border border-gray-200 dark:border-gray-700 shadow-lg dark:shadow-gray-900/50
+                 transition-transform duration-300 hover:scale-105 hover:shadow-2xl dark:hover:shadow-gray-900/70
+                 hover:z-10"
       style={{ backfaceVisibility: 'hidden' }}
     >
       {children}
@@ -223,4 +225,3 @@ const ThreeDCarousel = React.memo(
 ThreeDCarousel.displayName = 'ThreeDCarousel';
 
 export default ThreeDCarousel;
-
