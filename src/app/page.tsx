@@ -413,33 +413,33 @@ export default function Home() {
   const features = [
     {
       icon: <Brain className="w-12 h-12" />,
-      title: "Advanced AI",
-      description: "We use the latest AI models to create highly effective campaigns"
+      title: "Advanced AI for Google Ads",
+      description: "We use the latest AI models to create and optimize highly effective Google Ads campaigns"
     },
     {
       icon: <Target className="w-12 h-12" />,
-      title: "Precise Targeting",
-      description: "Identify your ideal audience with high accuracy using advanced analytics"
+      title: "Precise Audience Targeting",
+      description: "Identify your ideal audience with high accuracy using advanced Google Ads analytics"
     },
     {
       icon: <BarChart3 className="w-12 h-12" />,
-      title: "Comprehensive Analytics",
-      description: "Detailed reports and real-time analytics for your campaign performance"
+      title: "Comprehensive Campaign Analytics",
+      description: "Detailed reports and real-time analytics for your Google Ads campaign performance"
     },
     {
       icon: <Zap className="w-12 h-12" />,
-      title: "Auto Optimization",
-      description: "AI automatically optimizes your campaigns for best results"
+      title: "Auto Campaign Optimization",
+      description: "AI automatically optimizes your Google Ads campaigns for best ROAS and lower CPC"
     },
     {
       icon: <Globe className="w-12 h-12" />,
-      title: "Global Coverage",
-      description: "Support all Google Ads campaign types in every market"
+      title: "All Google Ads Types",
+      description: "Support Search, Display, Shopping, Video, and Performance Max campaigns worldwide"
     },
     {
       icon: <Shield className="w-12 h-12" />,
-      title: "Security & Reliability",
-      description: "Your data is protected with the highest global security standards"
+      title: "Secure Ad Account Management",
+      description: "Your Google Ads accounts are protected with the highest global security standards"
     }
   ];
 
@@ -473,19 +473,19 @@ export default function Home() {
 
   const faqData = [
     {
-      question: "How does the AI create campaigns?",
-      answer: "Our AI analyzes your business description, target audience, and goals to generate optimized campaigns. It uses machine learning trained on millions of successful campaigns to create ad copy, select keywords, and set up targeting that maximizes your ROI."
+      question: "How does the AI create Google Ads campaigns?",
+      answer: "Our AI analyzes your business description, target audience, and goals to generate optimized Google Ads campaigns. It uses machine learning trained on millions of successful campaigns to create ad copy, select keywords, and set up targeting that maximizes your ROI and lowers your cost per click (CPC)."
     },
     {
-      question: "Do I need any technical experience?",
-      answer: "Not at all! Our platform is designed for everyone. Simply describe what you want in plain language, and our AI handles all the technical aspects. You can launch professional campaigns in minutes without any prior advertising experience."
+      question: "Do I need any Google Ads experience?",
+      answer: "Not at all! Our Google Ads management platform is designed for everyone. Simply describe what you want in plain language, and our AI handles all the technical aspects including keyword research, bid optimization, and ad copywriting. You can launch professional Google Ads campaigns in minutes."
     },
     {
       question: "What's included in the 'Work on Our Accounts' plan?",
-      answer: "This premium plan gives you access to our verified, high-trust ad accounts that have excellent standing with Google. This means no suspension risks, instant approval for ads, and higher ad limits. Perfect for businesses that need reliable, hassle-free advertising."
+      answer: "This premium plan gives you access to our verified, high-trust Google Ads accounts that have excellent standing with Google. This means no suspension risks, instant approval for ads, and higher ad limits. Perfect for businesses that need reliable, hassle-free Google Ads management."
     },
     {
-      question: "Can I cancel my subscription anytime?",
+      question: "Can I cancel my Google Ads management subscription anytime?",
       answer: "Yes! We offer flexible monthly billing with no long-term contracts. You can cancel anytime directly from your dashboard. If you choose annual billing, you'll save 20% and can still cancel with a prorated refund."
     },
   ];
@@ -586,16 +586,16 @@ export default function Home() {
                 
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                   <span className="bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
-                    Launch Your Ad Campaigns
+                    AI‑Powered Google Ads Management
                   </span>
                   <br />
                   <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                    with AI Power
+                    Launch High‑Converting Campaigns
                   </span>
                 </h1>
                 
                 <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                  A comprehensive platform that uses artificial intelligence to create and manage Google Ads campaigns with high efficiency
+                  AI‑powered platform to create, manage, and optimize profitable Google Ads campaigns worldwide. Reduce CPC, increase conversions, and maximize your ROAS with smart automation.
                 </p>
               </div>
 
@@ -876,10 +876,10 @@ export default function Home() {
                   <span className="text-blue-300 text-sm font-medium">Compare Your Options</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">Furriyadh AI</span>?
+                  Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">Furriyadh AI for Google Ads</span>?
                 </h2>
                 <p className="text-gray-400 max-w-2xl mx-auto">
-                  See how our AI platform compares to agencies and freelancers
+                  See how our AI‑powered Google Ads management platform compares to agencies and freelancers
                 </p>
               </div>
 
@@ -1324,10 +1324,10 @@ export default function Home() {
             <div className="container mx-auto max-w-6xl">
               <div className="text-center mb-12">
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                  What Our Clients Say
+                  What Our Clients Say About Google Ads Management
                 </h2>
                 <p className="text-xl text-gray-400">
-                  Thousands of companies trust our platform to manage their ad campaigns
+                  Thousands of companies trust our platform to manage their Google Ads campaigns and increase conversions
                 </p>
                       </div>
 
@@ -1350,10 +1350,10 @@ export default function Home() {
                   <span className="text-sm text-purple-300">Simple Pricing</span>
                   </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                  Choose Your Plan
+                  Choose Your Google Ads Management Plan
                 </h2>
                 <p className="text-xl text-gray-400 mb-8">
-                  Two simple options to get started with AI-powered advertising
+                  Two simple options to get started with AI‑powered Google Ads management and campaign optimization
                 </p>
 
                 {/* Billing Toggle */}
@@ -1534,10 +1534,10 @@ export default function Home() {
               <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 backdrop-blur-sm border border-white/10 rounded-3xl p-12">
                 <Sparkles className="w-16 h-16 mx-auto mb-6 text-purple-400" />
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                  Ready to Transform Your Campaigns?
+                  Ready to Transform Your Google Ads Campaigns?
                 </h2>
                 <p className="text-xl text-gray-400 mb-8">
-                  Join thousands of businesses that trust our platform to manage their ad campaigns
+                  Join thousands of businesses that trust our platform to manage and optimize their Google Ads campaigns. Start your free trial today and see the difference AI makes.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -1555,6 +1555,11 @@ export default function Home() {
                     Contact Sales
                 </Link>
                 </div>
+                
+                {/* SEO-rich paragraph */}
+                <p className="mt-8 text-sm text-gray-500 max-w-3xl mx-auto leading-relaxed">
+                  Furriyadh is a specialized Google Ads (Google AdWords) management platform that helps businesses worldwide run high‑performance Search, Display, Video, Shopping, and Performance Max campaigns. Our AI‑powered tools handle keyword research, ad copywriting, bid optimization, and continuous campaign improvement to maximize your ROAS and minimize cost per click.
+                </p>
               </div>
             </div>
           </section>

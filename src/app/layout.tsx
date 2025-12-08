@@ -21,8 +21,233 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Furriyadh - Google Ads Management Platform",
-  description: "Furriyadh - Professional Google Ads Management Platform",
+  metadataBase: new URL('https://furriyadh.com'),
+  title: {
+    default: "Furriyadh | Google Ads Management & AI Campaigns | إدارة إعلانات جوجل بالذكاء الاصطناعي",
+    template: "%s | Furriyadh - Google Ads Management",
+  },
+  description: "Furriyadh is an AI-powered Google Ads management platform that creates, manages, and optimizes profitable campaigns worldwide. منصة احترافية لإدارة حملات إعلانات جوجل (Google Ads) لزيادة المبيعات، تقليل تكلفة النقرة، وتحسين عائد الإنفاق الإعلاني.",
+  keywords: [
+    // === ENGLISH KEYWORDS ===
+    // Core Google Ads
+    "Google Ads management",
+    "Google Ads agency",
+    "Google Ads expert",
+    "Google Ads campaigns",
+    "Google Ads optimization",
+    "Google Ads services",
+    "Google AdWords management",
+    "Google Ads management platform",
+    "AI Google Ads",
+    "Google Ads automation",
+    // PPC & Paid Ads
+    "PPC management",
+    "paid ads management",
+    "campaign optimization",
+    "ad campaign management",
+    "digital advertising platform",
+    "pay per click advertising",
+    "Google paid ads",
+    "Google sponsored ads cost",
+    "Google Ads cost per click",
+    "CPC Google Ads",
+    "Google Ads price",
+    "Google Ads monthly cost",
+    "Google advertising cost",
+    // Campaign Types
+    "Google search ads",
+    "Google display ads",
+    "Google shopping ads",
+    "Performance Max campaigns",
+    "Google video ads",
+    "Google Maps advertising",
+    // Management & Agency
+    "Google Ads agency near me",
+    "top Google Ads agency",
+    "Google Ads manager",
+    "Google Ads consultant",
+    "Google Ads bidding strategies",
+    "Google Ads tips",
+    "how to increase quality score Google Ads",
+    // === ARABIC KEYWORDS ===
+    // خبير ومدير
+    "خبير إعلانات جوجل",
+    "خبير اعلانات جوجل",
+    "خبير اعلانات قوقل",
+    "خبير إعلانات قوقل",
+    "مدير اعلانات جوجل",
+    "مدير إعلانات جوجل",
+    "مدير اعلانات قوقل",
+    "محترف اعلانات جوجل",
+    "محترف إعلانات جوجل",
+    "متخصص اعلانات جوجل",
+    // إعلانات جوجل
+    "إعلانات جوجل",
+    "اعلانات جوجل",
+    "إعلانات قوقل",
+    "اعلانات قوقل",
+    "إعلان جوجل",
+    "اعلان جوجل",
+    "إعلان قوقل",
+    "اعلان قوقل",
+    // جوجل ادورد وادز
+    "جوجل ادورد",
+    "جوجل أدورد",
+    "جوجل ادز",
+    "جوجل أدز",
+    "قوقل ادز",
+    "قوقل ادورد",
+    "قوقل أدورد",
+    "جوجل ادوردز",
+    "جوجل أدووردز",
+    "قوقل ادوردز",
+    "اعلانات جوجل ادورد",
+    "اعلانات جوجل ادز",
+    "اعلانات قوقل ادز",
+    "اعلانات قوقل ادورد",
+    // إدارة وشركة
+    "إدارة إعلانات جوجل",
+    "ادارة اعلانات جوجل",
+    "ادارة اعلانات قوقل",
+    "إدارة اعلانات قوقل",
+    "شركة اعلانات جوجل",
+    "شركة إعلانات جوجل",
+    "شركة اعلانات قوقل",
+    "شركة إعلانات قوقل",
+    "خدمات إدارة إعلانات جوجل",
+    "ادارة حملات جوجل",
+    "ادارة حملات قوقل",
+    "ادارة حملات جوجل الاعلانية",
+    "ادارة حملات قوقل الاعلانية",
+    // حملات
+    "حملات جوجل الاعلانية",
+    "حملات قوقل الاعلانية",
+    "حملات جوجل",
+    "حملات قوقل",
+    "حملة اعلانية على جوجل",
+    "حملة اعلانية على قوقل",
+    "حملة إعلانات جوجل",
+    "حملات إعلانات جوجل",
+    "انشاء حملة اعلانية على جوجل",
+    // إنشاء وعمل
+    "انشاء اعلان جوجل",
+    "انشاء اعلان قوقل",
+    "انشاء إعلان على جوجل",
+    "انشاء اعلانات جوجل",
+    "طريقة عمل اعلانات جوجل",
+    "كيفية عمل اعلانات جوجل",
+    "طريقة عمل اعلان جوجل",
+    "عمل اعلان على جوجل",
+    "عمل اعلانات جوجل",
+    "طريقة اعلان في قوقل",
+    "طريقة الاعلان على جوجل",
+    "كيفية الاعلان في قوقل",
+    // حساب
+    "انشاء حساب اعلانات جوجل",
+    "إنشاء حساب إعلانات جوجل",
+    "انشاء حساب جوجل ادورد",
+    "حساب اعلانات جوجل",
+    "حساب جوجل ادورد",
+    "تسجيل الدخول اعلانات جوجل",
+    // تكلفة وأسعار
+    "تكلفة اعلانات جوجل",
+    "سعر اعلانات جوجل",
+    "اسعار اعلانات جوجل",
+    "أسعار الإعلانات في قوقل",
+    "كم تكلفة الاعلان على جوجل",
+    "تكلفة اعلان جوجل",
+    "سعر الاعلان على جوجل",
+    "اسعار اعلانات قوقل",
+    "اسعار حملات جوجل ادورد",
+    "تكلفة الإعلان على جوجل",
+    // أنواع
+    "انواع اعلانات جوجل",
+    "أنواع إعلانات جوجل",
+    "اعلانات البحث",
+    "اعلانات جوجل ماب",
+    "اعلانات قوقل ماب",
+    "اعلانات خرائط جوجل",
+    "إعلانات جوجل للتسوق",
+    "إعلانات جوجل للمبتدئين",
+    "اعلانات جوجل للمبتدئين",
+    "اعلانات جوجل الممولة",
+    "اعلانات جوجل المدفوعة",
+    "اعلانات جوجل المجانية",
+    "إعلانات جوجل المجانية",
+    // تحسين واحتراف
+    "تحسين اعلانات جوجل",
+    "احتراف اعلانات جوجل",
+    "أفضل اعلانات جوجل",
+    // دعم ومساعدة
+    "دعم اعلانات جوجل",
+    "مساعدة اعلانات جوجل",
+    // كلمات مفتاحية
+    "جوجل ادورد كلمات مفتاحية",
+    "جوجل ادورد الكلمات المفتاحية",
+    // عام
+    "الاعلان على جوجل",
+    "الاعلان في جوجل",
+    "الاعلان على قوقل",
+    "الاعلان في قوقل",
+    "اعلان على جوجل",
+    "اعلان في جوجل",
+    "اعلان على قوقل",
+    "اعلان في قوقل",
+    "جوجل اعلانات",
+    "قوقل اعلانات",
+    "اعلانات google",
+    "إعلانات google",
+    "google اعلانات",
+    "اعلانات google ads",
+    "اعلانات google adwords",
+    "ترويج جوجل",
+    "دعايات جوجل",
+    "تسويق عبر إعلانات جوجل",
+  ],
+  alternates: {
+    canonical: "https://furriyadh.com",
+  },
+  openGraph: {
+    title: "Furriyadh – AI‑Powered Google Ads Management Platform | إدارة إعلانات جوجل بالذكاء الاصطناعي",
+    description: "Launch and scale profitable Google Ads campaigns worldwide with Furriyadh's AI‑powered management platform. إدارة احترافية لحملات إعلانات جوجل لزيادة التحويلات وتقليل تكلفة النقرة.",
+    url: "https://furriyadh.com",
+    siteName: "Furriyadh",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/images/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Furriyadh - AI-Powered Google Ads Management Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Furriyadh – AI‑Powered Google Ads Management Platform",
+    description: "Increase conversions and lower CPC with smart Google Ads management for businesses around the world.",
+    images: ["/images/og-image.png"],
+    creator: "@furaborsa",
+  },
+  authors: [{ name: "Furriyadh", url: "https://furriyadh.com" }],
+  creator: "Furriyadh",
+  publisher: "Furriyadh",
+  category: "Technology",
+  verification: {
+    google: "afQfdE-n6JYLJ8w-AW3SBPAIuEdf6fZJjh8T2JcQwhA",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -36,6 +261,142 @@ export default function RootLayout({
         <meta
           name="google-site-verification"
           content="afQfdE-n6JYLJ8w-AW3SBPAIuEdf6fZJjh8T2JcQwhA"
+        />
+        
+        {/* JSON-LD Structured Data for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://furriyadh.com/#organization",
+                  "name": "Furriyadh",
+                  "url": "https://furriyadh.com",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://furriyadh.com/images/logo.png",
+                    "width": 512,
+                    "height": 512
+                  },
+                  "description": "AI-powered Google Ads management platform that creates, manages, and optimizes profitable campaigns worldwide.",
+                  "sameAs": [
+                    "https://twitter.com/furaborsa",
+                    "https://www.linkedin.com/company/furriyadh"
+                  ],
+                  "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer service",
+                    "availableLanguage": ["English", "Arabic"]
+                  }
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://furriyadh.com/#website",
+                  "url": "https://furriyadh.com",
+                  "name": "Furriyadh - Google Ads Management Platform",
+                  "description": "AI-powered Google Ads management platform",
+                  "publisher": {
+                    "@id": "https://furriyadh.com/#organization"
+                  },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://furriyadh.com/search?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  },
+                  "inLanguage": ["en", "ar"]
+                },
+                {
+                  "@type": "SoftwareApplication",
+                  "@id": "https://furriyadh.com/#application",
+                  "name": "Furriyadh",
+                  "applicationCategory": "BusinessApplication",
+                  "operatingSystem": "Web",
+                  "description": "AI-powered Google Ads management platform for creating, managing, and optimizing profitable advertising campaigns.",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "99",
+                    "priceCurrency": "USD",
+                    "priceValidUntil": "2025-12-31"
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.9",
+                    "ratingCount": "5000",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                  }
+                },
+                {
+                  "@type": "Service",
+                  "serviceType": "Google Ads Management",
+                  "provider": {
+                    "@id": "https://furriyadh.com/#organization"
+                  },
+                  "name": "Google Ads Campaign Management",
+                  "description": "Professional AI-powered Google Ads management services including campaign creation, optimization, keyword research, bid management, and performance analytics.",
+                  "areaServed": "Worldwide",
+                  "hasOfferCatalog": {
+                    "@type": "OfferCatalog",
+                    "name": "Google Ads Management Plans",
+                    "itemListElement": [
+                      {
+                        "@type": "Offer",
+                        "itemOffered": {
+                          "@type": "Service",
+                          "name": "Manage Your Account Plan",
+                          "description": "Full AI Campaign Management for existing Google Ads accounts"
+                        },
+                        "price": "99",
+                        "priceCurrency": "USD"
+                      },
+                      {
+                        "@type": "Offer",
+                        "itemOffered": {
+                          "@type": "Service",
+                          "name": "Work on Our Accounts Plan",
+                          "description": "Premium verified ad accounts with no suspension risk"
+                        },
+                        "price": "199",
+                        "priceCurrency": "USD"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "@type": "FAQPage",
+                  "mainEntity": [
+                    {
+                      "@type": "Question",
+                      "name": "How does the AI create Google Ads campaigns?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Our AI analyzes your business description, target audience, and goals to generate optimized Google Ads campaigns. It uses machine learning trained on millions of successful campaigns to create ad copy, select keywords, and set up targeting that maximizes your ROI."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Do I need any Google Ads experience?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Not at all! Our Google Ads management platform is designed for everyone. Simply describe what you want in plain language, and our AI handles all the technical aspects including keyword research, bid optimization, and ad copywriting."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "How much does Google Ads management cost?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Our plans start at $99/month for the Manage Your Account plan and $199/month for the Work on Our Accounts premium plan. Annual billing saves you 20%."
+                      }
+                    }
+                  ]
+                }
+              ]
+            })
+          }}
         />
         {/* CRITICAL: Clean up sidebar-open classes immediately to prevent black screen */}
         <script
