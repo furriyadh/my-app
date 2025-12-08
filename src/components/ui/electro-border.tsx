@@ -198,7 +198,7 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
     return (
         <div
             ref={rootRef}
-            className={`relative isolate ${className ?? ""}`}
+            className={`relative isolate overflow-visible ${className ?? ""}`}
             style={style}
         >
             {/* SVG Filter */}
@@ -253,10 +253,10 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
             </svg>
 
             {/* Border + Effects */}
-            <div className="absolute inset-0 pointer-events-none" style={radiusStyle}>
+            <div className="absolute inset-0 pointer-events-none overflow-visible" style={radiusStyle}>
                 <div
                     ref={strokeLayer}
-                    className="absolute inset-0 -left-2 -top-3"
+                    className="absolute inset-0"
                     style={borderBase}
                 />
                 {effects && glow && <div className="absolute inset-0" style={glowLayer1} />}
@@ -265,7 +265,7 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
             </div>
 
             {/* Content */}
-            <div className="relative z-10" style={radiusStyle}>
+            <div className="relative z-10 h-full" style={radiusStyle}>
                 {children}
             </div>
         </div>
