@@ -7,21 +7,13 @@
     "config": "tailwind.config.js",
     "css": "src/app/globals.css",
     "baseColor": "slate",
-    "cssVariables": true,
-    "prefix": ""
+    "cssVariables": true
   },
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/hooks",
-    "types": "@/types",
-    "services": "@/services",
-    "assets": "@/assets",
-    "styles": "@/styles"
-  },
-  "iconLibrary": "lucide-react",
-  "experimentalGlobalCss": false
+    "hooks": "@/hooks"
+  }
 }
-

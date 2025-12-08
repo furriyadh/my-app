@@ -1810,7 +1810,7 @@ html[dir="rtl"] {
 /** Front Page Navbar */
 #navbar {
   &.is-sticky {
-    @apply z-[999] bg-white dark:bg-dark;
+    @apply z-[999] bg-black/90 backdrop-blur-md;
 
     &.lms-navbar {
       @apply py-[15px] md:py-[20px];

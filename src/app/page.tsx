@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import Lenis from "lenis";
 import { 
   Plus, ChevronDown, Mic, ArrowUp, Sparkles, TrendingUp, Target, Zap, 
   BarChart3, Users, Globe, CheckCircle, ArrowRight, Brain, Rocket, Shield,
@@ -21,6 +22,7 @@ import CardSwap, { Card } from "@/components/ui/card-swap";
 import { CountUp } from "@/components/lightswind/count-up";
 import AnimatedNotification from "@/components/ui/animated-notification";
 import ModernLoader from "@/components/ui/modern-loader";
+import { MotionGrid } from "@/components/ui/motion-grid";
 import dynamic from "next/dynamic";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -31,20 +33,20 @@ import {
 const LaserFlow = dynamic(() => import("@/components/ui/laser-flow"), { ssr: false });
 const ThreeDCarousel = dynamic(() => import("@/components/ui/3d-carousel"), { ssr: false });
 
-// Animation variants
+// Animation variants - Ultra light for performance
 const fadeInUp = {
-  hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } }
 };
 
 const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  hidden: { opacity: 1 },
+  visible: { opacity: 1 }
 };
 
 const scaleIn = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.15 } }
 };
 
 // Sample chart data for AI Performance
@@ -93,117 +95,45 @@ const TypewriterText = ({ texts, className }: { texts: string[], className?: str
   );
 };
 
-// Floating Particles Component - Fixed for SSR
-const FloatingParticles = () => {
-  const [particles, setParticles] = useState<Array<{
-    x: number;
-    y: number;
-    scale: number;
-    animateY: number;
-    duration: number;
-    delay: number;
-  }>>([]);
 
-  useEffect(() => {
-    // Generate particles only on client side
-    const newParticles = [...Array(50)].map(() => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * 800,
-      scale: Math.random() * 0.5 + 0.5,
-      animateY: Math.random() * -200 - 100,
-      duration: Math.random() * 10 + 10,
-      delay: Math.random() * 5,
-    }));
-    setParticles(newParticles);
-  }, []);
-
-  if (particles.length === 0) return null;
+// Live AI Stats Component - Static for better performance
+const LiveAIStats = () => {
+  const stats = {
+    campaigns: "10,247+",
+    savings: "$2.8M",
+    ctrImprovement: "+342%",
+    activeOptimizations: "1,847"
+  };
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((particle, i) => (
-        <motion.div
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      {[
+        { value: stats.campaigns, label: "Campaigns Optimized", icon: <Rocket className="w-4 h-4" />, color: "from-green-500 to-emerald-500" },
+        { value: stats.savings, label: "Budget Saved", icon: <TrendingUp className="w-4 h-4" />, color: "from-blue-500 to-cyan-500" },
+        { value: stats.ctrImprovement, label: "Avg CTR Boost", icon: <Target className="w-4 h-4" />, color: "from-purple-500 to-pink-500" },
+        { value: stats.activeOptimizations, label: "Live Optimizations", icon: <Zap className="w-4 h-4" />, color: "from-orange-500 to-red-500" },
+      ].map((stat, i) => (
+        <div
           key={i}
-          className="absolute w-1 h-1 bg-purple-500/30 rounded-full"
-          initial={{
-            x: particle.x,
-            y: particle.y,
-            scale: particle.scale,
-          }}
-          animate={{
-            y: [null, particle.animateY],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            ease: "linear",
-            delay: particle.delay,
-          }}
-        />
+          className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3 md:p-4 overflow-hidden group hover:bg-white/10 transition-colors"
+        >
+          <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
+          <div className="relative z-10">
+            <div className={`inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} text-white mb-2`}>
+              {stat.icon}
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl md:text-2xl font-bold text-white">{stat.value}</span>
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+            </div>
+            <p className="text-[10px] md:text-xs text-gray-400 mt-1">{stat.label}</p>
+          </div>
+        </div>
       ))}
     </div>
   );
 };
 
-// Aurora Background Component
-const AuroraBackground = () => {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute w-full h-full">
-        {/* Aurora Layers */}
-        <motion.div
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: 'radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: 'radial-gradient(ellipse at 30% 70%, rgba(59, 130, 246, 0.4) 0%, transparent 50%)',
-          }}
-          animate={{
-            scale: [1.2, 1, 1.2],
-            x: [0, -100, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: 'radial-gradient(ellipse at 70% 30%, rgba(236, 72, 153, 0.3) 0%, transparent 50%)',
-          }}
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 50, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      </div>
-    </div>
-  );
-};
 
 // Floating Chat Widget Component
 const FloatingChatWidget = () => {
@@ -314,6 +244,87 @@ const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answ
   );
 };
 
+// Progress Bar Component
+const ScrollProgressBar = () => {
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let ticking = false;
+    
+    const updateProgress = () => {
+      if (progressRef.current) {
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (window.scrollY / totalHeight) * 100;
+        progressRef.current.style.width = `${progress}%`;
+      }
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateProgress);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    updateProgress(); // Initial call
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[9999] h-1.5 bg-black/20 backdrop-blur-sm">
+      <div 
+        ref={progressRef}
+        className="h-full bg-gradient-to-r from-purple-500 via-pink-500 via-50% to-cyan-400 relative will-change-[width]"
+        style={{ 
+          width: '0%',
+          boxShadow: '0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(236, 72, 153, 0.6), 0 0 60px rgba(34, 211, 238, 0.4)'
+        }}
+      >
+        {/* Glow tip */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full blur-sm" />
+      </div>
+    </div>
+  );
+};
+
+// Back to Top Button Component
+const BackToTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 500);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-full shadow-lg shadow-purple-500/30 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-purple-500/40"
+          aria-label="Back to top"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+};
+
 export default function Home() {
   const [prompt, setPrompt] = useState('');
   const [isAddPopupOpen, setAddPopupOpen] = useState(false);
@@ -333,6 +344,29 @@ export default function Home() {
     "Best keywords for my e-commerce store?",
     "Optimize my Google Ads budget...",
   ];
+
+  // Lenis Smooth Scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      touchMultiplier: 2,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -514,47 +548,41 @@ export default function Home() {
 
   return (
     <>
-      <div className="front-page-body overflow-hidden bg-black min-h-screen text-white" dir="ltr">
+      {/* Progress Bar */}
+      <ScrollProgressBar />
+      
+      {/* Back to Top Button */}
+      <BackToTopButton />
+      
+      <div className="front-page-body overflow-hidden bg-black min-h-screen text-white relative" dir="ltr">
+        {/* Global Motion Grid Background */}
+        <div className="fixed inset-0 z-0">
+          <MotionGrid
+            speed="3s"
+            opacity={0.15}
+            enableGlow={true}
+            lineColor="147, 51, 234"
+            backgroundColor="#000000"
+            gridSpacing="20px"
+            className="w-full h-full"
+          />
+            </div>
+        
         <Navbar />
         
-        <main className="min-h-screen bg-black text-white">
+        <main className="min-h-screen bg-transparent text-white relative z-10">
           {/* ============================================ */}
           {/* HERO SECTION - AI Chat Interface */}
           {/* ============================================ */}
           <section className="relative pt-32 pb-20 px-4 overflow-hidden min-h-screen flex items-center">
-            {/* Aurora Animated Background */}
-            <AuroraBackground />
-            
-            {/* Floating Particles */}
-            <FloatingParticles />
 
-            {/* Grid Pattern Overlay */}
-            <div 
-              className="absolute inset-0 opacity-[0.02]"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-                backgroundSize: '50px 50px'
-              }}
-            />
-
-            <motion.div 
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="container mx-auto max-w-6xl relative z-10"
-            >
+            <div className="container mx-auto max-w-6xl relative z-10">
               {/* Hero Text */}
-              <motion.div variants={fadeInUp} className="text-center mb-12">
-                <motion.div 
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm"
-                  animate={{ 
-                    boxShadow: ['0 0 20px rgba(139, 92, 246, 0)', '0 0 20px rgba(139, 92, 246, 0.3)', '0 0 20px rgba(139, 92, 246, 0)']
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm shadow-lg shadow-purple-500/10">
                   <Sparkles className="w-4 h-4 text-purple-400" />
                   <span className="text-sm text-purple-300">Powered by Advanced AI</span>
-                </motion.div>
+                </div>
                 
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                   <span className="bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
@@ -569,129 +597,121 @@ export default function Home() {
                 <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
                   A comprehensive platform that uses artificial intelligence to create and manage Google Ads campaigns with high efficiency
                 </p>
-              </motion.div>
+              </div>
 
               {/* AI Chatbot Component with Glow Effect */}
-              <motion.div variants={fadeInUp} className="max-w-3xl mx-auto mb-8">
-                <motion.div 
-                  className="relative"
-                  animate={isTyping ? { 
-                    boxShadow: ['0 0 30px rgba(139, 92, 246, 0.3)', '0 0 60px rgba(139, 92, 246, 0.5)', '0 0 30px rgba(139, 92, 246, 0.3)']
-                  } : {}}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
+              <div className="max-w-3xl mx-auto mb-8">
+                <div className={`relative ${isTyping ? 'shadow-lg shadow-purple-500/30' : ''}`}>
                   {/* Glow Effect */}
                   <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 rounded-3xl blur-xl opacity-50"></div>
                   
                   <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-6 transition-all duration-300 hover:border-purple-500/30">
                     {/* Typewriter Placeholder */}
                     <div className="relative">
-                      <textarea
-                        className="w-full p-4 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-lg leading-relaxed"
-                        rows={3}
+                  <textarea
+                    className="w-full p-4 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-lg leading-relaxed"
+                    rows={3}
                         placeholder=""
-                        value={prompt}
+                    value={prompt}
                         onChange={(e) => {
                           setPrompt(e.target.value);
                           setIsTyping(e.target.value.length > 0);
                         }}
                         onFocus={() => setIsTyping(true)}
                         onBlur={() => setIsTyping(prompt.length > 0)}
-                      />
+                  />
                       {!prompt && (
                         <div className="absolute top-4 left-4 text-gray-500 text-lg pointer-events-none">
                           <TypewriterText texts={typewriterTexts} />
                         </div>
                       )}
                     </div>
-                    
-                    <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-4">
-                      {/* Left Controls */}
-                      <div className="flex items-center gap-3">
-                        <div className="relative" ref={addPopupRef}>
-                          <button 
-                            onClick={() => setAddPopupOpen(!isAddPopupOpen)}
-                            className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all duration-200 border border-white/10"
-                          >
-                            <Plus size={22} />
-                          </button>
-                          {isAddPopupOpen && (
-                            <div className="absolute bottom-full left-0 mb-3 w-64 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
-                              <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
-                                <span className="text-gray-300">Add Images</span>
-                              </button>
-                              <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
-                                <span className="text-gray-300">Add Files</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="relative" ref={modelRef}>
-                          <button 
-                            onClick={() => setModelOpen(!isModelOpen)} 
-                            className="flex items-center gap-2 h-12 px-4 bg-purple-600/20 hover:bg-purple-600/30 text-white rounded-2xl transition-all duration-200 border border-purple-500/30"
-                          >
-                            <Brain size={18} className="text-purple-400" />
-                            <span className="font-medium hidden md:block">{selectedModel}</span>
-                            <ChevronDown size={16} />
-                          </button>
-                          {isModelOpen && (
-                            <div className="absolute bottom-full left-0 mb-3 w-48 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
-                              {models.map((model) => (
-                                <button
-                                  key={model}
-                                  onClick={() => handleModelSelect(model)}
-                                  className="w-full p-3 hover:bg-white/10 rounded-xl transition-colors text-left text-gray-300"
-                                >
-                                  {model}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right Controls */}
-                      <div className="flex items-center gap-3">
-                        <button className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all duration-200 border border-white/10">
-                          <Mic size={22} />
-                        </button>
-                        <motion.button 
-                          onClick={handleSend}
-                          className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 ${
-                            prompt.trim() 
-                              ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/50' 
-                              : 'bg-white/10 text-gray-500 cursor-not-allowed'
-                          }`}
-                          whileHover={prompt.trim() ? { scale: 1.1 } : {}}
-                          whileTap={prompt.trim() ? { scale: 0.95 } : {}}
+                  
+                  <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-4">
+                    {/* Left Controls */}
+                    <div className="flex items-center gap-3">
+                      <div className="relative" ref={addPopupRef}>
+                        <button 
+                          onClick={() => setAddPopupOpen(!isAddPopupOpen)}
+                          className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all duration-200 border border-white/10"
                         >
-                          <ArrowUp size={22} />
-                        </motion.button>
+                          <Plus size={22} />
+                        </button>
+                        {isAddPopupOpen && (
+                          <div className="absolute bottom-full left-0 mb-3 w-64 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
+                            <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
+                                <span className="text-gray-300">Add Images</span>
+                            </button>
+                            <button className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors">
+                                <span className="text-gray-300">Add Files</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="relative" ref={modelRef}>
+                        <button 
+                          onClick={() => setModelOpen(!isModelOpen)} 
+                          className="flex items-center gap-2 h-12 px-4 bg-purple-600/20 hover:bg-purple-600/30 text-white rounded-2xl transition-all duration-200 border border-purple-500/30"
+                        >
+                          <Brain size={18} className="text-purple-400" />
+                          <span className="font-medium hidden md:block">{selectedModel}</span>
+                          <ChevronDown size={16} />
+                        </button>
+                        {isModelOpen && (
+                          <div className="absolute bottom-full left-0 mb-3 w-48 bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-10 p-2">
+                            {models.map((model) => (
+                              <button
+                                key={model}
+                                onClick={() => handleModelSelect(model)}
+                                className="w-full p-3 hover:bg-white/10 rounded-xl transition-colors text-left text-gray-300"
+                              >
+                                {model}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
+
+                    {/* Right Controls */}
+                    <div className="flex items-center gap-3">
+                      <button className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all duration-200 border border-white/10">
+                        <Mic size={22} />
+                      </button>
+                        <motion.button 
+                        onClick={handleSend}
+                        className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 ${
+                          prompt.trim() 
+                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/50' 
+                            : 'bg-white/10 text-gray-500 cursor-not-allowed'
+                        }`}
+                          whileHover={prompt.trim() ? { scale: 1.1 } : {}}
+                          whileTap={prompt.trim() ? { scale: 0.95 } : {}}
+                      >
+                        <ArrowUp size={22} />
+                        </motion.button>
+                    </div>
+                    </div>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Example Prompts */}
                 <div className="flex flex-wrap gap-3 mt-6 justify-center">
                   {examplePrompts.map((example, index) => (
-                    <motion.button
+                    <button
                       key={index}
                       onClick={() => setPrompt(example)}
-                      className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 transition-all duration-200 hover:border-purple-500/50"
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 transition-all duration-200 hover:border-purple-500/50 hover:scale-105"
                     >
                       {example}
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
 
               {/* Trust Badge - Immediately after chat */}
-              <motion.div variants={fadeInUp} className="flex justify-center mt-8">
+              <div className="flex justify-center mt-8">
                 <TrustedUsers
                   avatars={[
                     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
@@ -712,10 +732,10 @@ export default function Home() {
                     "ring-orange-500",
                   ]}
                 />
-              </motion.div>
+              </div>
 
               {/* CTA Buttons */}
-              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
                 <Link
                   href="/authentication/sign-up"
                   className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
@@ -730,34 +750,37 @@ export default function Home() {
                   <Play className="w-5 h-5" />
                   Watch Demo
                 </Link>
-              </motion.div>
+              </div>
 
               {/* No Credit Card Required */}
-              <motion.p variants={fadeInUp} className="text-center text-gray-500 text-sm mt-4">
+              <p className="text-center text-gray-500 text-sm mt-4">
                 ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial &nbsp;•&nbsp; ✓ Cancel anytime
-              </motion.p>
-            </motion.div>
+              </p>
+
+              {/* Live AI Stats */}
+              <div className="mt-16">
+                <div className="flex items-center justify-center gap-2 mb-6">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-green-400 text-sm font-medium">Live AI Performance</span>
+                    </div>
+                <LiveAIStats />
+              </div>
+            </div>
           </section>
 
           {/* ============================================ */}
           {/* PARTNERS SECTION */}
           {/* ============================================ */}
-          <section className="py-20 px-4 bg-gradient-to-b from-black via-gray-950 to-black">
-            <div className="container mx-auto max-w-6xl">
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="text-center mb-12"
-              >
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          <section className="py-20 px-4 relative overflow-hidden">
+            <div className="container mx-auto max-w-6xl relative z-10">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
                   Trusted by Industry Leaders
                 </h2>
-                <p className="text-lg text-gray-400">
+                <p className="text-lg text-gray-400 hover:text-gray-300 transition-colors">
                   Leading companies use our platform to achieve their advertising goals
                 </p>
-              </motion.div>
+              </div>
 
               <LogoStepper
                 logos={[
@@ -851,64 +874,218 @@ export default function Home() {
           </section>
 
           {/* ============================================ */}
-          {/* AI-POWERED AD EXAMPLES - Ultimate Showcase */}
+          {/* AI vs COMPETITORS COMPARISON SECTION */}
           {/* ============================================ */}
-          <section className="py-24 px-4 relative overflow-hidden bg-gradient-to-b from-black via-emerald-950/5 to-black">
-            {/* Animated Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-green-950/10 to-black"></div>
-            <div className="absolute inset-0">
-              <div className="absolute w-[800px] h-[800px] top-0 left-1/4 bg-green-600/10 rounded-full blur-[200px] animate-pulse"></div>
-              <div className="absolute w-[600px] h-[600px] bottom-0 right-1/4 bg-blue-600/10 rounded-full blur-[200px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-              <div className="absolute w-[400px] h-[400px] top-1/2 right-0 bg-purple-600/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-              {/* Matrix-like falling code effect */}
-              <div className="absolute inset-0 overflow-hidden opacity-10">
-                {[...Array(15)].map((_, i) => (
-                  <motion.div
+          <section className="py-20 px-4 relative overflow-hidden">
+            <div className="container mx-auto max-w-6xl relative z-10">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
+                  <Brain className="w-4 h-4 text-blue-400" />
+                  <span className="text-blue-300 text-sm font-medium">Compare Your Options</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">Furriyadh AI</span>?
+                </h2>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  See how our AI platform compares to agencies, freelancers, and doing it yourself
+                </p>
+              </div>
+
+              {/* Comparison Table - 4 Columns */}
+              <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden overflow-x-auto">
+                {/* Header */}
+                <div className="grid grid-cols-5 gap-2 md:gap-4 p-3 md:p-6 border-b border-white/10 bg-white/5 min-w-[600px]">
+                  <div className="text-gray-400 text-xs md:text-sm font-medium">Metric</div>
+                  <div className="text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                        <Users className="w-4 h-4 text-gray-400" />
+                    </div>
+                      <span className="text-gray-400 text-[10px] md:text-xs">DIY / Manual</span>
+                  </div>
+              </div>
+                  <div className="text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+                        <MessageCircle className="w-4 h-4 text-orange-400" />
+            </div>
+                      <span className="text-orange-400 text-[10px] md:text-xs">Freelancer</span>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                        <Globe className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <span className="text-purple-400 text-[10px] md:text-xs">Agency</span>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-green-400 text-[10px] md:text-xs font-semibold">Furriyadh AI</span>
+                    </div>
+                </div>
+              </div>
+
+                {/* Rows - Comprehensive comparison */}
+                {[
+                  {
+                    metric: "Monthly Cost", 
+                    diy: "$0", 
+                    freelancer: "$800-2K", 
+                    agency: "$2K-10K", 
+                    ai: "$99-299",
+                    diyColor: "text-gray-400",
+                    freelancerColor: "text-orange-400",
+                    agencyColor: "text-purple-400",
+                    aiColor: "text-green-400"
+                  },
+                  {
+                    metric: "Setup Time", 
+                    diy: "Weeks", 
+                    freelancer: "3-5 Days", 
+                    agency: "1-2 Weeks", 
+                    ai: "30 Seconds",
+                    diyColor: "text-red-400",
+                    freelancerColor: "text-yellow-400",
+                    agencyColor: "text-yellow-400",
+                    aiColor: "text-green-400"
+                  },
+                  { 
+                    metric: "Optimization", 
+                    diy: "Manual", 
+                    freelancer: "Weekly", 
+                    agency: "2-3x/Week", 
+                    ai: "Real-time 24/7",
+                    diyColor: "text-red-400",
+                    freelancerColor: "text-yellow-400",
+                    agencyColor: "text-yellow-400",
+                    aiColor: "text-green-400"
+                  },
+                  {
+                    metric: "Response Time", 
+                    diy: "Your time", 
+                    freelancer: "24-48 hrs", 
+                    agency: "Same day", 
+                    ai: "Instant",
+                    diyColor: "text-gray-400",
+                    freelancerColor: "text-orange-400",
+                    agencyColor: "text-yellow-400",
+                    aiColor: "text-green-400"
+                  },
+                  {
+                    metric: "Avg. CTR Boost", 
+                    diy: "Baseline", 
+                    freelancer: "+20-40%", 
+                    agency: "+40-60%", 
+                    ai: "+60-120%",
+                    diyColor: "text-gray-400",
+                    freelancerColor: "text-orange-400",
+                    agencyColor: "text-purple-400",
+                    aiColor: "text-green-400"
+                  },
+                  {
+                    metric: "CPC Reduction", 
+                    diy: "0%", 
+                    freelancer: "10-20%", 
+                    agency: "15-30%", 
+                    ai: "25-45%",
+                    diyColor: "text-gray-400",
+                    freelancerColor: "text-orange-400",
+                    agencyColor: "text-purple-400",
+                    aiColor: "text-green-400"
+                  },
+                  {
+                    metric: "Scalability", 
+                    diy: "Limited", 
+                    freelancer: "Limited", 
+                    agency: "Good", 
+                    ai: "Unlimited",
+                    diyColor: "text-red-400",
+                    freelancerColor: "text-orange-400",
+                    agencyColor: "text-purple-400",
+                    aiColor: "text-green-400"
+                  },
+                  {
+                    metric: "Your Time", 
+                    diy: "40+ hrs/mo", 
+                    freelancer: "5-10 hrs/mo", 
+                    agency: "2-5 hrs/mo", 
+                    ai: "Set & Forget",
+                    diyColor: "text-red-400",
+                    freelancerColor: "text-yellow-400",
+                    agencyColor: "text-yellow-400",
+                    aiColor: "text-green-400"
+                  },
+                ].map((row, i) => (
+                  <div
                     key={i}
-                    className="absolute text-green-400 text-xs font-mono"
-                    style={{ left: `${i * 7}%` }}
-                    animate={{ y: ['-100%', '100vh'] }}
-                    transition={{ duration: 5 + (i % 5), repeat: Infinity, delay: i * 0.3 }}
+                    className="grid grid-cols-5 gap-2 md:gap-4 p-3 md:p-5 border-b border-white/5 hover:bg-white/5 transition-colors min-w-[600px]"
                   >
-                    {['01', '10', 'AI', '→', '◆', '∞', '⚡'].map((char, j) => (
-                      <div key={j} className="my-4">{char}</div>
-                    ))}
-                  </motion.div>
+                    <div className="text-white font-medium text-[11px] md:text-sm">{row.metric}</div>
+                    <div className={`text-center text-[10px] md:text-sm ${row.diyColor}`}>{row.diy}</div>
+                    <div className={`text-center text-[10px] md:text-sm ${row.freelancerColor}`}>{row.freelancer}</div>
+                    <div className={`text-center text-[10px] md:text-sm ${row.agencyColor}`}>{row.agency}</div>
+                    <div className={`text-center text-[10px] md:text-sm font-semibold ${row.aiColor}`}>{row.ai}</div>
+            </div>
                 ))}
+
+                {/* Footer CTA */}
+                <div className="p-4 md:p-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex -space-x-2">
+                        <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center border-2 border-gray-900">
+                          <Users className="w-3 h-3 text-gray-400" />
+              </div>
+                        <div className="w-8 h-8 bg-orange-500/30 rounded-full flex items-center justify-center border-2 border-gray-900">
+                          <MessageCircle className="w-3 h-3 text-orange-400" />
+                      </div>
+                        <div className="w-8 h-8 bg-purple-500/30 rounded-full flex items-center justify-center border-2 border-gray-900">
+                          <Globe className="w-3 h-3 text-purple-400" />
+                    </div>
+                        <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center border-2 border-gray-900">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                  </div>
+              </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">Best Value for Performance</p>
+                        <p className="text-green-400 text-xs">Save up to 90% vs Agencies with better results</p>
+            </div>
+                  </div>
+                    <Link href="/auth/register">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-green-500/25 transition-all flex items-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Try Furriyadh AI Free
+                      </motion.button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
+          </section>
 
+          {/* ============================================ */}
+          {/* AI-POWERED AD EXAMPLES - Ultimate Showcase */}
+          {/* ============================================ */}
+          <section className="py-24 px-4 relative overflow-hidden">
             <div className="container mx-auto max-w-7xl relative z-10">
               {/* Header with AI Animation */}
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="text-center mb-16"
-              >
+              <div className="text-center mb-16">
                 {/* AI Status Badge - Enhanced */}
-                <motion.div 
-                  className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 border border-green-500/30 rounded-full mb-8 backdrop-blur-xl"
-                  animate={{ 
-                    boxShadow: ['0 0 30px rgba(34, 197, 94, 0.3)', '0 0 60px rgba(34, 197, 94, 0.5)', '0 0 30px rgba(34, 197, 94, 0.3)'],
-                    borderColor: ['rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.6)', 'rgba(34, 197, 94, 0.3)']
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+                <div className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 border border-green-500/30 rounded-full mb-8 backdrop-blur-xl shadow-lg shadow-green-500/20">
                   <div className="relative">
-                    <motion.div 
-                      className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center"
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    >
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
                       <Brain className="w-5 h-5 text-white" />
-                    </motion.div>
-                    <motion.div 
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full"
-                      animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
                   </div>
                   <div className="text-left">
                     <p className="text-green-300 font-bold text-sm">AI Engine Active</p>
@@ -917,25 +1094,21 @@ export default function Home() {
                   <div className="h-8 w-px bg-green-500/30"></div>
                   <div className="flex items-center gap-2">
                     <span className="text-green-400 text-xs font-mono">LIVE</span>
-                    <motion.div 
-                      className="w-2 h-2 bg-green-400 rounded-full"
-                      animate={{ opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    />
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                   </div>
-                </motion.div>
-
+                  </div>
+                  
                 <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
                   <span className="text-white">Watch AI Create </span>
                   <br className="hidden md:block" />
                   <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                     Winning Campaigns
                   </span>
-                </h2>
+                  </h2>
                 <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-10">
                   See our AI analyze, create, and optimize ads in real-time. From competitor analysis to launch in seconds.
-                </p>
-
+                  </p>
+                  
                 {/* AI Capabilities - Enhanced Pills */}
                 <div className="flex flex-wrap justify-center gap-4">
                   {[
@@ -945,54 +1118,31 @@ export default function Home() {
                     { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics", color: "from-green-500/20 to-emerald-500/20 border-green-500/30" },
                     { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization", color: "from-pink-500/20 to-red-500/20 border-pink-500/30" },
                   ].map((item, i) => (
-                    <motion.div
+                    <div
                       key={i}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${item.color} border rounded-full text-sm text-white/90 backdrop-blur-sm cursor-default`}
+                      className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${item.color} border rounded-full text-sm text-white/90 backdrop-blur-sm cursor-default hover:scale-105 transition-transform`}
                     >
                       {item.icon}
                       {item.text}
-                    </motion.div>
+                    </div>
                   ))}
-                </div>
-              </motion.div>
-
+                      </div>
+                    </div>
+                    
               {/* Main Content - AI Command Center Layout */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
                 {/* Left Side - AI Code Generator with Modern Loader */}
-                <motion.div
-                  initial={{ opacity: 0, x: -50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="lg:col-span-5 space-y-6"
-                >
+                <div className="lg:col-span-5 space-y-6">
                   {/* Modern AI Loader Card */}
                   <div className="relative h-full flex flex-col justify-center">
                     {/* Floating Status Badge */}
-                    <motion.div 
-                      className="absolute -top-4 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full shadow-lg shadow-green-500/30"
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Brain className="w-4 h-4 text-white" />
-                      </motion.div>
+                    <div className="absolute -top-4 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full shadow-lg shadow-green-500/30">
+                      <Brain className="w-4 h-4 text-white" />
                       <span className="text-white text-xs font-bold">AI Campaign Generator</span>
-                      <motion.div 
-                        className="w-2 h-2 bg-white rounded-full"
-                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
-                    </motion.div>
-
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    </div>
+                    
                     {/* Glow Effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 rounded-3xl blur-xl"></div>
                     
@@ -1012,276 +1162,254 @@ export default function Home() {
                           "Maximizing ROAS potential...",
                         ]}
                       />
+                      </div>
                     </div>
                   </div>
-                </motion.div>
-
+                  
                 {/* Right Side - 3D Carousel Ad Preview */}
-                <motion.div
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="lg:col-span-7"
-                >
+                <div className="lg:col-span-7">
                   {/* 3D Carousel Container */}
                   <div className="relative">
                     {/* Floating AI Badge */}
-                    <motion.div 
-                      className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 rounded-full shadow-2xl shadow-green-500/40"
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Brain className="w-5 h-5 text-white" />
-                      </motion.div>
-                      <span className="text-white font-bold">AI Generated Ads • Drag to Explore</span>
-                      <motion.div
-                        className="flex gap-1"
-                      >
-                        <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.6, repeat: Infinity }} />
-                        <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
-                        <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
-                      </motion.div>
-                    </motion.div>
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 rounded-full shadow-2xl shadow-green-500/40">
+                      <Brain className="w-5 h-5 text-white" />
+                      <span className="text-white font-bold text-sm">AI Generated Ads • Drag to Explore</span>
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                          </div>
+                        </div>
 
                     {/* Glow Effect Behind Carousel */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <motion.div 
-                        className="w-[500px] h-[500px] bg-gradient-to-r from-green-600/30 via-blue-600/30 to-purple-600/30 rounded-full blur-[100px]"
-                        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                      />
-                    </div>
-
+                      <div className="w-[500px] h-[500px] bg-gradient-to-r from-green-600/20 via-blue-600/20 to-purple-600/20 rounded-full blur-[100px]" />
+                          </div>
+                          
                     {/* 3D Carousel */}
-                    <div className="h-[450px] relative z-10">
+                    <div className="h-[420px] relative z-10">
                       <ThreeDCarousel 
-                        radius={240}
-                        cardW={180}
-                        cardH={240}
+                        radius={280}
+                        cardW={200}
+                        cardH={280}
                         items={[
                           // Google Pixel Search Ad
-                          <div key="pixel" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="p-3 flex-1 flex flex-col">
-                              <span className="text-[10px] text-gray-400 mb-1">Sponsored</span>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                                  <span className="text-blue-500 font-bold text-xs">G</span>
-                                </div>
-                                <span className="text-gray-300 text-xs">pixel.google</span>
-                              </div>
-                              <h3 className="text-white font-medium text-xs mb-1 line-clamp-2">
+                          <div key="pixel" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 flex-1 flex flex-col">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
+                              <div className="flex items-center gap-2 mt-2 mb-3">
+                                <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                                  <span className="text-blue-500 font-bold text-[10px]">G</span>
+                            </div>
+                                <span className="text-gray-400 text-[10px]">pixel.google</span>
+                          </div>
+                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
                                 Google Pixel Smartphone
-                              </h3>
-                              <p className="text-gray-400 text-[11px] flex-1 line-clamp-3">
+                            </h3>
+                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
                                 Pixel provides productivity, security, and support for your business.
                               </p>
-                              <div className="border-t border-gray-700 pt-2 mt-2 space-y-1">
-                                <p className="text-blue-400 text-[11px]">Find the Right Pixel</p>
-                                <p className="text-blue-400 text-[11px]">Google Phones Info</p>
-                              </div>
+                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Find the Right Pixel</p>
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Google Phones Info</p>
                             </div>
-                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                          </div>
+                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +340%
                                 </span>
-                                <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI</span>
-                              </div>
-                            </div>
+                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                        </div>
+                      </div>
                           </div>,
 
                           // Google Play Ad
-                          <div key="play" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="p-3 flex-1 flex flex-col">
-                              <span className="text-[10px] text-gray-400 mb-1">Sponsored</span>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6">
+                          <div key="play" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 flex-1 flex flex-col">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
+                              <div className="flex items-center gap-2 mt-2 mb-3">
+                                <div className="w-5 h-5">
                                   <svg viewBox="0 0 24 24" className="w-full h-full">
                                     <path fill="#EA4335" d="M3.5 20.5l9.5-9.5-9.5-9.5v19z"/>
                                     <path fill="#FBBC04" d="M3.5 20.5l12-7-2.5-2.5-9.5 9.5z"/>
                                     <path fill="#34A853" d="M15.5 13.5l5-3-5-3v6z"/>
                                     <path fill="#4285F4" d="M3.5 1.5l12 7-2.5 2.5-9.5-9.5z"/>
-                                  </svg>
-                                </div>
-                                <span className="text-gray-300 text-xs">Google Play</span>
-                              </div>
-                              <h3 className="text-white font-medium text-xs mb-1 line-clamp-2">
-                                Shop popular brands - Gift cards
+                            </svg>
+                          </div>
+                                <span className="text-gray-400 text-[10px]">Google Play</span>
+                        </div>
+                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
+                                Shop popular brands
                               </h3>
-                              <p className="text-gray-400 text-[11px] flex-1 line-clamp-3">
+                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
                                 Google Play is the secure, simple way to shop and send gift cards.
                               </p>
-                              <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-2">
+                              <div className="flex items-center gap-1.5 mt-3">
                                 <Star className="w-3 h-3 text-yellow-500" fill="#eab308" />
-                                <span>4.8 • 100M+</span>
-                              </div>
+                                <span className="text-gray-400 text-[10px]">4.8 • 100M+</span>
+                          </div>
                             </div>
-                            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +280%
                                 </span>
-                                <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI</span>
-                              </div>
+                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                          </div>
                             </div>
                           </div>,
 
                           // Google Cloud Ad
-                          <div key="cloud" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="p-3 flex-1 flex flex-col">
-                              <span className="text-[10px] text-gray-400 mb-1">Sponsored</span>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-1">
+                          <div key="cloud" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 flex-1 flex flex-col">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
+                              <div className="flex items-center gap-2 mt-2 mb-3">
+                                <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5">
                                   <svg viewBox="0 0 24 24" className="w-full h-full">
                                     <path fill="#4285F4" d="M12 7.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5-4.5-2-4.5-4.5 2-4.5 4.5-4.5z"/>
                                     <path fill="#EA4335" d="M19.5 12c0-1.4-.4-2.7-1-3.8l-3 3c.3.5.5 1.1.5 1.8h3.5z"/>
                                   </svg>
                                 </div>
-                                <span className="text-gray-300 text-xs">Google Cloud</span>
+                                <span className="text-gray-400 text-[10px]">Google Cloud</span>
                               </div>
-                              <h3 className="text-white font-medium text-xs mb-1 line-clamp-2">
-                                Google Cloud Built for AI
-                              </h3>
-                              <p className="text-gray-400 text-[11px] flex-1 line-clamp-3">
+                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
+                                Google Cloud for AI
+                            </h3>
+                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
                                 Code using any language. Deploy as container. $300 free credits.
                               </p>
-                              <div className="border-t border-gray-700 pt-2 mt-2 space-y-1">
-                                <p className="text-blue-400 text-[11px]">Start Free Trial</p>
-                                <p className="text-blue-400 text-[11px]">View Pricing</p>
-                              </div>
+                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Start Free Trial</p>
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">View Pricing</p>
                             </div>
-                            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                          </div>
+                            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +420%
                                 </span>
-                                <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI</span>
-                              </div>
-                            </div>
+                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                        </div>
+                      </div>
                           </div>,
 
                           // Shopping Ad with Product Image
-                          <div key="shopping" className="w-full h-full bg-gray-900 flex flex-col relative">
+                          <div key="shopping" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
                             <div className="flex-1 flex flex-col">
-                              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-4">
+                              <div className="h-32 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-3">
                                 <img 
                                   src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=200&h=150&fit=crop" 
                                   alt="Pixel Phone" 
-                                  className="w-full h-24 object-contain"
+                                  className="w-full h-full object-contain"
                                 />
-                              </div>
-                              <div className="p-3">
-                                <h4 className="text-white font-semibold text-xs mb-1 line-clamp-1">
-                                  Pixel 10 Pro Fold 256GB
+                          </div>
+                              <div className="p-4 flex-1">
+                                <h4 className="text-white font-semibold text-[12px] mb-1">
+                                  Pixel 10 Pro Fold
                                 </h4>
-                                <p className="text-green-400 font-bold text-lg">$1,799</p>
-                                <p className="text-gray-400 text-[10px]">Google Store</p>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <div className="flex text-yellow-400 text-[10px]">★★★★★</div>
-                                  <span className="text-gray-500 text-[10px]">(2.8k)</span>
-                                </div>
+                                <p className="text-green-400 font-bold text-base">$1,799</p>
+                                <p className="text-gray-500 text-[9px] mt-1">Google Store</p>
+                                <div className="flex items-center gap-1 mt-2">
+                                  <div className="flex text-yellow-400 text-[9px]">★★★★★</div>
+                                  <span className="text-gray-500 text-[9px]">(2.8k)</span>
+                        </div>
                               </div>
                             </div>
-                            <div className="bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                            <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +520%
                                 </span>
-                                <span>Shopping</span>
+                                <span className="text-[9px]">Shopping</span>
                               </div>
                             </div>
                           </div>,
 
                           // App Ad
-                          <div key="app" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="p-3 flex-1 flex flex-col">
-                              <div className="flex items-start gap-2 mb-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-green-500 to-yellow-500 flex items-center justify-center">
-                                  <svg viewBox="0 0 24 24" className="w-5 h-5">
+                          <div key="app" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 flex-1 flex flex-col">
+                              <div className="flex items-start gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 via-green-500 to-yellow-500 flex items-center justify-center flex-shrink-0">
+                                  <svg viewBox="0 0 24 24" className="w-6 h-6">
                                     <path fill="#fff" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                   </svg>
-                                </div>
-                                <div className="flex-1">
-                                  <h4 className="text-white font-bold text-xs">Google Pay</h4>
-                                  <p className="text-gray-400 text-[10px]">Online shopping</p>
-                                </div>
-                              </div>
-                              <div className="flex justify-between text-center border-y border-gray-700 py-2 mb-3 text-[10px]">
-                                <div className="flex-1">
-                                  <p className="text-gray-500">DL</p>
-                                  <p className="text-white font-medium">100M+</p>
-                                </div>
-                                <div className="flex-1 border-x border-gray-700">
-                                  <p className="text-gray-500">CAT</p>
-                                  <p className="text-white font-medium">Finance</p>
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-gray-500">DEV</p>
-                                  <p className="text-white font-medium">Google</p>
+                          </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-white font-semibold text-[12px]">Google Pay</h4>
+                                  <p className="text-gray-500 text-[9px]">Finance • Google</p>
                                 </div>
                               </div>
-                              <button className="w-full bg-blue-600 text-white py-2 rounded-full font-bold text-xs mt-auto">
+                              <div className="flex justify-between text-center border-y border-gray-800 py-3 mb-4">
+                                <div className="flex-1">
+                                  <p className="text-gray-500 text-[8px]">Downloads</p>
+                                  <p className="text-white font-semibold text-[10px]">100M+</p>
+                                </div>
+                                <div className="flex-1 border-x border-gray-800">
+                                  <p className="text-gray-500 text-[8px]">Rating</p>
+                                  <p className="text-white font-semibold text-[10px]">4.8★</p>
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-gray-500 text-[8px]">Size</p>
+                                  <p className="text-white font-semibold text-[10px]">45MB</p>
+                                </div>
+                              </div>
+                              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold text-[11px] mt-auto transition-colors">
                                 Install
                               </button>
                             </div>
-                            <div className="bg-gradient-to-r from-green-500 to-teal-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                            <div className="bg-gradient-to-r from-green-500 to-teal-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +680%
                                 </span>
-                                <span>App</span>
+                                <span className="text-[9px]">App Campaign</span>
                               </div>
                             </div>
                           </div>,
 
                           // Video Ad
-                          <div key="video" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="flex items-center gap-2 p-2">
-                              <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                                <span className="text-white font-bold text-[8px]">S</span>
-                              </div>
-                              <span className="text-gray-400 text-[10px]">Sponsored</span>
+                          <div key="video" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-3">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
                             </div>
-                            <div className="relative flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                            <div className="relative h-36 bg-gradient-to-br from-gray-800 to-gray-900">
                               <img 
                                 src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=120&fit=crop" 
                                 alt="Google Nest" 
                                 className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                                  <Play className="w-5 h-5 text-gray-800 ml-0.5" fill="currentColor" />
-                                </div>
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <div className="w-14 h-14 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
+                                  <Play className="w-6 h-6 text-gray-800 ml-1" fill="currentColor" />
+                          </div>
                               </div>
-                              <div className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-white text-[10px]">
+                              <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-[9px] font-medium">
                                 0:30
                               </div>
                             </div>
-                            <div className="p-2">
-                              <p className="text-gray-300 text-[11px] line-clamp-2">
-                                Nest Learning Thermostat. Stay up-to-date...
+                            <div className="p-4 flex-1">
+                              <h3 className="text-white font-semibold text-[12px] mb-1">Nest Thermostat</h3>
+                              <p className="text-gray-400 text-[10px] leading-relaxed">
+                                Stay up-to-date on your home energy.
                               </p>
                             </div>
-                            <div className="bg-gradient-to-r from-red-500 to-orange-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                            <div className="bg-gradient-to-r from-red-500 to-orange-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +320%
                                 </span>
-                                <span>Video</span>
+                                <span className="text-[9px]">Video</span>
                               </div>
                             </div>
                           </div>,
 
                           // Search Ad
-                          <div key="search" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="p-3 flex-1 flex flex-col">
-                              <span className="text-[10px] text-gray-400 mb-1">Sponsored</span>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6">
+                          <div key="search" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 flex-1 flex flex-col">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
+                              <div className="flex items-center gap-2 mt-2 mb-3">
+                                <div className="w-5 h-5">
                                   <svg viewBox="0 0 24 24" className="w-full h-full">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -1289,108 +1417,127 @@ export default function Home() {
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                                   </svg>
                                 </div>
-                                <span className="text-gray-300 text-xs">google.com</span>
+                                <span className="text-gray-400 text-[10px]">google.com</span>
                               </div>
-                              <h3 className="text-white font-medium text-xs mb-1 line-clamp-2">
+                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
                                 How Google Search works
-                              </h3>
-                              <p className="text-gray-400 text-[11px] flex-1 line-clamp-2">
+                            </h3>
+                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
                                 Learn how Google provides helpful information.
                               </p>
-                              <div className="border-t border-gray-700 pt-2 mt-2 space-y-1">
-                                <p className="text-blue-400 text-[11px]">Learn Search</p>
-                                <p className="text-blue-400 text-[11px]">Detecting Spam</p>
-                                <p className="text-blue-400 text-[11px]">Search Features</p>
-                              </div>
+                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Learn Search</p>
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Search Features</p>
                             </div>
-                            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                          </div>
+                            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +380%
                                 </span>
-                                <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI</span>
-                              </div>
-                            </div>
+                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                        </div>
+                      </div>
                           </div>,
 
                           // Fi Ad
-                          <div key="fi" className="w-full h-full bg-gray-900 flex flex-col relative">
-                            <div className="p-3 flex-1 flex flex-col">
-                              <span className="text-[10px] text-gray-400 mb-1">Sponsored</span>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 via-green-400 to-yellow-400 flex items-center justify-center">
-                                  <span className="text-white font-bold text-[10px]">Fi</span>
-                                </div>
-                                <span className="text-gray-300 text-xs">Google Fi</span>
-                              </div>
-                              <h3 className="text-white font-medium text-xs mb-1 line-clamp-2">
-                                Try Fi for free - Start trial
+                          <div key="fi" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-4 flex-1 flex flex-col">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
+                              <div className="flex items-center gap-2 mt-2 mb-3">
+                                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 via-green-400 to-yellow-400 flex items-center justify-center">
+                                  <span className="text-white font-bold text-[8px]">Fi</span>
+                </div>
+                                <span className="text-gray-400 text-[10px]">Google Fi</span>
+              </div>
+                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
+                                Try Fi for free
                               </h3>
-                              <p className="text-gray-400 text-[11px] flex-1 line-clamp-3">
+                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
                                 Test Google Fi coverage. $50/mo. Cancel anytime.
                               </p>
-                              <div className="border-t border-gray-700 pt-2 mt-2 space-y-1">
-                                <p className="text-blue-400 text-[11px]">Try Fi Free</p>
-                                <p className="text-blue-400 text-[11px]">7 days trial</p>
-                              </div>
+                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Try Fi Free</p>
+                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">7 days trial</p>
                             </div>
-                            <div className="bg-gradient-to-r from-green-500 to-teal-500 px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-[10px]">
-                                <span className="flex items-center gap-1 font-bold">
+                          </div>
+                            <div className="bg-gradient-to-r from-green-500 to-teal-500 px-4 py-2.5">
+                              <div className="flex items-center justify-between text-white">
+                                <span className="flex items-center gap-1 text-[10px] font-bold">
                                   <TrendingUp className="w-3 h-3" /> +190%
                                 </span>
-                                <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI</span>
-                              </div>
-                            </div>
+                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
+                        </div>
+                      </div>
                           </div>,
                         ]}
                       />
-                    </div>
+              </div>
 
-                    {/* Bottom Stats Bar */}
-                    <motion.div 
-                      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 px-6 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-white/10"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                    >
+                    {/* Bottom Stats Bar - Enhanced */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 md:gap-6 px-4 md:px-8 py-3 md:py-4 bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-gray-400 text-sm">9 Ad Types</span>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                        <span className="text-white text-xs md:text-sm font-medium">8 Ad Types</span>
+                </div>
+                      <div className="h-4 w-px bg-white/20 hidden md:block"></div>
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400 text-xs md:text-sm font-bold">+365% Avg</span>
                       </div>
-                      <div className="h-4 w-px bg-white/20"></div>
-                      <div className="flex items-center gap-2 text-green-400 text-sm font-bold">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>Avg +365% Performance</span>
+                      <div className="h-4 w-px bg-white/20 hidden md:block"></div>
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-yellow-400" />
+                        <span className="text-yellow-400 text-xs md:text-sm font-medium">Real-time AI</span>
                       </div>
-                    </motion.div>
+                    </div>
                   </div>
-                </motion.div>
+                </div>
+              </div>
+                    
+              {/* Mini Real-time Dashboard */}
+              <div className="mt-16 bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6 max-w-3xl mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                      <LayoutDashboard className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white font-semibold">AI Optimization Status</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                    <span className="text-green-400 text-xs font-medium">Active</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "Active Campaigns", value: "1,247", change: "+12", color: "text-green-400" },
+                    { label: "Budget Saved Today", value: "$4.2K", change: "+8%", color: "text-blue-400" },
+                    { label: "CTR Improvement", value: "+47%", change: "↑", color: "text-purple-400" },
+                    { label: "Conversions/hr", value: "89", change: "+23", color: "text-cyan-400" },
+                  ].map((item, i) => (
+                    <div key={i} className="text-center p-3 bg-white/5 rounded-xl">
+                      <p className={`text-xl md:text-2xl font-bold ${item.color}`}>{item.value}</p>
+                      <p className="text-gray-400 text-xs mt-1">{item.label}</p>
+                      <span className="text-green-400 text-xs">{item.change}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Bottom CTA - Enhanced */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mt-20"
-              >
+              <div className="text-center mt-12">
                 <div className="inline-block">
                   <Link
                     href="/authentication/sign-up"
-                    className="group relative inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 text-white rounded-2xl font-bold text-xl transition-all duration-300 shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 overflow-hidden"
+                    className="group relative inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 text-white rounded-2xl font-bold text-lg transition-all duration-300 shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 overflow-hidden"
                   >
-                    <motion.div 
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                    />
-                    <Brain className="w-7 h-7 relative z-10" />
+                    <Brain className="w-6 h-6 relative z-10" />
                     <span className="relative z-10">Start Creating AI-Powered Ads</span>
-                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform relative z-10" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform relative z-10" />
                   </Link>
                 </div>
-                <p className="text-gray-500 mt-6 flex items-center justify-center gap-4">
+                <p className="text-gray-500 mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
                   <span className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-400" />
                     No credit card required
@@ -1404,7 +1551,7 @@ export default function Home() {
                     Cancel anytime
                   </span>
                 </p>
-              </motion.div>
+              </div>
             </div>
           </section>
 
@@ -1412,38 +1559,16 @@ export default function Home() {
           {/* AI PERFORMANCE CHARTS SECTION - Enhanced */}
           {/* ============================================ */}
           <section className="py-24 px-4 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-blue-950/10 to-black"></div>
-            <div className="absolute inset-0">
-              <div className="absolute w-[600px] h-[600px] top-0 left-1/4 bg-green-600/10 rounded-full blur-[200px] animate-pulse"></div>
-              <div className="absolute w-[600px] h-[600px] bottom-0 right-1/4 bg-blue-600/10 rounded-full blur-[200px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-            </div>
-
             <div className="container mx-auto max-w-7xl relative z-10">
               {/* Header */}
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="text-center mb-16"
-              >
-                <motion.div 
-                  className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-full mb-8"
-                  animate={{ boxShadow: ['0 0 20px rgba(34, 197, 94, 0.2)', '0 0 40px rgba(34, 197, 94, 0.3)', '0 0 20px rgba(34, 197, 94, 0.2)'] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-full mb-8 shadow-lg shadow-green-500/20">
                   <div className="relative">
                     <BarChart3 className="w-5 h-5 text-green-400" />
-                    <motion.div 
-                      className="absolute inset-0 bg-green-400 rounded-full blur-sm"
-                      animate={{ opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
                   </div>
                   <span className="text-green-300 font-medium">Live Performance Data</span>
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                </motion.div>
+                </div>
 
                 <h2 className="text-4xl md:text-6xl font-bold mb-6">
                   <span className="text-white">See the </span>
@@ -1454,44 +1579,30 @@ export default function Home() {
                 <p className="text-xl text-gray-400 max-w-3xl mx-auto">
                   Real results from businesses using our AI platform - updated in real-time
                 </p>
-              </motion.div>
+              </div>
 
               {/* Stats Row */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
-              >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
                 {[
                   { value: "+340%", label: "Avg. CTR Increase", color: "text-green-400", bg: "from-green-600/20" },
                   { value: "-65%", label: "CPA Reduction", color: "text-blue-400", bg: "from-blue-600/20" },
                   { value: "4.8x", label: "ROAS Improvement", color: "text-purple-400", bg: "from-purple-600/20" },
                   { value: "24/7", label: "AI Optimization", color: "text-cyan-400", bg: "from-cyan-600/20" },
                 ].map((stat, i) => (
-                  <motion.div
+                  <div
                     key={i}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
                     className={`bg-gradient-to-br ${stat.bg} to-transparent backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-all`}
                   >
                     <p className={`text-3xl md:text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</p>
                     <p className="text-gray-400 text-sm">{stat.label}</p>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
-
+                  </div>
+                  
               {/* Charts Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Chart 1 - AI vs Manual Performance */}
-                <motion.div 
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-500"
-                >
+                <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-500">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center">
@@ -1500,7 +1611,7 @@ export default function Home() {
                       <div>
                         <h3 className="text-lg font-bold text-white">Performance Comparison</h3>
                         <p className="text-gray-400 text-xs">AI vs Manual Management</p>
-                      </div>
+                    </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
@@ -1545,20 +1656,15 @@ export default function Home() {
                     <TrendingUp className="w-5 h-5 text-green-400" />
                     <span className="text-green-400 font-semibold">+180% Better Performance with AI</span>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Chart 2 - Cost Reduction */}
-                <motion.div 
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-br from-gray-900 via-gray-900 to-green-900/20 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:border-green-500/30 transition-all duration-500"
-                >
+                <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-green-900/20 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:border-green-500/30 transition-all duration-500">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-green-600/20 flex items-center justify-center">
                         <Target className="w-5 h-5 text-green-400" />
-                      </div>
+                  </div>
                       <div>
                         <h3 className="text-lg font-bold text-white">Cost Optimization</h3>
                         <p className="text-gray-400 text-xs">CPA Reduction Over Time</p>
@@ -1602,36 +1708,31 @@ export default function Home() {
                     <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
                       <p className="text-2xl font-bold text-red-400">$120</p>
                       <p className="text-xs text-gray-400 mt-1">Starting CPA</p>
-                    </div>
+                      </div>
                     <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
                       <p className="text-2xl font-bold text-green-400">$60</p>
                       <p className="text-xs text-gray-400 mt-1">Current CPA</p>
-                    </div>
+                      </div>
                     <div className="text-center p-4 bg-green-500/20 border border-green-500/30 rounded-xl">
                       <p className="text-2xl font-bold text-green-400">50%</p>
                       <p className="text-xs text-gray-400 mt-1">Savings</p>
                     </div>
                   </div>
-                </motion.div>
-              </div>
-
+                      </div>
+                    </div>
+                    
               {/* Bottom Insight */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mt-12 bg-gradient-to-r from-purple-900/30 via-blue-900/30 to-green-900/30 backdrop-blur-xl rounded-3xl p-8 border border-white/10"
-              >
+              <div className="mt-12 bg-gradient-to-r from-purple-900/30 via-blue-900/30 to-green-900/30 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
                       <Brain className="w-8 h-8 text-white" />
-                    </div>
+                      </div>
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">AI Optimization Running</h3>
                       <p className="text-gray-400">Our AI has made <span className="text-green-400 font-semibold">2,847 optimizations</span> in the last 24 hours</p>
+                      </div>
                     </div>
-                  </div>
                   <Link
                     href="/authentication/sign-up"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-500 hover:to-blue-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
@@ -1640,60 +1741,42 @@ export default function Home() {
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </section>
 
           {/* ============================================ */}
           {/* TESTIMONIALS SECTION */}
           {/* ============================================ */}
-          <section className="py-20 px-4 bg-gradient-to-b from-black via-purple-950/5 to-black">
+          <section className="py-20 px-4 relative overflow-hidden">
             <div className="container mx-auto max-w-6xl">
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="text-center mb-12"
-              >
+              <div className="text-center mb-12">
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
                   What Our Clients Say
                 </h2>
                 <p className="text-xl text-gray-400">
                   Thousands of companies trust our platform to manage their ad campaigns
                 </p>
-              </motion.div>
+                      </div>
 
               <AnimatedTestimonials
                 data={testimonials}
                 className="w-full"
                 cardClassName="bg-gray-800/50 backdrop-blur-sm border-gray-700"
               />
-            </div>
+                      </div>
           </section>
 
           {/* ============================================ */}
           {/* PRICING SECTION with Toggle */}
           {/* ============================================ */}
-          <section className="py-20 px-4 relative overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black">
-            {/* Background */}
-            <div className="absolute inset-0">
-              <div className="absolute w-[600px] h-[600px] top-0 right-0 bg-purple-600/10 rounded-full blur-[150px]"></div>
-              <div className="absolute w-[600px] h-[600px] bottom-0 left-0 bg-blue-600/10 rounded-full blur-[150px]"></div>
-            </div>
-
+          <section className="py-20 px-4 relative overflow-hidden">
             <div className="container mx-auto max-w-5xl relative z-10">
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="text-center mb-12"
-              >
+              <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
                   <Crown className="w-4 h-4 text-purple-400" />
                   <span className="text-sm text-purple-300">Simple Pricing</span>
-                </div>
+                  </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
                   Choose Your Plan
                 </h2>
@@ -1724,18 +1807,12 @@ export default function Home() {
                     Yearly
                     <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">-20%</span>
                   </button>
-                </div>
-              </motion.div>
-
+                    </div>
+                  </div>
+                  
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 {/* Plan 1 - Client Account Management */}
-                <motion.div 
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={fadeInUp}
-                  className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300"
-                >
+                <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
                   <div className="mb-6">
                     <h3 className="text-2xl font-bold text-white mb-2">Manage Your Account</h3>
                     <p className="text-gray-400">For businesses with existing Google Ads accounts</p>
@@ -1749,7 +1826,7 @@ export default function Home() {
                     {billingCycle === 'yearly' && (
                       <p className="text-green-400 text-sm mt-1">Billed annually (Save $240/year)</p>
                     )}
-                  </div>
+                </div>
 
                   <ul className="space-y-4 mb-8">
                     {[
@@ -1773,16 +1850,10 @@ export default function Home() {
                   >
                     Get Started
                   </Link>
-                </motion.div>
+                </div>
 
                 {/* Plan 2 - Work on Our Accounts (Highlighted) */}
-                <motion.div 
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={fadeInUp}
-                  className="relative"
-                >
+                <div className="relative">
                   {/* Gradient Border Effect */}
                   <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 rounded-3xl blur-sm opacity-75 animate-pulse"></div>
                   
@@ -1792,9 +1863,9 @@ export default function Home() {
                       <div className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white text-sm font-semibold flex items-center gap-2">
                         <Star className="w-4 h-4" />
                         Most Popular
-                      </div>
-                    </div>
-
+                  </div>
+                  </div>
+                  
                     <div className="mb-6 mt-2">
                       <h3 className="text-2xl font-bold text-white mb-2">Work on Our Accounts</h3>
                       <p className="text-gray-400">Premium verified ad accounts with no suspensions</p>
@@ -1803,13 +1874,13 @@ export default function Home() {
                     <div className="mb-6">
                       <span className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                         ${billingCycle === 'monthly' ? pricing.monthly.premium : pricing.yearly.premium}
-                      </span>
+                    </span>
                       <span className="text-gray-400">/month</span>
                       {billingCycle === 'yearly' && (
                         <p className="text-green-400 text-sm mt-1">Billed annually (Save $480/year)</p>
                       )}
-                    </div>
-
+                  </div>
+                  
                     <ul className="space-y-4 mb-8">
                       {[
                         "Everything in Basic Plan",
@@ -1840,7 +1911,7 @@ export default function Home() {
                       30-day money-back guarantee
                     </p>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
           </section>
@@ -1853,15 +1924,9 @@ export default function Home() {
           {/* ============================================ */}
           {/* FAQ SECTION */}
           {/* ============================================ */}
-          <section className="py-20 px-4 bg-gradient-to-b from-black via-cyan-950/5 to-black">
+          <section className="py-20 px-4 relative overflow-hidden">
             <div className="container mx-auto max-w-3xl">
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="text-center mb-12"
-              >
+              <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full mb-6">
                   <HelpCircle className="w-4 h-4 text-blue-400" />
                   <span className="text-sm text-blue-300">FAQ</span>
@@ -1872,41 +1937,29 @@ export default function Home() {
                 <p className="text-xl text-gray-400">
                   Got questions? We've got answers
                 </p>
-              </motion.div>
+              </div>
 
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={staggerContainer}
-                className="space-y-4"
-              >
+              <div className="space-y-4">
                 {faqData.map((faq, index) => (
-                  <motion.div key={index} variants={fadeInUp}>
+                  <div key={index}>
                     <FAQItem
                       question={faq.question}
                       answer={faq.answer}
                       isOpen={openFAQ === index}
                       onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
                     />
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             </div>
           </section>
 
           {/* ============================================ */}
           {/* FINAL CTA SECTION */}
           {/* ============================================ */}
-          <section className="py-20 px-4 bg-gradient-to-b from-black via-purple-950/10 to-black">
+          <section className="py-20 px-4 relative overflow-hidden">
             <div className="container mx-auto max-w-4xl text-center">
-              <motion.div 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 backdrop-blur-sm border border-white/10 rounded-3xl p-12"
-              >
+              <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 backdrop-blur-sm border border-white/10 rounded-3xl p-12">
                 <Sparkles className="w-16 h-16 mx-auto mb-6 text-purple-400" />
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
                   Ready to Transform Your Campaigns?
@@ -1915,10 +1968,10 @@ export default function Home() {
                   Join thousands of businesses that trust our platform to manage their ad campaigns
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    href="/authentication/sign-up"
+                <Link
+                  href="/authentication/sign-up"
                     className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 hover:scale-105"
-                  >
+                >
                     Start Free Trial
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
@@ -1928,9 +1981,9 @@ export default function Home() {
                   >
                     <Phone className="w-5 h-5" />
                     Contact Sales
-                  </Link>
+                </Link>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </section>
         </main>

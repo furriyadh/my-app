@@ -112,40 +112,30 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
   const visibleLines = lines.slice(visibleStart, visibleEnd);
 
   return (
-    <div className="w-full max-w-md lg:max-w-xl xl:max-w-2xl mx-auto p-8">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        className="relative bg-background h-[300px] lg:h-[400px] xl:h-[450px] rounded-2xl shadow-2xl overflow-hidden border border-border"
-      >
-        <div className="px-4 py-3 lg:px-6 lg:py-4 flex items-center z-10 relative">
-          <div className="flex items-center gap-1.5 lg:gap-2">
-            <motion.div className="w-2 xs:w-2.5 sm:w-3 lg:w-4 h-2 xs:h-2.5 sm:h-3 lg:h-4 rounded-full bg-red-500" />
-            <motion.div className="w-2 xs:w-2.5 sm:w-3 lg:w-4 h-2 xs:h-2.5 sm:h-3 lg:h-4 rounded-full bg-yellow-500" />
-            <motion.div className="w-2 xs:w-2.5 sm:w-3 lg:w-4 h-2 xs:h-2.5 sm:h-3 lg:h-4 rounded-full bg-green-500" />
+    <div className="w-full max-w-xl mx-auto">
+      <div className="relative bg-gray-900 h-[340px] rounded-2xl shadow-xl overflow-hidden border border-gray-700">
+        <div className="px-4 py-2 flex items-center z-10 relative border-b border-gray-700/50 bg-gray-900">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
           </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex-1 text-center"
-          >
+          <div className="flex-1 text-center">
             <TypeAnimation
               words={words}
               typingSpeed="slow"
               deletingSpeed="slow"
               pauseDuration={2000}
-              className="text-muted-foreground text-xs lg:text-sm font-mono"
+              className="text-gray-400 text-xs font-mono"
             />
-          </motion.div>
+          </div>
         </div>
 
         <div
           ref={containerRef}
-          className="relative px-5 py-4 lg:px-8 lg:py-6 font-mono text-sm lg:text-base overflow-y-hidden h-[calc(100%-48px)] lg:h-[calc(100%-64px)]"
+          className="absolute inset-x-0 top-[36px] bottom-0 px-4 py-3 font-mono text-xs overflow-hidden"
         >
-          <div className="space-y-2 relative z-10">
+          <div className="space-y-1.5 relative z-10">
             <AnimatePresence mode="sync">
               {visibleLines.map((line, idx) => {
                 const actualIndex = visibleStart + idx;
@@ -210,26 +200,15 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
             </AnimatePresence>
 
             {currentLine < lines.length && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center h-5"
-                style={{
-                  paddingLeft: `${
-                    lines[currentLine]?.segments[0]?.indent ? 16 : 0
-                  }px`,
-                }}
-              >
-                <motion.div
-                  animate={{ opacity: cursorVisible ? 1 : 0 }}
-                  transition={{ duration: 0.1 }}
-                  className="w-0.5 h-3.5 bg-blue-500"
+              <div className="flex items-center h-5">
+                <div 
+                  className={`w-0.5 h-3.5 bg-blue-500 transition-opacity duration-100 ${cursorVisible ? 'opacity-100' : 'opacity-0'}`}
                 />
-              </motion.div>
+              </div>
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

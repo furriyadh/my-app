@@ -41,7 +41,7 @@
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
-    "framer-motion": "^12.23.5",
+    "framer-motion": "^12.23.25",
     "google-ads-api": "^20.0.1",
     "gsap": "^3.13.0",
     "i18next": "^25.2.1",

@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-gray-100 dark:border-[#172036]">
+      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/20 bg-black/80 backdrop-blur-sm">
         <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px]">
             <div className="ltr:xl:-mr-[35px] rtl:xl:-ml-[35px]">

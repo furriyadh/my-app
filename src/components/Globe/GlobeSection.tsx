@@ -398,7 +398,7 @@ export function GlobeSection() {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 md:py-20 min-h-[600px] md:min-h-[700px] dark:bg-black bg-black relative w-full overflow-hidden">
+    <div className="flex flex-col items-center justify-center py-12 md:py-20 min-h-[600px] md:min-h-[700px] bg-transparent relative w-full overflow-hidden">
       <div className="max-w-7xl mx-auto w-full relative px-4">
         {/* Text Content - Always on top */}
         <motion.div

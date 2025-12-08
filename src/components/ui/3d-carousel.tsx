@@ -10,14 +10,14 @@ const FALLBACK =
   ' text-anchor="middle" fill="%234a5568" font-size="18">Image</text></svg>';
 
 /* 2️⃣  Config ————————————————————————— */
-const CARD_W = 180;
-const CARD_H = 240;
-const RADIUS = 240;
-const TILT_SENSITIVITY = 10;
-const DRAG_SENSITIVITY = 0.5;
-const INERTIA_FRICTION = 0.95;
-const AUTOSPIN_SPEED = 0.08;
-const IDLE_TIMEOUT = 2000;
+const CARD_W = 200;
+const CARD_H = 280;
+const RADIUS = 300;
+const TILT_SENSITIVITY = 0; // Disabled tilt to prevent flipping
+const DRAG_SENSITIVITY = 0.3;
+const INERTIA_FRICTION = 0.92;
+const AUTOSPIN_SPEED = 0.15;
+const IDLE_TIMEOUT = 1500;
 
 /* 3️⃣  Card Component (Memoized for Performance) ——— */
 interface CardProps {
@@ -79,20 +79,10 @@ const ThreeDCarousel = React.memo(
     const lastInteractionRef = useRef(Date.now());
     const animationFrameRef = useRef<number | null>(null);
 
+    // Tilt disabled to prevent card flipping on mobile
     useEffect(() => {
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!parentRef.current || isDraggingRef.current) return;
-        lastInteractionRef.current = Date.now();
-        const parentRect = parentRef.current.getBoundingClientRect();
-        const mouseY = e.clientY - parentRect.top;
-        const normalizedY = (mouseY / parentRect.height - 0.5) * 2;
-        targetTiltRef.current = -normalizedY * TILT_SENSITIVITY;
-      };
-
-      window.addEventListener('mousemove', handleMouseMove);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-      };
+      // Keep tilt at 0 for stable display
+      targetTiltRef.current = 0;
     }, []);
 
     useEffect(() => {
