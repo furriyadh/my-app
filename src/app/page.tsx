@@ -1034,13 +1034,6 @@ export default function Home() {
                 <div className="w-full max-w-2xl mx-auto px-4">
                   {/* Modern AI Loader Card */}
                   <div className="relative">
-                    {/* Floating Status Badge */}
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full shadow-lg shadow-green-500/30">
-                      <Brain className="w-4 h-4 text-white" />
-                      <span className="text-white text-xs font-bold">AI Campaign Generator</span>
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    </div>
-                    
                     {/* Glow Effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 rounded-3xl blur-xl"></div>
                     
@@ -1066,7 +1059,7 @@ export default function Home() {
               </div>
 
               {/* Circular Gallery - AI Generated Ads Showcase */}
-              <div className="mt-20 relative">
+              <div className="mt-20 relative hidden md:block">
                 {/* Section Header */}
                 <div className="text-center mb-12">
                   <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full mb-6">
@@ -1082,8 +1075,8 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* Circular Gallery */}
-                <div style={{ height: '600px', position: 'relative' }}>
+                {/* Circular Gallery - Desktop Only */}
+                <div className="h-[400px] lg:h-[500px] xl:h-[600px] relative">
                   <CircularGallery
                     items={[
                       { image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&h=600", text: "Search Ads" },
@@ -1102,7 +1095,45 @@ export default function Home() {
                     scrollEase={0.02}
                   />
                 </div>
+              </div>
 
+              {/* Mobile Alternative - Simple Grid Gallery */}
+              <div className="mt-16 md:hidden">
+                {/* Section Header */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full mb-4">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span className="text-purple-300 text-sm font-medium">AI-Generated Ads</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Explore All Ad Types
+                  </h3>
+                  <p className="text-gray-400 text-sm px-4">
+                    AI-generated campaigns across all platforms
+                  </p>
+                </div>
+
+                {/* Mobile Grid */}
+                <div className="grid grid-cols-2 gap-3 px-4">
+                  {[
+                    { image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&h=300", text: "Search Ads" },
+                    { image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=300", text: "Display Ads" },
+                    { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300", text: "Shopping Ads" },
+                    { image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300", text: "Video Ads" },
+                    { image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300", text: "App Campaigns" },
+                    { image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300", text: "Performance Max" },
+                  ].map((item, i) => (
+                    <div key={i} className="relative group overflow-hidden rounded-xl aspect-[4/3]">
+                      <img 
+                        src={item.image} 
+                        alt={item.text}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <p className="absolute bottom-2 left-2 right-2 text-white text-sm font-medium">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Bottom CTA - Enhanced */}
