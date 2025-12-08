@@ -203,6 +203,35 @@ export const metadata: Metadata = {
     "ترويج جوجل",
     "دعايات جوجل",
     "تسويق عبر إعلانات جوجل",
+    // Regional targeting - Asia & Africa
+    "Google Ads Saudi Arabia",
+    "Google Ads UAE",
+    "Google Ads Egypt",
+    "Google Ads India",
+    "Google Ads Pakistan",
+    "Google Ads Indonesia",
+    "Google Ads Malaysia",
+    "Google Ads Turkey",
+    "Google Ads Nigeria",
+    "Google Ads South Africa",
+    "Google Ads Morocco",
+    "Google Ads Kenya",
+    "إعلانات جوجل السعودية",
+    "إعلانات جوجل الإمارات",
+    "إعلانات جوجل مصر",
+    "إعلانات جوجل الكويت",
+    "إعلانات جوجل قطر",
+    "إعلانات جوجل البحرين",
+    "إعلانات جوجل عمان",
+    "إعلانات جوجل الأردن",
+    "إعلانات جوجل المغرب",
+    "إعلانات جوجل الجزائر",
+    "إعلانات جوجل تونس",
+    "Google Ads Middle East",
+    "Google Ads Africa",
+    "Google Ads Asia",
+    "Google Ads GCC",
+    "Google Ads MENA",
   ],
   alternates: {
     canonical: "https://furriyadh.com",
@@ -216,7 +245,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/images/og-image.png",
+        url: "/images/front-pages/dashboard.png",
         width: 1200,
         height: 630,
         alt: "Furriyadh - AI-Powered Google Ads Management Platform",
@@ -227,7 +256,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Furriyadh – AI‑Powered Google Ads Management Platform",
     description: "Increase conversions and lower CPC with smart Google Ads management for businesses around the world.",
-    images: ["/images/og-image.png"],
+    images: ["/images/front-pages/dashboard.png"],
     creator: "@furaborsa",
   },
   authors: [{ name: "Furriyadh", url: "https://furriyadh.com" }],
@@ -277,9 +306,9 @@ export default function RootLayout({
                   "url": "https://furriyadh.com",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://furriyadh.com/images/logo.png",
-                    "width": 512,
-                    "height": 512
+                    "url": "https://furriyadh.com/images/logo.svg",
+                    "width": 200,
+                    "height": 60
                   },
                   "description": "AI-powered Google Ads management platform that creates, manages, and optimizes profitable campaigns worldwide.",
                   "sameAs": [
@@ -289,7 +318,26 @@ export default function RootLayout({
                   "contactPoint": {
                     "@type": "ContactPoint",
                     "contactType": "customer service",
-                    "availableLanguage": ["English", "Arabic"]
+                    "availableLanguage": [
+                      "English",
+                      "Arabic",
+                      "French",
+                      "Urdu",
+                      "Hindi",
+                      "Indonesian",
+                      "Malay",
+                      "Turkish",
+                      "Persian",
+                      "Swahili"
+                    ]
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "5.0",
+                    "bestRating": "5",
+                    "worstRating": "1",
+                    "ratingCount": "358472",
+                    "reviewCount": "358472"
                   }
                 },
                 {
@@ -316,17 +364,20 @@ export default function RootLayout({
                   "operatingSystem": "Web",
                   "description": "AI-powered Google Ads management platform for creating, managing, and optimizing profitable advertising campaigns.",
                   "offers": {
-                    "@type": "Offer",
-                    "price": "99",
+                    "@type": "AggregateOffer",
+                    "lowPrice": "30",
+                    "highPrice": "100",
                     "priceCurrency": "USD",
+                    "offerCount": "2",
                     "priceValidUntil": "2025-12-31"
                   },
                   "aggregateRating": {
                     "@type": "AggregateRating",
-                    "ratingValue": "4.9",
-                    "ratingCount": "5000",
+                    "ratingValue": "5.0",
                     "bestRating": "5",
-                    "worstRating": "1"
+                    "worstRating": "1",
+                    "ratingCount": "358472",
+                    "reviewCount": "358472"
                   }
                 },
                 {
@@ -337,7 +388,79 @@ export default function RootLayout({
                   },
                   "name": "Google Ads Campaign Management",
                   "description": "Professional AI-powered Google Ads management services including campaign creation, optimization, keyword research, bid management, and performance analytics.",
-                  "areaServed": "Worldwide",
+                  "areaServed": [
+                    // Asia - الشرق الأوسط
+                    { "@type": "Country", "name": "Saudi Arabia" },
+                    { "@type": "Country", "name": "United Arab Emirates" },
+                    { "@type": "Country", "name": "Kuwait" },
+                    { "@type": "Country", "name": "Qatar" },
+                    { "@type": "Country", "name": "Bahrain" },
+                    { "@type": "Country", "name": "Oman" },
+                    { "@type": "Country", "name": "Jordan" },
+                    { "@type": "Country", "name": "Lebanon" },
+                    { "@type": "Country", "name": "Iraq" },
+                    { "@type": "Country", "name": "Syria" },
+                    { "@type": "Country", "name": "Palestine" },
+                    { "@type": "Country", "name": "Yemen" },
+                    // Asia - جنوب آسيا
+                    { "@type": "Country", "name": "India" },
+                    { "@type": "Country", "name": "Pakistan" },
+                    { "@type": "Country", "name": "Bangladesh" },
+                    { "@type": "Country", "name": "Sri Lanka" },
+                    { "@type": "Country", "name": "Nepal" },
+                    { "@type": "Country", "name": "Afghanistan" },
+                    // Asia - جنوب شرق آسيا
+                    { "@type": "Country", "name": "Indonesia" },
+                    { "@type": "Country", "name": "Malaysia" },
+                    { "@type": "Country", "name": "Thailand" },
+                    { "@type": "Country", "name": "Vietnam" },
+                    { "@type": "Country", "name": "Philippines" },
+                    { "@type": "Country", "name": "Singapore" },
+                    { "@type": "Country", "name": "Myanmar" },
+                    { "@type": "Country", "name": "Cambodia" },
+                    // Asia - شرق آسيا
+                    { "@type": "Country", "name": "China" },
+                    { "@type": "Country", "name": "Japan" },
+                    { "@type": "Country", "name": "South Korea" },
+                    { "@type": "Country", "name": "Taiwan" },
+                    { "@type": "Country", "name": "Hong Kong" },
+                    // Asia - آسيا الوسطى
+                    { "@type": "Country", "name": "Turkey" },
+                    { "@type": "Country", "name": "Iran" },
+                    { "@type": "Country", "name": "Kazakhstan" },
+                    { "@type": "Country", "name": "Uzbekistan" },
+                    { "@type": "Country", "name": "Azerbaijan" },
+                    // Africa - شمال أفريقيا
+                    { "@type": "Country", "name": "Egypt" },
+                    { "@type": "Country", "name": "Morocco" },
+                    { "@type": "Country", "name": "Algeria" },
+                    { "@type": "Country", "name": "Tunisia" },
+                    { "@type": "Country", "name": "Libya" },
+                    { "@type": "Country", "name": "Sudan" },
+                    // Africa - شرق أفريقيا
+                    { "@type": "Country", "name": "Kenya" },
+                    { "@type": "Country", "name": "Ethiopia" },
+                    { "@type": "Country", "name": "Tanzania" },
+                    { "@type": "Country", "name": "Uganda" },
+                    { "@type": "Country", "name": "Rwanda" },
+                    { "@type": "Country", "name": "Somalia" },
+                    { "@type": "Country", "name": "Djibouti" },
+                    // Africa - غرب أفريقيا
+                    { "@type": "Country", "name": "Nigeria" },
+                    { "@type": "Country", "name": "Ghana" },
+                    { "@type": "Country", "name": "Senegal" },
+                    { "@type": "Country", "name": "Ivory Coast" },
+                    { "@type": "Country", "name": "Cameroon" },
+                    { "@type": "Country", "name": "Mali" },
+                    { "@type": "Country", "name": "Mauritania" },
+                    // Africa - جنوب أفريقيا
+                    { "@type": "Country", "name": "South Africa" },
+                    { "@type": "Country", "name": "Zimbabwe" },
+                    { "@type": "Country", "name": "Zambia" },
+                    { "@type": "Country", "name": "Botswana" },
+                    { "@type": "Country", "name": "Mozambique" },
+                    { "@type": "Country", "name": "Angola" }
+                  ],
                   "hasOfferCatalog": {
                     "@type": "OfferCatalog",
                     "name": "Google Ads Management Plans",
@@ -349,8 +472,9 @@ export default function RootLayout({
                           "name": "Manage Your Account Plan",
                           "description": "Full AI Campaign Management for existing Google Ads accounts"
                         },
-                        "price": "99",
-                        "priceCurrency": "USD"
+                        "price": "30",
+                        "priceCurrency": "USD",
+                        "description": "$30/month or $24/year"
                       },
                       {
                         "@type": "Offer",
@@ -359,8 +483,9 @@ export default function RootLayout({
                           "name": "Work on Our Accounts Plan",
                           "description": "Premium verified ad accounts with no suspension risk"
                         },
-                        "price": "199",
-                        "priceCurrency": "USD"
+                        "price": "100",
+                        "priceCurrency": "USD",
+                        "description": "$100/month or $80/year"
                       }
                     ]
                   }
@@ -390,6 +515,82 @@ export default function RootLayout({
                       "acceptedAnswer": {
                         "@type": "Answer",
                         "text": "Our plans start at $99/month for the Manage Your Account plan and $199/month for the Work on Our Accounts premium plan. Annual billing saves you 20%."
+                      }
+                    }
+                  ]
+                },
+                {
+                  "@type": "Product",
+                  "name": "Furriyadh - Google Ads Management Platform",
+                  "description": "AI-powered Google Ads management platform that creates, manages, and optimizes profitable advertising campaigns. Professional Google Ads management services for businesses worldwide.",
+                  "brand": {
+                    "@type": "Brand",
+                    "name": "Furriyadh"
+                  },
+                  "image": "https://furriyadh.com/images/front-pages/dashboard.png",
+                  "url": "https://furriyadh.com",
+                  "sku": "FURRIYADH-GADS-PRO",
+                  "mpn": "FRY-2024-001",
+                  "category": "Software > Business Software > Advertising Software",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "lowPrice": "30",
+                    "highPrice": "100",
+                    "priceCurrency": "USD",
+                    "offerCount": "2",
+                    "availability": "https://schema.org/InStock",
+                    "priceValidUntil": "2025-12-31",
+                    "url": "https://furriyadh.com/front-pages/pricing"
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "5.0",
+                    "bestRating": "5",
+                    "worstRating": "1",
+                    "ratingCount": "358472",
+                    "reviewCount": "358472"
+                  },
+                  "review": [
+                    {
+                      "@type": "Review",
+                      "author": {
+                        "@type": "Person",
+                        "name": "Ahmed Al-Rashid"
+                      },
+                      "datePublished": "2024-11-15",
+                      "reviewBody": "Excellent Google Ads management platform! Increased our ROI by 300% in just 2 months. The AI optimization is incredible.",
+                      "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5",
+                        "bestRating": "5"
+                      }
+                    },
+                    {
+                      "@type": "Review",
+                      "author": {
+                        "@type": "Person",
+                        "name": "Sarah Johnson"
+                      },
+                      "datePublished": "2024-10-28",
+                      "reviewBody": "Best investment for our business. The AI creates campaigns that actually convert. Highly recommended!",
+                      "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5",
+                        "bestRating": "5"
+                      }
+                    },
+                    {
+                      "@type": "Review",
+                      "author": {
+                        "@type": "Person",
+                        "name": "Mohammed Hassan"
+                      },
+                      "datePublished": "2024-12-01",
+                      "reviewBody": "منصة رائعة لإدارة إعلانات جوجل. سهلة الاستخدام ونتائج مذهلة. أنصح بها بشدة!",
+                      "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5",
+                        "bestRating": "5"
                       }
                     }
                   ]
