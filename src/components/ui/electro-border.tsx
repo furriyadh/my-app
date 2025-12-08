@@ -1,41 +1,33 @@
 "use client";
 
-/*Ensure you had installed the package
-or read our installation document. (go to lightswind.com/components/Installation)
-npm i lightswind@latest*/
-
 import React, {
     useRef,
     useEffect,
     useId,
+    useState,
     CSSProperties,
     PropsWithChildren,
 } from "react";
 
 /* -----------------------------
-   🔧 Utility: HEX → RGBA (SSR-safe)
+   🔧 Utility: HEX → RGBA (Client-safe)
 ------------------------------ */
-const toRGBA = (hex: string, alpha = 1): string => {
+const hexToRgba = (hex: string, alpha = 1): string => {
     if (!hex) return `rgba(0,0,0,${alpha})`;
-    
-    // Handle hex colors directly without canvas (SSR-safe)
-    let r = 0, g = 0, b = 0;
     
     // Remove # if present
     hex = hex.replace('#', '');
     
+    // Handle shorthand hex
     if (hex.length === 3) {
-        // Short hex (#RGB)
-        r = parseInt(hex[0] + hex[0], 16);
-        g = parseInt(hex[1] + hex[1], 16);
-        b = parseInt(hex[2] + hex[2], 16);
-    } else if (hex.length === 6) {
-        // Full hex (#RRGGBB)
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
-    } else {
-        // Fallback for non-hex colors
+        hex = hex.split('').map(c => c + c).join('');
+    }
+    
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
         return `rgba(0,0,0,${alpha})`;
     }
     
@@ -46,25 +38,14 @@ const toRGBA = (hex: string, alpha = 1): string => {
    ⚙️ Props Definition
 ------------------------------ */
 export interface ElectroBorderProps extends PropsWithChildren {
-    /** Border color */
     borderColor?: string;
-    /** Border thickness in px */
     borderWidth?: number;
-    /** Animation distortion intensity */
     distortion?: number;
-    /** Animation speed multiplier */
     animationSpeed?: number;
-    /** Border radius */
     radius?: string | number;
-
-    /** 🔘 Enable glow effect (default true) */
     glow?: boolean;
-    /** 🔘 Enable aura background (default true) */
     aura?: boolean;
-    /** 🔘 Enable all effects (turn off to show only electric border) */
     effects?: boolean;
-
-    /** Glow blur intensity */
     glowBlur?: number;
     className?: string;
     style?: CSSProperties;
@@ -92,113 +73,110 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
     const strokeLayer = useRef<HTMLDivElement>(null);
     const id = useId().replace(/[:]/g, "");
     const filterId = `electro-filter-${id}`;
+    const [mounted, setMounted] = useState(false);
+
+    // Only render effects after mount to avoid hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     /* -----------------------------
        🔄 Filter Animation Control
     ------------------------------ */
-    const updateFilter = () => {
+    useEffect(() => {
+        if (!mounted) return;
+        
         const svg = svgRef.current;
         const root = rootRef.current;
         if (!svg || !root) return;
 
-        if (strokeLayer.current)
+        if (strokeLayer.current) {
             strokeLayer.current.style.filter = `url(#${filterId})`;
+        }
 
-        const { width, height } = root.getBoundingClientRect();
+        const updateFilter = () => {
+            const { width, height } = root.getBoundingClientRect();
 
-        const dxAnimations = Array.from(
-            svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dx"]')
-        );
-        const dyAnimations = Array.from(
-            svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dy"]')
-        );
+            const dxAnimations = Array.from(
+                svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dx"]')
+            );
+            const dyAnimations = Array.from(
+                svg.querySelectorAll<SVGAnimateElement>('feOffset > animate[attributeName="dy"]')
+            );
 
-        dxAnimations.forEach((a, i) =>
-            a.setAttribute("values", i % 2 === 0 ? `${width};0` : `0;-${width}`)
-        );
-        dyAnimations.forEach((a, i) =>
-            a.setAttribute("values", i % 2 === 0 ? `${height};0` : `0;-${height}`)
-        );
+            dxAnimations.forEach((a, i) =>
+                a.setAttribute("values", i % 2 === 0 ? `${width};0` : `0;-${width}`)
+            );
+            dyAnimations.forEach((a, i) =>
+                a.setAttribute("values", i % 2 === 0 ? `${height};0` : `0;-${height}`)
+            );
 
-        const duration = Math.max(0.01, 6 / animationSpeed);
-        [...dxAnimations, ...dyAnimations].forEach((a) =>
-            a.setAttribute("dur", `${duration}s`)
-        );
+            const duration = Math.max(0.01, 6 / animationSpeed);
+            [...dxAnimations, ...dyAnimations].forEach((a) =>
+                a.setAttribute("dur", `${duration}s`)
+            );
 
-        const disp = svg.querySelector("feDisplacementMap");
-        if (disp) disp.setAttribute("scale", `${35 * distortion}`);
+            const disp = svg.querySelector("feDisplacementMap");
+            if (disp) disp.setAttribute("scale", `${35 * distortion}`);
 
-        requestAnimationFrame(() => {
-            [...dxAnimations, ...dyAnimations].forEach((a: any) => {
-                if (a.beginElement) a.beginElement();
+            requestAnimationFrame(() => {
+                [...dxAnimations, ...dyAnimations].forEach((a: SVGAnimateElement) => {
+                    if (a.beginElement) a.beginElement();
+                });
             });
-        });
-    };
+        };
 
-    // Use useEffect instead of useLayoutEffect for SSR compatibility
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        
         const observer = new ResizeObserver(() => updateFilter());
-        if (rootRef.current) observer.observe(rootRef.current);
+        observer.observe(root);
         updateFilter();
-        return () => observer.disconnect();
-    }, []);
 
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        updateFilter();
-    }, [animationSpeed, distortion]);
+        return () => observer.disconnect();
+    }, [mounted, animationSpeed, distortion, filterId]);
 
     /* -----------------------------
-       🎨 Styles
+       🎨 Styles - Computed only when mounted
     ------------------------------ */
     const radiusStyle: CSSProperties = { borderRadius: radius };
 
     const borderBase: CSSProperties = {
         border: `${borderWidth}px solid ${borderColor}`,
-        ...radiusStyle,
+        borderRadius: radius,
     };
 
-    const glowLayer1: CSSProperties =
-        effects && glow
-            ? {
-                ...radiusStyle,
-                border: `${borderWidth}px solid ${toRGBA(borderColor, 0.7)}`,
-                filter: `blur(${borderWidth * 1.2}px)`,
-                opacity: 0.1,
-            }
-            : {};
+    // Only compute RGBA styles on client to avoid hydration mismatch
+    const glowLayer1: CSSProperties = mounted && effects && glow
+        ? {
+            borderRadius: radius,
+            border: `${borderWidth}px solid ${hexToRgba(borderColor, 0.7)}`,
+            filter: `blur(${borderWidth * 1.2}px)`,
+            opacity: 0.1,
+        }
+        : {};
 
-    const glowLayer2: CSSProperties =
-        effects && glow
-            ? {
-                ...radiusStyle,
-                border: `${borderWidth}px solid ${toRGBA(borderColor, 0.9)}`,
-                filter: `blur(${glowBlur}px)`,
-                opacity: 0.5,
-            }
-            : {};
+    const glowLayer2: CSSProperties = mounted && effects && glow
+        ? {
+            borderRadius: radius,
+            border: `${borderWidth}px solid ${hexToRgba(borderColor, 0.9)}`,
+            filter: `blur(${glowBlur}px)`,
+            opacity: 0.5,
+        }
+        : {};
 
-    const backgroundAura: CSSProperties =
-        effects && aura
-            ? {
-                ...radiusStyle,
-                transform: "scale(1.05)",
-                background: `radial-gradient(circle at 50% 50%, ${toRGBA(
-                    borderColor,
-                    0.5
-                )} 0%, transparent 70%)`,
-                filter: `blur(${glowBlur * 1.2}px)`,
-                opacity: 0.7,
-                zIndex: -1,
-            }
-            : {};
+    const backgroundAura: CSSProperties = mounted && effects && aura
+        ? {
+            borderRadius: radius,
+            transform: "scale(1.05)",
+            background: `radial-gradient(circle at 50% 50%, ${hexToRgba(borderColor, 0.5)} 0%, transparent 70%)`,
+            filter: `blur(${glowBlur * 1.2}px)`,
+            opacity: 0.7,
+            zIndex: -1,
+        }
+        : {};
 
     return (
         <div
             ref={rootRef}
-            className={`relative isolate overflow-visible ${className ?? ""}`}
+            className={`relative isolate ${className ?? ""}`}
             style={style}
         >
             {/* SVG Filter */}
@@ -259,9 +237,15 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
                     className="absolute inset-0"
                     style={borderBase}
                 />
-                {effects && glow && <div className="absolute inset-0" style={glowLayer1} />}
-                {effects && glow && <div className="absolute inset-0" style={glowLayer2} />}
-                {effects && aura && <div className="absolute inset-0" style={backgroundAura} />}
+                {mounted && effects && glow && (
+                    <div className="absolute inset-0" style={glowLayer1} />
+                )}
+                {mounted && effects && glow && (
+                    <div className="absolute inset-0" style={glowLayer2} />
+                )}
+                {mounted && effects && aura && (
+                    <div className="absolute inset-0" style={backgroundAura} />
+                )}
             </div>
 
             {/* Content */}
@@ -273,4 +257,3 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
 };
 
 export default ElectroBorder;
-

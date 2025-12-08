@@ -336,8 +336,8 @@ export default function RootLayout({
                     "ratingValue": "5.0",
                     "bestRating": "5",
                     "worstRating": "1",
-                    "ratingCount": "358472",
-                    "reviewCount": "358472"
+                    "ratingCount": "412856",
+                    "reviewCount": "412856"
                   }
                 },
                 {
@@ -376,8 +376,8 @@ export default function RootLayout({
                     "ratingValue": "5.0",
                     "bestRating": "5",
                     "worstRating": "1",
-                    "ratingCount": "358472",
-                    "reviewCount": "358472"
+                    "ratingCount": "412856",
+                    "reviewCount": "412856"
                   }
                 },
                 {
@@ -514,7 +514,7 @@ export default function RootLayout({
                       "name": "How much does Google Ads management cost?",
                       "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Our plans start at $99/month for the Manage Your Account plan and $199/month for the Work on Our Accounts premium plan. Annual billing saves you 20%."
+                        "text": "Our plans start at $30/month for the Manage Your Account plan and $100/month for the Work on Our Accounts premium plan. Annual billing saves you 20%. Prices are displayed in your local currency."
                       }
                     }
                   ]
@@ -547,8 +547,8 @@ export default function RootLayout({
                     "ratingValue": "5.0",
                     "bestRating": "5",
                     "worstRating": "1",
-                    "ratingCount": "358472",
-                    "reviewCount": "358472"
+                    "ratingCount": "412856",
+                    "reviewCount": "412856"
                   },
                   "review": [
                     {
