@@ -33,6 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta
+          name="google-site-verification"
+          content="afQfdE-n6JYLJ8w-AW3SBPAIuEdf6fZJjh8T2JcQwhA"
+        />
         {/* CRITICAL: Clean up sidebar-open classes immediately to prevent black screen */}
         <script
           suppressHydrationWarning
