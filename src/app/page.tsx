@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,6 +23,7 @@ import { CountUp } from "@/components/lightswind/count-up";
 import AnimatedNotification from "@/components/ui/animated-notification";
 import ModernLoader from "@/components/ui/modern-loader";
 import { MotionGrid } from "@/components/ui/motion-grid";
+import ElectroBorder from "@/components/ui/electro-border";
 import dynamic from "next/dynamic";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -58,6 +59,62 @@ const aiPerformanceData = [
   { month: "May", manual: 51, ai: 115, cost: 75, conversions: 110 },
   { month: "Jun", manual: 52, ai: 145, cost: 60, conversions: 156 },
 ];
+
+// Base pricing in USD (will be converted dynamically)
+const BASE_PRICING_USD = {
+  single: 30,      // $30/month for single account
+  multiple: 100,   // $100/month for multiple accounts
+};
+
+// Currency symbols mapping (English only)
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: "$", EUR: "€", GBP: "£", 
+  SAR: "SAR ", AED: "AED ", EGP: "EGP ",
+  KWD: "KWD ", QAR: "QAR ", BHD: "BHD ", OMR: "OMR ", JOD: "JOD ",
+  MAD: "MAD ", TND: "TND ", DZD: "DZD ",
+  INR: "₹", PKR: "PKR ", AUD: "A$", CAD: "C$",
+  SGD: "S$", MYR: "RM ", TRY: "₺", BRL: "R$", JPY: "¥",
+  CNY: "¥", KRW: "₩", THB: "฿", PHP: "₱", IDR: "Rp ",
+  VND: "₫", ZAR: "R ", NGN: "₦", KES: "KSh ", CHF: "Fr ",
+  SEK: "kr ", NOK: "kr ", DKK: "kr ", PLN: "zł ",
+  MXN: "MX$", HKD: "HK$", TWD: "NT$"
+};
+
+// Country to currency mapping
+const COUNTRY_CURRENCY: Record<string, string> = {
+  // Middle East
+  SA: "SAR", AE: "AED", EG: "EGP", KW: "KWD", QA: "QAR",
+  BH: "BHD", OM: "OMR", JO: "JOD", LB: "USD", IQ: "USD",
+  // North Africa
+  MA: "MAD", TN: "TND", DZ: "DZD",
+  // Europe
+  DE: "EUR", FR: "EUR", ES: "EUR", IT: "EUR", NL: "EUR",
+  BE: "EUR", AT: "EUR", PT: "EUR", IE: "EUR", FI: "EUR",
+  GR: "EUR", SK: "EUR", SI: "EUR", LT: "EUR", LV: "EUR",
+  EE: "EUR", CY: "EUR", MT: "EUR", LU: "EUR",
+  GB: "GBP", CH: "CHF", SE: "SEK", NO: "NOK", DK: "DKK", PL: "PLN",
+  // North America
+  US: "USD", CA: "CAD", MX: "MXN",
+  // Asia Pacific
+  IN: "INR", PK: "PKR", AU: "AUD", SG: "SGD", MY: "MYR",
+  JP: "JPY", KR: "KRW", CN: "CNY", HK: "HKD", TW: "TWD",
+  TH: "THB", PH: "PHP", ID: "IDR", VN: "VND",
+  // Others
+  TR: "TRY", BR: "BRL", ZA: "ZAR", NG: "NGN", KE: "KES",
+  // Default
+  DEFAULT: "USD"
+};
+
+// Dynamic pricing interface
+interface DynamicPricing {
+  currency: string;
+  symbol: string;
+  single: number;
+  multiple: number;
+  singleYearly: number;
+  multipleYearly: number;
+  exchangeRate: number;
+}
 
 // Typewriter Component
 const TypewriterText = ({ texts, className }: { texts: string[], className?: string }) => {
@@ -333,10 +390,95 @@ export default function Home() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [userCountry, setUserCountry] = useState<string>('DEFAULT');
+  const [currentPricing, setCurrentPricing] = useState<DynamicPricing>({
+    currency: 'USD',
+    symbol: '$',
+    single: BASE_PRICING_USD.single,
+    multiple: BASE_PRICING_USD.multiple,
+    singleYearly: Math.round(BASE_PRICING_USD.single * 0.8),
+    multipleYearly: Math.round(BASE_PRICING_USD.multiple * 0.8),
+    exchangeRate: 1
+  });
+  const [isLoadingPricing, setIsLoadingPricing] = useState(true);
   const models = ['GPT-4 Turbo', 'Claude 3 Opus', 'Gemini Pro'];
   
   const addPopupRef = useRef<HTMLDivElement>(null);
   const modelRef = useRef<HTMLDivElement>(null);
+
+  // Fallback exchange rates for currencies not supported by Frankfurter API
+  const FALLBACK_RATES: Record<string, number> = {
+    EGP: 50.85, SAR: 3.75, AED: 3.67, KWD: 0.31, QAR: 3.64,
+    BHD: 0.38, OMR: 0.38, JOD: 0.71, MAD: 10.1, TND: 3.15,
+    DZD: 134.5, PKR: 278.5, IDR: 16100, VND: 25400, NGN: 1650,
+    KES: 129, MXN: 17.2, HKD: 7.82, TWD: 32.5
+  };
+
+  // Fetch user's country and live exchange rates
+  useEffect(() => {
+    const fetchPricingData = async () => {
+      setIsLoadingPricing(true);
+      try {
+        // Step 1: Get user's country from IP
+        const geoResponse = await fetch('https://ipapi.co/json/');
+        const geoData = await geoResponse.json();
+        const countryCode = geoData.country_code || 'DEFAULT';
+        setUserCountry(countryCode);
+        
+        // Step 2: Get currency for this country
+        const targetCurrency = COUNTRY_CURRENCY[countryCode] || 'USD';
+        const symbol = CURRENCY_SYMBOLS[targetCurrency] || '$';
+        
+        // Step 3: Fetch live exchange rates
+        let exchangeRate = 1;
+        if (targetCurrency !== 'USD') {
+          // Check if we have a fallback rate first
+          if (FALLBACK_RATES[targetCurrency]) {
+            exchangeRate = FALLBACK_RATES[targetCurrency];
+            console.log(`💱 Using fallback rate: 1 USD = ${exchangeRate} ${targetCurrency}`);
+          } else {
+            // Try Frankfurter API for supported currencies
+            try {
+              const ratesResponse = await fetch(`https://api.frankfurter.app/latest?from=USD&to=${targetCurrency}`);
+              const ratesData = await ratesResponse.json();
+              if (ratesData.rates?.[targetCurrency]) {
+                exchangeRate = ratesData.rates[targetCurrency];
+                console.log(`💱 Live exchange rate: 1 USD = ${exchangeRate} ${targetCurrency}`);
+              }
+            } catch (rateError) {
+              console.warn('Could not fetch exchange rates, using USD');
+              exchangeRate = 1;
+            }
+          }
+        }
+        
+        // Step 4: Calculate prices in local currency
+        const singlePrice = Math.round(BASE_PRICING_USD.single * exchangeRate);
+        const multiplePrice = Math.round(BASE_PRICING_USD.multiple * exchangeRate);
+        
+        setCurrentPricing({
+          currency: targetCurrency,
+          symbol: symbol,
+          single: singlePrice,
+          multiple: multiplePrice,
+          singleYearly: Math.round(singlePrice * 0.8), // 20% discount
+          multipleYearly: Math.round(multiplePrice * 0.8), // 20% discount
+          exchangeRate: exchangeRate
+        });
+        
+        console.log(`🌍 User country: ${countryCode}, Currency: ${targetCurrency}, Rate: ${exchangeRate}`);
+        console.log(`💰 Prices: Single ${symbol}${singlePrice}, Multiple ${symbol}${multiplePrice}`);
+        
+      } catch (error) {
+        console.log('Could not detect location, using default USD pricing');
+        // Keep default USD pricing
+      } finally {
+        setIsLoadingPricing(false);
+      }
+    };
+    
+    fetchPricingData();
+  }, []);
 
   const typewriterTexts = [
     "Create a campaign for my restaurant in NYC...",
@@ -541,10 +683,7 @@ export default function Home() {
     },
   ];
 
-  const pricing = {
-    monthly: { single: 30, multiple: 100 },
-    yearly: { single: 24, multiple: 80 }
-  };
+  // Pricing is now dynamic based on user's country (currentPricing state)
 
   return (
     <>
@@ -916,7 +1055,7 @@ export default function Home() {
 
                 {/* Rows */}
                 {[
-                  { metric: "Monthly Cost", freelancer: "$800-2K", agency: "$2K-10K", ai: "$30-100", freelancerColor: "text-orange-400", agencyColor: "text-purple-400", aiColor: "text-green-400" },
+                  { metric: "Monthly Cost", freelancer: "$800-2K", agency: "$2K-10K", ai: `${currentPricing.symbol}${currentPricing.single}-${currentPricing.multiple}`, freelancerColor: "text-orange-400", agencyColor: "text-purple-400", aiColor: "text-green-400" },
                   { metric: "Setup Time", freelancer: "3-5 Days", agency: "1-2 Weeks", ai: "30 Seconds", freelancerColor: "text-yellow-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
                   { metric: "Optimization", freelancer: "Weekly", agency: "2-3x/Week", ai: "Real-time 24/7", freelancerColor: "text-yellow-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
                   { metric: "Response Time", freelancer: "24-48 hrs", agency: "Same day", ai: "Instant", freelancerColor: "text-orange-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
@@ -1383,82 +1522,105 @@ export default function Home() {
                   </div>
                   
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                {/* Plan 1 - Manage Client Accounts */}
-                <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-green-500/30 transition-all duration-300">
-                  <div className="mb-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full mb-4">
-                      <Users className="w-4 h-4 text-green-400" />
-                      <span className="text-green-400 text-xs font-medium">Your Accounts</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Manage Client Accounts</h3>
-                    <p className="text-gray-400 text-sm">AI management for your existing Google Ads accounts</p>
-                  </div>
-                  
-                  {/* Pricing Options */}
-                  <div className="space-y-4 mb-6">
-                    <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-300 font-medium">Single Account</span>
-                        <div>
-                          <span className="text-3xl font-bold text-white">${billingCycle === 'monthly' ? pricing.monthly.single : pricing.yearly.single}</span>
-                          <span className="text-gray-400 text-sm">/mo</span>
-                        </div>
+                {/* Plan 1 - Manage Client Accounts with ElectroBorder */}
+                <ElectroBorder
+                  borderColor="#10b981"
+                  borderWidth={2}
+                  radius="1.5rem"
+                  distortion={0.5}
+                  animationSpeed={0.6}
+                  glow={true}
+                  aura={true}
+                  glowBlur={25}
+                >
+                  <div className="bg-gray-900/90 backdrop-blur-xl rounded-3xl p-8 h-full">
+                    <div className="mb-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full mb-4">
+                        <Users className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400 text-xs font-medium">Your Accounts</span>
                       </div>
-                      <p className="text-gray-500 text-xs">Perfect for small businesses</p>
+                      <h3 className="text-2xl font-bold text-white mb-2">Manage Client Accounts</h3>
+                      <p className="text-gray-400 text-sm">AI management for your existing Google Ads accounts</p>
                     </div>
-                    <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-300 font-medium">Multiple Accounts</span>
-                          <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">Best Value</span>
-                        </div>
-                        <div>
-                          <span className="text-3xl font-bold text-green-400">${billingCycle === 'monthly' ? pricing.monthly.multiple : pricing.yearly.multiple}</span>
-                          <span className="text-gray-400 text-sm">/mo</span>
-                        </div>
+                    
+                    {/* Pricing Options - Dynamic based on country */}
+                    <div className="space-y-4 mb-6">
+                      {/* Country indicator */}
+                      <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mb-2">
+                        <Globe className="w-3 h-3" />
+                        <span>Prices in {currentPricing.currency}</span>
                       </div>
-                      <p className="text-gray-500 text-xs">Unlimited accounts for agencies</p>
+                      
+                      <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-300 font-medium">Single Account</span>
+                          <div>
+                            <span className="text-3xl font-bold text-white">{currentPricing.symbol}{billingCycle === 'monthly' ? currentPricing.single : currentPricing.singleYearly}</span>
+                            <span className="text-gray-400 text-sm">/mo</span>
+                          </div>
+                        </div>
+                        <p className="text-gray-500 text-xs">Perfect for small businesses</p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/30">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-300 font-medium">Multiple Accounts</span>
+                            <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">Best Value</span>
+                          </div>
+                          <div>
+                            <span className="text-3xl font-bold text-green-400">{currentPricing.symbol}{billingCycle === 'monthly' ? currentPricing.multiple : currentPricing.multipleYearly}</span>
+                            <span className="text-gray-400 text-sm">/mo</span>
+                          </div>
+                        </div>
+                        <p className="text-gray-500 text-xs">Unlimited accounts for agencies</p>
+                      </div>
+                      {billingCycle === 'yearly' && (
+                        <p className="text-green-400 text-sm text-center">Save 20% with annual billing!</p>
+                      )}
                     </div>
-                    {billingCycle === 'yearly' && (
-                      <p className="text-green-400 text-sm text-center">Save 20% with annual billing!</p>
-                    )}
+
+                    <ul className="space-y-3 mb-8">
+                      {[
+                        "AI-Generated Ad Images & Creatives",
+                        "AI Ad Copy & Headlines Writing",
+                        "Smart Keyword Research & Selection",
+                        "Real-time Campaign Optimization",
+                        "Automated A/B Testing",
+                        "Advanced Analytics Dashboard",
+                        "24/7 AI Monitoring",
+                        "Email & Chat Support"
+                      ].map((feature, index) => (
+                        <li key={index} className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link
+                      href="/authentication/sign-up"
+                      className="block w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-green-500/30"
+                    >
+                      Start Managing
+                    </Link>
                   </div>
+                </ElectroBorder>
 
-                  <ul className="space-y-3 mb-8">
-                    {[
-                      "AI-Generated Ad Images & Creatives",
-                      "AI Ad Copy & Headlines Writing",
-                      "Smart Keyword Research & Selection",
-                      "Real-time Campaign Optimization",
-                      "Automated A/B Testing",
-                      "Advanced Analytics Dashboard",
-                      "24/7 AI Monitoring",
-                      "Email & Chat Support"
-                    ].map((feature, index) => (
-                      <li key={index} className="flex items-center gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href="/authentication/sign-up"
-                    className="block w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-green-500/30"
-                  >
-                    Start Managing
-                  </Link>
-                </div>
-
-                {/* Plan 2 - Work on Our Accounts (Highlighted) */}
-                <div className="relative">
-                  {/* Gradient Border Effect */}
-                  <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 rounded-3xl blur-sm opacity-75 animate-pulse"></div>
-                  
-                  <div className="relative bg-gray-900 rounded-3xl p-8 border border-purple-500/50 h-full">
+                {/* Plan 2 - Work on Our Accounts with ElectroBorder */}
+                <ElectroBorder
+                  borderColor="#a855f7"
+                  borderWidth={2}
+                  radius="1.5rem"
+                  distortion={0.8}
+                  animationSpeed={0.8}
+                  glow={true}
+                  aura={true}
+                  glowBlur={35}
+                >
+                  <div className="bg-gray-900/90 backdrop-blur-xl rounded-3xl p-8 h-full relative">
                     {/* Popular Badge */}
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <div className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white text-sm font-semibold flex items-center gap-2">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                      <div className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white text-sm font-semibold flex items-center gap-2 shadow-lg shadow-purple-500/50">
                         <Star className="w-4 h-4" />
                         Most Popular
                       </div>
@@ -1516,7 +1678,7 @@ export default function Home() {
                       30-day money-back guarantee
                     </p>
                   </div>
-                </div>
+                </ElectroBorder>
               </div>
             </div>
           </section>
