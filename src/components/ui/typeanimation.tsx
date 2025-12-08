@@ -1,68 +1,55 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { motion } from "framer-motion";
+import { TypeAnimation } from "react-type-animation";
+import { cn } from "@/lib/utils";
+import { ComponentProps } from "react";
 
-interface TypeAnimationProps {
-  words: string[];
-  typingSpeed?: 'slow' | 'medium' | 'fast';
-  deletingSpeed?: 'slow' | 'medium' | 'fast';
-  pauseDuration?: number;
+type LibrarySpeedType = ComponentProps<typeof TypeAnimation>["speed"];
+
+type SpeedType = number | "slow" | "normal" | "fast";
+
+interface TypeanimationProps {
+  words?: string[];
   className?: string;
-  style?: React.CSSProperties;
+  typingSpeed?: SpeedType;
+  deletingSpeed?: SpeedType;
+  pauseDuration?: number;
+  gradientFrom?: string;
+  gradientTo?: string;
 }
 
-const TypeAnimation: React.FC<TypeAnimationProps> = ({
-  words,
-  typingSpeed = 'medium',
-  deletingSpeed = 'medium',
-  pauseDuration = 2000,
-  className = '',
-  style = {},
-}) => {
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [currentText, setCurrentText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
+const Typeanimation = ({
+  words = [" existence", " reality", " the Internet"],
+  className,
+  typingSpeed = 50,
+  deletingSpeed = 50,
+  pauseDuration = 1000,
+  gradientFrom = "blue-500",
+  gradientTo = "purple-600",
+}: TypeanimationProps) => {
+  const sequence = words.flatMap((word) => [word, pauseDuration]);
 
-  const speeds = {
-    slow: 100,
-    medium: 50,
-    fast: 30,
-  };
-
-  const typeSpeed = speeds[typingSpeed];
-  const deleteSpeed = speeds[deletingSpeed];
-
-  useEffect(() => {
-    if (words.length === 0) return;
-
-    const currentWord = words[currentWordIndex];
-    let timeout: NodeJS.Timeout;
-
-    if (!isDeleting && currentText === currentWord) {
-      // Pause before deleting
-      timeout = setTimeout(() => setIsDeleting(true), pauseDuration);
-    } else if (isDeleting && currentText === '') {
-      // Move to next word
-      setIsDeleting(false);
-      setCurrentWordIndex((prev) => (prev + 1) % words.length);
-    } else if (isDeleting) {
-      // Delete character
-      timeout = setTimeout(() => {
-        setCurrentText((prev) => prev.slice(0, -1));
-      }, deleteSpeed);
-    } else {
-      // Type character
-      timeout = setTimeout(() => {
-        setCurrentText((prev) => currentWord.slice(0, prev.length + 1));
-      }, typeSpeed);
-    }
-
-    return () => clearTimeout(timeout);
-  }, [currentText, isDeleting, currentWordIndex, words, typeSpeed, deleteSpeed, pauseDuration]);
-
-  return <span className={cn(className)} style={{ color: '#ffffff', ...style }}>{currentText}</span>;
+  return (
+    <motion.span
+      className={cn(
+        `bg-clip-text text-transparent bg-gradient-to-r from-${gradientFrom} to-${gradientTo}`,
+        className
+      )}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+    >
+      <TypeAnimation
+        sequence={sequence}
+        wrapper="span"
+        repeat={Infinity}
+        className=""
+        speed={typingSpeed as LibrarySpeedType}
+        deletionSpeed={deletingSpeed as LibrarySpeedType}
+      />
+    </motion.span>
+  );
 };
 
-export default TypeAnimation;
-
+export default Typeanimation;

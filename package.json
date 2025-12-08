@@ -69,6 +69,7 @@
     "react-simple-wysiwyg": "^3.2.2",
     "react-spring": "^10.0.1",
     "react-svg-worldmap": "^2.0.0-alpha.16",
+    "react-type-animation": "^3.2.0",
     "recharts": "^2.15.4",
     "remixicon": "^4.6.0",
     "simplex-noise": "^4.0.3",

@@ -1,12 +1,5 @@
 "use client";
-
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import TypeAnimation from "@/components/ui/typeanimation";
@@ -16,46 +9,31 @@ interface ModernLoaderProps {
 }
 
 const ModernLoader: React.FC<ModernLoaderProps> = ({
-  words = [
-    "Setting things up...",
-    "Initializing modules...",
-    "Almost ready...",
-  ],
+  words = ["Setting things up...", "Initializing modules...", "Almost ready..."],
 }) => {
   const [currentLine, setCurrentLine] = useState(0);
   const [cursorVisible, setCursorVisible] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const colors = useMemo(
-    () => [
-      "bg-gray-500",
-      "bg-teal-500",
-      "bg-blue-500",
-      "bg-gray-600",
-      "bg-pink-500",
-    ],
-    []
-  );
-
+  () => ["bg-gray-500", "bg-teal-500", "bg-blue-500", "bg-gray-600", "bg-pink-500"],
+  []
+);
   const BUFFER = 20;
   const MAX_LINES = 100;
 
-  const generateLines = useCallback(
-    (count = 20) =>
-      Array.from({ length: count }, (_, idx) => ({
-        id: Date.now() + idx,
-        segments: Array.from(
-          { length: Math.floor(Math.random() * 4) + 1 },
-          () => ({
-            width: `${Math.floor(Math.random() * 80) + 50}px`,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            isCircle: Math.random() > 0.93,
-            indent: Math.random() > 0.7 ? 1 : 0,
-          })
-        ),
-      })),
-    [colors]
-  );
+  const generateLines = useCallback((count = 20) =>
+  Array.from({ length: count }, (_, idx) => ({
+    id: Date.now() + idx,
+    segments: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
+      width: `${Math.floor(Math.random() * 80) + 50}px`,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      isCircle: Math.random() > 0.93,
+      indent: Math.random() > 0.7 ? 1 : 0,
+    })),
+  })),
+  [colors]
+);
 
   const [lines, setLines] = useState(() => generateLines());
 
@@ -77,12 +55,10 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
     const timer = setTimeout(() => {
       setCurrentLine((prev) => {
         const nextLine = prev + 1;
-        if (nextLine >= lines.length - 10)
-          setLines((old) => [...old, ...generateLines(50)]);
+        if (nextLine >= lines.length - 10) setLines((old) => [...old, ...generateLines(50)]);
         return nextLine;
       });
     }, 200);
-
     return () => clearTimeout(timer);
   }, [currentLine, lines.length, generateLines]);
 
@@ -104,7 +80,6 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
         });
       }
     };
-
     const interval = setInterval(cleanup, 5000);
     return () => clearInterval(interval);
   }, [currentLine, lines.length]);
@@ -112,46 +87,48 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
   const visibleLines = lines.slice(visibleStart, visibleEnd);
 
   return (
-    <div className="w-full max-w-xl mx-auto">
-      <div className="relative bg-gray-900 h-[340px] rounded-2xl shadow-xl overflow-hidden border border-gray-700">
-        <div className="px-4 py-2 flex items-center z-10 relative border-b border-gray-700/50 bg-gray-900">
+    <div className="w-full max-w-xl mx-auto p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="relative bg-background h-[380px] rounded-2xl shadow-2xl overflow-hidden border border-border"
+      >
+        <div className="px-4 py-3 flex items-center z-10 relative">
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+            <motion.div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 rounded-full bg-red-500" />
+            <motion.div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 rounded-full bg-yellow-500" />
+            <motion.div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 rounded-full bg-green-500" />
           </div>
-          <div className="flex-1 text-center">
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex-1 text-center"
+          >
             <TypeAnimation
               words={words}
               typingSpeed="slow"
               deletingSpeed="slow"
               pauseDuration={2000}
-              className="text-gray-400 text-xs font-mono"
+              className="text-muted-foreground text-xs font-mono"
             />
-          </div>
+          </motion.div>
         </div>
 
-        <div
-          ref={containerRef}
-          className="absolute inset-x-0 top-[36px] bottom-0 px-4 py-3 font-mono text-xs overflow-hidden"
-        >
-          <div className="space-y-1.5 relative z-10">
+        <div ref={containerRef} className="relative px-5 py-4 font-mono text-sm overflow-y-hidden h-[calc(100%-48px)]">
+          <div className="space-y-2 relative z-10">
             <AnimatePresence mode="sync">
               {visibleLines.map((line, idx) => {
                 const actualIndex = visibleStart + idx;
                 if (actualIndex >= currentLine) return null;
-
                 const extraMargin = (idx + 1) % 4 === 0 ? "mt-2" : "";
                 const paddingClass = line.segments[0]?.indent ? "pl-4" : "";
-
                 return (
                   <React.Fragment key={line.id}>
                     <motion.div
-                      className={cn(
-                        "flex items-center gap-2 h-5",
-                        extraMargin,
-                        paddingClass
-                      )}
+                      className={cn("flex items-center gap-2 h-5", extraMargin, paddingClass)}
                       initial={{ opacity: 0, x: -5 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0 }}
@@ -164,10 +141,7 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ duration: 0.2, delay: 0.05 }}
-                            className={cn(
-                              "w-4 h-4 rounded-full opacity-50",
-                              seg.color
-                            )}
+                            className={cn("w-4 h-4 rounded-full opacity-50", seg.color)}
                           />
                         ) : (
                           <motion.div
@@ -175,10 +149,7 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
                             initial={{ width: 0 }}
                             animate={{ width: seg.width }}
                             transition={{ duration: 0.25, ease: "easeOut" }}
-                            className={cn(
-                              "h-3 rounded-sm opacity-50",
-                              seg.color
-                            )}
+                            className={cn("h-3 rounded-sm opacity-50", seg.color)}
                             style={{ width: seg.width }}
                           />
                         )
@@ -200,15 +171,22 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
             </AnimatePresence>
 
             {currentLine < lines.length && (
-              <div className="flex items-center h-5">
-                <div 
-                  className={`w-0.5 h-3.5 bg-blue-500 transition-opacity duration-100 ${cursorVisible ? 'opacity-100' : 'opacity-0'}`}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center h-5"
+                style={{ paddingLeft: `${lines[currentLine]?.segments[0]?.indent ? 16 : 0}px` }}
+              >
+                <motion.div
+                  animate={{ opacity: cursorVisible ? 1 : 0 }}
+                  transition={{ duration: 0.1 }}
+                  className="w-0.5 h-3.5 bg-blue-500"
                 />
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
