@@ -1,10 +1,11 @@
+"use client";
+
 /*Ensure you had installed the package
 or read our installation document. (go to lightswind.com/components/Installation)
 npm i lightswind@latest*/
 
 import React, {
     useRef,
-    useLayoutEffect,
     useEffect,
     useId,
     CSSProperties,
@@ -12,21 +13,33 @@ import React, {
 } from "react";
 
 /* -----------------------------
-   🔧 Utility: HEX → RGBA
+   🔧 Utility: HEX → RGBA (SSR-safe)
 ------------------------------ */
 const toRGBA = (hex: string, alpha = 1): string => {
     if (!hex) return `rgba(0,0,0,${alpha})`;
-    const ctx = document.createElement("canvas").getContext("2d");
-    if (!ctx) return `rgba(0,0,0,${alpha})`;
-    ctx.fillStyle = hex;
-    const computed = ctx.fillStyle;
-    if (computed.startsWith("rgba")) {
-        return computed.replace(/[\d.]+\)$/g, `${alpha})`);
+    
+    // Handle hex colors directly without canvas (SSR-safe)
+    let r = 0, g = 0, b = 0;
+    
+    // Remove # if present
+    hex = hex.replace('#', '');
+    
+    if (hex.length === 3) {
+        // Short hex (#RGB)
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+    } else if (hex.length === 6) {
+        // Full hex (#RRGGBB)
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+    } else {
+        // Fallback for non-hex colors
+        return `rgba(0,0,0,${alpha})`;
     }
-    if (computed.startsWith("rgb")) {
-        return computed.replace("rgb", "rgba").replace(")", `,${alpha})`);
-    }
-    return computed;
+    
+    return `rgba(${r},${g},${b},${alpha})`;
 };
 
 /* -----------------------------
@@ -122,14 +135,20 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
         });
     };
 
-    useLayoutEffect(() => {
+    // Use useEffect instead of useLayoutEffect for SSR compatibility
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
         const observer = new ResizeObserver(() => updateFilter());
         if (rootRef.current) observer.observe(rootRef.current);
         updateFilter();
         return () => observer.disconnect();
     }, []);
 
-    useEffect(() => updateFilter(), [animationSpeed, distortion]);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        updateFilter();
+    }, [animationSpeed, distortion]);
 
     /* -----------------------------
        🎨 Styles
