@@ -31,7 +31,7 @@ import {
 
 // Dynamic imports to avoid SSR issues
 const LaserFlow = dynamic(() => import("@/components/ui/laser-flow"), { ssr: false });
-const ThreeDCarousel = dynamic(() => import("@/components/ui/3d-carousel"), { ssr: false });
+const CircularGallery = dynamic(() => import("@/components/ui/CircularGallery"), { ssr: false });
 
 // Animation variants - Ultra light for performance
 const fadeInUp = {
@@ -757,14 +757,6 @@ export default function Home() {
                 ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial &nbsp;•&nbsp; ✓ Cancel anytime
               </p>
 
-              {/* Live AI Stats */}
-              <div className="mt-16">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-green-400 text-sm font-medium">Live AI Performance</span>
-                    </div>
-                <LiveAIStats />
-              </div>
             </div>
           </section>
 
@@ -877,7 +869,7 @@ export default function Home() {
           {/* AI vs COMPETITORS COMPARISON SECTION */}
           {/* ============================================ */}
           <section className="py-20 px-4 relative overflow-hidden">
-            <div className="container mx-auto max-w-6xl relative z-10">
+            <div className="container mx-auto max-w-5xl relative z-10">
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
                   <Brain className="w-4 h-4 text-blue-400" />
@@ -887,28 +879,20 @@ export default function Home() {
                   Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">Furriyadh AI</span>?
                 </h2>
                 <p className="text-gray-400 max-w-2xl mx-auto">
-                  See how our AI platform compares to agencies, freelancers, and doing it yourself
+                  See how our AI platform compares to agencies and freelancers
                 </p>
               </div>
 
-              {/* Comparison Table - 4 Columns */}
-              <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden overflow-x-auto">
+              {/* Comparison Table - 3 Columns (without DIY) */}
+              <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
                 {/* Header */}
-                <div className="grid grid-cols-5 gap-2 md:gap-4 p-3 md:p-6 border-b border-white/10 bg-white/5 min-w-[600px]">
+                <div className="grid grid-cols-4 gap-4 p-4 md:p-6 border-b border-white/10 bg-white/5">
                   <div className="text-gray-400 text-xs md:text-sm font-medium">Metric</div>
-                  <div className="text-center">
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                        <Users className="w-4 h-4 text-gray-400" />
-                    </div>
-                      <span className="text-gray-400 text-[10px] md:text-xs">DIY / Manual</span>
-                  </div>
-              </div>
                   <div className="text-center">
                     <div className="flex flex-col items-center gap-1">
                       <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
                         <MessageCircle className="w-4 h-4 text-orange-400" />
-            </div>
+                      </div>
                       <span className="text-orange-400 text-[10px] md:text-xs">Freelancer</span>
                     </div>
                   </div>
@@ -927,110 +911,29 @@ export default function Home() {
                       </div>
                       <span className="text-green-400 text-[10px] md:text-xs font-semibold">Furriyadh AI</span>
                     </div>
+                  </div>
                 </div>
-              </div>
 
-                {/* Rows - Comprehensive comparison */}
+                {/* Rows */}
                 {[
-                  {
-                    metric: "Monthly Cost", 
-                    diy: "$0", 
-                    freelancer: "$800-2K", 
-                    agency: "$2K-10K", 
-                    ai: "$99-299",
-                    diyColor: "text-gray-400",
-                    freelancerColor: "text-orange-400",
-                    agencyColor: "text-purple-400",
-                    aiColor: "text-green-400"
-                  },
-                  {
-                    metric: "Setup Time", 
-                    diy: "Weeks", 
-                    freelancer: "3-5 Days", 
-                    agency: "1-2 Weeks", 
-                    ai: "30 Seconds",
-                    diyColor: "text-red-400",
-                    freelancerColor: "text-yellow-400",
-                    agencyColor: "text-yellow-400",
-                    aiColor: "text-green-400"
-                  },
-                  { 
-                    metric: "Optimization", 
-                    diy: "Manual", 
-                    freelancer: "Weekly", 
-                    agency: "2-3x/Week", 
-                    ai: "Real-time 24/7",
-                    diyColor: "text-red-400",
-                    freelancerColor: "text-yellow-400",
-                    agencyColor: "text-yellow-400",
-                    aiColor: "text-green-400"
-                  },
-                  {
-                    metric: "Response Time", 
-                    diy: "Your time", 
-                    freelancer: "24-48 hrs", 
-                    agency: "Same day", 
-                    ai: "Instant",
-                    diyColor: "text-gray-400",
-                    freelancerColor: "text-orange-400",
-                    agencyColor: "text-yellow-400",
-                    aiColor: "text-green-400"
-                  },
-                  {
-                    metric: "Avg. CTR Boost", 
-                    diy: "Baseline", 
-                    freelancer: "+20-40%", 
-                    agency: "+40-60%", 
-                    ai: "+60-120%",
-                    diyColor: "text-gray-400",
-                    freelancerColor: "text-orange-400",
-                    agencyColor: "text-purple-400",
-                    aiColor: "text-green-400"
-                  },
-                  {
-                    metric: "CPC Reduction", 
-                    diy: "0%", 
-                    freelancer: "10-20%", 
-                    agency: "15-30%", 
-                    ai: "25-45%",
-                    diyColor: "text-gray-400",
-                    freelancerColor: "text-orange-400",
-                    agencyColor: "text-purple-400",
-                    aiColor: "text-green-400"
-                  },
-                  {
-                    metric: "Scalability", 
-                    diy: "Limited", 
-                    freelancer: "Limited", 
-                    agency: "Good", 
-                    ai: "Unlimited",
-                    diyColor: "text-red-400",
-                    freelancerColor: "text-orange-400",
-                    agencyColor: "text-purple-400",
-                    aiColor: "text-green-400"
-                  },
-                  {
-                    metric: "Your Time", 
-                    diy: "40+ hrs/mo", 
-                    freelancer: "5-10 hrs/mo", 
-                    agency: "2-5 hrs/mo", 
-                    ai: "Set & Forget",
-                    diyColor: "text-red-400",
-                    freelancerColor: "text-yellow-400",
-                    agencyColor: "text-yellow-400",
-                    aiColor: "text-green-400"
-                  },
+                  { metric: "Monthly Cost", freelancer: "$800-2K", agency: "$2K-10K", ai: "$99-299", freelancerColor: "text-orange-400", agencyColor: "text-purple-400", aiColor: "text-green-400" },
+                  { metric: "Setup Time", freelancer: "3-5 Days", agency: "1-2 Weeks", ai: "30 Seconds", freelancerColor: "text-yellow-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
+                  { metric: "Optimization", freelancer: "Weekly", agency: "2-3x/Week", ai: "Real-time 24/7", freelancerColor: "text-yellow-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
+                  { metric: "Response Time", freelancer: "24-48 hrs", agency: "Same day", ai: "Instant", freelancerColor: "text-orange-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
+                  { metric: "Avg. CTR Boost", freelancer: "+20-40%", agency: "+40-60%", ai: "+60-120%", freelancerColor: "text-orange-400", agencyColor: "text-purple-400", aiColor: "text-green-400" },
+                  { metric: "CPC Reduction", freelancer: "10-20%", agency: "15-30%", ai: "25-45%", freelancerColor: "text-orange-400", agencyColor: "text-purple-400", aiColor: "text-green-400" },
+                  { metric: "Scalability", freelancer: "Limited", agency: "Good", ai: "Unlimited", freelancerColor: "text-orange-400", agencyColor: "text-purple-400", aiColor: "text-green-400" },
+                  { metric: "Your Time", freelancer: "5-10 hrs/mo", agency: "2-5 hrs/mo", ai: "Set & Forget", freelancerColor: "text-yellow-400", agencyColor: "text-yellow-400", aiColor: "text-green-400" },
                 ].map((row, i) => (
                   <div
                     key={i}
-                    className="grid grid-cols-5 gap-2 md:gap-4 p-3 md:p-5 border-b border-white/5 hover:bg-white/5 transition-colors min-w-[600px]"
+                    className="grid grid-cols-4 gap-4 p-4 md:p-5 border-b border-white/5 hover:bg-white/5 transition-colors"
                   >
-                    <div className="text-white font-medium text-[11px] md:text-sm">{row.metric}</div>
-                    <div className={`text-center text-[10px] md:text-sm ${row.diyColor}`}>{row.diy}</div>
-                    <div className={`text-center text-[10px] md:text-sm ${row.freelancerColor}`}>{row.freelancer}</div>
-                    <div className={`text-center text-[10px] md:text-sm ${row.agencyColor}`}>{row.agency}</div>
-                    <div className={`text-center text-[10px] md:text-sm font-semibold ${row.aiColor}`}>{row.ai}</div>
-            </div>
+                    <div className="text-white font-medium text-xs md:text-sm">{row.metric}</div>
+                    <div className={`text-center text-xs md:text-sm ${row.freelancerColor}`}>{row.freelancer}</div>
+                    <div className={`text-center text-xs md:text-sm ${row.agencyColor}`}>{row.agency}</div>
+                    <div className={`text-center text-xs md:text-sm font-semibold ${row.aiColor}`}>{row.ai}</div>
+                  </div>
                 ))}
 
                 {/* Footer CTA */}
@@ -1038,24 +941,21 @@ export default function Home() {
                   <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="flex -space-x-2">
-                        <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center border-2 border-gray-900">
-                          <Users className="w-3 h-3 text-gray-400" />
-              </div>
                         <div className="w-8 h-8 bg-orange-500/30 rounded-full flex items-center justify-center border-2 border-gray-900">
                           <MessageCircle className="w-3 h-3 text-orange-400" />
-                      </div>
+                        </div>
                         <div className="w-8 h-8 bg-purple-500/30 rounded-full flex items-center justify-center border-2 border-gray-900">
                           <Globe className="w-3 h-3 text-purple-400" />
-                    </div>
+                        </div>
                         <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center border-2 border-gray-900">
                           <CheckCircle className="w-3 h-3 text-white" />
-                  </div>
-              </div>
+                        </div>
+                      </div>
                       <div>
                         <p className="text-white font-semibold text-sm">Best Value for Performance</p>
                         <p className="text-green-400 text-xs">Save up to 90% vs Agencies with better results</p>
-            </div>
-                  </div>
+                      </div>
+                    </div>
                     <Link href="/auth/register">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -1129,15 +1029,13 @@ export default function Home() {
                       </div>
                     </div>
                     
-              {/* Main Content - AI Command Center Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
-                {/* Left Side - AI Code Generator with Modern Loader */}
-                <div className="lg:col-span-5 space-y-6">
+              {/* Main Content - AI Campaign Generator - Centered */}
+              <div className="flex justify-center items-center w-full">
+                <div className="w-full max-w-2xl mx-auto px-4">
                   {/* Modern AI Loader Card */}
-                  <div className="relative h-full flex flex-col justify-center">
+                  <div className="relative">
                     {/* Floating Status Badge */}
-                    <div className="absolute -top-4 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full shadow-lg shadow-green-500/30">
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full shadow-lg shadow-green-500/30">
                       <Brain className="w-4 h-4 text-white" />
                       <span className="text-white text-xs font-bold">AI Campaign Generator</span>
                       <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -1162,367 +1060,49 @@ export default function Home() {
                           "Maximizing ROAS potential...",
                         ]}
                       />
-                      </div>
-                    </div>
-                  </div>
-                  
-                {/* Right Side - 3D Carousel Ad Preview */}
-                <div className="lg:col-span-7">
-                  {/* 3D Carousel Container */}
-                  <div className="relative">
-                    {/* Floating AI Badge */}
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 rounded-full shadow-2xl shadow-green-500/40">
-                      <Brain className="w-5 h-5 text-white" />
-                      <span className="text-white font-bold text-sm">AI Generated Ads • Drag to Explore</span>
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                          </div>
-                        </div>
-
-                    {/* Glow Effect Behind Carousel */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-[500px] h-[500px] bg-gradient-to-r from-green-600/20 via-blue-600/20 to-purple-600/20 rounded-full blur-[100px]" />
-                          </div>
-                          
-                    {/* 3D Carousel */}
-                    <div className="h-[420px] relative z-10">
-                      <ThreeDCarousel 
-                        radius={280}
-                        cardW={200}
-                        cardH={280}
-                        items={[
-                          // Google Pixel Search Ad
-                          <div key="pixel" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 flex-1 flex flex-col">
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
-                              <div className="flex items-center gap-2 mt-2 mb-3">
-                                <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
-                                  <span className="text-blue-500 font-bold text-[10px]">G</span>
-                            </div>
-                                <span className="text-gray-400 text-[10px]">pixel.google</span>
-                          </div>
-                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
-                                Google Pixel Smartphone
-                            </h3>
-                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
-                                Pixel provides productivity, security, and support for your business.
-                              </p>
-                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Find the Right Pixel</p>
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Google Phones Info</p>
-                            </div>
-                          </div>
-                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +340%
-                                </span>
-                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
-                        </div>
-                      </div>
-                          </div>,
-
-                          // Google Play Ad
-                          <div key="play" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 flex-1 flex flex-col">
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
-                              <div className="flex items-center gap-2 mt-2 mb-3">
-                                <div className="w-5 h-5">
-                                  <svg viewBox="0 0 24 24" className="w-full h-full">
-                                    <path fill="#EA4335" d="M3.5 20.5l9.5-9.5-9.5-9.5v19z"/>
-                                    <path fill="#FBBC04" d="M3.5 20.5l12-7-2.5-2.5-9.5 9.5z"/>
-                                    <path fill="#34A853" d="M15.5 13.5l5-3-5-3v6z"/>
-                                    <path fill="#4285F4" d="M3.5 1.5l12 7-2.5 2.5-9.5-9.5z"/>
-                            </svg>
-                          </div>
-                                <span className="text-gray-400 text-[10px]">Google Play</span>
-                        </div>
-                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
-                                Shop popular brands
-                              </h3>
-                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
-                                Google Play is the secure, simple way to shop and send gift cards.
-                              </p>
-                              <div className="flex items-center gap-1.5 mt-3">
-                                <Star className="w-3 h-3 text-yellow-500" fill="#eab308" />
-                                <span className="text-gray-400 text-[10px]">4.8 • 100M+</span>
-                          </div>
-                            </div>
-                            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +280%
-                                </span>
-                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
-                          </div>
-                            </div>
-                          </div>,
-
-                          // Google Cloud Ad
-                          <div key="cloud" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 flex-1 flex flex-col">
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
-                              <div className="flex items-center gap-2 mt-2 mb-3">
-                                <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5">
-                                  <svg viewBox="0 0 24 24" className="w-full h-full">
-                                    <path fill="#4285F4" d="M12 7.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5-4.5-2-4.5-4.5 2-4.5 4.5-4.5z"/>
-                                    <path fill="#EA4335" d="M19.5 12c0-1.4-.4-2.7-1-3.8l-3 3c.3.5.5 1.1.5 1.8h3.5z"/>
-                                  </svg>
-                                </div>
-                                <span className="text-gray-400 text-[10px]">Google Cloud</span>
-                              </div>
-                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
-                                Google Cloud for AI
-                            </h3>
-                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
-                                Code using any language. Deploy as container. $300 free credits.
-                              </p>
-                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Start Free Trial</p>
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">View Pricing</p>
-                            </div>
-                          </div>
-                            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +420%
-                                </span>
-                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
-                        </div>
-                      </div>
-                          </div>,
-
-                          // Shopping Ad with Product Image
-                          <div key="shopping" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="flex-1 flex flex-col">
-                              <div className="h-32 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-3">
-                                <img 
-                                  src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=200&h=150&fit=crop" 
-                                  alt="Pixel Phone" 
-                                  className="w-full h-full object-contain"
-                                />
-                          </div>
-                              <div className="p-4 flex-1">
-                                <h4 className="text-white font-semibold text-[12px] mb-1">
-                                  Pixel 10 Pro Fold
-                                </h4>
-                                <p className="text-green-400 font-bold text-base">$1,799</p>
-                                <p className="text-gray-500 text-[9px] mt-1">Google Store</p>
-                                <div className="flex items-center gap-1 mt-2">
-                                  <div className="flex text-yellow-400 text-[9px]">★★★★★</div>
-                                  <span className="text-gray-500 text-[9px]">(2.8k)</span>
-                        </div>
-                              </div>
-                            </div>
-                            <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +520%
-                                </span>
-                                <span className="text-[9px]">Shopping</span>
-                              </div>
-                            </div>
-                          </div>,
-
-                          // App Ad
-                          <div key="app" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 flex-1 flex flex-col">
-                              <div className="flex items-start gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 via-green-500 to-yellow-500 flex items-center justify-center flex-shrink-0">
-                                  <svg viewBox="0 0 24 24" className="w-6 h-6">
-                                    <path fill="#fff" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                  </svg>
-                          </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-white font-semibold text-[12px]">Google Pay</h4>
-                                  <p className="text-gray-500 text-[9px]">Finance • Google</p>
-                                </div>
-                              </div>
-                              <div className="flex justify-between text-center border-y border-gray-800 py-3 mb-4">
-                                <div className="flex-1">
-                                  <p className="text-gray-500 text-[8px]">Downloads</p>
-                                  <p className="text-white font-semibold text-[10px]">100M+</p>
-                                </div>
-                                <div className="flex-1 border-x border-gray-800">
-                                  <p className="text-gray-500 text-[8px]">Rating</p>
-                                  <p className="text-white font-semibold text-[10px]">4.8★</p>
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-gray-500 text-[8px]">Size</p>
-                                  <p className="text-white font-semibold text-[10px]">45MB</p>
-                                </div>
-                              </div>
-                              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold text-[11px] mt-auto transition-colors">
-                                Install
-                              </button>
-                            </div>
-                            <div className="bg-gradient-to-r from-green-500 to-teal-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +680%
-                                </span>
-                                <span className="text-[9px]">App Campaign</span>
-                              </div>
-                            </div>
-                          </div>,
-
-                          // Video Ad
-                          <div key="video" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-3">
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
-                            </div>
-                            <div className="relative h-36 bg-gradient-to-br from-gray-800 to-gray-900">
-                              <img 
-                                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=120&fit=crop" 
-                                alt="Google Nest" 
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                <div className="w-14 h-14 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
-                                  <Play className="w-6 h-6 text-gray-800 ml-1" fill="currentColor" />
-                          </div>
-                              </div>
-                              <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-[9px] font-medium">
-                                0:30
-                              </div>
-                            </div>
-                            <div className="p-4 flex-1">
-                              <h3 className="text-white font-semibold text-[12px] mb-1">Nest Thermostat</h3>
-                              <p className="text-gray-400 text-[10px] leading-relaxed">
-                                Stay up-to-date on your home energy.
-                              </p>
-                            </div>
-                            <div className="bg-gradient-to-r from-red-500 to-orange-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +320%
-                                </span>
-                                <span className="text-[9px]">Video</span>
-                              </div>
-                            </div>
-                          </div>,
-
-                          // Search Ad
-                          <div key="search" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 flex-1 flex flex-col">
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
-                              <div className="flex items-center gap-2 mt-2 mb-3">
-                                <div className="w-5 h-5">
-                                  <svg viewBox="0 0 24 24" className="w-full h-full">
-                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                                  </svg>
-                                </div>
-                                <span className="text-gray-400 text-[10px]">google.com</span>
-                              </div>
-                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
-                                How Google Search works
-                            </h3>
-                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
-                                Learn how Google provides helpful information.
-                              </p>
-                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Learn Search</p>
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Search Features</p>
-                            </div>
-                          </div>
-                            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +380%
-                                </span>
-                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
-                        </div>
-                      </div>
-                          </div>,
-
-                          // Fi Ad
-                          <div key="fi" className="w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col">
-                            <div className="p-4 flex-1 flex flex-col">
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Sponsored</span>
-                              <div className="flex items-center gap-2 mt-2 mb-3">
-                                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 via-green-400 to-yellow-400 flex items-center justify-center">
-                                  <span className="text-white font-bold text-[8px]">Fi</span>
-                </div>
-                                <span className="text-gray-400 text-[10px]">Google Fi</span>
-              </div>
-                              <h3 className="text-white font-semibold text-[13px] leading-tight mb-2">
-                                Try Fi for free
-                              </h3>
-                              <p className="text-gray-400 text-[10px] leading-relaxed flex-1">
-                                Test Google Fi coverage. $50/mo. Cancel anytime.
-                              </p>
-                              <div className="border-t border-gray-800 pt-3 mt-3 space-y-1.5">
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">Try Fi Free</p>
-                                <p className="text-blue-400 text-[10px] hover:underline cursor-pointer">7 days trial</p>
-                            </div>
-                          </div>
-                            <div className="bg-gradient-to-r from-green-500 to-teal-500 px-4 py-2.5">
-                              <div className="flex items-center justify-between text-white">
-                                <span className="flex items-center gap-1 text-[10px] font-bold">
-                                  <TrendingUp className="w-3 h-3" /> +190%
-                                </span>
-                                <span className="flex items-center gap-1 text-[9px]"><Sparkles className="w-2.5 h-2.5" /> AI</span>
-                        </div>
-                      </div>
-                          </div>,
-                        ]}
-                      />
-              </div>
-
-                    {/* Bottom Stats Bar - Enhanced */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center justify-center gap-3 md:gap-6 px-4 md:px-8 py-3 md:py-4 bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                        <span className="text-white text-xs md:text-sm font-medium">8 Ad Types</span>
-                </div>
-                      <div className="h-4 w-px bg-white/20 hidden md:block"></div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-green-400" />
-                        <span className="text-green-400 text-xs md:text-sm font-bold">+365% Avg</span>
-                      </div>
-                      <div className="h-4 w-px bg-white/20 hidden md:block"></div>
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-yellow-400" />
-                        <span className="text-yellow-400 text-xs md:text-sm font-medium">Real-time AI</span>
-                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-                    
-              {/* Mini Real-time Dashboard */}
-              <div className="mt-16 bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6 max-w-3xl mx-auto">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                      <LayoutDashboard className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-white font-semibold">AI Optimization Status</span>
+
+              {/* Circular Gallery - AI Generated Ads Showcase */}
+              <div className="mt-20 relative">
+                {/* Section Header */}
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full mb-6">
+                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <span className="text-purple-300 font-medium">AI-Generated Ad Gallery</span>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                    <span className="text-green-400 text-xs font-medium">Active</span>
-                  </div>
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Explore All Ad Types
+                  </h3>
+                  <p className="text-gray-400 max-w-2xl mx-auto">
+                    Drag to explore our AI-generated campaigns across Search, Display, Shopping, Video, and more
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: "Active Campaigns", value: "1,247", change: "+12", color: "text-green-400" },
-                    { label: "Budget Saved Today", value: "$4.2K", change: "+8%", color: "text-blue-400" },
-                    { label: "CTR Improvement", value: "+47%", change: "↑", color: "text-purple-400" },
-                    { label: "Conversions/hr", value: "89", change: "+23", color: "text-cyan-400" },
-                  ].map((item, i) => (
-                    <div key={i} className="text-center p-3 bg-white/5 rounded-xl">
-                      <p className={`text-xl md:text-2xl font-bold ${item.color}`}>{item.value}</p>
-                      <p className="text-gray-400 text-xs mt-1">{item.label}</p>
-                      <span className="text-green-400 text-xs">{item.change}</span>
-                    </div>
-                  ))}
+
+                {/* Circular Gallery */}
+                <div style={{ height: '600px', position: 'relative' }}>
+                  <CircularGallery
+                    items={[
+                      { image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&h=600", text: "Search Ads" },
+                      { image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600", text: "Display Ads" },
+                      { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600", text: "Shopping Ads" },
+                      { image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=600", text: "Video Ads" },
+                      { image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=600", text: "App Campaigns" },
+                      { image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600", text: "Performance Max" },
+                      { image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600", text: "Smart Campaigns" },
+                      { image: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=800&h=600", text: "Discovery Ads" },
+                    ]}
+                    bend={3}
+                    textColor="#ffffff"
+                    borderRadius={0.05}
+                    scrollSpeed={2}
+                    scrollEase={0.02}
+                  />
                 </div>
+
               </div>
 
               {/* Bottom CTA - Enhanced */}
