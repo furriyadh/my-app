@@ -296,6 +296,7 @@ export default function RootLayout({
         
       </head>
       <body className={inter.variable} suppressHydrationWarning>
+        <GoogleTagManager gtmId="GTM-M3P8KJ2R" />
         <CampaignProvider>
           <LayoutProvider>
             {children}
