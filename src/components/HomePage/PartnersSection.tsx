@@ -19,81 +19,81 @@ export default function PartnersSection() {
           logos={[
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/google.com"
-                  alt="Google"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                    Google
+                  </span>
+                </div>
               ),
               label: "Google",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/microsoft.com"
-                  alt="Microsoft"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    Microsoft
+                  </span>
+                </div>
               ),
               label: "Microsoft",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/amazon.com"
-                  alt="Amazon"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
+                    Amazon
+                  </span>
+                </div>
               ),
               label: "Amazon",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/meta.com"
-                  alt="Meta"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                    Meta
+                  </span>
+                </div>
               ),
               label: "Meta",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/shopify.com"
-                  alt="Shopify"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
+                    Shopify
+                  </span>
+                </div>
               ),
               label: "Shopify",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/stripe.com"
-                  alt="Stripe"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-600 bg-clip-text text-transparent">
+                    Stripe
+                  </span>
+                </div>
               ),
               label: "Stripe",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/hubspot.com"
-                  alt="HubSpot"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
+                    HubSpot
+                  </span>
+                </div>
               ),
               label: "HubSpot",
             },
             {
               icon: (
-                <img
-                  src="https://logo.clearbit.com/salesforce.com"
-                  alt="Salesforce"
-                  className="w-full h-full object-contain"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
+                    Salesforce
+                  </span>
+                </div>
               ),
               label: "Salesforce",
             },
