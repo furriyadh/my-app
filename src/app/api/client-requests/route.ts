@@ -325,3 +325,73 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// DELETE - مسح جميع حسابات المستخدم الحالي (للـ Reconnect)
+export async function DELETE(request: NextRequest) {
+  try {
+    console.log('🗑️ DELETE /api/client-requests - مسح حسابات المستخدم الحالي...');
+    
+    // الحصول على المستخدم الحالي من HttpOnly cookies
+    const cookieStore = await cookies();
+    const oauthUserInfo = cookieStore.get('oauth_user_info')?.value;
+    
+    if (!oauthUserInfo) {
+      console.log('⚠️ No OAuth user info found');
+      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+    }
+    
+    let userInfo;
+    try {
+      userInfo = JSON.parse(oauthUserInfo);
+    } catch (parseError) {
+      console.error('❌ Failed to parse oauth_user_info cookie:', parseError);
+      return NextResponse.json({ success: false, error: 'Invalid user info' }, { status: 400 });
+    }
+    
+    console.log('👤 Deleting accounts for user:', { id: userInfo.id, email: userInfo.email });
+    
+    if (!userInfo.id && !userInfo.email) {
+      return NextResponse.json({ success: false, error: 'No user identifier' }, { status: 400 });
+    }
+    
+    const supabaseAdmin = getSupabaseAdmin();
+    
+    // مسح جميع الحسابات للمستخدم الحالي
+    let deleteResult;
+    
+    if (userInfo.id) {
+      deleteResult = await supabaseAdmin
+        .from('client_requests')
+        .delete()
+        .eq('user_id', userInfo.id);
+    }
+    
+    // إذا لم نحذف شيء بـ user_id، نحاول بـ user_email
+    if ((!deleteResult || deleteResult.error) && userInfo.email) {
+      console.log('🔍 Trying to delete by user_email...');
+      deleteResult = await supabaseAdmin
+        .from('client_requests')
+        .delete()
+        .eq('user_email', userInfo.email);
+    }
+    
+    if (deleteResult?.error) {
+      console.error('❌ Supabase delete error:', deleteResult.error);
+      return NextResponse.json({
+        success: false,
+        error: 'Database error',
+        details: deleteResult.error.message
+      }, { status: 500 });
+    }
+    
+    console.log('✅ Deleted all accounts for user:', userInfo.email);
+    return NextResponse.json({ success: true, message: 'All accounts deleted' });
+    
+  } catch (error) {
+    console.error('❌ Error in DELETE client requests API:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Internal server error'
+    }, { status: 500 });
+  }
+}

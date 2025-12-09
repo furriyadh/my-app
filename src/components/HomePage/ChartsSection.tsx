@@ -18,31 +18,31 @@ const aiPerformanceData = [
 
 export default function ChartsSection() {
   return (
-    <section className="py-24 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-7xl relative z-10">
+    <section className="py-16 px-4 relative overflow-hidden">
+      <div className="container mx-auto max-w-6xl relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-full mb-8 shadow-lg shadow-green-500/20">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-full mb-6 shadow-lg shadow-green-500/20">
             <div className="relative">
-              <BarChart3 className="w-5 h-5 text-green-400" />
+              <BarChart3 className="w-4 h-4 text-green-400" />
             </div>
-            <span className="text-green-300 font-medium">Live Performance Data</span>
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-green-300 text-sm font-medium">Live Performance Data</span>
+            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
             <span className="text-white">See the </span>
             <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               AI Difference
             </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
             Real results from businesses using our AI platform - updated in real-time
           </p>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
           {[
             { value: "+340%", label: "Avg. CTR Increase", color: "text-green-400", bg: "from-green-600/20" },
             { value: "-65%", label: "CPA Reduction", color: "text-blue-400", bg: "from-blue-600/20" },
@@ -51,26 +51,26 @@ export default function ChartsSection() {
           ].map((stat, i) => (
             <div
               key={i}
-              className={`bg-gradient-to-br ${stat.bg} to-transparent backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-all`}
+              className={`bg-gradient-to-br ${stat.bg} to-transparent backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center hover:border-white/20 transition-all`}
             >
-              <p className={`text-3xl md:text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</p>
-              <p className="text-gray-400 text-sm">{stat.label}</p>
+              <p className={`text-2xl md:text-3xl font-bold ${stat.color} mb-1`}>{stat.value}</p>
+              <p className="text-gray-400 text-xs">{stat.label}</p>
             </div>
           ))}
         </div>
           
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Chart 1 - AI vs Manual Performance */}
-          <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-500">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-purple-400" />
+          <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border border-white/10 hover:border-purple-500/30 transition-all duration-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-purple-600/20 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Performance Comparison</h3>
-                  <p className="text-gray-400 text-xs">AI vs Manual Management</p>
+                  <h3 className="text-base font-bold text-white">Performance Comparison</h3>
+                  <p className="text-gray-400 text-[10px]">AI vs Manual Management</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -84,7 +84,7 @@ export default function ChartsSection() {
                 </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={aiPerformanceData}>
                 <defs>
                   <linearGradient id="colorAi2" x1="0" y1="0" x2="0" y2="1">
@@ -119,22 +119,22 @@ export default function ChartsSection() {
           </div>
 
           {/* Chart 2 - Cost Reduction */}
-          <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-green-900/20 backdrop-blur-xl rounded-3xl p-6 border border-white/10 hover:border-green-500/30 transition-all duration-500">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-600/20 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-green-400" />
+          <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-green-900/20 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border border-white/10 hover:border-green-500/30 transition-all duration-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-green-600/20 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-green-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Cost Optimization</h3>
-                  <p className="text-gray-400 text-xs">CPA Reduction Over Time</p>
+                  <h3 className="text-base font-bold text-white">Cost Optimization</h3>
+                  <p className="text-gray-400 text-[10px]">CPA Reduction Over Time</p>
                 </div>
               </div>
-              <div className="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
-                <span className="text-green-400 text-sm font-bold">-50% CPA</span>
+              <div className="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
+                <span className="text-green-400 text-xs font-bold">-50% CPA</span>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={200}>
               <LineChart data={aiPerformanceData}>
                 <defs>
                   <linearGradient id="colorCost2" x1="0" y1="0" x2="0" y2="1">

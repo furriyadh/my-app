@@ -93,16 +93,16 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative pt-32 pb-20 px-4 overflow-hidden min-h-screen flex items-center">
-      <div className="container mx-auto max-w-6xl relative z-10">
+    <section className="relative pt-24 pb-16 px-4 overflow-hidden min-h-[90vh] flex items-center">
+      <div className="container mx-auto max-w-5xl relative z-10">
         {/* Hero Text */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm shadow-lg shadow-purple-500/10">
             <Sparkles className="w-4 h-4 text-purple-400" />
             <span className="text-sm text-purple-300">Powered by Advanced AI</span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 leading-tight">
             <span className="bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
               AI‑Powered Google Ads Management
             </span>
@@ -112,23 +112,23 @@ export default function HeroSection() {
             </span>
           </h1>
           
-          <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
             AI‑powered platform to create, manage, and optimize profitable Google Ads campaigns worldwide. Reduce CPC, increase conversions, and maximize your ROAS with smart automation.
           </p>
         </div>
 
         {/* AI Chatbot Component with Glow Effect */}
-        <div className="max-w-3xl mx-auto mb-8">
+        <div className="max-w-2xl mx-auto mb-6">
           <div className={`relative ${isTyping ? 'shadow-lg shadow-purple-500/30' : ''}`}>
             {/* Glow Effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 rounded-3xl blur-xl opacity-50"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 rounded-2xl blur-lg opacity-50"></div>
             
-            <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-6 transition-all duration-300 hover:border-purple-500/30">
+            <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl shadow-xl border border-white/10 p-4 sm:p-5 transition-all duration-300 hover:border-purple-500/30">
               {/* Typewriter Placeholder */}
               <div className="relative">
                 <textarea
-                  className="w-full p-4 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-lg leading-relaxed"
-                  rows={3}
+                  className="w-full p-3 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-base leading-relaxed"
+                  rows={2}
                   placeholder=""
                   value={prompt}
                   onChange={(e) => {

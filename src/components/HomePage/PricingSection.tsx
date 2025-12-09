@@ -16,17 +16,17 @@ export default function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   return (
-    <section className="py-20 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-5xl relative z-10">
-        <div className="text-center mb-12">
+    <section className="py-16 px-4 relative overflow-hidden">
+      <div className="container mx-auto max-w-4xl relative z-10">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
             <Crown className="w-4 h-4 text-purple-400" />
             <span className="text-sm text-purple-300">Simple Pricing</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             Choose Your Google Ads Management Plan
           </h2>
-          <p className="text-xl text-gray-400 mb-8">
+          <p className="text-base md:text-lg text-gray-400 mb-6">
             Two simple options to get started with AI‑powered Google Ads management and campaign optimization
           </p>
 
@@ -56,7 +56,7 @@ export default function PricingSection() {
           </div>
         </div>
           
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Plan 1 - Manage Client Accounts */}
           <ElectroBorder
             borderColor="#10b981"
@@ -69,7 +69,7 @@ export default function PricingSection() {
             glowBlur={15}
             className="w-full h-full"
           >
-            <div className="bg-gray-900/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 h-full">
+            <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl p-5 sm:p-6 h-full">
               <div className="mb-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full mb-4">
                   <Users className="w-4 h-4 text-green-400" />

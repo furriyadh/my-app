@@ -37,12 +37,14 @@ const getIntegrationColors = (title: string): { from: string; to: string } => {
   }
 };
 
-const IntegrationCard: React.FC<IntegrationCardProps> = ({
+const IntegrationCard: React.FC<IntegrationCardProps & { onRefresh?: () => void; isRefreshing?: boolean }> = ({
   title,
   description,
   icon,
   status,
-  onConnect
+  onConnect,
+  onRefresh,
+  isRefreshing
 }) => {
   const colors = getIntegrationColors(title);
   const { language, isRTL } = useTranslation();
@@ -93,25 +95,50 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
         {/* Footer Section */}
         <div className="w-full px-1 pb-1">
           {status === 'connected' ? (
-            // Connected state - فقط زر إدارة (بدون زر Disconnect)
-            <InteractiveInput
-              className="bg-green-500 text-white w-full"
-              variant="default"
-              inputSize="small"
-              glow={true}
-              rounded="custom"
-              hideAnimations={false}
-              uppercase={true}
-              textEffect="normal"
-              shimmerColor="#39FF14"
-              shimmerSize="0.1em"
-              shimmerDuration="3s"
-              borderRadius="100px"
-              background="rgba(0, 0, 0, 1)"
-              onClick={() => window.location.href = '/integrations/google-ads'}
-            >
-              {language === 'ar' ? 'إدارة' : 'Manage'}
-            </InteractiveInput>
+            // Connected state - زر إدارة + زر تحديث الأذونات
+            <div className="flex gap-2">
+              <InteractiveInput
+                className="bg-green-500 text-white flex-1"
+                variant="default"
+                inputSize="small"
+                glow={true}
+                rounded="custom"
+                hideAnimations={false}
+                uppercase={true}
+                textEffect="normal"
+                shimmerColor="#39FF14"
+                shimmerSize="0.1em"
+                shimmerDuration="3s"
+                borderRadius="100px"
+                background="rgba(0, 0, 0, 1)"
+                onClick={() => window.location.href = '/integrations/google-ads'}
+              >
+                {language === 'ar' ? 'إدارة' : 'Manage'}
+              </InteractiveInput>
+              {onRefresh && (
+                <InteractiveInput
+                  className={`text-white flex-1 ${isRefreshing ? 'opacity-50 pointer-events-none' : ''}`}
+                  variant="default"
+                  inputSize="small"
+                  glow={true}
+                  rounded="custom"
+                  hideAnimations={false}
+                  uppercase={true}
+                  textEffect="normal"
+                  shimmerColor="#A855F7"
+                  shimmerSize="0.1em"
+                  shimmerDuration="3s"
+                  borderRadius="100px"
+                  background="rgba(0, 0, 0, 1)"
+                  onClick={isRefreshing ? undefined : onRefresh}
+                >
+                  {isRefreshing 
+                    ? (language === 'ar' ? 'جاري...' : 'Loading...') 
+                    : (language === 'ar' ? 'إعادة الاتصال' : 'Reconnect')
+                  }
+                </InteractiveInput>
+              )}
+            </div>
           ) : (
             // Not connected state - single button
             <InteractiveInput
@@ -143,6 +170,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
 const IntegrationsPage: React.FC = () => {
   const router = useRouter();
   const { t, language, isRTL } = useTranslation();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: 'google-ads',
@@ -190,6 +218,49 @@ const IntegrationsPage: React.FC = () => {
       status: 'not-connected'
     }
   ]);
+
+  // Function to refresh permissions and fetch accounts
+  const handleRefreshPermissions = async () => {
+    setIsRefreshing(true);
+    try {
+      console.log('🔄 Refreshing Google Ads permissions and accounts...');
+      
+      // 1. مسح الحسابات القديمة من قاعدة البيانات للمستخدم الحالي
+      try {
+        console.log('🗑️ Deleting old accounts from database...');
+        const deleteResponse = await fetch('/api/client-requests', {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        if (deleteResponse.ok) {
+          console.log('✅ Old accounts deleted from database');
+        } else {
+          console.warn('⚠️ Could not delete old accounts:', await deleteResponse.text());
+        }
+      } catch (e) {
+        console.warn('⚠️ Could not delete old accounts:', e);
+      }
+      
+      // 2. مسح الكاش
+      try {
+        await fetch('/api/user/accounts?clearCache=true', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        console.log('✅ Cache cleared');
+      } catch (e) {
+        console.warn('⚠️ Could not clear cache:', e);
+      }
+      
+      // 3. إعادة توجيه المستخدم لعملية OAuth لتحديث الأذونات وجلب الحسابات
+      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/integrations/google-ads') + '&refresh=true';
+      
+    } catch (error) {
+      console.error('❌ Error refreshing permissions:', error);
+      alert(language === 'ar' ? 'حدث خطأ أثناء تحديث الأذونات' : 'Error refreshing permissions');
+      setIsRefreshing(false);
+    }
+  };
 
   const handleConnect = async (integrationId: string) => {
     console.log(`Connecting to ${integrationId}`);
@@ -328,6 +399,8 @@ const IntegrationsPage: React.FC = () => {
               icon={integration.icon}
               status={integration.status}
               onConnect={() => handleConnect(integration.id)}
+              onRefresh={integration.id === 'google-ads' ? handleRefreshPermissions : undefined}
+              isRefreshing={isRefreshing}
             />
           ))}
         </div>

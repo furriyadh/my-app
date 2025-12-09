@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
-import { getMCCAccessToken, getDeveloperToken, getMCCId } from '@/lib/google-ads-auth';
 
 // إنشاء Supabase client
 const getSupabaseAdmin = () => {
@@ -249,21 +248,18 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   }
 }
 
-// Helper function for Google Ads API calls - يستخدم الـ helper الموحد
+// Helper function for Google Ads API calls
 async function googleAdsQuery(customerId: string, accessToken: string, developerToken: string, query: string) {
   try {
-    const cleanCustomerId = customerId.replace(/-/g, '');
-    const mccId = getMCCId();
-    
     const response = await fetch(
-      `https://googleads.googleapis.com/v21/customers/${cleanCustomerId}/googleAds:search`,
+      `https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`,
       {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'developer-token': developerToken,
           'Content-Type': 'application/json',
-          'login-customer-id': mccId
+          'login-customer-id': (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '')
         },
         body: JSON.stringify({ query })
       }
@@ -271,12 +267,12 @@ async function googleAdsQuery(customerId: string, accessToken: string, developer
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Google Ads API Error for ${cleanCustomerId}:`, response.status, errorText.substring(0, 200));
+      console.error(`❌ Google Ads API Error for ${customerId}:`, response.status, errorText.substring(0, 200));
       return [];
     }
     
     const data = await response.json();
-    console.log(`✅ Query success for ${cleanCustomerId}: ${data.results?.length || 0} results`);
+    console.log(`✅ Query success for ${customerId}: ${data.results?.length || 0} results`);
     return data.results || [];
   } catch (error) {
     console.error(`❌ Exception in googleAdsQuery for ${customerId}:`, error);
@@ -579,16 +575,42 @@ export async function GET(request: NextRequest) {
     }
     
     // ==================== تجديد MCC Token تلقائياً ====================
-    // استخدام الـ helper الموحد - يُجدد تلقائياً ويخزن في cache
-    const accessToken = await getMCCAccessToken();
+    // دائماً نستخدم MCC refresh token للحصول على access token جديد
+    // هذا يضمن أن الـ token دائماً صالح ولا نعتمد على cookies
+    const mccRefreshToken = process.env.MCC_REFRESH_TOKEN || process.env.GOOGLE_ADS_REFRESH_TOKEN;
+    let accessToken: string | null = null;
     
-    if (!accessToken) {
-      console.log('❌ Failed to get MCC access token');
-      return NextResponse.json({ success: false, error: 'Failed to get access token' }, { status: 401 });
+    if (mccRefreshToken) {
+      console.log('🔄 Auto-refreshing MCC access token...');
+      accessToken = await refreshAccessToken(mccRefreshToken);
+      
+      if (accessToken) {
+        console.log('✅ MCC Token refreshed automatically');
+      } else {
+        console.log('⚠️ MCC Token refresh failed, trying user token...');
+      }
     }
     
-    const developerToken = getDeveloperToken();
-    console.log('✅ MCC Token ready for API calls');
+    // Fallback: استخدام user refresh token إذا فشل MCC
+    if (!accessToken && oauthRefreshToken) {
+      console.log('🔄 Falling back to user refresh token...');
+      accessToken = await refreshAccessToken(oauthRefreshToken);
+      
+      if (accessToken) {
+        console.log('✅ User token refreshed successfully');
+      }
+    }
+    
+    // Fallback: استخدام access token من cookies إذا موجود
+    if (!accessToken && oauthAccessToken) {
+      console.log('🔑 Using existing access token from cookies');
+      accessToken = oauthAccessToken;
+    }
+    
+    if (!accessToken) {
+      console.log('❌ No valid access token available');
+      return NextResponse.json({ success: false, error: 'No valid access token' }, { status: 401 });
+    }
     // ==================== نهاية تجديد Token ====================
     
     // جلب الحسابات المرتبطة من Supabase (بالـ user_id أو email)
@@ -614,7 +636,10 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // developerToken تم تعريفه أعلاه من الـ helper
+    // Developer token مطلوب لجميع الاستدعاءات
+    const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN!;
+    
+    console.log('✅ Using access token for API calls');
     
     // Initialize data containers
     const deviceData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number; ctr: number }> = {};

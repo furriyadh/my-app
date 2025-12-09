@@ -127,21 +127,21 @@ function AIConnectingLines() {
 
 export default function HowItWorksSection() {
   return (
-    <section className="py-24 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-7xl relative z-10">
+    <section className="py-16 px-4 relative overflow-hidden">
+      <div className="container mx-auto max-w-6xl relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
             <Sparkles className="w-4 h-4 text-purple-400" />
             <span className="text-sm text-purple-300">Simple 3-Step Process</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
             <span className="text-white">How </span>
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               It Works
             </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto">
             Launch your first AI-powered Google Ads campaign in minutes, not days
           </p>
         </div>
@@ -176,19 +176,19 @@ export default function HowItWorksSection() {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">{step.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{step.title}</h3>
 
                   {/* Description */}
-                  <p className="text-gray-400 mb-6 leading-relaxed text-sm sm:text-base flex-grow">
+                  <p className="text-gray-400 mb-4 leading-relaxed text-xs sm:text-sm flex-grow">
                     {step.description}
                   </p>
 
                   {/* Features */}
-                  <ul className="space-y-2 mt-auto">
+                  <ul className="space-y-1.5 mt-auto">
                     {step.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
+                      <li key={i} className="flex items-center gap-2 text-xs text-gray-300">
                         <CheckCircle 
-                          className="w-4 h-4 flex-shrink-0" 
+                          className="w-3.5 h-3.5 flex-shrink-0" 
                           style={{ color: step.glowColor }} 
                         />
                         <span>{feature}</span>
@@ -206,12 +206,12 @@ export default function HowItWorksSection() {
           <div className="inline-flex flex-col sm:flex-row items-center gap-4">
             <Link
               href="/authentication/sign-up"
-              className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-2xl font-semibold transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
+              className="group px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl font-semibold text-sm transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
             >
               Start Creating in 30 Seconds
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <p className="text-gray-500 text-sm">No credit card required</p>
+            <p className="text-gray-500 text-xs">No credit card required</p>
           </div>
         </div>
       </div>

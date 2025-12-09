@@ -24,19 +24,19 @@ const faqData = [
 
 const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answer: string; isOpen: boolean; onClick: () => void }) => {
   return (
-    <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-colors">
+    <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-colors">
       <button
         onClick={onClick}
-        className="w-full p-6 flex items-center justify-between text-left"
+        className="w-full p-4 sm:p-5 flex items-center justify-between text-left"
       >
-        <span className="text-lg font-semibold text-white pr-4">{question}</span>
-        <ChevronDown className={`w-5 h-5 text-purple-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="text-base font-semibold text-white pr-3">{question}</span>
+        <ChevronDown className={`w-4 h-4 text-purple-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       <div 
         className={`grid transition-all duration-200 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
         <div className="overflow-hidden">
-          <div className="px-6 pb-6 text-gray-400 leading-relaxed">
+          <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-gray-400 text-sm leading-relaxed">
             {answer}
           </div>
         </div>
@@ -49,17 +49,17 @@ export default function FAQSection() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
   return (
-    <section className="py-20 px-4 relative overflow-hidden">
+    <section className="py-16 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-3xl">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full mb-6">
             <HelpCircle className="w-4 h-4 text-blue-400" />
             <span className="text-sm text-blue-300">FAQ</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-400">
+          <p className="text-base md:text-lg text-gray-400">
             Got questions? We've got answers
           </p>
         </div>

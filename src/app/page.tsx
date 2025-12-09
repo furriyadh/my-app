@@ -17,10 +17,6 @@ const HeroSection = dynamic(() => import("@/components/HomePage/HeroSection"), {
   ssr: true,
 });
 
-const PartnersSection = dynamic(() => import("@/components/HomePage/PartnersSection"), {
-  loading: () => <MinimalPlaceholder />,
-  ssr: true,
-});
 
 // Lazy load heavy components - Globe after Partners
 const GlobeSection = dynamic(() => import("@/components/Globe/GlobeSection").then(mod => ({ default: mod.GlobeSection })), {
@@ -298,31 +294,28 @@ export default function Home() {
           {/* 2. Live Demo - Show the Product Immediately! */}
           <LiveDemoSection />
                     
-          {/* 3. Partners - Build Trust */}
-          <PartnersSection />
-                    
-          {/* 4. Globe - Global Reach & Credibility */}
+          {/* 3. Globe - Global Reach & Credibility */}
           <GlobeSection />
 
-          {/* 5. How It Works - 3 Simple Steps */}
+          {/* 4. How It Works - 3 Simple Steps */}
           <HowItWorksSection />
           
-          {/* 6. Comparison - Why Choose Us vs Others */}
+          {/* 5. Comparison - Why Choose Us vs Others */}
           <ComparisonSection />
           
-          {/* 7. Charts - Results & ROI Proof */}
+          {/* 6. Charts - Results & ROI Proof */}
           <ChartsSection />
           
-          {/* 8. Testimonials - Customer Success Stories */}
+          {/* 7. Testimonials - Customer Success Stories */}
           <TestimonialsSection />
           
-          {/* 9. Pricing - Convert Visitors */}
+          {/* 8. Pricing - Convert Visitors */}
           <PricingSection />
 
-          {/* 10. FAQ - Answer Objections */}
+          {/* 9. FAQ - Answer Objections */}
           <FAQSection />
           
-          {/* 11. CTA - Final Push to Register */}
+          {/* 10. CTA - Final Push to Register */}
           <CTASection />
         </main>
 

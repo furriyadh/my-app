@@ -10,48 +10,48 @@ const PRICING = {
 
 export default function ComparisonSection() {
   return (
-    <section className="py-20 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-5xl relative z-10">
-        <div className="text-center mb-12">
+    <section className="py-16 px-4 relative overflow-hidden">
+      <div className="container mx-auto max-w-4xl relative z-10">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
             <Brain className="w-4 h-4 text-blue-400" />
             <span className="text-blue-300 text-sm font-medium">Compare Your Options</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
             Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">Furriyadh AI for Google Ads</span>?
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-gray-400 max-w-xl mx-auto">
             See how our AI‑powered Google Ads management platform compares to agencies and freelancers
           </p>
         </div>
 
         {/* Comparison Table */}
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-4 gap-4 p-4 md:p-6 border-b border-white/10 bg-white/5">
-            <div className="text-gray-400 text-xs md:text-sm font-medium">Metric</div>
+          <div className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/10 bg-white/5">
+            <div className="text-gray-400 text-[10px] md:text-xs font-medium">Metric</div>
             <div className="text-center">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-4 h-4 text-orange-400" />
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-6 h-6 md:w-7 md:h-7 bg-orange-500/20 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-3 h-3 md:w-3.5 md:h-3.5 text-orange-400" />
                 </div>
-                <span className="text-orange-400 text-[10px] md:text-xs">Freelancer</span>
+                <span className="text-orange-400 text-[9px] md:text-[10px]">Freelancer</span>
               </div>
             </div>
             <div className="text-center">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center">
-                  <Globe className="w-4 h-4 text-purple-400" />
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-6 h-6 md:w-7 md:h-7 bg-purple-500/20 rounded-full flex items-center justify-center">
+                  <Globe className="w-3 h-3 md:w-3.5 md:h-3.5 text-purple-400" />
                 </div>
-                <span className="text-purple-400 text-[10px] md:text-xs">Agency</span>
+                <span className="text-purple-400 text-[9px] md:text-[10px]">Agency</span>
               </div>
             </div>
             <div className="text-center">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-6 h-6 md:w-7 md:h-7 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
                 </div>
-                <span className="text-green-400 text-[10px] md:text-xs font-semibold">Furriyadh AI</span>
+                <span className="text-green-400 text-[9px] md:text-[10px] font-semibold">Furriyadh AI</span>
               </div>
             </div>
           </div>
@@ -69,12 +69,12 @@ export default function ComparisonSection() {
           ].map((row, i) => (
             <div
               key={i}
-              className="grid grid-cols-4 gap-4 p-4 md:p-5 border-b border-white/5 hover:bg-white/5 transition-colors"
+              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/5 hover:bg-white/5 transition-colors"
             >
-              <div className="text-white font-medium text-xs md:text-sm">{row.metric}</div>
-              <div className={`text-center text-xs md:text-sm ${row.freelancerColor}`}>{row.freelancer}</div>
-              <div className={`text-center text-xs md:text-sm ${row.agencyColor}`}>{row.agency}</div>
-              <div className={`text-center text-xs md:text-sm font-semibold ${row.aiColor}`}>{row.ai}</div>
+              <div className="text-white font-medium text-[10px] md:text-xs">{row.metric}</div>
+              <div className={`text-center text-[10px] md:text-xs ${row.freelancerColor}`}>{row.freelancer}</div>
+              <div className={`text-center text-[10px] md:text-xs ${row.agencyColor}`}>{row.agency}</div>
+              <div className={`text-center text-[10px] md:text-xs font-semibold ${row.aiColor}`}>{row.ai}</div>
             </div>
           ))}
 

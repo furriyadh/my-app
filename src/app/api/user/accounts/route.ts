@@ -32,28 +32,16 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   }
 }
 
-// دالة للحصول على Access Token - تستخدم MCC Token أولاً ثم User Token كـ fallback
+// دالة للحصول على Access Token - تستخدم User Token أولاً (لجلب حسابات المستخدم الفعلية)
+// ملاحظة: هذا الـ API يجلب حسابات المستخدم الحالي، لذا يجب استخدام User Token وليس MCC Token
 async function getValidAccessToken(userAccessToken?: string, userRefreshToken?: string): Promise<string | null> {
-  // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
-  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-  
-  if (mccRefreshToken) {
-    console.log('🔑 محاولة استخدام MCC Token من البيئة...');
-    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
-    if (mccAccessToken) {
-      console.log('✅ تم الحصول على MCC Access Token بنجاح');
-      return mccAccessToken;
-    }
-    console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
-  }
-  
-  // 2. ثانياً: نحاول User Access Token الموجود
+  // 1. أولاً: نحاول User Access Token الموجود (الأفضل لجلب حسابات المستخدم)
   if (userAccessToken) {
     console.log('🔑 استخدام User Access Token الموجود...');
     return userAccessToken;
   }
   
-  // 3. ثالثاً: نحاول تجديد User OAuth Token
+  // 2. ثانياً: نحاول تجديد User OAuth Token
   if (userRefreshToken) {
     console.log('🔑 محاولة تجديد User OAuth Token...');
     const newUserToken = await refreshAccessToken(userRefreshToken);
@@ -63,7 +51,11 @@ async function getValidAccessToken(userAccessToken?: string, userRefreshToken?: 
     }
   }
   
-  console.error('❌ فشل الحصول على أي Access Token صالح');
+  // 3. ملاحظة: لا نستخدم MCC Token هنا لأننا نريد حسابات المستخدم الفعلية وليس حسابات MCC
+  console.log('⚠️ لا يوجد User Token - المستخدم يحتاج لإعادة تسجيل الدخول');
+  console.log('ℹ️ لجلب حسابات المستخدم الفعلية، يجب استخدام User OAuth Token');
+  
+  console.error('❌ فشل الحصول على User Access Token');
   return null;
 }
 
@@ -227,6 +219,15 @@ async function getRealCustomerAccounts(accessToken: string) {
 export async function GET(request: NextRequest) {
   try {
     console.log('🔄 GET /api/user/accounts - جلب حسابات المستخدم الحالي فقط...');
+    
+    // فحص إذا كان المطلوب مسح الكاش (عند الضغط على Reconnect)
+    const { searchParams } = new URL(request.url);
+    const clearCache = searchParams.get('clearCache') === 'true';
+    
+    if (clearCache) {
+      console.log('🗑️ مسح الكاش بناءً على طلب المستخدم...');
+      accountsCache.clear();
+    }
     
     // الحصول على access token من HttpOnly cookies
     const cookieStore = await cookies();
