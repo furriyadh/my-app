@@ -131,18 +131,16 @@ const Navbar: React.FC = () => {
 
             <button
               type="button"
-              className="inline-block relative leading-none lg:hidden group"
+              className="relative w-[36px] h-[36px] flex flex-col items-center justify-center gap-[6px] p-1 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 lg:hidden group"
               onClick={handleToggle}
               aria-label="Toggle menu"
             >
-              <div className="relative w-[36px] h-[36px] flex flex-col items-center justify-center gap-[6px] p-1 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
-                <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[9px]' : ''}`}></span>
-                <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
-                <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`}></span>
-                
-                {/* AI Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300"></div>
-              </div>
+              <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? 'rotate-45 translate-y-[9px]' : ''}`}></span>
+              <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
+              <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`}></span>
+              
+              {/* AI Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300 pointer-events-none"></div>
             </button>
 
             {/* For Big Devices */}
