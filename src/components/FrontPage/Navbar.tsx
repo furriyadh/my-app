@@ -235,7 +235,7 @@ const Navbar: React.FC = () => {
 
             {/* For Resposive */}
             <div
-              className={`bg-white dark:bg-black mt-[20px] p-[20px] md:p-[30px] w-full lg:hidden ${
+              className={`fixed left-0 right-0 top-[76px] bg-black/95 dark:bg-black/95 backdrop-blur-xl border-t border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl shadow-purple-500/10 max-h-[calc(100vh-76px)] overflow-y-auto z-[999] ${
                 isMenuOpen ? "block" : "hidden"
               }`}
               id="navbar-collapse"
