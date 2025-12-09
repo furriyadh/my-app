@@ -72,7 +72,7 @@ const TestimonialCard = ({
 }) => (
   <div
     className={cn(
-      "group mx-2 flex h-32 w-80 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-gray-700 p-3 transition-all hover:border-blue-400 hover:shadow-[0_0_10px_#60a5fa] dark:hover:border-blue-400 bg-gray-800/70",
+      "group mx-2 flex h-32 w-80 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-purple-500/20 sm:border-gray-700 p-3 transition-all sm:hover:border-purple-500/40 sm:hover:shadow-[0_0_10px_rgba(168,85,247,0.4)] bg-gray-800/70",
       className
     )}
   >

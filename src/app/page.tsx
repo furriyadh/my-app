@@ -296,10 +296,10 @@ export default function Home() {
                     
           {/* 3. Globe - Global Reach & Credibility */}
           <GlobeSection />
-
+                    
           {/* 4. How It Works - 3 Simple Steps */}
           <HowItWorksSection />
-          
+
           {/* 5. Comparison - Why Choose Us vs Others */}
           <ComparisonSection />
           
@@ -314,7 +314,7 @@ export default function Home() {
 
           {/* 9. FAQ - Answer Objections */}
           <FAQSection />
-          
+
           {/* 10. CTA - Final Push to Register */}
           <CTASection />
         </main>
