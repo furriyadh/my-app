@@ -1,5 +1,7 @@
 export { default as HeroSection } from './HeroSection';
 export { default as PartnersSection } from './PartnersSection';
+export { default as HowItWorksSection } from './HowItWorksSection';
+export { default as LiveDemoSection } from './LiveDemoSection';
 export { default as ComparisonSection } from './ComparisonSection';
 export { default as AIShowcaseSection } from './AIShowcaseSection';
 export { default as ChartsSection } from './ChartsSection';

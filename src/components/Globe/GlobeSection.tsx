@@ -427,7 +427,7 @@ export function GlobeSection() {
         <div className="relative w-full h-[350px] sm:h-[400px] md:h-[500px] lg:h-[550px] mt-4 md:mt-0">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-full h-full max-w-[600px] md:max-w-none">
-              <World data={sampleArcs} globeConfig={globeConfig} />
+          <World data={sampleArcs} globeConfig={globeConfig} />
             </div>
           </div>
         </div>

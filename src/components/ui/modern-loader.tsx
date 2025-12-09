@@ -17,23 +17,23 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
 
   const colors = useMemo(
   () => ["bg-gray-500", "bg-teal-500", "bg-blue-500", "bg-gray-600", "bg-pink-500"],
-  []
-);
+    []
+  );
   const BUFFER = 20;
   const MAX_LINES = 100;
 
   const generateLines = useCallback((count = 20) =>
-  Array.from({ length: count }, (_, idx) => ({
-    id: Date.now() + idx,
+      Array.from({ length: count }, (_, idx) => ({
+        id: Date.now() + idx,
     segments: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
-      width: `${Math.floor(Math.random() * 80) + 50}px`,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      isCircle: Math.random() > 0.93,
-      indent: Math.random() > 0.7 ? 1 : 0,
+            width: `${Math.floor(Math.random() * 80) + 50}px`,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            isCircle: Math.random() > 0.93,
+            indent: Math.random() > 0.7 ? 1 : 0,
     })),
-  })),
-  [colors]
-);
+      })),
+    [colors]
+  );
 
   const [lines, setLines] = useState(() => generateLines());
 

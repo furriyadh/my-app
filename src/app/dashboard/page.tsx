@@ -3125,61 +3125,6 @@ const DashboardPage: React.FC = () => {
 
         <div className="section-divider" />
 
-        {/* 🤖 AI Insights - Compact */}
-        <div className="max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12">
-        <div className="flex items-baseline gap-3 mb-3">
-          <span className="text-3xl" style={{ lineHeight: 1, transform: 'translateY(-2px)' }}>🤖</span>
-          <h3 className="text-xl font-bold text-white">{isRTL ? 'رؤى AI' : 'AI Insights'}</h3>
-        </div>
-        <div className="space-y-1.5">
-          {campaigns.length > 0 ? (
-            <>
-              {/* Best Campaign */}
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-green-500/5 border-l-2 border-green-500">
-                <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <p className="text-xs text-gray-300 truncate">
-                  {(() => {
-                    const best = campaigns.reduce((a, b) => (a.roas || 0) > (b.roas || 0) ? a : b, campaigns[0]);
-                    return isRTL 
-                      ? `أفضل: "${best?.name}" - ROAS ${(best?.roas || 0).toFixed(1)}x`
-                      : `Top: "${best?.name}" - ${(best?.roas || 0).toFixed(1)}x ROAS`;
-                  })()}
-                </p>
-              </div>
-              {/* Low CTR */}
-              {campaigns.some(c => (c.ctr || 0) < 2) && (
-                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-yellow-500/5 border-l-2 border-yellow-500">
-                  <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                  <p className="text-xs text-gray-300 truncate">
-                    {isRTL 
-                      ? `${campaigns.filter(c => (c.ctr || 0) < 2).length} حملات CTR < 2%`
-                      : `${campaigns.filter(c => (c.ctr || 0) < 2).length} campaigns CTR < 2%`}
-                  </p>
-                </div>
-              )}
-              {/* Spend */}
-              {metrics.totalSpend > 0 && (
-                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-blue-500/5 border-l-2 border-blue-500">
-                  <DollarSign className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <p className="text-xs text-gray-300 truncate">
-                    {isRTL 
-                      ? `الإنفاق: ${formatCurrency(metrics.totalSpend)} | CPA: ${formatCurrency(metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions) : 0)}`
-                      : `Spend: ${formatCurrency(metrics.totalSpend)} | CPA: ${formatCurrency(metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions) : 0)}`}
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-purple-500/5 border-l-2 border-purple-500">
-              <Zap className="w-4 h-4 text-purple-400 flex-shrink-0" />
-              <p className="text-xs text-gray-400">
-                {isRTL ? 'أنشئ حملتك الأولى لرؤية البيانات' : 'Create your first campaign to see insights'}
-              </p>
-            </div>
-          )}
-            </div>
-            </div>
-            
         <div className="mt-10 sm:mt-12 md:mt-16 lg:mt-20"></div>
 
         {/* Charts Section */}
@@ -3281,8 +3226,8 @@ const DashboardPage: React.FC = () => {
 
                 return (
                   <div className="flex flex-col h-full justify-center items-center px-1 sm:px-2">
-                    <ChartContainer
-                      config={{
+              <ChartContainer
+                config={{
                         ctr: { label: "CTR", color: '#3B82F6' },
                         conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#EC4899' },
                         cost: { label: isRTL ? "التكلفة" : "Cost", color: '#F97316' }
@@ -3372,9 +3317,9 @@ const DashboardPage: React.FC = () => {
                             dot={false}
                             name="CTR"
                           />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
                     
                     {/* Legend مع الإحصائيات الحقيقية */}
                     <div className="flex flex-row items-center justify-center gap-6 sm:gap-10 mt-3 pt-3 border-t border-gray-700/50 px-2">
@@ -3382,7 +3327,7 @@ const DashboardPage: React.FC = () => {
                         <div className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></div>
                           <span className="text-[10px] sm:text-xs text-gray-400">{isRTL ? 'التكلفة' : 'Cost'}</span>
-                        </div>
+                </div>
                         <span className="text-xs sm:text-sm font-bold text-orange-400">{formatCurrency(totalCost)}</span>
                       </div>
                       <div className="flex flex-col items-center gap-1">
@@ -3586,9 +3531,9 @@ const DashboardPage: React.FC = () => {
                             };
                           }}
                         />
-                      </div>
-                    </div>
-
+            </div>
+          </div>
+            
                     {/* Locations List - Real Data with Flags */}
                     <div className="overflow-y-auto custom-scrollbar py-2 flex-shrink-0" style={{ maxHeight: '100px' }}>
                       <ul className="space-y-1.5 sm:space-y-2">
@@ -3635,8 +3580,8 @@ const DashboardPage: React.FC = () => {
                               ) : (
                                 <div className="w-6 h-[18px] rounded bg-gray-700 flex items-center justify-center">
                                   <Globe className="w-3 h-3 text-gray-500" />
-                                </div>
-                              )}
+                    </div>
+              )}
                             </div>
                             
                             {/* Country Name */}
@@ -3644,14 +3589,14 @@ const DashboardPage: React.FC = () => {
                               <span className="block text-[10px] sm:text-xs font-medium text-purple-200 truncate">
                                 {location.country}
                               </span>
-                            </div>
+                  </div>
                             
                             {/* Stats */}
                             <div className="flex items-center gap-2 sm:gap-3 text-[8px] sm:text-[10px]">
                               <div className="flex items-center gap-1">
                                 <MousePointer className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-cyan-400" />
                                 <span className="text-cyan-300 font-medium">{formatLargeNumber(location.clicks)}</span>
-                              </div>
+                  </div>
                               <div className="flex items-center gap-1">
                                 <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-400" />
                                 <span className="text-blue-300 font-medium">{formatLargeNumber(location.impressions)}</span>
@@ -3660,8 +3605,8 @@ const DashboardPage: React.FC = () => {
                                 <div className="flex items-center gap-1">
                                   <Target className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-400" />
                                   <span className="text-green-300 font-medium">{formatLargeNumber(location.conversions)}</span>
-                                </div>
-                              )}
+                    </div>
+              )}
                             </div>
                             
                             {/* Percentage */}
@@ -3671,9 +3616,9 @@ const DashboardPage: React.FC = () => {
                                   className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full"
                                   style={{ width: `${percentage}%` }}
                                 />
-                              </div>
+                  </div>
                               <span className="block text-[8px] sm:text-[9px] text-gray-400 text-center mt-0.5">{percentage}%</span>
-                            </div>
+                </div>
                           </li>
                         );
                       });
@@ -3683,11 +3628,11 @@ const DashboardPage: React.FC = () => {
                     <div className="text-center py-4 text-gray-500 text-xs">
                       <Globe className="w-8 h-8 mx-auto mb-2 opacity-30" />
                       {isRTL ? 'لا توجد بيانات جغرافية' : 'No geographic data available'}
-                    </div>
-                  )}
+            </div>
+          )}
                 </div>
 
-                  </div>
+            </div>
                 </div>
               );
             })()}
@@ -3707,7 +3652,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-                </div>
+              </div>
               ) : effectiveDeviceData.length > 0 ? (
                 (() => {
                   // حساب النسب المئوية للأجهزة
@@ -3755,13 +3700,13 @@ const DashboardPage: React.FC = () => {
                   }));
 
                   return (
-                    <ChartContainer
-                      config={{
+              <ChartContainer
+                config={{
                         clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#10B981' }
-                      }}
+                }}
                       className="h-[250px] sm:h-[280px] md:h-[300px]"
-                    >
-                      <ResponsiveContainer width="100%" height="100%">
+              >
+                <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={finalPieData}
@@ -3808,8 +3753,8 @@ const DashboardPage: React.FC = () => {
                             )}
                           />
                         </PieChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
+                </ResponsiveContainer>
+              </ChartContainer>
                   );
                 })()
               ) : (
@@ -3834,7 +3779,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-500"></div>
-              </div>
+          </div>
               ) : effectiveGenderData.length > 0 ? (
                 <ChartContainer config={{ impressions: { label: "Impressions", color: '#EC4899' } }} className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -3900,7 +3845,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
-                </div>
+              </div>
               ) : effectiveAgeData.length > 0 ? (
               <div className="flex justify-center items-center px-2 sm:px-4">
               <ChartContainer
@@ -3940,8 +3885,8 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
-            
+                </div>
+
             {/* ⚔️ Competition Analysis Chart - Enhanced */}
             <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
@@ -3954,7 +3899,7 @@ const DashboardPage: React.FC = () => {
               {loadingAiInsights ? (
                 <div className="h-[250px] flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
-                </div>
+              </div>
               ) : effectiveCompetitionData.length > 0 ? (
               <div className="flex justify-center items-center px-1 sm:px-2">
               <ChartContainer
@@ -4035,9 +3980,9 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               )}
-                </div>
+            </div>
 
-              </div>
+          </div>
 
           {/* Row 5: Weekly Performance & Keyword Performance */}
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
@@ -4065,7 +4010,7 @@ const DashboardPage: React.FC = () => {
                   className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart 
+                  <BarChart 
                       data={(() => {
                         // إنشاء بيانات أسبوعية من performanceData أو من metrics
                         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -4178,7 +4123,7 @@ const DashboardPage: React.FC = () => {
                         radius={[4, 4, 0, 0]}
                         name={isRTL ? "التحويلات" : "Conversions"}
                       />
-                    </BarChart>
+                  </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
               </div>
@@ -4784,13 +4729,13 @@ const DashboardPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-center">
-                      <button
+                        <button
                         onClick={() => router.push(`/campaign/edit-ads?campaignId=${campaign.id}&customerId=${campaign.customerId || ''}`)}
                         className="p-2 hover:bg-purple-900/50 rounded-lg transition-colors border border-purple-500/30 hover:border-purple-500/60"
                         title={isRTL ? 'تعديل الحملة' : 'Edit Campaign'}
                       >
                         <Edit className="w-4 h-4 text-purple-400" />
-                      </button>
+                        </button>
                     </td>
                   </tr>
                 ))}

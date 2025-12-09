@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
+import { getMCCAccessToken, getDeveloperToken, getMCCId } from '@/lib/google-ads-auth';
 
 // إنشاء Supabase client
 const getSupabaseAdmin = () => {
@@ -248,18 +249,21 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   }
 }
 
-// Helper function for Google Ads API calls
+// Helper function for Google Ads API calls - يستخدم الـ helper الموحد
 async function googleAdsQuery(customerId: string, accessToken: string, developerToken: string, query: string) {
   try {
+    const cleanCustomerId = customerId.replace(/-/g, '');
+    const mccId = getMCCId();
+    
     const response = await fetch(
-      `https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`,
+      `https://googleads.googleapis.com/v21/customers/${cleanCustomerId}/googleAds:search`,
       {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'developer-token': developerToken,
           'Content-Type': 'application/json',
-          'login-customer-id': (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '')
+          'login-customer-id': mccId
         },
         body: JSON.stringify({ query })
       }
@@ -267,12 +271,12 @@ async function googleAdsQuery(customerId: string, accessToken: string, developer
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Google Ads API Error for ${customerId}:`, response.status, errorText.substring(0, 200));
+      console.error(`❌ Google Ads API Error for ${cleanCustomerId}:`, response.status, errorText.substring(0, 200));
       return [];
     }
     
     const data = await response.json();
-    console.log(`✅ Query success for ${customerId}: ${data.results?.length || 0} results`);
+    console.log(`✅ Query success for ${cleanCustomerId}: ${data.results?.length || 0} results`);
     return data.results || [];
   } catch (error) {
     console.error(`❌ Exception in googleAdsQuery for ${customerId}:`, error);
@@ -569,10 +573,23 @@ export async function GET(request: NextRequest) {
     
     console.log('👤 AI Insights - User:', { userId, userEmail });
     
-    if (!userId || !oauthAccessToken) {
-      console.log('❌ Not authenticated - missing userId or access token');
+    if (!userId) {
+      console.log('❌ Not authenticated - missing userId');
       return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
     }
+    
+    // ==================== تجديد MCC Token تلقائياً ====================
+    // استخدام الـ helper الموحد - يُجدد تلقائياً ويخزن في cache
+    const accessToken = await getMCCAccessToken();
+    
+    if (!accessToken) {
+      console.log('❌ Failed to get MCC access token');
+      return NextResponse.json({ success: false, error: 'Failed to get access token' }, { status: 401 });
+    }
+    
+    const developerToken = getDeveloperToken();
+    console.log('✅ MCC Token ready for API calls');
+    // ==================== نهاية تجديد Token ====================
     
     // جلب الحسابات المرتبطة من Supabase (بالـ user_id أو email)
     const connectedAccounts = await getConnectedAccounts(userId, userEmail);
@@ -597,54 +614,7 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // ==================== استخدام MCC credentials بدلاً من user OAuth ====================
-    // المستخدم قد يملك OAuth token لكن بدون صلاحيات MCC
-    // لذلك نستخدم MCC refresh token من environment variables للوصول للبيانات
-    const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-    const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN!;
-    
-    let accessToken: string | null = null;
-    
-    // أولاً: نحاول استخدام MCC refresh token (الأفضل للوصول لجميع الحسابات)
-    if (mccRefreshToken) {
-      console.log('🔑 Using MCC refresh token for API access...');
-      const newToken = await refreshAccessToken(mccRefreshToken);
-      if (newToken) {
-        accessToken = newToken;
-        console.log('✅ MCC Token refreshed successfully');
-      }
-    }
-    
-    // إذا فشل MCC token، نحاول user OAuth token كـ fallback
-    if (!accessToken && oauthRefreshToken) {
-      console.log('🔑 Falling back to user OAuth token...');
-      const newToken = await refreshAccessToken(oauthRefreshToken);
-      if (newToken) {
-        accessToken = newToken;
-        console.log('✅ User OAuth Token refreshed successfully');
-      }
-    }
-    
-    // إذا لم نحصل على أي token
-    if (!accessToken) {
-      console.error('❌ No valid access token available');
-      return NextResponse.json({
-        success: false,
-        error: 'No valid access token',
-        device_performance: [],
-        audience_data: { age: [], gender: [] },
-        competition_data: { impression_share: [], keywords: [] },
-        location_data: [],
-        hourly_data: [],
-        optimization_score: null,
-        search_terms: [],
-        ad_strength: { distribution: { excellent: 0, good: 0, average: 0, poor: 0 }, details: [] },
-        landing_pages: [],
-        budget_recommendations: [],
-        auction_insights: []
-      });
-    }
-    // ==================== نهاية إعداد التوكن ====================
+    // developerToken تم تعريفه أعلاه من الـ helper
     
     // Initialize data containers
     const deviceData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number; ctr: number }> = {};

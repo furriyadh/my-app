@@ -22,14 +22,26 @@ const PartnersSection = dynamic(() => import("@/components/HomePage/PartnersSect
   ssr: true,
 });
 
-const ComparisonSection = dynamic(() => import("@/components/HomePage/ComparisonSection"), {
+// Lazy load heavy components - Globe after Partners
+const GlobeSection = dynamic(() => import("@/components/Globe/GlobeSection").then(mod => ({ default: mod.GlobeSection })), {
+  loading: () => <MinimalPlaceholder />,
+  ssr: false,
+});
+
+const HowItWorksSection = dynamic(() => import("@/components/HomePage/HowItWorksSection"), {
   loading: () => <MinimalPlaceholder />,
   ssr: true,
 });
 
-const AIShowcaseSection = dynamic(() => import("@/components/HomePage/AIShowcaseSection"), {
+const LiveDemoSection = dynamic(() => import("@/components/HomePage/LiveDemoSection"), {
   loading: () => <MinimalPlaceholder />,
-  ssr: false, // Heavy component
+  ssr: true,
+});
+
+
+const ComparisonSection = dynamic(() => import("@/components/HomePage/ComparisonSection"), {
+  loading: () => <MinimalPlaceholder />,
+  ssr: true,
 });
 
 const ChartsSection = dynamic(() => import("@/components/HomePage/ChartsSection"), {
@@ -56,13 +68,7 @@ const CTASection = dynamic(() => import("@/components/HomePage/CTASection"), {
   loading: () => <MinimalPlaceholder />,
   ssr: true,
 });
-
-// Lazy load heavy components
-const GlobeSection = dynamic(() => import("@/components/Globe/GlobeSection").then(mod => ({ default: mod.GlobeSection })), {
-  loading: () => <MinimalPlaceholder />,
-  ssr: false,
-});
-
+  
 const AnimatedNotification = dynamic(() => import("@/components/ui/animated-notification"), {
   ssr: false,
 });
@@ -263,7 +269,7 @@ export default function Home() {
     <>
       {/* Progress Bar */}
       <ScrollProgressBar />
-
+                    
       {/* Back to Top Button */}
       <BackToTopButton />
       
@@ -279,21 +285,44 @@ export default function Home() {
             gridSpacing="20px"
             className="w-full h-full"
           />
-              </div>
-
+                  </div>
+                  
         <Navbar />
         
         <main className="min-h-screen bg-transparent text-white relative z-10">
-          {/* All sections render immediately - no Suspense blocking for smooth scroll */}
+          {/* Optimized Section Order for Maximum Conversion */}
+          
+          {/* 1. Hero - First Impression + AI Chat */}
           <HeroSection />
+          
+          {/* 2. Live Demo - Show the Product Immediately! */}
+          <LiveDemoSection />
+                    
+          {/* 3. Partners - Build Trust */}
           <PartnersSection />
-          <ComparisonSection />
-          <AIShowcaseSection />
-          <ChartsSection />
-          <TestimonialsSection />
-          <PricingSection />
+                    
+          {/* 4. Globe - Global Reach & Credibility */}
           <GlobeSection />
+
+          {/* 5. How It Works - 3 Simple Steps */}
+          <HowItWorksSection />
+          
+          {/* 6. Comparison - Why Choose Us vs Others */}
+          <ComparisonSection />
+          
+          {/* 7. Charts - Results & ROI Proof */}
+          <ChartsSection />
+          
+          {/* 8. Testimonials - Customer Success Stories */}
+          <TestimonialsSection />
+          
+          {/* 9. Pricing - Convert Visitors */}
+          <PricingSection />
+
+          {/* 10. FAQ - Answer Objections */}
           <FAQSection />
+          
+          {/* 11. CTA - Final Push to Register */}
           <CTASection />
         </main>
 
