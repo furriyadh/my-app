@@ -252,7 +252,8 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
         budget: budget.amountMicros ? budget.amountMicros / 1000000 : 0,
         impressions: parseInt(metrics.impressions) || 0,
         clicks: parseInt(metrics.clicks) || 0,
-        ctr: parseFloat(metrics.ctr) || 0,
+        // Google Ads API returns CTR as decimal (0.1429 = 14.29%), we convert to percentage
+        ctr: metrics.ctr ? parseFloat(metrics.ctr) * 100 : 0,
         conversions: parseFloat(metrics.conversions) || 0,
         conversionsValue: parseFloat(metrics.conversionsValue) || 0,
         cost: metrics.costMicros ? metrics.costMicros / 1000000 : 0,

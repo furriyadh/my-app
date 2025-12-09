@@ -1173,7 +1173,8 @@ const DashboardPage: React.FC = () => {
     const totalRevenue = metrics.conversionsValue || 0;
     const totalSpend = metrics.totalSpend || 0;
     const roas = totalSpend > 0 ? (totalRevenue / totalSpend).toFixed(2) : '0';
-    const ctr = metrics.ctr || 0;
+    // CTR comes as percentage string from API (e.g., "14.29")
+    const ctr = typeof metrics.ctr === 'string' ? parseFloat(metrics.ctr) : (metrics.ctr || 0);
     const clicks = metrics.clicks || 0;
     const conversions = metrics.conversions || 0;
     
@@ -1192,7 +1193,7 @@ const DashboardPage: React.FC = () => {
       spendChange: hasData ? (metrics.spendChange || 0) : 0,
       roas: roas,
       roasChange: hasData ? (metrics.roasChange || 0) : 0,
-      ctr: ctr,
+      ctr: Number(ctr).toFixed(2),
       ctrChange: hasData ? (metrics.ctrChange || 0) : 0,
       cpc: cpc,
       cpcChange: hasData ? (metrics.cpcChange || 0) : 0,

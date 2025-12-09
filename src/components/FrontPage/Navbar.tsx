@@ -11,6 +11,7 @@ const Navbar: React.FC = () => {
   const { t, language, setLanguage } = useTranslation();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [isMobileLanguageOpen, setMobileLanguageOpen] = useState(false);
   const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const handleToggle = () => setMenuOpen(!isMenuOpen);
 
@@ -130,12 +131,18 @@ const Navbar: React.FC = () => {
 
             <button
               type="button"
-              className="inline-block relative leading-none lg:hidden"
+              className="inline-block relative leading-none lg:hidden group"
               onClick={handleToggle}
+              aria-label="Toggle menu"
             >
-              <span className="h-[3px] w-[30px] my-[5px] block bg-black dark:bg-white"></span>
-              <span className="h-[3px] w-[30px] my-[5px] block bg-black dark:bg-white"></span>
-              <span className="h-[3px] w-[30px] my-[5px] block bg-black dark:bg-white"></span>
+              <div className="relative w-[36px] h-[36px] flex flex-col items-center justify-center gap-[6px] p-1 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
+                <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[9px]' : ''}`}></span>
+                <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
+                <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`}></span>
+                
+                {/* AI Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300"></div>
+              </div>
             </button>
 
             {/* For Big Devices */}
@@ -252,32 +259,50 @@ const Navbar: React.FC = () => {
                   </li>
                 ))}
                 
-                {/* Languages for Mobile */}
+                {/* Languages for Mobile - Collapsible */}
                 <li className="my-[14px] md:my-[16px]">
-                  <div className="font-semibold text-gray-900 dark:text-white mb-3 text-base">
-                    {t.common.languages}
-                  </div>
-                  <div className="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar">
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => switchLanguage(lang.code)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${
-                          language === lang.code ? 'bg-blue-50 dark:bg-blue-900/30' : ''
-                        }`}
-                      >
-                        <Image 
-                          src={lang.flag} 
-                          alt={lang.name} 
-                          width={24} 
-                          height={24} 
-                          className="rounded-sm"
-                        />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {lang.name}
-                        </span>
-                      </button>
-                    ))}
+                  <button
+                    onClick={() => setMobileLanguageOpen(!isMobileLanguageOpen)}
+                    className="w-full flex items-center justify-between font-semibold text-gray-900 dark:text-white text-base py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="material-symbols-outlined !text-[20px] text-purple-600">
+                        language
+                      </i>
+                      <span>{t.common.languages}</span>
+                    </div>
+                    <i className={`material-symbols-outlined !text-[20px] transition-transform duration-300 ${isMobileLanguageOpen ? 'rotate-180' : ''}`}>
+                      expand_more
+                    </i>
+                  </button>
+                  
+                  {/* Dropdown Content */}
+                  <div className={`overflow-hidden transition-all duration-300 ${isMobileLanguageOpen ? 'max-h-[600px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+                    <div className="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar pl-2">
+                      {SUPPORTED_LANGUAGES.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            switchLanguage(lang.code);
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${
+                            language === lang.code ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-600' : ''
+                          }`}
+                        >
+                          <Image 
+                            src={lang.flag} 
+                            alt={lang.name} 
+                            width={24} 
+                            height={24} 
+                            className="rounded-sm"
+                          />
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {lang.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </li>
               </ul>
