@@ -189,7 +189,13 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
         <div
             ref={rootRef}
             className={`relative isolate ${className ?? ""}`}
-            style={style}
+            style={{ 
+                ...style,
+                willChange: 'transform, opacity',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                perspective: '1000px'
+            }}
         >
             {/* SVG Filter */}
             <svg
@@ -202,8 +208,8 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
                     <filter id={filterId} x="-200%" y="-200%" width="500%" height="500%">
                         <feTurbulence
                             type="turbulence"
-                            baseFrequency="0.02"
-                            numOctaves="8"
+                            baseFrequency="0.015"
+                            numOctaves="4"
                             result="turb1"
                             seed="1"
                         />
@@ -217,8 +223,8 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
                         </feOffset>
                         <feTurbulence
                             type="turbulence"
-                            baseFrequency="0.03"
-                            numOctaves="8"
+                            baseFrequency="0.02"
+                            numOctaves="4"
                             result="turb2"
                             seed="2"
                         />
@@ -243,11 +249,11 @@ export const ElectroBorder: React.FC<ElectroBorderProps> = ({
             </svg>
 
             {/* Border + Effects */}
-            <div className="absolute inset-0 pointer-events-none" style={radiusStyle}>
+            <div className="absolute inset-0 pointer-events-none" style={{ ...radiusStyle, willChange: 'filter' }}>
                 <div
                     ref={strokeLayer}
                     className="absolute inset-0 -left-2 -top-3"
-                    style={borderBase}
+                    style={{ ...borderBase, willChange: 'filter', transform: 'translateZ(0)' }}
                 />
                 {effects && glow && <div className="absolute inset-0" style={glowLayer1} />}
                 {effects && glow && <div className="absolute inset-0" style={glowLayer2} />}

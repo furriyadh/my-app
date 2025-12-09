@@ -62,14 +62,14 @@ export default function PricingSection() {
             borderColor="#10b981"
             borderWidth={2}
             radius="1.5rem"
-            distortion={0.3}
-            animationSpeed={0.5}
+            distortion={0.2}
+            animationSpeed={0.8}
             glow={true}
             aura={false}
-            glowBlur={15}
+            glowBlur={10}
             className="w-full h-full"
           >
-            <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl p-5 sm:p-6 h-full border-2 border-green-500/30 sm:border-0">
+            <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl p-5 sm:p-6 h-full border border-green-500/20 sm:border-0" style={{ willChange: 'transform' }}>
               <div className="mb-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full mb-4">
                   <Users className="w-4 h-4 text-green-400" />
@@ -141,14 +141,14 @@ export default function PricingSection() {
             borderColor="#a855f7"
             borderWidth={2}
             radius="1.5rem"
-            distortion={0.4}
-            animationSpeed={0.6}
+            distortion={0.2}
+            animationSpeed={0.8}
             glow={true}
             aura={false}
-            glowBlur={20}
+            glowBlur={10}
             className="w-full h-full"
           >
-            <div className="bg-gray-900/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 h-full relative border-2 border-purple-500/30 sm:border-0">
+            <div className="bg-gray-900/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 h-full border border-purple-500/20 sm:border-0" style={{ willChange: 'transform' }}>
               {/* Popular Badge */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
                 <div className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white text-sm font-semibold flex items-center gap-2 shadow-lg shadow-purple-500/50">

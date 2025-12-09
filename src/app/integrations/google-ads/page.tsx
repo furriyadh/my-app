@@ -2074,8 +2074,48 @@ const GoogleAdsContent: React.FC = () => {
         console.error('❌ Failed to create link request:', errorResult);
         const errorStr = JSON.stringify(errorResult).toLowerCase();
         
-        // 🔴 معالجة خطأ 500 أو ALREADY_MANAGED (الحساب معلق)
-        if (linkResponse.status === 500 || errorStr.includes('already_managed') || errorStr.includes('already managed')) {
+        // 🟢 معالجة ALREADY_MANAGED (الحساب مرتبط بالفعل بالـ MCC)
+        // يتضمن جميع الحالات الممكنة من Google Ads API
+        const isAlreadyLinked = 
+          errorStr.includes('already_managed') || 
+          errorStr.includes('already managed') || 
+          errorStr.includes('already_linked') ||
+          errorStr.includes('already linked') ||
+          errorStr.includes('manager_link_already_exists') ||
+          errorStr.includes('link already exists') ||
+          errorStr.includes('customer_already_managed') ||
+          errorStr.includes('customer already managed') ||
+          errorStr.includes('account is already') ||
+          errorStr.includes('مرتبط بالفعل') ||
+          errorStr.includes('cannot invite') ||
+          errorStr.includes('pending invitation') ||
+          (linkResponse.status === 500 && !errorStr.includes('suspended') && !errorStr.includes('policy'));
+          
+        if (isAlreadyLinked) {
+          console.log('🟢 الحساب مرتبط بالفعل أو في انتظار الموافقة - إظهار إشعار نجاح');
+          setErrorNotification({
+            show: true,
+            type: 'ALREADY_LINKED',
+            customerId: customerId,
+            message: 'This account is already linked to the MCC or has a pending invitation. Click "Refresh Statuses" to update the status.',
+            messageEn: 'هذا الحساب مرتبط بالفعل أو لديه دعوة معلقة. اضغط على "تحديث الحالات" لتحديث الحالة.'
+          });
+          
+          // تحديث حالة الحساب في الواجهة إلى مرتبط
+          setAccounts(prevAccounts => 
+            prevAccounts.map(account => 
+              account.customerId === customerId 
+                ? { ...account, displayStatus: 'Linked', isDisabled: false }
+                : account
+            )
+          );
+          
+          setTimeout(() => setErrorNotification(null), 15000);
+          return;
+        }
+        
+        // 🔴 معالجة خطأ 500 أو حساب معلق فعلياً
+        if (linkResponse.status === 500 && (errorStr.includes('suspended') || errorStr.includes('policy_violation') || errorStr.includes('policy violation'))) {
           console.log('🔴 الحساب معلق - إظهار إشعار');
           setErrorNotification({
             show: true,
@@ -2328,66 +2368,138 @@ const GoogleAdsContent: React.FC = () => {
               </div>
             )}
             
-            {/* 🔴 إشعار الخطأ (الحساب المعلق) - بنفس تصميم النافذة الخضراء */}
+            {/* 🔔 إشعار ذكي - يتغير حسب نوع الخطأ */}
             {errorNotification?.show && (
               <div className="mt-5 w-full max-w-sm mx-auto">
-                <div 
-                  className="relative rounded-[20px] border border-red-500/30 bg-[#100808] p-5 overflow-hidden transition-all duration-300 hover:border-red-500/50"
-                  style={{
-                    boxShadow: '0 0 30px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.1)'
-                  }}
-                >
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-red-500/5 via-transparent to-orange-500/5 pointer-events-none"></div>
-                  
-                  {/* Header */}
-                  <div className="relative flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-lg shadow-red-400/50"></div>
-                      <span className="text-red-400 text-sm font-semibold">Account Suspended</span>
+                {/* 🟢 نافذة الحساب المرتبط بالفعل */}
+                {errorNotification.type === 'ALREADY_LINKED' ? (
+                  <div 
+                    className="relative rounded-[20px] border border-blue-500/30 bg-[#080814] p-5 overflow-hidden transition-all duration-300 hover:border-blue-500/50"
+                    style={{
+                      boxShadow: '0 0 30px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(59, 130, 246, 0.1)'
+                    }}
+                  >
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-blue-500/5 via-transparent to-emerald-500/5 pointer-events-none"></div>
+                    
+                    {/* Header */}
+                    <div className="relative flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse shadow-lg shadow-blue-400/50"></div>
+                        <span className="text-blue-400 text-sm font-semibold">Already Linked</span>
+                      </div>
+                      <button
+                        onClick={() => setErrorNotification(null)}
+                        className="text-gray-600 hover:text-blue-400 transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setErrorNotification(null)}
-                      className="text-gray-600 hover:text-red-400 transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-          </div>
 
-                  {/* Account ID */}
-                  <div className="relative mb-4">
-                    <p className="text-gray-400 text-sm">
-                      Account <span className="font-mono text-red-300 bg-red-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(errorNotification.customerId)}</span>
-                    </p>
-                  </div>
-                  
-                  {/* Message */}
-                  <div className="relative mb-5 py-3 px-4 rounded-xl bg-black/30 border border-red-500/10">
-                    <p className="text-gray-300 text-sm leading-relaxed">
-                      {errorNotification.message}
-                    </p>
-                  </div>
-                  
-                  {/* Button */}
-                  {errorNotification.helpUrl && (
-                    <a
-                      href={errorNotification.helpUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold transition-all hover:from-red-400 hover:to-orange-400 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
+                    {/* Account ID */}
+                    <div className="relative mb-4">
+                      <p className="text-gray-400 text-sm">
+                        Account <span className="font-mono text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(errorNotification.customerId)}</span>
+                      </p>
+                    </div>
+                    
+                    {/* Success Icon */}
+                    <div className="relative flex justify-center mb-4">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-emerald-500/20 flex items-center justify-center border border-blue-500/30">
+                        <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    {/* Message */}
+                    <div className="relative mb-5 py-3 px-4 rounded-xl bg-black/30 border border-blue-500/10">
+                      <p className="text-gray-300 text-sm leading-relaxed text-center">
+                        {isRTL ? 'هذا الحساب مرتبط بالفعل بحساب المدير (MCC). اضغط على الزر أدناه لتحديث الحالة.' : 'This account is already linked to the MCC. Click the button below to refresh the status.'}
+                      </p>
+                    </div>
+                    
+                    {/* Refresh Button */}
+                    <button
+                      onClick={() => {
+                        setErrorNotification(null);
+                        syncStatusesFromGoogleAds();
+                      }}
+                      className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white text-sm font-bold transition-all hover:from-blue-400 hover:to-emerald-400 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
                     >
-                      <span>Contact Google Support</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                    </a>
-                  )}
-                  
-                  {/* Bottom glow */}
-                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                </div>
+                      <span>{isRTL ? 'تحديث الحالات' : 'Refresh Statuses'}</span>
+                    </button>
+                    
+                    {/* Bottom glow */}
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                  </div>
+                ) : (
+                  /* 🔴 نافذة الحساب المعلق أو الأخطاء الأخرى */
+                  <div 
+                    className="relative rounded-[20px] border border-red-500/30 bg-[#100808] p-5 overflow-hidden transition-all duration-300 hover:border-red-500/50"
+                    style={{
+                      boxShadow: '0 0 30px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.1)'
+                    }}
+                  >
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-red-500/5 via-transparent to-orange-500/5 pointer-events-none"></div>
+                    
+                    {/* Header */}
+                    <div className="relative flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-lg shadow-red-400/50"></div>
+                        <span className="text-red-400 text-sm font-semibold">
+                          {errorNotification.type === 'ACCOUNT_SUSPENDED' ? 'Account Suspended' : 'Error'}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setErrorNotification(null)}
+                        className="text-gray-600 hover:text-red-400 transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Account ID */}
+                    <div className="relative mb-4">
+                      <p className="text-gray-400 text-sm">
+                        Account <span className="font-mono text-red-300 bg-red-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(errorNotification.customerId)}</span>
+                      </p>
+                    </div>
+                    
+                    {/* Message */}
+                    <div className="relative mb-5 py-3 px-4 rounded-xl bg-black/30 border border-red-500/10">
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {errorNotification.message}
+                      </p>
+                    </div>
+                    
+                    {/* Button */}
+                    {errorNotification.helpUrl && (
+                      <a
+                        href={errorNotification.helpUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold transition-all hover:from-red-400 hover:to-orange-400 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
+                      >
+                        <span>Contact Google Support</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    )}
+                    
+                    {/* Bottom glow */}
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                  </div>
+                )}
               </div>
             )}
           </div>
