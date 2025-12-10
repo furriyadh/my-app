@@ -408,13 +408,15 @@ class SearchCampaignCreator:
             # 8. إضافة استهداف الأوقات (متطلب رسمي)
             self._add_schedule_targeting(campaign_resource_name)
             
-            # 9. إضافة الأصول/الإضافات (Assets/Extensions)
+            # 9. إضافة الأصول/الإضافات (Assets/Extensions) - المولدة من AI
             business_name = campaign_name.replace("حملة ", "").replace(" - SEARCH", "")
             self._add_campaign_assets(
                 campaign_resource_name, 
                 website_url, 
                 business_name=business_name,
-                phone_number=None  # يمكن إضافته لاحقاً من معاملات الدالة
+                phone_number=None,  # يمكن إضافته لاحقاً من معاملات الدالة
+                ad_copies=ad_copies,  # تمرير الأصول المولدة من AI
+                keywords=keywords  # تمرير الكلمات المفتاحية للاستخدام في Negative Keywords
             )
             
             campaign_id = campaign_resource_name.split('/')[-1]
@@ -1306,19 +1308,43 @@ class SearchCampaignCreator:
             print(f"⚠️ خطأ في إضافة تتبع التحويلات: {e}")
     
     def _add_campaign_assets(self, campaign_resource_name: str, website_url: str, 
-                            business_name: str = "أعمالنا", phone_number: str = None):
-        """إضافة الأصول/الإضافات للحملة (Sitelinks, Callouts, Call Extension)"""
+                            business_name: str = "أعمالنا", phone_number: str = None, ad_copies: dict = None, keywords: list = None):
+        """إضافة الأصول/الإضافات للحملة (Sitelinks, Callouts, Call Extension) - مولدة من محتوى الموقع"""
         try:
-            print("\n🎨 إضافة الأصول الإعلانية (Assets/Extensions)...")
+            print("\n🎨 إضافة الأصول الإعلانية (Assets/Extensions) - مولدة من محتوى الموقع...")
+            
+            # استخراج الأصول المولدة من AI
+            callouts = ad_copies.get('callouts', []) if ad_copies else []
+            structured_snippets_list = ad_copies.get('structured_snippets', []) if ad_copies else []
+            
+            # معالجة structured_snippets - يمكن أن يكون array أو object
+            if isinstance(structured_snippets_list, list):
+                structured_snippets = structured_snippets_list
+            elif isinstance(structured_snippets_list, dict):
+                structured_snippets = [structured_snippets_list]  # تحويل إلى array
+            else:
+                structured_snippets = []
+            
+            promotion = ad_copies.get('promotion', {}) if ad_copies else {}
+            
+            if callouts:
+                print(f"✅ استلام {len(callouts)} Callouts مولدة من AI")
+            if structured_snippets:
+                print(f"✅ استلام {len(structured_snippets)} Structured Snippets مولدة من AI")
+            if promotion:
+                print(f"✅ استلام Promotion مولد من AI")
             
             # 1. إضافة Sitelinks (روابط إضافية)
             self._add_sitelink_assets(campaign_resource_name, website_url)
             
-            # 2. إضافة Callouts (نقاط مميزة)
-            self._add_callout_assets(campaign_resource_name)
+            # 2. إضافة Callouts (نقاط مميزة) - المولدة من AI
+            self._add_callout_assets(campaign_resource_name, callouts)
             
-            # 3. إضافة Structured Snippets (مقتطفات منظمة)
-            self._add_structured_snippet_assets(campaign_resource_name)
+            # 3. إضافة Structured Snippets (مقتطفات منظمة) - المولدة من AI (يمكن أن يكون 1-2)
+            if structured_snippets:
+                for snippet in structured_snippets[:2]:  # حد أقصى 2 snippets
+                    if snippet:
+                        self._add_structured_snippet_assets(campaign_resource_name, snippet)
             
             # 4. إضافة Call Extension (رقم الهاتف) إذا كان متاحاً
             if phone_number:
@@ -1327,10 +1353,17 @@ class SearchCampaignCreator:
             # 5. Price Extension محذوف (حسب طلب المستخدم)
             # self._add_price_extension(campaign_resource_name)
             
-            # 6. إضافة Promotion Extension (العروض)
-            self._add_promotion_extension(campaign_resource_name)
+            # 6. إضافة Promotion Extension (العروض) - المولد من AI
+            self._add_promotion_extension(campaign_resource_name, website_url, promotion)
             
-            print("✅ تم إضافة جميع الأصول الإعلانية (Sitelinks, Callouts, Snippets, Promotions)")
+            # 7. إضافة Image Extensions (للحصول على Quality Score 10/10)
+            if ad_copies and ad_copies.get('images'):
+                self._add_image_assets(campaign_resource_name, ad_copies.get('images'))
+            
+            # 8. إضافة Negative Keywords (لتحسين Relevance و Quality Score)
+            self._add_negative_keywords(campaign_resource_name, keywords)
+            
+            print("✅ تم إضافة جميع الأصول الإعلانية (Sitelinks, Callouts, Snippets, Promotions, Images, Negative Keywords)")
             
         except Exception as e:
             print(f"⚠️ خطأ في إضافة الأصول: {e}")
@@ -1442,21 +1475,27 @@ class SearchCampaignCreator:
         except Exception as e:
             print(f"⚠️ تحذير: فشل في إضافة Sitelinks: {e}")
     
-    def _add_callout_assets(self, campaign_resource_name: str):
-        """إضافة نقاط مميزة (Callouts)"""
+    def _add_callout_assets(self, campaign_resource_name: str, callouts_from_ai: list = None):
+        """إضافة نقاط مميزة (Callouts) - مولدة من AI بناءً على محتوى الموقع"""
         try:
             asset_service = self.client.get_service("AssetService")
             campaign_asset_service = self.client.get_service("CampaignAssetService")
             
-            # إنشاء 6 callouts
+            # استخدام Callouts المولدة من AI، أو fallback إذا لم تُولَّد
+            if callouts_from_ai and len(callouts_from_ai) >= 4:
+                callouts = callouts_from_ai[:6]  # حد أقصى 6
+                print(f"✅ استخدام Callouts المولدة من AI: {callouts}")
+            else:
+                # fallback فقط إذا فشل التوليد
             callouts = [
-                "خدمة 24/7",
+                    "خدمة متميزة",
                 "جودة عالية",
-                "أسعار منافسة",
+                    "أسعار مناسبة",
                 "فريق محترف",
-                "خبرة طويلة",
-                "ضمان الجودة"
+                    "خبرة واسعة",
+                    "رضا العملاء"
             ]
+                print(f"⚠️ استخدام Callouts الافتراضية (لم تُولَّد من AI)")
             
             for callout_text in callouts:
                 # إنشاء Asset
@@ -1491,24 +1530,30 @@ class SearchCampaignCreator:
         except Exception as e:
             print(f"⚠️ تحذير: فشل في إضافة Callouts: {e}")
     
-    def _add_structured_snippet_assets(self, campaign_resource_name: str):
-        """إضافة مقتطفات منظمة (Structured Snippets)"""
+    def _add_structured_snippet_assets(self, campaign_resource_name: str, snippets_from_ai: dict = None):
+        """إضافة مقتطفات منظمة (Structured Snippets) - مولدة من AI بناءً على محتوى الموقع"""
         try:
             asset_service = self.client.get_service("AssetService")
             campaign_asset_service = self.client.get_service("CampaignAssetService")
             
+            # استخدام Structured Snippets المولدة من AI، أو fallback
+            if snippets_from_ai and 'header' in snippets_from_ai and 'values' in snippets_from_ai and len(snippets_from_ai['values']) >= 3:
+                header = snippets_from_ai['header']
+                values = snippets_from_ai['values'][:4]  # حد أقصى 4
+                print(f"✅ استخدام Structured Snippets المولدة من AI: {header} - {values}")
+            else:
+                # fallback فقط إذا فشل التوليد
+                header = "الخدمات"
+                values = ["خدمة متميزة", "جودة عالية", "فريق محترف", "خبرة واسعة"]
+                print(f"⚠️ استخدام Structured Snippets الافتراضية (لم تُولَّد من AI)")
+            
             # إنشاء Structured Snippet
             asset_operation = self.client.get_type("AssetOperation")
             asset = asset_operation.create
-            asset.name = "خدماتنا المميزة"
+            asset.name = f"{header} المميزة"
             asset.type_ = self.client.enums.AssetTypeEnum.STRUCTURED_SNIPPET
-            asset.structured_snippet_asset.header = "الخدمات"
-            asset.structured_snippet_asset.values.extend([
-                "صيانة شاملة",
-                "إصلاح سريع",
-                "فحص دوري",
-                "قطع غيار أصلية"
-            ])
+            asset.structured_snippet_asset.header = header
+            asset.structured_snippet_asset.values.extend(values)
             
             # إنشاء الأصل
             asset_response = asset_service.mutate_assets(
@@ -1652,23 +1697,34 @@ class SearchCampaignCreator:
         except Exception as e:
             print(f"⚠️ تحذير: فشل في إضافة Price Extension: {e}")
     
-    def _add_promotion_extension(self, campaign_resource_name: str):
-        """إضافة إضافة العروض (Promotion Extension)"""
+    def _add_promotion_extension(self, campaign_resource_name: str, website_url: str = None, promotion_from_ai: dict = None):
+        """إضافة إضافة العروض (Promotion Extension) - مولدة من AI بناءً على محتوى الموقع"""
         try:
             asset_service = self.client.get_service("AssetService")
             campaign_asset_service = self.client.get_service("CampaignAssetService")
             
+            # استخدام Promotion المولد من AI، أو fallback
+            if promotion_from_ai and 'name' in promotion_from_ai and 'target' in promotion_from_ai:
+                promo_name = promotion_from_ai['name'][:15]  # حد أقصى 15 حرف
+                promo_target = promotion_from_ai['target'][:30]  # حد أقصى 30 حرف
+                print(f"✅ استخدام Promotion المولد من AI: {promo_name} - {promo_target}")
+            else:
+                # fallback فقط إذا فشل التوليد
+                promo_name = "عرض خاص"
+                promo_target = "خصم على جميع الخدمات"
+                print(f"⚠️ استخدام Promotion الافتراضي (لم يُولَّد من AI)")
+            
             # إنشاء Promotion Asset
             asset_operation = self.client.get_type("AssetOperation")
             asset = asset_operation.create
-            asset.name = "عرض خاص"
+            asset.name = promo_name
             asset.type_ = self.client.enums.AssetTypeEnum.PROMOTION
             
             # إضافة final_urls (مطلوب)
-            asset.final_urls.append("https://warshasa.com")
+            asset.final_urls.append(website_url if website_url else "https://warshasa.com")
             
             # تعيين تفاصيل العرض
-            asset.promotion_asset.promotion_target = "خصم على جميع الخدمات"
+            asset.promotion_asset.promotion_target = promo_target
             asset.promotion_asset.discount_modifier = self.client.enums.PromotionExtensionDiscountModifierEnum.UP_TO
             
             # FIXED: استخدام money_amount_off بدلاً من percent_off لتجنب مشاكل Format
@@ -1713,4 +1769,107 @@ class SearchCampaignCreator:
             
         except Exception as e:
             print(f"⚠️ تحذير: فشل في إضافة Promotion Extension: {e}")
+    
+    def _add_image_assets(self, campaign_resource_name: str, images: list = None):
+        """إضافة صور إعلانية (Image Assets) - للحصول على Quality Score 10/10"""
+        try:
+            if not images or len(images) == 0:
+                print("⚠️ لا توجد صور لإضافتها")
+                return
+            
+            asset_service = self.client.get_service("AssetService")
+            campaign_asset_service = self.client.get_service("CampaignAssetService")
+            
+            print(f"📸 إضافة {len(images)} صورة إعلانية...")
+            
+            for idx, image_url in enumerate(images[:4]):  # حد أقصى 4 صور
+                try:
+                    # تحميل الصورة
+                    import requests
+                    response = requests.get(image_url, timeout=10)
+                    if response.status_code != 200:
+                        continue
+                    
+                    image_data = response.content
+                    
+                    # إنشاء Image Asset
+                    asset_operation = self.client.get_type("AssetOperation")
+                    asset = asset_operation.create
+                    asset.name = f"Search Image {idx + 1}"
+                    asset.type_ = self.client.enums.AssetTypeEnum.IMAGE
+                    asset.image_asset.data = image_data
+                    
+                    # إنشاء الأصل
+                    asset_response = asset_service.mutate_assets(
+                        customer_id=self.customer_id,
+                        operations=[asset_operation]
+                    )
+                    
+                    asset_resource_name = asset_response.results[0].resource_name
+                    
+                    # ربط الأصل بالحملة
+                    campaign_asset_operation = self.client.get_type("CampaignAssetOperation")
+                    campaign_asset = campaign_asset_operation.create
+                    campaign_asset.campaign = campaign_resource_name
+                    campaign_asset.asset = asset_resource_name
+                    campaign_asset.field_type = self.client.enums.AssetFieldTypeEnum.MARKETING_IMAGE
+                    
+                    campaign_asset_service.mutate_campaign_assets(
+                        customer_id=self.customer_id,
+                        operations=[campaign_asset_operation]
+                    )
+                    
+                    print(f"  ✅ تم إضافة صورة {idx + 1}")
+                    
+                except Exception as img_error:
+                    print(f"  ⚠️ فشل في إضافة صورة {idx + 1}: {img_error}")
+                    continue
+            
+            print(f"✅ تم إضافة Image Assets للحملة")
+            
+        except Exception as e:
+            print(f"⚠️ تحذير: فشل في إضافة Image Assets: {e}")
+    
+    def _add_negative_keywords(self, campaign_resource_name: str, keywords: list = None):
+        """إضافة كلمات مفتاحية سلبية (Negative Keywords) - لتحسين Quality Score"""
+        try:
+            if not keywords:
+                print("⚠️ لا توجد كلمات مفتاحية لاستخراج الكلمات السلبية منها")
+                return
+            
+            # قائمة الكلمات السلبية العامة (تُستخدم دائماً)
+            universal_negatives = [
+                "مجاني", "مجانا", "مجانية", "free",
+                "وظيفة", "وظائف", "توظيف", "job", "jobs",
+                "كورس", "كورسات", "دورة", "course",
+                "pdf", "تحميل", "download",
+                "رخيص", "رخيصة", "cheap"
+            ]
+            
+            # استخراج كلمات سلبية ذكية بناءً على نوع النشاط
+            campaign_criterion_service = self.client.get_service("CampaignCriterionService")
+            operations = []
+            
+            for negative_keyword in universal_negatives[:20]:  # حد أقصى 20
+                try:
+                    campaign_criterion_operation = self.client.get_type("CampaignCriterionOperation")
+                    criterion = campaign_criterion_operation.create
+                    criterion.campaign = campaign_resource_name
+                    criterion.negative = True
+                    criterion.keyword.text = negative_keyword
+                    criterion.keyword.match_type = self.client.enums.KeywordMatchTypeEnum.PHRASE
+                    
+                    operations.append(campaign_criterion_operation)
+                except Exception as e:
+                    continue
+            
+            if operations:
+                response = campaign_criterion_service.mutate_campaign_criteria(
+                    customer_id=self.customer_id,
+                    operations=operations
+                )
+                print(f"✅ تم إضافة {len(operations)} كلمة مفتاحية سلبية")
+            
+        except Exception as e:
+            print(f"⚠️ تحذير: فشل في إضافة Negative Keywords: {e}")
 

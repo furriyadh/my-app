@@ -1016,12 +1016,23 @@ export default function CampaignPreviewPage() {
 
           {/* Headlines */}
           <div className="space-y-1 sm:space-y-1.5">
+            {/* Mobile/Tablet: Single Headline */}
             <h3 
-              className="text-xs sm:text-sm md:text-base font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-2 sm:line-clamp-1"
+              className="xl:hidden text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-2 sm:line-clamp-1"
               dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
             >
               {ad.headlines[0]}
             </h3>
+            
+            {/* Desktop/Laptop: Two Headlines with separator */}
+            {ad.headlines[1] && (
+              <h3 
+                className="hidden xl:block text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-1"
+                dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
+              >
+                {ad.headlines[0]} <span className="text-gray-400 dark:text-gray-600 mx-1">|</span> {ad.headlines[1]}
+              </h3>
+            )}
             
             {/* Descriptions */}
             <div className="space-y-0.5">

@@ -14,6 +14,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 import sys
 from dotenv import load_dotenv
+from bs4 import BeautifulSoup
 
 # تحميل متغيرات البيئة من ملف .env.development
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env.development'))
@@ -579,8 +580,11 @@ Return results in JSON format:
         }
     
     def _fetch_website_content(self, website_url: str) -> str:
-        """Fetch website content with www fallback"""
+        """Fetch website content using the SAME METHOD as detect_website_language (100% working!)"""
         try:
+            # ✅ استخدام نفس منطق detect_website_language الناجح 100%!
+            import requests as http_requests
+            import re
             from urllib.parse import urlparse
             
             # Add https:// if no scheme provided
@@ -591,43 +595,62 @@ Return results in JSON format:
             
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
+                'Accept-Language': 'ar,en,fr,es,de,it,ja,ko,zh,*;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
             }
             
-            # Try to fetch with www fallback
+            # Try to fetch the website - with www fallback
+            response = None
             urls_to_try = [website_url]
+            
+            # Add www variant if not present
             parsed = urlparse(website_url)
-            if not parsed.netloc.startswith('www.'):
+            if parsed.netloc and not parsed.netloc.startswith('www.'):
                 www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
                 if parsed.query:
                     www_url += f"?{parsed.query}"
                 urls_to_try.append(www_url)
             
+            fetch_error_msg = None
             response = None
             for url_attempt in urls_to_try:
                 try:
-                    self.logger.info(f"🔗 Trying: {url_attempt}")
-                    response = requests.get(url_attempt, headers=headers, timeout=30)
+                    self.logger.info(f"🔗 Fetching: {url_attempt}")
+                    response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True, verify=False)
                     if response.status_code == 200:
-                        self.logger.info(f"✅ Successfully fetched: {url_attempt}")
+                        self.logger.info(f"✅ Website fetched successfully: {response.status_code}")
                         break
-                except Exception as e:
-                    self.logger.warning(f"⚠️ Failed {url_attempt}: {e}")
+                except Exception as fetch_error:
+                    fetch_error_msg = str(fetch_error)
+                    self.logger.warning(f"⚠️ Failed to fetch {url_attempt}: {fetch_error}")
+                    response = None
                     continue
             
             if not response or response.status_code != 200:
-                raise Exception("Could not fetch website from any URL variant")
+                self.logger.error(f"❌ Could not fetch website from any URL variant")
+                raise Exception(f"Could not fetch website: {fetch_error_msg}")
             
-            # Extract text from HTML
-            html_content = response.text
-            text_content = self._extract_text_from_html(html_content)
+            # ✅ KEY FIX: استخدام response.content مباشرة - مثل detect_website_language!
+            soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Limit content to reduce cost (first 3000 chars)
-            text_content = text_content[:3000]
+            # Remove script, style, and navigation elements for cleaner text
+            for element in soup(['script', 'style', 'nav', 'noscript', 'iframe', 'svg', 'header', 'footer']):
+                element.decompose()
+            
+            # Get main content text
+            text_content = soup.get_text(separator=' ', strip=True)
+            # Clean up the text - remove extra whitespace
+            text_content = re.sub(r'\s+', ' ', text_content).strip()
+            
+            # طباعة عينة من المحتوى المستخرج للتأكد من صحته
+            if text_content:
+                self.logger.info(f"✅ تم استخراج {len(text_content)} حرف من محتوى الموقع")
+                self.logger.info(f"📝 أول 200 حرف: {text_content[:200]}")
+            else:
+                self.logger.warning("⚠️ لم يتم استخراج أي محتوى من الموقع")
+            
+            # Limit content to reduce cost (first 5000 chars for better analysis)
+            text_content = text_content[:5000]
             
             self.logger.info(f"Successfully fetched website content: {len(text_content)} chars")
             return text_content
@@ -637,23 +660,52 @@ Return results in JSON format:
             return ""
     
     def _extract_text_from_html(self, html_content: str) -> str:
-        """استخراج النص من محتوى HTML"""
-        import re
+        """استخراج النص من محتوى HTML - نفس طريقة WebsiteAnalyzer"""
+        from bs4 import BeautifulSoup
         
-        # إزالة script و style tags
-        clean = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.DOTALL)
-        clean = re.sub(r'<style[^>]*>.*?</style>', '', clean, flags=re.DOTALL)
-        
-        # إزالة HTML tags
-        clean = re.sub(r'<[^>]+>', ' ', clean)
-        
-        # إزالة المسافات الزائدة
-        clean = re.sub(r'\s+', ' ', clean)
-        
-        # إزالة الأحرف الخاصة
-        clean = re.sub(r'[^\w\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]', ' ', clean)
-        
-        return clean.strip()
+        try:
+            # Try multiple parsers - lxml is faster and better for complex HTML
+            for parser in ['lxml', 'html.parser', 'html5lib']:
+                try:
+                    soup = BeautifulSoup(html_content, parser)
+                    break
+                except:
+                    continue
+            else:
+                soup = BeautifulSoup(html_content, 'html.parser')
+            
+            # إزالة السكريبتات والأنماط
+            for script in soup(['script', 'style', 'meta', 'link', 'noscript', 'head']):
+                script.decompose()
+            
+            # استخراج النص
+            text = soup.get_text(separator=' ', strip=True)
+            
+            # التحقق من أن النص يحتوي على أحرف عربية/إنجليزية حقيقية
+            import re
+            # عد الأحرف العربية والإنجليزية
+            arabic_chars = len(re.findall(r'[\u0600-\u06FF]', text))
+            english_chars = len(re.findall(r'[a-zA-Z]', text))
+            
+            if arabic_chars < 10 and english_chars < 10:
+                self.logger.warning(f"⚠️ النص المستخرج لا يحتوي على أحرف كافية: عربي={arabic_chars}, إنجليزي={english_chars}")
+            
+            # تنظيف النص - نفس طريقة WebsiteAnalyzer
+            lines = (line.strip() for line in text.splitlines())
+            chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+            text = ' '.join(chunk for chunk in chunks if chunk)
+            
+            return text.strip()
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error extracting text from HTML: {e}")
+            # Fallback to simple regex
+            import re
+            clean = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.DOTALL)
+            clean = re.sub(r'<style[^>]*>.*?</style>', '', clean, flags=re.DOTALL)
+            clean = re.sub(r'<[^>]+>', ' ', clean)
+            clean = re.sub(r'\s+', ' ', clean)
+            return clean.strip()
     
     def _get_best_model_for_task(self, task_type: str) -> str:
         """اختيار أفضل نموذج حسب نوع المهمة"""
@@ -1154,19 +1206,97 @@ Base ALL content on the keywords from Google Keyword Planner and adapt to the sp
             }
     
     def _get_campaign_requirements(self, campaign_type: str) -> str:
-        """الحصول على متطلبات Google Ads لكل نوع حملة"""
+        """الحصول على متطلبات Google Ads لكل نوع حملة - حسب Google Ads API v21"""
         requirements = {
-            "SEARCH": "Headlines: 3-15 (max 30 chars each), Descriptions: 2-4 (max 90 chars each)",
-            "DISPLAY": "Headlines: 5 short (max 30 chars), Descriptions: 5 long (max 90 chars), Images required",
-            "VIDEO": "Headlines: 5 (max 30 chars), Descriptions: 5 (max 90 chars), Video required",
-            "SHOPPING": "Product title, description, price, images",
-            "PERFORMANCE_MAX": "Headlines: 3-15 (max 30 chars), Descriptions: 2-5 (max 90 chars), Images: 3-20",
-            "DEMAND_GEN": "Headlines: 5 (max 40 chars), Descriptions: 5 (max 90 chars), Images required",
-            "APP": "Headlines: 4 (max 30 chars), Descriptions: 4 (max 90 chars)",
-            "LOCAL": "Business name, address, phone, headlines, descriptions",
-            "SMART": "Headlines: 3 (max 30 chars), Descriptions: 2 (max 90 chars)",
-            "HOTEL": "Hotel name, price, images, descriptions",
-            "TRAVEL": "Headlines, descriptions, destination info, images"
+            "SEARCH": """
+**SEARCH CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Responsive Search Ads (RSA)
+- Headlines: 15-30 (max 30 chars) - REQUIRED for EXCELLENT Ad Strength
+- Descriptions: 4-5 (60-90 chars) - MUST end with CTA
+- Assets: Callouts (8-10), Sitelinks (4-8), Structured Snippets (1-2)
+- Keywords: 20-50 keywords with match types (Broad, Phrase, Exact)
+            """,
+            "DISPLAY": """
+**DISPLAY CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Responsive Display Ads
+- Short Headlines: 5+ (max 30 chars)
+- Long Headlines: 1-5 (max 90 chars)
+- Descriptions: 5 (max 90 chars)
+- Images: 15+ (Square 1200x1200 + Landscape 1200x628 required)
+- Logo: 1200x1200
+- Videos: 5+ (recommended)
+            """,
+            "VIDEO": """
+**VIDEO CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Video Responsive Ads (recommended)
+- Headlines: 5-15 (max 30 chars)
+- Long Headlines: 1-5 (max 90 chars)  
+- Descriptions: 4-5 (max 90 chars)
+- Videos: 5+ (different lengths: 6s, 15s, 30s, 60s+)
+- Video Formats: Horizontal 16:9 (required), Vertical 9:16, Square 1:1
+- Call-to-Action: 10 chars max
+            """,
+            "SHOPPING": """
+**SHOPPING CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Product Feed from Google Merchant Center
+- Required: id, title, description, link, image_link, price, availability
+- Recommended: brand, gtin, mpn, color, size, product_type
+            """,
+            "PERFORMANCE_MAX": """
+**PERFORMANCE MAX REQUIREMENTS (Google Ads API v21):**
+- Asset Groups with:
+  * Headlines: 5-15 (max 30 chars)
+  * Long Headlines: 1-5 (max 90 chars)
+  * Descriptions: 4-5 (max 90 chars)
+  * Images: 15-20 (Square, Landscape, Portrait, Logo)
+  * Videos: 5+ (all formats)
+  * Business Name: 25 chars max
+  * Call-to-Action: required
+- Audience Signals: 2-3 minimum
+- Conversion Tracking: required
+            """,
+            "DEMAND_GEN": """
+**DEMAND GEN CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Similar to Performance Max
+- Headlines: 5-15 (max 30 chars)
+- Long Headlines: 1-5 (max 90 chars)
+- Descriptions: 4-5 (max 90 chars)  
+- Images: 15-20 (all sizes)
+- Videos: 5+
+- Focus: Gmail, YouTube, Discover
+            """,
+            "APP": """
+**APP CAMPAIGN REQUIREMENTS (MULTI_CHANNEL - Google Ads API v21):**
+- Headlines: 5+ (max 30 chars)
+- Descriptions: 5+ (max 90 chars)
+- Images: 20+ images
+- Videos: 5+ videos
+- App Store/Play Store link required
+            """,
+            "LOCAL": """
+**LOCAL CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Business name, address, phone
+- Headlines: 3-5 (max 30 chars)
+- Descriptions: 2-4 (max 90 chars)
+- Images: 20+ images
+            """,
+            "SMART": """
+**SMART CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Simplified setup
+- Headlines: 3 (max 30 chars)
+- Descriptions: 2 (max 90 chars)
+            """,
+            "HOTEL": """
+**HOTEL CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Hotel name, price, images, descriptions
+- Integration with Google Hotel Center
+            """,
+            "TRAVEL": """
+**TRAVEL CAMPAIGN REQUIREMENTS (Google Ads API v21):**
+- Headlines, descriptions, destination info
+- Images: travel-focused
+- Integration with travel feeds
+            """
         }
         return requirements.get(campaign_type.upper(), requirements["DISPLAY"])
     
@@ -1178,8 +1308,19 @@ Base ALL content on the keywords from Google Keyword Planner and adapt to the sp
             # استخدام website_content إذا تم تمريره، وإلا جلبه
             if not website_content:
                 website_content = self._fetch_website_content(website_url)
+                print(f"✅ تم جلب محتوى الموقع: {len(website_content)} حرف")
             else:
-                self.logger.info(f"✅ استخدام محتوى الموقع الممرر: {len(website_content)} حرف")
+                print(f"✅ استخدام محتوى الموقع الممرر: {len(website_content)} حرف")
+            
+            # التحقق من جودة المحتوى المستخرج
+            if not website_content or len(website_content) < 100:
+                print("⚠️ تحذير: محتوى الموقع قصير جداً أو فارغ!")
+            
+            # طباعة عينة من محتوى الموقع للتأكد من صحته
+            print("=" * 80)
+            print(f"📄 عينة من محتوى الموقع المستخرج (أول 300 حرف):")
+            print(website_content[:300] if len(website_content) > 300 else website_content)
+            print("=" * 80)
 
             # استخدام الكلمات المفتاحية الممررة مباشرة
             keywords_line = ""
@@ -1238,7 +1379,12 @@ Base ALL content on the keywords from Google Keyword Planner and adapt to the sp
             
             # برومبت ديناميكي بناءً على نوع الحملة والكلمات المفتاحية الحقيقية من Google
             comprehensive_prompt = f"""
-Create professional Google Ads content based on these keywords from Google Keyword Planner.
+⚠️ CRITICAL: You MUST carefully read and analyze the ACTUAL website content below to understand the business.
+DO NOT generate generic content. ALL content must be SPECIFIC to the business described in the website content.
+
+=== WEBSITE CONTENT (READ CAREFULLY) ===
+{website_content}
+===========================================
 
 Campaign Type: {campaign_type}
 Website URL: {website_url}
@@ -1246,40 +1392,104 @@ Website URL: {website_url}
 KEYWORDS FROM GOOGLE KEYWORD PLANNER:
 {keywords_line}
 
-Website Content:
-{website_content}
-
 Google Ads Requirements for {campaign_type}:
 {campaign_requirements}
 
+CRITICAL INSTRUCTION:
+1. READ the website content above THOROUGHLY
+2. IDENTIFY the exact business type (e.g., pet store, restaurant, travel agency, etc.)
+3. EXTRACT real services/products mentioned in the website
+4. Generate content that is SPECIFIC and RELEVANT to this exact business
+5. DO NOT use generic phrases like "خدمة متميزة" or "جودة عالية" unless they match the business
+
 REQUIREMENTS:
 
-**HEADLINES (30 characters max):**
-- Generate EXACTLY 30 unique headlines
-- Analyze the keywords to understand the industry and target audience
-- Use relevant numbers, percentages, and industry-specific power words
-- Include location if present in keywords
-- Create headlines that match the business type and tone
-- Mix of: service/product names, benefits, urgency, credibility elements
+**HEADLINES (30 characters max) - DIVERSITY IS KEY FOR EXCELLENT:**
+- Generate EXACTLY 30 unique headlines with HIGH DIVERSITY
+- MUST be based on ACTUAL services/products from the website content
+- Read the website content to identify the REAL business offerings
+- Use SPECIFIC product/service names mentioned in the website
+- Include location if present in website or keywords
 
-**DESCRIPTIONS (60-90 characters - CRITICAL):**
-- Generate EXACTLY 4 descriptions
-- Length: MINIMUM 60 characters, MAXIMUM 90 characters
+**CRITICAL: Headlines MUST include variety:**
+- 30% with NUMBERS: "خبرة 15 عاماً", "خصم 20%", "أكثر من 1000 عميل"
+- 30% with OFFERS: "عرض خاص اليوم", "احصل على خصم", "تخفيضات الموسم"
+- 20% with KEYWORDS: "عزل أسطح بالرياض", "تنسيق حدائق منزلية"
+- 20% with CTAs: "احجز الآن", "اتصل اليوم", "اطلب استشارة مجانية"
+
+DO NOT use generic headlines - be specific to this business
+Examples for travel: "رحلات سفاري بخصم 15%", "احجز رحلتك الآن", "خبرة 10 سنوات في السفاري"
+Examples for pet store: "طعام حيوانات أصلي", "خصم على مستلزمات العناية", "اشترِ الآن واستفد"
+
+**DESCRIPTIONS (60-90 characters - CRITICAL FOR EXCELLENT AD STRENGTH):**
+- Generate EXACTLY 5 descriptions (Google recommends 4-5 for EXCELLENT rating)
+- Length: MINIMUM 60 characters, TARGET 80-90 characters (use full space!)
 - MANDATORY: Each description MUST end with a Call-to-Action (CTA)
-- Structure: [Value/Benefit] + [Key Feature] + [Industry-Appropriate CTA]
-- The CTA must be relevant to the business type identified from keywords
-- Analyze keywords to determine appropriate CTAs (booking, purchasing, contacting, registering, etc.)
-- Use full character space (60-90 chars)
+- MUST mention SPECIFIC services/products from the website content
+- Structure: [Specific Service/Product] + [Real Benefit] + [Unique Value] + [Business-Appropriate CTA]
+- Read the website to identify the business type, then use appropriate CTA
+- Examples for travel: "احجز الآن واحصل على خصم", "اتصل لحجز رحلتك المميزة"
+- Examples for store: "اشتري الآن بأفضل الأسعار", "تسوق اليوم واستفد من العروض"
+- Include specific benefits: prices, guarantees, experience years, unique features
+- DO NOT use vague descriptions - be specific about what this business offers
+- Use full character space (aim for 85-90 chars for better quality score)
+
+**CALLOUTS (25 characters max) - CRITICAL FOR EXCELLENT AD STRENGTH:**
+- Generate EXACTLY 8-10 callouts (Google recommends 6-10 for EXCELLENT rating)
+- Each callout: MAXIMUM 25 characters
+- ⚠️ CRITICAL: Extract callouts from ACTUAL features mentioned in website content
+- Categories to cover: Features, Benefits, Guarantees, Experience, Speed, Quality, Price
+- Read what services/features the website offers and create callouts based on them
+- Examples: "استشارات مجانية", "ضمان 5 سنوات", "خبرة 15 عاماً", "خدمة 24/7", "أسعار تنافسية"
+- If website mentions "رحلات سفاري", use "رحلات سفاري متميزة"
+- If website mentions "طعام حيوانات", use "طعام حيوانات أصلي"
+- DO NOT invent features - only use what's in the website content
+- Mix of: service features, time/speed, quality, price, guarantees, experience
+
+**STRUCTURED SNIPPETS - MUST EXTRACT FROM WEBSITE (CRITICAL FOR EXCELLENT):**
+- ⚠️ CRITICAL: Generate 2 different structured snippets for better coverage
+- First snippet: Main category (e.g., "الخدمات" or "المنتجات")
+- Second snippet: Sub-category or complementary (e.g., "الأنواع" or "الفئات")
+- Choose headers from: ["الخدمات", "المنتجات", "الأنواع", "الفئات", "الماركات", "الموديلات", "الأنماط"]
+- Each snippet: 3-6 values
+- Each value: MAXIMUM 25 characters
+- Values MUST be taken from actual content on the website
+- Example for pet store: 
+  - Snippet 1: header "المنتجات" with values like "طعام حيوانات", "مستلزمات عناية", "ألعاب"
+  - Snippet 2: header "الأنواع" with values like "للقطط", "للكلاب", "للطيور"
+- DO NOT make up services/products - only use what's mentioned in website
+
+**PROMOTION - BASED ON BUSINESS TYPE:**
+- Read website to understand the business type
+- Generate realistic promotional offer matching that business
+- Name: MAXIMUM 15 characters
+- Target: MAXIMUM 30 characters  
+- Examples: Travel → "عرض رحلات", "خصم على الحجوزات"
+- Examples: Store → "خصم الافتتاح", "عرض على المنتجات"
+- Must match the actual business type from website content
 
 CRITICAL LANGUAGE REQUIREMENT:
-ALL content (headlines, descriptions, keywords) MUST be written in {language_name} language.
+ALL content (headlines, descriptions, keywords, callouts, structured_snippets, promotion) MUST be written in {language_name} language.
 Use {language_name} professional, persuasive, industry-appropriate tone.
 
-Return VALID JSON:
+⚠️ FINAL REMINDER:
+- You have read the website content at the top
+- You know what business this is
+- Generate content SPECIFIC to this business
+- DO NOT use generic/template content
+- Every headline, description, callout must reflect the ACTUAL business
+
+Return VALID JSON (use the keywords provided above):
 {{
     "headlines": ["headline 1", "headline 2", "headline 3", "headline 4", "headline 5", "headline 6", "headline 7", "headline 8", "headline 9", "headline 10", "headline 11", "headline 12", "headline 13", "headline 14", "headline 15", "headline 16", "headline 17", "headline 18", "headline 19", "headline 20", "headline 21", "headline 22", "headline 23", "headline 24", "headline 25", "headline 26", "headline 27", "headline 28", "headline 29", "headline 30"],
-    "descriptions": ["description 1 (60-90 chars with CTA)", "description 2 (60-90 chars with CTA)", "description 3 (60-90 chars with CTA)", "description 4 (60-90 chars with CTA)"],
-    "keywords": {keywords_line.split(',') if keywords_line else []},
+    "descriptions": ["description 1 (80-90 chars with CTA)", "description 2 (80-90 chars with CTA)", "description 3 (80-90 chars with CTA)", "description 4 (80-90 chars with CTA)", "description 5 (80-90 chars with CTA)"],
+    "keywords": ["keyword1", "keyword2", "keyword3"],
+    "callouts": ["callout 1 (from website)", "callout 2 (from website)", "callout 3 (from website)", "callout 4 (from website)", "callout 5 (from website)", "callout 6 (from website)", "callout 7 (from website)", "callout 8 (from website)", "callout 9 (optional)", "callout 10 (optional)"],
+    "structured_snippets": [
+        {{"header": "المنتجات", "values": ["value 1 (from website)", "value 2 (from website)", "value 3 (from website)", "value 4 (from website)"]}},
+        {{"header": "الأنواع", "values": ["type 1 (from website)", "type 2 (from website)", "type 3 (from website)"]}}
+    ],
+    "promotion": {{"name": "عرض خاص", "target": "عرض مناسب للنشاط التجاري"}},
     "recommended_campaign_type": "{campaign_type.lower()}",
     "confidence_score": 95,
     "reasoning": "Created content based on Google keywords with industry-appropriate CTAs",
@@ -1289,11 +1499,13 @@ Return VALID JSON:
             }}
             """
             
-            # طباعة البرومبت للتحقق من الكلمات المفتاحية
+            # طباعة البرومبت للتحقق من محتوى الموقع والكلمات المفتاحية
             print("=" * 80)
             print("🤖 البرومبت المرسل للذكاء الاصطناعي:")
             print("=" * 80)
-            print(comprehensive_prompt[:500] + "..." if len(comprehensive_prompt) > 500 else comprehensive_prompt)
+            print(f"📊 طول البرومبت: {len(comprehensive_prompt)} حرف")
+            print(f"📝 أول 1500 حرف من البرومبت:")
+            print(comprehensive_prompt[:1500] + "..." if len(comprehensive_prompt) > 1500 else comprehensive_prompt)
             print("=" * 80)
             
             # طلب واحد فقط لجميع المهام
@@ -1367,6 +1579,29 @@ Return VALID JSON:
                         "bid_amount": 2500000
                     })
                 
+                # استخراج الأصول الإضافية المولدة من AI بناءً على محتوى الموقع
+                callouts = parsed_result.get("callouts", [])[:10]  # حد أقصى 10
+                structured_snippets_raw = parsed_result.get("structured_snippets", [])
+                
+                # معالجة structured_snippets - يمكن أن يكون array أو object
+                if isinstance(structured_snippets_raw, list):
+                    structured_snippets = structured_snippets_raw[:2]  # حد أقصى 2
+                elif isinstance(structured_snippets_raw, dict):
+                    # تحويل object واحد إلى array
+                    structured_snippets = [structured_snippets_raw]
+                else:
+                    structured_snippets = []
+                
+                promotion = parsed_result.get("promotion", {})
+                
+                # طباعة الأصول المولدة للتأكد
+                if callouts:
+                    print(f"✅ تم توليد {len(callouts)} Callouts من محتوى الموقع: {callouts}")
+                if structured_snippets:
+                    print(f"✅ تم توليد {len(structured_snippets)} Structured Snippets من محتوى الموقع: {structured_snippets}")
+                if promotion:
+                    print(f"✅ تم توليد Promotion من محتوى الموقع: {promotion}")
+                
                 result = {
                     "success": True,
                     "product_service": product_service,
@@ -1374,6 +1609,9 @@ Return VALID JSON:
                     "headlines": cleaned_headlines,
                     "descriptions": cleaned_descriptions,
                     "keywords": cleaned_keywords,
+                    "callouts": callouts if callouts else [],  # 8-10 callouts للحصول على EXCELLENT
+                    "structured_snippets": structured_snippets if structured_snippets else [],  # 1-2 snippets
+                    "promotion": promotion if promotion else {},
                     "ad_copies": cleaned_ad_copies,
                     "recommended_campaign_type": parsed_result.get("recommended_campaign_type", "search_ads"),
                     "confidence_score": parsed_result.get("confidence_score", 0),

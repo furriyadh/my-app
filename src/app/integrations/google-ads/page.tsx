@@ -2440,65 +2440,65 @@ const GoogleAdsContent: React.FC = () => {
                   </div>
                 ) : (
                   /* 🔴 نافذة الحساب المعلق أو الأخطاء الأخرى */
-                  <div 
-                    className="relative rounded-[20px] border border-red-500/30 bg-[#100808] p-5 overflow-hidden transition-all duration-300 hover:border-red-500/50"
-                    style={{
-                      boxShadow: '0 0 30px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.1)'
-                    }}
-                  >
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-red-500/5 via-transparent to-orange-500/5 pointer-events-none"></div>
-                    
-                    {/* Header */}
-                    <div className="relative flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-lg shadow-red-400/50"></div>
+                <div 
+                  className="relative rounded-[20px] border border-red-500/30 bg-[#100808] p-5 overflow-hidden transition-all duration-300 hover:border-red-500/50"
+                  style={{
+                    boxShadow: '0 0 30px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.1)'
+                  }}
+                >
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-red-500/5 via-transparent to-orange-500/5 pointer-events-none"></div>
+                  
+                  {/* Header */}
+                  <div className="relative flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-lg shadow-red-400/50"></div>
                         <span className="text-red-400 text-sm font-semibold">
                           {errorNotification.type === 'ACCOUNT_SUSPENDED' ? 'Account Suspended' : 'Error'}
                         </span>
-                      </div>
-                      <button
-                        onClick={() => setErrorNotification(null)}
-                        className="text-gray-600 hover:text-red-400 transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
                     </div>
-
-                    {/* Account ID */}
-                    <div className="relative mb-4">
-                      <p className="text-gray-400 text-sm">
-                        Account <span className="font-mono text-red-300 bg-red-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(errorNotification.customerId)}</span>
-                      </p>
-                    </div>
-                    
-                    {/* Message */}
-                    <div className="relative mb-5 py-3 px-4 rounded-xl bg-black/30 border border-red-500/10">
-                      <p className="text-gray-300 text-sm leading-relaxed">
-                        {errorNotification.message}
-                      </p>
-                    </div>
-                    
-                    {/* Button */}
-                    {errorNotification.helpUrl && (
-                      <a
-                        href={errorNotification.helpUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold transition-all hover:from-red-400 hover:to-orange-400 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
-                      >
-                        <span>Contact Google Support</span>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    )}
-                    
-                    {/* Bottom glow */}
-                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <button
+                      onClick={() => setErrorNotification(null)}
+                      className="text-gray-600 hover:text-red-400 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   </div>
+                  
+                  {/* Account ID */}
+                  <div className="relative mb-4">
+                    <p className="text-gray-400 text-sm">
+                      Account <span className="font-mono text-red-300 bg-red-500/10 px-2 py-0.5 rounded-md" dir="ltr">{formatCustomerId(errorNotification.customerId)}</span>
+                    </p>
+                  </div>
+                  
+                  {/* Message */}
+                  <div className="relative mb-5 py-3 px-4 rounded-xl bg-black/30 border border-red-500/10">
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      {errorNotification.message}
+                    </p>
+                  </div>
+                  
+                  {/* Button */}
+                  {errorNotification.helpUrl && (
+                    <a
+                      href={errorNotification.helpUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold transition-all hover:from-red-400 hover:to-orange-400 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
+                    >
+                      <span>Contact Google Support</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  )}
+                  
+                  {/* Bottom glow */}
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-40 h-20 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                </div>
                 )}
               </div>
             )}

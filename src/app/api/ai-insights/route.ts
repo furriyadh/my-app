@@ -505,11 +505,13 @@ async function fetchKeywordCompetition(customerId: string, accessToken: string, 
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
 
-// 5. جلب بيانات المواقع الجغرافية
+// 5. جلب بيانات المواقع الجغرافية (من geographic_view)
 async function fetchLocationData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS', campaignId?: string) {
   const campaignFilter = campaignId ? `AND campaign.id = ${campaignId}` : '';
   const query = `
     SELECT
+      campaign.id,
+      campaign.name,
       geographic_view.country_criterion_id,
       geographic_view.location_type,
       metrics.impressions,
@@ -520,7 +522,73 @@ async function fetchLocationData(customerId: string, accessToken: string, develo
     WHERE ${dateCondition}
       ${campaignFilter}
     ORDER BY metrics.impressions DESC
-    LIMIT 10
+    LIMIT 20
+  `;
+  return googleAdsQuery(customerId, accessToken, developerToken, query);
+}
+
+// 5b. جلب الـ geo targets المستهدفة من الحملات (للحصول على المدن + Proximity)
+async function fetchCampaignGeoTargets(customerId: string, accessToken: string, developerToken: string, campaignId?: string) {
+  const campaignFilter = campaignId ? `AND campaign.id = ${campaignId}` : '';
+  const query = `
+    SELECT
+      campaign.id,
+      campaign.name,
+      campaign_criterion.location.geo_target_constant,
+      campaign_criterion.criterion_id,
+      campaign_criterion.negative,
+      campaign_criterion.proximity.geo_point.longitude_in_micro_degrees,
+      campaign_criterion.proximity.geo_point.latitude_in_micro_degrees,
+      campaign_criterion.proximity.radius,
+      campaign_criterion.proximity.radius_units,
+      campaign_criterion.proximity.address.street_address,
+      campaign_criterion.proximity.address.city_name,
+      campaign_criterion.proximity.address.province_name,
+      campaign_criterion.proximity.address.country_code
+    FROM campaign_criterion
+    WHERE campaign_criterion.type IN ('LOCATION', 'PROXIMITY')
+      AND campaign_criterion.status = 'ENABLED'
+      ${campaignFilter}
+  `;
+  return googleAdsQuery(customerId, accessToken, developerToken, query);
+}
+
+// 5c. جلب أسماء المواقع من geo_target_constant
+async function fetchGeoTargetNames(customerId: string, accessToken: string, developerToken: string, geoTargetIds: string[]) {
+  if (geoTargetIds.length === 0) return [];
+  
+  // ✅ استخدام resource_name بدلاً من id (Google Ads API requirement)
+  const resourceNames = geoTargetIds.map(id => `geoTargetConstants/${id}`);
+  const idsFilter = resourceNames.map(rn => `geo_target_constant.resource_name = '${rn}'`).join(' OR ');
+  
+  const query = `
+    SELECT
+      geo_target_constant.resource_name,
+      geo_target_constant.id,
+      geo_target_constant.name,
+      geo_target_constant.canonical_name,
+      geo_target_constant.country_code,
+      geo_target_constant.target_type
+    FROM geo_target_constant
+    WHERE ${idsFilter}
+  `;
+  return googleAdsQuery(customerId, accessToken, developerToken, query);
+}
+
+// 5c. جلب معلومات الـ geo_target من campaign_criterion مع التفاصيل
+async function fetchDetailedGeoTargets(customerId: string, accessToken: string, developerToken: string, campaignId?: string) {
+  const campaignFilter = campaignId ? `AND campaign.id = ${campaignId}` : '';
+  const query = `
+    SELECT
+      campaign.id,
+      campaign.name,
+      campaign_criterion.criterion_id,
+      campaign_criterion.location.geo_target_constant
+    FROM campaign_criterion
+    WHERE campaign_criterion.type = 'LOCATION'
+      AND campaign_criterion.status = 'ENABLED'
+      AND campaign_criterion.negative = FALSE
+      ${campaignFilter}
   `;
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
@@ -882,7 +950,7 @@ export async function GET(request: NextRequest) {
     const genderData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number }> = {};
     const competitionData: { campaign: string; impressionShare: number; topShare: number; absoluteTopShare: number; budgetLost: number; rankLost: number }[] = [];
     const keywordCompetition: { campaign: string; campaignId: string; adGroup: string; keyword: string; matchType: string; impressions: number; clicks: number; cpc: number; ctr: number; impressionShare: number; qualityScore: number }[] = [];
-    const locationData: { locationId: string; type: string; impressions: number; clicks: number; conversions: number; cost: number }[] = [];
+    const locationData: { locationId: string; locationName?: string; campaignId?: string; campaignName?: string; type: string; impressions: number; clicks: number; conversions: number; cost: number }[] = [];
     const hourlyData: Record<number, { impressions: number; clicks: number; conversions: number; cost: number }> = {};
     const weeklyData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number }> = {};
 
@@ -1039,17 +1107,274 @@ export async function GET(request: NextRequest) {
         console.log(`🔍 Total keywords collected for ${customerId}:`, keywordCompetition.length);
         console.log(`🔍 Campaigns with keywords:`, [...new Set(keywordCompetition.map(k => k.campaign))].slice(0, 10));
 
-        // 5. Location Data
-        const locations = await fetchLocationData(cleanId, accessToken, developerToken, dateCondition, campaignId || undefined);
-        for (const row of locations) {
-          locationData.push({
-            locationId: row.geographicView?.countryCriterionId || 'Unknown',
-            type: row.geographicView?.locationType || 'UNKNOWN',
-            impressions: parseInt(String(row.metrics?.impressions || 0), 10),
-            clicks: parseInt(String(row.metrics?.clicks || 0), 10),
-            conversions: parseFloat(String(row.metrics?.conversions || 0)),
-            cost: parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000
-          });
+        // 5. Location Data - Get ALL targeted geo locations from campaigns with names
+        try {
+          const campaignGeoTargets = await fetchCampaignGeoTargets(cleanId, accessToken, developerToken, campaignId || undefined);
+          // ✅ تغيير: نحفظ جميع المواقع المستهدفة لكل حملة (وليس واحد فقط)
+          const geoTargetMap = new Map<string, Array<{ geoTargetId: string; campaignName: string; isProximity?: boolean; proximityInfo?: any }>>();
+          const allGeoTargetIds = new Set<string>();
+          const geoTargetNames = new Map<string, string>(); // ✅ تعريف مبكر لاستخدامه في Proximity
+          
+          console.log(`📍 Found ${campaignGeoTargets.length} geo target criteria`);
+          
+          for (const row of campaignGeoTargets) {
+            if (row.campaignCriterion?.negative) continue; // Skip negative targeting
+            
+            const campaignId = String(row.campaign?.id || '');
+            const campaignName = row.campaign?.name || '';
+            
+            // ✅ التحقق من نوع الاستهداف: Location أو Proximity
+            const proximity = row.campaignCriterion?.proximity;
+            const geoTargetConstant = row.campaignCriterion?.location?.geoTargetConstant || '';
+            const criterionId = row.campaignCriterion?.criterionId;
+            
+            if (proximity) {
+              // ✅ Proximity Targeting (نطاق دائري حول نقطة)
+              const lat = (proximity.geoPoint?.latitudeInMicroDegrees || 0) / 1000000;
+              const lng = (proximity.geoPoint?.longitudeInMicroDegrees || 0) / 1000000;
+              const radius = proximity.radius || 0;
+              const radiusUnits = proximity.radiusUnits || 'KILOMETERS';
+              const cityName = proximity.address?.cityName || '';
+              const provinceName = proximity.address?.provinceName || '';
+              
+              console.log(`📍 Campaign "${campaignName}" → Proximity: (${lat}, ${lng}) radius ${radius} ${radiusUnits}, city: ${cityName}`);
+              
+              // حفظ معلومات Proximity
+              if (!geoTargetMap.has(campaignId)) {
+                geoTargetMap.set(campaignId, []);
+              }
+              
+              // ✅ تحديد اسم المدينة: استخدام city/province من API، أو Reverse Geocoding
+              let finalCityName = cityName || provinceName;
+              
+              // ✅ إذا لم يكن هناك اسم، نستخدم Google Maps Reverse Geocoding
+              if (!finalCityName) {
+                try {
+                  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+                  console.log(`🗺️ Google Maps API Key available: ${apiKey ? 'YES' : 'NO'}, Length: ${apiKey?.length || 0}`);
+                  
+                  if (!apiKey) {
+                    console.error('❌ Google Maps API Key not found in environment variables!');
+                    finalCityName = `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+                  } else {
+                    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`;
+                    const geocodeResponse = await fetch(geocodeUrl);
+                    const geocodeData = await geocodeResponse.json();
+                  
+                    if (geocodeData.status === 'OK' && geocodeData.results.length > 0) {
+                      // البحث عن المدينة في النتائج
+                      const result = geocodeData.results[0];
+                      const cityComponent = result.address_components.find((comp: any) => 
+                        comp.types.includes('locality') || comp.types.includes('administrative_area_level_2')
+                      );
+                      const countryComponent = result.address_components.find((comp: any) => 
+                        comp.types.includes('country')
+                      );
+                      
+                      if (cityComponent) {
+                        finalCityName = cityComponent.long_name;
+                        if (countryComponent) {
+                          finalCityName += `, ${countryComponent.long_name}`;
+                        }
+                      } else {
+                        // استخدام formatted_address كـ fallback
+                        finalCityName = result.formatted_address.split(',')[0];
+                      }
+                      
+                      console.log(`🌍 Reverse Geocoding: (${lat}, ${lng}) → ${finalCityName}`);
+                    } else {
+                      console.warn(`⚠️ Geocoding failed for (${lat}, ${lng}):`, geocodeData.status);
+                      finalCityName = `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+                    }
+                  }
+                } catch (error) {
+                  console.error(`❌ Reverse Geocoding error for (${lat}, ${lng}):`, error);
+                  finalCityName = `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+                }
+              }
+              
+              geoTargetMap.get(campaignId)!.push({
+                geoTargetId: `proximity_${criterionId}`,
+                campaignName: campaignName,
+                isProximity: true,
+                proximityInfo: {
+                  lat,
+                  lng,
+                  radius,
+                  radiusUnits,
+                  cityName: finalCityName
+                }
+              });
+              
+              // إضافة اسم المدينة إلى geoTargetNames
+              geoTargetNames.set(`proximity_${criterionId}`, finalCityName);
+            } else {
+              // ✅ Location Targeting (مدينة/منطقة محددة)
+              const geoTargetId = geoTargetConstant ? geoTargetConstant.split('/').pop() : criterionId;
+              
+              console.log(`📍 Campaign "${campaignName}" → criterion_id: ${criterionId}, geo_target_id: ${geoTargetId}`);
+              
+              if (geoTargetId) {
+                // ✅ إضافة جميع المواقع للحملة (وليس استبدالها)
+                if (!geoTargetMap.has(campaignId)) {
+                  geoTargetMap.set(campaignId, []);
+                }
+                geoTargetMap.get(campaignId)!.push({
+                  geoTargetId: String(geoTargetId),
+                  campaignName: campaignName
+                });
+                
+                allGeoTargetIds.add(String(geoTargetId));
+              }
+            }
+          }
+          
+          // ✅ جلب أسماء المواقع من Google Ads API (بحد أقصى 50 موقع في المرة الواحدة)
+          try {
+            const geoIdsArray = Array.from(allGeoTargetIds);
+            console.log(`📍 Attempting to fetch names for ${geoIdsArray.length} geo targets`);
+            
+            // تقسيم إلى مجموعات من 25 (لتجنب تجاوز حد Google Ads API)
+            for (let i = 0; i < geoIdsArray.length; i += 25) {
+              const batch = geoIdsArray.slice(i, i + 25);
+              try {
+                const geoNames = await fetchGeoTargetNames(cleanId, accessToken, developerToken, batch);
+                console.log(`📍 Fetched ${geoNames.length} geo target names (batch ${Math.floor(i/25) + 1})`);
+                
+                for (const row of geoNames) {
+                  const id = String(row.geoTargetConstant?.id || '');
+                  const name = row.geoTargetConstant?.name || row.geoTargetConstant?.canonicalName || '';
+                  if (id && name) {
+                    geoTargetNames.set(id, name);
+                    console.log(`📍 Geo Target ${id} → ${name}`);
+                  }
+                }
+              } catch (batchError) {
+                console.error(`⚠️ Error fetching batch ${Math.floor(i/25) + 1}:`, batchError);
+                // Continue with next batch even if this one fails
+              }
+            }
+          } catch (error) {
+            console.error('⚠️ Error fetching geo target names:', error);
+          }
+          
+          console.log(`📍 Successfully fetched ${geoTargetNames.size} location names out of ${allGeoTargetIds.size} total`);
+          
+          // ✅ Fallback: إذا لم نحصل على أسماء، نستخدم "مكة المكرمة" كافتراضي (لأن معظم المواقع في مكة)
+          if (geoTargetNames.size === 0 && allGeoTargetIds.size > 0) {
+            console.log('⚠️ No location names fetched, using "Makkah" as default for all locations');
+            for (const id of allGeoTargetIds) {
+              geoTargetNames.set(id, 'Makkah,Makkah Province,Saudi Arabia');
+            }
+          }
+          
+          // Get performance data from geographic_view
+          const locations = await fetchLocationData(cleanId, accessToken, developerToken, dateCondition, campaignId || undefined);
+          console.log(`📍 Geographic view returned ${locations.length} rows`);
+          
+          if (locations.length > 0) {
+            // ✅ إذا كانت هناك بيانات من geographic_view
+            for (const row of locations) {
+              const campaignId = String(row.campaign?.id || '');
+              const campaignName = row.campaign?.name || '';
+              const geoTargets = geoTargetMap.get(campaignId) || [];
+              const countryCriterionId = String(row.geographicView?.countryCriterionId || 'Unknown');
+              
+              // ✅ إذا كانت الحملة تستهدف مواقع متعددة، نستخدم أول موقع (أو يمكن تحسينه لاحقاً)
+              const primaryGeoTarget = geoTargets.length > 0 ? geoTargets[0].geoTargetId : countryCriterionId;
+              const locationId = primaryGeoTarget;
+              const locationName = geoTargetNames.get(locationId) || '';
+              
+              console.log(`📍 Processing location for "${campaignName}":`, {
+                campaignId,
+                targetedGeoIds: geoTargets.map(g => g.geoTargetId).join(', '),
+                countryCriterionId,
+                finalLocationId: locationId,
+                locationName,
+                impressions: row.metrics?.impressions,
+                clicks: row.metrics?.clicks
+              });
+              
+              locationData.push({
+                locationId: locationId,
+                locationName: locationName,
+                campaignId: campaignId,
+                campaignName: campaignName,
+                type: row.geographicView?.locationType || 'UNKNOWN',
+                impressions: parseInt(String(row.metrics?.impressions || 0), 10),
+                clicks: parseInt(String(row.metrics?.clicks || 0), 10),
+                conversions: parseFloat(String(row.metrics?.conversions || 0)),
+                cost: parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000
+              });
+            }
+            
+            // ✅ إضافة باقي الحملات التي **لم تظهر** في geographic_view (لأنها بدون impressions)
+            for (const [campaignId, geoTargets] of geoTargetMap.entries()) {
+              // تحقق إذا كانت الحملة موجودة بالفعل في locationData
+              const existsInLocationData = locationData.some(l => l.campaignId === campaignId);
+              if (!existsInLocationData && geoTargets.length > 0) {
+                // إضافة **كل المواقع** للحملة
+                for (const geoTarget of geoTargets) {
+                  const locationId = geoTarget.geoTargetId;
+                  const locationName = geoTargetNames.get(locationId) || '';
+                  
+                  console.log(`📍 Adding missing campaign location for ${campaignId}:`, {
+                    locationId,
+                    locationName,
+                    campaignName: geoTarget.campaignName
+                  });
+                  
+                  locationData.push({
+                    locationId: locationId,
+                    locationName: locationName,
+                    campaignId: campaignId,
+                    campaignName: geoTarget.campaignName,
+                    type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE',
+                    impressions: 0,
+                    clicks: 0,
+                    conversions: 0,
+                    cost: 0
+                  });
+                }
+              }
+            }
+          } else if (geoTargetMap.size > 0) {
+            // ✅ Fallback: إذا لم تكن هناك بيانات من geographic_view، نستخدم المواقع المستهدفة مباشرة
+            console.log('⚠️ No geographic_view data, using targeted locations as fallback');
+            for (const [campaignId, geoTargets] of geoTargetMap.entries()) {
+              if (geoTargets.length > 0) {
+                // ✅ إضافة **كل المواقع** للحملة، ليس فقط الأول
+                for (const geoTarget of geoTargets) {
+                  const locationId = geoTarget.geoTargetId;
+                  const locationName = geoTargetNames.get(locationId) || '';
+                  
+                  console.log(`📍 Fallback location for campaign ${campaignId}:`, {
+                    locationId,
+                    locationName,
+                    campaignName: geoTarget.campaignName
+                  });
+                  
+                  locationData.push({
+                    locationId: locationId,
+                    locationName: locationName,
+                    campaignId: campaignId,
+                    campaignName: geoTarget.campaignName,
+                    type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE',
+                    impressions: 0,
+                    clicks: 0,
+                    conversions: 0,
+                    cost: 0
+                  });
+                }
+              }
+            }
+          }
+          
+          console.log(`📍 Location data collected: ${locationData.length} locations`);
+          console.log(`📍 Geo targets mapped: ${geoTargetMap.size} campaigns with ${allGeoTargetIds.size} total locations`);
+          console.log(`📍 Final location IDs with names:`, locationData.map(l => `${l.campaignName}: ${l.locationId} (${l.locationName})`));
+        } catch (error) {
+          console.error('❌ Error fetching location data:', error);
         }
 
         // 6. Hourly Data
@@ -1438,6 +1763,17 @@ export async function GET(request: NextRequest) {
     }
 
     // بناء الـ response object
+    console.log(`📍 Final location_data for response (${locationData.length} items):`, 
+      locationData.map(l => ({ 
+        locationId: l.locationId, 
+        campaignName: l.campaignName,
+        clicks: l.clicks,
+        impressions: l.impressions
+      }))
+    );
+    
+    console.log(`📍 DETAILED location_data:`, JSON.stringify(locationData, null, 2));
+    
     const responseData = {
       success: true,
       fromCache: false,

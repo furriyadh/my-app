@@ -1857,16 +1857,10 @@ def analyze_website_and_forecast():
         logger.info(f"   📍 Locations: {len(target_locations)}")
         logger.info(f"   🗣️ Language: {language_id}")
         
-        # Extract location IDs
+        # Extract location IDs - Search for cities/regions in Google Ads geo_target_constant
         location_ids = []
-        for loc in target_locations:
-            if isinstance(loc, (str, int)):
-                location_ids.append(str(loc))
-            elif isinstance(loc, dict):
-                if 'location_id' in loc:
-                    location_ids.append(str(loc['location_id']))
-                elif 'coordinates' in loc and 'countryCode' in loc:
-                    country_code = loc.get('countryCode', '')
+        
+        # Country code to geo_target_id mapping (fallback for countries)
                     country_map = {
                         'SA': '2682', 'AE': '2784', 'EG': '2818', 'US': '2840',
                         'GB': '2826', 'DE': '2276', 'FR': '2250', 'IT': '2380',
@@ -1883,13 +1877,171 @@ def analyze_website_and_forecast():
                         'IQ': '2368', 'KW': '2414', 'OM': '2512', 'QA': '2634',
                         'BH': '2048'
                     }
-                    location_id = country_map.get(country_code)
+        
+        # Initialize Google Ads client for geo_target lookup
+        try:
+            from utils.google_ads_helper import get_google_ads_client
+            client = get_google_ads_client()
+            ga_service = client.get_service("GoogleAdsService")
+            mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
+        except Exception as e:
+            logger.warning(f"⚠️ Could not initialize Google Ads client for geo lookup: {e}")
+            client = None
+            ga_service = None
+        
+        for loc in target_locations:
+            if isinstance(loc, (str, int)):
+                location_ids.append(str(loc))
+            elif isinstance(loc, dict):
+                loc_name = loc.get('name', 'Unknown')
+                english_name = loc.get('english_name', '') or loc.get('englishName', '')
+                loc_type = loc.get('location_type') or loc.get('locationType', 'city')
+                country_code = loc.get('country_code') or loc.get('countryCode', '')
+                formatted_address = loc.get('formatted_address', '')
+                coordinates = loc.get('coordinates', {})
+                
+                logger.info(f"   📍 Processing location: {loc_name} (type: {loc_type}, country: {country_code})")
+                logger.info(f"      🔤 English name: {english_name}")
+                logger.info(f"      📝 Formatted address: {formatted_address}")
+                if coordinates:
+                    logger.info(f"      🌐 Coordinates: {coordinates.get('lat')}, {coordinates.get('lng')}")
+                
+                # Priority 1: Direct location_id (if frontend provides it)
+                if 'location_id' in loc:
+                    location_ids.append(str(loc['location_id']))
+                    logger.info(f"      ✅ Using provided location_id: {loc['location_id']}")
+                    continue
+                
+                # Priority 2: Search for city/region in Google Ads geo_target_constant
+                if loc_type in ['city', 'region', 'country'] and ga_service:
+                    try:
+                        # Build search names list - try multiple variants
+                        search_names = []
+                        
+                        # 1. Use english_name from frontend (most reliable - from Google Places API)
+                        if english_name and not any(ord(c) > 127 for c in english_name):
+                            search_names.append(english_name)
+                            logger.info(f"      🔤 Using English name from frontend: {english_name}")
+                        
+                        # 2. Extract English name from formatted_address (fallback)
+                        if formatted_address and not search_names:
+                            parts = formatted_address.split(',')
+                            if parts:
+                                extracted_name = parts[0].strip()
+                                if extracted_name and not any(ord(c) > 127 for c in extracted_name):
+                                    search_names.append(extracted_name)
+                                    logger.info(f"      🔤 Extracted English name from address: {extracted_name}")
+                        
+                        # 2. Add original name
+                        if loc_name:
+                            search_names.append(loc_name)
+                        
+                        # 3. Common Arabic-English mappings (fallback)
+                        arabic_to_english = {
+                            'جدة': 'Jeddah', 'الرياض': 'Riyadh', 'مكة': 'Makkah', 'المدينة': 'Madinah',
+                            'الدمام': 'Dammam', 'الخبر': 'Khobar', 'الطائف': 'Taif', 'تبوك': 'Tabuk',
+                            'دبي': 'Dubai', 'أبوظبي': 'Abu Dhabi', 'الشارقة': 'Sharjah',
+                            'القاهرة': 'Cairo', 'الإسكندرية': 'Alexandria', 'الجيزة': 'Giza',
+                            'عمان': 'Amman', 'بيروت': 'Beirut', 'الكويت': 'Kuwait',
+                            'الدوحة': 'Doha', 'المنامة': 'Manama', 'مسقط': 'Muscat',
+                            'بغداد': 'Baghdad', 'الدار البيضاء': 'Casablanca', 'الرباط': 'Rabat',
+                        }
+                        if loc_name in arabic_to_english:
+                            search_names.insert(0, arabic_to_english[loc_name])
+                        
+                        # Remove duplicates while preserving order
+                        search_names = list(dict.fromkeys(search_names))
+                        logger.info(f"      🔍 Search names: {search_names}")
+                        
+                        best_match = None
+                        
+                        for search_name in search_names:
+                            if best_match:
+                                break
+                            
+                            # Skip Arabic names in query (Google Ads uses English)
+                            if any(ord(c) > 127 for c in search_name):
+                                logger.info(f"      ⏭️ Skipping non-English name: {search_name}")
+                                continue
+                            
+                            try:
+                                query = f"""
+                                    SELECT
+                                        geo_target_constant.id,
+                                        geo_target_constant.name,
+                                        geo_target_constant.canonical_name,
+                                        geo_target_constant.country_code,
+                                        geo_target_constant.target_type
+                                    FROM geo_target_constant
+                                    WHERE geo_target_constant.canonical_name LIKE '%{search_name}%'
+                                """
+                                
+                                if country_code:
+                                    query += f" AND geo_target_constant.country_code = '{country_code.upper()}'"
+                                
+                                query += " LIMIT 15"
+                                
+                                response = ga_service.search(
+                                    customer_id=mcc_customer_id,
+                                    query=query
+                                )
+                                
+                                # Find best match (prefer City type and exact match)
+                                for row in response:
+                                    geo = row.geo_target_constant
+                                    geo_type = geo.target_type.name if hasattr(geo.target_type, 'name') else str(geo.target_type)
+                                    
+                                    logger.info(f"      🔍 Found: {geo.canonical_name} (ID: {geo.id}, Type: {geo_type})")
+                                    
+                                    # Prefer exact name match (case insensitive)
+                                    if search_name.lower() in geo.canonical_name.lower():
+                                        if geo_type == 'City':
+                                            best_match = geo
+                                            break
+                                        elif not best_match:
+                                            best_match = geo
+                                    elif not best_match:
+                                        best_match = geo
+                                        
+                            except Exception as query_error:
+                                logger.warning(f"      ⚠️ Query failed for '{search_name}': {query_error}")
+                        
+                        if best_match:
+                            location_id = str(best_match.id)
+                            if location_id not in location_ids:
+                                location_ids.append(location_id)
+                                logger.info(f"      ✅ Found city/region: {best_match.canonical_name} (ID: {location_id})")
+                                logger.info(f"      📍 Using precise location targeting for: {loc_name}")
+                            continue
+                        else:
+                            logger.warning(f"      ⚠️ No geo_target found in Google Ads for: {loc_name}")
+                            logger.warning(f"      💡 This location may not be available in Google Ads geo_target_constant")
+                            logger.warning(f"      🔄 Will fallback to country-level targeting: {country_code}")
+                    
+                    except Exception as e:
+                        logger.warning(f"      ⚠️ Error searching geo_target for {loc_name}: {e}")
+                        logger.warning(f"      🔄 Will fallback to country-level targeting: {country_code}")
+                
+                # Priority 3: Fallback to country code mapping
+                if country_code:
+                    location_id = country_map.get(country_code.upper())
                     if location_id and location_id not in location_ids:
                         location_ids.append(location_id)
+                        logger.info(f"      ✅ Fallback to country {country_code} → location_id: {location_id}")
+                    else:
+                        logger.warning(f"      ⚠️ Unknown country code: {country_code}")
+                else:
+                    logger.warning(f"      ⚠️ No country_code found in location: {loc}")
         
         if not location_ids:
             location_ids = ['2682']  # Default: Saudi Arabia
-            logger.warning(f"⚠️ No locations provided, using default: Saudi Arabia")
+            logger.warning(f"⚠️ No valid locations extracted, using default: Saudi Arabia")
+        else:
+            logger.info(f"✅ Extracted {len(location_ids)} location IDs: {location_ids}")
+            logger.info(f"📊 Location Targeting Summary:")
+            logger.info(f"   • Total locations processed: {len(target_locations)}")
+            logger.info(f"   • Successfully mapped to Google Ads: {len(location_ids)}")
+            logger.info(f"   • Location IDs: {', '.join(location_ids)}")
         
         # Step 1: Generate keyword ideas from URL (EXACTLY like google-ads-official)
         try:
@@ -1931,42 +2083,42 @@ def analyze_website_and_forecast():
             
             for url_attempt in urls_to_try:
                 try:
-                    keyword_ideas_request = client.get_type("GenerateKeywordIdeasRequest")
-                    mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
-                    keyword_ideas_request.customer_id = mcc_customer_id
-                    keyword_ideas_request.language = language_rn
-                    keyword_ideas_request.geo_target_constants = location_rns
-                    keyword_ideas_request.include_adult_keywords = False
-                    keyword_ideas_request.keyword_plan_network = (
-                        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
-                    )
-                    
+            keyword_ideas_request = client.get_type("GenerateKeywordIdeasRequest")
+            mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
+            keyword_ideas_request.customer_id = mcc_customer_id
+            keyword_ideas_request.language = language_rn
+            keyword_ideas_request.geo_target_constants = location_rns
+            keyword_ideas_request.include_adult_keywords = False
+            keyword_ideas_request.keyword_plan_network = (
+                client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
+            )
+            
                     # Use URL seed to generate keywords from website
                     keyword_ideas_request.url_seed.url = url_attempt
-                    
+            
                     logger.info(f"🚀 Step 1: Generating keyword ideas from URL: {url_attempt}")
-                    
-                    # Call API to get keyword ideas
-                    keyword_ideas = keyword_plan_idea_service.generate_keyword_ideas(
-                        request=keyword_ideas_request
-                    )
-                    
-                    # Extract keywords and metrics
-                    for idea in keyword_ideas:
-                        keyword_text = idea.text
-                        metrics = idea.keyword_idea_metrics
-                        competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
-                        
-                        keywords_list.append(keyword_text)
-                        keywords_data.append({
-                            'keyword': keyword_text,
-                            'avg_monthly_searches': metrics.avg_monthly_searches,
-                            'competition': competition_value
-                        })
-                        
-                        # Limit to top 10 keywords
-                        if len(keywords_list) >= 10:
-                            break
+            
+            # Call API to get keyword ideas
+            keyword_ideas = keyword_plan_idea_service.generate_keyword_ideas(
+                request=keyword_ideas_request
+            )
+            
+            # Extract keywords and metrics
+            for idea in keyword_ideas:
+                keyword_text = idea.text
+                metrics = idea.keyword_idea_metrics
+                competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
+                
+                keywords_list.append(keyword_text)
+                keywords_data.append({
+                    'keyword': keyword_text,
+                    'avg_monthly_searches': metrics.avg_monthly_searches,
+                    'competition': competition_value
+                })
+                
+                # Limit to top 10 keywords
+                if len(keywords_list) >= 10:
+                    break
                     
                     if keywords_list:
                         logger.info(f"✅ Successfully generated keywords from: {url_attempt}")
@@ -2180,11 +2332,11 @@ def detect_website_language():
         text_content = ''
         
         # Fetch the website (20 second timeout)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept-Language': 'ar,en,fr,es,de,it,ja,ko,zh,*;q=0.9',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-        }
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            }
         
         # Try to fetch the website - with www fallback
         response = None
@@ -2205,7 +2357,7 @@ def detect_website_language():
                 logger.info(f"🔗 Fetching: {url_attempt}")
                 response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
                 if response.status_code == 200:
-                    logger.info(f"✅ Website fetched successfully: {response.status_code}")
+            logger.info(f"✅ Website fetched successfully: {response.status_code}")
                     break
             except Exception as fetch_error:
                 fetch_error_msg = str(fetch_error)
@@ -2225,13 +2377,13 @@ def detect_website_language():
                 'suggestion': 'جرب إضافة www. للرابط أو تأكد من أن الموقع يعمل',
                 'error_details': fetch_error_msg
             }), 400
-        
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
         # Get HTML lang attribute (for reference only)
         html_lang_attr = None
-        html_tag = soup.find('html')
-        if html_tag and html_tag.get('lang'):
+            html_tag = soup.find('html')
+            if html_tag and html_tag.get('lang'):
             html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
             logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
         
@@ -2339,8 +2491,8 @@ def detect_website_language():
             devanagari_chars = len(re.findall(r'[\u0900-\u097F]', text_content))
             latin_chars = len(re.findall(r'[a-zA-Z]', text_content))
             
-            total_chars = len(text_content)
-            
+                total_chars = len(text_content)
+                
             # Find the dominant script
             scripts = {
                 'ar': arabic_chars,
@@ -2389,7 +2541,7 @@ def detect_website_language():
             if persian_score > arabic_score and persian_score > 10:
                 detected_lang_code = 'fa'
                 logger.info(f"✅ PERSIAN confirmed (score: {persian_score} vs Arabic: {arabic_score})")
-            else:
+                    else:
                 detected_lang_code = 'ar'
                 logger.info(f"✅ ARABIC confirmed (score: {arabic_score} vs Persian: {persian_score})")
         
@@ -2400,7 +2552,7 @@ def detect_website_language():
             # Last resort: use HTML lang attribute if available
             if html_lang_attr:
                 detected_lang_code = html_lang_attr
-                confidence = 'low'
+                        confidence = 'low'
                 logger.info(f"⚠️ Using HTML lang attribute as last resort: {detected_lang_code}")
             else:
                 logger.error(f"❌ Could not determine language")
@@ -2725,7 +2877,7 @@ def launch_campaign():
                             if location_id not in location_ids:
                                 location_ids.append(location_id)
                             logger.info(f"✅ Using FULL COUNTRY targeting for: {location_name} (ID: {location_id})")
-                        else:
+                            else:
                             logger.warning(f"⚠️ Could not find country ID for: {location_name}")
                 
                 # CASE 2: REGION/STATE - Use location_id if available, search if not
@@ -2735,21 +2887,21 @@ def launch_campaign():
                     # For now, use country-level as fallback
                     if country_code and country_code in country_map:
                         location_id = country_map[country_code]
-                        if location_id not in location_ids:
-                            location_ids.append(location_id)
+                            if location_id not in location_ids:
+                                location_ids.append(location_id)
                         logger.info(f"   ℹ️ Using country-level targeting as fallback for region: {location_name}")
                         
                 # CASE 3: CITY/NEIGHBORHOOD - Use proximity targeting for precise targeting
                 elif location_type in ['city', 'locality', 'neighborhood', 'sublocality', 'مدينة', 'حي', 'منطقة فرعية']:
-                    if 'coordinates' in loc:
-                        coords = loc['coordinates']
-                        radius = loc.get('radius', 10)
-                        proximity_targets.append({
-                            'latitude': coords.get('lat'),
-                            'longitude': coords.get('lng'),
-                            'radius_km': radius,
-                            'name': location_name
-                        })
+                            if 'coordinates' in loc:
+                                coords = loc['coordinates']
+                                radius = loc.get('radius', 10)
+                                proximity_targets.append({
+                                    'latitude': coords.get('lat'),
+                                    'longitude': coords.get('lng'),
+                                    'radius_km': radius,
+                                    'name': location_name
+                                })
                         logger.info(f"✅ Using PROXIMITY targeting for city/neighborhood: {location_name} (radius: {radius}km)")
                     
                     # Also add country for Keyword Planner compatibility
@@ -2778,14 +2930,14 @@ def launch_campaign():
                         logger.info(f"✅ Detected as COUNTRY, using full targeting for: {location_name} (ID: {location_id})")
                     elif 'coordinates' in loc:
                         # Has coordinates but unknown type - use proximity
-                        coords = loc['coordinates']
-                        radius = loc.get('radius', 10)
-                        proximity_targets.append({
-                            'latitude': coords.get('lat'),
-                            'longitude': coords.get('lng'),
-                            'radius_km': radius,
+                            coords = loc['coordinates']
+                            radius = loc.get('radius', 10)
+                            proximity_targets.append({
+                                'latitude': coords.get('lat'),
+                                'longitude': coords.get('lng'),
+                                'radius_km': radius,
                             'name': location_name
-                        })
+                            })
                         logger.info(f"⚠️ Unknown location type for: {location_name}, using proximity targeting (radius: {radius}km)")
                         
                         # Add country for compatibility if available

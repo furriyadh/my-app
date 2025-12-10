@@ -13,6 +13,7 @@ interface Location {
   id: string;
   name: string;
   secondaryText?: string; // Added to distinguish between locations with same name
+  englishName?: string; // English name from Google Places API for Google Ads targeting
   country: string;
   countryCode: string;
   radius: number;
@@ -1721,11 +1722,17 @@ const LocationTargetingPage: React.FC = () => {
 
         // Determine location type
         const locationType = getLocationType(place.address_components || []);
+        
+        // Extract English name from formatted_address (e.g., "Jeddah, Saudi Arabia")
+        const formattedAddress = place.formatted_address || '';
+        const englishName = formattedAddress.split(',')[0]?.trim() || result.structured_formatting.main_text;
+        console.log(`🔤 English name from formatted_address: ${englishName}`);
             
             const newLocation: Location = {
           id: `loc_${Date.now()}`,
           name: result.structured_formatting.main_text, // Use the search result text (in user's language)
           secondaryText: result.structured_formatting.secondary_text || '', // Save secondary text for comparison
+          englishName: englishName, // English name for Google Ads API
           country: countryName,
           countryCode: countryCode,
           radius: radius,

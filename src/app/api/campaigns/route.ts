@@ -218,6 +218,7 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
             SELECT 
               campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type,
               campaign.start_date, campaign.end_date, campaign_budget.amount_micros,
+              campaign.primary_status, campaign.primary_status_reasons,
               metrics.impressions, metrics.clicks, metrics.ctr, metrics.conversions,
               metrics.conversions_value, metrics.cost_micros, metrics.average_cpc,
               metrics.average_cpm, metrics.cost_per_conversion
@@ -278,6 +279,29 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
         'SHOPPING': 'SHOPPING', 'PERFORMANCE_MAX': 'PERFORMANCE_MAX'
       };
 
+      // ✅ معالجة حالة المراجعة (Review Status)
+      const primaryStatus = campaign.primaryStatus || 'UNKNOWN';
+      const primaryStatusReasons = campaign.primaryStatusReasons || [];
+      
+      // تحديد حالة المراجعة بناءً على primary_status
+      let reviewStatus = 'APPROVED'; // افتراضياً مقبولة
+      let reviewStatusLabel = 'Approved';
+      let reviewStatusLabelAr = 'مقبولة';
+      
+      if (primaryStatus === 'PENDING' || primaryStatusReasons.includes('PENDING_REVIEW')) {
+        reviewStatus = 'UNDER_REVIEW';
+        reviewStatusLabel = 'Under Review';
+        reviewStatusLabelAr = 'قيد المراجعة';
+      } else if (primaryStatus === 'NOT_ELIGIBLE' || primaryStatusReasons.includes('DISAPPROVED')) {
+        reviewStatus = 'DISAPPROVED';
+        reviewStatusLabel = 'Disapproved';
+        reviewStatusLabelAr = 'مرفوضة';
+      } else if (primaryStatus === 'ELIGIBLE' || primaryStatus === 'PAUSED' || primaryStatus === 'REMOVED') {
+        reviewStatus = 'APPROVED';
+        reviewStatusLabel = 'Approved';
+        reviewStatusLabelAr = 'مقبولة';
+      }
+
       return {
         id: campaign.id?.toString() || '',
         name: campaign.name || 'Unnamed Campaign',
@@ -286,6 +310,12 @@ async function fetchCampaignsFromAccount(customerId: string, accessToken: string
         customerId: customerId,
         currency: currency,
         budget: budget.amountMicros ? budget.amountMicros / 1000000 : 0,
+        // ✅ إضافة حالة المراجعة
+        reviewStatus: reviewStatus,
+        reviewStatusLabel: reviewStatusLabel,
+        reviewStatusLabelAr: reviewStatusLabelAr,
+        primaryStatus: primaryStatus,
+        primaryStatusReasons: primaryStatusReasons,
         impressions: parseInt(metrics.impressions) || 0,
         clicks: parseInt(metrics.clicks) || 0,
         // Google Ads API returns CTR as decimal (0.1429 = 14.29%), we convert to percentage

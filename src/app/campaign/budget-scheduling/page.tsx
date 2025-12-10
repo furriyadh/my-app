@@ -87,37 +87,74 @@ const BudgetSchedulingPage: React.FC = () => {
     'SAR': 3.75,
     'AED': 3.67,
     'USD': 1.0,
-    'EGP': 49.0,
-    'EUR': 0.92,
+    'EGP': 50.5,
+    'EUR': 0.93,
     'GBP': 0.79,
     'INR': 83.12,
     'BRL': 4.97
   });
   const [isLoadingRates, setIsLoadingRates] = useState(false);
 
-  // جلب أسعار الصرف الحية من Frankfurter API
+  // جلب أسعار الصرف الحية من Backend API (يستخدم exchangerate-api.com)
+  // يتم الجلب مرة واحدة فقط عند دخول الصفحة
   useEffect(() => {
     const fetchExchangeRates = async () => {
       setIsLoadingRates(true);
       try {
-        const response = await fetch('https://api.frankfurter.app/latest?from=USD');
+        // إضافة timestamp لإجبار الـ backend على جلب أسعار جديدة إذا كان الـ cache قديم
+        const apiUrl = getApiUrl('/api/ai-campaign/get-live-exchange-rates');
+        console.log('💱 جلب أسعار الصرف الحقيقية من:', apiUrl);
+        console.log('⏰ وقت الطلب:', new Date().toLocaleTimeString());
+        
+        const response = await fetch(apiUrl, {
+          cache: 'no-cache', // لا تستخدم cache المتصفح
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         const data = await response.json();
         
-        if (data.rates) {
+        if (data.success && data.rates) {
           const rates: Record<string, number> = { 'USD': 1.0, ...data.rates };
           setConversionRates(rates);
-          console.log('💱 أسعار الصرف الحية (Budget Page):', rates);
+          console.log('✅ تم جلب أسعار الصرف الحقيقية بنجاح:', {
+            total: data.total_currencies,
+            source: data.source,
+            last_update: data.last_update,
+            cache_age_minutes: data.cache_age_minutes,
+            next_update_in: data.next_update_in_minutes,
+            sample_rates: {
+              SAR: rates.SAR?.toFixed(4),
+              AED: rates.AED?.toFixed(4),
+              EGP: rates.EGP?.toFixed(4),
+              EUR: rates.EUR?.toFixed(4),
+              GBP: rates.GBP?.toFixed(4),
+              INR: rates.INR?.toFixed(4),
+              BRL: rates.BRL?.toFixed(4)
+            }
+          });
+          
+          // عرض أمثلة على التحويل
+          console.log('💰 أمثلة على التحويل من $15 USD:');
+          console.log(`   SAR: ${(15 * rates.SAR).toFixed(2)}`);
+          console.log(`   AED: ${(15 * rates.AED).toFixed(2)}`);
+          console.log(`   EGP: ${(15 * rates.EGP).toFixed(2)}`);
+          console.log(`   EUR: ${(15 * rates.EUR).toFixed(2)}`);
+        } else {
+          console.error('❌ فشل في جلب أسعار الصرف:', data.error);
         }
       } catch (error) {
         console.error('❌ خطأ في جلب أسعار الصرف:', error);
+        console.warn('⚠️ سيتم استخدام القيم الافتراضية');
         // استخدام القيم الافتراضية في حالة فشل API
       } finally {
         setIsLoadingRates(false);
       }
     };
     
+    // جلب الأسعار مرة واحدة فقط عند تحميل الصفحة
     fetchExchangeRates();
-  }, []);
+  }, []); // Empty dependency array = runs only once on mount
   
   // Helper functions to get currency symbol and rate with fallback to USD
   const getCurrencySymbol = useCallback((curr: string) => {
@@ -149,13 +186,21 @@ const BudgetSchedulingPage: React.FC = () => {
   ], []);
   
   // Convert budget options to selected currency
-  const budgetOptions = useMemo(() => 
-    budgetOptionsUSD.map(option => ({
-      ...option,
-      amountUSD: option.amount,
-      amount: Math.round(option.amount * getConversionRate(currency))
-    }))
-  , [currency, getConversionRate, budgetOptionsUSD]);
+  const budgetOptions = useMemo(() => {
+    const rate = getConversionRate(currency);
+    console.log(`💱 Converting budget options to ${currency} (rate: ${rate})`);
+    
+    return budgetOptionsUSD.map(option => {
+      const convertedAmount = Math.round(option.amount * rate);
+      console.log(`   $${option.amount} → ${getCurrencySymbol(currency)}${convertedAmount}`);
+      
+      return {
+        ...option,
+        amountUSD: option.amount,
+        amount: convertedAmount
+      };
+    });
+  }, [currency, getConversionRate, budgetOptionsUSD, getCurrencySymbol]);
   
   // Calculate displayed budget based on currency
   const selectedBudget = useMemo(() => 
@@ -166,8 +211,10 @@ const BudgetSchedulingPage: React.FC = () => {
   // Load campaign data and initial estimates on mount
   useEffect(() => {
     const data = localStorage.getItem('campaignData');
+    let parsedCampaignData = null;
     if (data) {
-      setCampaignData(JSON.parse(data));
+      parsedCampaignData = JSON.parse(data);
+      setCampaignData(parsedCampaignData);
     }
     
     // Load initial estimates from website analysis (if available)
@@ -183,6 +230,102 @@ const BudgetSchedulingPage: React.FC = () => {
         });
       } catch (e) {
         console.warn('Failed to parse initialEstimates');
+      }
+    }
+    
+    // 🚀 Start website analysis with SELECTED LOCATIONS (moved from website-url page)
+    const selectedLocationsStr = localStorage.getItem('selectedLocations');
+    if (selectedLocationsStr && parsedCampaignData?.websiteUrl) {
+      try {
+        const selectedLocations = JSON.parse(selectedLocationsStr);
+        
+        // Only call API if we have locations selected
+        if (selectedLocations.length > 0) {
+          console.log('🚀 Starting website analysis with selected locations:', selectedLocations.length);
+          
+          const targetLocations = selectedLocations.map((loc: any) => ({
+            name: loc.name,
+            english_name: loc.englishName || loc.name, // English name for Google Ads API
+            formatted_address: loc.englishName || loc.country || loc.secondaryText || loc.name,
+            place_id: loc.id,
+            country_code: loc.countryCode,
+            location_type: loc.locationType || 'city',
+            coordinates: loc.coordinates,
+            radius: loc.radius || 10
+          }));
+          
+          const preferredLanguage = localStorage.getItem('preferredLanguage') || 'ar';
+          const languageId = preferredLanguage === 'en' ? '1000' : '1019';
+          const dailyBudget = parsedCampaignData.dailyBudget || 15;
+          
+          // Start combined analysis in background with REAL locations
+          fetch(getApiUrl('/api/ai-campaign/analyze-website-and-forecast'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              website_url: parsedCampaignData.websiteUrl,
+              target_locations: targetLocations,
+              language_id: languageId,
+              daily_budget_usd: dailyBudget
+            })
+          })
+            .then(response => response.json())
+            .then(result => {
+              if (result.success) {
+                console.log(`✅ Website Analysis Complete with ${selectedLocations.length} locations!`);
+                console.log(`   📍 Locations: ${selectedLocations.map((l: any) => l.name).join(', ')}`);
+                console.log(`   📊 Generated ${result.keywords.length} keywords from website`);
+                console.log(`   💰 Monthly Impressions: ${result.forecast.monthly.impressions.toLocaleString()}`);
+                console.log(`   🖱️ Monthly Clicks: ${result.forecast.monthly.clicks.toLocaleString()}`);
+                console.log(`   ✅ Monthly Conversions: ${result.forecast.monthly.conversions.toLocaleString()}`);
+                
+                // Store keywords with competition data
+                localStorage.setItem('generatedContent', JSON.stringify({
+                  keywords: result.keywords.map((kw: any) => kw.keyword),
+                  keywordsWithMetrics: result.keywords
+                }));
+                
+                // Store forecast data
+                localStorage.setItem('forecastData', JSON.stringify(result.forecast));
+                
+                // Store initial estimates
+                localStorage.setItem('initialEstimates', JSON.stringify({
+                  impressions: result.forecast.monthly.impressions,
+                  clicks: result.forecast.monthly.clicks,
+                  conversions: result.forecast.monthly.conversions,
+                  avgCPC: result.forecast.monthly.avg_cpc
+                }));
+                
+                // Update estimates in state
+                setEstimates({
+                  impressions: result.forecast.monthly.impressions,
+                  clicks: result.forecast.monthly.clicks,
+                  conversions: result.forecast.monthly.conversions
+                });
+                
+                // Update campaign data
+                const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+                const finalData = {
+                  ...currentData,
+                  websiteAnalyzed: true,
+                  forecastGenerated: true,
+                  keywordsGenerated: result.keywords.length
+                };
+                localStorage.setItem('campaignData', JSON.stringify(finalData));
+                
+                console.log('💾 Website analysis saved with correct locations');
+              } else {
+                console.log('⚠️ Website analysis failed:', result.error);
+              }
+            })
+            .catch(error => {
+              console.log('⚠️ Website analysis error:', error);
+            });
+        } else {
+          console.log('⚠️ No locations selected - skipping website analysis');
+        }
+      } catch (e) {
+        console.warn('Failed to parse selectedLocations for analysis');
       }
     }
   }, []);

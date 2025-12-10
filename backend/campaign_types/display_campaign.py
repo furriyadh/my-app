@@ -520,17 +520,25 @@ class DisplayCampaignCreator:
         responsive_display_ad_info.marketing_images.append(marketing_image)
         responsive_display_ad_info.square_marketing_images.append(square_marketing_image)
         
-        # Add headlines (1-5)
+        # Add short headlines (5 minimum للحصول على GOOD Ad Strength)
         for headline_text in headlines[:5]:
             headline = self.client.get_type("AdTextAsset")
             headline.text = headline_text[:30]  # Max 30 chars
             responsive_display_ad_info.headlines.append(headline)
         
-        # Add long headline
-        responsive_display_ad_info.long_headline.text = long_headline[:90]  # Max 90 chars
+        # Add long headlines (1-5 للحصول على EXCELLENT - Google Ads API v21)
+        long_headlines = headlines[5:10] if len(headlines) > 5 else [long_headline] if long_headline else []
+        for long_headline_text in long_headlines[:5]:
+            long_headline_asset = self.client.get_type("AdTextAsset")
+            long_headline_asset.text = long_headline_text[:90]  # Max 90 chars
+            responsive_display_ad_info.long_headlines.append(long_headline_asset)
         
-        # Add descriptions (1-5) - استخدام set لتجنب التكرار
-        unique_descriptions = list(dict.fromkeys(descriptions[:5]))  # إزالة التكرار مع الحفاظ على الترتيب
+        # Fallback: إذا لم يتم إضافة أي long headline، استخدم الأول
+        if len(responsive_display_ad_info.long_headlines) == 0 and long_headline:
+            responsive_display_ad_info.long_headline.text = long_headline[:90]
+        
+        # Add descriptions (5 minimum للحصول على EXCELLENT Ad Strength)
+        unique_descriptions = list(dict.fromkeys(descriptions[:5]))  # إزالة التكرار
         for description_text in unique_descriptions:
             description = self.client.get_type("AdTextAsset")
             description.text = description_text[:90]  # Max 90 chars

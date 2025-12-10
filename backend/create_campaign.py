@@ -1164,15 +1164,26 @@ class OfficialCampaignCreator:
             headlines = [copy.get('headline', '') for copy in ad_copies[:15] if copy.get('headline')]
             descriptions = [copy.get('description', '') for copy in ad_copies[:4] if copy.get('description')]
             
-            # إعداد بيانات النسخ الإعلانية
+            # إعداد بيانات النسخ الإعلانية مع الأصول المولدة من AI بناءً على محتوى الموقع
             ad_copies_data = {
                 'headlines': headlines,
                 'descriptions': descriptions,
                 'keywords': website_content.get('keywords', [])[:20],
                 'long_headline': headlines[0] if headlines else 'خدمات متميزة',
                 'business_name': website_content.get('title', 'عملي'),
+                'callouts': ai_result.get('callouts', []),  # مولدة من محتوى الموقع
+                'structured_snippets': ai_result.get('structured_snippets', {}),  # مولدة من محتوى الموقع
+                'promotion': ai_result.get('promotion', {}),  # مولدة من محتوى الموقع
                 'images': []
             }
+            
+            # طباعة الأصول المولدة للتأكد
+            if ad_copies_data.get('callouts'):
+                print(f"\n📝 Callouts المولدة: {ad_copies_data['callouts']}")
+            if ad_copies_data.get('structured_snippets'):
+                print(f"📝 Structured Snippets المولدة: {ad_copies_data['structured_snippets']}")
+            if ad_copies_data.get('promotion'):
+                print(f"📝 Promotion المولد: {ad_copies_data['promotion']}")
             
             # إنشاء الحملة باستخدام campaign creator المتخصص
             campaign_name = f"حملة {website_content.get('title', 'خدمات متخصصة')} - {campaign_type}"

@@ -458,84 +458,9 @@ const WebsiteUrlPage: React.FC = () => {
       // Navigate immediately - no waiting!
       router.push('/campaign/location-targeting');
       
-      // Start background analysis (don't wait for it)
-      console.log('🚀 Starting background website analysis...');
-      
-      // Get selected locations from localStorage
-      const selectedLocationsStr = localStorage.getItem('selectedLocations');
-      let targetLocations: any[] = [];
-      if (selectedLocationsStr) {
-        try {
-          targetLocations = JSON.parse(selectedLocationsStr);
-        } catch (e) {
-          console.warn('Failed to parse selectedLocations');
-        }
-      }
-      
-      // Get language preference
-      const preferredLanguage = localStorage.getItem('preferredLanguage') || 'ar';
-      const languageId = preferredLanguage === 'en' ? '1000' : '1019';
-      
-      // Get budget (default to $15 if not set yet)
-      const storedCampaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
-      const dailyBudget = storedCampaignData.dailyBudget || 15;
-      
-      // Start combined analysis in background (language detection + keyword generation + forecast)
-      fetch(getApiUrl('/api/ai-campaign/analyze-website-and-forecast'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          website_url: fullUrl,
-          target_locations: targetLocations,
-          language_id: languageId,
-          daily_budget_usd: dailyBudget
-        })
-      })
-        .then(response => response.json())
-        .then(result => {
-          if (result.success) {
-            console.log(`✅ Background Website Analysis Complete!`);
-            console.log(`   📊 Generated ${result.keywords.length} keywords from website`);
-            console.log(`   💰 Monthly Impressions: ${result.forecast.monthly.impressions.toLocaleString()}`);
-            console.log(`   🖱️ Monthly Clicks: ${result.forecast.monthly.clicks.toLocaleString()}`);
-            console.log(`   ✅ Monthly Conversions: ${result.forecast.monthly.conversions.toLocaleString()}`);
-            
-            // Save comprehensive data to localStorage
-            const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
-            
-            // Store keywords with competition data
-            localStorage.setItem('generatedContent', JSON.stringify({
-              keywords: result.keywords.map((kw: any) => kw.keyword),
-              keywordsWithMetrics: result.keywords // Full data with competition
-            }));
-            
-            // Store forecast data
-            localStorage.setItem('forecastData', JSON.stringify(result.forecast));
-            
-            // Store initial estimates in budget page format
-            localStorage.setItem('initialEstimates', JSON.stringify({
-              impressions: result.forecast.monthly.impressions,
-              clicks: result.forecast.monthly.clicks,
-              conversions: result.forecast.monthly.conversions,
-              avgCPC: result.forecast.monthly.avg_cpc
-            }));
-            
-            const finalData = {
-              ...currentData,
-              websiteAnalyzed: true,
-              forecastGenerated: true,
-              keywordsGenerated: result.keywords.length
-            };
-            
-            localStorage.setItem('campaignData', JSON.stringify(finalData));
-            console.log('💾 Background website analysis and forecast saved to localStorage');
-          } else {
-            console.log('⚠️ Background website analysis failed:', result.error);
-          }
-        })
-        .catch(error => {
-          console.log('⚠️ Background website analysis error:', error);
-        });
+      // ℹ️ Website analysis will be done in budget-scheduling page AFTER user selects locations
+      // This ensures the API receives the correct target locations chosen by the user
+      console.log('📍 Website URL saved. Full analysis will start after location selection in budget-scheduling page.');
       
       // Also detect language separately in background (optional, for UI display)
       fetch(getApiUrl('/api/ai-campaign/detect-website-language'), {
@@ -600,7 +525,6 @@ const WebsiteUrlPage: React.FC = () => {
       
       <div className="min-h-screen bg-black overflow-x-hidden" style={{ 
         position: 'relative',
-        minHeight: '100vh',
         minHeight: '100dvh' // Use dynamic viewport height for mobile
       }}>
       {/* Campaign Progress */}
