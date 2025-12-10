@@ -268,7 +268,7 @@ const Navbar: React.FC = () => {
                         language
                       </i>
                       <span>{t.common.languages}</span>
-                    </div>
+                  </div>
                     <i className={`material-symbols-outlined !text-[20px] transition-transform duration-300 ${isMobileLanguageOpen ? 'rotate-180' : ''}`}>
                       expand_more
                     </i>
@@ -277,29 +277,29 @@ const Navbar: React.FC = () => {
                   {/* Dropdown Content */}
                   <div className={`overflow-hidden transition-all duration-300 ${isMobileLanguageOpen ? 'max-h-[600px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
                     <div className="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar pl-2">
-                      {SUPPORTED_LANGUAGES.map((lang) => (
-                        <button
-                          key={lang.code}
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
                           onClick={() => {
                             switchLanguage(lang.code);
                             setMobileLanguageOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${
                             language === lang.code ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-600' : ''
-                          }`}
-                        >
-                          <Image 
-                            src={lang.flag} 
-                            alt={lang.name} 
-                            width={24} 
-                            height={24} 
-                            className="rounded-sm"
-                          />
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {lang.name}
-                          </span>
-                        </button>
-                      ))}
+                        }`}
+                      >
+                        <Image 
+                          src={lang.flag} 
+                          alt={lang.name} 
+                          width={24} 
+                          height={24} 
+                          className="rounded-sm"
+                        />
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {lang.name}
+                        </span>
+                      </button>
+                    ))}
                     </div>
                   </div>
                 </li>

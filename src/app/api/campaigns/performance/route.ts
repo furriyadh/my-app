@@ -22,21 +22,21 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
       .from('client_requests')
       .select('customer_id, status, link_details')
       .eq('user_id', userId);
-    
+
     if (error) return [];
-    
+
     // فلترة الحسابات المرتبطة (Connected) - نفس المنطق في صفحة الحسابات
     // نضيف ENABLED لأن بعض الحسابات تُحفظ بهذه الحالة من Google Ads API
     const connectedStatuses = ['ACTIVE', 'ENABLED', 'DISABLED', 'SUSPENDED', 'CUSTOMER_NOT_ENABLED', 'PENDING'];
     const connectedAccounts = (allData || []).filter(row => {
       if (!row.customer_id) return false;
-      
+
       // التحقق من الحالة المباشرة
       if (connectedStatuses.includes(row.status)) {
         console.log(`✅ Performance: Account ${row.customer_id} connected via status: ${row.status}`);
         return true;
       }
-      
+
       // التحقق من link_details
       const linkDetails = row.link_details as any;
       if (linkDetails) {
@@ -45,16 +45,16 @@ async function getConnectedAccounts(userId: string): Promise<string[]> {
           return true;
         }
       }
-      
+
       // إذا لم يكن هناك status محدد لكن الحساب موجود، نعتبره متصل
       if (!row.status && row.customer_id) {
         console.log(`✅ Performance: Account ${row.customer_id} connected (no status, assuming connected)`);
         return true;
       }
-      
+
       return false;
     });
-    
+
     // إزالة التكرارات
     const uniqueIds = [...new Set(connectedAccounts.map(row => row.customer_id).filter(Boolean))];
     return uniqueIds;
@@ -94,7 +94,7 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
   // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
   const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-  
+
   if (mccRefreshToken) {
     console.log('🔑 محاولة استخدام MCC Token من البيئة...');
     const mccAccessToken = await refreshAccessToken(mccRefreshToken);
@@ -104,7 +104,7 @@ async function getValidAccessToken(userRefreshToken?: string): Promise<string | 
     }
     console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
   }
-  
+
   // 2. ثانياً: نحاول User OAuth Token كـ fallback
   if (userRefreshToken) {
     console.log('🔑 محاولة استخدام User OAuth Token...');
@@ -114,15 +114,43 @@ async function getValidAccessToken(userRefreshToken?: string): Promise<string | 
       return userAccessToken;
     }
   }
-  
+
   console.error('❌ فشل الحصول على أي Access Token صالح');
   return null;
 }
 
 // دالة لجلب بيانات الأداء اليومية من حساب واحد
-async function fetchDailyPerformance(customerId: string, accessToken: string, startDate: string, endDate: string) {
+async function fetchDailyPerformance(customerId: string, accessToken: string, startDate: string, endDate: string, campaignId?: string) {
   try {
     const loginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '');
+
+    let query = '';
+
+    if (campaignId) {
+      // جلب بيانات حملة محددة
+      query = `
+        SELECT 
+          segments.date,
+          metrics.impressions, metrics.clicks, metrics.ctr,
+          metrics.conversions, metrics.conversions_value, metrics.cost_micros, metrics.average_cpc
+        FROM campaign
+        WHERE segments.date BETWEEN '${startDate}' AND '${endDate}'
+          AND campaign.id = ${campaignId}
+        ORDER BY segments.date ASC
+      `;
+    } else {
+      // جلب بيانات الحساب بالكامل
+      query = `
+        SELECT 
+          segments.date,
+          metrics.impressions, metrics.clicks, metrics.ctr,
+          metrics.conversions, metrics.conversions_value, metrics.cost_micros, metrics.average_cpc
+        FROM customer
+        WHERE segments.date BETWEEN '${startDate}' AND '${endDate}'
+        ORDER BY segments.date ASC
+      `;
+    }
+
     const response = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
       method: 'POST',
       headers: {
@@ -131,20 +159,10 @@ async function fetchDailyPerformance(customerId: string, accessToken: string, st
         'login-customer-id': loginCustomerId,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        query: `
-          SELECT 
-            segments.date,
-            metrics.impressions, metrics.clicks, metrics.ctr,
-            metrics.conversions, metrics.conversions_value, metrics.cost_micros, metrics.average_cpc
-          FROM customer
-          WHERE segments.date BETWEEN '${startDate}' AND '${endDate}'
-          ORDER BY segments.date ASC
-        `
-      }),
+      body: JSON.stringify({ query }),
       signal: AbortSignal.timeout(15000)
     });
-    
+
     if (!response.ok) return [];
     const data = await response.json();
     return data.results || [];
@@ -157,34 +175,35 @@ async function fetchDailyPerformance(customerId: string, accessToken: string, st
 export async function GET(request: NextRequest) {
   try {
     console.log('📊 GET /api/campaigns/performance - جلب بيانات الأداء للحسابات المرتبطة...');
-    
+
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30';
     const days = parseInt(timeRange);
     // جلب التواريخ المرسلة من العميل (بتوقيته المحلي)
     const startDateParam = searchParams.get('startDate');
     const endDateParam = searchParams.get('endDate');
-    
+    const campaignId = searchParams.get('campaignId'); // ✅ جديد
+
     console.log(`📅 الفترة الزمنية: ${days} يوم، التواريخ: ${startDateParam || 'غير محدد'} - ${endDateParam || 'غير محدد'}`);
-    
+
     // الحصول على معلومات المستخدم و tokens من cookies
     const cookieStore = await cookies();
     const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
     const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
-    
+
     // استخراج user ID
     let userId = null;
     if (userInfoCookie) {
       try {
         const userInfo = JSON.parse(userInfoCookie);
         userId = userInfo.id;
-      } catch (e) {}
+      } catch (e) { }
     }
-    
+
     // 🔑 الحصول على Access Token - MCC أولاً ثم User Token
     console.log('🔑 جلب Access Token (MCC أولاً)...');
     const accessToken = await getValidAccessToken(userRefreshToken);
-    
+
     // إذا لم يوجد access token أو user ID - إرجاع بيانات فارغة (وليس mock)
     if (!accessToken || !userId) {
       return NextResponse.json({
@@ -195,10 +214,10 @@ export async function GET(request: NextRequest) {
         message: 'يرجى تسجيل الدخول وربط حساباتك الإعلانية.'
       });
     }
-    
+
     // 🔑 جلب الحسابات المرتبطة فقط من Supabase
     const connectedAccountIds = await getConnectedAccounts(userId);
-    
+
     if (connectedAccountIds.length === 0) {
       return NextResponse.json({
         success: true,
@@ -208,11 +227,11 @@ export async function GET(request: NextRequest) {
         message: 'لا توجد حسابات مرتبطة'
       });
     }
-    
+
     // استخدام التواريخ المرسلة من العميل إذا وجدت، وإلا حساب التواريخ على الخادم
     let startDateStr: string;
     let endDateStr: string;
-    
+
     if (startDateParam && endDateParam) {
       // استخدام التواريخ المرسلة من العميل (بتوقيته المحلي)
       startDateStr = startDateParam;
@@ -227,36 +246,36 @@ export async function GET(request: NextRequest) {
       endDateStr = endDate.toISOString().split('T')[0];
       console.log(`📅 حساب التواريخ على الخادم: ${startDateStr} - ${endDateStr}`);
     }
-    
+
     console.log(`🔗 جلب بيانات الأداء من ${connectedAccountIds.length} حساب مرتبط...`);
-    
+
     // جلب البيانات من جميع الحسابات المرتبطة بالتوازي
-    const performancePromises = connectedAccountIds.map(customerId => 
-      fetchDailyPerformance(customerId, accessToken!, startDateStr, endDateStr)
+    const performancePromises = connectedAccountIds.map(customerId =>
+      fetchDailyPerformance(customerId, accessToken!, startDateStr, endDateStr, campaignId || undefined)
     );
-    
+
     const allResults = await Promise.all(performancePromises);
-    
+
     console.log(`📊 جلب ${allResults.length} مجموعة نتائج`);
     for (let i = 0; i < allResults.length; i++) {
       console.log(`   - حساب ${connectedAccountIds[i]}: ${allResults[i].length} سجل`);
     }
-    
+
     // تجميع البيانات حسب التاريخ
     const dailyDataMap = new Map<string, {
       impressions: number; clicks: number; conversions: number;
       cost: number; conversionsValue: number;
     }>();
-    
+
     for (const results of allResults) {
       for (const row of results) {
         const date = row.segments?.date || '';
         const metrics = row.metrics || {};
-        
+
         const existing = dailyDataMap.get(date) || {
           impressions: 0, clicks: 0, conversions: 0, cost: 0, conversionsValue: 0
         };
-        
+
         dailyDataMap.set(date, {
           impressions: existing.impressions + (parseInt(metrics.impressions) || 0),
           clicks: existing.clicks + (parseInt(metrics.clicks) || 0),
@@ -266,7 +285,7 @@ export async function GET(request: NextRequest) {
         });
       }
     }
-    
+
     // تحويل إلى مصفوفة مرتبة
     const performanceData = Array.from(dailyDataMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
@@ -286,9 +305,9 @@ export async function GET(request: NextRequest) {
           roas: data.cost > 0 ? Math.round((data.conversionsValue / data.cost) * 100) / 100 : 0
         };
       });
-    
+
     console.log(`✅ تم جلب بيانات ${performanceData.length} يوم من ${connectedAccountIds.length} حساب مرتبط`);
-    
+
     return NextResponse.json({
       success: true,
       data: performanceData.length > 0 ? performanceData : [],
@@ -296,7 +315,7 @@ export async function GET(request: NextRequest) {
       accountsCount: connectedAccountIds.length,
       source: 'google_ads_connected_accounts'
     });
-    
+
   } catch (error) {
     console.error('❌ Error fetching performance data:', error);
     // إرجاع بيانات فارغة في حالة الخطأ (وليس mock)

@@ -2,9 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import { InteractiveInput } from '@/components/ui/interactive-input';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+
+// Smart Notification Manager
+const NotificationManager = dynamic(() => import('@/components/NotificationManager'), {
+  ssr: false,
+});
 
 // Integration Card Component
 interface IntegrationCardProps {
@@ -405,6 +411,9 @@ const IntegrationsPage: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Smart Notifications for Integrations Page */}
+      <NotificationManager />
     </div>
   );
 };

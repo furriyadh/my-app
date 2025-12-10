@@ -64,8 +64,9 @@ const CTASection = dynamic(() => import("@/components/HomePage/CTASection"), {
   loading: () => <MinimalPlaceholder />,
   ssr: true,
 });
-  
-const AnimatedNotification = dynamic(() => import("@/components/ui/animated-notification"), {
+
+// Smart Notification Manager - Auto-detects page and shows relevant notifications
+const NotificationManager = dynamic(() => import("@/components/NotificationManager"), {
   ssr: false,
 });
 
@@ -324,25 +325,8 @@ export default function Home() {
         {/* Floating Chat Widget */}
         <FloatingChatWidget />
 
-        {/* Animated Notifications */}
-        <AnimatedNotification
-          autoGenerate={true}
-          maxNotifications={1}
-          autoInterval={20000}
-          autoDismissTimeout={8000}
-          animationDuration={1000}
-          variant="glass"
-          position="bottom-left"
-          showAvatars={true}
-          allowDismiss={true}
-          customMessages={[
-            "Campaign optimized! ROI +45% 📈",
-            "AI adjusted bidding strategy 🤖",
-            "Budget allocation optimized 💰",
-            "Performance report ready 📊",
-            "Quality score improved! ⭐"
-          ]}
-        />
+        {/* Smart Notification Manager - Shows relevant notifications based on current page */}
+        <NotificationManager />
       </div>
     </>
   );

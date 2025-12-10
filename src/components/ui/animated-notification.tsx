@@ -62,22 +62,10 @@ const Avatar: React.FC<{
   if (!showAvatar) return null;
 
   return (
-    <div
-      className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/40 flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
-      style={{ backgroundColor: user.color }}
-    >
-      {user.avatarUrl ? (
-        <img
-          src={user.avatarUrl}
-          alt={`${user.name} avatar`}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-white drop-shadow-sm">
-          {user.initials || user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-        </span>
-      )}
+    <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center transition-all duration-300 backdrop-blur-sm shadow-lg shadow-purple-500/30">
+      <span className="text-xs font-bold text-white">
+        AI
+      </span>
     </div>
   );
 };
@@ -129,30 +117,29 @@ const Notification: React.FC<{
     <div
       className={cn(
         "group relative transition-all duration-500 ease-out transform",
-        "rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 flex items-start gap-2 sm:gap-2.5 md:gap-3",
-        "w-[220px] sm:w-[260px] md:w-[300px] max-w-[calc(100vw-1.5rem)] cursor-pointer",
+        "rounded-xl p-3 flex items-center gap-2.5",
+        "w-64 max-w-[calc(100vw-2rem)] cursor-pointer",
         getVariantStyles(),
         getPriorityStyles(),
         notification.fadingOut && "animate-pulse"
       )}
       onClick={onClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg sm:rounded-xl pointer-events-none" />
-      <Avatar user={notification.user} showAvatar={showAvatars} />
-      <div className="flex-1 min-w-0 space-y-0.5">
-        <div className="flex items-center justify-between gap-1">
-          <h3 className="font-semibold text-[11px] sm:text-xs md:text-sm text-white/90 truncate">
-            {notification.user.name}
-          </h3>
-          {showTimestamps && notification.timestamp && (
-            <span className="text-[9px] sm:text-[10px] md:text-xs text-gray-400/70 font-mono hidden md:block flex-shrink-0">
-              {notification.timestamp}
-            </span>
-          )}
-        </div>
-        <p className="text-[10px] sm:text-xs md:text-sm text-gray-300/80 line-clamp-2 leading-snug sm:leading-relaxed">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none" />
+      
+      {/* Avatar */}
+      {showAvatars && <Avatar user={notification.user} showAvatar={showAvatars} />}
+      
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-white/90 line-clamp-1">
           {notification.message}
         </p>
+        {showTimestamps && notification.timestamp && (
+          <span className="text-[10px] text-white/50 mt-0.5 block">
+            {notification.timestamp}
+          </span>
+        )}
       </div>
       {allowDismiss && (
         <button
@@ -160,9 +147,9 @@ const Notification: React.FC<{
             e.stopPropagation();
             onDismiss?.();
           }}
-          className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 text-gray-400/50 hover:text-gray-300 transition-all duration-200 opacity-70 sm:opacity-0 group-hover:opacity-100"
+          className="flex-shrink-0 w-4 h-4 text-gray-400/50 hover:text-gray-300 transition-all duration-200 opacity-0 group-hover:opacity-100"
         >
-          <X className="w-3 h-3 sm:w-4 sm:h-4" />
+          <X className="w-3 h-3" />
         </button>
       )}
     </div>
