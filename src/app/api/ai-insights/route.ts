@@ -559,20 +559,37 @@ async function fetchGeoTargetNames(customerId: string, accessToken: string, deve
   
   // ✅ استخدام resource_name بدلاً من id (Google Ads API requirement)
   const resourceNames = geoTargetIds.map(id => `geoTargetConstants/${id}`);
-  const idsFilter = resourceNames.map(rn => `geo_target_constant.resource_name = '${rn}'`).join(' OR ');
   
-  const query = `
-    SELECT
-      geo_target_constant.resource_name,
-      geo_target_constant.id,
-      geo_target_constant.name,
-      geo_target_constant.canonical_name,
-      geo_target_constant.country_code,
-      geo_target_constant.target_type
-    FROM geo_target_constant
-    WHERE ${idsFilter}
-  `;
-  return googleAdsQuery(customerId, accessToken, developerToken, query);
+  // ⚠️ IMPORTANT: geo_target_constant يجب استخدام IN بدلاً من OR للأداء الأفضل
+  // ولكن Google Ads API لا يدعم IN مع resource_name، لذا نستخدم OR
+  // ✅ FIX: استخدام query أبسط بدون WHERE معقد
+  const results = [];
+  
+  // نجلب كل geo_target بشكل منفصل (أكثر أماناً)
+  for (const id of geoTargetIds) {
+    try {
+      const query = `
+        SELECT
+          geo_target_constant.resource_name,
+          geo_target_constant.id,
+          geo_target_constant.name,
+          geo_target_constant.canonical_name,
+          geo_target_constant.country_code,
+          geo_target_constant.target_type
+        FROM geo_target_constant
+        WHERE geo_target_constant.resource_name = 'geoTargetConstants/${id}'
+      `;
+      const result = await googleAdsQuery(customerId, accessToken, developerToken, query);
+      if (result && result.length > 0) {
+        results.push(...result);
+      }
+    } catch (error) {
+      console.warn(`⚠️ Could not fetch geo_target ${id}:`, error);
+      // Continue with next ID
+    }
+  }
+  
+  return results;
 }
 
 // 5c. جلب معلومات الـ geo_target من campaign_criterion مع التفاصيل
@@ -803,6 +820,105 @@ async function fetchAuctionInsights(customerId: string, accessToken: string, dev
   `;
   console.log(`🏆 Auction Insights Query (REAL DATA) for ${customerId}`);
   return googleAdsQuery(customerId, accessToken, developerToken, query);
+}
+
+// دالة مساعدة لتطبيع اسم المدينة (Normalization) - ديناميكية 100%
+function normalizeCityName(cityName: string): string {
+  if (!cityName) return 'Unknown';
+  
+  let normalized = cityName.trim();
+  
+  // 1️⃣ إزالة البادئات الشائعة (At, Al, Al-) أولاً
+  // إذا كان الاسم يبدأ بـ "At " (مثل "At Taif")، نزيل "At "
+  if (/^At\s+/i.test(normalized)) {
+    normalized = normalized.replace(/^At\s+/i, '').trim();
+  }
+  // إذا كان الاسم يبدأ بـ "Al " أو "Al-"
+  else if (/^Al[\s-]/i.test(normalized)) {
+    // مثال: "Al Khobar" → "Khobar" (لتوحيد مع "الخبر")
+    const withoutAl = normalized.replace(/^Al[\s-]/i, '').trim();
+    // لكن نبقي "Al" إذا كان الاسم قصير جداً (مثل "Al Ain")
+    if (withoutAl.length > 3) {
+      normalized = withoutAl;
+    }
+  }
+  
+  // 2️⃣ إزالة الكلمات الإدارية الشائعة (Province, Principality, Region, etc.)
+  normalized = normalized
+    .replace(/\s+(Province|Principality|Region|Governorate|District|Area|Municipality)$/i, '')
+    .trim();
+  
+  // 3️⃣ تطبيع الأسماء العربية → الإنجليزية (باستخدام نمط ديناميكي)
+  // إذا كان الاسم يحتوي على "مكة" أو "المكرمة"، نستبدله بـ "Makkah"
+  if (/مكة|المكرمة/i.test(normalized)) {
+    normalized = 'Makkah';
+  }
+  // إذا كان الاسم يحتوي على "الطائف"، نستبدله بـ "Taif"
+  else if (/الطائف/i.test(normalized)) {
+    normalized = 'Taif';
+  }
+  
+  return normalized.trim();
+}
+
+// دالة مساعدة لاستخراج اسم المدينة من Google Ads API data
+function extractCityName(
+  locationName: string, 
+  geoTargetId: string, 
+  geoTargetNames: Map<string, string>
+): string {
+  if (!locationName) return 'Unknown';
+  
+  // 1️⃣ الحصول على canonical_name و target_type من Google Ads API
+  const canonicalName = geoTargetNames.get(`${geoTargetId}_canonical`) || '';
+  const targetType = geoTargetNames.get(`${geoTargetId}_type`) || '';
+  
+  let cityName = '';
+  
+  // 2️⃣ إذا كان target_type = "Country"، نستخدم الاسم مباشرة
+  if (targetType === 'Country') {
+    cityName = locationName.split(',')[0].trim();
+  }
+  // 3️⃣ إذا كان target_type = "City"، نستخدم الاسم مباشرة
+  else if (targetType === 'City') {
+    cityName = locationName.split(',')[0].trim();
+  }
+  // 4️⃣ لأي نوع آخر (Province, Region, Neighborhood, Postal Code)، نستخرج من canonical_name
+  else if (canonicalName) {
+    // canonical_name format examples:
+    // - "Saudi Arabia,Makkah Province" (Province)
+    // - "Saudi Arabia,Makkah Province,Makkah" (City)
+    // - "Saudi Arabia,Makkah Province,Makkah,Mina" (Neighborhood)
+    const parts = canonicalName.split(',').map(p => p.trim());
+    
+    if (targetType === 'Province' || targetType === 'Region') {
+      // للمحافظات/المناطق: نأخذ الجزء الأخير
+      cityName = parts[parts.length - 1];
+    } else if (targetType === 'Neighborhood' || targetType === 'Postal Code' || targetType === 'District') {
+      // للأحياء/الرموز البريدية: نأخذ المدينة (قبل الأخير)
+      if (parts.length >= 3) {
+        cityName = parts[parts.length - 2];
+      } else if (parts.length >= 2) {
+        cityName = parts[parts.length - 1];
+      } else {
+        cityName = parts[0];
+      }
+    } else {
+      // Fallback: نأخذ آخر جزء غير الدولة
+      if (parts.length >= 2) {
+        cityName = parts[parts.length - 1];
+      } else {
+        cityName = parts[0];
+      }
+    }
+  }
+  // 5️⃣ Fallback النهائي: استخدام الاسم كما هو
+  else {
+    cityName = locationName.split(',')[0].trim();
+  }
+  
+  // 6️⃣ تطبيع الاسم
+  return normalizeCityName(cityName);
 }
 
 export async function GET(request: NextRequest) {
@@ -1115,6 +1231,9 @@ export async function GET(request: NextRequest) {
           const allGeoTargetIds = new Set<string>();
           const geoTargetNames = new Map<string, string>(); // ✅ تعريف مبكر لاستخدامه في Proximity
           
+          // ✅ Grouping: تجميع الإحداثيات المتقاربة
+          const proximityGroupsMap = new Map<string, Array<{ lat: number; lng: number; campaignId: string; campaignName: string; criterionId: string; radius: number; radiusUnits: string }>>();
+          
           console.log(`📍 Found ${campaignGeoTargets.length} geo target criteria`);
           
           for (const row of campaignGeoTargets) {
@@ -1139,58 +1258,26 @@ export async function GET(request: NextRequest) {
               
               console.log(`📍 Campaign "${campaignName}" → Proximity: (${lat}, ${lng}) radius ${radius} ${radiusUnits}, city: ${cityName}`);
               
-              // حفظ معلومات Proximity
-              if (!geoTargetMap.has(campaignId)) {
-                geoTargetMap.set(campaignId, []);
+              // ✅ Grouping: تجميع الإحداثيات المتقاربة (تقريب لـ 2 خانات = ~1 كم)
+              const coordKey = `${lat.toFixed(2)}_${lng.toFixed(2)}`;
+              
+              if (!proximityGroupsMap.has(coordKey)) {
+                proximityGroupsMap.set(coordKey, []);
               }
               
-              // ✅ تحديد اسم المدينة: استخدام city/province من API، أو Reverse Geocoding
-              let finalCityName = cityName || provinceName;
+              proximityGroupsMap.get(coordKey)!.push({
+                lat,
+                lng,
+                campaignId,
+                campaignName,
+                criterionId: String(criterionId),
+                radius,
+                radiusUnits
+              });
               
-              // ✅ إذا لم يكن هناك اسم، نستخدم Google Maps Reverse Geocoding
-              if (!finalCityName) {
-                try {
-                  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-                  console.log(`🗺️ Google Maps API Key available: ${apiKey ? 'YES' : 'NO'}, Length: ${apiKey?.length || 0}`);
-                  
-                  if (!apiKey) {
-                    console.error('❌ Google Maps API Key not found in environment variables!');
-                    finalCityName = `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
-                  } else {
-                    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`;
-                    const geocodeResponse = await fetch(geocodeUrl);
-                    const geocodeData = await geocodeResponse.json();
-                  
-                    if (geocodeData.status === 'OK' && geocodeData.results.length > 0) {
-                      // البحث عن المدينة في النتائج
-                      const result = geocodeData.results[0];
-                      const cityComponent = result.address_components.find((comp: any) => 
-                        comp.types.includes('locality') || comp.types.includes('administrative_area_level_2')
-                      );
-                      const countryComponent = result.address_components.find((comp: any) => 
-                        comp.types.includes('country')
-                      );
-                      
-                      if (cityComponent) {
-                        finalCityName = cityComponent.long_name;
-                        if (countryComponent) {
-                          finalCityName += `, ${countryComponent.long_name}`;
-                        }
-                      } else {
-                        // استخدام formatted_address كـ fallback
-                        finalCityName = result.formatted_address.split(',')[0];
-                      }
-                      
-                      console.log(`🌍 Reverse Geocoding: (${lat}, ${lng}) → ${finalCityName}`);
-                    } else {
-                      console.warn(`⚠️ Geocoding failed for (${lat}, ${lng}):`, geocodeData.status);
-                      finalCityName = `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
-                    }
-                  }
-                } catch (error) {
-                  console.error(`❌ Reverse Geocoding error for (${lat}, ${lng}):`, error);
-                  finalCityName = `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
-                }
+              // حفظ معلومات Proximity مؤقتاً (سنحدث الاسم لاحقاً)
+              if (!geoTargetMap.has(campaignId)) {
+                geoTargetMap.set(campaignId, []);
               }
               
               geoTargetMap.get(campaignId)!.push({
@@ -1202,12 +1289,10 @@ export async function GET(request: NextRequest) {
                   lng,
                   radius,
                   radiusUnits,
-                  cityName: finalCityName
+                  cityName: cityName || provinceName || '', // سنحدثه لاحقاً
+                  coordKey // لربطه بالمجموعة
                 }
               });
-              
-              // إضافة اسم المدينة إلى geoTargetNames
-              geoTargetNames.set(`proximity_${criterionId}`, finalCityName);
             } else {
               // ✅ Location Targeting (مدينة/منطقة محددة)
               const geoTargetId = geoTargetConstant ? geoTargetConstant.split('/').pop() : criterionId;
@@ -1243,10 +1328,25 @@ export async function GET(request: NextRequest) {
                 
                 for (const row of geoNames) {
                   const id = String(row.geoTargetConstant?.id || '');
-                  const name = row.geoTargetConstant?.name || row.geoTargetConstant?.canonicalName || '';
+                  const name = row.geoTargetConstant?.name || '';
+                  const canonicalName = row.geoTargetConstant?.canonicalName || '';
+                  const targetType = row.geoTargetConstant?.targetType || '';
+                  
                   if (id && name) {
+                    // ✅ حفظ الاسم الكامل مع canonical_name للمعالجة لاحقاً
                     geoTargetNames.set(id, name);
-                    console.log(`📍 Geo Target ${id} → ${name}`);
+                    
+                    // ✅ حفظ canonical_name بشكل منفصل للاستخدام في استخراج اسم المدينة
+                    if (canonicalName) {
+                      geoTargetNames.set(`${id}_canonical`, canonicalName);
+                    }
+                    
+                    // ✅ حفظ target_type للتمييز بين City, Neighborhood, Postal Code, etc.
+                    if (targetType) {
+                      geoTargetNames.set(`${id}_type`, targetType);
+                    }
+                    
+                    console.log(`📍 Geo Target ${id} → ${name} (${targetType})`);
                   }
                 }
               } catch (batchError) {
@@ -1260,76 +1360,279 @@ export async function GET(request: NextRequest) {
           
           console.log(`📍 Successfully fetched ${geoTargetNames.size} location names out of ${allGeoTargetIds.size} total`);
           
-          // ✅ Fallback: إذا لم نحصل على أسماء، نستخدم "مكة المكرمة" كافتراضي (لأن معظم المواقع في مكة)
-          if (geoTargetNames.size === 0 && allGeoTargetIds.size > 0) {
-            console.log('⚠️ No location names fetched, using "Makkah" as default for all locations');
-            for (const id of allGeoTargetIds) {
-              geoTargetNames.set(id, 'Makkah,Makkah Province,Saudi Arabia');
+          // ✅ معالجة Proximity Groups مع Caching
+          console.log(`🔄 Processing ${proximityGroupsMap.size} proximity groups with Caching...`);
+          const supabase = getSupabaseAdmin();
+          const coordToCityMap = new Map<string, { cityName: string; areasCount: number }>();
+          
+          for (const [coordKey, group] of proximityGroupsMap.entries()) {
+            const firstCoord = group[0];
+            const [latStr, lngStr] = coordKey.split('_');
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
+            
+            // 1️⃣ التحقق من Cache أولاً
+            try {
+              const { data: cachedData } = await supabase
+                .from('geocoding_cache')
+                .select('city_name, country')
+                .eq('latitude', lat)
+                .eq('longitude', lng)
+                .single();
+              
+              if (cachedData && cachedData.city_name) {
+                // ✅ تطبيع الاسم من الـ Cache
+                const normalizedCityName = normalizeCityName(cachedData.city_name);
+                const cityName = cachedData.country ? `${normalizedCityName}, ${cachedData.country}` : normalizedCityName;
+                coordToCityMap.set(coordKey, { cityName, areasCount: group.length });
+                console.log(`✅ Cache hit: ${coordKey} → ${cityName} (${group.length} areas)`);
+                continue;
+              }
+            } catch (cacheError) {
+              // Cache miss - سنستدعي Google Maps API
+            }
+            
+            // 2️⃣ إذا لم يكن في Cache، استدعاء Google Maps API
+            try {
+              const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+              
+              if (!apiKey) {
+                console.error('❌ Google Maps API Key not found!');
+                coordToCityMap.set(coordKey, { cityName: `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, areasCount: group.length });
+                continue;
+              }
+              
+              const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`;
+              const geocodeResponse = await fetch(geocodeUrl);
+              const geocodeData = await geocodeResponse.json();
+              
+              if (geocodeData.status === 'OK' && geocodeData.results.length > 0) {
+                const result = geocodeData.results[0];
+                const cityComponent = result.address_components.find((comp: any) => 
+                  comp.types.includes('locality') || comp.types.includes('administrative_area_level_2')
+                );
+                const countryComponent = result.address_components.find((comp: any) => 
+                  comp.types.includes('country')
+                );
+                
+                const cityNameOnly = cityComponent?.long_name || result.formatted_address.split(',')[0];
+                const countryName = countryComponent?.long_name || '';
+                
+                // ✅ تطبيع اسم المدينة
+                const normalizedCityName = normalizeCityName(cityNameOnly);
+                const fullCityName = countryName ? `${normalizedCityName}, ${countryName}` : normalizedCityName;
+                
+                coordToCityMap.set(coordKey, { cityName: fullCityName, areasCount: group.length });
+                console.log(`🌍 Google Maps API: ${coordKey} → ${fullCityName} (${group.length} areas)`);
+                
+                // 3️⃣ حفظ في Cache (مع الاسم المطبّع)
+                supabase
+                  .from('geocoding_cache')
+                  .upsert({
+                    latitude: lat,
+                    longitude: lng,
+                    city_name: normalizedCityName,  // ✅ حفظ الاسم المطبّع
+                    country: countryName,
+                    full_address: result.formatted_address
+                  }, { onConflict: 'latitude,longitude' })
+                  .then(() => console.log(`💾 Cached: ${coordKey}`));
+              } else {
+                console.warn(`⚠️ Geocoding failed for ${coordKey}:`, geocodeData.status);
+                coordToCityMap.set(coordKey, { cityName: `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, areasCount: group.length });
+              }
+            } catch (error) {
+              console.error(`❌ Geocoding error for ${coordKey}:`, error);
+              coordToCityMap.set(coordKey, { cityName: `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, areasCount: group.length });
             }
           }
+          
+          // ✅ تحديث أسماء المدن في geoTargetMap
+          for (const [campaignId, targets] of geoTargetMap.entries()) {
+            for (const target of targets) {
+              if (target.isProximity && target.proximityInfo?.coordKey) {
+                const groupInfo = coordToCityMap.get(target.proximityInfo.coordKey);
+                if (groupInfo) {
+                  target.proximityInfo.cityName = groupInfo.cityName;
+                  target.proximityInfo.areasCount = groupInfo.areasCount;
+                  // إضافة الاسم إلى geoTargetNames
+                  geoTargetNames.set(target.geoTargetId, groupInfo.cityName);
+                }
+              }
+            }
+          }
+          
+          console.log(`✅ Processed ${proximityGroupsMap.size} groups → ${coordToCityMap.size} unique locations`);
           
           // Get performance data from geographic_view
           const locations = await fetchLocationData(cleanId, accessToken, developerToken, dateCondition, campaignId || undefined);
           console.log(`📍 Geographic view returned ${locations.length} rows`);
+          console.log(`🔍 Campaign Filter: ${campaignId ? `Filtering for campaign ${campaignId}` : 'All Campaigns'}`);
           
           if (locations.length > 0) {
             // ✅ إذا كانت هناك بيانات من geographic_view
+            // نجمع البيانات الإجمالية لكل حملة (لأن geographic_view يعطي بيانات على مستوى الدولة فقط)
+            const campaignTotals = new Map<string, { impressions: number; clicks: number; conversions: number; cost: number; campaignName: string }>();
+            
             for (const row of locations) {
-              const campaignId = String(row.campaign?.id || '');
+              const rowCampaignId = String(row.campaign?.id || '');
               const campaignName = row.campaign?.name || '';
-              const geoTargets = geoTargetMap.get(campaignId) || [];
-              const countryCriterionId = String(row.geographicView?.countryCriterionId || 'Unknown');
               
-              // ✅ إذا كانت الحملة تستهدف مواقع متعددة، نستخدم أول موقع (أو يمكن تحسينه لاحقاً)
-              const primaryGeoTarget = geoTargets.length > 0 ? geoTargets[0].geoTargetId : countryCriterionId;
-              const locationId = primaryGeoTarget;
-              const locationName = geoTargetNames.get(locationId) || '';
+              if (!campaignTotals.has(rowCampaignId)) {
+                campaignTotals.set(rowCampaignId, {
+                  impressions: 0,
+                  clicks: 0,
+                  conversions: 0,
+                  cost: 0,
+                  campaignName
+                });
+              }
               
-              console.log(`📍 Processing location for "${campaignName}":`, {
-                campaignId,
-                targetedGeoIds: geoTargets.map(g => g.geoTargetId).join(', '),
-                countryCriterionId,
-                finalLocationId: locationId,
-                locationName,
-                impressions: row.metrics?.impressions,
-                clicks: row.metrics?.clicks
-              });
+              const totals = campaignTotals.get(rowCampaignId)!;
+              totals.impressions += parseInt(String(row.metrics?.impressions || 0), 10);
+              totals.clicks += parseInt(String(row.metrics?.clicks || 0), 10);
+              totals.conversions += parseFloat(String(row.metrics?.conversions || 0));
+              totals.cost += parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
+            }
+            
+            // الآن نعرض المواقع المستهدفة بدون بيانات أداء (لأن Google Ads لا يوفر بيانات لكل موقع محدد)
+            for (const [rowCampaignId, totals] of campaignTotals.entries()) {
+              const geoTargets = geoTargetMap.get(rowCampaignId) || [];
               
-              locationData.push({
-                locationId: locationId,
-                locationName: locationName,
-                campaignId: campaignId,
-                campaignName: campaignName,
-                type: row.geographicView?.locationType || 'UNKNOWN',
-                impressions: parseInt(String(row.metrics?.impressions || 0), 10),
-                clicks: parseInt(String(row.metrics?.clicks || 0), 10),
-                conversions: parseFloat(String(row.metrics?.conversions || 0)),
-                cost: parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000
-              });
+              // ✅ تجميع المواقع حسب المدينة لعرض عدد المناطق
+              const cityGroups = new Map<string, { 
+                locationId: string; 
+                areasCount: number; 
+                type: string;
+              }>();
+              
+              for (const geoTarget of geoTargets) {
+                const locationId = geoTarget.geoTargetId;
+                let locationName = geoTargetNames.get(locationId) || '';
+                
+                // تحديد اسم المدينة
+                let cityName = '';
+                let areasCount = 1;
+                
+                if (geoTarget.isProximity && geoTarget.proximityInfo) {
+                  // استخدام اسم المدينة من Proximity (مثل "Makkah" أو "Taif")
+                  const proximityCity = geoTarget.proximityInfo.cityName?.split(',')[0]?.trim() || '';
+                  cityName = normalizeCityName(proximityCity) || 'Unknown';
+                  areasCount = geoTarget.proximityInfo.areasCount || 1;
+                } else if (locationName) {
+                  // استخدام الدالة المساعدة لاستخراج اسم المدينة من Google Ads API data
+                  cityName = extractCityName(locationName, locationId, geoTargetNames);
+                } else {
+                  cityName = 'Unknown';
+                }
+                
+                // إذا كانت المدينة موجودة بالفعل، نزيد العدد
+                if (cityGroups.has(cityName)) {
+                  const existing = cityGroups.get(cityName)!;
+                  existing.areasCount += areasCount;
+                } else {
+                  cityGroups.set(cityName, {
+                    locationId,
+                    areasCount,
+                    type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE'
+                  });
+                }
+              }
+              
+              // إضافة المواقع المجمعة (بدون بيانات أداء لأن Google Ads لا يوفرها لكل موقع)
+              // ✅ الحل الذكي: نعرض المدينة الرئيسية مع إجمالي عدد المناطق
+              if (cityGroups.size > 0) {
+                const totalAreas = Array.from(cityGroups.values()).reduce((sum, group) => sum + group.areasCount, 0);
+                const cityNames = Array.from(cityGroups.keys());
+                
+                // نأخذ المدينة الأولى (الأكثر أهمية) ونعرض إجمالي المناطق
+                const primaryCity = cityNames[0];
+                const displayName = totalAreas > 1 ? `${primaryCity} (${totalAreas} areas)` : primaryCity;
+                
+                const firstGroup = cityGroups.values().next().value;
+                
+                console.log(`📍 Smart grouping for "${totals.campaignName}":`, {
+                  campaignId: rowCampaignId,
+                  locationName: displayName,
+                  totalLocations: cityGroups.size,
+                  totalAreas: totalAreas
+                });
+                
+                locationData.push({
+                  locationId: firstGroup.locationId,
+                  locationName: displayName,
+                  campaignId: rowCampaignId,
+                  campaignName: totals.campaignName,
+                  type: firstGroup.type,
+                  impressions: totals.impressions,
+                  clicks: totals.clicks,
+                  conversions: totals.conversions,
+                  cost: totals.cost
+                });
+              }
             }
             
             // ✅ إضافة باقي الحملات التي **لم تظهر** في geographic_view (لأنها بدون impressions)
-            for (const [campaignId, geoTargets] of geoTargetMap.entries()) {
+            for (const [mapCampaignId, geoTargets] of geoTargetMap.entries()) {
+              // ✅ إذا كان هناك فلتر حملة محدد، نتجاهل الحملات الأخرى
+              if (campaignId && mapCampaignId !== campaignId) {
+                continue;
+              }
+              
               // تحقق إذا كانت الحملة موجودة بالفعل في locationData
-              const existsInLocationData = locationData.some(l => l.campaignId === campaignId);
+              const existsInLocationData = locationData.some(l => l.campaignId === mapCampaignId);
               if (!existsInLocationData && geoTargets.length > 0) {
                 // إضافة **كل المواقع** للحملة
+                // ✅ تجميع المواقع حسب المدينة لعرض عدد المناطق
+                const cityGroups = new Map<string, { locationId: string; areasCount: number; type: string }>();
+                
                 for (const geoTarget of geoTargets) {
                   const locationId = geoTarget.geoTargetId;
-                  const locationName = geoTargetNames.get(locationId) || '';
+                  let locationName = geoTargetNames.get(locationId) || '';
                   
-                  console.log(`📍 Adding missing campaign location for ${campaignId}:`, {
-                    locationId,
-                    locationName,
-                    campaignName: geoTarget.campaignName
+                  // تحديد اسم المدينة
+                  let cityName = '';
+                  let areasCount = 1;
+                  
+                  if (geoTarget.isProximity && geoTarget.proximityInfo) {
+                    const proximityCity = geoTarget.proximityInfo.cityName?.split(',')[0]?.trim() || '';
+                    cityName = normalizeCityName(proximityCity) || 'Unknown';
+                    areasCount = geoTarget.proximityInfo.areasCount || 1;
+                  } else {
+                    cityName = extractCityName(locationName, locationId, geoTargetNames);
+                  }
+                  
+                  // إذا كانت المدينة موجودة بالفعل، نزيد العدد
+                  if (cityGroups.has(cityName)) {
+                    const existing = cityGroups.get(cityName)!;
+                    existing.areasCount += areasCount;
+                  } else {
+                    cityGroups.set(cityName, {
+                      locationId,
+                      areasCount,
+                      type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE'
+                    });
+                  }
+                }
+                
+                // إضافة المواقع المجمعة
+                for (const [cityName, groupInfo] of cityGroups.entries()) {
+                  const displayName = groupInfo.areasCount > 1 
+                    ? `${cityName} (${groupInfo.areasCount} areas)` 
+                    : cityName;
+                  
+                  console.log(`📍 Adding grouped location for ${mapCampaignId}:`, {
+                    locationId: groupInfo.locationId,
+                    locationName: displayName,
+                    areasCount: groupInfo.areasCount,
+                    campaignName: geoTargets[0].campaignName
                   });
                   
                   locationData.push({
-                    locationId: locationId,
-                    locationName: locationName,
-                    campaignId: campaignId,
-                    campaignName: geoTarget.campaignName,
-                    type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE',
+                    locationId: groupInfo.locationId,
+                    locationName: displayName,
+                    campaignId: mapCampaignId,
+                    campaignName: geoTargets[0].campaignName,
+                    type: groupInfo.type,
                     impressions: 0,
                     clicks: 0,
                     conversions: 0,
@@ -1341,25 +1644,64 @@ export async function GET(request: NextRequest) {
           } else if (geoTargetMap.size > 0) {
             // ✅ Fallback: إذا لم تكن هناك بيانات من geographic_view، نستخدم المواقع المستهدفة مباشرة
             console.log('⚠️ No geographic_view data, using targeted locations as fallback');
-            for (const [campaignId, geoTargets] of geoTargetMap.entries()) {
+            for (const [mapCampaignId, geoTargets] of geoTargetMap.entries()) {
+              // ✅ إذا كان هناك فلتر حملة محدد، نتجاهل الحملات الأخرى
+              if (campaignId && mapCampaignId !== campaignId) {
+                continue;
+              }
+              
               if (geoTargets.length > 0) {
-                // ✅ إضافة **كل المواقع** للحملة، ليس فقط الأول
+                // ✅ تجميع المواقع حسب المدينة لعرض عدد المناطق
+                const cityGroups = new Map<string, { locationId: string; areasCount: number; type: string }>();
+                
                 for (const geoTarget of geoTargets) {
                   const locationId = geoTarget.geoTargetId;
-                  const locationName = geoTargetNames.get(locationId) || '';
+                  let locationName = geoTargetNames.get(locationId) || '';
                   
-                  console.log(`📍 Fallback location for campaign ${campaignId}:`, {
-                    locationId,
-                    locationName,
-                    campaignName: geoTarget.campaignName
+                  // تحديد اسم المدينة
+                  let cityName = '';
+                  let areasCount = 1;
+                  
+                  if (geoTarget.isProximity && geoTarget.proximityInfo) {
+                    const proximityCity = geoTarget.proximityInfo.cityName?.split(',')[0]?.trim() || '';
+                    cityName = normalizeCityName(proximityCity) || 'Unknown';
+                    areasCount = geoTarget.proximityInfo.areasCount || 1;
+                  } else {
+                    cityName = extractCityName(locationName, locationId, geoTargetNames);
+                  }
+                  
+                  // إذا كانت المدينة موجودة بالفعل، نزيد العدد
+                  if (cityGroups.has(cityName)) {
+                    const existing = cityGroups.get(cityName)!;
+                    existing.areasCount += areasCount;
+                  } else {
+                    cityGroups.set(cityName, {
+                      locationId,
+                      areasCount,
+                      type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE'
+                    });
+                  }
+                }
+                
+                // إضافة المواقع المجمعة
+                for (const [cityName, groupInfo] of cityGroups.entries()) {
+                  const displayName = groupInfo.areasCount > 1 
+                    ? `${cityName} (${groupInfo.areasCount} areas)` 
+                    : cityName;
+                  
+                  console.log(`📍 Fallback grouped location for ${mapCampaignId}:`, {
+                    locationId: groupInfo.locationId,
+                    locationName: displayName,
+                    areasCount: groupInfo.areasCount,
+                    campaignName: geoTargets[0].campaignName
                   });
                   
                   locationData.push({
-                    locationId: locationId,
-                    locationName: locationName,
-                    campaignId: campaignId,
-                    campaignName: geoTarget.campaignName,
-                    type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE',
+                    locationId: groupInfo.locationId,
+                    locationName: displayName,
+                    campaignId: mapCampaignId,
+                    campaignName: geoTargets[0].campaignName,
+                    type: groupInfo.type,
                     impressions: 0,
                     clicks: 0,
                     conversions: 0,

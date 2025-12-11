@@ -3630,24 +3630,40 @@ const DashboardPage: React.FC = () => {
                   // 0. أولوية قصوى: استخدام locationName من API إذا كان متوفراً
                   if (loc.locationName) {
                     console.log('✅ Using locationName from API:', loc.locationName);
-                    // استخراج اسم المدينة/المنطقة من canonical_name
-                    // مثال: "Mecca,Makkah Province,Saudi Arabia" أو "Al Aziziyah,Makkah Province,Saudi Arabia"
-                    const parts = loc.locationName.split(',');
-                    const locationName = parts[0].trim(); // أول جزء هو اسم الموقع (مدينة/حي/منطقة)
-                    const countryName = parts[parts.length - 1]?.trim() || 'Saudi Arabia';
+                    
+                    // إزالة "(X areas)" من الاسم إذا وجد
+                    let cleanedLocationName = loc.locationName.replace(/\s*\(\d+\s+areas?\)\s*/gi, '').trim();
+                    
+                    // استخراج اسم المدينة/المنطقة والدولة
+                    // مثال: "Makkah, Saudi Arabia" أو "Algeria" أو "Makkah"
+                    const parts = cleanedLocationName.split(',').map((p: string) => p.trim());
+                    const locationName = parts[0]; // أول جزء هو اسم الموقع (مدينة/حي/منطقة/دولة)
+                    const countryName = parts.length > 1 ? parts[parts.length - 1] : locationName; // آخر جزء هو الدولة
                     
                     // محاولة الحصول على كود الدولة
                     let countryCode = 'SA'; // افتراضي
                     try {
                       const code = getCode(countryName);
-                      if (code) countryCode = code.toUpperCase();
-                    } catch (e) { }
+                      if (code) {
+                        countryCode = code.toUpperCase();
+                      } else {
+                        // إذا فشل، نحاول مع locationName نفسه (قد يكون اسم دولة)
+                        const codeFromLocation = getCode(locationName);
+                        if (codeFromLocation) countryCode = codeFromLocation.toUpperCase();
+                      }
+                    } catch (e) {
+                      // Fallback: محاولة مع locationName
+                      try {
+                        const codeFromLocation = getCode(locationName);
+                        if (codeFromLocation) countryCode = codeFromLocation.toUpperCase();
+                      } catch (e2) { }
+                    }
                     
-                    // ✅ عرض اسم الموقع كما هو (مدينة، حي، منطقة، إلخ)
+                    // ✅ عرض اسم الموقع كما هو (مدينة، حي، منطقة، دولة، إلخ)
                     return {
                       code: countryCode,
-                      name: locationName,
-                      nameAr: locationName // نستخدم نفس الاسم (عادة يكون بالإنجليزية من Google)
+                      name: loc.locationName, // نستخدم الاسم الكامل مع "(X areas)" للعرض
+                      nameAr: loc.locationName
                     };
                   }
                   
