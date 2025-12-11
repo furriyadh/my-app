@@ -177,6 +177,56 @@ const DashboardPage: React.FC = () => {
   const [loadingAiInsights, setLoadingAiInsights] = useState(false);
   const campaignsPerPage = 10;
 
+  // 💱 Currency System - Exchange rates and symbols
+  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({
+    'SAR': 3.75,
+    'AED': 3.67,
+    'USD': 1.0,
+    'EGP': 50.5,
+    'EUR': 0.93,
+    'GBP': 0.79,
+    'KWD': 0.31,
+    'QAR': 3.64,
+    'BHD': 0.38,
+    'OMR': 0.38
+  });
+
+  // Currency symbols in English
+  const currencySymbols: Record<string, string> = useMemo(() => ({
+    'SAR': 'SAR ',
+    'AED': 'AED ',
+    'USD': '$',
+    'EGP': 'EGP ',
+    'EUR': '€',
+    'GBP': '£',
+    'KWD': 'KWD ',
+    'QAR': 'QAR ',
+    'BHD': 'BHD ',
+    'OMR': 'OMR '
+  }), []);
+
+  // Fetch live exchange rates on mount
+  useEffect(() => {
+    const fetchExchangeRates = async () => {
+      try {
+        const response = await fetch('/api/ai-campaign/get-live-exchange-rates', {
+          cache: 'no-cache'
+        });
+        const data = await response.json();
+
+        if (data.success && data.rates) {
+          const rates: Record<string, number> = { 'USD': 1.0, ...data.rates };
+          setExchangeRates(rates);
+          console.log('💱 Exchange rates loaded:', Object.keys(rates).length, 'currencies');
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to fetch exchange rates, using defaults');
+      }
+    };
+
+    fetchExchangeRates();
+  }, []);
+
   // مفتاح الكاش في localStorage
   const CACHE_KEY = 'dashboard_cache';
   const CACHE_EXPIRY_MS = 60 * 60 * 1000; // ساعة واحدة
@@ -842,6 +892,27 @@ const DashboardPage: React.FC = () => {
     );
   }, [campaigns, selectedCampaignFilter]);
 
+  // 💱 Determine display currency based on selected campaign filter
+  // - "All Campaigns": Use USD (aggregate all currencies to USD)
+  // - Specific campaign: Use the campaign's native currency
+  const displayCurrency = useMemo(() => {
+    if (selectedCampaignFilter === 'all') {
+      return 'USD'; // All campaigns aggregated in USD
+    }
+    // Get the currency from the selected campaign
+    const selectedCampaign = campaignsForStats[0];
+    return selectedCampaign?.currency || 'USD';
+  }, [selectedCampaignFilter, campaignsForStats]);
+
+  // Helper function to convert amount to USD
+  const convertToUSD = useCallback((amount: number, fromCurrency: string): number => {
+    if (fromCurrency === 'USD' || !exchangeRates[fromCurrency]) {
+      return amount;
+    }
+    // Convert from native currency to USD
+    return amount / exchangeRates[fromCurrency];
+  }, [exchangeRates]);
+
   // ✅ عند تغيير الحملة المختارة أو الفترة الزمنية، نجلب البيانات من جديد
   useEffect(() => {
     // تحقق من أن هناك حملات وأن القيم تغيرت فعلاً
@@ -893,10 +964,34 @@ const DashboardPage: React.FC = () => {
   }, [campaignsForStats]);
 
   // Stats calculations - محسوبة من الحملات المفلترة
+  // 💱 When "All Campaigns" selected: Convert all values to USD before aggregating
   const statsData = useMemo(() => {
     // حساب الإحصائيات من الحملات المفلترة
-    const totalRevenue = campaignsForStats.reduce((sum, c) => sum + (c.conversionsValue || 0), 0);
-    const totalSpend = campaignsForStats.reduce((sum, c) => sum + (c.cost || 0), 0);
+    // 💱 تحويل القيم لـ USD عند اختيار "كل الحملات"
+    const shouldConvertToUSD = selectedCampaignFilter === 'all';
+
+    console.log('💱 Currency Conversion:', {
+      shouldConvertToUSD,
+      selectedFilter: selectedCampaignFilter,
+      campaignCurrencies: campaignsForStats.map(c => ({ name: c.name, currency: c.currency, cost: c.cost }))
+    });
+
+    const totalRevenue = campaignsForStats.reduce((sum, c) => {
+      const value = c.conversionsValue || 0;
+      if (shouldConvertToUSD && c.currency && c.currency !== 'USD') {
+        return sum + convertToUSD(value, c.currency);
+      }
+      return sum + value;
+    }, 0);
+
+    const totalSpend = campaignsForStats.reduce((sum, c) => {
+      const value = c.cost || 0;
+      if (shouldConvertToUSD && c.currency && c.currency !== 'USD') {
+        return sum + convertToUSD(value, c.currency);
+      }
+      return sum + value;
+    }, 0);
+
     const totalClicks = campaignsForStats.reduce((sum, c) => sum + (c.clicks || 0), 0);
     const totalConversions = campaignsForStats.reduce((sum, c) => sum + (c.conversions || 0), 0);
     const totalImpressions = campaignsForStats.reduce((sum, c) => sum + (c.impressions || 0), 0);
@@ -949,7 +1044,7 @@ const DashboardPage: React.FC = () => {
       costPerConversionChange: hasData ? (displayMetrics.costPerConversionChange || 0) : 0,
       qualityScore: calculatedQualityScore
     };
-  }, [campaignsForStats, displayMetrics]);
+  }, [campaignsForStats, displayMetrics, selectedCampaignFilter, convertToUSD]);
 
   // 📊 إنشاء بيانات الـ charts من الحملات المفلترة
   const campaignBasedChartData = useMemo(() => {
@@ -1258,9 +1353,33 @@ const DashboardPage: React.FC = () => {
     })));
     console.log(`🔍 ====================================`);
 
-    // ترتيب حسب النقرات
-    return keywords.sort((a: any, b: any) => (b.clicks || 0) - (a.clicks || 0));
-  }, [aiInsights, selectedCampaignFilter, campaignsForStats]);
+    // 💱 تحويل CPC لـ USD عند اختيار "كل الحملات"
+    const shouldConvertToUSD = selectedCampaignFilter === 'all';
+
+    // ترتيب حسب النقرات مع تحويل العملة إذا لزم الأمر
+    return keywords
+      .map((kw: any) => {
+        // Find the campaign to get its currency
+        const campaign = campaigns.find(c =>
+          c.id === String(kw.campaignId || kw.campaign_id) ||
+          c.name === kw.campaign
+        );
+        const kwCurrency = campaign?.currency || 'USD';
+
+        // Convert CPC to USD if needed
+        let convertedCpc = kw.cpc || 0;
+        if (shouldConvertToUSD && kwCurrency !== 'USD') {
+          convertedCpc = convertToUSD(convertedCpc, kwCurrency);
+        }
+
+        return {
+          ...kw,
+          cpc: convertedCpc,
+          originalCurrency: kwCurrency
+        };
+      })
+      .sort((a: any, b: any) => (b.clicks || 0) - (a.clicks || 0));
+  }, [aiInsights, selectedCampaignFilter, campaignsForStats, campaigns, convertToUSD]);
   // Location data - إنشاء بيانات افتراضية من الحملات المفلترة
   const effectiveLocationData = useMemo(() => {
     console.log('🔍 effectiveLocationData calculation started');
@@ -1278,6 +1397,7 @@ const DashboardPage: React.FC = () => {
     console.log('📊 campaignsForStats:', campaignsForStats.length, 'campaigns');
 
     // 2. Fallback: إنشاء بيانات من الحملات المفلترة
+    // ✅ تعديل: عرض الموقع المستهدف حتى لو لم تكن هناك نقرات أو ظهورات
     if (campaignsForStats.length > 0) {
       const totalClicks = campaignsForStats.reduce((sum, c) => sum + (c.clicks || 0), 0);
       const totalImpressions = campaignsForStats.reduce((sum, c) => sum + (c.impressions || 0), 0);
@@ -1285,19 +1405,17 @@ const DashboardPage: React.FC = () => {
 
       console.log('📊 Total metrics:', { totalClicks, totalImpressions, totalConversions });
 
-      if (totalClicks > 0 || totalImpressions > 0) {
-        console.log('✅ Using fallback location data (Riyadh)');
-        // استخدام الرياض كـ fallback بدلاً من السعودية
-        return [
-          {
-            locationId: '1012088', // Riyadh (الرياض)
-            clicks: totalClicks,
-            impressions: totalImpressions,
-            conversions: totalConversions,
-            cost: 0
-          }
-        ];
-      }
+      // ✅ جديد: عرض الموقع دائماً حتى بدون نقرات/ظهور
+      console.log('✅ Using fallback location data (Riyadh) - showing targeted location');
+      return [
+        {
+          locationId: '1012088', // Riyadh (الرياض)
+          clicks: totalClicks,
+          impressions: totalImpressions,
+          conversions: totalConversions,
+          cost: 0
+        }
+      ];
     }
 
     console.log('❌ No location data available');
@@ -1617,14 +1735,22 @@ const DashboardPage: React.FC = () => {
   };
 
 
-  // Format currency بدون تحويل العملات
-  const formatCurrency = (num: number): string => {
-    if (!num || isNaN(num)) return '$0';
+  // Format currency with dynamic currency symbol based on selected campaign
+  // - All Campaigns: Shows values in USD ($)
+  // - Single Campaign: Shows values in the campaign's native currency
+  const formatCurrency = useCallback((num: number, overrideCurrency?: string): string => {
+    if (!num || isNaN(num)) {
+      const symbol = currencySymbols[overrideCurrency || displayCurrency] || '$';
+      return `${symbol}0`;
+    }
 
-    if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `$${(num / 1000).toFixed(1)}K`;
-    return `$${num.toFixed(2)}`;
-  };
+    const currency = overrideCurrency || displayCurrency;
+    const symbol = currencySymbols[currency] || '$';
+
+    if (num >= 1000000) return `${symbol}${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${symbol}${(num / 1000).toFixed(1)}K`;
+    return `${symbol}${num.toFixed(2)}`;
+  }, [displayCurrency, currencySymbols]);
 
   // Format percentage
   const formatPercentage = (num: number): string => {
@@ -3660,37 +3786,54 @@ const DashboardPage: React.FC = () => {
                             backgroundColor="transparent"
                             color="#10B981"
                             borderColor="#374151"
-                            valueSuffix={isRTL ? " نقرة" : " clicks"}
+                            valueSuffix=""
                             size="responsive"
                             data={(() => {
                               // استخدام البيانات الحقيقية إذا وجدت
                               if (effectiveLocationData && effectiveLocationData.length > 0) {
-                                return effectiveLocationData.slice(0, 15).map((loc: any) => {
-                                  const info = getCountryInfo(loc);
-                                  return {
-                                    country: info?.code.toLowerCase() || 'xx',
-                                    value: Math.round(loc.clicks || loc.impressions || 0)
-                                  };
-                                }).filter((d: any) => d.value > 0 && d.country !== 'xx');
-                              }
+                                // ✅ تجميع النقرات حسب الدولة (لتجنب عرض 0 عندما يكون هناك نقرات)
+                                const countryAggregation = new Map<string, number>();
 
-                              // لا نعرض بيانات وهمية - فقط البيانات الحقيقية من Google Ads
+                                effectiveLocationData.forEach((loc: any) => {
+                                  const info = getCountryInfo(loc);
+                                  const countryCode = info?.code.toLowerCase() || 'xx';
+                                  if (countryCode === 'xx') return;
+
+                                  const clicks = Math.round(loc.clicks || 0);
+                                  const currentTotal = countryAggregation.get(countryCode) || 0;
+                                  countryAggregation.set(countryCode, currentTotal + clicks);
+                                });
+
+                                // ✅ تحويل إلى صيغة WorldMap
+                                return Array.from(countryAggregation.entries()).map(([country, totalClicks]) => ({
+                                  country,
+                                  value: totalClicks > 0 ? totalClicks : 0.001 // عرض الموقع حتى بدون نقرات
+                                }));
+                              }
                               return [];
                             })()}
+                            tooltipTextFunction={(context: any) => {
+                              // ✅ عرض القيمة الحقيقية في التلميح
+                              const actualClicks = context.countryValue < 1 ? 0 : Math.round(context.countryValue);
+                              const suffix = isRTL ? ' نقرة' : ' clicks';
+                              return `${context.countryName}: ${actualClicks}${suffix}`;
+                            }}
                             styleFunction={(context: any) => {
                               const { countryValue, maxValue, color } = context;
                               const calculatedValue = typeof countryValue === "number" ? countryValue : 0;
                               const calculatedMax = typeof maxValue === "number" && maxValue > 0 ? maxValue : 1;
-                              const opacityLevel = calculatedValue > 0
-                                ? 0.4 + (calculatedValue / calculatedMax) * 0.6
+                              // ✅ إظهار اللون الأخضر للمواقع المستهدفة (حتى بقيمة صغيرة جداً)
+                              const isTargeted = calculatedValue > 0;
+                              const opacityLevel = isTargeted
+                                ? (calculatedValue >= 1 ? 0.4 + (calculatedValue / calculatedMax) * 0.6 : 0.5)
                                 : 0.15;
                               return {
-                                fill: calculatedValue > 0 ? color : "#1f2937",
+                                fill: isTargeted ? color : "#1f2937",
                                 fillOpacity: opacityLevel,
                                 stroke: "#4b5563",
                                 strokeWidth: 0.3,
                                 strokeOpacity: 0.6,
-                                cursor: calculatedValue > 0 ? "pointer" : "default",
+                                cursor: isTargeted ? "pointer" : "default",
                               };
                             }}
                           />
@@ -4410,7 +4553,7 @@ const DashboardPage: React.FC = () => {
                                   {formatLargeNumber(kw.clicks || 0)}
                                 </td>
                                 <td className="text-center py-2.5 px-2 text-emerald-400 font-semibold text-xs sm:text-sm group-hover:text-emerald-300">
-                                  ${typeof kw.cpc === 'number' ? kw.cpc.toFixed(2) : '0.00'}
+                                  {formatCurrency(typeof kw.cpc === 'number' ? kw.cpc : 0)}
                                 </td>
                                 <td className="text-center py-2.5 px-2">
                                   <div className="flex justify-center">

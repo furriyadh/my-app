@@ -843,9 +843,11 @@ function extractCityName(
   if (targetType === 'Country') {
     cityName = locationName.split(',')[0].trim();
   }
-  // 3️⃣ إذا كان target_type = "City"، نستخدم الاسم مباشرة
-  else if (targetType === 'City') {
+  // 3️⃣ إذا كان target_type = "City" أو "Governorate"، نستخدم الاسم مباشرة
+  // ✅ Governorate مثل "Al Khobar" يجب عرضها كما هي
+  else if (targetType === 'City' || targetType === 'Governorate') {
     cityName = locationName.split(',')[0].trim();
+    console.log(`📍 Using direct name for ${targetType}: "${cityName}" (from "${locationName}")`);
   }
   // 4️⃣ لأي نوع آخر (Province, Region, Neighborhood, Postal Code)، نستخرج من canonical_name
   else if (canonicalName) {
@@ -876,9 +878,11 @@ function extractCityName(
       }
     }
   }
-  // 5️⃣ Fallback النهائي: استخدام الاسم كما هو
+  // 5️⃣ Fallback النهائي: استخدام الاسم كما هو (بدون تحويل للدولة)
   else {
+    // ✅ جديد: إذا كان الاسم موجود ومختلف عن الدولة، نستخدمه
     cityName = locationName.split(',')[0].trim();
+    console.log(`📍 Fallback: Using name as-is: "${cityName}" (type: ${targetType || 'unknown'})`);
   }
 
   // 6️⃣ تطبيع الاسم
@@ -1879,6 +1883,10 @@ export async function GET(request: NextRequest) {
                   const locationId = geoTarget.geoTargetId;
                   let locationName = geoTargetNames.get(locationId) || '';
 
+                  // ✅ DEBUG: Log what we're getting from geoTargetNames
+                  const targetType = geoTargetNames.get(`${locationId}_type`) || '';
+                  console.log(`📍 Processing geoTarget ${locationId}: name="${locationName}", type="${targetType}"`);
+
                   // تحديد اسم المدينة
                   let cityName = '';
                   let areasCount = 1;
@@ -1889,6 +1897,7 @@ export async function GET(request: NextRequest) {
                     areasCount = geoTarget.proximityInfo.areasCount || 1;
                   } else {
                     cityName = extractCityName(locationName, locationId, geoTargetNames);
+                    console.log(`📍 extractCityName result: "${cityName}" (from locationName="${locationName}")`);
                   }
 
                   // إذا كانت المدينة موجودة بالفعل، نزيد العدد
