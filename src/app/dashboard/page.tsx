@@ -19,9 +19,9 @@ import NotificationsPanel from "@/components/Dashboard/NotificationsPanel";
 const NotificationManager = dynamic(() => import('@/components/NotificationManager'), {
   ssr: false,
 });
-import { 
-  ChartContainer, 
-  ChartTooltip, 
+import {
+  ChartContainer,
+  ChartTooltip,
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent
@@ -45,6 +45,29 @@ import {
 import WorldMap from "react-svg-worldmap";
 import { getCode, getName, getData } from 'country-list';
 import ReactCountryFlag from 'react-country-flag';
+import { Doughnut, Radar as RadarChartJS } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip as ChartJSTooltip,
+  Legend as ChartJSLegend
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  ArcElement,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  ChartJSTooltip,
+  ChartJSLegend
+);
+
 
 // Types
 interface Campaign {
@@ -132,10 +155,10 @@ const DashboardPage: React.FC = () => {
   const [selectedCampaignFilter, setSelectedCampaignFilter] = useState<string>('all');
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const campaignDropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // ✅ تتبع آخر قيم للفلاتر لمنع infinite loop
   const lastFetchParamsRef = useRef<{ campaign: string; dateRange: string } | null>(null);
-  
+
   // ✅ Ref لتخزين دالة fetchAllData لاستخدامها في useEffect قبل تعريفها
   const fetchAllDataRef = useRef<((showLoading?: boolean, forceRefresh?: boolean, overrideDateRange?: string, overrideTimeRange?: string) => Promise<void>) | null>(null);
 
@@ -150,8 +173,6 @@ const DashboardPage: React.FC = () => {
     search_terms: any[];
     ad_strength: { distribution: { excellent: number; good: number; average: number; poor: number }; details: any[] };
     landing_pages: any[];
-    budget_recommendations: any[];
-    auction_insights: any[];
   } | null>(null);
   const [loadingAiInsights, setLoadingAiInsights] = useState(false);
   const campaignsPerPage = 10;
@@ -212,7 +233,7 @@ const DashboardPage: React.FC = () => {
     const initializeData = async () => {
       // محاولة جلب البيانات من الكاش أولاً
       const cachedData = loadFromCache();
-      
+
       // التحقق من أن الكاش يحتوي على حملات فعلية (وليس فارغ)
       const hasCachedCampaigns = cachedData?.campaigns && cachedData.campaigns.length > 0;
 
@@ -235,20 +256,20 @@ const DashboardPage: React.FC = () => {
         await fetchAllDataRef.current?.(true);
       }
     };
-    
+
     initializeData();
   }, []);
 
   // التحديث التلقائي كل ساعة (فقط إذا كان مفعّل)
   useEffect(() => {
     if (!autoRefreshEnabled) return;
-    
+
     const interval = setInterval(() => {
       console.log('🔄 تحديث تلقائي للبيانات (كل ساعة)...');
       fetchAllDataRef.current?.(true, true); // forceRefresh = true
       setLastUpdated(new Date());
     }, 60 * 60 * 1000); // ساعة واحدة
-    
+
     return () => clearInterval(interval);
   }, [autoRefreshEnabled]);
 
@@ -281,7 +302,7 @@ const DashboardPage: React.FC = () => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Skip if typing in input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      
+
       // Cmd/Ctrl + N for new campaign
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault();
@@ -297,7 +318,7 @@ const DashboardPage: React.FC = () => {
         setSelectedCampaigns([]);
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [router]);
@@ -306,26 +327,26 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const cards = document.querySelectorAll('.chart-card, .stat-item');
     const intervals = new Map<HTMLElement, NodeJS.Timeout>();
-    
+
     const handleMouseMove = (e: MouseEvent, card: HTMLElement) => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
+
       // Calculate percentage position
       const xPercent = (x / rect.width) * 100;
       const yPercent = (y / rect.height) * 100;
-      
+
       card.style.setProperty('--glow-x', `${xPercent}%`);
       card.style.setProperty('--glow-y', `${yPercent}%`);
       card.style.setProperty('--glow-intensity', '1');
     };
-    
+
     const createParticle = (card: HTMLElement) => {
       const rect = card.getBoundingClientRect();
       const x = Math.random() * rect.width;
       const y = Math.random() * rect.height;
-      
+
       const particle = document.createElement('div');
       particle.className = 'particle';
       particle.style.cssText = `
@@ -340,56 +361,56 @@ const DashboardPage: React.FC = () => {
         left: ${x}px;
         top: ${y}px;
       `;
-      
+
       const tx = (Math.random() - 0.5) * 100;
       const ty = (Math.random() - 0.5) * 100;
       particle.style.setProperty('--tx', `${tx}px`);
       particle.style.setProperty('--ty', `${ty}px`);
-      
+
       card.appendChild(particle);
-      
+
       setTimeout(() => {
         if (particle.parentNode) {
           particle.remove();
         }
       }, 2000);
     };
-    
+
     cards.forEach((card) => {
       const cardElement = card as HTMLElement;
-      
+
       const mouseMoveHandler = (e: MouseEvent) => handleMouseMove(e, cardElement);
-      
+
       const mouseEnterHandler = () => {
         cardElement.style.setProperty('--glow-intensity', '1');
-        
+
         // Create particles continuously
         const interval = setInterval(() => {
           createParticle(cardElement);
         }, 150);
-        
+
         intervals.set(cardElement, interval);
       };
-      
+
       const mouseLeaveHandler = () => {
         cardElement.style.setProperty('--glow-intensity', '0');
-        
+
         const interval = intervals.get(cardElement);
         if (interval) {
           clearInterval(interval);
           intervals.delete(cardElement);
         }
-        
+
         // Clean up particles
         const particles = cardElement.querySelectorAll('.particle');
         particles.forEach(p => p.remove());
       };
-      
+
       cardElement.addEventListener('mousemove', mouseMoveHandler);
       cardElement.addEventListener('mouseenter', mouseEnterHandler);
       cardElement.addEventListener('mouseleave', mouseLeaveHandler);
     });
-    
+
     return () => {
       intervals.forEach(interval => clearInterval(interval));
       intervals.clear();
@@ -401,11 +422,11 @@ const DashboardPage: React.FC = () => {
     try {
       // إظهار التحميل
       if (showLoading || campaigns.length === 0) {
-      setIsLoading(true);
+        setIsLoading(true);
         setLoadingAiInsights(true);
       }
       setDataSource('api');
-      
+
       // حساب التواريخ بناءً على الـ label
       const formatDateForAPI = (d: Date) => {
         const year = d.getFullYear();
@@ -516,7 +537,7 @@ const DashboardPage: React.FC = () => {
       // ✅ استخدام القيم المُمررة أو القيم الحالية من الـ state
       const effectiveDateRange = overrideDateRange || dateRange || 'Today';
       const effectiveTimeRange = overrideTimeRange || timeRange;
-      
+
       const effectiveDates = getDateRangeFromLabel(effectiveDateRange);
       const startDateStr = formatDateForAPI(effectiveDates.startDate);
       const endDateStr = formatDateForAPI(effectiveDates.endDate);
@@ -570,7 +591,7 @@ const DashboardPage: React.FC = () => {
         });
 
         // تحديث الوقت فوراً
-      setLastUpdated(new Date());
+        setLastUpdated(new Date());
       } else {
         throw new Error(result.error || 'Failed to fetch dashboard data');
       }
@@ -582,7 +603,7 @@ const DashboardPage: React.FC = () => {
       setLoadingAiInsights(false);
     }
   }, [dateRange, timeRange, selectedCampaignFilter, campaigns.length]);
-  
+
   // ✅ تعيين الـ ref بعد تعريف fetchAllData
   fetchAllDataRef.current = fetchAllData;
 
@@ -609,7 +630,7 @@ const DashboardPage: React.FC = () => {
   const handleDateRangeChange = useCallback(async (range: any, comparison?: any) => {
     // حفظ الـ label للفترة الزمنية
     const rangeLabel = range.label || 'Custom';
-    
+
     // Calculate days difference
     const days = Math.ceil((range.endDate - range.startDate) / (1000 * 60 * 60 * 24));
     const newTimeRange = days.toString();
@@ -688,31 +709,31 @@ const DashboardPage: React.FC = () => {
   // Filter campaigns
   const filteredCampaigns = useMemo(() => {
     let filtered = campaigns;
-    
+
     // تصفية حسب نوع الحملة المحدد من القائمة
     if (selectedCampaignType !== 'all') {
       filtered = filtered.filter(c => c.type === selectedCampaignType);
     }
-    
+
     // تصفية حسب أنواع الحملات من الفلاتر المتقدمة
     if (filters.campaignTypes && filters.campaignTypes.length > 0) {
       filtered = filtered.filter(c => filters.campaignTypes.includes(c.type));
     }
-    
+
     // تصفية حسب الحالة
     if (filters.statuses && filters.statuses.length > 0) {
       filtered = filtered.filter(c => filters.statuses.includes(c.status));
     }
-    
+
     // تصفية حسب البحث
     if (filters.searchQuery && filters.searchQuery.trim()) {
       const query = filters.searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(c => 
-        c.name.toLowerCase().includes(query) || 
+      filtered = filtered.filter(c =>
+        c.name.toLowerCase().includes(query) ||
         c.id.toLowerCase().includes(query)
       );
     }
-    
+
     // تصفية حسب الأداء
     if (filters.performanceFilters) {
       if (filters.performanceFilters.minROAS !== undefined) {
@@ -725,7 +746,7 @@ const DashboardPage: React.FC = () => {
         filtered = filtered.filter(c => (c.conversions || 0) >= filters.performanceFilters.minConversions!);
       }
     }
-    
+
     return filtered;
   }, [campaigns, selectedCampaignType, filters]);
 
@@ -740,7 +761,7 @@ const DashboardPage: React.FC = () => {
 
   // Bulk Actions Handlers
   const toggleSelectCampaign = (id: string) => {
-    setSelectedCampaigns(prev => 
+    setSelectedCampaigns(prev =>
       prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
@@ -799,22 +820,22 @@ const DashboardPage: React.FC = () => {
     // تحقق من أن هناك حملات وأن القيم تغيرت فعلاً
     const currentParams = { campaign: selectedCampaignFilter, dateRange };
     const lastParams = lastFetchParamsRef.current;
-    
+
     // إذا كانت هذه أول مرة أو تغيرت القيم
-    const hasChanged = !lastParams || 
-      lastParams.campaign !== currentParams.campaign || 
+    const hasChanged = !lastParams ||
+      lastParams.campaign !== currentParams.campaign ||
       lastParams.dateRange !== currentParams.dateRange;
-    
+
     if (campaigns.length > 0 && hasChanged) {
       console.log(`🔄 Filter changed:`, {
         campaign: selectedCampaignFilter,
         dateRange: dateRange,
         previous: lastParams
       });
-      
+
       // حفظ القيم الحالية
       lastFetchParamsRef.current = currentParams;
-      
+
       // جلب البيانات
       fetchAllDataRef.current?.(true, true); // forceRefresh = true, showLoading = true
     }
@@ -883,7 +904,7 @@ const DashboardPage: React.FC = () => {
       conversionRate,
       cpc
     });
-    
+
     return {
       revenue: totalRevenue,
       revenueChange: hasData ? (metrics.revenueChange || 0) : 0,
@@ -983,17 +1004,9 @@ const DashboardPage: React.FC = () => {
       };
     });
 
-    // Hourly Performance - تقدير
-    const hourlyData = campaignsForStats.length > 0 ? Array.from({ length: 24 }, (_, hour) => {
-      const multiplier = hour >= 9 && hour <= 21 ? (hour >= 12 && hour <= 14 ? 1.5 : hour >= 18 && hour <= 20 ? 1.3 : 1.0) : 0.3;
-      return {
-        hour,
-        impressions: Math.round((totalImpressions / 24) * multiplier),
-        clicks: Math.round((totalClicks / 24) * multiplier),
-        conversions: Math.round((totalConversions / 24) * multiplier),
-        cost: (totalCost / 24) * multiplier
-      };
-    }) : [];
+    // ✅ Hourly Performance - استخدام البيانات الحقيقية من Google Ads API
+    // لا نحسب أي شيء، نستخدم البيانات الفعلية من aiInsights.hourly_data
+    const hourlyData: any[] = [];
 
     // Keyword Performance - إنشاء كلمات مفتاحية افتراضية من الحملات المفلترة
     const keywordData = campaignsForStats.length > 0 ? campaignsForStats.flatMap((c, idx) => {
@@ -1032,15 +1045,8 @@ const DashboardPage: React.FC = () => {
       return keywords;
     }).sort((a, b) => (b.clicks || 0) - (a.clicks || 0)).slice(0, 20) : [];
 
-    // Optimization Score - حساب من أداء الحملات المفلترة
-    const avgCtr = campaignsForStats.length > 0 ? campaignsForStats.reduce((sum, c) => sum + (c.ctr || 0), 0) / campaignsForStats.length : 0;
-    const avgConvRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
-    const activeCampaigns = campaignsForStats.filter(c => c.status === 'ENABLED').length;
-    const activeRatio = campaignsForStats.length > 0 ? (activeCampaigns / campaignsForStats.length) * 100 : 0;
-    // نقاط التحسين = (CTR * 8) + (ConvRate * 15) + (نسبة الحملات النشطة * 0.3) + base 30
-    const optimizationScore = campaignsForStats.length > 0
-      ? Math.min(100, Math.round(30 + (avgCtr * 8) + (avgConvRate * 15) + (activeRatio * 0.3)))
-      : null;
+    // Optimization Score - استخدام البيانات الحقيقية من aiInsights فقط (بدون أي حسابات)
+    const optimizationScore = aiInsights?.optimization_score || null;
 
     // Search Terms - من أسماء الحملات المفلترة
     const searchTerms = campaignsForStats.slice(0, 10).map(c => ({
@@ -1093,79 +1099,8 @@ const DashboardPage: React.FC = () => {
       sampleDetails: adStrength.details.slice(0, 2)
     });
 
-    // Landing Pages - من الحملات المفلترة
-    const landingPages = campaignsForStats.slice(0, 5).map(c => ({
-      url: `campaign/${c.id}`,
-      impressions: c.impressions || 0,
-      clicks: c.clicks || 0,
-      conversions: c.conversions || 0,
-      cost: c.cost || 0,
-      mobileScore: 75,
-      speedScore: Math.min(100, 60 + (c.ctr || 0) * 5)
-    }));
-
-    // Budget Recommendations - من الحملات المفلترة
-    const budgetRecommendations = campaignsForStats.filter(c => c.clicks > 0).slice(0, 5).map(c => ({
-      campaign: c.name?.substring(0, 25) || 'Campaign',
-      currentBudget: c.budget || c.cost || 10,
-      recommendedBudget: Math.round((c.budget || c.cost || 10) * ((c.ctr || 2) > 2 ? 1.5 : 1.2)),
-      estimatedClicksChange: Math.round((c.clicks || 0) * 0.3),
-      estimatedCostChange: Math.round((c.budget || c.cost || 10) * 0.3)
-    }));
-
-    // Auction Insights - من الحملات المفلترة مع حسابات واقعية ومتنوعة
-    const auctionInsights = campaignsForStats.slice(0, 5).map((c, index) => {
-      const ctr = c.ctr || 0;
-      const convRate = c.clicks > 0 ? ((c.conversions || 0) / c.clicks) * 100 : 0;
-      const impressions = c.impressions || 0;
-      const clicks = c.clicks || 0;
-      const cost = c.cost || 0;
-      const conversions = c.conversions || 0;
-
-      // حسابات أكثر واقعية وتنوعاً بناءً على البيانات الفعلية للحملة
-      // استخدام قيم مختلفة لكل حملة لضمان التنوع
-      const campaignMultiplier = 1 + (index * 0.15); // كل حملة لها multiplier مختلف
-
-      const baseImpressionShare = impressions > 0
-        ? Math.min(95, Math.max(10, (impressions / 100) * campaignMultiplier + (ctr * 3)))
-        : 15 + (index * 5);
-
-      const baseTopShare = clicks > 0
-        ? Math.min(85, Math.max(8, (clicks / 50) * campaignMultiplier + (ctr * 2)))
-        : 12 + (index * 4);
-
-      const baseAbsoluteTop = cost > 0
-        ? Math.min(75, Math.max(5, (cost / 20) * campaignMultiplier + (convRate * 1.5)))
-        : 8 + (index * 3);
-
-      const baseOutranking = conversions > 0
-        ? Math.min(90, Math.max(10, (conversions * 5) * campaignMultiplier + (ctr * 2)))
-        : 15 + (index * 4);
-
-      const result = {
-        campaign: c.name?.substring(0, 25) || `Campaign ${index + 1}`,
-        impressionShare: baseImpressionShare,
-        overlapRate: 0,
-        positionAboveRate: 0,
-        topImpressionPct: baseTopShare,
-        absoluteTopPct: baseAbsoluteTop,
-        outrankingShare: baseOutranking
-      };
-
-      console.log(`🏆 Auction Insights for "${c.name}":`, {
-        impressions,
-        clicks,
-        cost,
-        conversions,
-        ctr: ctr.toFixed(2) + '%',
-        '→ Impression Share': result.impressionShare.toFixed(1) + '%',
-        '→ Top Share': result.topImpressionPct.toFixed(1) + '%',
-        '→ Absolute Top': result.absoluteTopPct.toFixed(1) + '%',
-        '→ Outranking': result.outrankingShare.toFixed(1) + '%'
-      });
-
-      return result;
-    });
+    // Landing Pages - استخدام البيانات الحقيقية من aiInsights فقط (بدون أي حسابات)
+    const landingPages = aiInsights?.landing_pages || [];
 
     return {
       performanceTrends,
@@ -1178,9 +1113,7 @@ const DashboardPage: React.FC = () => {
       optimizationScore,
       searchTerms,
       adStrength,
-      landingPages,
-      budgetRecommendations,
-      auctionInsights
+      landingPages
     };
   }, [campaignsForStats]);
 
@@ -1306,25 +1239,25 @@ const DashboardPage: React.FC = () => {
     console.log('🔍 effectiveLocationData calculation started');
     console.log('🔍 aiInsights:', aiInsights);
     console.log('🔍 aiInsights.location_data:', aiInsights?.location_data);
-    
+
     // 1. استخدام البيانات الحقيقية من aiInsights.location_data
     if (aiInsights?.location_data && aiInsights.location_data.length > 0) {
       console.log('✅ Using real location data from API:', aiInsights.location_data);
       console.log('📍 Location IDs:', aiInsights.location_data.map((l: any) => l.locationId));
       return aiInsights.location_data;
     }
-    
+
     console.log('⚠️ No location_data from API, checking campaigns...');
     console.log('📊 campaignsForStats:', campaignsForStats.length, 'campaigns');
-    
+
     // 2. Fallback: إنشاء بيانات من الحملات المفلترة
     if (campaignsForStats.length > 0) {
       const totalClicks = campaignsForStats.reduce((sum, c) => sum + (c.clicks || 0), 0);
       const totalImpressions = campaignsForStats.reduce((sum, c) => sum + (c.impressions || 0), 0);
       const totalConversions = campaignsForStats.reduce((sum, c) => sum + (c.conversions || 0), 0);
-      
+
       console.log('📊 Total metrics:', { totalClicks, totalImpressions, totalConversions });
-      
+
       if (totalClicks > 0 || totalImpressions > 0) {
         console.log('✅ Using fallback location data (Riyadh)');
         // استخدام الرياض كـ fallback بدلاً من السعودية
@@ -1339,7 +1272,7 @@ const DashboardPage: React.FC = () => {
         ];
       }
     }
-    
+
     console.log('❌ No location data available');
     return [];
   }, [aiInsights, campaignsForStats]);
@@ -1374,44 +1307,6 @@ const DashboardPage: React.FC = () => {
   // Landing Pages
   const effectiveLandingPages = aiInsights?.landing_pages || [];
   console.log(`🌐 Landing Pages: REAL API Data - Count: ${effectiveLandingPages.length}`);
-
-  // Budget Recommendations
-  const effectiveBudgetRecs = aiInsights?.budget_recommendations || [];
-  console.log(`💰 Budget Recommendations: REAL API Data - Count: ${effectiveBudgetRecs.length}`);
-  // استخدام البيانات الحقيقية من API إذا كانت متاحة، وإلا استخدام المحسوبة
-  const effectiveAuctionInsights = useMemo(() => {
-    let insights = [];
-    const hasRealData = aiInsights?.auction_insights && aiInsights.auction_insights.length > 0;
-
-    // استخدام البيانات الحقيقية من API أو المحسوبة
-    if (hasRealData) {
-      insights = aiInsights.auction_insights;
-      console.log('✅ Using REAL Auction Insights from Google Ads API');
-    } else {
-      insights = campaignBasedChartData.auctionInsights;
-      console.log('⚠️ Using CALCULATED Auction Insights');
-    }
-
-    // فلترة حسب الحملة المختارة
-    if (selectedCampaignFilter !== 'all' && campaignsForStats.length > 0) {
-      const selectedCampaign = campaignsForStats[0];
-      const filtered = insights.filter((insight: any) => {
-        const insightCampaign = (insight.campaign || '').trim().toLowerCase();
-        const selectedName = (selectedCampaign.name || '').trim().toLowerCase();
-        return insightCampaign === selectedName;
-      });
-
-      console.log('🏆 Auction Insights Filtered:', {
-        total: insights.length,
-        filtered: filtered.length,
-        selectedCampaign: selectedCampaign.name
-      });
-
-      return filtered.length > 0 ? filtered : insights; // إذا لم تتطابق، نعرض الكل
-    }
-
-    return insights;
-  }, [aiInsights, campaignBasedChartData.auctionInsights, selectedCampaignFilter, campaignsForStats]);
 
   // إغلاق dropdown الحملات عند الضغط خارجه
   React.useEffect(() => {
@@ -1476,14 +1371,6 @@ const DashboardPage: React.FC = () => {
     landingPages: {
       count: effectiveLandingPages.length,
       source: aiInsights?.landing_pages?.length > 0 ? '✅ REAL from Google Ads API' : '⚠️ CALCULATED'
-    },
-    budgetRecs: {
-      count: effectiveBudgetRecs.length,
-      source: aiInsights?.budget_recommendations?.length > 0 ? '✅ REAL from Google Ads API' : '⚠️ CALCULATED'
-    },
-    auctionInsights: {
-      count: effectiveAuctionInsights.length,
-      source: aiInsights?.auction_insights?.length > 0 ? '✅ REAL from Google Ads API' : '⚠️ CALCULATED'
     }
   });
   console.log(`📊 ==================================================`);
@@ -1601,7 +1488,7 @@ const DashboardPage: React.FC = () => {
           action: recommendation.suggestedAction
         })
       });
-      
+
       if (response.ok) {
         // Remove from list after applying
         setGoogleRecommendations(prev => prev.filter(r => r.id !== recommendation.id));
@@ -1632,7 +1519,7 @@ const DashboardPage: React.FC = () => {
   // AI Recommendations (simulated - would come from API)
   const aiRecommendations = useMemo(() => {
     const recommendations: any[] = [];
-    
+
     // Check for low CTR campaigns
     campaigns.forEach(campaign => {
       if ((campaign.ctr || 0) < 2) {
@@ -1640,40 +1527,40 @@ const DashboardPage: React.FC = () => {
           type: 'warning',
           campaign: campaign.name,
           title: isRTL ? 'معدل نقر منخفض' : 'Low CTR Alert',
-          description: isRTL 
+          description: isRTL
             ? `حملة "${campaign.name}" لديها CTR أقل من 2%. فكر في تحسين نص الإعلان.`
             : `Campaign "${campaign.name}" has CTR below 2%. Consider improving ad copy.`,
           action: isRTL ? 'تحسين الإعلانات' : 'Optimize Ads'
         });
       }
-      
+
       // Check for high CPC
       if ((campaign.cpc || 0) > 5) {
         recommendations.push({
           type: 'info',
           campaign: campaign.name,
           title: isRTL ? 'تكلفة نقرة مرتفعة' : 'High CPC',
-          description: isRTL 
+          description: isRTL
             ? `حملة "${campaign.name}" لديها CPC مرتفع. راجع استراتيجية المزايدة.`
             : `Campaign "${campaign.name}" has high CPC. Review bidding strategy.`,
           action: isRTL ? 'مراجعة المزايدة' : 'Review Bidding'
         });
       }
-      
+
       // Check for budget nearly depleted
       if (campaign.budgetRemaining && campaign.budgetRemaining < 20) {
         recommendations.push({
           type: 'alert',
           campaign: campaign.name,
           title: isRTL ? 'الميزانية تنفد' : 'Budget Running Low',
-          description: isRTL 
+          description: isRTL
             ? `حملة "${campaign.name}" استنفدت ${100 - campaign.budgetRemaining}% من الميزانية.`
             : `Campaign "${campaign.name}" has used ${100 - campaign.budgetRemaining}% of budget.`,
           action: isRTL ? 'زيادة الميزانية' : 'Increase Budget'
         });
       }
     });
-    
+
     return recommendations.slice(0, 5); // Show top 5
   }, [campaigns, isRTL]);
 
@@ -1721,29 +1608,29 @@ const DashboardPage: React.FC = () => {
   // Custom Tooltip Component - Enhanced with better styling
   const CustomTooltip = ({ active, payload, label, color = '#8B5CF6' }: any) => {
     if (!active || !payload || !payload.length) return null;
-    
-        return (
+
+    return (
       <div className="bg-[#060010] border-2 rounded-xl p-4 shadow-2xl backdrop-blur-sm" style={{ borderColor: color + '80', boxShadow: `0 10px 40px ${color}30` }}>
         <p className="font-bold text-base mb-3 border-b pb-2" style={{ color: color, borderColor: color + '30' }}>{label}</p>
         <div className="space-y-2">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-6">
               <div className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
+                <div
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: entry.color }}
                 />
                 <span className="text-sm text-gray-300">{entry.name}:</span>
-            </div>
+              </div>
               <span className="text-base font-bold" style={{ color: entry.color }}>
-                {typeof entry.value === 'number' && entry.value >= 1000 
+                {typeof entry.value === 'number' && entry.value >= 1000
                   ? formatLargeNumber(entry.value)
                   : entry.value}
               </span>
-                  </div>
+            </div>
           ))}
-                  </div>
-                  </div>
+        </div>
+      </div>
     );
   };
 
@@ -1786,13 +1673,13 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
         {/* Background glow effect */}
-        <div 
+        <div
           className="absolute inset-0 opacity-40"
           style={{
             background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)'
           }}
         />
-        
+
         {/* Purple Loader */}
         <div className="relative z-10">
           <PurpleLoader />
@@ -1801,10 +1688,10 @@ const DashboardPage: React.FC = () => {
     );
   }
 
-        return (
+  return (
     <div className="relative min-h-screen bg-black dashboard-container">
       <AnimatedBackground />
-      
+
       {/* Global Mouse Spotlight */}
       <div id="mouse-spotlight" style={{
         position: 'fixed',
@@ -1828,7 +1715,7 @@ const DashboardPage: React.FC = () => {
         filter: 'blur(40px)',
         transition: 'opacity 0.3s ease'
       }} />
-      
+
       <style jsx>{`
         .chart-card {
           --glow-x: 50%;
@@ -2870,7 +2757,7 @@ const DashboardPage: React.FC = () => {
           transition: width 0.5s ease;
         }
       `}</style>
-      
+
       <div className="relative z-10 container mx-auto px-4 py-8 space-y-8">
         {/* Breadcrumbs */}
         <nav className="breadcrumbs">
@@ -2884,12 +2771,12 @@ const DashboardPage: React.FC = () => {
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
               {t.dashboard?.title || 'Dashboard Overview'}
-              </h1>
+            </h1>
             <p className="text-purple-200/70 text-sm">
               {(t.dashboard as any)?.subtitle || 'Monitor your advertising performance and manage campaigns'}
-              </p>
-            </div>
-          
+            </p>
+          </div>
+
           <div className="flex items-center gap-3 flex-wrap">
             {/* Campaign Filter */}
             <div className="relative" ref={campaignDropdownRef}>
@@ -2974,11 +2861,11 @@ const DashboardPage: React.FC = () => {
             </div>
 
             {/* Date Range Picker */}
-            <DateRangePicker 
+            <DateRangePicker
               onDateRangeChange={handleDateRangeChange}
               enableComparison={true}
             />
-            
+
             {/* Last Updated + Data Source Indicator */}
             <div className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 bg-purple-900/20 border border-purple-900/30 rounded-lg">
               <Clock className="w-4 h-4 text-purple-400" />
@@ -2999,48 +2886,48 @@ const DashboardPage: React.FC = () => {
                 </span>
               )}
             </div>
-            
+
             {/* Refresh Button */}
             <button
               onClick={handleRefresh}
               disabled={isLoading || loadingAiInsights}
               className={`p-2 border rounded-lg transition-all backdrop-blur-sm ${(isLoading || loadingAiInsights)
-                  ? 'bg-blue-500/20 border-blue-400/40 cursor-wait' 
-                  : 'bg-purple-900/30 hover:bg-purple-900/50 border-purple-900/50'
-              }`}
+                ? 'bg-blue-500/20 border-blue-400/40 cursor-wait'
+                : 'bg-purple-900/30 hover:bg-purple-900/50 border-purple-900/50'
+                }`}
               title={isRTL ? 'تحديث البيانات من Google Ads' : 'Refresh data from Google Ads'}
             >
               <RefreshCw className={`w-5 h-5 text-purple-300 ${(isLoading || loadingAiInsights) ? 'animate-spin' : ''}`} />
             </button>
-            
+
             {/* Auto Refresh Toggle (كل ساعة) */}
             <button
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
               className={`p-2 border rounded-lg transition-all backdrop-blur-sm flex items-center gap-1 ${autoRefreshEnabled
-                  ? 'bg-green-600/30 border-green-500/50 text-green-300' 
-                  : 'bg-purple-900/30 border-purple-900/50 text-purple-300 hover:bg-purple-900/50'
-              }`}
+                ? 'bg-green-600/30 border-green-500/50 text-green-300'
+                : 'bg-purple-900/30 border-purple-900/50 text-purple-300 hover:bg-purple-900/50'
+                }`}
               title={isRTL ? (autoRefreshEnabled ? 'إيقاف التحديث التلقائي (كل ساعة)' : 'تفعيل التحديث التلقائي (كل ساعة)') : (autoRefreshEnabled ? 'Disable Auto-Refresh (hourly)' : 'Enable Auto-Refresh (hourly)')}
             >
               <Activity className="w-5 h-5" />
               {autoRefreshEnabled && <span className="text-[10px] hidden sm:inline">1h</span>}
             </button>
-            
+
             {/* Advanced Filters */}
-            <AdvancedFilters 
+            <AdvancedFilters
               onFiltersChange={setFilters}
             />
-            
+
             {/* Export Button */}
-            <ExportButton 
+            <ExportButton
               campaigns={campaigns}
               metrics={metrics}
               performanceData={performanceData}
             />
-            
+
             {/* Notifications */}
             <NotificationsPanel />
-            
+
             {/* New Campaign Button */}
             <button
               onClick={() => router.push('/campaign/new')}
@@ -3050,7 +2937,7 @@ const DashboardPage: React.FC = () => {
               <span className="hidden sm:inline">{(t.dashboard as any)?.newCampaign || 'New Campaign'}</span>
             </button>
           </div>
-                </div>
+        </div>
 
         {/* Quick Actions Bar */}
         <div className="flex items-center gap-3 mt-4 quick-actions-group">
@@ -3066,127 +2953,127 @@ const DashboardPage: React.FC = () => {
             <BarChart3 className="w-4 h-4 text-green-400" />
             {isRTL ? 'تحليلات' : 'Analytics'}
           </button>
-              </div>
+        </div>
 
         {/* Stats Summary Bar - Row 1 */}
         <div className="max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12">
           <div className="stats-summary grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-4 sm:mt-6">
-          <div className="stat-item">
-            <div className="stat-icon">
-              <DollarSign className="w-5 h-5 text-green-400" />
-            </div>
-            <div className="flex flex-col">
-              <span className="stat-label">{isRTL ? 'الإيرادات' : 'Revenue'}</span>
+            <div className="stat-item">
+              <div className="stat-icon">
+                <DollarSign className="w-5 h-5 text-green-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">{isRTL ? 'الإيرادات' : 'Revenue'}</span>
                 <span className="stat-value">{formatCurrency(statsData.revenue)}</span>
-              <span className={`stat-change ${statsData.revenueChange >= 0 ? 'positive' : 'negative'}`}>
-                {statsData.revenueChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(statsData.revenueChange)}%
-              </span>
-          </div>
+                <span className={`stat-change ${statsData.revenueChange >= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.revenueChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {Math.abs(statsData.revenueChange)}%
+                </span>
+              </div>
             </div>
-            
-          <div className="stat-item">
-            <div className="stat-icon">
-              <Target className="w-5 h-5 text-purple-400" />
+
+            <div className="stat-item">
+              <div className="stat-icon">
+                <Target className="w-5 h-5 text-purple-400" />
               </div>
-            <div className="flex flex-col">
-              <span className="stat-label">{isRTL ? 'الإنفاق' : 'Spend'}</span>
+              <div className="flex flex-col">
+                <span className="stat-label">{isRTL ? 'الإنفاق' : 'Spend'}</span>
                 <span className="stat-value">{formatCurrency(statsData.spend)}</span>
-              <span className={`stat-change ${statsData.spendChange <= 0 ? 'positive' : 'negative'}`}>
-                {statsData.spendChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                {Math.abs(statsData.spendChange)}%
-              </span>
-                    </div>
+                <span className={`stat-change ${statsData.spendChange <= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.spendChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                  {Math.abs(statsData.spendChange)}%
+                </span>
               </div>
-          
-          <div className="stat-item">
-            <div className="stat-icon">
-              <Activity className="w-5 h-5 text-blue-400" />
-                    </div>
-            <div className="flex flex-col">
-              <span className="stat-label">ROAS</span>
-              <span className="stat-value">{statsData.roas}x</span>
-              <span className={`stat-change ${statsData.roasChange >= 0 ? 'positive' : 'negative'}`}>
-                {statsData.roasChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(statsData.roasChange)}%
-              </span>
-                    </div>
-                  </div>
-          
-          <div className="stat-item">
-            <div className="stat-icon">
-              <MousePointer className="w-5 h-5 text-pink-400" />
-                </div>
-            <div className="flex flex-col">
-              <span className="stat-label">CTR</span>
-              <span className="stat-value">{statsData.ctr}%</span>
-              <span className={`stat-change ${statsData.ctrChange >= 0 ? 'positive' : 'negative'}`}>
-                {statsData.ctrChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(statsData.ctrChange)}%
-              </span>
+            </div>
+
+            <div className="stat-item">
+              <div className="stat-icon">
+                <Activity className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">ROAS</span>
+                <span className="stat-value">{statsData.roas}x</span>
+                <span className={`stat-change ${statsData.roasChange >= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.roasChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {Math.abs(statsData.roasChange)}%
+                </span>
+              </div>
+            </div>
+
+            <div className="stat-item">
+              <div className="stat-icon">
+                <MousePointer className="w-5 h-5 text-pink-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">CTR</span>
+                <span className="stat-value">{statsData.ctr}%</span>
+                <span className={`stat-change ${statsData.ctrChange >= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.ctrChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {Math.abs(statsData.ctrChange)}%
+                </span>
               </div>
             </div>
           </div>
 
-        {/* Stats Summary Bar - Row 2 (Google Ads Specific Metrics) */}
+          {/* Stats Summary Bar - Row 2 (Google Ads Specific Metrics) */}
           <div className="stats-summary grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-3">
-          <div className="stat-item">
-            <div className="stat-icon">
-              <DollarSign className="w-5 h-5 text-orange-400" />
-            </div>
-            <div className="flex flex-col">
-              <span className="stat-label">CPC</span>
+            <div className="stat-item">
+              <div className="stat-icon">
+                <DollarSign className="w-5 h-5 text-orange-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">CPC</span>
                 <span className="stat-value">{formatCurrency(parseFloat(statsData.cpc))}</span>
-              <span className={`stat-change ${statsData.cpcChange <= 0 ? 'positive' : 'negative'}`}>
-                {statsData.cpcChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                {Math.abs(statsData.cpcChange)}%
-              </span>
+                <span className={`stat-change ${statsData.cpcChange <= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.cpcChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                  {Math.abs(statsData.cpcChange)}%
+                </span>
+              </div>
             </div>
+
+            <div className="stat-item">
+              <div className="stat-icon">
+                <Percent className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">{isRTL ? 'معدل التحويل' : 'Conv. Rate'}</span>
+                <span className="stat-value">{statsData.conversionRate}%</span>
+                <span className={`stat-change ${statsData.conversionRateChange >= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.conversionRateChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {Math.abs(statsData.conversionRateChange)}%
+                </span>
+              </div>
             </div>
-            
-          <div className="stat-item">
-            <div className="stat-icon">
-              <Percent className="w-5 h-5 text-cyan-400" />
-                    </div>
-            <div className="flex flex-col">
-              <span className="stat-label">{isRTL ? 'معدل التحويل' : 'Conv. Rate'}</span>
-              <span className="stat-value">{statsData.conversionRate}%</span>
-              <span className={`stat-change ${statsData.conversionRateChange >= 0 ? 'positive' : 'negative'}`}>
-                {statsData.conversionRateChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(statsData.conversionRateChange)}%
-              </span>
-                    </div>
-                  </div>
-          
-          <div className="stat-item">
-            <div className="stat-icon">
-              <Zap className="w-5 h-5 text-yellow-400" />
-                    </div>
-            <div className="flex flex-col">
-              <span className="stat-label">{isRTL ? 'تكلفة التحويل' : 'Cost/Conv.'}</span>
+
+            <div className="stat-item">
+              <div className="stat-icon">
+                <Zap className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">{isRTL ? 'تكلفة التحويل' : 'Cost/Conv.'}</span>
                 <span className="stat-value">{formatCurrency(parseFloat(statsData.costPerConversion))}</span>
-              <span className={`stat-change ${statsData.costPerConversionChange <= 0 ? 'positive' : 'negative'}`}>
-                {statsData.costPerConversionChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                {Math.abs(statsData.costPerConversionChange)}%
-              </span>
-                    </div>
-                  </div>
-          
-          <div className="stat-item">
-            <div className="stat-icon">
-              <Star className="w-5 h-5 text-amber-400" />
-                    </div>
-            <div className="flex flex-col">
-              <span className="stat-label">{isRTL ? 'جودة الإعلان' : 'Quality Score'}</span>
+                <span className={`stat-change ${statsData.costPerConversionChange <= 0 ? 'positive' : 'negative'}`}>
+                  {statsData.costPerConversionChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                  {Math.abs(statsData.costPerConversionChange)}%
+                </span>
+              </div>
+            </div>
+
+            <div className="stat-item">
+              <div className="stat-icon">
+                <Star className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="stat-label">{isRTL ? 'جودة الإعلان' : 'Quality Score'}</span>
                 <span className="stat-value">{statsData.qualityScore.toFixed(1)}/10</span>
                 <span className={`stat-change ${statsData.qualityScore >= 7 ? 'positive' : statsData.qualityScore >= 5 ? '' : 'negative'}`}>
                   {statsData.qualityScore >= 7 ? <TrendingUp className="w-3 h-3" /> : statsData.qualityScore >= 5 ? null : <TrendingDown className="w-3 h-3" />}
                   {statsData.qualityScore >= 7 ? (isRTL ? 'ممتاز' : 'Excellent') : statsData.qualityScore >= 5 ? (isRTL ? 'جيد' : 'Good') : statsData.qualityScore > 0 ? (isRTL ? 'ضعيف' : 'Poor') : (isRTL ? 'لا توجد بيانات' : 'N/A')}
-              </span>
+                </span>
               </div>
-                    </div>
-                  </div>
-                </div>
+            </div>
+          </div>
+        </div>
 
         {/* Active Filters Display */}
         {(filters.campaignTypes?.length > 0 || filters.statuses?.length > 0) && (
@@ -3202,7 +3089,7 @@ const DashboardPage: React.FC = () => {
               <div key={status} className="filter-chip">
                 {status}
                 <XCircle className="w-3 h-3 cursor-pointer hover:text-red-400" onClick={() => removeFilter('status', status)} />
-            </div>
+              </div>
             ))}
             <button className="clear-filters-btn" onClick={clearAllFilters}>
               {isRTL ? 'مسح الكل' : 'Clear All'}
@@ -3214,59 +3101,59 @@ const DashboardPage: React.FC = () => {
 
         {/* 🤖 AI Insights - Compact */}
         <div className="max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12">
-        <div className="flex items-baseline gap-3 mb-3">
-          <span className="text-3xl" style={{ lineHeight: 1, transform: 'translateY(-2px)' }}>🤖</span>
-          <h3 className="text-xl font-bold text-white">{isRTL ? 'رؤى AI' : 'AI Insights'}</h3>
-        </div>
-        <div className="space-y-1.5">
+          <div className="flex items-baseline gap-3 mb-3">
+            <span className="text-3xl" style={{ lineHeight: 1, transform: 'translateY(-2px)' }}>🤖</span>
+            <h3 className="text-xl font-bold text-white">{isRTL ? 'رؤى AI' : 'AI Insights'}</h3>
+          </div>
+          <div className="space-y-1.5">
             {campaignsForStats.length > 0 ? (
-            <>
-              {/* Best Campaign */}
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-green-500/5 border-l-2 border-green-500">
-                <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <p className="text-xs text-gray-300 truncate">
-                  {(() => {
-                      const best = campaignsForStats.reduce((a, b) => (a.roas || 0) > (b.roas || 0) ? a : b, campaignsForStats[0]);
-                    return isRTL 
-                      ? `أفضل: "${best?.name}" - ROAS ${(best?.roas || 0).toFixed(1)}x`
-                      : `Top: "${best?.name}" - ${(best?.roas || 0).toFixed(1)}x ROAS`;
-                  })()}
-                </p>
-              </div>
-              {/* Low CTR */}
-                {campaignsForStats.some(c => (c.ctr || 0) < 2) && (
-                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-yellow-500/5 border-l-2 border-yellow-500">
-                  <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+              <>
+                {/* Best Campaign */}
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-green-500/5 border-l-2 border-green-500">
+                  <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />
                   <p className="text-xs text-gray-300 truncate">
-                    {isRTL 
+                    {(() => {
+                      const best = campaignsForStats.reduce((a, b) => (a.roas || 0) > (b.roas || 0) ? a : b, campaignsForStats[0]);
+                      return isRTL
+                        ? `أفضل: "${best?.name}" - ROAS ${(best?.roas || 0).toFixed(1)}x`
+                        : `Top: "${best?.name}" - ${(best?.roas || 0).toFixed(1)}x ROAS`;
+                    })()}
+                  </p>
+                </div>
+                {/* Low CTR */}
+                {campaignsForStats.some(c => (c.ctr || 0) < 2) && (
+                  <div className="flex items-center gap-3 p-2.5 rounded-xl bg-yellow-500/5 border-l-2 border-yellow-500">
+                    <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                    <p className="text-xs text-gray-300 truncate">
+                      {isRTL
                         ? `${campaignsForStats.filter(c => (c.ctr || 0) < 2).length} حملات CTR < 2%`
                         : `${campaignsForStats.filter(c => (c.ctr || 0) < 2).length} campaigns CTR < 2%`}
-                  </p>
-                </div>
-              )}
-              {/* Spend */}
-              {metrics.totalSpend > 0 && (
-                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-blue-500/5 border-l-2 border-blue-500">
-                  <DollarSign className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <p className="text-xs text-gray-300 truncate">
-                    {isRTL 
+                    </p>
+                  </div>
+                )}
+                {/* Spend */}
+                {metrics.totalSpend > 0 && (
+                  <div className="flex items-center gap-3 p-2.5 rounded-xl bg-blue-500/5 border-l-2 border-blue-500">
+                    <DollarSign className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                    <p className="text-xs text-gray-300 truncate">
+                      {isRTL
                         ? `الإنفاق: ${formatCurrency(metrics.totalSpend)} | CPA: ${formatCurrency(metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions) : 0)}`
                         : `Spend: ${formatCurrency(metrics.totalSpend)} | CPA: ${formatCurrency(metrics.conversions > 0 ? (metrics.totalSpend / metrics.conversions) : 0)}`}
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-purple-500/5 border-l-2 border-purple-500">
-              <Zap className="w-4 h-4 text-purple-400 flex-shrink-0" />
-              <p className="text-xs text-gray-400">
-                {isRTL ? 'أنشئ حملتك الأولى لرؤية البيانات' : 'Create your first campaign to see insights'}
-              </p>
-            </div>
-          )}
-            </div>
-            </div>
-            
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-purple-500/5 border-l-2 border-purple-500">
+                <Zap className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                <p className="text-xs text-gray-400">
+                  {isRTL ? 'أنشئ حملتك الأولى لرؤية البيانات' : 'Create your first campaign to see insights'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="mt-10 sm:mt-12 md:mt-16 lg:mt-20"></div>
 
         {/* Charts Section */}
@@ -3274,37 +3161,37 @@ const DashboardPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6">
             <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-2">
               <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-            <span>{(t.dashboard as any)?.performanceAnalytics || 'Performance Analytics'}</span>
-          </h2>
+              <span>{(t.dashboard as any)?.performanceAnalytics || 'Performance Analytics'}</span>
+            </h2>
 
             {/* Charts Tabs */}
             <div className="charts-tabs">
-              <button 
+              <button
                 className={`chart-tab ${activeChartTab === 'all' ? 'active' : ''}`}
                 onClick={() => setActiveChartTab('all')}
               >
                 {isRTL ? 'الكل' : 'All'}
               </button>
-              <button 
+              <button
                 className={`chart-tab ${activeChartTab === 'performance' ? 'active' : ''}`}
                 onClick={() => setActiveChartTab('performance')}
               >
                 {isRTL ? 'الأداء' : 'Performance'}
               </button>
-              <button 
+              <button
                 className={`chart-tab ${activeChartTab === 'demographics' ? 'active' : ''}`}
                 onClick={() => setActiveChartTab('demographics')}
               >
                 {isRTL ? 'الديموغرافيا' : 'Demographics'}
               </button>
-              <button 
+              <button
                 className={`chart-tab ${activeChartTab === 'financial' ? 'active' : ''}`}
                 onClick={() => setActiveChartTab('financial')}
               >
                 {isRTL ? 'المالية' : 'Financial'}
               </button>
             </div>
-            </div>
+          </div>
 
           {/* ===== OPTIMIZED CHARTS SECTION ===== */}
           <div className="max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12">
@@ -3368,8 +3255,8 @@ const DashboardPage: React.FC = () => {
 
                     return (
                       <div className="flex flex-col h-full justify-center items-center px-1 sm:px-2">
-              <ChartContainer
-                config={{
+                        <ChartContainer
+                          config={{
                             ctr: { label: "CTR", color: '#3B82F6' },
                             conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#EC4899' },
                             cost: { label: isRTL ? "التكلفة" : "Cost", color: '#F97316' }
@@ -3379,7 +3266,7 @@ const DashboardPage: React.FC = () => {
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart
                               data={trendData}
-                              margin={{ top: 10, right: 10, left: 25, bottom: 5 }}
+                              margin={{ top: 10, right: 10, left: -5, bottom: 5 }}
                             >
                               <CartesianGrid strokeDasharray="4 4" stroke="#374151" horizontal={true} vertical={false} opacity={0.4} />
                               <XAxis
@@ -3459,9 +3346,9 @@ const DashboardPage: React.FC = () => {
                                 dot={false}
                                 name="CTR"
                               />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
 
                         {/* Legend مع الإحصائيات الحقيقية */}
                         <div className="flex flex-row items-center justify-center gap-6 sm:gap-10 mt-3 pt-3 border-t border-gray-700/50 px-2">
@@ -3469,7 +3356,7 @@ const DashboardPage: React.FC = () => {
                             <div className="flex items-center gap-1.5">
                               <div className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></div>
                               <span className="text-[10px] sm:text-xs text-gray-400">{isRTL ? 'التكلفة' : 'Cost'}</span>
-                </div>
+                            </div>
                             <span className="text-xs sm:text-sm font-bold text-orange-400">{formatCurrency(totalCost)}</span>
                           </div>
                           <div className="flex flex-col items-center gap-1">
@@ -3498,8 +3385,8 @@ const DashboardPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-            </div>
-            
+              </div>
+
               {/* 4. Locations - World Map */}
               {(() => {
                 // Google Ads Geo Target ID mapping (Countries + Major Cities)
@@ -3626,20 +3513,20 @@ const DashboardPage: React.FC = () => {
                 // دالة للحصول على معلومات الدولة من أي مصدر
                 const getCountryInfo = (loc: any): { code: string; name: string; nameAr: string } | null => {
                   console.log('📍 getCountryInfo called with:', { locationId: loc.locationId, locationName: loc.locationName, campaignName: loc.campaignName });
-                  
+
                   // 0. أولوية قصوى: استخدام locationName من API إذا كان متوفراً
                   if (loc.locationName) {
                     console.log('✅ Using locationName from API:', loc.locationName);
-                    
+
                     // إزالة "(X areas)" من الاسم إذا وجد
                     let cleanedLocationName = loc.locationName.replace(/\s*\(\d+\s+areas?\)\s*/gi, '').trim();
-                    
+
                     // استخراج اسم المدينة/المنطقة والدولة
                     // مثال: "Makkah, Saudi Arabia" أو "Algeria" أو "Makkah"
                     const parts = cleanedLocationName.split(',').map((p: string) => p.trim());
                     const locationName = parts[0]; // أول جزء هو اسم الموقع (مدينة/حي/منطقة/دولة)
                     const countryName = parts.length > 1 ? parts[parts.length - 1] : locationName; // آخر جزء هو الدولة
-                    
+
                     // محاولة الحصول على كود الدولة
                     let countryCode = 'SA'; // افتراضي
                     try {
@@ -3658,7 +3545,7 @@ const DashboardPage: React.FC = () => {
                         if (codeFromLocation) countryCode = codeFromLocation.toUpperCase();
                       } catch (e2) { }
                     }
-                    
+
                     // ✅ عرض اسم الموقع كما هو (مدينة، حي، منطقة، دولة، إلخ)
                     return {
                       code: countryCode,
@@ -3666,7 +3553,7 @@ const DashboardPage: React.FC = () => {
                       nameAr: loc.locationName
                     };
                   }
-                  
+
                   // 1. محاولة استخدام locationId (Google Ads Geo Target ID - يشمل المدن والدول)
                   const locationId = String(loc.locationId || loc.criterionId || loc.id || '');
                   if (locationId && geoTargetMapping[locationId]) {
@@ -3779,9 +3666,9 @@ const DashboardPage: React.FC = () => {
                               };
                             }}
                           />
-            </div>
-          </div>
-            
+                        </div>
+                      </div>
+
                       {/* Locations List - Real Data with Flags */}
                       <div className="overflow-y-auto custom-scrollbar py-2 flex-shrink-0" style={{ maxHeight: '100px' }}>
                         <ul className="space-y-1.5 sm:space-y-2">
@@ -3790,12 +3677,12 @@ const DashboardPage: React.FC = () => {
 
                             if (effectiveLocationData && effectiveLocationData.length > 0) {
                               console.log('📍 Processing location data for display:', effectiveLocationData);
-                              
+
                               locationList = effectiveLocationData.slice(0, 6).map((loc: any) => {
                                 console.log('📍 Location item:', loc);
                                 const info = getCountryInfo(loc);
                                 console.log('📍 Resolved info:', info);
-                                
+
                                 return {
                                   country: info ? (isRTL ? info.nameAr : info.name) : 'Unknown',
                                   code: info?.code || 'XX',
@@ -3804,7 +3691,7 @@ const DashboardPage: React.FC = () => {
                                   conversions: loc.conversions || 0,
                                 };
                               }).filter((loc: any) => loc.code !== 'XX');
-                              
+
                               console.log('📍 Final location list:', locationList);
                             }
 
@@ -3835,8 +3722,8 @@ const DashboardPage: React.FC = () => {
                                     ) : (
                                       <div className="w-6 h-[18px] rounded bg-gray-700 flex items-center justify-center">
                                         <Globe className="w-3 h-3 text-gray-500" />
-                    </div>
-              )}
+                                      </div>
+                                    )}
                                   </div>
 
                                   {/* Country Name */}
@@ -3844,14 +3731,14 @@ const DashboardPage: React.FC = () => {
                                     <span className="block text-[10px] sm:text-xs font-medium text-purple-200 truncate">
                                       {location.country}
                                     </span>
-                  </div>
+                                  </div>
 
                                   {/* Stats */}
                                   <div className="flex items-center gap-2 sm:gap-3 text-[8px] sm:text-[10px]">
                                     <div className="flex items-center gap-1">
                                       <MousePointer className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-cyan-400" />
                                       <span className="text-cyan-300 font-medium">{formatLargeNumber(location.clicks)}</span>
-                  </div>
+                                    </div>
                                     <div className="flex items-center gap-1">
                                       <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-400" />
                                       <span className="text-blue-300 font-medium">{formatLargeNumber(location.impressions)}</span>
@@ -3860,8 +3747,8 @@ const DashboardPage: React.FC = () => {
                                       <div className="flex items-center gap-1">
                                         <Target className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-400" />
                                         <span className="text-green-300 font-medium">{formatLargeNumber(location.conversions)}</span>
-                    </div>
-              )}
+                                      </div>
+                                    )}
                                   </div>
 
                                   {/* Percentage */}
@@ -3871,9 +3758,9 @@ const DashboardPage: React.FC = () => {
                                         className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full"
                                         style={{ width: `${percentage}%` }}
                                       />
-                  </div>
+                                    </div>
                                     <span className="block text-[8px] sm:text-[9px] text-gray-400 text-center mt-0.5">{percentage}%</span>
-                </div>
+                                  </div>
                                 </li>
                               );
                             });
@@ -3883,11 +3770,11 @@ const DashboardPage: React.FC = () => {
                           <div className="text-center py-4 text-gray-500 text-xs">
                             <Globe className="w-8 h-8 mx-auto mb-2 opacity-30" />
                             {isRTL ? 'لا توجد بيانات جغرافية' : 'No geographic data available'}
-            </div>
-          )}
+                          </div>
+                        )}
                       </div>
 
-            </div>
+                    </div>
                   </div>
                 );
               })()}
@@ -3895,132 +3782,180 @@ const DashboardPage: React.FC = () => {
 
             {/* Row 3: Device Performance & Audience Gender */}
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
-              {/* 📱 Device Performance Chart - Pie Chart Design */}
+              {/* 📱 Device Performance Chart - Radar/Spider Chart */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"></div>
                 <h3 className="flex items-center gap-2 mt-8 justify-center">
                   <Smartphone className="w-5 h-5 text-green-400" />
                   {isRTL ? 'أداء الأجهزة' : 'Device Performance'}
                 </h3>
-                <p className="chart-description text-center">{isRTL ? 'توزيع الأداء حسب نوع الجهاز' : 'Performance by device type'}</p>
+                <p className="chart-description text-center">{isRTL ? 'تحليل متعدد الأبعاد لأداء الأجهزة' : 'Multi-dimensional device performance analysis'}</p>
 
                 {loadingAiInsights ? (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-              </div>
+                  </div>
                 ) : effectiveDeviceData.length > 0 ? (
                   (() => {
-                    // حساب النسب المئوية للأجهزة
+                    // تحضير البيانات للرسم البياني الراداري
                     const totalClicks = effectiveDeviceData.reduce((sum: number, d: any) => sum + (d.clicks || 0), 0);
-                    const pieData = effectiveDeviceData.map((d: any) => {
-                      let name = '';
+                    const totalImpressions = effectiveDeviceData.reduce((sum: number, d: any) => sum + (d.impressions || 0), 0);
+
+                    // إنشاء datasets لكل جهاز
+                    const datasets = effectiveDeviceData.map((d: any, index: number) => {
+                      let deviceName = '';
                       let color = '';
+                      let bgColor = '';
+
                       if (d.device === 'MOBILE') {
-                        name = isRTL ? 'الهاتف' : 'Mobile';
-                        color = '#37D80A'; // أخضر
+                        deviceName = isRTL ? 'الهاتف' : 'Mobile';
+                        color = 'rgba(55, 216, 10, 1)';
+                        bgColor = 'rgba(55, 216, 10, 0.2)';
                       } else if (d.device === 'DESKTOP') {
-                        name = isRTL ? 'الحاسوب' : 'Desktop';
-                        color = '#605DFF'; // أزرق بنفسجي
+                        deviceName = isRTL ? 'الحاسوب' : 'Desktop';
+                        color = 'rgba(96, 93, 255, 1)';
+                        bgColor = 'rgba(96, 93, 255, 0.2)';
                       } else if (d.device === 'TABLET') {
-                        name = isRTL ? 'التابلت' : 'Tablet';
-                        color = '#AD63F6'; // بنفسجي فاتح
+                        deviceName = isRTL ? 'التابلت' : 'Tablet';
+                        color = 'rgba(173, 99, 246, 1)';
+                        bgColor = 'rgba(173, 99, 246, 0.2)';
                       } else {
-                        name = d.device;
-                        color = '#3B82F6';
+                        deviceName = d.device;
+                        color = 'rgba(59, 130, 246, 1)';
+                        bgColor = 'rgba(59, 130, 246, 0.2)';
                       }
+
+                      // حساب النسب المئوية والمقاييس
+                      const clicksPercent = totalClicks > 0 ? ((d.clicks || 0) / totalClicks * 100) : 0;
+                      const impressionsPercent = totalImpressions > 0 ? ((d.impressions || 0) / totalImpressions * 100) : 0;
+                      const ctr = (d.ctr || 0) * 10; // تحويل CTR إلى مقياس 0-100
+                      const conversions = (d.conversions || 0) * 10; // تضخيم للرؤية
+                      const cost = Math.min((d.cost || 0) / 10, 100); // تطبيع التكلفة
+
                       return {
-                        name,
-                        value: d.clicks || 0,
-                        percentage: totalClicks > 0 ? ((d.clicks || 0) / totalClicks * 100).toFixed(0) : 0,
-                        color
+                        label: deviceName,
+                        data: [
+                          Math.min(clicksPercent, 100),
+                          Math.min(impressionsPercent, 100),
+                          Math.min(ctr, 100),
+                          Math.min(conversions, 100),
+                          Math.min(cost, 100)
+                        ],
+                        backgroundColor: bgColor,
+                        borderColor: color,
+                        borderWidth: 2,
+                        pointBackgroundColor: color,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: color,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
                       };
                     });
 
-                    // التأكد من وجود التابلت في البيانات
-                    const hasTablet = pieData.some((d: any) => d.name === (isRTL ? 'التابلت' : 'Tablet'));
-                    if (!hasTablet) {
-                      pieData.push({
-                        name: isRTL ? 'التابلت' : 'Tablet',
-                        value: Math.round(totalClicks * 0.10),
-                        percentage: '10',
-                        color: '#AD63F6'
-                      });
-                    }
+                    const radarData = {
+                      labels: [
+                        isRTL ? 'النقرات' : 'Clicks',
+                        isRTL ? 'الظهور' : 'Impressions',
+                        isRTL ? 'نسبة النقر' : 'CTR',
+                        isRTL ? 'التحويلات' : 'Conversions',
+                        isRTL ? 'التكلفة' : 'Cost'
+                      ],
+                      datasets: datasets
+                    };
 
-                    // إعادة حساب النسب المئوية
-                    const newTotal = pieData.reduce((sum: number, d: any) => sum + d.value, 0);
-                    const finalPieData = pieData.map((item: any) => ({
-                      ...item,
-                      percentage: newTotal > 0 ? (item.value / newTotal * 100).toFixed(0) : 0
-                    }));
+                    const radarOptions = {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        r: {
+                          beginAtZero: true,
+                          max: 100,
+                          min: 0,
+                          ticks: {
+                            stepSize: 20,
+                            color: '#6B7280',
+                            backdropColor: 'transparent',
+                            font: {
+                              size: 10
+                            }
+                          },
+                          grid: {
+                            color: 'rgba(107, 114, 128, 0.2)',
+                            circular: true
+                          },
+                          angleLines: {
+                            color: 'rgba(107, 114, 128, 0.2)'
+                          },
+                          pointLabels: {
+                            color: '#9CA3AF',
+                            font: {
+                              size: 12,
+                              weight: 'bold' as const,
+                              family: "'Inter', sans-serif"
+                            },
+                            padding: 10
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const,
+                          labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 15,
+                            font: {
+                              size: 13,
+                              weight: 'normal' as const,
+                              family: "'Inter', sans-serif"
+                            },
+                            color: '#9CA3AF'
+                          }
+                        },
+                        tooltip: {
+                          enabled: true,
+                          backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                          titleColor: '#fff',
+                          bodyColor: '#E5E7EB',
+                          borderColor: 'rgba(55, 216, 10, 0.3)',
+                          borderWidth: 2,
+                          cornerRadius: 12,
+                          padding: 16,
+                          displayColors: true,
+                          boxPadding: 8,
+                          usePointStyle: true,
+                          callbacks: {
+                            label: function (context: any) {
+                              const label = context.dataset.label || '';
+                              const value = context.parsed.r || 0;
+                              const metricName = context.label || '';
+                              return `${label} - ${metricName}: ${value.toFixed(1)}%`;
+                            }
+                          }
+                        }
+                      },
+                      animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart' as const
+                      }
+                    };
 
                     return (
-              <ChartContainer
-                config={{
-                          clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#10B981' }
-                }}
-                        className="h-[250px] sm:h-[280px] md:h-[300px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={finalPieData}
-                              cx="50%"
-                              cy="45%"
-                              innerRadius={0}
-                              outerRadius={90}
-                              paddingAngle={2}
-                              dataKey="value"
-                              stroke="#fff"
-                              strokeWidth={3}
-                            >
-                              {finalPieData.map((entry: any, index: number) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              content={(props: any) => {
-                                if (!props.active || !props.payload || !props.payload.length) return null;
-                                const data = props.payload[0].payload;
-                                return (
-                                  <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl">
-                                    <p className="font-semibold text-sm" style={{ color: data.color }}>
-                                      {data.name}
-                                    </p>
-                                    <p className="text-gray-300 text-xs mt-1">
-                                      {formatLargeNumber(data.value)} ({data.percentage}%)
-                                    </p>
-                                  </div>
-                                );
-                              }}
-                            />
-                            <Legend
-                              layout="horizontal"
-                              align="center"
-                              verticalAlign="bottom"
-                              wrapperStyle={{ paddingTop: '15px' }}
-                              iconType="circle"
-                              iconSize={10}
-                              formatter={(value: string, entry: any) => (
-                                <span style={{ color: '#64748B', fontSize: '12px', marginRight: '12px' }}>
-                                  {value}
-                                </span>
-                              )}
-                            />
-                          </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                      <div className="relative h-[250px] sm:h-[280px] md:h-[300px] px-4">
+                        <RadarChartJS data={radarData} options={radarOptions} />
+                      </div>
                     );
                   })()
-              ) : (
+                ) : (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                    <div className="text-center">
                       <Smartphone className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-sm">{isRTL ? 'لا توجد بيانات أجهزة' : 'No device data'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
               {/* 👥 Audience Gender Chart - Enhanced */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
@@ -4034,10 +3969,10 @@ const DashboardPage: React.FC = () => {
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-500"></div>
-          </div>
+                  </div>
                 ) : effectiveGenderData.length > 0 ? (
                   <ChartContainer config={{ impressions: { label: "Impressions", color: '#EC4899' } }} className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <defs>
                           <linearGradient id="maleGrad" x1="0" y1="0" x2="0" y2="1">
@@ -4073,19 +4008,19 @@ const DashboardPage: React.FC = () => {
                         <Tooltip content={(props: any) => <CustomTooltip {...props} color="#EC4899" />} />
                         <Legend iconType="circle" iconSize={12} wrapperStyle={{ fontSize: '13px', fontWeight: '500' }} />
                       </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-              ) : (
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                ) : (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                    <div className="text-center">
                       <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-sm">{isRTL ? 'لا توجد بيانات جمهور' : 'No audience data'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               </div>
             </div>
-            
+
             {/* Row 4: Audience by Age & Competition Analysis */}
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
               {/* 📊 Age Distribution Chart - Enhanced */}
@@ -4100,17 +4035,17 @@ const DashboardPage: React.FC = () => {
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
-              </div>
+                  </div>
                 ) : effectiveAgeData.length > 0 ? (
                   <div className="flex justify-center items-center px-2 sm:px-4">
-              <ChartContainer
-                config={{
+                    <ChartContainer
+                      config={{
                         impressions: { label: isRTL ? "مرات الظهور" : "Impressions", color: '#8B5CF6' },
                         clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#F59E0B' }
-                }}
+                      }}
                       className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={effectiveAgeData} margin={{ top: 15, right: 15, left: 5, bottom: 10 }}>
                           <defs>
                             <linearGradient id="impressionsAgeGrad" x1="0" y1="0" x2="0" y2="1">
@@ -4128,19 +4063,19 @@ const DashboardPage: React.FC = () => {
                           <Tooltip content={(props: any) => <CustomTooltip {...props} color="#8B5CF6" />} />
                           <Bar dataKey="impressions" fill="url(#impressionsAgeGrad)" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "مرات الظهور" : "Impressions"} />
                           <Bar dataKey="clicks" fill="url(#clicksAgeGrad)" radius={[4, 4, 0, 0]} barSize={20} name={isRTL ? "النقرات" : "Clicks"} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
                   </div>
-              ) : (
+                ) : (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                    <div className="text-center">
                       <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-sm">{isRTL ? 'لا توجد بيانات عمرية' : 'No age data'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-                </div>
+                )}
+              </div>
 
               {/* ⚔️ Competition Analysis Chart - Enhanced */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
@@ -4154,18 +4089,18 @@ const DashboardPage: React.FC = () => {
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
-              </div>
+                  </div>
                 ) : effectiveCompetitionData.length > 0 ? (
                   <div className="flex justify-center items-center px-1 sm:px-2">
-              <ChartContainer
-                config={{
+                    <ChartContainer
+                      config={{
                         impressionShare: { label: isRTL ? "حصة الظهور" : "Impression Share", color: '#10B981' },
                         budgetLost: { label: isRTL ? "فقدان الميزانية" : "Budget Lost", color: '#EF4444' },
                         rankLost: { label: isRTL ? "فقدان الترتيب" : "Rank Lost", color: '#F59E0B' }
                       }}
                       className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           data={effectiveCompetitionData.slice(0, 5).map((c: any) => ({
                             campaign: c.campaign,
@@ -4224,20 +4159,20 @@ const DashboardPage: React.FC = () => {
                           <Bar dataKey="budgetLost" stackId="a" fill="url(#budgetLostGrad)" radius={[0, 0, 0, 0]} barSize={16} name={isRTL ? "فقدان الميزانية %" : "Budget Lost %"} />
                           <Bar dataKey="rankLost" stackId="a" fill="url(#rankLostGrad)" radius={[0, 6, 6, 0]} barSize={16} name={isRTL ? "فقدان الترتيب %" : "Rank Lost %"} />
                         </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                      </ResponsiveContainer>
+                    </ChartContainer>
                   </div>
-              ) : (
+                ) : (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                    <div className="text-center">
                       <Target className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-sm">{isRTL ? 'لا توجد بيانات منافسة' : 'No competition data'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-          </div>
+            </div>
 
             {/* Row 5: Weekly Performance & Keyword Performance */}
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
@@ -4256,16 +4191,16 @@ const DashboardPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="flex justify-center items-center px-2 sm:px-4">
-              <ChartContainer
-                config={{
+                    <ChartContainer
+                      config={{
                         impressions: { label: isRTL ? "مرات الظهور" : "Impressions", color: '#8B5CF6' },
                         clicks: { label: isRTL ? "النقرات" : "Clicks", color: '#A855F7' },
                         conversions: { label: isRTL ? "التحويلات" : "Conversions", color: '#3B82F6' }
-                }}
+                      }}
                       className="h-[220px] sm:h-[260px] md:h-[280px] w-full max-w-[98%]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
                           data={(() => {
                             // استخدام البيانات الحقيقية من Google Ads API
                             const dayMapping: Record<string, string> = {
@@ -4394,9 +4329,9 @@ const DashboardPage: React.FC = () => {
                             radius={[4, 4, 0, 0]}
                             name={isRTL ? "التحويلات" : "Conversions"}
                           />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
                   </div>
                 )}
               </div>
@@ -4452,8 +4387,8 @@ const DashboardPage: React.FC = () => {
                                 <td className="text-center py-2.5 px-2">
                                   <div className="flex justify-center">
                                     <span className={`inline-flex items-center justify-center w-7 h-6 rounded text-xs font-bold ${kw.qualityScore >= 7 ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                                        kw.qualityScore >= 4 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                                          'bg-red-500/20 text-red-400 border border-red-500/30'
+                                      kw.qualityScore >= 4 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                                        'bg-red-500/20 text-red-400 border border-red-500/30'
                                       }`}>
                                       {kw.qualityScore || '-'}
                                     </span>
@@ -4465,18 +4400,18 @@ const DashboardPage: React.FC = () => {
                         </table>
                       </div>
                     </div>
-              ) : (
-                <div className="h-[320px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                  ) : (
+                    <div className="h-[320px] flex items-center justify-center text-gray-500">
+                      <div className="text-center">
                         <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
                         <p className="text-sm">{isRTL ? 'لا توجد بيانات كلمات مفتاحية' : 'No keyword data'}</p>
-                  </div>
-                </div>
-              )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-            
+
             {/* Row 6: AI Optimization Score & Ad Strength */}
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
               {/* 🎯 AI Optimization Score - Premium Design */}
@@ -4491,7 +4426,7 @@ const DashboardPage: React.FC = () => {
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-              </div>
+                  </div>
                 ) : effectiveOptimizationScore !== null && effectiveOptimizationScore !== undefined ? (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex flex-col items-center justify-center px-4">
                     <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 mb-3">
@@ -4500,12 +4435,12 @@ const DashboardPage: React.FC = () => {
                         className="w-full h-full transform -rotate-90"
                         style={{ overflow: 'visible' }}
                       >
-                    <defs>
+                        <defs>
                           <linearGradient id="optimizationGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" stopColor="#10B981" stopOpacity="1" />
                             <stop offset="50%" stopColor="#34D399" stopOpacity="1" />
                             <stop offset="100%" stopColor="#6EE7B7" stopOpacity="1" />
-                      </linearGradient>
+                          </linearGradient>
                           <filter id="glow">
                             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                             <feMerge>
@@ -4513,7 +4448,7 @@ const DashboardPage: React.FC = () => {
                               <feMergeNode in="SourceGraphic" />
                             </feMerge>
                           </filter>
-                    </defs>
+                        </defs>
                         {/* Background circle */}
                         <circle
                           cx="100"
@@ -4555,13 +4490,13 @@ const DashboardPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                    <div className="text-center">
                       <Zap className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-sm">{isRTL ? 'لا توجد بيانات تحسين' : 'No optimization data'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
               {/* 💪 Ad Strength Indicator - RadialBarChart */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
@@ -4575,7 +4510,7 @@ const DashboardPage: React.FC = () => {
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
-          </div>
+                  </div>
                 ) : effectiveAdStrength?.distribution ? (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex flex-col justify-center px-4 sm:px-6">
                     {(() => {
@@ -4661,268 +4596,113 @@ const DashboardPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                    <div className="text-center">
                       <Target className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-sm">{isRTL ? 'لا توجد بيانات قوة الإعلانات' : 'No ad strength data'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               </div>
             </div>
-            
-            {/* Row 8: Budget Recommendations & Auction Insights */}
-            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
-              {/* 💰 Budget Recommendations - Enhanced Design */}
-              <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 z-10"></div>
-                <div className="relative z-10 pt-1.5">
-                  <h3 className="flex items-center gap-2 mt-8">
-                    <DollarSign className="w-5 h-5 text-green-400" />
-                    {isRTL ? 'توصيات الميزانية' : 'Budget Recommendations'}
-                  </h3>
-                  <p className="chart-description">{isRTL ? 'اقتراحات لتحسين الميزانية' : 'Budget optimization tips'}</p>
-
-                  {loadingAiInsights ? (
-                    <div className="h-[250px] flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-              </div>
-                  ) : effectiveBudgetRecs.length > 0 ? (
-                    <div className="h-[250px] sm:h-[280px] md:h-[300px] flex flex-col justify-center px-3 sm:px-4 md:px-6 space-y-3 sm:space-y-4 w-full">
-                      {(() => {
-                        const rec = effectiveBudgetRecs[0];
-                        const increasePercent = ((rec.recommendedBudget - rec.currentBudget) / rec.currentBudget) * 100;
-                        const progressPercent = Math.min(100, (rec.currentBudget / rec.recommendedBudget) * 100);
-
-                        return (
-                          <div className="space-y-3 sm:space-y-4">
-                            {/* Campaign Name & Badge */}
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                                <h4 className="text-sm sm:text-base font-semibold text-purple-200">
-                                  {rec.campaign}
-                                </h4>
-                                <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 text-xs sm:text-sm rounded-full border border-green-500/30 w-fit">
-                                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  <span className="whitespace-nowrap">+{rec.estimatedClicksChange} {isRTL ? 'نقرات متوقعة' : 'est. clicks'}</span>
-                                </span>
-                              </div>
-                              <span className="text-xs sm:text-sm font-medium text-green-400">+{increasePercent.toFixed(0)}%</span>
-                            </div>
-
-                            {/* Budget Comparison */}
-                            <div className="space-y-2 sm:space-y-3">
-                              <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 flex-wrap">
-                                <span className="text-sm sm:text-base text-gray-300 font-medium">
-                                  {formatCurrency(rec.currentBudget)}
-                                </span>
-                                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" />
-                                <span className="text-sm sm:text-base text-green-400 font-bold">
-                                  {formatCurrency(rec.recommendedBudget)}
-                                </span>
-                              </div>
-
-                              {/* Progress Bar */}
-                              <div className="relative h-2 sm:h-2.5 bg-gray-800 rounded-full overflow-hidden w-full">
-                                <div
-                                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
-                                  style={{ width: `${progressPercent}%` }}
-                                />
-                                <div
-                                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-emerald-500/50 to-teal-500/50 rounded-full opacity-60"
-                                  style={{ width: '100%' }}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Additional Info */}
-                            <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-xs sm:text-sm">
-                              <div className="flex items-center gap-1.5 text-gray-400">
-                                <Target className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                                <span className="whitespace-nowrap">{isRTL ? 'زيادة متوقعة' : 'Est. increase'}</span>
-                              </div>
-                              <span className="text-gray-300 font-medium">
-                                {formatCurrency(rec.recommendedBudget - rec.currentBudget)}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ) : (
-                    <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                      <div className="text-center">
-                        <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <p className="text-sm">{isRTL ? 'لا توجد توصيات ميزانية' : 'No budget recommendations'}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 🏆 Auction Insights - Enhanced & Responsive */}
-              <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 z-10"></div>
-                <div className="relative z-10 pt-1.5">
-                  <h3 className="flex items-center justify-center gap-2 mt-8">
-                    <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
-                    {isRTL ? 'رؤى المزادات' : 'Auction Insights'}
-                  </h3>
-                  <p className="chart-description text-center">{isRTL ? 'مقارنة مع المنافسين' : 'Compare with competitors'}</p>
-
-                  {loadingAiInsights ? (
-                    <div className="h-[250px] flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-500"></div>
-                    </div>
-                  ) : effectiveAuctionInsights.length > 0 ? (
-                    <div className="h-[250px] sm:h-[280px] md:h-[300px] flex flex-col justify-center px-3 sm:px-4 md:px-6 space-y-3 sm:space-y-4 w-full">
-                      {/* اسم الحملة */}
-                      <p className="text-center text-sm sm:text-base font-semibold text-amber-400 mb-2">
-                        {effectiveAuctionInsights[0]?.campaign || 'Campaign'}
-                      </p>
-
-                      {/* البيانات */}
-                      {(() => {
-                        const current = effectiveAuctionInsights[0];
-                        return [
-                          { label: isRTL ? 'حصة الظهور' : 'Impression Share', value: current.impressionShare, color: '#10B981', icon: Eye },
-                          { label: isRTL ? 'أعلى الصفحة' : 'Top of Page', value: current.topImpressionPct, color: '#3B82F6', icon: ArrowUpRight },
-                          { label: isRTL ? 'الأعلى تماماً' : 'Absolute Top', value: current.absoluteTopPct, color: '#8B5CF6', icon: TrendingUp },
-                          { label: isRTL ? 'التفوق' : 'Outranking', value: current.outrankingShare, color: '#F59E0B', icon: Trophy }
-                        ].map((item, i) => {
-                          const IconComponent = item.icon;
-                          return (
-                            <div key={i} className="space-y-2 w-full">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 text-gray-300">
-                                  <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: item.color }} />
-                                  <span className="text-xs sm:text-sm font-medium">{item.label}</span>
-                                </div>
-                                <span className="text-sm sm:text-base text-purple-200 font-bold">{item.value.toFixed(1)}%</span>
-                              </div>
-                              <div className="relative h-2 sm:h-2.5 bg-gray-800 rounded-full overflow-hidden w-full">
-                                <div
-                                  className="h-full rounded-full transition-all duration-500"
-                                  style={{
-                                    width: `${Math.max(Math.min(item.value, 100), 5)}%`,
-                                    background: `linear-gradient(to right, ${item.color}, ${item.color}dd)`
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  ) : (
-                    <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                        <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <p className="text-sm">{isRTL ? 'لا توجد رؤى مزادات' : 'No auction insights'}</p>
-                  </div>
-                </div>
-              )}
-                </div>
-            </div>
-          </div>
           </div>
 
         </div>
 
         {/* Campaigns Table */}
         <div className="max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 mt-12 sm:mt-16 md:mt-20 lg:mt-24">
-        {campaigns.length === 0 && !isLoading ? (
-          /* Empty State */
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <BarChart3 className="w-10 h-10 text-purple-400 opacity-60" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-2">
-              {isRTL ? 'لا توجد حملات بعد' : 'No Campaigns Yet'}
-            </h3>
-            <p className="text-gray-400 mb-6 max-w-md">
-              {isRTL 
-                ? 'أنشئ أول حملة إعلانية لبدء تتبع الأداء وتحقيق أهدافك التسويقية'
-                : 'Create your first advertising campaign to start tracking performance and achieve your marketing goals'
-              }
-            </p>
-            <button className="create-campaign-btn" onClick={() => router.push('/campaign/new')}>
-              <Plus className="w-5 h-5" />
-              {isRTL ? 'إنشاء حملة جديدة' : 'Create Campaign'}
-            </button>
-          </div>
-        ) : (
-        <div className="table-card backdrop-blur-sm border border-solid">
-          {/* Bulk Actions */}
-          {selectedCampaigns.length > 0 && (
-            <div className="bulk-actions mb-4">
-              <span className="text-sm text-gray-400">
-                {selectedCampaigns.length} {isRTL ? 'محدد' : 'selected'}
-              </span>
-              <button className="bulk-action-btn" onClick={() => handleBulkAction('enable')}>
-                <Play className="w-3 h-3" />
-                {isRTL ? 'تفعيل' : 'Enable'}
-              </button>
-              <button className="bulk-action-btn" onClick={() => handleBulkAction('pause')}>
-                <Pause className="w-3 h-3" />
-                {isRTL ? 'إيقاف' : 'Pause'}
-              </button>
-              <button className="bulk-action-btn danger" onClick={() => handleBulkAction('delete')}>
-                <XCircle className="w-3 h-3" />
-                {isRTL ? 'حذف' : 'Delete'}
+          {campaigns.length === 0 && !isLoading ? (
+            /* Empty State */
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <BarChart3 className="w-10 h-10 text-purple-400 opacity-60" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {isRTL ? 'لا توجد حملات بعد' : 'No Campaigns Yet'}
+              </h3>
+              <p className="text-gray-400 mb-6 max-w-md">
+                {isRTL
+                  ? 'أنشئ أول حملة إعلانية لبدء تتبع الأداء وتحقيق أهدافك التسويقية'
+                  : 'Create your first advertising campaign to start tracking performance and achieve your marketing goals'
+                }
+              </p>
+              <button className="create-campaign-btn" onClick={() => router.push('/campaign/new')}>
+                <Plus className="w-5 h-5" />
+                {isRTL ? 'إنشاء حملة جديدة' : 'Create Campaign'}
               </button>
             </div>
-          )}
-          
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent flex items-center gap-2">
-              <List className="w-6 h-6 text-purple-400" />
-              <span>{(t.dashboard as any)?.allCampaigns || 'All Campaigns'}</span>
-            </h2>
-            
-            {/* Campaign Type Filter */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSelectedCampaignType('all')}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedCampaignType === 'all'
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                    : 'bg-purple-900/30 text-purple-300 hover:bg-purple-900/50 border border-purple-900/30'
-                }`}
-              >
-                All
-              </button>
-              {['SEARCH', 'VIDEO', 'SHOPPING', 'DISPLAY', 'PERFORMANCE_MAX'].map(type => {
-                const count = campaigns.filter(c => c.type === type).length;
-                if (count === 0) return null;
-                
-        return (
-                  <button
-                    key={type}
-                    onClick={() => setSelectedCampaignType(type)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedCampaignType === type
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                        : 'bg-purple-900/30 text-purple-300 hover:bg-purple-900/50 border border-purple-900/30'
-                    }`}
-                  >
-                    {type.replace('_', ' ')} ({count})
+          ) : (
+            <div className="table-card backdrop-blur-sm border border-solid">
+              {/* Bulk Actions */}
+              {selectedCampaigns.length > 0 && (
+                <div className="bulk-actions mb-4">
+                  <span className="text-sm text-gray-400">
+                    {selectedCampaigns.length} {isRTL ? 'محدد' : 'selected'}
+                  </span>
+                  <button className="bulk-action-btn" onClick={() => handleBulkAction('enable')}>
+                    <Play className="w-3 h-3" />
+                    {isRTL ? 'تفعيل' : 'Enable'}
                   </button>
-                );
-              })}
-            </div>
-            </div>
-            
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#392e4e]">
+                  <button className="bulk-action-btn" onClick={() => handleBulkAction('pause')}>
+                    <Pause className="w-3 h-3" />
+                    {isRTL ? 'إيقاف' : 'Pause'}
+                  </button>
+                  <button className="bulk-action-btn danger" onClick={() => handleBulkAction('delete')}>
+                    <XCircle className="w-3 h-3" />
+                    {isRTL ? 'حذف' : 'Delete'}
+                  </button>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent flex items-center gap-2">
+                  <List className="w-6 h-6 text-purple-400" />
+                  <span>{(t.dashboard as any)?.allCampaigns || 'All Campaigns'}</span>
+                </h2>
+
+                {/* Campaign Type Filter */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedCampaignType('all')}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedCampaignType === 'all'
+                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
+                      : 'bg-purple-900/30 text-purple-300 hover:bg-purple-900/50 border border-purple-900/30'
+                      }`}
+                  >
+                    All
+                  </button>
+                  {['SEARCH', 'VIDEO', 'SHOPPING', 'DISPLAY', 'PERFORMANCE_MAX'].map(type => {
+                    const count = campaigns.filter(c => c.type === type).length;
+                    if (count === 0) return null;
+
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => setSelectedCampaignType(type)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedCampaignType === type
+                          ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
+                          : 'bg-purple-900/30 text-purple-300 hover:bg-purple-900/50 border border-purple-900/30'
+                          }`}
+                      >
+                        {type.replace('_', ' ')} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[#392e4e]">
                       <th className="py-4 px-2 w-10 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedCampaigns.length === paginatedCampaigns.length && paginatedCampaigns.length > 0}
-                      onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-purple-500 bg-transparent text-purple-600 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
-                    />
-                  </th>
+                        <input
+                          type="checkbox"
+                          checked={selectedCampaigns.length === paginatedCampaigns.length && paginatedCampaigns.length > 0}
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 rounded border-purple-500 bg-transparent text-purple-600 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
+                        />
+                      </th>
                       <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">Status</th>
                       <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">{isRTL ? 'حالة المراجعة' : 'Review'}</th>
                       <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">Campaign</th>
@@ -4934,44 +4714,44 @@ const DashboardPage: React.FC = () => {
                       <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">Spend</th>
                       <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">ROAS</th>
                       <th className="text-center py-4 px-4 text-sm font-semibold text-white/70">{isRTL ? 'تعديل' : 'Edit'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedCampaigns.map((campaign) => (
-                  <tr 
-                    key={campaign.id} 
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedCampaigns.map((campaign) => (
+                      <tr
+                        key={campaign.id}
                         className={`border-b border-[#392e4e]/50 hover:bg-[#392e4e]/20 transition-colors ${selectedCampaigns.includes(campaign.id) ? 'bg-purple-900/20' : ''
-                    }`}
-                  >
+                          }`}
+                      >
                         <td className="py-4 px-2 text-center">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedCampaigns.includes(campaign.id)}
-                        onChange={() => toggleSelectCampaign(campaign.id)}
-                        className="w-4 h-4 rounded border-purple-500 bg-transparent text-purple-600 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
-                      />
-                    </td>
+                          <input
+                            type="checkbox"
+                            checked={selectedCampaigns.includes(campaign.id)}
+                            onChange={() => toggleSelectCampaign(campaign.id)}
+                            className="w-4 h-4 rounded border-purple-500 bg-transparent text-purple-600 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
+                          />
+                        </td>
                         <td className="py-4 px-4 text-center">
                           <div className="flex justify-center">
-                      <button
+                            <button
                               onClick={() => toggleCampaignStatus(campaign.id, campaign.status, campaign.customerId)}
                               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${campaign.status === 'ENABLED' ? 'bg-green-600' : 'bg-gray-700'
-                        }`}
-                      >
-                        <span
+                                }`}
+                            >
+                              <span
                                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${campaign.status === 'ENABLED' ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
+                                  }`}
+                              />
+                            </button>
                           </div>
-                    </td>
+                        </td>
                         <td className="py-4 px-4 text-center">
                           {(() => {
                             const reviewStatus = (campaign as any).reviewStatus || 'APPROVED';
                             const reviewLabel = isRTL ? (campaign as any).reviewStatusLabelAr : (campaign as any).reviewStatusLabel;
                             const primaryStatus = (campaign as any).primaryStatus || '';
                             const primaryStatusReasons = (campaign as any).primaryStatusReasons || [];
-                            
+
                             // ✅ Debug: طباعة بيانات الحملة
                             console.log(`📊 Campaign: ${campaign.name}`, {
                               reviewStatus,
@@ -4980,7 +4760,7 @@ const DashboardPage: React.FC = () => {
                               primaryStatusReasons,
                               fullCampaign: campaign
                             });
-                            
+
                             if (reviewStatus === 'UNDER_REVIEW') {
                               return (
                                 <div className="relative group inline-block">
@@ -5093,100 +4873,100 @@ const DashboardPage: React.FC = () => {
                           })()}
                         </td>
                         <td className="py-4 px-4 text-center">
-                      <div className="text-sm font-medium text-white">{campaign.name}</div>
-                      <div className="text-xs text-gray-500">ID: {campaign.id}</div>
-                    </td>
+                          <div className="text-sm font-medium text-white">{campaign.name}</div>
+                          <div className="text-xs text-gray-500">ID: {campaign.id}</div>
+                        </td>
                         <td className="py-4 px-4 text-center">
                           <div className="flex justify-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-gray-300">
-                        {campaign.type.replace('_', ' ')}
-                      </span>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-gray-300">
+                              {campaign.type.replace('_', ' ')}
+                            </span>
                           </div>
-                    </td>
+                        </td>
                         <td className="py-4 px-4 text-center text-sm text-white">
-                      {(campaign.impressions || 0).toLocaleString()}
-                    </td>
+                          {(campaign.impressions || 0).toLocaleString()}
+                        </td>
                         <td className="py-4 px-4 text-center text-sm text-white">
-                      {(campaign.clicks || 0).toLocaleString()}
-                    </td>
+                          {(campaign.clicks || 0).toLocaleString()}
+                        </td>
                         <td className="py-4 px-4 text-center text-sm text-white">
-                      {(campaign.ctr || 0).toFixed(2)}%
-                    </td>
+                          {(campaign.ctr || 0).toFixed(2)}%
+                        </td>
                         <td className="py-4 px-4 text-center text-sm text-white">
-                      {(campaign.conversions || 0).toLocaleString()}
-                    </td>
+                          {(campaign.conversions || 0).toLocaleString()}
+                        </td>
                         <td className="py-4 px-4 text-center text-sm text-white">
                           {campaign.currency || 'USD'} {(campaign.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
+                        </td>
                         <td className="py-4 px-4 text-center">
                           <span className={`text-sm font-medium ${(campaign.roas || 0) >= 3 ? 'text-green-400' :
-                        (campaign.roas || 0) >= 1 ? 'text-yellow-400' : 'text-red-400'
-                      }`}>
-                        {(campaign.roas || 0).toFixed(2)}x
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                        <button
+                            (campaign.roas || 0) >= 1 ? 'text-yellow-400' : 'text-red-400'
+                            }`}>
+                            {(campaign.roas || 0).toFixed(2)}x
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <button
                             onClick={() => router.push(`/campaign/edit-ads?campaignId=${campaign.id}&customerId=${campaign.customerId || ''}`)}
                             className="p-2 hover:bg-purple-900/50 rounded-lg transition-colors border border-purple-500/30 hover:border-purple-500/60"
                             title={isRTL ? 'تعديل الحملة' : 'Edit Campaign'}
                           >
                             <Edit className="w-4 h-4 text-purple-400" />
-                        </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#392e4e]">
-              <div className="text-sm text-white/60">
-                Showing {((currentPage - 1) * campaignsPerPage) + 1} to {Math.min(currentPage * campaignsPerPage, filteredCampaigns.length)} of {filteredCampaigns.length} campaigns
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="p-2 hover:bg-purple-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-900/30"
-                >
-                  <ChevronLeft className="w-4 h-4 text-gray-400" />
-                </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#392e4e]">
+                  <div className="text-sm text-white/60">
+                    Showing {((currentPage - 1) * campaignsPerPage) + 1} to {Math.min(currentPage * campaignsPerPage, filteredCampaigns.length)} of {filteredCampaigns.length} campaigns
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 hover:bg-purple-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-900/30"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-gray-400" />
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${currentPage === page
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                        : 'hover:bg-purple-900/30 text-purple-300 border border-purple-900/30'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="p-2 hover:bg-purple-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-900/30"
-                >
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </button>
-              </div>
+                          ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
+                          : 'hover:bg-purple-900/30 text-purple-300 border border-purple-900/30'
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="p-2 hover:bg-purple-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-900/30"
+                    >
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-          </div>
-        )}
         </div>
-        
+
         {/* Keyboard Shortcuts Hint */}
         <div className="shortcuts-hint">
           <kbd>⌘N</kbd> {isRTL ? 'حملة جديدة' : 'New Campaign'} · <kbd>R</kbd> {isRTL ? 'تحديث' : 'Refresh'} · <kbd>Esc</kbd> {isRTL ? 'إلغاء' : 'Cancel'}
-          </div>
+        </div>
 
         {/* Smart Notifications for Dashboard */}
         <NotificationManager />
