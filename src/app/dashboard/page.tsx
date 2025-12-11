@@ -759,6 +759,33 @@ const DashboardPage: React.FC = () => {
 
   const totalPages = Math.ceil(filteredCampaigns.length / campaignsPerPage);
 
+  // 🔥 حساب الإحصائيات من الحملات المفلترة
+  const filteredMetrics = useMemo(() => {
+    if (filteredCampaigns.length === 0) {
+      return metrics; // إذا لا توجد حملات مفلترة، استخدم الإحصائيات الأصلية
+    }
+
+    // حساب الإحصائيات من الحملات المفلترة فقط
+    const filtered: any = {
+      clicks: filteredCampaigns.reduce((sum, c) => sum + (c.clicks || 0), 0),
+      impressions: filteredCampaigns.reduce((sum, c) => sum + (c.impressions || 0), 0),
+      cost: filteredCampaigns.reduce((sum, c) => sum + (c.cost || 0), 0),
+      conversions: filteredCampaigns.reduce((sum, c) => sum + (c.conversions || 0), 0),
+      revenue: filteredCampaigns.reduce((sum, c) => sum + (c.revenue || 0), 0),
+    };
+
+    // حساب المؤشرات المشتقة
+    filtered.ctr = filtered.impressions > 0 ? (filtered.clicks / filtered.impressions) * 100 : 0;
+    filtered.cpc = filtered.clicks > 0 ? filtered.cost / filtered.clicks : 0;
+    filtered.roas = filtered.cost > 0 ? filtered.revenue / filtered.cost : 0;
+    filtered.conversionRate = filtered.clicks > 0 ? (filtered.conversions / filtered.clicks) * 100 : 0;
+
+    return filtered;
+  }, [filteredCampaigns, metrics]);
+
+  // استخدم filteredMetrics بدلاً من metrics في جميع الرسوم البيانية والإحصائيات
+  const displayMetrics = filteredCampaigns.length < campaigns.length ? filteredMetrics : metrics;
+
   // Bulk Actions Handlers
   const toggleSelectCampaign = (id: string) => {
     setSelectedCampaigns(prev =>
@@ -907,22 +934,22 @@ const DashboardPage: React.FC = () => {
 
     return {
       revenue: totalRevenue,
-      revenueChange: hasData ? (metrics.revenueChange || 0) : 0,
+      revenueChange: hasData ? (displayMetrics.revenueChange || 0) : 0,
       spend: totalSpend,
-      spendChange: hasData ? (metrics.spendChange || 0) : 0,
+      spendChange: hasData ? (displayMetrics.spendChange || 0) : 0,
       roas: roas,
-      roasChange: hasData ? (metrics.roasChange || 0) : 0,
+      roasChange: hasData ? (displayMetrics.roasChange || 0) : 0,
       ctr: ctr,
-      ctrChange: hasData ? (metrics.ctrChange || 0) : 0,
+      ctrChange: hasData ? (displayMetrics.ctrChange || 0) : 0,
       cpc: cpc,
-      cpcChange: hasData ? (metrics.cpcChange || 0) : 0,
+      cpcChange: hasData ? (displayMetrics.cpcChange || 0) : 0,
       conversionRate: conversionRate,
-      conversionRateChange: hasData ? (metrics.conversionRateChange || 0) : 0,
+      conversionRateChange: hasData ? (displayMetrics.conversionRateChange || 0) : 0,
       costPerConversion: costPerConversion,
-      costPerConversionChange: hasData ? (metrics.costPerConversionChange || 0) : 0,
+      costPerConversionChange: hasData ? (displayMetrics.costPerConversionChange || 0) : 0,
       qualityScore: calculatedQualityScore
     };
-  }, [campaignsForStats, metrics]);
+  }, [campaignsForStats, displayMetrics]);
 
   // 📊 إنشاء بيانات الـ charts من الحملات المفلترة
   const campaignBasedChartData = useMemo(() => {
@@ -2769,10 +2796,10 @@ const DashboardPage: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white text-center sm:text-left mb-4 sm:mb-6 lg:mb-8">
               {t.dashboard?.title || 'Dashboard Overview'}
             </h1>
-            <p className="text-purple-200/70 text-sm">
+            <p className="text-purple-200/70 text-xs sm:text-sm lg:text-base text-center sm:text-left leading-relaxed">
               {(t.dashboard as any)?.subtitle || 'Monitor your advertising performance and manage campaigns'}
             </p>
           </div>
@@ -2797,7 +2824,8 @@ const DashboardPage: React.FC = () => {
               {/* Dropdown */}
               {isCampaignDropdownOpen && (
                 <div
-                  className="absolute top-full mt-2 right-0 w-80 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl"
+                  className={`absolute top-full mt-2 w-80 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl ${isRTL ? 'right-0' : 'left-0'
+                    }`}
                   style={{ direction: isRTL ? 'rtl' : 'ltr' }}
                 >
                   {/* Header */}
@@ -3200,11 +3228,11 @@ const DashboardPage: React.FC = () => {
               {/* 3. Performance Trends - Multi Line Chart */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-pink-500 to-blue-500"></div>
-                <h3 className="flex items-center gap-2 mt-8">
+                <h3 className="flex items-center justify-center gap-2 mt-6 sm:mt-8 text-sm sm:text-base lg:text-lg">
                   <TrendingUp className="w-5 h-5 text-orange-400" />
                   {isRTL ? 'التحليلات الشهرية' : 'Monthly Analytics'}
                 </h3>
-                <p className="chart-description">{isRTL ? 'تحليل أداء الحملات شهرياً' : 'Monthly campaign performance analysis'}</p>
+                <p className="chart-description text-xs sm:text-sm lg:text-base text-center">{isRTL ? 'تحليل أداء الحملات شهرياً' : 'Monthly campaign performance analysis'}</p>
                 {campaignsForStats.length > 0 ? (
                   (() => {
                     // حساب البيانات الحقيقية من الحملات المفلترة
@@ -3789,7 +3817,7 @@ const DashboardPage: React.FC = () => {
                   <Smartphone className="w-5 h-5 text-green-400" />
                   {isRTL ? 'أداء الأجهزة' : 'Device Performance'}
                 </h3>
-                <p className="chart-description text-center">{isRTL ? 'تحليل متعدد الأبعاد لأداء الأجهزة' : 'Multi-dimensional device performance analysis'}</p>
+                <p className="chart-description text-xs sm:text-sm lg:text-base text-center">{isRTL ? 'تحليل متعدد الأبعاد لأداء الأجهزة' : 'Multi-dimensional device performance analysis'}</p>
 
                 {loadingAiInsights ? (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center">
@@ -3960,11 +3988,11 @@ const DashboardPage: React.FC = () => {
               {/* 👥 Audience Gender Chart - Enhanced */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
-                <h3 className="flex items-center gap-2 mt-8">
+                <h3 className="flex items-center justify-center sm:justify-start gap-2 mt-6 sm:mt-8 text-base sm:text-lg lg:text-xl">
                   <Users className="w-5 h-5 text-pink-400" />
                   {isRTL ? 'توزيع الجمهور (الجنس)' : 'Audience by Gender'}
                 </h3>
-                <p className="chart-description">{isRTL ? 'أداء الحملات حسب الجنس' : 'Campaign performance by gender'}</p>
+                <p className="chart-description text-xs sm:text-sm lg:text-base text-center">{isRTL ? 'أداء الحملات حسب الجنس' : 'Campaign performance by gender'}</p>
 
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
@@ -4026,11 +4054,11 @@ const DashboardPage: React.FC = () => {
               {/* 📊 Age Distribution Chart - Enhanced */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500"></div>
-                <h3 className="flex items-center gap-2 mt-8">
+                <h3 className="flex items-center justify-center sm:justify-start gap-2 mt-6 sm:mt-8 text-base sm:text-lg lg:text-xl">
                   <Users className="w-5 h-5 text-orange-400" />
                   {isRTL ? 'توزيع الجمهور (العمر)' : 'Audience by Age'}
                 </h3>
-                <p className="chart-description">{isRTL ? 'أداء حسب الفئة العمرية' : 'Performance by age'}</p>
+                <p className="chart-description text-xs sm:text-sm lg:text-base text-center">{isRTL ? 'أداء حسب الفئة العمرية' : 'Performance by age'}</p>
 
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
@@ -4080,11 +4108,11 @@ const DashboardPage: React.FC = () => {
               {/* ⚔️ Competition Analysis Chart - Enhanced */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
-                <h3 className="flex items-center gap-2 mt-8">
+                <h3 className="flex items-center justify-center sm:justify-start gap-2 mt-6 sm:mt-8 text-base sm:text-lg lg:text-xl">
                   <Target className="w-5 h-5 text-red-400" />
                   {isRTL ? 'تحليل المنافسة' : 'Competition Analysis'}
                 </h3>
-                <p className="chart-description">{isRTL ? 'حصتك من ظهور الإعلانات مقارنة بالمنافسين' : 'Your impression share vs competitors'}</p>
+                <p className="chart-description text-xs sm:text-sm lg:text-base text-center">{isRTL ? 'حصتك من ظهور الإعلانات مقارنة بالمنافسين' : 'Your impression share vs competitors'}</p>
 
                 {loadingAiInsights ? (
                   <div className="h-[250px] flex items-center justify-center">
@@ -4179,11 +4207,11 @@ const DashboardPage: React.FC = () => {
               {/* 📊 Weekly Performance - Bar Chart Design */}
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-500 via-purple-500 to-blue-500"></div>
-                <h3 className="flex items-center gap-2 mt-8">
+                <h3 className="flex items-center justify-center sm:justify-start gap-2 mt-6 sm:mt-8 text-base sm:text-lg lg:text-xl">
                   <BarChart3 className="w-5 h-5 text-violet-400" />
                   {isRTL ? 'الأداء الأسبوعي' : 'Weekly Performance'}
                 </h3>
-                <p className="chart-description">{isRTL ? 'تحليل الأداء حسب أيام الأسبوع' : 'Performance analysis by day of week'}</p>
+                <p className="chart-description text-xs sm:text-sm lg:text-base text-center">{isRTL ? 'تحليل الأداء حسب أيام الأسبوع' : 'Performance analysis by day of week'}</p>
 
                 {loadingAiInsights ? (
                   <div className="h-[250px] sm:h-[280px] md:h-[300px] flex items-center justify-center">
@@ -4340,11 +4368,11 @@ const DashboardPage: React.FC = () => {
               <div className="chart-card backdrop-blur-sm border border-solid relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"></div>
                 <div className="px-4 sm:px-6 py-4">
-                  <h3 className="flex items-center gap-2 mb-2">
+                  <h3 className="flex items-center justify-center gap-2 mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg">
                     <Search className="w-5 h-5 text-violet-400" />
                     {isRTL ? 'أداء الكلمات المفتاحية' : 'Keyword Performance'}
                   </h3>
-                  <p className="text-gray-400 text-xs sm:text-sm mb-4">{isRTL ? 'أفضل الكلمات المفتاحية' : 'Top keywords'}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm lg:text-base text-center mb-4 sm:mb-6">{isRTL ? 'أفضل الكلمات المفتاحية' : 'Top keywords'}</p>
 
                   {loadingAiInsights ? (
                     <div className="h-[320px] flex items-center justify-center">

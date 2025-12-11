@@ -52,7 +52,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       const newTypes = prev.campaignTypes.includes(type)
         ? prev.campaignTypes.filter(t => t !== type)
         : [...prev.campaignTypes, type];
-      
+
       const newFilters = { ...prev, campaignTypes: newTypes };
       onFiltersChange(newFilters);
       return newFilters;
@@ -64,7 +64,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       const newStatuses = prev.statuses.includes(status)
         ? prev.statuses.filter(s => s !== status)
         : [...prev.statuses, status];
-      
+
       const newFilters = { ...prev, statuses: newStatuses };
       onFiltersChange(newFilters);
       return newFilters;
@@ -105,9 +105,9 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     onFiltersChange(clearedFilters);
   };
 
-  const hasActiveFilters = 
-    filters.campaignTypes.length > 0 || 
-    filters.statuses.length > 0 || 
+  const hasActiveFilters =
+    filters.campaignTypes.length > 0 ||
+    filters.statuses.length > 0 ||
     filters.searchQuery.length > 0 ||
     Object.keys(filters.performanceFilters).length > 0;
 
@@ -120,13 +120,13 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       >
         <Filter className="w-4 h-4" />
         <span className="hidden sm:inline">{isRTL ? 'تصفية' : 'Filters'}</span>
-        
+
         {/* Active Filters Badge */}
         {hasActiveFilters && (
           <span className="absolute -top-2 -right-2 w-5 h-5 bg-purple-600 text-white text-xs rounded-full flex items-center justify-center font-semibold">
             {activeFiltersCount || (
-              filters.campaignTypes.length + 
-              filters.statuses.length + 
+              filters.campaignTypes.length +
+              filters.statuses.length +
               (filters.searchQuery ? 1 : 0) +
               Object.keys(filters.performanceFilters).length
             )}
@@ -138,14 +138,16 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          
+
+
           {/* Panel */}
-          <div 
-            className="absolute top-full mt-2 right-0 w-96 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl max-h-[600px] overflow-y-auto custom-scrollbar"
+          <div
+            className={`absolute top-full mt-2 w-96 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl max-h-[600px] overflow-y-auto custom-scrollbar ${isRTL ? 'right-0' : 'left-0'
+              }`}
             style={{ direction: isRTL ? 'rtl' : 'ltr' }}
           >
             {/* Header */}
@@ -198,16 +200,15 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                 {campaignTypes.map(type => {
                   const Icon = type.icon;
                   const isSelected = filters.campaignTypes.includes(type.value);
-                  
+
                   return (
                     <button
                       key={type.value}
                       onClick={() => handleTypeToggle(type.value)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                        isSelected
-                          ? 'bg-purple-600/20 border border-purple-500/30 text-white'
-                          : 'bg-purple-900/10 border border-transparent text-gray-300 hover:bg-purple-900/20'
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${isSelected
+                        ? 'bg-purple-600/20 border border-purple-500/30 text-white'
+                        : 'bg-purple-900/10 border border-transparent text-gray-300 hover:bg-purple-900/20'
+                        }`}
                     >
                       <Icon className={`w-4 h-4 ${type.color}`} />
                       <span className="flex-1 text-left text-sm">
@@ -229,16 +230,15 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                 {statuses.map(status => {
                   const Icon = status.icon;
                   const isSelected = filters.statuses.includes(status.value);
-                  
+
                   return (
                     <button
                       key={status.value}
                       onClick={() => handleStatusToggle(status.value)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                        isSelected
-                          ? 'bg-purple-600/20 border border-purple-500/30 text-white'
-                          : 'bg-purple-900/10 border border-transparent text-gray-300 hover:bg-purple-900/20'
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${isSelected
+                        ? 'bg-purple-600/20 border border-purple-500/30 text-white'
+                        : 'bg-purple-900/10 border border-transparent text-gray-300 hover:bg-purple-900/20'
+                        }`}
                     >
                       <Icon className={`w-4 h-4 ${status.color}`} />
                       <span className="flex-1 text-left text-sm">
@@ -270,7 +270,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                     className="w-full px-3 py-2 bg-purple-900/20 border border-purple-900/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors text-sm"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">
                     {isRTL ? 'الحد الأدنى لـ CTR (%)' : 'Min CTR (%)'}
@@ -284,7 +284,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                     className="w-full px-3 py-2 bg-purple-900/20 border border-purple-900/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors text-sm"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">
                     {isRTL ? 'الحد الأدنى للتحويلات' : 'Min Conversions'}
