@@ -34,13 +34,13 @@ interface Integration {
 const getIntegrationColors = (title: string): { from: string; to: string } => {
   switch (title) {
     case 'Google Ads integration':
-      return { from: 'purple-600', to: 'purple-600' }; // Purple
+      return { from: 'emerald-500', to: 'green-400' }; // Green like sidebar
     case 'Google Analytics integration':
-      return { from: 'purple-600', to: 'purple-600' }; // Purple
+      return { from: 'emerald-500', to: 'green-400' }; // Green like sidebar
     case 'Google Tag Manager integration':
-      return { from: 'purple-600', to: 'purple-600' }; // Purple
+      return { from: 'emerald-500', to: 'green-400' }; // Green like sidebar
     default:
-      return { from: 'purple-600', to: 'purple-600' }; // Purple default
+      return { from: 'emerald-500', to: 'green-400' }; // Green default
   }
 };
 
@@ -56,56 +56,133 @@ const IntegrationCard: React.FC<IntegrationCardProps & { onRefresh?: () => void;
 }) => {
   const colors = getIntegrationColors(title);
   const { language, isRTL } = useTranslation();
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = React.useState('perspective(1000px) rotateX(0deg) rotateY(0deg)');
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Calculate rotation based on mouse position (increased for visible effect)
+    const rotateX = ((e.clientY - centerY) / (rect.height / 2)) * -10; // Max 10 degrees
+    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 10;   // Max 10 degrees
+
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)');
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
 
   return (
-    <GlowingBorderCard
-      className="w-80 h-80"
-      fromColor={colors.from}
-      toColor={colors.to}
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform,
+        transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.4s ease-out',
+        transformStyle: 'preserve-3d',
+      }}
     >
-      <div className="w-full h-full flex flex-col relative overflow-hidden">
-        {/* Header Section */}
-        <div className="flex justify-between items-start w-full mb-2 px-1">
-          {/* Status Badge */}
-          <div className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${status === 'connected'
-            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-            }`}>
-            {status === 'connected' ? (language === 'ar' ? 'متصل' : 'CONNECTED') : (language === 'ar' ? 'مميز' : 'FEATURED')}
+      <GlowingBorderCard
+        className="w-80 h-80"
+        fromColor={colors.from}
+        toColor={colors.to}
+      >
+        <div className="w-full h-full flex flex-col relative overflow-hidden">
+          {/* Header Section */}
+          <div className="flex justify-between items-start w-full mb-2 px-1">
+            {/* Status Badge */}
+            <div className={`px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${status === 'connected'
+              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              }`}>
+              {status === 'connected' ? (language === 'ar' ? 'متصل' : 'CONNECTED') : (language === 'ar' ? 'مميز' : 'FEATURED')}
+            </div>
+
+            {/* Icon */}
+            <div className="text-white opacity-90 transform hover:scale-110 transition-transform flex items-center justify-center">
+              {icon}
+            </div>
           </div>
 
-          {/* Icon */}
-          <div className="text-white opacity-90 transform hover:scale-110 transition-transform flex items-center justify-center">
-            {icon}
+          {/* Main Content Section */}
+          <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-1">
+            {/* Title */}
+            <h3 className="text-lg font-semibold mb-1 text-white leading-tight text-center">
+              {title.includes('Tag Manager')
+                ? 'Tag Manager'
+                : title.replace(' integration', '')
+              }
+            </h3>
+
+            {/* Description */}
+            <p className="text-xs text-gray-400 leading-relaxed text-center">
+              {title.includes('Tag Manager')
+                ? 'Manage website tracking and analytics tags'
+                : description.replace('this project to your ', 'your ')
+              }
+            </p>
           </div>
-        </div>
 
-        {/* Main Content Section */}
-        <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-1">
-          {/* Title */}
-          <h3 className="text-lg font-semibold mb-1 text-white leading-tight text-center">
-            {title.includes('Tag Manager')
-              ? 'Tag Manager'
-              : title.replace(' integration', '')
-            }
-          </h3>
-
-          {/* Description */}
-          <p className="text-xs text-gray-400 leading-relaxed text-center">
-            {title.includes('Tag Manager')
-              ? 'Manage website tracking and analytics tags'
-              : description.replace('this project to your ', 'your ')
-            }
-          </p>
-        </div>
-
-        {/* Footer Section */}
-        <div className="w-full px-1 pb-1">
-          {status === 'connected' ? (
-            // Connected state - زر إدارة + زر ربط حساب جديد
-            <div className="flex gap-2">
+          {/* Footer Section */}
+          <div className="w-full px-1 pb-1">
+            {status === 'connected' ? (
+              // Connected state - زر إدارة + زر ربط حساب جديد
+              <div className="flex gap-2">
+                <InteractiveInput
+                  className="bg-green-500 text-white flex-1"
+                  variant="default"
+                  inputSize="small"
+                  glow={true}
+                  rounded="custom"
+                  hideAnimations={false}
+                  uppercase={true}
+                  textEffect="normal"
+                  shimmerColor="#39FF14"
+                  shimmerSize="0.1em"
+                  shimmerDuration="3s"
+                  borderRadius="100px"
+                  background="rgba(0, 0, 0, 1)"
+                  onClick={() => window.location.href = `/integrations/${integrationId}`}
+                >
+                  {language === 'ar' ? 'إدارة' : 'Manage'}
+                </InteractiveInput>
+                <InteractiveInput
+                  className="text-white flex-1"
+                  variant="default"
+                  inputSize="small"
+                  glow={true}
+                  rounded="custom"
+                  hideAnimations={false}
+                  uppercase={true}
+                  textEffect="normal"
+                  shimmerColor="#3B82F6"
+                  shimmerSize="0.1em"
+                  shimmerDuration="3s"
+                  borderRadius="100px"
+                  background="rgba(0, 0, 0, 1)"
+                  onClick={onConnect}
+                >
+                  {language === 'ar' ? 'ربط حساب' : 'Add New'}
+                </InteractiveInput>
+              </div>
+            ) : (
+              // Not connected state - single button
               <InteractiveInput
-                className="bg-green-500 text-white flex-1"
+                className="bg-green-500 text-white w-full"
                 variant="default"
                 inputSize="small"
                 glow={true}
@@ -118,53 +195,15 @@ const IntegrationCard: React.FC<IntegrationCardProps & { onRefresh?: () => void;
                 shimmerDuration="3s"
                 borderRadius="100px"
                 background="rgba(0, 0, 0, 1)"
-                onClick={() => window.location.href = `/integrations/${integrationId}`}
-              >
-                {language === 'ar' ? 'إدارة' : 'Manage'}
-              </InteractiveInput>
-              <InteractiveInput
-                className="text-white flex-1"
-                variant="default"
-                inputSize="small"
-                glow={true}
-                rounded="custom"
-                hideAnimations={false}
-                uppercase={true}
-                textEffect="normal"
-                shimmerColor="#3B82F6"
-                shimmerSize="0.1em"
-                shimmerDuration="3s"
-                borderRadius="100px"
-                background="rgba(0, 0, 0, 1)"
                 onClick={onConnect}
               >
-                {language === 'ar' ? 'ربط حساب' : 'Add New'}
+                {language === 'ar' ? 'ابدأ' : 'Get Started'}
               </InteractiveInput>
-            </div>
-          ) : (
-            // Not connected state - single button
-            <InteractiveInput
-              className="bg-green-500 text-white w-full"
-              variant="default"
-              inputSize="small"
-              glow={true}
-              rounded="custom"
-              hideAnimations={false}
-              uppercase={true}
-              textEffect="normal"
-              shimmerColor="#39FF14"
-              shimmerSize="0.1em"
-              shimmerDuration="3s"
-              borderRadius="100px"
-              background="rgba(0, 0, 0, 1)"
-              onClick={onConnect}
-            >
-              {language === 'ar' ? 'ابدأ' : 'Get Started'}
-            </InteractiveInput>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </GlowingBorderCard>
+      </GlowingBorderCard>
+    </div>
   );
 };
 
@@ -575,6 +614,14 @@ const IntegrationsPage: React.FC = () => {
       // Google Tag Manager - comes with Analytics
       console.log('🔗 Starting Google Tag Manager OAuth...');
       window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/integrations/google-tag-manager');
+    } else if (integrationId === 'google-merchant') {
+      // Google Merchant Center
+      console.log('🔗 Starting Google Merchant Center OAuth...');
+      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/integrations/google-merchant');
+    } else if (integrationId === 'meta-ads') {
+      // Meta Ads (Facebook)
+      console.log('🔗 Starting Meta Ads OAuth...');
+      window.location.href = '/api/oauth/meta?redirect_after=' + encodeURIComponent('/integrations/meta-ads');
     } else {
       // For other integrations, show coming soon message
       alert('This integration will be available soon!');
@@ -610,6 +657,18 @@ const IntegrationsPage: React.FC = () => {
               ? { ...integration, status: hasGoogleAdsConnection ? 'connected' : 'not-connected' }
               : integration
           )
+        );
+
+        // Update categories too
+        setIntegrationCategories(prev =>
+          prev.map(category => ({
+            ...category,
+            integrations: category.integrations.map(integration =>
+              integration.id === 'google-ads'
+                ? { ...integration, status: hasGoogleAdsConnection ? 'connected' : 'not-connected' }
+                : integration
+            )
+          }))
         );
       } catch (error) {
         console.warn('⚠️ خطأ في فحص حالة Google Ads:', error);
@@ -700,9 +759,55 @@ const IntegrationsPage: React.FC = () => {
       }
     };
 
-    checkGoogleAdsConnection();
-    checkGoogleAnalyticsConnection();
-    checkGTMConnection();
+    const checkMerchantConnection = async () => {
+      try {
+        const response = await fetch('/api/merchant/connected', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          console.warn('⚠️ فشل في فحص حالة Merchant:', response.status);
+          return;
+        }
+
+        const result = await response.json();
+        const hasMerchantConnection = result.success && result.accounts && result.accounts.length > 0;
+
+        setIntegrations(prev =>
+          prev.map(integration =>
+            integration.id === 'google-merchant'
+              ? { ...integration, status: hasMerchantConnection ? 'connected' : 'not-connected' }
+              : integration
+          )
+        );
+
+        // Update categories too
+        setIntegrationCategories(prev =>
+          prev.map(category => ({
+            ...category,
+            integrations: category.integrations.map(integration =>
+              integration.id === 'google-merchant'
+                ? { ...integration, status: hasMerchantConnection ? 'connected' : 'not-connected' }
+                : integration
+            )
+          }))
+        );
+      } catch (error) {
+        console.warn('⚠️ خطأ في فحص حالة Merchant:', error);
+      }
+    };
+
+    // Run all checks in parallel for faster loading
+    Promise.all([
+      checkGoogleAdsConnection(),
+      checkGoogleAnalyticsConnection(),
+      checkGTMConnection(),
+      checkMerchantConnection()
+    ]);
   }, []);
 
   const connectedCount = integrations.filter(int => int.status === 'connected').length;
@@ -742,7 +847,7 @@ const IntegrationsPage: React.FC = () => {
             </div>
 
             {/* Category Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center"
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-16 gap-y-12 justify-items-center px-4 py-6"
             >
               {category.integrations.map((integration) => (
                 <IntegrationCard

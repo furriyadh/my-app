@@ -22,11 +22,14 @@ export async function GET(request: NextRequest) {
         const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
 
         if (!userInfoCookie) {
+            console.log('⚠️ No oauth_user_info cookie found - returning empty array');
             return NextResponse.json({
-                success: false,
-                error: 'Not authenticated',
-                message: 'يرجى تسجيل الدخول أولاً'
-            }, { status: 401 });
+                success: true,
+                properties: [],
+                activeProperty: null,
+                count: 0,
+                message: 'Not authenticated'
+            });
         }
 
         const userInfo = JSON.parse(userInfoCookie);

@@ -1,5 +1,5 @@
-// Google Tag Manager API - Save/List connected containers
-// حفظ وجلب Containers المرتبطة من Supabase
+// Meta Ads API - Save/List connected accounts
+// حفظ وجلب حسابات Meta Ads المرتبطة من Supabase
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
@@ -13,20 +13,24 @@ const getSupabaseAdmin = () => {
     });
 };
 
-// GET - جلب Containers المحفوظة للمستخدم الحالي
+// GET - جلب الحسابات المحفوظة للمستخدم الحالي
 export async function GET(request: NextRequest) {
     try {
-        console.log('📦 جلب GTM Containers المحفوظة...');
+        console.log('📱 جلب Meta Ad Accounts المحفوظة...');
 
         const cookieStore = await cookies();
-        const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
+        // نستخدم meta_user_info أو oauth_user_info
+        const metaUserCookie = cookieStore.get('meta_user_info')?.value;
+        const googleUserCookie = cookieStore.get('oauth_user_info')?.value;
+
+        const userInfoCookie = metaUserCookie || googleUserCookie;
 
         if (!userInfoCookie) {
-            console.log('⚠️ No oauth_user_info cookie found - returning empty array');
+            console.log('⚠️ No user info cookie found - returning empty array');
             return NextResponse.json({
                 success: true,
-                containers: [],
-                activeContainer: null,
+                accounts: [],
+                activeAccount: null,
                 count: 0,
                 message: 'Not authenticated'
             });
@@ -36,13 +40,13 @@ export async function GET(request: NextRequest) {
         const supabase = getSupabaseAdmin();
 
         const { data, error } = await supabase
-            .from('gtm_containers')
+            .from('meta_ad_accounts')
             .select('*')
             .eq('user_id', userInfo.id)
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('❌ Error fetching containers:', error);
+            console.error('❌ Error fetching accounts:', error);
             return NextResponse.json({
                 success: false,
                 error: 'Database error',
@@ -50,18 +54,18 @@ export async function GET(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // جلب Container النشط
-        const activeContainer = data?.find(c => c.is_active) || data?.[0] || null;
+        // جلب الحساب النشط
+        const activeAccount = data?.find(a => a.is_active) || data?.[0] || null;
 
         return NextResponse.json({
             success: true,
-            containers: data || [],
-            activeContainer: activeContainer,
+            accounts: data || [],
+            activeAccount: activeAccount,
             count: data?.length || 0
         });
 
     } catch (error) {
-        console.error('❌ Error in GET gtm/connected:', error);
+        console.error('❌ Error in GET meta/connected:', error);
         return NextResponse.json({
             success: false,
             error: 'Internal server error',
@@ -70,64 +74,75 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST - حفظ Container جديد للمستخدم
+// POST - حفظ حساب جديد للمستخدم
 export async function POST(request: NextRequest) {
     try {
-        console.log('💾 حفظ GTM Container...');
+        console.log('💾 حفظ Meta Ad Account...');
 
         const cookieStore = await cookies();
-        const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
+        const metaUserCookie = cookieStore.get('meta_user_info')?.value;
+        const metaAccessToken = cookieStore.get('meta_access_token')?.value;
 
-        if (!userInfoCookie) {
+        if (!metaUserCookie) {
             return NextResponse.json({
                 success: false,
-                error: 'Not authenticated',
-                message: 'يرجى تسجيل الدخول أولاً'
+                error: 'Not authenticated with Meta',
+                message: 'يرجى تسجيل الدخول بـ Meta أولاً'
             }, { status: 401 });
         }
 
-        const userInfo = JSON.parse(userInfoCookie);
+        const userInfo = JSON.parse(metaUserCookie);
         const body = await request.json();
-        const { accountId, accountName, containerId, containerName, containerPublicId, usageContext } = body;
+        const {
+            adAccountId,
+            accountName,
+            businessId,
+            businessName,
+            currency,
+            timezoneName,
+            accountStatus
+        } = body;
 
-        if (!containerId) {
+        if (!adAccountId) {
             return NextResponse.json({
                 success: false,
-                error: 'Container ID required',
-                message: 'يجب تحديد Container ID'
+                error: 'Ad Account ID required',
+                message: 'يجب تحديد Ad Account ID'
             }, { status: 400 });
         }
 
         const supabase = getSupabaseAdmin();
 
-        // إلغاء تفعيل جميع Containers السابقة للمستخدم
+        // إلغاء تفعيل جميع الحسابات السابقة للمستخدم
         await supabase
-            .from('gtm_containers')
+            .from('meta_ad_accounts')
             .update({ is_active: false })
             .eq('user_id', userInfo.id);
 
-        // إضافة أو تحديث Container الجديد
+        // إضافة أو تحديث الحساب الجديد
         const { data, error } = await supabase
-            .from('gtm_containers')
+            .from('meta_ad_accounts')
             .upsert({
                 user_id: userInfo.id,
-                user_email: userInfo.email,
-                account_id: accountId || null,
+                user_email: userInfo.email || '',
+                ad_account_id: adAccountId,
                 account_name: accountName || null,
-                container_id: containerId,
-                container_name: containerName || null,
-                container_public_id: containerPublicId || null,
-                usage_context: usageContext || null,
+                business_id: businessId || null,
+                business_name: businessName || null,
+                currency: currency || null,
+                timezone_name: timezoneName || null,
+                account_status: accountStatus || null,
+                access_token: metaAccessToken || null,
                 is_active: true,
                 updated_at: new Date().toISOString()
             }, {
-                onConflict: 'user_id,container_id'
+                onConflict: 'user_id,ad_account_id'
             })
             .select()
             .single();
 
         if (error) {
-            console.error('❌ Error saving container:', error);
+            console.error('❌ Error saving account:', error);
             return NextResponse.json({
                 success: false,
                 error: 'Database error',
@@ -135,15 +150,15 @@ export async function POST(request: NextRequest) {
             }, { status: 500 });
         }
 
-        console.log('✅ Container saved successfully:', data);
+        console.log('✅ Account saved successfully:', data);
         return NextResponse.json({
             success: true,
-            container: data,
-            message: 'تم حفظ Container بنجاح'
+            account: data,
+            message: 'تم حفظ الحساب بنجاح'
         });
 
     } catch (error) {
-        console.error('❌ Error in POST gtm/connected:', error);
+        console.error('❌ Error in POST meta/connected:', error);
         return NextResponse.json({
             success: false,
             error: 'Internal server error',
@@ -152,42 +167,42 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// DELETE - حذف Container
+// DELETE - حذف حساب
 export async function DELETE(request: NextRequest) {
     try {
-        console.log('🗑️ حذف GTM Container...');
+        console.log('🗑️ حذف Meta Ad Account...');
 
         const cookieStore = await cookies();
-        const userInfoCookie = cookieStore.get('oauth_user_info')?.value;
+        const metaUserCookie = cookieStore.get('meta_user_info')?.value;
 
-        if (!userInfoCookie) {
+        if (!metaUserCookie) {
             return NextResponse.json({
                 success: false,
                 error: 'Not authenticated'
             }, { status: 401 });
         }
 
-        const userInfo = JSON.parse(userInfoCookie);
+        const userInfo = JSON.parse(metaUserCookie);
         const { searchParams } = new URL(request.url);
-        const containerId = searchParams.get('containerId');
+        const adAccountId = searchParams.get('adAccountId');
 
-        if (!containerId) {
+        if (!adAccountId) {
             return NextResponse.json({
                 success: false,
-                error: 'Container ID required'
+                error: 'Ad Account ID required'
             }, { status: 400 });
         }
 
         const supabase = getSupabaseAdmin();
 
         const { error } = await supabase
-            .from('gtm_containers')
+            .from('meta_ad_accounts')
             .delete()
             .eq('user_id', userInfo.id)
-            .eq('container_id', containerId);
+            .eq('ad_account_id', adAccountId);
 
         if (error) {
-            console.error('❌ Error deleting container:', error);
+            console.error('❌ Error deleting account:', error);
             return NextResponse.json({
                 success: false,
                 error: error.message
@@ -196,11 +211,11 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: 'تم حذف Container بنجاح'
+            message: 'تم حذف الحساب بنجاح'
         });
 
     } catch (error) {
-        console.error('❌ Error in DELETE gtm/connected:', error);
+        console.error('❌ Error in DELETE meta/connected:', error);
         return NextResponse.json({
             success: false,
             error: 'Internal server error'
