@@ -47,7 +47,9 @@ export const OAUTH_SCOPES = {
   GOOGLE_ADS: 'https://www.googleapis.com/auth/adwords',
   GOOGLE_ADS_READONLY: 'https://www.googleapis.com/auth/adwords.readonly',
   USERINFO_EMAIL: 'https://www.googleapis.com/auth/userinfo.email',
-  USERINFO_PROFILE: 'https://www.googleapis.com/auth/userinfo.profile'
+  USERINFO_PROFILE: 'https://www.googleapis.com/auth/userinfo.profile',
+  // Google Analytics
+  ANALYTICS_READONLY: 'https://www.googleapis.com/auth/analytics.readonly',
 };
 
 // ===== WORKFLOW STEPS =====

@@ -33,6 +33,11 @@ const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/adwords',           // Google Ads API (مطلوب)
   'https://www.googleapis.com/auth/userinfo.email',    // معلومات البريد الإلكتروني
   'https://www.googleapis.com/auth/userinfo.profile',  // معلومات الملف الشخصي
+  'https://www.googleapis.com/auth/analytics.readonly', // Google Analytics (قراءة فقط)
+  'https://www.googleapis.com/auth/analytics.manage.users', // إدارة مستخدمي Analytics (لإضافة Admin)
+  'https://www.googleapis.com/auth/tagmanager.readonly', // Google Tag Manager (قراءة فقط)
+  'https://www.googleapis.com/auth/tagmanager.manage.users', // إدارة مستخدمي GTM (لإضافة Admin)
+  'https://www.googleapis.com/auth/content',             // Google Merchant Center (Content API)
   'openid',                                            // OpenID Connect (حسب Google Identity Platform)
   'profile',                                           // معلومات الملف الشخصي الأساسية
   'email'                                              // معلومات البريد الإلكتروني الأساسية
@@ -41,14 +46,14 @@ const GOOGLE_OAUTH_SCOPES = [
 export async function GET(request: NextRequest) {
   try {
     console.log('🔗 بدء OAuth مع Google (حسب Google Ads API Documentation)...');
-    
+
     // الحصول على معاملات من الطلب
     const { searchParams } = new URL(request.url);
     const mcc_customer_id = searchParams.get('mcc_customer_id');
     const redirect_after = searchParams.get('redirect_after');
-    
+
     console.log('📊 معاملات الطلب:', { mcc_customer_id, redirect_after });
-    
+
     // التحقق من وجود client_id (مطلوب حسب Google Ads API Documentation)
     const clientId = process.env.GOOGLE_ADS_CLIENT_ID;
     if (!clientId) {
@@ -61,7 +66,7 @@ export async function GET(request: NextRequest) {
         docs: 'https://developers.google.com/google-ads/api/docs/oauth/overview'
       }, { status: 500 });
     }
-    
+
     // تحديد baseUrl
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
@@ -78,14 +83,14 @@ export async function GET(request: NextRequest) {
     // تحديد redirect_uri النهائي (إما من env أو مبني من baseUrl)
     const redirectUri =
       redirectUriFromEnv || `${baseUrl}/api/oauth/google/callback`;
-    
+
     // التحقق من تطابق redirect_uri مع Google Cloud Console
     console.log('🔍 NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
     console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
     console.log('🔍 Final redirectUri:', redirectUri);
     console.log('🔗 Base URL:', baseUrl);
     console.log('🔗 Redirect URI:', redirectUri);
-    
+
     // التحقق من أن redirect_uri يطابق Google Cloud Console (لأغراض التشخيص فقط)
     const expectedRedirectUri =
       redirectUriFromEnv ||
@@ -99,19 +104,19 @@ export async function GET(request: NextRequest) {
     } else {
       console.log('✅ redirect_uri matches Google Cloud Console');
     }
-    
+
     // توليد PKCE و state (حسب Google Identity Platform)
     const { codeVerifier, codeChallenge } = generatePKCE();
     const baseState = generateState();
     const sessionId = crypto.randomBytes(16).toString('hex');
-    
+
     // إضافة redirect_after إلى state إذا كان موجوداً
     const stateData = {
       state: baseState,
       redirect_after: redirect_after || '/integrations/google-ads'
     };
     const state = Buffer.from(JSON.stringify(stateData)).toString('base64');
-    
+
     // بناء رابط المصادقة مع Google (حسب Google Identity Platform)
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.set('client_id', clientId);
@@ -124,15 +129,15 @@ export async function GET(request: NextRequest) {
     authUrl.searchParams.set('access_type', 'offline');  // للحصول على refresh token
     authUrl.searchParams.set('prompt', 'consent');       // إجبار ظهور شاشة الأذونات
     authUrl.searchParams.set('include_granted_scopes', 'true');
-    
+
     console.log('✅ تم إنشاء رابط المصادقة بنجاح (حسب Google Ads API Documentation)');
     console.log('🔗 رابط المصادقة:', authUrl.toString());
     console.log('📋 يتبع: https://developers.google.com/identity/protocols/oauth2');
-    
+
     // فحص نوع الطلب - JSON أم redirect
     const acceptHeader = request.headers.get('accept');
     const isJsonRequest = acceptHeader?.includes('application/json');
-    
+
     if (isJsonRequest) {
       // إرجاع البيانات كـ JSON للاستخدام مع JavaScript
       const jsonResponse = NextResponse.json({
@@ -143,7 +148,7 @@ export async function GET(request: NextRequest) {
         message: 'Authorization URL generated successfully',
         docs: 'https://developers.google.com/identity/protocols/oauth2'
       });
-      
+
       // 🔧 sameSite: 'lax' مطلوب لـ OAuth redirects من Google
       jsonResponse.cookies.set('oauth_code_verifier', codeVerifier, {
         httpOnly: true,        // يمنع الوصول من JavaScript
@@ -152,7 +157,7 @@ export async function GET(request: NextRequest) {
         maxAge: 600,
         path: '/'
       });
-      
+
       jsonResponse.cookies.set('oauth_state', state, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
@@ -160,7 +165,7 @@ export async function GET(request: NextRequest) {
         maxAge: 600,
         path: '/'
       });
-      
+
       jsonResponse.cookies.set('oauth_session_id', sessionId, {
         httpOnly: true,        // يمنع الوصول من JavaScript
         secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
@@ -168,7 +173,7 @@ export async function GET(request: NextRequest) {
         maxAge: 600,
         path: '/'
       });
-      
+
       if (mcc_customer_id) {
         jsonResponse.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
           httpOnly: true,        // يمنع الوصول من JavaScript
@@ -178,7 +183,7 @@ export async function GET(request: NextRequest) {
           path: '/'
         });
       }
-      
+
       if (redirect_after) {
         jsonResponse.cookies.set('oauth_redirect_after', redirect_after, {
           httpOnly: true,        // يمنع الوصول من JavaScript
@@ -188,13 +193,13 @@ export async function GET(request: NextRequest) {
           path: '/'
         });
       }
-      
+
       return jsonResponse;
     }
-    
+
     // حفظ البيانات المهمة في cookies للأمان (حسب الممارسات الرسمية) - للـ redirect
     const response = NextResponse.redirect(authUrl.toString());
-    
+
     // حفظ code_verifier (مطلوب لـ PKCE)
     // ⚠️ يجب استخدام sameSite: 'lax' لأن OAuth يتطلب redirect من موقع خارجي (Google)
     // strict يمنع إرسال cookies في cross-site redirects
@@ -205,7 +210,7 @@ export async function GET(request: NextRequest) {
       maxAge: 600,           // 10 دقائق
       path: '/'
     });
-    
+
     // حفظ state (للتحقق من الأمان)
     response.cookies.set('oauth_state', state, {
       httpOnly: true,        // يمنع الوصول من JavaScript
@@ -214,7 +219,7 @@ export async function GET(request: NextRequest) {
       maxAge: 600,           // 10 دقائق
       path: '/'
     });
-    
+
     // حفظ معاملات إضافية
     if (mcc_customer_id) {
       response.cookies.set('oauth_mcc_customer_id', mcc_customer_id, {
@@ -225,7 +230,7 @@ export async function GET(request: NextRequest) {
         path: '/'
       });
     }
-    
+
     if (redirect_after) {
       response.cookies.set('oauth_redirect_after', redirect_after, {
         httpOnly: true,        // يمنع الوصول من JavaScript
@@ -235,9 +240,9 @@ export async function GET(request: NextRequest) {
         path: '/'
       });
     }
-    
+
     return response;
-    
+
   } catch (error) {
     console.error('❌ خطأ في OAuth Google:', error);
     console.error('📋 راجع: https://developers.google.com/google-ads/api/docs/oauth/installed-app');
