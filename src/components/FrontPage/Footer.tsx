@@ -165,7 +165,7 @@ const Footer: React.FC = () => {
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/settings/terms-conditions/"
+                    href="/terms"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
@@ -192,7 +192,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/settings/privacy-policy/"
+                    href="/privacy"
                     className="lg:text-[16px] inline-block text-gray-500 dark:text-gray-400 transition-all hover:text-primary-600"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >

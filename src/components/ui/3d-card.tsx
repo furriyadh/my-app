@@ -19,21 +19,67 @@ export const CardContainer = ({
   className,
   containerClassName,
   speed = "normal",
+  autoRotate = false,
+  autoRotateSpeed = 8,
+  disabled = false,
 }: {
   children?: React.ReactNode;
   className?: string;
   containerClassName?: string;
   speed?: "fast" | "medium" | "normal";
+  autoRotate?: boolean;
+  autoRotateSpeed?: number; // seconds for full rotation cycle
+  disabled?: boolean; // completely disable all 3D effects
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [isMouseEntered, setIsMouseEntered] = useState(false);
+  const animationRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  // Auto-rotation animation
+  useEffect(() => {
+    if (!autoRotate || isMouseEntered || !innerRef.current) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
+
+    const animate = (timestamp: number) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const elapsed = timestamp - startTimeRef.current;
+
+      // Calculate rotation based on time (slow elliptical motion)
+      const progress = (elapsed / (autoRotateSpeed * 1000)) % 1;
+      const angle = progress * Math.PI * 2;
+
+      // Create a gentle floating/orbiting effect - very slow and subtle
+      const rotateY = Math.sin(angle) * 2.5; // ±2.5 degrees Y (reduced from 5)
+      const rotateX = Math.cos(angle * 0.5) * 1.5; // ±1.5 degrees X (reduced from 3)
+
+      if (innerRef.current) {
+        innerRef.current.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [autoRotate, isMouseEntered, autoRotateSpeed]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current || !innerRef.current) return;
+    if (disabled || !containerRef.current || !innerRef.current) return;
     const { left, top, width, height } =
       containerRef.current.getBoundingClientRect();
-    const divisor = speed === "fast" ? 5 : speed === "medium" ? 12 : 25;
+    const divisor = speed === "fast" ? 20 : speed === "medium" ? 60 : 100;
     const x = (e.clientX - left - width / 2) / divisor;
     const y = (e.clientY - top - height / 2) / divisor;
     innerRef.current.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
@@ -41,12 +87,18 @@ export const CardContainer = ({
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsMouseEntered(true);
+    // Reset animation start time when leaving hover
+    startTimeRef.current = 0;
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!innerRef.current) return;
     setIsMouseEntered(false);
-    innerRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
+    if (!autoRotate) {
+      innerRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
+    }
+    // Reset start time for smooth animation restart
+    startTimeRef.current = 0;
   };
   return (
     <MouseEnterContext.Provider value={[isMouseEntered, setIsMouseEntered]}>
@@ -67,15 +119,13 @@ export const CardContainer = ({
           ref={innerRef}
           className={cn(
             "relative w-full",
-            speed === "fast" 
-              ? "transition-transform duration-150 ease-out" 
-              : speed === "medium" 
-                ? "transition-transform duration-250 ease-out" 
-                : "transition-all duration-200 ease-linear",
             className
           )}
           style={{
             transformStyle: "preserve-3d",
+            transition: isMouseEntered
+              ? "transform 0.1s ease-out"
+              : "transform 0.4s ease-out",
           }}
         >
           {children}
@@ -128,6 +178,7 @@ export const CardItem = ({
   rotateX?: number | string;
   rotateY?: number | string;
   rotateZ?: number | string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -135,6 +186,7 @@ export const CardItem = ({
 
   useEffect(() => {
     handleAnimations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMouseEntered]);
 
   const handleAnimations = () => {
@@ -146,14 +198,15 @@ export const CardItem = ({
     }
   };
 
+  // Always render as div for proper ref handling
   return (
-    <Tag
+    <div
       ref={ref}
       className={cn("w-fit transition duration-200 ease-linear", className)}
       {...rest}
     >
       {children}
-    </Tag>
+    </div>
   );
 };
 

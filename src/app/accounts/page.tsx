@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  ExternalLink, 
+import {
+  CheckCircle,
+  AlertCircle,
+  ExternalLink,
   Settings,
   ArrowLeft,
   Trash2,
@@ -62,7 +62,7 @@ const AccountsPage: React.FC = () => {
         }
       });
       const data = await response.json();
-      
+
       if (data.google_ads && data.google_ads.length > 0) {
         const formattedAccounts = data.google_ads.map((acc: any) => ({
           id: acc.id,
@@ -94,22 +94,22 @@ const AccountsPage: React.FC = () => {
     if (confirm('Are you sure you want to disconnect this account? This will revoke all permissions.')) {
       try {
         console.log('🔌 Disconnecting account:', accountId);
-        
+
         // إلغاء جميع الأذونات والكوكيز
         await fetch('/api/oauth/logout', {
           method: 'POST',
           credentials: 'include'
         });
-        
+
         // Clear non-HttpOnly cookies
         document.cookie = 'google_ads_connected=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        
+
         // مسح localStorage
         localStorage.removeItem('hasSeenServiceModal');
         localStorage.removeItem('googleAdsConnected');
         localStorage.removeItem('googleAdsConnectionTime');
         localStorage.removeItem('selectedGoogleAdsAccount');
-        
+
         // إلغاء الأذونات من Google
         try {
           await fetch('https://oauth2.googleapis.com/revoke', {
@@ -124,14 +124,14 @@ const AccountsPage: React.FC = () => {
         } catch (revokeError) {
           console.log('⚠️ Could not revoke token from Google');
         }
-        
+
         // تحديث الحالة المحلية
         setAccounts(prev => prev.filter(acc => acc.id !== accountId));
         setSelectedAccount(null);
-        
+
         console.log('✅ Account disconnected successfully');
         alert('Account disconnected successfully. You can reconnect anytime from the integrations page.');
-        
+
       } catch (error) {
         console.error('❌ Error disconnecting account:', error);
         alert('Error disconnecting account. Please try again.');
@@ -162,9 +162,9 @@ const AccountsPage: React.FC = () => {
       {/* Account Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <img 
-            src="/images/integrations/google-ads-logo.svg" 
-            alt="Google Ads" 
+          <img
+            src="/images/integrations/google-ads-logo.svg"
+            alt="Google Ads"
             className="w-8 h-8"
           />
           <div>
@@ -176,16 +176,15 @@ const AccountsPage: React.FC = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-            account.status === 'ENABLED' 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
+          <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${account.status === 'ENABLED'
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
               : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-          }`}>
+            }`}>
             {account.status}
           </span>
-          
+
           {account.isConnected && (
             <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
           )}
@@ -198,17 +197,17 @@ const AccountsPage: React.FC = () => {
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">العملة</p>
           <p className="font-semibold text-gray-900 dark:text-white">{account.currencyCode}</p>
         </div>
-        
+
         <div className="bg-gray-50 /50 rounded-lg p-3">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">المنطقة الزمنية</p>
           <p className="font-semibold text-gray-900 dark:text-white text-xs">{account.timeZone}</p>
         </div>
-        
+
         <div className="bg-gray-50 /50 rounded-lg p-3">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">عدد الحملات</p>
           <p className="font-semibold text-gray-900 dark:text-white">{account.campaignsCount}</p>
         </div>
-        
+
         <div className="bg-gray-50 /50 rounded-lg p-3">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">الإنفاق الشهري</p>
           <p className="font-semibold text-gray-900 dark:text-white text-xs">
@@ -234,15 +233,15 @@ const AccountsPage: React.FC = () => {
           <Eye className="w-4 h-4" />
           عرض التفاصيل
         </button>
-        
+
         <button
-          onClick={() => router.push(`/campaign/new`)}
+          onClick={() => router.push(`/campaign/website-url`)}
           className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
         >
           <ExternalLink className="w-4 h-4" />
           إنشاء حملة
         </button>
-        
+
         <button
           onClick={() => handleDisconnectAccount(account.id)}
           className="flex items-center gap-2 px-3 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm"
@@ -281,7 +280,7 @@ const AccountsPage: React.FC = () => {
                 {language === 'ar' ? 'إدارة ومراقبة جميع حسابات Google Ads المربوطة بحسابك' : 'Manage and monitor all your connected Google Ads accounts'}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="rounded-lg px-4 py-2 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-2">
@@ -291,7 +290,7 @@ const AccountsPage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              
+
               <button
                 onClick={() => router.push('/integrations')}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -309,7 +308,7 @@ const AccountsPage: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
               الحسابات المربوطة
             </h2>
-            
+
             <AnimatedList
               items={accountItems}
               onItemSelect={handleAccountSelect}

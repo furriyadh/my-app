@@ -73,7 +73,7 @@ const RecentCampaigns = () => {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         const formattedCampaigns = (result.data?.campaigns || result.campaigns || []).map(campaign => ({
           id: campaign.id,
@@ -93,7 +93,7 @@ const RecentCampaigns = () => {
           endDate: campaign.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           lastModified: campaign.last_modified || campaign.created_date || 'Recently'
         }));
-        
+
         setCampaigns(formattedCampaigns);
       } else {
         throw new Error(result.error || 'Failed to fetch campaigns');
@@ -309,20 +309,20 @@ const RecentCampaigns = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {/* Status Badge */}
             <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.color}`}>
               <StatusIcon className="w-3 h-3" />
               <span>{statusConfig.label}</span>
             </div>
-            
+
             {/* Performance Badge */}
             <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-md border border-blue-200/30 ${performanceConfig.color}`}>
               <PerformanceIcon className="w-3 h-3" />
               <span>{performanceConfig.label}</span>
             </div>
-            
+
             {/* Actions Menu */}
             <div className="relative">
               <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
@@ -341,10 +341,9 @@ const RecentCampaigns = () => {
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
-              className={`h-2 rounded-full transition-all duration-300 ${
-                budgetUsed > 90 ? 'bg-red-500' : budgetUsed > 70 ? 'bg-yellow-500' : 'bg-green-500'
-              }`}
+            <div
+              className={`h-2 rounded-full transition-all duration-300 ${budgetUsed > 90 ? 'bg-red-500' : budgetUsed > 70 ? 'bg-yellow-500' : 'bg-green-500'
+                }`}
               style={{ width: `${Math.min(budgetUsed, 100)}%` }}
             ></div>
           </div>
@@ -364,7 +363,7 @@ const RecentCampaigns = () => {
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Impressions</div>
           </div>
-          
+
           <div className="text-center">
             <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-1">
               <MousePointer className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -374,7 +373,7 @@ const RecentCampaigns = () => {
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Clicks</div>
           </div>
-          
+
           <div className="text-center">
             <div className="flex items-center justify-center w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg mx-auto mb-1">
               <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -384,21 +383,21 @@ const RecentCampaigns = () => {
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Conversions</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {campaign.ctr}%
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">CTR</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {formatCurrency(campaign.cpc)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">CPC</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
               {campaign.roas}x
@@ -413,23 +412,23 @@ const RecentCampaigns = () => {
             <Calendar className="w-3 h-3" />
             <span>{new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}</span>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <button 
+            <button
               onClick={() => handleAction('edit', campaign.id)}
               className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               title="Edit Campaign"
             >
               <Edit3 className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={() => handleAction('copy', campaign.id)}
               className="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               title="Duplicate Campaign"
             >
               <Copy className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={() => handleAction('delete', campaign.id)}
               className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
               title="Delete Campaign"
@@ -454,9 +453,9 @@ const RecentCampaigns = () => {
             {t.dashboard?.manageCampaigns || 'Manage and monitor your advertising campaigns'}
           </p>
         </div>
-        
-        <button 
-          onClick={() => router.push('/campaign/new')}
+
+        <button
+          onClick={() => router.push('/campaign/website-url')}
           className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -491,7 +490,7 @@ const RecentCampaigns = () => {
             <option value="ended">Ended</option>
             <option value="draft">Draft</option>
           </select>
-          
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -519,7 +518,7 @@ const RecentCampaigns = () => {
           <p className="text-gray-500 dark:text-gray-400 mb-6">
             {error}
           </p>
-          <button 
+          <button
             onClick={fetchCampaigns}
             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto"
           >
@@ -542,13 +541,13 @@ const RecentCampaigns = () => {
             {t.dashboard?.noCampaignsFound || 'No campaigns found'}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            {searchTerm || statusFilter !== "all" 
+            {searchTerm || statusFilter !== "all"
               ? t.dashboard?.tryAdjustingFilters || "Try adjusting your search or filter criteria"
               : t.dashboard?.getStartedCampaign || "Get started by creating your first campaign"
             }
           </p>
-          <button 
-            onClick={() => router.push('/campaign/new')}
+          <button
+            onClick={() => router.push('/campaign/website-url')}
             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto"
           >
             <Plus className="w-4 h-4" />

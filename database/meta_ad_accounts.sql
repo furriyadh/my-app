@@ -35,7 +35,7 @@ ALTER TABLE meta_ad_accounts ENABLE ROW LEVEL SECURITY;
 -- السماح للـ service role بكل العمليات
 CREATE POLICY "Service role has full access on meta" ON meta_ad_accounts
     FOR ALL USING (true) WITH CHECK (true);
-
+استمر
 -- 5. دالة لتحديث updated_at تلقائياً
 CREATE OR REPLACE FUNCTION update_meta_ad_accounts_updated_at()
 RETURNS TRIGGER AS $$

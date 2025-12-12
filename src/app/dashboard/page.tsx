@@ -356,7 +356,7 @@ const DashboardPage: React.FC = () => {
       // Cmd/Ctrl + N for new campaign
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault();
-        router.push('/campaign/new');
+        router.push('/campaign/website-url');
       }
       // R for refresh (without modifier)
       if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -3084,7 +3084,7 @@ const DashboardPage: React.FC = () => {
 
             {/* New Campaign Button */}
             <button
-              onClick={() => router.push('/campaign/new')}
+              onClick={() => router.push('/campaign/website-url')}
               className="ripple-btn px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-purple-600/50 hover:shadow-purple-600/70"
             >
               <Plus className="w-5 h-5" />
@@ -3095,7 +3095,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Quick Actions Bar */}
         <div className="flex items-center gap-3 mt-4 quick-actions-group">
-          <button className="quick-action" onClick={() => router.push('/campaign/new')}>
+          <button className="quick-action" onClick={() => router.push('/campaign/website-url')}>
             <Zap className="w-4 h-4 text-yellow-400" />
             {isRTL ? 'حملة سريعة' : 'Quick Campaign'}
           </button>
@@ -4796,7 +4796,7 @@ const DashboardPage: React.FC = () => {
                   : 'Create your first advertising campaign to start tracking performance and achieve your marketing goals'
                 }
               </p>
-              <button className="create-campaign-btn" onClick={() => router.push('/campaign/new')}>
+              <button className="create-campaign-btn" onClick={() => router.push('/campaign/website-url')}>
                 <Plus className="w-5 h-5" />
                 {isRTL ? 'إنشاء حملة جديدة' : 'Create Campaign'}
               </button>

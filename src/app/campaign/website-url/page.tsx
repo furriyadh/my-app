@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Globe, Link as LinkIcon, Shield, Sparkles, Zap, Phone, Search, ChevronDown, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Globe, Link as LinkIcon, Shield, Sparkles, Zap, Phone, Search, ChevronDown, AlertCircle, CheckCircle2, XCircle, ShoppingCart, Smartphone, Video, Monitor, Store } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import GlowButton from '@/components/ui/glow-button';
 import { VerifyBadge } from '@/components/ui/verify-badge';
@@ -11,6 +11,37 @@ import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
+
+// Types for URL detection
+interface UrlDetectionResult {
+  type: 'website' | 'store' | 'app' | 'video';
+  platform?: 'android' | 'ios';
+  appId?: string;
+  videoId?: string;
+  channelId?: string;
+  suggestedCampaignType: string;
+  details?: {
+    name?: string;
+    icon?: string;
+  };
+}
+
+interface MerchantAccount {
+  id: string;
+  name: string;
+  linked: boolean;
+  products: number | null;
+  approvalRate: number | null;
+}
+
+interface AppResult {
+  id: string;
+  name: string;
+  icon: string;
+  developer: string;
+  packageName: string;
+  platform: 'android' | 'ios';
+}
 
 const WebsiteUrlPage: React.FC = () => {
   const router = useRouter();
@@ -25,6 +56,18 @@ const WebsiteUrlPage: React.FC = () => {
   const [urlErrorMessage, setUrlErrorMessage] = useState('');
   const [isUrlVerified, setIsUrlVerified] = useState(false);
   const { t, language, isRTL } = useTranslation();
+
+  // New state for smart URL detection
+  const [detectedUrlType, setDetectedUrlType] = useState<UrlDetectionResult | null>(null);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [merchantAccounts, setMerchantAccounts] = useState<MerchantAccount[]>([]);
+  const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
+  const [isFetchingMerchants, setIsFetchingMerchants] = useState(false);
+  const [selectedOS, setSelectedOS] = useState<'android' | 'ios'>('android');
+  const [appSearchQuery, setAppSearchQuery] = useState('');
+  const [appSearchResults, setAppSearchResults] = useState<AppResult[]>([]);
+  const [selectedApp, setSelectedApp] = useState<AppResult | null>(null);
+  const [isSearchingApps, setIsSearchingApps] = useState(false);
 
   // Dynamic colors based on campaign type
   const campaignTypeColors = {
@@ -243,7 +286,7 @@ const WebsiteUrlPage: React.FC = () => {
       const target = event.target as HTMLElement;
       const dropdownContainer = target.closest('.country-dropdown-container');
       const searchInput = target.closest('.country-search-input');
-      
+
       // Only close if clicking outside the dropdown AND not on the search input
       if (!dropdownContainer && !searchInput) {
         setIsCountryDropdownOpen(false);
@@ -256,7 +299,7 @@ const WebsiteUrlPage: React.FC = () => {
       setTimeout(() => {
         document.addEventListener('click', handleClickOutside);
       }, 10);
-      
+
       return () => {
         document.removeEventListener('click', handleClickOutside);
       };
@@ -324,9 +367,9 @@ const WebsiteUrlPage: React.FC = () => {
   // Filter countries based on search query
   const filteredCountries = useMemo(() => {
     if (!countrySearchQuery) return allCountryCodes;
-    
+
     const query = countrySearchQuery.toLowerCase();
-    return allCountryCodes.filter(country => 
+    return allCountryCodes.filter(country =>
       country.country.toLowerCase().includes(query) ||
       country.arabicName.includes(query) ||
       country.code.includes(query)
@@ -336,14 +379,14 @@ const WebsiteUrlPage: React.FC = () => {
   // Extract domain from URL
   const cleanUrl = (url: string) => {
     if (!url) return '';
-    
+
     try {
       // Remove protocol if exists
       let cleanedUrl = url.replace(/^(https?:\/\/)?(www\.)?/i, '');
-      
+
       // Remove trailing slash
       cleanedUrl = cleanedUrl.replace(/\/+$/, '');
-      
+
       return cleanedUrl;
     } catch {
       return url;
@@ -377,7 +420,7 @@ const WebsiteUrlPage: React.FC = () => {
       // Add https:// temporarily to validate the full URL structure
       const fullUrl = `https://${url}`;
       const urlObject = new URL(fullUrl);
-      
+
       // Check if hostname is valid (has at least one dot)
       if (!urlObject.hostname.includes('.')) {
         return { isValid: false, errorMessage: 'Please enter a valid domain (e.g., example.com)', isVerified: false };
@@ -420,12 +463,297 @@ const WebsiteUrlPage: React.FC = () => {
     const value = e.target.value;
     const cleaned = cleanUrl(value);
     setWebsiteUrl(cleaned);
-    
+
     const validation = validateUrl(cleaned);
     setIsValidUrl(validation.isValid);
     setUrlErrorMessage(validation.errorMessage);
     setIsUrlVerified(validation.isVerified);
+
+    // Reset detection when URL changes
+    setDetectedUrlType(null);
+    setSelectedMerchant(null);
+    setSelectedApp(null);
   };
+
+  // Detect URL type when URL is verified
+  useEffect(() => {
+    if (isUrlVerified && websiteUrl) {
+      detectUrlType(websiteUrl);
+    }
+  }, [isUrlVerified, websiteUrl]);
+
+  // URL type detection function - Smart detection using Merchant Center accounts + API
+  const detectUrlType = async (url: string) => {
+    setIsDetecting(true);
+    try {
+      // Smart Step 1: Check if URL matches any existing Merchant Center account website
+      // This is instant and doesn't require HTML parsing
+      const normalizedUrl = url.toLowerCase().replace(/^www\./, '').replace(/\/$/, '');
+
+      // First, try to fetch merchant accounts to see if this URL is already known
+      try {
+        console.log('🔍 Smart detection: Fetching merchant accounts...');
+        const merchantResponse = await fetch('/api/merchant/accounts', {
+          credentials: 'include'
+        });
+        console.log('📥 Merchant response status:', merchantResponse.status);
+
+        if (merchantResponse.ok) {
+          const merchantData = await merchantResponse.json();
+          console.log('📦 Merchant data received:', merchantData);
+
+          if (merchantData.success && merchantData.accounts && merchantData.accounts.length > 0) {
+            // Fetch linked accounts for status
+            let linkedIds: Set<string> = new Set();
+            try {
+              const linkedRes = await fetch('/api/merchant/connected', { credentials: 'include' });
+              if (linkedRes.ok) {
+                const linkedData = await linkedRes.json();
+                if (linkedData.accounts) {
+                  linkedIds = new Set(linkedData.accounts.map((a: { merchant_id: string }) => a.merchant_id));
+                }
+              }
+            } catch { /* ignore */ }
+
+            // Map to our format
+            const mappedAccounts = merchantData.accounts.map((acc: { merchantId: string; name: string; websiteUrl?: string }) => ({
+              id: acc.merchantId,
+              name: acc.name || `Account ${acc.merchantId}`,
+              linked: linkedIds.has(acc.merchantId),
+              products: null,
+              approvalRate: null,
+              websiteUrl: acc.websiteUrl
+            }));
+
+            // Store accounts for display - filter to only show matching domains
+            // Extract domain from entered URL for comparison
+            const extractDomain = (urlStr: string) => {
+              try {
+                // Handle URLs without protocol
+                let fullUrl = urlStr;
+                if (!fullUrl.startsWith('http')) {
+                  fullUrl = 'https://' + fullUrl;
+                }
+                const parsed = new URL(fullUrl);
+                return parsed.hostname.replace(/^www\./, '').toLowerCase();
+              } catch {
+                // Fallback: extract domain manually
+                return urlStr.toLowerCase()
+                  .replace(/^https?:\/\//, '')
+                  .replace(/^www\./, '')
+                  .split('/')[0]
+                  .split('?')[0];
+              }
+            };
+
+            const enteredDomain = extractDomain(url);
+            console.log('🌐 Entered URL domain:', enteredDomain);
+
+            // Find accounts that match the entered URL's domain
+            const matchingAccounts = mappedAccounts.filter((account: { websiteUrl?: string }) => {
+              if (!account.websiteUrl) return false;
+              const accountDomain = extractDomain(account.websiteUrl);
+              console.log(`🔗 Comparing: ${enteredDomain} vs ${accountDomain}`);
+              return enteredDomain === accountDomain ||
+                enteredDomain.endsWith('.' + accountDomain) ||
+                accountDomain.endsWith('.' + enteredDomain);
+            });
+
+            console.log('✅ Matching accounts:', matchingAccounts.length);
+
+            if (matchingAccounts.length > 0) {
+              // Found matching accounts - set them for display
+              setMerchantAccounts(matchingAccounts);
+
+              // Auto-select if only one match
+              const firstMatch = matchingAccounts[0];
+              console.log('🎯 Smart detection: URL matches Merchant Center account:', firstMatch.name);
+              setDetectedUrlType({
+                type: 'store',
+                suggestedCampaignType: 'SHOPPING',
+                details: { name: firstMatch.name }
+              });
+              setCampaignType('SHOPPING');
+              if (matchingAccounts.length === 1) {
+                setSelectedMerchant(firstMatch.id);
+              }
+              setIsDetecting(false);
+              return; // Early return - no need for further detection
+            } else {
+              // No matching accounts - clear merchant accounts
+              console.log('⚠️ No matching Merchant accounts for domain:', enteredDomain);
+              setMerchantAccounts([]);
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Merchant check skipped:', e);
+      }
+
+      // Step 2: Fall back to API-based detection
+      const response = await fetch('/api/url/detect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setDetectedUrlType(result);
+
+        // Auto-select campaign type based on URL detection
+        if (result.suggestedCampaignType) {
+          setCampaignType(result.suggestedCampaignType);
+          localStorage.setItem('campaignData', JSON.stringify({
+            ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
+            campaignType: result.suggestedCampaignType,
+            detectedUrlType: result.type
+          }));
+        }
+
+        // Fetch Merchant accounts if store detected - filtered by URL domain
+        if (result.type === 'store' || result.suggestedCampaignType === 'SHOPPING') {
+          fetchMerchantAccounts(url);
+        }
+
+        // Set app info if app detected
+        if (result.type === 'app' && result.platform) {
+          setSelectedOS(result.platform);
+          if (result.appId) {
+            setAppSearchQuery(result.appId);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('URL detection error:', error);
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
+  // Fetch Merchant accounts - filtered by URL domain
+  const fetchMerchantAccounts = async (urlToMatch?: string) => {
+    setIsFetchingMerchants(true);
+    try {
+      // Use the same API that works in /integrations/google-merchant
+      const response = await fetch('/api/merchant/accounts', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('📦 Merchant accounts response:', result);
+
+        if (result.success && result.accounts) {
+          // Also fetch linked accounts to check status
+          let linkedIds: Set<string> = new Set();
+          try {
+            const linkedRes = await fetch('/api/merchant/connected', { credentials: 'include' });
+            if (linkedRes.ok) {
+              const linkedData = await linkedRes.json();
+              if (linkedData.accounts) {
+                linkedIds = new Set(linkedData.accounts.map((a: { merchant_id: string }) => a.merchant_id));
+              }
+            }
+          } catch (e) {
+            console.log('Could not fetch linked accounts');
+          }
+
+          // Map to our format with linked status
+          const mappedAccounts = result.accounts.map((acc: { merchantId: string; name: string; websiteUrl?: string }) => ({
+            id: acc.merchantId,
+            name: acc.name || `Account ${acc.merchantId}`,
+            linked: linkedIds.has(acc.merchantId),
+            products: null,
+            approvalRate: null,
+            websiteUrl: acc.websiteUrl
+          }));
+
+          // Filter by URL domain if provided
+          if (urlToMatch) {
+            const extractDomain = (urlStr: string) => {
+              try {
+                let fullUrl = urlStr;
+                if (!fullUrl.startsWith('http')) {
+                  fullUrl = 'https://' + fullUrl;
+                }
+                const parsed = new URL(fullUrl);
+                return parsed.hostname.replace(/^www\./, '').toLowerCase();
+              } catch {
+                return urlStr.toLowerCase()
+                  .replace(/^https?:\/\//, '')
+                  .replace(/^www\./, '')
+                  .split('/')[0]
+                  .split('?')[0];
+              }
+            };
+
+            const enteredDomain = extractDomain(urlToMatch);
+            console.log('🌐 Filtering by domain:', enteredDomain);
+
+            const matchingAccounts = mappedAccounts.filter((account: { websiteUrl?: string }) => {
+              if (!account.websiteUrl) return false;
+              const accountDomain = extractDomain(account.websiteUrl);
+              return enteredDomain === accountDomain ||
+                enteredDomain.endsWith('.' + accountDomain) ||
+                accountDomain.endsWith('.' + enteredDomain);
+            });
+
+            console.log('✅ Matching accounts after filter:', matchingAccounts.length);
+            setMerchantAccounts(matchingAccounts);
+          } else {
+            console.log('✅ All merchant accounts (no filter):', mappedAccounts.length);
+            setMerchantAccounts(mappedAccounts);
+          }
+        } else {
+          console.warn('⚠️ No accounts in response or success=false:', result);
+          setMerchantAccounts([]);
+        }
+      } else {
+        console.error('❌ Failed to fetch merchant accounts:', response.status, await response.text());
+        setMerchantAccounts([]);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching Merchant accounts:', error);
+      setMerchantAccounts([]);
+    } finally {
+      setIsFetchingMerchants(false);
+    }
+  };
+
+  // Search for apps
+  const searchApps = async (query: string) => {
+    if (!query || query.length < 2) return;
+
+    setIsSearchingApps(true);
+    try {
+      const response = await fetch('/api/apps/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, platform: selectedOS })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setAppSearchResults(result.apps || []);
+      }
+    } catch (error) {
+      console.error('Error searching apps:', error);
+    } finally {
+      setIsSearchingApps(false);
+    }
+  };
+
+  // Debounced app search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (appSearchQuery) {
+        searchApps(appSearchQuery);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [appSearchQuery, selectedOS]);
 
   const handleNext = async () => {
     if (!websiteUrl) {
@@ -443,25 +771,45 @@ const WebsiteUrlPage: React.FC = () => {
     }
 
     try {
-      // Save basic data first
+      // Save all data including detected type, Merchant, and App selections
       const campaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
       const fullUrl = `https://${websiteUrl}`;
-      
+
       const updatedData = {
         ...campaignData,
         websiteUrl: fullUrl,
-        phoneNumber: phoneNumber ? `${selectedCountryCode}${phoneNumber}` : null
+        phoneNumber: phoneNumber ? `${selectedCountryCode}${phoneNumber}` : null,
+        // Save detected URL type
+        detectedUrlType: detectedUrlType?.type || 'website',
+        suggestedCampaignType: detectedUrlType?.suggestedCampaignType || 'SEARCH',
+        // Save Merchant selection for Shopping campaigns
+        selectedMerchantId: selectedMerchant,
+        selectedMerchantName: merchantAccounts.find(m => m.id === selectedMerchant)?.name || null,
+        // Save App selection for App campaigns
+        selectedApp: selectedApp ? {
+          id: selectedApp.id,
+          name: selectedApp.name,
+          packageName: selectedApp.packageName,
+          platform: selectedApp.platform,
+          icon: selectedApp.icon
+        } : null,
+        selectedOS: selectedOS,
+        // Auto-set campaign type based on detection
+        campaignType: detectedUrlType?.suggestedCampaignType || campaignData.campaignType || 'SEARCH'
       };
-      
+
       localStorage.setItem('campaignData', JSON.stringify(updatedData));
-      
-      // Navigate immediately - no waiting!
-      router.push('/campaign/location-targeting');
-      
+
+      // Dispatch event to update sidebar
+      window.dispatchEvent(new Event('campaignTypeChanged'));
+
+      // Navigate to campaign type selection (new flow: website-url → new)
+      router.push('/campaign/new');
+
       // ℹ️ Website analysis will be done in budget-scheduling page AFTER user selects locations
       // This ensures the API receives the correct target locations chosen by the user
       console.log('📍 Website URL saved. Full analysis will start after location selection in budget-scheduling page.');
-      
+
       // Also detect language separately in background (optional, for UI display)
       fetch(getApiUrl('/api/ai-campaign/detect-website-language'), {
         method: 'POST',
@@ -472,7 +820,7 @@ const WebsiteUrlPage: React.FC = () => {
         .then(result => {
           if (result.success) {
             console.log(`✅ Background language detection: ${result.language_code} (ID: ${result.language_id})`);
-            
+
             const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
             const finalData = {
               ...currentData,
@@ -482,14 +830,14 @@ const WebsiteUrlPage: React.FC = () => {
               selectedLanguage: result.language_id,
               selectedLanguageCode: result.language_code
             };
-            
+
             localStorage.setItem('campaignData', JSON.stringify(finalData));
           }
         })
         .catch(error => {
           console.log('⚠️ Background language detection error:', error);
         });
-      
+
     } catch (error) {
       console.log('⚠️ Error:', error);
       // Still navigate even if there's an error
@@ -498,7 +846,7 @@ const WebsiteUrlPage: React.FC = () => {
   };
 
   const handleBack = () => {
-    router.push('/campaign/new');
+    router.push('/dashboard');
   };
 
   return (
@@ -522,269 +870,536 @@ const WebsiteUrlPage: React.FC = () => {
           }
         }
       `}</style>
-      
-      <div className="min-h-screen bg-black overflow-x-hidden" style={{ 
+
+      <div className="min-h-screen bg-black overflow-x-hidden" style={{
         position: 'relative',
         minHeight: '100dvh' // Use dynamic viewport height for mobile
       }}>
-      {/* Campaign Progress */}
-      <CampaignProgress currentStep={0} totalSteps={3} />
-      
+        {/* Campaign Progress */}
+        <CampaignProgress currentStep={0} totalSteps={3} />
+
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="ltr" style={{
           position: 'relative',
           zIndex: 1
         }}>
-        
-        {/* Header */}
+
+          {/* Header */}
           <div className="text-center mb-3 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
-            {language === 'ar' ? 'ما هو رابط موقعك الإلكتروني؟' : 'What is your website URL?'}
-          </h2>
-        </div>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
+              {language === 'ar' ? 'ما هو رابط موقعك الإلكتروني؟' : 'What is your website URL?'}
+            </h2>
+          </div>
 
-        {/* Main Content */}
-        <div className="max-w-2xl mx-auto url-input-container" style={{
-          position: 'relative',
-          zIndex: 2
-        }}>
-          {/* URL Input Card - Dynamic colors based on campaign type */}
-          <CardContainer containerClassName="w-full mb-8" speed="medium">
-            <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
-              position: 'relative',
-              zIndex: 3
-            }}>
-              <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
-                <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
-              </CardItem>
-            <div className="space-y-6">
-              {/* Input Field */}
-              <div>
-                <CardItem translateZ={50}>
-                  <label className="block text-sm font-semibold text-white mb-3 drop-shadow-md text-left">
-                  {language === 'ar' ? 'رابط موقعك الإلكتروني' : 'Your Website URL'}
-                </label>
+          {/* Main Content */}
+          <div className="max-w-2xl mx-auto url-input-container" style={{
+            position: 'relative',
+            zIndex: 2
+          }}>
+            {/* URL Input Card - 3D rotation like integrations page */}
+            <CardContainer containerClassName="w-full mb-8" speed="medium">
+              <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
+                position: 'relative',
+                zIndex: 3
+              }}>
+                <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
+                  <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
                 </CardItem>
-                <CardItem translateZ={60} as="div" className="!w-full">
-                <div className="flex gap-3">
-                    {/* HTTPS Prefix - Matches input border state */}
-                    <div className={`w-28 px-4 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white flex items-center justify-center transition-all duration-200 ${
-                      !isValidUrl && websiteUrl 
-                        ? 'border-red-300/50 ring-4 ring-red-300/30' 
-                        : isUrlVerified
-                          ? 'border-white/50 bg-white/25'
-                          : isFocused
-                            ? 'border-white/70 ring-4 ring-white/30 bg-white/25'
-                            : 'border-white/30'
-                    }`}>
-                      <span className="text-base font-medium">https://</span>
-                  </div>
-                  
-                    {/* URL Input with Icon */}
-                    <div className="flex-1 relative">
-                    {/* Link Icon */}
-                    <LinkIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${
-                      !isValidUrl && websiteUrl 
-                        ? 'text-red-300/70' 
-                        : isUrlVerified
-                          ? 'text-white/80'
-                          : 'text-white/50'
-                    }`} />
-                    
-                    <input
-                      type="url"
-                      value={websiteUrl}
-                      onChange={handleUrlChange}
-                      onFocus={() => setIsFocused(true)}
-                      onBlur={() => setIsFocused(false)}
-                      placeholder={language === 'ar' ? 'example.com' : 'www.example.com'}
-                      dir="ltr"
-                      className={`w-full px-4 pl-12 pr-12 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
-                        focus:outline-none focus:ring-4 focus:bg-white/25 
-                        transition-all duration-200 overflow-x-auto whitespace-nowrap
-                        ${
-                          !isValidUrl && websiteUrl 
-                            ? 'border-red-300/50 focus:border-red-300/70 focus:ring-red-300/30' 
-                            : isUrlVerified
-                              ? 'border-white/50 focus:border-white/70 focus:ring-white/30'
-                              : 'border-white/30 focus:border-white/70 focus:ring-white/30'
-                        }`}
-                      autoFocus
-                      style={{ 
-                        textOverflow: 'clip',
-                        fontSize: '16px', // Prevent zoom on iOS
-                        transform: 'translateZ(0)', // Force hardware acceleration
-                        WebkitAppearance: 'none' // Remove iOS styling
-                      }}
-                    />
-                    
-                    {/* Status Icon */}
-                    {websiteUrl && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        {!isValidUrl ? (
-                          <XCircle className="w-5 h-5 text-red-300" />
-                        ) : isUrlVerified ? (
-                          <CheckCircle2 className="w-5 h-5 text-white/80" />
-                        ) : null}
-                      </div>
-                    )}
-                    </div>
-                  </div>
-                </CardItem>
-                
-                {/* Error Message */}
-                {!isValidUrl && websiteUrl && urlErrorMessage && (
-                  <CardItem translateZ={40} as="div" className="!w-full">
-                  <div className="mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm">
-                    <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-red-200">{language === 'ar' ? 'رابط غير صحيح' : 'Invalid URL'}</p>
-                      <p className="text-sm text-red-300">{urlErrorMessage}</p>
-                    </div>
-                  </div>
-                  </CardItem>
-                )}
-                
-                {/* Success Message - White style matching card */}
-                {isUrlVerified && (
-                  <CardItem translateZ={40} as="div" className="!w-full">
-                    <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm">
-                      <CheckCircle2 className="w-5 h-5 text-white/80 flex-shrink-0 mt-0.5" />
-                      <div className="text-left">
-                        <p className="text-sm font-semibold text-white">{language === 'ar' ? 'رابط صحيح' : 'Valid URL'}</p>
-                        <p className="text-sm text-white/80">{language === 'ar' ? 'تنسيق الرابط صحيح' : 'URL format is correct'}</p>
-                      </div>
-                  </div>
-                  </CardItem>
-                )}
-              </div>
-
-            </div>
-            </CardBody>
-          </CardContainer>
-
-          {/* Phone Number Card - Only show for Call Ads */}
-          {campaignType === 'Call Ads' && (
-            <div className="relative rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg p-8 mb-6">
-            {/* Icon decoration */}
-            <div className="absolute top-2 right-4">
-              <div className="text-4xl opacity-70 text-white">📞</div>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <div className="text-sm text-white/90 mb-4">
-                  Your phone number is required for Call Ads campaigns
-                </div>
-                
-                <div className="flex gap-3">
-                  {/* Country Code Dropdown with Search */}
-                  <div className="relative country-dropdown-container">
-                    <div
-                      onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                      className="w-24 px-4 py-5 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-xl text-white cursor-pointer flex items-center justify-center hover:border-white/50 transition-all"
-                    >
-                      <div className="flex items-center gap-2">
-                        {allCountryCodes.find(c => c.code === selectedCountryCode)?.iso ? (
-                          <ReactCountryFlag 
-                            countryCode={allCountryCodes.find(c => c.code === selectedCountryCode)?.iso || 'US'} 
-                            svg 
-                            style={{
-                              width: '1.2em',
-                              height: '1.2em',
-                            }}
-                            title={allCountryCodes.find(c => c.code === selectedCountryCode)?.country}
-                          />
-                        ) : (
-                          <span className="text-lg">🌐</span>
-                        )}
-                        <span className="font-medium mr-3">{selectedCountryCode}</span>
-                      </div>
-                      <ChevronDown className={`w-5 h-5 text-white/60 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
-                    </div>
-
-                    {/* Dropdown Menu */}
-                    {isCountryDropdownOpen && (
-                      <div className="country-dropdown-container absolute z-[9999] top-full mt-2 w-72 bg-white/10 dark:bg-gray-800/10 backdrop-blur-lg rounded-xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden">
-                        {/* Search Input */}
-                        <div className="p-3 border-b border-white/20 dark:border-gray-700/20">
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
-                              type="text"
-                              value={countrySearchQuery}
-                              onChange={(e) => setCountrySearchQuery(e.target.value)}
-                              placeholder="Search country by name or code..."
-                              className="country-search-input w-full pl-10 pr-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-lg text-sm text-white dark:text-white placeholder-white/60 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/50"
-                              autoFocus
-                            />
-                          </div>
+                <div className="space-y-6">
+                  {/* Input Field */}
+                  <div>
+                    <CardItem translateZ={50}>
+                      <label className="block text-sm font-semibold text-white mb-3 drop-shadow-md text-left">
+                        {language === 'ar' ? 'رابط موقعك الإلكتروني' : 'Your Website URL'}
+                      </label>
+                    </CardItem>
+                    <CardItem translateZ={60} as="div" className="!w-full">
+                      <div className="flex gap-3">
+                        {/* HTTPS Prefix - Matches input border state */}
+                        <div className={`w-28 px-4 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white flex items-center justify-center transition-all duration-200 ${!isValidUrl && websiteUrl
+                          ? 'border-red-300/50 ring-4 ring-red-300/30'
+                          : isUrlVerified
+                            ? 'border-white/50 bg-white/25'
+                            : isFocused
+                              ? 'border-white/70 ring-4 ring-white/30 bg-white/25'
+                              : 'border-white/30'
+                          }`}>
+                          <span className="text-base font-medium">https://</span>
                         </div>
 
-                        {/* Countries List */}
-                        <div className="max-h-64 overflow-y-auto">
-                          {filteredCountries.length > 0 ? (
-                            filteredCountries.map((country) => (
-                              <div
-                                key={country.iso}
-                                onClick={() => {
-                                  setSelectedCountryCode(country.code);
-                                  setIsCountryDropdownOpen(false);
-                                  setCountrySearchQuery('');
-                                }}
-                                className="px-3 py-2 hover:bg-white/20 dark:hover:bg-gray-700/30 cursor-pointer flex items-center justify-between group transition-colors"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <ReactCountryFlag 
-                                    countryCode={country.iso} 
-                                    svg 
-                                    style={{
-                                      width: '1.2em',
-                                      height: '1.2em',
-                                    }}
-                                    title={country.country}
-                                  />
-                                  <div>
-                                    <div className="text-sm font-medium text-white dark:text-white">
-                                      {country.country}
-                                    </div>
-                                    <div className="text-xs text-white/70 dark:text-gray-300">
-                                      {country.arabicName}
-                                    </div>
-                                  </div>
-                                </div>
-                                <span className="text-xs font-medium text-white/80 dark:text-gray-300 group-hover:text-white dark:group-hover:text-white">
-                                  {country.code}
-                                </span>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="px-4 py-6 text-center text-sm text-white/70 dark:text-gray-300">
-                              No countries found
+                        {/* URL Input with Icon */}
+                        <div className="flex-1 relative">
+                          {/* Link Icon */}
+                          <LinkIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${!isValidUrl && websiteUrl
+                            ? 'text-red-300/70'
+                            : isUrlVerified
+                              ? 'text-white/80'
+                              : 'text-white/50'
+                            }`} />
+
+                          <input
+                            type="url"
+                            value={websiteUrl}
+                            onChange={handleUrlChange}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
+                            placeholder={language === 'ar' ? 'example.com' : 'www.example.com'}
+                            dir="ltr"
+                            className={`w-full px-4 pl-12 pr-12 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
+                        focus:outline-none focus:ring-4 focus:bg-white/25 
+                        transition-all duration-200 overflow-x-auto whitespace-nowrap
+                        ${!isValidUrl && websiteUrl
+                                ? 'border-red-300/50 focus:border-red-300/70 focus:ring-red-300/30'
+                                : isUrlVerified
+                                  ? 'border-white/50 focus:border-white/70 focus:ring-white/30'
+                                  : 'border-white/30 focus:border-white/70 focus:ring-white/30'
+                              }`}
+                            autoFocus
+                            style={{
+                              textOverflow: 'clip',
+                              fontSize: '16px', // Prevent zoom on iOS
+                              transform: 'translateZ(0)', // Force hardware acceleration
+                              WebkitAppearance: 'none' // Remove iOS styling
+                            }}
+                          />
+
+                          {/* Status Icon */}
+                          {websiteUrl && (
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              {!isValidUrl ? (
+                                <XCircle className="w-5 h-5 text-red-300" />
+                              ) : isUrlVerified ? (
+                                <CheckCircle2 className="w-5 h-5 text-white/80" />
+                              ) : null}
                             </div>
                           )}
                         </div>
                       </div>
+                    </CardItem>
+
+                    {/* Error Message */}
+                    {!isValidUrl && websiteUrl && urlErrorMessage && (
+                      <CardItem translateZ={40} as="div" className="!w-full">
+                        <div className="mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm">
+                          <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
+                          <div className="text-left">
+                            <p className="text-sm font-semibold text-red-200">{language === 'ar' ? 'رابط غير صحيح' : 'Invalid URL'}</p>
+                            <p className="text-sm text-red-300">{urlErrorMessage}</p>
+                          </div>
+                        </div>
+                      </CardItem>
+                    )}
+
+                    {/* Success Message - White style matching card */}
+                    {isUrlVerified && (
+                      <CardItem translateZ={40} as="div" className="!w-full">
+                        <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm">
+                          <CheckCircle2 className="w-5 h-5 text-white/80 flex-shrink-0 mt-0.5" />
+                          <div className="text-left flex-1">
+                            <p className="text-sm font-semibold text-white">{language === 'ar' ? 'رابط صحيح' : 'Valid URL'}</p>
+                            <p className="text-sm text-white/80">{language === 'ar' ? 'تنسيق الرابط صحيح' : 'URL format is correct'}</p>
+                          </div>
+                          {/* Detected URL Type Badge */}
+                          {isDetecting && (
+                            <div className="flex items-center gap-2 text-white/70">
+                              <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin" />
+                              <span className="text-xs">{language === 'ar' ? 'جاري الكشف...' : 'Detecting...'}</span>
+                            </div>
+                          )}
+                          {detectedUrlType && !isDetecting && (
+                            <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${detectedUrlType.type === 'app' ? 'bg-orange-500/30 text-orange-200' :
+                              detectedUrlType.type === 'video' ? 'bg-purple-500/30 text-purple-200' :
+                                detectedUrlType.type === 'store' ? 'bg-cyan-500/30 text-cyan-200' :
+                                  'bg-blue-500/30 text-blue-200'
+                              }`}>
+                              {detectedUrlType.type === 'app' && <Smartphone className="w-3 h-3" />}
+                              {detectedUrlType.type === 'video' && <Video className="w-3 h-3" />}
+                              {detectedUrlType.type === 'store' && <Store className="w-3 h-3" />}
+                              {detectedUrlType.type === 'website' && <Monitor className="w-3 h-3" />}
+                              {detectedUrlType.type === 'app' ? (language === 'ar' ? 'تطبيق' : 'App') :
+                                detectedUrlType.type === 'video' ? (language === 'ar' ? 'فيديو' : 'Video') :
+                                  detectedUrlType.type === 'store' ? (language === 'ar' ? 'متجر' : 'Store') :
+                                    (language === 'ar' ? 'موقع' : 'Website')}
+                            </div>
+                          )}
+                        </div>
+                      </CardItem>
+                    )}
+
+                    {/* Merchant Center Selection for Shopping Campaigns - Google Ads Style */}
+                    {detectedUrlType && (detectedUrlType.type === 'store' || detectedUrlType.suggestedCampaignType === 'SHOPPING') && (
+                      <CardItem translateZ={35} as="div" className="!w-full">
+                        <div className="mt-4 p-5 bg-white/10 border border-cyan-400/30 rounded-xl backdrop-blur-sm">
+                          {/* Info Message */}
+                          <div className="flex items-start gap-3 mb-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                            <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                              <ShoppingCart className="w-4 h-4 text-blue-300" />
+                            </div>
+                            <p className="text-sm text-white/90">
+                              {language === 'ar'
+                                ? 'للإعلان عن منتجات على موقعك الإلكتروني، اختَر حسابًا على Merchant Center.'
+                                : 'To advertise products on your website, choose a Merchant Center account.'}
+                            </p>
+                          </div>
+
+                          {/* Search Box */}
+                          <div className="relative mb-4">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                            <input
+                              type="text"
+                              placeholder={language === 'ar' ? 'اختيار حساب' : 'Search accounts'}
+                              className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50"
+                            />
+                          </div>
+
+                          {/* Table Header */}
+                          <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-white/5 rounded-t-lg border-b border-white/10 text-xs font-semibold text-white/70">
+                            <div className="col-span-5">{language === 'ar' ? 'Merchant Center' : 'Merchant Center'}</div>
+                            <div className="col-span-2 text-center">{language === 'ar' ? 'المنتجات' : 'Products'}</div>
+                            <div className="col-span-2 text-center">{language === 'ar' ? 'نسبة الموافقة' : 'Approval'}</div>
+                            <div className="col-span-3 text-center">{language === 'ar' ? 'الحالة' : 'Status'}</div>
+                          </div>
+
+                          {/* Table Body */}
+                          {isFetchingMerchants ? (
+                            <div className="flex items-center justify-center py-8">
+                              <div className="w-6 h-6 border-2 border-cyan-400/50 border-t-transparent rounded-full animate-spin" />
+                            </div>
+                          ) : merchantAccounts.length > 0 ? (
+                            <div className="max-h-60 overflow-y-auto">
+                              {merchantAccounts.map((account, index) => (
+                                <div
+                                  key={account.id}
+                                  onClick={() => {
+                                    if (account.linked) {
+                                      setSelectedMerchant(account.id);
+                                      // Save to localStorage for campaign flow
+                                      const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+                                      localStorage.setItem('campaignData', JSON.stringify({
+                                        ...currentData,
+                                        selectedMerchantId: account.id,
+                                        selectedMerchantName: account.name,
+                                        merchantLinked: true
+                                      }));
+                                    }
+                                  }}
+                                  className={`grid grid-cols-12 gap-2 px-3 py-3 transition-all items-center ${index % 2 === 0 ? 'bg-white/5' : 'bg-transparent'
+                                    } ${selectedMerchant === account.id
+                                      ? 'bg-cyan-500/20 ring-1 ring-cyan-400/50'
+                                      : account.linked ? 'hover:bg-white/10 cursor-pointer' : 'opacity-70'
+                                    }`}
+                                >
+                                  {/* Merchant Info */}
+                                  <div className="col-span-5 flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                      <ShoppingCart className="w-4 h-4 text-cyan-300" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-medium text-white truncate">{account.name}</p>
+                                      <p className="text-xs text-white/50">{account.id}</p>
+                                    </div>
+                                  </div>
+                                  {/* Products Count */}
+                                  <div className="col-span-2 text-center text-sm text-white/70">
+                                    {account.products !== null ? account.products.toLocaleString() : '-'}
+                                  </div>
+                                  {/* Approval Rate */}
+                                  <div className="col-span-2 text-center text-sm text-white/70">
+                                    {account.approvalRate !== null ? `${account.approvalRate}%` : '-'}
+                                  </div>
+                                  {/* Status & Link Button */}
+                                  <div className="col-span-3 text-center">
+                                    {account.linked ? (
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        Linked
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          // Save current campaign data before redirecting
+                                          const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+                                          localStorage.setItem('campaignData', JSON.stringify({
+                                            ...currentData,
+                                            pendingMerchantId: account.id,
+                                            pendingMerchantName: account.name,
+                                            returnUrl: '/campaign/website-url'
+                                          }));
+                                          // Redirect to merchant linking page
+                                          window.location.href = '/integrations/google-merchant';
+                                        }}
+                                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/30 hover:bg-blue-500/50 text-blue-300 text-xs font-medium rounded-full transition-colors"
+                                      >
+                                        <LinkIcon className="w-3 h-3" />
+                                        Link
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8 text-white/60 text-sm">
+                              <p>{language === 'ar' ? 'لا توجد حسابات Merchant Center متاحة' : 'No Merchant Center accounts available'}</p>
+                              <button
+                                onClick={() => window.location.href = '/integrations/google-merchant'}
+                                className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 text-sm font-medium rounded-lg transition-colors"
+                              >
+                                <LinkIcon className="w-4 h-4" />
+                                {language === 'ar' ? 'ربط حساب جديد' : 'Link New Account'}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Selected Confirmation */}
+                          {selectedMerchant && (
+                            <div className="mt-3 p-3 bg-green-500/20 border border-green-400/30 rounded-lg flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-green-400" />
+                              <span className="text-sm text-green-200">
+                                {language === 'ar' ? 'تم اختيار الحساب' : 'Account selected'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </CardItem>
+                    )}
+
+                    {/* App Campaign Selection */}
+                    {detectedUrlType && detectedUrlType.type === 'app' && (
+                      <CardItem translateZ={35} as="div" className="!w-full">
+                        <div className="mt-4 p-4 bg-white/10 border border-orange-400/30 rounded-xl backdrop-blur-sm">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Smartphone className="w-5 h-5 text-orange-300" />
+                            <p className="text-sm font-semibold text-white">
+                              {language === 'ar' ? 'إعدادات حملة التطبيق' : 'App Campaign Settings'}
+                            </p>
+                          </div>
+
+                          {/* OS Selection */}
+                          <div className="flex gap-3 mb-4">
+                            <button
+                              onClick={() => setSelectedOS('android')}
+                              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${selectedOS === 'android'
+                                ? 'bg-green-500/30 border border-green-400/50 text-green-200'
+                                : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                                }`}
+                            >
+                              <span className="text-sm font-medium">Android</span>
+                            </button>
+                            <button
+                              onClick={() => setSelectedOS('ios')}
+                              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${selectedOS === 'ios'
+                                ? 'bg-blue-500/30 border border-blue-400/50 text-blue-200'
+                                : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                                }`}
+                            >
+                              <span className="text-sm font-medium">iOS</span>
+                            </button>
+                          </div>
+
+                          {/* App Search */}
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                            <input
+                              type="text"
+                              value={appSearchQuery}
+                              onChange={(e) => setAppSearchQuery(e.target.value)}
+                              placeholder={language === 'ar'
+                                ? 'ادخل اسم التطبيق أو اسم الحزمة أو URL'
+                                : 'Enter app name, package name, or store URL'}
+                              className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                            />
+                            {isSearchingApps && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-orange-400/50 border-t-transparent rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* App Search Results */}
+                          {appSearchResults.length > 0 && (
+                            <div className="mt-4">
+                              {/* Results Header - Google Ads Style */}
+                              <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+                                <p className="text-sm text-white/80">
+                                  {language === 'ar'
+                                    ? `نتائج البحث عن تطبيقات ${selectedOS === 'ios' ? 'iOS' : 'Android'} في ${selectedOS === 'ios' ? 'Apple Store' : 'Google Play'} (${appSearchResults.length})`
+                                    : `${selectedOS === 'ios' ? 'iOS' : 'Android'} apps from ${selectedOS === 'ios' ? 'Apple Store' : 'Google Play'} (${appSearchResults.length})`
+                                  }
+                                </p>
+                              </div>
+
+                              {/* Results List */}
+                              <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {appSearchResults.map((app) => (
+                                  <div
+                                    key={app.id}
+                                    onClick={() => setSelectedApp(app)}
+                                    className={`p-3 rounded-lg cursor-pointer transition-all flex items-center gap-4 ${selectedApp?.id === app.id
+                                      ? 'bg-orange-500/30 border-2 border-orange-400/70'
+                                      : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                      }`}
+                                  >
+                                    {/* App Icon */}
+                                    <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+                                      {app.icon ? (
+                                        <img src={app.icon} alt={app.name} className="w-full h-full object-cover rounded-xl" />
+                                      ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+                                          <Smartphone className="w-6 h-6 text-white/60" />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* App Info */}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-base font-semibold text-white truncate">{app.name}</p>
+                                      <p className="text-sm text-white/60 truncate">{app.developer} - {app.id}</p>
+                                    </div>
+
+                                    {/* Selection Indicator */}
+                                    {selectedApp?.id === app.id && (
+                                      <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <CheckCircle2 className="w-4 h-4 text-white" />
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardItem>
                     )}
                   </div>
 
-                  {/* Phone Number Input */}
-                  <div className="flex-1">
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                      placeholder="Enter your phone number"
-                      className="w-full px-4 py-5 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/50 text-sm transition-all duration-200"
-                    />
+                </div>
+              </CardBody>
+            </CardContainer>
+
+            {/* Phone Number Card - Only show for Call Ads */}
+            {campaignType === 'Call Ads' && (
+              <div className="relative rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg p-8 mb-6">
+                {/* Icon decoration */}
+                <div className="absolute top-2 right-4">
+                  <div className="text-4xl opacity-70 text-white">📞</div>
+                </div>
+                <div className="space-y-6">
+                  <div>
+                    <div className="text-sm text-white/90 mb-4">
+                      Your phone number is required for Call Ads campaigns
+                    </div>
+
+                    <div className="flex gap-3">
+                      {/* Country Code Dropdown with Search */}
+                      <div className="relative country-dropdown-container">
+                        <div
+                          onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                          className="w-24 px-4 py-5 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-xl text-white cursor-pointer flex items-center justify-center hover:border-white/50 transition-all"
+                        >
+                          <div className="flex items-center gap-2">
+                            {allCountryCodes.find(c => c.code === selectedCountryCode)?.iso ? (
+                              <ReactCountryFlag
+                                countryCode={allCountryCodes.find(c => c.code === selectedCountryCode)?.iso || 'US'}
+                                svg
+                                style={{
+                                  width: '1.2em',
+                                  height: '1.2em',
+                                }}
+                                title={allCountryCodes.find(c => c.code === selectedCountryCode)?.country}
+                              />
+                            ) : (
+                              <span className="text-lg">🌐</span>
+                            )}
+                            <span className="font-medium mr-3">{selectedCountryCode}</span>
+                          </div>
+                          <ChevronDown className={`w-5 h-5 text-white/60 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+                        </div>
+
+                        {/* Dropdown Menu */}
+                        {isCountryDropdownOpen && (
+                          <div className="country-dropdown-container absolute z-[9999] top-full mt-2 w-72 bg-white/10 dark:bg-gray-800/10 backdrop-blur-lg rounded-xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden">
+                            {/* Search Input */}
+                            <div className="p-3 border-b border-white/20 dark:border-gray-700/20">
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  value={countrySearchQuery}
+                                  onChange={(e) => setCountrySearchQuery(e.target.value)}
+                                  placeholder="Search country by name or code..."
+                                  className="country-search-input w-full pl-10 pr-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-lg text-sm text-white dark:text-white placeholder-white/60 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/50"
+                                  autoFocus
+                                />
+                              </div>
+                            </div>
+
+                            {/* Countries List */}
+                            <div className="max-h-64 overflow-y-auto">
+                              {filteredCountries.length > 0 ? (
+                                filteredCountries.map((country) => (
+                                  <div
+                                    key={country.iso}
+                                    onClick={() => {
+                                      setSelectedCountryCode(country.code);
+                                      setIsCountryDropdownOpen(false);
+                                      setCountrySearchQuery('');
+                                    }}
+                                    className="px-3 py-2 hover:bg-white/20 dark:hover:bg-gray-700/30 cursor-pointer flex items-center justify-between group transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <ReactCountryFlag
+                                        countryCode={country.iso}
+                                        svg
+                                        style={{
+                                          width: '1.2em',
+                                          height: '1.2em',
+                                        }}
+                                        title={country.country}
+                                      />
+                                      <div>
+                                        <div className="text-sm font-medium text-white dark:text-white">
+                                          {country.country}
+                                        </div>
+                                        <div className="text-xs text-white/70 dark:text-gray-300">
+                                          {country.arabicName}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <span className="text-xs font-medium text-white/80 dark:text-gray-300 group-hover:text-white dark:group-hover:text-white">
+                                      {country.code}
+                                    </span>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="px-4 py-6 text-center text-sm text-white/70 dark:text-gray-300">
+                                  No countries found
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Phone Number Input */}
+                      <div className="flex-1">
+                        <input
+                          type="tel"
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                          placeholder="Enter your phone number"
+                          className="w-full px-4 py-5 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/50 text-sm transition-all duration-200"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-          )}
-        </div>
 
-        {/* Navigation Buttons - Outside card */}
-        <div className="flex justify-between items-center max-w-2xl mx-auto mt-8">
+          {/* Navigation Buttons - Outside card */}
+          <div className="flex justify-between items-center max-w-2xl mx-auto mt-8">
             <GlowButton
               onClick={handleBack}
               variant="green"
@@ -794,20 +1409,20 @@ const WebsiteUrlPage: React.FC = () => {
                 {language === 'ar' ? 'السابق' : 'Previous'}
               </span>
             </GlowButton>
-            
+
             <GlowButton
               onClick={handleNext}
               disabled={!websiteUrl || !isValidUrl || !isUrlVerified}
               variant="blue"
             >
               <span className="flex items-center gap-2">
-                    {language === 'ar' ? 'متابعة' : 'Continue'}
-                    <ArrowRight className="w-5 h-5" />
+                {language === 'ar' ? 'متابعة' : 'Continue'}
+                <ArrowRight className="w-5 h-5" />
               </span>
             </GlowButton>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

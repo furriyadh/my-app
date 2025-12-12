@@ -1,9 +1,9 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { 
-  Home, 
-  Target, 
-  Users, 
+import {
+  Home,
+  Target,
+  Users,
   Settings,
   Plus,
   Link,
@@ -27,7 +27,7 @@ const navigationItems = [
     id: "new-campaign",
     label: "حملة جديدة",
     icon: Plus,
-    href: "/campaign/new",
+    href: "/campaign/website-url",
     highlight: true,
     description: "إنشاء حملة إعلانية جديدة"
   },
@@ -120,9 +120,9 @@ export function Sidebar({ className, ...props }) {
             </Badge>
           </div>
         </div>
-        
+
         <Separator />
-        
+
         {/* Main Navigation */}
         <div className="px-3">
           <div className="space-y-1">
@@ -132,9 +132,9 @@ export function Sidebar({ className, ...props }) {
             {navigationItems.map(renderNavItem)}
           </div>
         </div>
-        
+
         <Separator />
-        
+
         {/* Account Management */}
         <div className="px-3">
           <div className="space-y-1">

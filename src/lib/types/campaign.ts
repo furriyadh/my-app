@@ -52,21 +52,21 @@ export interface CampaignData {
   name: string;
   type: AdType;
   websiteUrl: string;
-  
+
   // الخطوة 2: الاستهداف الجغرافي
   targetLocation: LocationData;
-  
+
   // الخطوة 3: الميزانية والجدولة
   budget: BudgetData;
   schedule: ScheduleData;
-  
+
   // الخطوة 4: تصميم الإعلان
   adCreative: AdCreativeData;
-  
+
   // الخطوة 5: الحساب
   accountChoice: 'existing' | 'new';
   selectedAccountId?: string;
-  
+
   // معلومات إضافية
   status: 'draft' | 'pending' | 'active' | 'paused';
   createdAt: Date;
@@ -122,7 +122,7 @@ export const CAMPAIGN_STEPS: CampaignStep[] = [
     description: 'اسم الحملة ونوع الإعلان',
     isCompleted: false,
     isActive: true,
-    route: '/campaign/new'
+    route: '/campaign/website-url'
   },
   {
     id: 2,

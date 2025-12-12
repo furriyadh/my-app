@@ -78,7 +78,7 @@ export default function MCCDashboard() {
       const userInfoCookie = document.cookie
         .split('; ')
         .find(row => row.startsWith('oauth2_user_info='));
-      
+
       if (userInfoCookie) {
         const userInfo = JSON.parse(decodeURIComponent(userInfoCookie.split('=')[1]));
         setUserInfo(userInfo);
@@ -94,7 +94,7 @@ export default function MCCDashboard() {
   const loadMCCData = async () => {
     try {
       setLoading(true);
-      
+
       // استخدام النظام الموجود في الباك اند
       const response = await fetch('/api/mcc/accounts', {
         headers: {
@@ -122,8 +122,8 @@ export default function MCCDashboard() {
   };
 
   const handleAccountSelection = (customerId: string) => {
-    setSelectedAccounts(prev => 
-      prev.includes(customerId) 
+    setSelectedAccounts(prev =>
+      prev.includes(customerId)
         ? prev.filter(id => id !== customerId)
         : [...prev, customerId]
     );
@@ -219,7 +219,7 @@ export default function MCCDashboard() {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">خطأ</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => router.push('/campaign/new')}
+            onClick={() => router.push('/campaign/website-url')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
           >
             العودة لصفحة ربط الحساب
@@ -252,7 +252,7 @@ export default function MCCDashboard() {
                 🔄 مزامنة الحسابات
               </button>
               <button
-                onClick={() => router.push('/campaign/new')}
+                onClick={() => router.push('/campaign/website-url')}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 ➕ ربط حساب جديد
@@ -296,11 +296,10 @@ export default function MCCDashboard() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 font-medium rounded-t-lg transition-colors ${
-                  activeTab === tab
+                className={`px-4 py-2 font-medium rounded-t-lg transition-colors ${activeTab === tab
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-600 hover:text-gray-800'
-                }`}
+                  }`}
               >
                 {tab === 'overview' && 'نظرة عامة'}
                 {tab === 'accounts' && 'الحسابات'}
@@ -316,7 +315,7 @@ export default function MCCDashboard() {
           {activeTab === 'overview' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-6">نظرة عامة على MCC</h2>
-              
+
               {/* Performance Overview */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
@@ -326,7 +325,7 @@ export default function MCCDashboard() {
                   </div>
                   <p className="text-blue-100">معدل التحسين</p>
                 </div>
-                
+
                 <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg">
                   <h3 className="text-lg font-semibold mb-2">الإنطباعات</h3>
                   <div className="text-3xl font-bold mb-2">
@@ -334,7 +333,7 @@ export default function MCCDashboard() {
                   </div>
                   <p className="text-green-100">إجمالي الإنطباعات</p>
                 </div>
-                
+
                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg">
                   <h3 className="text-lg font-semibold mb-2">النقرات</h3>
                   <div className="text-3xl font-bold mb-2">
@@ -355,9 +354,8 @@ export default function MCCDashboard() {
                         <p className="text-sm text-gray-600">آخر تحديث: {new Date(account.last_updated).toLocaleDateString('ar-SA')}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          account.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs ${account.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
                           {account.status === 'ACTIVE' ? 'نشط' : 'غير نشط'}
                         </span>
                         <span className="text-sm text-gray-500">{account.currency_code}</span>
@@ -426,11 +424,10 @@ export default function MCCDashboard() {
                 {accounts.map((account) => (
                   <div
                     key={account.customer_id}
-                    className={`border rounded-lg p-4 transition-all ${
-                      selectedAccounts.includes(account.customer_id)
+                    className={`border rounded-lg p-4 transition-all ${selectedAccounts.includes(account.customer_id)
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -452,11 +449,10 @@ export default function MCCDashboard() {
                             <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                               {account.time_zone}
                             </span>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              account.status === 'ACTIVE' 
-                                ? 'bg-green-100 text-green-800' 
+                            <span className={`text-xs px-2 py-1 rounded ${account.status === 'ACTIVE'
+                                ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
-                            }`}>
+                              }`}>
                               {account.status === 'ACTIVE' ? 'نشط' : 'غير نشط'}
                             </span>
                             {account.test_account && (

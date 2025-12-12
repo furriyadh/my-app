@@ -6,12 +6,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useTranslation } from "@/lib/hooks/useTranslation";
-import { 
-  BarChart3, 
-  Plus, 
-  Link as LinkIcon, 
-  CloudUpload, 
-  Users, 
+import {
+  BarChart3,
+  Plus,
+  Link as LinkIcon,
+  CloudUpload,
+  Users,
   Settings,
   Building2,
   CreditCard,
@@ -30,10 +30,10 @@ import {
   Search,
   Clock
 } from "lucide-react";
- 
+
 const SidebarMenu: React.FC = React.memo(() => {
   const pathname = usePathname();
-  
+
   // CRITICAL: Clean up sidebar-open classes immediately on component mount
   // This must happen before any state initialization to prevent black screen
   React.useEffect(() => {
@@ -48,29 +48,29 @@ const SidebarMenu: React.FC = React.memo(() => {
       document.body.style.height = '';
     }
   }, []); // Run only once on mount
-  
+
   // State for submenu dropdowns
   const [billingOpen, setBillingOpen] = React.useState(false);
   const [accountsOpen, setAccountsOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [campaignsOpen, setCampaignsOpen] = React.useState(false);
-  
+
   // Check if any submenu is open
   const hasOpenSubmenu = billingOpen || accountsOpen || settingsOpen || campaignsOpen;
-  
+
   // Use translation hook
   const { t, language, isRTL } = useTranslation();
-  
+
   // State for sidebar open/close - Start with false for SSR consistency
   // This prevents hydration mismatch
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isHydrated, setIsHydrated] = React.useState(false);
-  
+
   // Initialize sidebar state after hydration (client-side only)
   React.useEffect(() => {
     // Mark as hydrated
     setIsHydrated(true);
-    
+
     // CRITICAL: Always clean up classes first to prevent black screen on refresh
     const cleanup = () => {
       document.body.classList.remove('sidebar-open');
@@ -88,12 +88,12 @@ const SidebarMenu: React.FC = React.memo(() => {
       document.documentElement.style.overflow = '';
       document.documentElement.style.height = '';
     };
-    
+
     // Run cleanup immediately
     cleanup();
-    
+
     const isMobile = window.innerWidth < 1280; // xl breakpoint
-    
+
     // On mobile, always start closed to prevent black screen
     if (isMobile) {
       // Remove from localStorage on mobile
@@ -104,26 +104,26 @@ const SidebarMenu: React.FC = React.memo(() => {
       localStorage.removeItem('sidebarOpen');
       setIsSidebarOpen(true);
     }
-    
+
     // Run cleanup multiple times to ensure it sticks
     setTimeout(cleanup, 0);
     setTimeout(cleanup, 10);
     setTimeout(cleanup, 50);
     setTimeout(cleanup, 100);
   }, []);
-  
+
   // State for Quick Search
   const [searchQuery, setSearchQuery] = React.useState('');
-  
+
   // State for Recent Pages
   const [recentPages, setRecentPages] = React.useState<{ path: string; name: string }[]>([]);
-  
+
   // State for selected campaign type color
   const [campaignTypeColor, setCampaignTypeColor] = React.useState({
     gradient: 'from-yellow-500 to-orange-600',
     hoverGradient: 'from-yellow-400 to-orange-500'
   });
-  
+
   // Toggle sidebar and save to localStorage
   const toggleSidebar = React.useCallback(() => {
     setIsSidebarOpen(prev => {
@@ -131,7 +131,7 @@ const SidebarMenu: React.FC = React.memo(() => {
       // Save to localStorage (only for desktop, but don't apply classes)
       if (typeof window !== 'undefined') {
         const isMobile = window.innerWidth < 1280;
-        
+
         // CRITICAL: On desktop, NEVER save to localStorage to prevent black screen
         // Only save on mobile (but it will be removed on refresh anyway)
         if (isMobile) {
@@ -141,7 +141,7 @@ const SidebarMenu: React.FC = React.memo(() => {
           } else {
             localStorage.removeItem('sidebarOpen');
           }
-          
+
           // Prevent body scroll on mobile when sidebar is open
           if (newState) {
             // Disable scroll on body and html
@@ -164,7 +164,7 @@ const SidebarMenu: React.FC = React.memo(() => {
           // On desktop, NEVER save to localStorage and NEVER apply classes
           // CRITICAL: Remove classes immediately and aggressively
           localStorage.removeItem('sidebarOpen');
-          
+
           // Force remove classes and styles immediately
           const forceCleanup = () => {
             document.body.classList.remove('sidebar-open');
@@ -184,7 +184,7 @@ const SidebarMenu: React.FC = React.memo(() => {
             document.documentElement.style.position = '';
             document.documentElement.style.width = '';
           };
-          
+
           forceCleanup();
           // Run cleanup multiple times to ensure it sticks
           setTimeout(forceCleanup, 0);
@@ -213,7 +213,7 @@ const SidebarMenu: React.FC = React.memo(() => {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const isMobile = window.innerWidth < 1280;
-      
+
       // Always clean up any leftover classes from previous session (both mobile and desktop)
       const cleanup = () => {
         document.body.classList.remove('sidebar-open');
@@ -228,14 +228,14 @@ const SidebarMenu: React.FC = React.memo(() => {
         document.documentElement.style.overflow = '';
         document.documentElement.style.height = '';
       };
-      
+
       cleanup();
-      
+
       // On desktop, set up MutationObserver to prevent sidebar-open class
       if (!isMobile) {
         // CRITICAL: Use MutationObserver to watch for sidebar-open class additions
-        const observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
+        const observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
               const target = mutation.target as HTMLElement;
               if (target === document.body || target === document.documentElement) {
@@ -266,7 +266,7 @@ const SidebarMenu: React.FC = React.memo(() => {
             }
           });
         });
-        
+
         // Start observing
         if (document.body) {
           observer.observe(document.body, {
@@ -282,19 +282,19 @@ const SidebarMenu: React.FC = React.memo(() => {
             subtree: false
           });
         }
-        
+
         // Cleanup observer on unmount
         return () => {
           observer.disconnect();
           cleanup();
         };
       }
-      
+
       // On mobile, always ensure sidebar is closed on mount
       if (isMobile) {
         // Ensure sidebar is closed on mobile
         if (isSidebarOpen) {
-        setIsSidebarOpen(false);
+          setIsSidebarOpen(false);
         }
       }
     }
@@ -304,7 +304,7 @@ const SidebarMenu: React.FC = React.memo(() => {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const isMobile = window.innerWidth < 1280;
-      
+
       // CRITICAL: On desktop, NEVER apply classes - always remove them aggressively
       if (!isMobile) {
         // Force remove classes on desktop - run continuously
@@ -324,8 +324,8 @@ const SidebarMenu: React.FC = React.memo(() => {
           document.documentElement.style.overflow = '';
           document.documentElement.style.height = '';
           document.documentElement.style.position = '';
-    };
-    
+        };
+
         // Run cleanup immediately and continuously
         cleanup();
         const intervals = [
@@ -338,7 +338,7 @@ const SidebarMenu: React.FC = React.memo(() => {
           setTimeout(cleanup, 200),
           setTimeout(cleanup, 500)
         ];
-    
+
         // Run cleanup every 100ms for first 2 seconds
         let cleanupCount = 0;
         const cleanupInterval = setInterval(() => {
@@ -348,14 +348,14 @@ const SidebarMenu: React.FC = React.memo(() => {
             clearInterval(cleanupInterval);
           }
         }, 100);
-        
+
         return () => {
           intervals.forEach(id => clearTimeout(id));
           clearInterval(cleanupInterval);
           cleanup();
         };
       }
-      
+
       // Only apply scroll lock on mobile
       if (isSidebarOpen) {
         // Disable scroll on body and html
@@ -375,7 +375,7 @@ const SidebarMenu: React.FC = React.memo(() => {
         }
       }
     }
-    
+
     return () => {
       // Cleanup on unmount - always clean up
       if (typeof window !== 'undefined') {
@@ -405,36 +405,36 @@ const SidebarMenu: React.FC = React.memo(() => {
 
           // Map campaign types to colors (same as campaign/new page)
           const colorMap: { [key: string]: { gradient: string; hoverGradient: string } } = {
-            'SEARCH': { 
-              gradient: 'from-yellow-500 to-orange-600', 
-              hoverGradient: 'from-yellow-400 to-orange-500' 
+            'SEARCH': {
+              gradient: 'from-yellow-500 to-orange-600',
+              hoverGradient: 'from-yellow-400 to-orange-500'
             },
-            'DISPLAY': { 
-              gradient: 'from-green-500 to-emerald-600', 
-              hoverGradient: 'from-green-400 to-emerald-500' 
+            'DISPLAY': {
+              gradient: 'from-green-500 to-emerald-600',
+              hoverGradient: 'from-green-400 to-emerald-500'
             },
-            'SHOPPING': { 
-              gradient: 'from-blue-500 to-cyan-600', 
-              hoverGradient: 'from-blue-400 to-cyan-500' 
+            'SHOPPING': {
+              gradient: 'from-blue-500 to-cyan-600',
+              hoverGradient: 'from-blue-400 to-cyan-500'
             },
-            'VIDEO': { 
-              gradient: 'from-purple-500 to-pink-600', 
-              hoverGradient: 'from-purple-400 to-pink-500' 
+            'VIDEO': {
+              gradient: 'from-purple-500 to-pink-600',
+              hoverGradient: 'from-purple-400 to-pink-500'
             },
-            'APP': { 
-              gradient: 'from-orange-500 to-red-600', 
-              hoverGradient: 'from-orange-400 to-red-500' 
+            'APP': {
+              gradient: 'from-orange-500 to-red-600',
+              hoverGradient: 'from-orange-400 to-red-500'
             },
-            'PERFORMANCE_MAX': { 
-              gradient: 'from-pink-500 to-rose-600', 
-              hoverGradient: 'from-pink-400 to-rose-500' 
+            'PERFORMANCE_MAX': {
+              gradient: 'from-pink-500 to-rose-600',
+              hoverGradient: 'from-pink-400 to-rose-500'
             },
-            'DEMAND_GEN': { 
-              gradient: 'from-red-500 to-pink-600', 
-              hoverGradient: 'from-red-400 to-pink-500' 
+            'DEMAND_GEN': {
+              gradient: 'from-red-500 to-pink-600',
+              hoverGradient: 'from-red-400 to-pink-500'
             }
           };
-          
+
           if (campaignType && colorMap[campaignType]) {
             setCampaignTypeColor(colorMap[campaignType]);
           }
@@ -443,13 +443,13 @@ const SidebarMenu: React.FC = React.memo(() => {
         console.error('Error reading campaign type:', error);
       }
     };
-    
+
     // Update on mount
     updateCampaignColor();
-    
+
     // Listen for storage changes
     window.addEventListener('storage', updateCampaignColor);
-    
+
     // Listen for custom event when campaign type changes
     window.addEventListener('campaignTypeChanged', updateCampaignColor);
 
@@ -467,19 +467,19 @@ const SidebarMenu: React.FC = React.memo(() => {
     } else {
       setBillingOpen(false);
     }
-    
+
     if (pathname?.startsWith('/accounts') || pathname?.startsWith('/my-profile')) {
       setAccountsOpen(true);
     } else {
       setAccountsOpen(false);
     }
-    
+
     if (pathname?.startsWith('/settings')) {
       setSettingsOpen(true);
     } else {
       setSettingsOpen(false);
     }
-    
+
     if (pathname?.includes('/campaign/performance') || pathname?.includes('/campaign/edit-ads') || pathname?.includes('/campaign/preview')) {
       setCampaignsOpen(true);
     } else {
@@ -493,12 +493,12 @@ const SidebarMenu: React.FC = React.memo(() => {
       // Don't track dashboard or root as recent
       return;
     }
-    
+
     try {
       // Load recent pages from localStorage
       const storedPages = localStorage.getItem('recentPages');
       const pages: { path: string; name: string }[] = storedPages ? JSON.parse(storedPages) : [];
-      
+
       // Get page name from pathname
       const getPageName = (path: string) => {
         if (!path) return 'Page';
@@ -520,23 +520,23 @@ const SidebarMenu: React.FC = React.memo(() => {
         const segments = path.split('/').filter(Boolean);
         return segments[segments.length - 1]?.replace(/-/g, ' ')?.replace(/\b\w/g, l => l.toUpperCase()) || 'Page';
       };
-      
+
       const currentPage = { path: pathname, name: getPageName(pathname) };
-      
+
       // Check if page already exists
       const existingIndex = pages.findIndex(p => p.path === pathname);
       if (existingIndex !== -1) {
         pages.splice(existingIndex, 1);
       }
-      
+
       // Add to beginning
       pages.unshift(currentPage);
-      
+
       // Keep only last 5 and filter out invalid entries
       const recentPagesLimit = pages
         .filter(p => p && p.path && p.name)
         .slice(0, 5);
-      
+
       // Save to localStorage
       localStorage.setItem('recentPages', JSON.stringify(recentPagesLimit));
       setRecentPages(recentPagesLimit);
@@ -570,7 +570,7 @@ const SidebarMenu: React.FC = React.memo(() => {
   const isActiveSection = React.useCallback((section: string) => {
     return pathname?.includes(`section=${section}`);
   }, [pathname]);
-  
+
   const isBillingActive = React.useMemo(() => {
     return pathname?.includes('section=billing') || pathname?.includes('/billing');
   }, [pathname]);
@@ -592,9 +592,9 @@ const SidebarMenu: React.FC = React.memo(() => {
   }, [pathname]);
 
   const isCampaignsActive = React.useMemo(() => {
-    return pathname?.includes('/campaign/performance') || 
-           pathname?.includes('/campaign/edit-ads') || 
-           pathname?.includes('/campaign/preview');
+    return pathname?.includes('/campaign/performance') ||
+      pathname?.includes('/campaign/edit-ads') ||
+      pathname?.includes('/campaign/preview');
   }, [pathname]);
 
   const isNotificationsActive = React.useMemo(() => {
@@ -644,7 +644,7 @@ const SidebarMenu: React.FC = React.memo(() => {
       id: 2,
       name: t.sidebar.newCampaign || 'New Campaign',
       icon: Plus,
-      href: '/campaign/new',
+      href: '/campaign/website-url',
       isActive: isCampaignActive,
       hasSubmenu: false,
       gradient: campaignTypeColor.gradient,
@@ -747,7 +747,7 @@ const SidebarMenu: React.FC = React.memo(() => {
   const filteredTabs = React.useMemo(() => {
     if (!searchQuery) return allTabs;
     const query = searchQuery.toLowerCase();
-    return allTabs.filter(tab => 
+    return allTabs.filter(tab =>
       tab.name.toLowerCase().includes(query) ||
       tab.subItems?.some(sub => sub.name.toLowerCase().includes(query))
     );
@@ -848,7 +848,7 @@ const SidebarMenu: React.FC = React.memo(() => {
           }
         }
       `}</style>
-      
+
       {/* Hamburger Button - Beautiful & Floating */}
       {/* Only show after hydration to prevent hydration mismatch */}
       {isHydrated && !isSidebarOpen && (
@@ -859,16 +859,15 @@ const SidebarMenu: React.FC = React.memo(() => {
           whileHover={{ scale: 1.1, rotate: 180 }}
           whileTap={{ scale: 0.9 }}
           onClick={toggleSidebar}
-          className={`fixed top-6 z-[101] p-4 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-2xl hover:shadow-indigo-500/50 transition-all duration-300 group ${
-            isRTL ? 'right-6' : 'left-6'
-          }`}
+          className={`fixed top-6 z-[101] p-4 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-2xl hover:shadow-indigo-500/50 transition-all duration-300 group ${isRTL ? 'right-6' : 'left-6'
+            }`}
         >
           {/* Glow effect */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-75 blur-xl transition-opacity duration-300"></div>
-          
+
           {/* Icon */}
           <Menu className="w-7 h-7 relative z-10 drop-shadow-lg" />
-          
+
           {/* Pulse animation */}
           <span className="absolute top-1 right-1 flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -879,338 +878,330 @@ const SidebarMenu: React.FC = React.memo(() => {
 
       {/* Sidebar - Only render after hydration to prevent hydration mismatch */}
       {isHydrated && (
-      <motion.div
-        initial={false}
-        animate={{
-          x: isSidebarOpen 
-            ? 0 
-            : isRTL 
-              ? 360 
-              : -360
-        }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed top-0 w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl overflow-hidden ${
-          isRTL 
-            ? 'right-0 border-l' 
-            : 'left-0 border-r'
-        }`}
-        style={{
-          backgroundColor: '#000000',
-          position: 'fixed',
-          willChange: 'transform',
-          height: '100vh',
-          minHeight: '100vh',
-          touchAction: 'pan-y' // Allow vertical scroll only
-        }}
-      >
-        {/* Close Button - Beautiful */}
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 90 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={toggleSidebar}
-          className={`absolute top-3 p-2.5 text-gray-400 hover:text-white hover:bg-gradient-to-br hover:from-red-500 hover:to-pink-600 rounded-xl transition-all duration-300 group ${
-            isRTL ? 'left-6' : 'right-6'
-          }`}
+        <motion.div
+          initial={false}
+          animate={{
+            x: isSidebarOpen
+              ? 0
+              : isRTL
+                ? 360
+                : -360
+          }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className={`fixed top-0 w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl overflow-hidden ${isRTL
+              ? 'right-0 border-l'
+              : 'left-0 border-r'
+            }`}
+          style={{
+            backgroundColor: '#000000',
+            position: 'fixed',
+            willChange: 'transform',
+            height: '100vh',
+            minHeight: '100vh',
+            touchAction: 'pan-y' // Allow vertical scroll only
+          }}
         >
-          <X className="w-6 h-6 group-hover:drop-shadow-lg transition-all" />
-        </motion.button>
+          {/* Close Button - Beautiful */}
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleSidebar}
+            className={`absolute top-3 p-2.5 text-gray-400 hover:text-white hover:bg-gradient-to-br hover:from-red-500 hover:to-pink-600 rounded-xl transition-all duration-300 group ${isRTL ? 'left-6' : 'right-6'
+              }`}
+          >
+            <X className="w-6 h-6 group-hover:drop-shadow-lg transition-all" />
+          </motion.button>
 
           {/* Organization Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="relative transition-transform hover:scale-105">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <Building2 className="w-8 h-8 text-white" />
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="relative transition-transform hover:scale-105">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Building2 className="w-8 h-8 text-white" />
                 </div>
-              <div className={`absolute -top-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900 ${
-                isRTL ? '-left-1' : '-right-1'
-              }`}></div>
-            </div>
-            
-            <div className="flex-1">
-              <p className="text-lg font-bold mb-1.5 text-white" dir={isRTL ? 'rtl' : 'ltr'}>
-                {t.sidebar.organizationName || 'Organization Name'}
-              </p>
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-indigo-900/60 text-indigo-200 border border-indigo-700/30" dir={isRTL ? 'rtl' : 'ltr'}>
-                {t.sidebar.basicPlan || 'Basic Plan'}
-              </span>
+                <div className={`absolute -top-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900 ${isRTL ? '-left-1' : '-right-1'
+                  }`}></div>
+              </div>
+
+              <div className="flex-1">
+                <p className="text-lg font-bold mb-1.5 text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                  {t.sidebar.organizationName || 'Organization Name'}
+                </p>
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-indigo-900/60 text-indigo-200 border border-indigo-700/30" dir={isRTL ? 'rtl' : 'ltr'}>
+                  {t.sidebar.basicPlan || 'Basic Plan'}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Quick Search Bar */}
-        <div className="mb-3 relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-all duration-300">
-            <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder={t.sidebar.quickSearch || 'Quick search...'}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-sm"
-              dir={isRTL ? 'rtl' : 'ltr'}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Pages */}
-        {recentPages.length > 0 && !searchQuery && (
-          <div className="mb-3 px-2">
-            <div className="flex items-center gap-2 mb-1.5 text-xs text-gray-400 font-semibold uppercase tracking-wider" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Clock className="w-3.5 h-3.5" />
-              <span>{t.sidebar.recentPages || 'Recent Pages'}</span>
-            </div>
-            <div className="space-y-1">
-              {recentPages.slice(0, 3).filter(page => page && page.path).map((page, index) => (
-                <Link
-                  key={index}
-                  href={page.path || '/dashboard'}
-                  onClick={handleLinkClick}
-                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 truncate group"
+          {/* Quick Search Bar */}
+          <div className="mb-3 relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-all duration-300">
+              <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <input
+                type="text"
+                placeholder={t.sidebar.quickSearch || 'Quick search...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-sm"
+                dir={isRTL ? 'rtl' : 'ltr'}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></div>
-                    <span>{page.name || 'Page'}</span>
-                  </div>
-                </Link>
-              ))}
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
-        )}
 
-      {/* Sidebar navigation */}
-      <div 
-        className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto overflow-x-hidden p-2 sidebar-scroll'
-        style={{
-          minHeight: 0, // Important for flex scroll
-          WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-          touchAction: 'pan-y', // Allow vertical scroll only
-          paddingBottom: '2rem' // Add padding to show last item
-        }}
-      >
-        {/* All Tabs */}
-        <div className='flex flex-col gap-1'>
-          {filteredTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isOpen = tab.id === 3 ? campaignsOpen : tab.id === 6 ? billingOpen : tab.id === 7 ? accountsOpen : tab.id === 9 ? settingsOpen : false;
-            const setOpen = tab.id === 3 ? setCampaignsOpen : tab.id === 6 ? setBillingOpen : tab.id === 7 ? setAccountsOpen : tab.id === 9 ? setSettingsOpen : () => {};
-            
-            return (
-              <div key={`tab-${tab.id}`}>
-                {/* Tab with or without submenu */}
-                {tab.hasSubmenu ? (
-                  <>
-                    {/* Main Tab Button (with submenu) - ENHANCED */}
-                    <button
-                      onClick={() => setOpen(!isOpen)}
-                      className={`
+          {/* Recent Pages */}
+          {recentPages.length > 0 && !searchQuery && (
+            <div className="mb-3 px-2">
+              <div className="flex items-center gap-2 mb-1.5 text-xs text-gray-400 font-semibold uppercase tracking-wider" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Clock className="w-3.5 h-3.5" />
+                <span>{t.sidebar.recentPages || 'Recent Pages'}</span>
+              </div>
+              <div className="space-y-1">
+                {recentPages.slice(0, 3).filter(page => page && page.path).map((page, index) => (
+                  <Link
+                    key={index}
+                    href={page.path || '/dashboard'}
+                    onClick={handleLinkClick}
+                    className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 truncate group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></div>
+                      <span>{page.name || 'Page'}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sidebar navigation */}
+          <div
+            className='flex-1 flex flex-col rounded-xl bg-white/5 backdrop-filter backdrop-blur-lg overflow-y-auto overflow-x-hidden p-2 sidebar-scroll'
+            style={{
+              minHeight: 0, // Important for flex scroll
+              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+              touchAction: 'pan-y', // Allow vertical scroll only
+              paddingBottom: '2rem' // Add padding to show last item
+            }}
+          >
+            {/* All Tabs */}
+            <div className='flex flex-col gap-1'>
+              {filteredTabs.map((tab) => {
+                const Icon = tab.icon;
+                const isOpen = tab.id === 3 ? campaignsOpen : tab.id === 6 ? billingOpen : tab.id === 7 ? accountsOpen : tab.id === 9 ? settingsOpen : false;
+                const setOpen = tab.id === 3 ? setCampaignsOpen : tab.id === 6 ? setBillingOpen : tab.id === 7 ? setAccountsOpen : tab.id === 9 ? setSettingsOpen : () => { };
+
+                return (
+                  <div key={`tab-${tab.id}`}>
+                    {/* Tab with or without submenu */}
+                    {tab.hasSubmenu ? (
+                      <>
+                        {/* Main Tab Button (with submenu) - ENHANCED */}
+                        <button
+                          onClick={() => setOpen(!isOpen)}
+                          className={`
                         relative group flex items-center justify-between w-full px-6 py-4 transition-all overflow-hidden
-                        ${
-                          tab.isActive
+                        ${tab.isActive
+                              ? 'text-white'
+                              : 'text-gray-400 hover:text-gray-200'
+                            }
+                      `}
+                          title={tab.tooltip}
+                        >
+                          {/* Background highlight for active tab with custom gradient */}
+                          {tab.isActive && (
+                            <motion.div
+                              layoutId='sidebarTabBackground'
+                              className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.2 }}
+                            />
+                          )}
+
+                          {/* Hover gradient effect */}
+                          {!tab.isActive && (
+                            <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
+                          )}
+
+                          {/* Glow effect on hover */}
+                          <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
+
+                          {/* Tab content with icon and text */}
+                          <div className='flex items-center gap-4 z-10 flex-1'>
+                            <motion.div
+                              animate={tab.isActive ? { scale: [1, 1.1, 1] } : {}}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <Icon className={`w-6 h-6 ${tab.isActive ? 'drop-shadow-lg' : ''} group-hover:scale-110 transition-transform`} />
+                            </motion.div>
+                            <span className='text-lg font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{tab.name}</span>
+
+                            {/* Badge */}
+                            {tab.badge && (
+                              <div className={`${tab.badge.color} text-white text-xs font-bold px-2 py-0.5 rounded-full ${isRTL ? 'mr-auto' : 'ml-auto'} ${tab.isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity`}>
+                                {tab.badge.text}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Chevron Icon */}
+                          <div className={`z-10 ${isRTL ? 'mr-2' : 'ml-2'}`}>
+                            <motion.div
+                              animate={{ rotate: isOpen ? 180 : 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <ChevronDown className='w-5 h-5' />
+                            </motion.div>
+                          </div>
+                        </button>
+
+                        {/* Submenu - ENHANCED */}
+                        {isOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className={`${isRTL ? 'mr-12' : 'ml-12'} mt-2 mb-3 space-y-2`}
+                          >
+                            {tab.subItems?.map((subItem) => {
+                              const isSubItemActive = pathname === subItem.href || pathname?.includes(subItem.id);
+
+                              return (
+                                <Link
+                                  key={subItem.id}
+                                  href={subItem.href}
+                                  prefetch={true}
+                                  onClick={handleLinkClick}
+                                  className={`
+                                relative block px-5 py-3 text-base rounded-lg transition-all group overflow-hidden
+                                ${isSubItemActive
+                                      ? 'text-white'
+                                      : 'text-gray-400 hover:text-gray-200'
+                                    }
+                              `}
+                                >
+                                  {/* Gradient Background for Active Submenu - using parent gradient */}
+                                  {isSubItemActive && (
+                                    <motion.div
+                                      layoutId={`submenu-${tab.id}-background`}
+                                      className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ duration: 0.2 }}
+                                    />
+                                  )}
+
+                                  {/* Hover gradient effect */}
+                                  {!isSubItemActive && (
+                                    <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
+                                  )}
+
+                                  {/* Submenu Text */}
+                                  <span className='relative z-10 font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{subItem.name}</span>
+
+                                  {/* White Dot Indicator */}
+                                  {isSubItemActive && (
+                                    <motion.div
+                                      layoutId={`submenu-${tab.id}-dot`}
+                                      className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white ${isRTL ? 'left-3' : 'right-3'
+                                        }`}
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{ delay: 0.1 }}
+                                    />
+                                  )}
+                                </Link>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </>
+                    ) : (
+                      /* Main Tab Link (without submenu) - ENHANCED */
+                      <Link
+                        href={tab.href}
+                        prefetch={true}
+                        onClick={handleLinkClick}
+                        className={`
+                      relative group flex items-center w-full px-6 py-4 transition-all overflow-hidden
+                      ${tab.isActive
                             ? 'text-white'
                             : 'text-gray-400 hover:text-gray-200'
-                        }
-                      `}
-                      title={tab.tooltip}
-                    >
-                      {/* Background highlight for active tab with custom gradient */}
-                      {tab.isActive && (
-                      <motion.div
-                          layoutId='sidebarTabBackground'
-                          className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                        />
-                      )}
+                          }
+                    `}
+                        title={tab.tooltip}
+                      >
+                        {/* Background highlight for active tab with custom gradient */}
+                        {tab.isActive && (
+                          <motion.div
+                            layoutId='sidebarTabBackground'
+                            className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        )}
 
-                      {/* Hover gradient effect */}
-                      {!tab.isActive && (
-                        <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
-                      )}
+                        {/* Hover gradient effect */}
+                        {!tab.isActive && (
+                          <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
+                        )}
 
-                      {/* Glow effect on hover */}
-                      <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
+                        {/* Glow effect on hover */}
+                        <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
 
-                      {/* Tab content with icon and text */}
-                      <div className='flex items-center gap-4 z-10 flex-1'>
-                        <motion.div
-                          animate={tab.isActive ? { scale: [1, 1.1, 1] } : {}}
-                          transition={{ duration: 0.5 }}
-                        >
-                          <Icon className={`w-6 h-6 ${tab.isActive ? 'drop-shadow-lg' : ''} group-hover:scale-110 transition-transform`} />
-                      </motion.div>
-                        <span className='text-lg font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{tab.name}</span>
-                        
+                        {/* Tab content with icon and text */}
+                        <div className='flex items-center gap-4 z-10 flex-1'>
+                          <motion.div
+                            animate={tab.isActive ? { scale: [1, 1.2, 1] } : {}}
+                            transition={{ duration: 0.5, repeat: tab.sparkle ? Infinity : 0, repeatDelay: 3 }}
+                          >
+                            <Icon className={`w-6 h-6 ${tab.isActive ? 'drop-shadow-lg' : ''} group-hover:scale-110 transition-transform`} />
+                          </motion.div>
+                          <span className='text-lg font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{tab.name}</span>
+                        </div>
+
                         {/* Badge */}
                         {tab.badge && (
-                          <div className={`${tab.badge.color} text-white text-xs font-bold px-2 py-0.5 rounded-full ${isRTL ? 'mr-auto' : 'ml-auto'} ${tab.isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity`}>
+                          <div className={`${tab.badge.color} text-white text-xs font-bold px-2 py-0.5 rounded-full z-10 ${tab.isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity`}>
                             {tab.badge.text}
                           </div>
                         )}
-                </div>
 
-                      {/* Chevron Icon */}
-                      <div className={`z-10 ${isRTL ? 'mr-2' : 'ml-2'}`}>
-            <motion.div
-                          animate={{ rotate: isOpen ? 180 : 0 }}
-                          transition={{ duration: 0.3 }}
-              >
-                          <ChevronDown className='w-5 h-5' />
-                        </motion.div>
+                        {/* Sparkles for New Campaign */}
+                        {tab.sparkle && tab.isActive && (
+                          <Sparkles className={`w-4 h-4 absolute top-2 z-10 text-yellow-300 animate-pulse ${isRTL ? 'left-2' : 'right-2'}`} />
+                        )}
+
+                        {/* Small dot indicator */}
+                        {tab.isActive && !tab.badge && (
+                          <motion.div
+                            layoutId='sidebarActiveDot'
+                            className={`absolute w-2.5 h-2.5 rounded-full bg-white ${isRTL ? 'left-4' : 'right-4'
+                              }`}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.1 }}
+                          />
+                        )}
+                      </Link>
+                    )}
                   </div>
-                    </button>
-
-                    {/* Submenu - ENHANCED */}
-                    {isOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className={`${isRTL ? 'mr-12' : 'ml-12'} mt-2 mb-3 space-y-2`}
-                      >
-                        {tab.subItems?.map((subItem) => {
-                          const isSubItemActive = pathname === subItem.href || pathname?.includes(subItem.id);
-                          
-                          return (
-            <Link
-                              key={subItem.id}
-                              href={subItem.href}
-                              prefetch={true}
-                              onClick={handleLinkClick}
-                              className={`
-                                relative block px-5 py-3 text-base rounded-lg transition-all group overflow-hidden
-                                ${
-                                  isSubItemActive
-                                    ? 'text-white'
-                                    : 'text-gray-400 hover:text-gray-200'
-                                }
-                              `}
-              >
-                              {/* Gradient Background for Active Submenu - using parent gradient */}
-                              {isSubItemActive && (
-                      <motion.div
-                                  layoutId={`submenu-${tab.id}-background`}
-                                  className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                                />
-                              )}
-                              
-                              {/* Hover gradient effect */}
-                              {!isSubItemActive && (
-                                <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
-                              )}
-                              
-                              {/* Submenu Text */}
-                              <span className='relative z-10 font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{subItem.name}</span>
-                              
-                              {/* White Dot Indicator */}
-                              {isSubItemActive && (
-                  <motion.div 
-                                  layoutId={`submenu-${tab.id}-dot`}
-                                  className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white ${
-                                    isRTL ? 'left-3' : 'right-3'
-                                  }`}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                                  transition={{ delay: 0.1 }}
-                  />
-              )}
-            </Link>
-                          );
-                        })}
-            </motion.div>
-                    )}
-                  </>
-                ) : (
-                  /* Main Tab Link (without submenu) - ENHANCED */
-            <Link
-                    href={tab.href}
-                    prefetch={true}
-                    onClick={handleLinkClick}
-                    className={`
-                      relative group flex items-center w-full px-6 py-4 transition-all overflow-hidden
-                      ${
-                        tab.isActive
-                          ? 'text-white'
-                          : 'text-gray-400 hover:text-gray-200'
-                      }
-                    `}
-                    title={tab.tooltip}
-                  >
-                    {/* Background highlight for active tab with custom gradient */}
-                    {tab.isActive && (
-                      <motion.div
-                        layoutId='sidebarTabBackground'
-                        className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-lg`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    )}
-
-                    {/* Hover gradient effect */}
-                    {!tab.isActive && (
-                      <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-lg`} />
-                    )}
-
-                    {/* Glow effect on hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-r ${tab.hoverGradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`} />
-
-                    {/* Tab content with icon and text */}
-                    <div className='flex items-center gap-4 z-10 flex-1'>
-                      <motion.div
-                        animate={tab.isActive ? { scale: [1, 1.2, 1] } : {}}
-                        transition={{ duration: 0.5, repeat: tab.sparkle ? Infinity : 0, repeatDelay: 3 }}
-                      >
-                        <Icon className={`w-6 h-6 ${tab.isActive ? 'drop-shadow-lg' : ''} group-hover:scale-110 transition-transform`} />
-                      </motion.div>
-                      <span className='text-lg font-medium' dir={language === 'ar' ? 'rtl' : 'ltr'}>{tab.name}</span>
-                </div>
-
-                    {/* Badge */}
-                    {tab.badge && (
-                      <div className={`${tab.badge.color} text-white text-xs font-bold px-2 py-0.5 rounded-full z-10 ${tab.isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity`}>
-                        {tab.badge.text}
-                      </div>
-                    )}
-
-                    {/* Sparkles for New Campaign */}
-                    {tab.sparkle && tab.isActive && (
-                      <Sparkles className={`w-4 h-4 absolute top-2 z-10 text-yellow-300 animate-pulse ${isRTL ? 'left-2' : 'right-2'}`} />
-                    )}
-
-                    {/* Small dot indicator */}
-                    {tab.isActive && !tab.badge && (
-                  <motion.div 
-                        layoutId='sidebarActiveDot'
-                        className={`absolute w-2.5 h-2.5 rounded-full bg-white ${
-                          isRTL ? 'left-4' : 'right-4'
-                        }`}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                        transition={{ delay: 0.1 }}
-                  />
-              )}
-            </Link>
-                )}
-                  </div>
-            );
-          })}
-        </div>
-      </div>
-      </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {/* Overlay when sidebar is open on mobile/tablet - click to close */}
