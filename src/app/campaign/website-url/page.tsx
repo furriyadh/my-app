@@ -175,7 +175,7 @@ const WebsiteUrlPage: React.FC = () => {
 
     // Always dispatch event to notify sidebar to update its color
     window.dispatchEvent(new Event('campaignTypeChanged'));
-    
+
     // Also trigger storage event for cross-tab sync
     window.dispatchEvent(new Event('storage'));
   }, [effectiveCampaignType]);
@@ -1136,25 +1136,29 @@ const WebsiteUrlPage: React.FC = () => {
             position: 'relative',
             zIndex: 2
           }}>
-            {/* Dynamic Border Glow Effect - Like integrations cards */}
-            <div className="relative group mb-8">
-              {/* Glowing border effect */}
-              <div 
-                className="absolute -inset-0.5 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
-                style={{
-                  background: effectiveCampaignType === 'SEARCH' 
-                    ? 'linear-gradient(to right, rgb(245, 158, 11), rgb(234, 179, 8))'
-                    : effectiveCampaignType === 'DISPLAY'
-                      ? 'linear-gradient(to right, rgb(16, 185, 129), rgb(74, 222, 128))'
-                      : effectiveCampaignType === 'SHOPPING'
-                        ? 'linear-gradient(to right, rgb(59, 130, 246), rgb(6, 182, 212))'
-                        : effectiveCampaignType === 'VIDEO'
-                          ? 'linear-gradient(to right, rgb(239, 68, 68), rgb(244, 63, 94))'
-                          : effectiveCampaignType === 'APP'
-                            ? 'linear-gradient(to right, rgb(249, 115, 22), rgb(245, 158, 11))'
-                            : 'linear-gradient(to right, rgb(168, 85, 247), rgb(139, 92, 246))', // Default purple
-                }}
-              />
+            {/* GlowingBorderCard - Like integrations cards */}
+            <GlowingBorderCard
+              fromColor={
+                effectiveCampaignType === 'SEARCH' ? 'amber-500'
+                  : effectiveCampaignType === 'DISPLAY' ? 'emerald-500'
+                    : effectiveCampaignType === 'SHOPPING' ? 'blue-500'
+                      : effectiveCampaignType === 'VIDEO' ? 'red-500'
+                        : effectiveCampaignType === 'APP' ? 'orange-500'
+                          : 'purple-500'
+              }
+              toColor={
+                effectiveCampaignType === 'SEARCH' ? 'yellow-500'
+                  : effectiveCampaignType === 'DISPLAY' ? 'green-400'
+                    : effectiveCampaignType === 'SHOPPING' ? 'cyan-500'
+                      : effectiveCampaignType === 'VIDEO' ? 'rose-500'
+                        : effectiveCampaignType === 'APP' ? 'amber-500'
+                          : 'violet-500'
+              }
+              className="mb-8"
+              noBackground={true}
+              rounded="xl"
+              enable3D={true}
+            >
               {/* URL Input Card - 3D rotation like integrations page */}
               <CardContainer containerClassName="w-full" speed="medium">
                 <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
@@ -1162,474 +1166,474 @@ const WebsiteUrlPage: React.FC = () => {
                   zIndex: 3
                 }}>
                   {!isDetecting && (
-                  <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
-                    <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
-                  </CardItem>
-                )}
-                <div className={`space-y-6 ${isDetecting ? 'invisible' : ''}`}>
-                  {/* Input Field */}
-                  <div>
-                    <CardItem translateZ={50}>
-                      <label className="block text-sm font-semibold text-white mb-3 drop-shadow-md text-left">
-                        {language === 'ar' ? 'رابط موقعك الإلكتروني' : 'Your Website URL'}
-                      </label>
+                    <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
+                      <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
                     </CardItem>
-                    <CardItem translateZ={60} as="div" className="!w-full">
-                      <div className="flex gap-3">
-                        {/* HTTPS Prefix - Matches input border state */}
-                        <div className={`w-28 px-4 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white flex items-center justify-center transition-all duration-200 ${!isValidUrl && websiteUrl
-                          ? 'border-red-300/50 ring-4 ring-red-300/30'
-                          : isUrlVerified
-                            ? 'border-white/50 bg-white/25'
-                            : isFocused
-                              ? 'border-white/70 ring-4 ring-white/30 bg-white/25'
-                              : 'border-white/30'
-                          }`}>
-                          <span className="text-base font-medium">https://</span>
-                        </div>
-
-                        {/* URL Input with Icon */}
-                        <div className="flex-1 relative">
-                          {/* Link Icon */}
-                          <LinkIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${!isValidUrl && websiteUrl
-                            ? 'text-red-300/70'
+                  )}
+                  <div className={`space-y-6 ${isDetecting ? 'invisible' : ''}`}>
+                    {/* Input Field */}
+                    <div>
+                      <CardItem translateZ={50}>
+                        <label className="block text-sm font-semibold text-white mb-3 drop-shadow-md text-left">
+                          {language === 'ar' ? 'رابط موقعك الإلكتروني' : 'Your Website URL'}
+                        </label>
+                      </CardItem>
+                      <CardItem translateZ={60} as="div" className="!w-full">
+                        <div className="flex gap-3">
+                          {/* HTTPS Prefix - Matches input border state */}
+                          <div className={`w-28 px-4 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white flex items-center justify-center transition-all duration-200 ${!isValidUrl && websiteUrl
+                            ? 'border-red-300/50 ring-4 ring-red-300/30'
                             : isUrlVerified
-                              ? 'text-white/80'
-                              : 'text-white/50'
-                            }`} />
+                              ? 'border-white/50 bg-white/25'
+                              : isFocused
+                                ? 'border-white/70 ring-4 ring-white/30 bg-white/25'
+                                : 'border-white/30'
+                            }`}>
+                            <span className="text-base font-medium">https://</span>
+                          </div>
 
-                          <input
-                            type="url"
-                            value={websiteUrl}
-                            onChange={handleUrlChange}
-                            onFocus={() => setIsFocused(true)}
-                            onBlur={() => setIsFocused(false)}
-                            placeholder={language === 'ar' ? 'example.com' : 'www.example.com'}
-                            dir="ltr"
-                            className={`w-full px-4 pl-12 pr-12 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
+                          {/* URL Input with Icon */}
+                          <div className="flex-1 relative">
+                            {/* Link Icon */}
+                            <LinkIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${!isValidUrl && websiteUrl
+                              ? 'text-red-300/70'
+                              : isUrlVerified
+                                ? 'text-white/80'
+                                : 'text-white/50'
+                              }`} />
+
+                            <input
+                              type="url"
+                              value={websiteUrl}
+                              onChange={handleUrlChange}
+                              onFocus={() => setIsFocused(true)}
+                              onBlur={() => setIsFocused(false)}
+                              placeholder={language === 'ar' ? 'example.com' : 'www.example.com'}
+                              dir="ltr"
+                              className={`w-full px-4 pl-12 pr-12 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
                         focus:outline-none focus:ring-4 focus:bg-white/25 
                         transition-all duration-200 overflow-x-auto whitespace-nowrap
                         ${!isValidUrl && websiteUrl
-                                ? 'border-red-300/50 focus:border-red-300/70 focus:ring-red-300/30'
-                                : isUrlVerified
-                                  ? 'border-white/50 focus:border-white/70 focus:ring-white/30'
-                                  : 'border-white/30 focus:border-white/70 focus:ring-white/30'
-                              }`}
-                            autoFocus
-                            style={{
-                              textOverflow: 'clip',
-                              fontSize: '16px', // Prevent zoom on iOS
-                              transform: 'translateZ(0)', // Force hardware acceleration
-                              WebkitAppearance: 'none' // Remove iOS styling
-                            }}
-                          />
-
-                          {/* Status Icon */}
-                          {websiteUrl && (
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                              {!isValidUrl ? (
-                                <XCircle className="w-5 h-5 text-red-300" />
-                              ) : isUrlVerified ? (
-                                <CheckCircle2 className="w-5 h-5 text-white/80" />
-                              ) : null}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardItem>
-
-                    {/* Error Message */}
-                    {!isValidUrl && websiteUrl && urlErrorMessage && (
-                      <CardItem translateZ={40} as="div" className="!w-full">
-                        <div className="mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm">
-                          <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
-                          <div className="text-left">
-                            <p className="text-sm font-semibold text-red-200">{language === 'ar' ? 'رابط غير صحيح' : 'Invalid URL'}</p>
-                            <p className="text-sm text-red-300">{urlErrorMessage}</p>
-                          </div>
-                        </div>
-                      </CardItem>
-                    )}
-
-                    {/* Success Message - White style matching card */}
-                    {isUrlVerified && (
-                      <CardItem translateZ={40} as="div" className="!w-full">
-                        <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm">
-                          <CheckCircle2 className="w-5 h-5 text-white/80 flex-shrink-0 mt-0.5" />
-                          <div className="text-left flex-1">
-                            <p className="text-sm font-semibold text-white">{language === 'ar' ? 'رابط صحيح' : 'Valid URL'}</p>
-                            <p className="text-sm text-white/80">{language === 'ar' ? 'تنسيق الرابط صحيح' : 'URL format is correct'}</p>
-                          </div>
-                          {/* Detected URL Type Badge */}
-                          {isDetecting && (
-                            <div className="flex items-center gap-2 text-white/70">
-                              <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin" />
-                              <span className="text-xs">{language === 'ar' ? 'جاري الكشف...' : 'Detecting...'}</span>
-                            </div>
-                          )}
-                          {detectedUrlType && !isDetecting && (
-                            <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${detectedUrlType.type === 'app' ? 'bg-orange-500/30 text-orange-200' :
-                              detectedUrlType.type === 'video' ? 'bg-purple-500/30 text-purple-200' :
-                                detectedUrlType.type === 'store' ? 'bg-cyan-500/30 text-cyan-200' :
-                                  'bg-blue-500/30 text-blue-200'
-                              }`}>
-                              {detectedUrlType.type === 'app' && <Smartphone className="w-3 h-3" />}
-                              {detectedUrlType.type === 'video' && <Video className="w-3 h-3" />}
-                              {detectedUrlType.type === 'store' && <Store className="w-3 h-3" />}
-                              {detectedUrlType.type === 'website' && <Monitor className="w-3 h-3" />}
-                              {detectedUrlType.type === 'app' ? (language === 'ar' ? 'تطبيق' : 'App') :
-                                detectedUrlType.type === 'video' ? (language === 'ar' ? 'فيديو' : 'Video') :
-                                  detectedUrlType.type === 'store' ? (language === 'ar' ? 'متجر' : 'Store') :
-                                    (language === 'ar' ? 'موقع' : 'Website')}
-                            </div>
-                          )}
-                        </div>
-                      </CardItem>
-                    )}
-
-                    {/* Merchant Center Selection for Shopping Campaigns - Google Ads Style */}
-                    {detectedUrlType && (detectedUrlType.type === 'store' || detectedUrlType.suggestedCampaignType === 'SHOPPING') && (
-                      <CardItem translateZ={35} as="div" className="!w-full">
-                        <div className="mt-4 p-5 bg-white/10 border border-cyan-400/30 rounded-xl backdrop-blur-sm">
-                          {/* Info Message */}
-                          <div className="flex items-start gap-3 mb-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-                            <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                              <ShoppingCart className="w-4 h-4 text-blue-300" />
-                            </div>
-                            <p className="text-sm text-white/90">
-                              {language === 'ar'
-                                ? 'للإعلان عن منتجات على موقعك الإلكتروني، اختَر حسابًا على Merchant Center.'
-                                : 'To advertise products on your website, choose a Merchant Center account.'}
-                            </p>
-                          </div>
-
-                          {/* Search Box */}
-                          <div className="relative mb-4">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
-                            <input
-                              type="text"
-                              placeholder={language === 'ar' ? 'اختيار حساب' : 'Search accounts'}
-                              className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50"
-                            />
-                          </div>
-
-                          {/* Table Header */}
-                          <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-white/5 rounded-t-lg border-b border-white/10 text-xs font-semibold text-white/70">
-                            <div className="col-span-5">{language === 'ar' ? 'Merchant Center' : 'Merchant Center'}</div>
-                            <div className="col-span-2 text-center">{language === 'ar' ? 'المنتجات' : 'Products'}</div>
-                            <div className="col-span-2 text-center">{language === 'ar' ? 'نسبة الموافقة' : 'Approval'}</div>
-                            <div className="col-span-3 text-center">{language === 'ar' ? 'الحالة' : 'Status'}</div>
-                          </div>
-
-                          {/* Table Body */}
-                          {isFetchingMerchants ? (
-                            <div className="flex items-center justify-center py-8">
-                              <div className="w-6 h-6 border-2 border-cyan-400/50 border-t-transparent rounded-full animate-spin" />
-                            </div>
-                          ) : merchantAccounts.length > 0 ? (
-                            <div className="max-h-60 overflow-y-auto">
-                              {merchantAccounts.map((account, index) => (
-                                <div
-                                  key={account.id}
-                                  onClick={() => {
-                                    if (account.linked) {
-                                      setSelectedMerchant(account.id);
-                                      // Save to localStorage for campaign flow
-                                      const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
-                                      localStorage.setItem('campaignData', JSON.stringify({
-                                        ...currentData,
-                                        selectedMerchantId: account.id,
-                                        selectedMerchantName: account.name,
-                                        merchantLinked: true
-                                      }));
-                                    }
-                                  }}
-                                  className={`grid grid-cols-12 gap-2 px-3 py-3 transition-all items-center ${index % 2 === 0 ? 'bg-white/5' : 'bg-transparent'
-                                    } ${selectedMerchant === account.id
-                                      ? 'bg-cyan-500/20 ring-1 ring-cyan-400/50'
-                                      : account.linked ? 'hover:bg-white/10 cursor-pointer' : 'opacity-70'
-                                    }`}
-                                >
-                                  {/* Merchant Info */}
-                                  <div className="col-span-5 flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                                      <ShoppingCart className="w-4 h-4 text-cyan-300" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-sm font-medium text-white truncate">{account.name}</p>
-                                      <p className="text-xs text-white/50">{account.id}</p>
-                                    </div>
-                                  </div>
-                                  {/* Products Count */}
-                                  <div className="col-span-2 text-center text-sm text-white/70">
-                                    {account.products !== null ? account.products.toLocaleString() : '-'}
-                                  </div>
-                                  {/* Approval Rate */}
-                                  <div className="col-span-2 text-center text-sm text-white/70">
-                                    {account.approvalRate !== null ? `${account.approvalRate}%` : '-'}
-                                  </div>
-                                  {/* Status & Link Button */}
-                                  <div className="col-span-3 text-center">
-                                    {account.linked ? (
-                                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
-                                        <CheckCircle2 className="w-3 h-3" />
-                                        Linked
-                                      </span>
-                                    ) : (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // Save current campaign data before redirecting
-                                          const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
-                                          localStorage.setItem('campaignData', JSON.stringify({
-                                            ...currentData,
-                                            pendingMerchantId: account.id,
-                                            pendingMerchantName: account.name,
-                                            returnUrl: '/campaign/website-url'
-                                          }));
-                                          // Redirect to merchant linking page
-                                          window.location.href = '/integrations/google-merchant';
-                                        }}
-                                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/30 hover:bg-blue-500/50 text-blue-300 text-xs font-medium rounded-full transition-colors"
-                                      >
-                                        <LinkIcon className="w-3 h-3" />
-                                        Link
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 text-white/60 text-sm">
-                              <p>{language === 'ar' ? 'لا توجد حسابات Merchant Center متاحة' : 'No Merchant Center accounts available'}</p>
-                              <button
-                                onClick={() => window.location.href = '/integrations/google-merchant'}
-                                className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 text-sm font-medium rounded-lg transition-colors"
-                              >
-                                <LinkIcon className="w-4 h-4" />
-                                {language === 'ar' ? 'ربط حساب جديد' : 'Link New Account'}
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Selected Confirmation */}
-                          {selectedMerchant && (
-                            <div className="mt-3 p-3 bg-green-500/20 border border-green-400/30 rounded-lg flex items-center gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-green-400" />
-                              <span className="text-sm text-green-200">
-                                {language === 'ar' ? 'تم اختيار الحساب' : 'Account selected'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </CardItem>
-                    )}
-
-                    {/* App Campaign Selection */}
-                    {detectedUrlType && detectedUrlType.type === 'app' && (
-                      <CardItem translateZ={35} as="div" className="!w-full">
-                        <div className="mt-4 p-4 bg-white/10 border border-orange-400/30 rounded-xl backdrop-blur-sm">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Smartphone className="w-5 h-5 text-orange-300" />
-                            <p className="text-sm font-semibold text-white">
-                              {language === 'ar' ? 'إعدادات حملة التطبيق' : 'App Campaign Settings'}
-                            </p>
-                          </div>
-
-                          {/* OS Selection */}
-                          <div className="flex gap-3 mb-4">
-                            <button
-                              onClick={() => setSelectedOS('android')}
-                              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${selectedOS === 'android'
-                                ? 'bg-green-500/30 border border-green-400/50 text-green-200'
-                                : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                                  ? 'border-red-300/50 focus:border-red-300/70 focus:ring-red-300/30'
+                                  : isUrlVerified
+                                    ? 'border-white/50 focus:border-white/70 focus:ring-white/30'
+                                    : 'border-white/30 focus:border-white/70 focus:ring-white/30'
                                 }`}
-                            >
-                              <span className="text-sm font-medium">Android</span>
-                            </button>
-                            <button
-                              onClick={() => setSelectedOS('ios')}
-                              className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${selectedOS === 'ios'
-                                ? 'bg-blue-500/30 border border-blue-400/50 text-blue-200'
-                                : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
-                                }`}
-                            >
-                              <span className="text-sm font-medium">iOS</span>
-                            </button>
-                          </div>
-
-                          {/* App Search */}
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
-                            <input
-                              type="text"
-                              value={appSearchQuery}
-                              onChange={(e) => setAppSearchQuery(e.target.value)}
-                              placeholder={language === 'ar'
-                                ? 'ادخل اسم التطبيق أو اسم الحزمة أو URL'
-                                : 'Enter app name, package name, or store URL'}
-                              className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                              autoFocus
+                              style={{
+                                textOverflow: 'clip',
+                                fontSize: '16px', // Prevent zoom on iOS
+                                transform: 'translateZ(0)', // Force hardware acceleration
+                                WebkitAppearance: 'none' // Remove iOS styling
+                              }}
                             />
-                            {isSearchingApps && (
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                <div className="w-4 h-4 border-2 border-orange-400/50 border-t-transparent rounded-full animate-spin" />
+
+                            {/* Status Icon */}
+                            {websiteUrl && (
+                              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                {!isValidUrl ? (
+                                  <XCircle className="w-5 h-5 text-red-300" />
+                                ) : isUrlVerified ? (
+                                  <CheckCircle2 className="w-5 h-5 text-white/80" />
+                                ) : null}
                               </div>
                             )}
                           </div>
+                        </div>
+                      </CardItem>
 
-                          {/* App Search Results */}
-                          {appSearchResults.length > 0 && (
-                            <div className="mt-4">
-                              {/* Results Header - Google Ads Style */}
-                              <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
-                                <p className="text-sm text-white/80">
-                                  {language === 'ar'
-                                    ? `نتائج البحث عن تطبيقات ${selectedOS === 'ios' ? 'iOS' : 'Android'} في ${selectedOS === 'ios' ? 'Apple Store' : 'Google Play'} (${appSearchResults.length})`
-                                    : `${selectedOS === 'ios' ? 'iOS' : 'Android'} apps from ${selectedOS === 'ios' ? 'Apple Store' : 'Google Play'} (${appSearchResults.length})`
-                                  }
-                                </p>
+                      {/* Error Message */}
+                      {!isValidUrl && websiteUrl && urlErrorMessage && (
+                        <CardItem translateZ={40} as="div" className="!w-full">
+                          <div className="mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm">
+                            <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
+                            <div className="text-left">
+                              <p className="text-sm font-semibold text-red-200">{language === 'ar' ? 'رابط غير صحيح' : 'Invalid URL'}</p>
+                              <p className="text-sm text-red-300">{urlErrorMessage}</p>
+                            </div>
+                          </div>
+                        </CardItem>
+                      )}
+
+                      {/* Success Message - White style matching card */}
+                      {isUrlVerified && (
+                        <CardItem translateZ={40} as="div" className="!w-full">
+                          <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm">
+                            <CheckCircle2 className="w-5 h-5 text-white/80 flex-shrink-0 mt-0.5" />
+                            <div className="text-left flex-1">
+                              <p className="text-sm font-semibold text-white">{language === 'ar' ? 'رابط صحيح' : 'Valid URL'}</p>
+                              <p className="text-sm text-white/80">{language === 'ar' ? 'تنسيق الرابط صحيح' : 'URL format is correct'}</p>
+                            </div>
+                            {/* Detected URL Type Badge */}
+                            {isDetecting && (
+                              <div className="flex items-center gap-2 text-white/70">
+                                <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin" />
+                                <span className="text-xs">{language === 'ar' ? 'جاري الكشف...' : 'Detecting...'}</span>
                               </div>
+                            )}
+                            {detectedUrlType && !isDetecting && (
+                              <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${detectedUrlType.type === 'app' ? 'bg-orange-500/30 text-orange-200' :
+                                detectedUrlType.type === 'video' ? 'bg-purple-500/30 text-purple-200' :
+                                  detectedUrlType.type === 'store' ? 'bg-cyan-500/30 text-cyan-200' :
+                                    'bg-blue-500/30 text-blue-200'
+                                }`}>
+                                {detectedUrlType.type === 'app' && <Smartphone className="w-3 h-3" />}
+                                {detectedUrlType.type === 'video' && <Video className="w-3 h-3" />}
+                                {detectedUrlType.type === 'store' && <Store className="w-3 h-3" />}
+                                {detectedUrlType.type === 'website' && <Monitor className="w-3 h-3" />}
+                                {detectedUrlType.type === 'app' ? (language === 'ar' ? 'تطبيق' : 'App') :
+                                  detectedUrlType.type === 'video' ? (language === 'ar' ? 'فيديو' : 'Video') :
+                                    detectedUrlType.type === 'store' ? (language === 'ar' ? 'متجر' : 'Store') :
+                                      (language === 'ar' ? 'موقع' : 'Website')}
+                              </div>
+                            )}
+                          </div>
+                        </CardItem>
+                      )}
 
-                              {/* Results List */}
-                              <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {appSearchResults.map((app) => (
+                      {/* Merchant Center Selection for Shopping Campaigns - Google Ads Style */}
+                      {detectedUrlType && (detectedUrlType.type === 'store' || detectedUrlType.suggestedCampaignType === 'SHOPPING') && (
+                        <CardItem translateZ={35} as="div" className="!w-full">
+                          <div className="mt-4 p-5 bg-white/10 border border-cyan-400/30 rounded-xl backdrop-blur-sm">
+                            {/* Info Message */}
+                            <div className="flex items-start gap-3 mb-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                              <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                <ShoppingCart className="w-4 h-4 text-blue-300" />
+                              </div>
+                              <p className="text-sm text-white/90">
+                                {language === 'ar'
+                                  ? 'للإعلان عن منتجات على موقعك الإلكتروني، اختَر حسابًا على Merchant Center.'
+                                  : 'To advertise products on your website, choose a Merchant Center account.'}
+                              </p>
+                            </div>
+
+                            {/* Search Box */}
+                            <div className="relative mb-4">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                              <input
+                                type="text"
+                                placeholder={language === 'ar' ? 'اختيار حساب' : 'Search accounts'}
+                                className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50"
+                              />
+                            </div>
+
+                            {/* Table Header */}
+                            <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-white/5 rounded-t-lg border-b border-white/10 text-xs font-semibold text-white/70">
+                              <div className="col-span-5">{language === 'ar' ? 'Merchant Center' : 'Merchant Center'}</div>
+                              <div className="col-span-2 text-center">{language === 'ar' ? 'المنتجات' : 'Products'}</div>
+                              <div className="col-span-2 text-center">{language === 'ar' ? 'نسبة الموافقة' : 'Approval'}</div>
+                              <div className="col-span-3 text-center">{language === 'ar' ? 'الحالة' : 'Status'}</div>
+                            </div>
+
+                            {/* Table Body */}
+                            {isFetchingMerchants ? (
+                              <div className="flex items-center justify-center py-8">
+                                <div className="w-6 h-6 border-2 border-cyan-400/50 border-t-transparent rounded-full animate-spin" />
+                              </div>
+                            ) : merchantAccounts.length > 0 ? (
+                              <div className="max-h-60 overflow-y-auto">
+                                {merchantAccounts.map((account, index) => (
                                   <div
-                                    key={app.id}
-                                    onClick={() => setSelectedApp(app)}
-                                    className={`p-3 rounded-lg cursor-pointer transition-all flex items-center gap-4 ${selectedApp?.id === app.id
-                                      ? 'bg-orange-500/30 border-2 border-orange-400/70'
-                                      : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                    key={account.id}
+                                    onClick={() => {
+                                      if (account.linked) {
+                                        setSelectedMerchant(account.id);
+                                        // Save to localStorage for campaign flow
+                                        const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+                                        localStorage.setItem('campaignData', JSON.stringify({
+                                          ...currentData,
+                                          selectedMerchantId: account.id,
+                                          selectedMerchantName: account.name,
+                                          merchantLinked: true
+                                        }));
+                                      }
+                                    }}
+                                    className={`grid grid-cols-12 gap-2 px-3 py-3 transition-all items-center ${index % 2 === 0 ? 'bg-white/5' : 'bg-transparent'
+                                      } ${selectedMerchant === account.id
+                                        ? 'bg-cyan-500/20 ring-1 ring-cyan-400/50'
+                                        : account.linked ? 'hover:bg-white/10 cursor-pointer' : 'opacity-70'
                                       }`}
                                   >
-                                    {/* App Icon */}
-                                    <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
-                                      {app.icon ? (
-                                        <img src={app.icon} alt={app.name} className="w-full h-full object-cover rounded-xl" />
+                                    {/* Merchant Info */}
+                                    <div className="col-span-5 flex items-center gap-3">
+                                      <div className="w-9 h-9 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <ShoppingCart className="w-4 h-4 text-cyan-300" />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-medium text-white truncate">{account.name}</p>
+                                        <p className="text-xs text-white/50">{account.id}</p>
+                                      </div>
+                                    </div>
+                                    {/* Products Count */}
+                                    <div className="col-span-2 text-center text-sm text-white/70">
+                                      {account.products !== null ? account.products.toLocaleString() : '-'}
+                                    </div>
+                                    {/* Approval Rate */}
+                                    <div className="col-span-2 text-center text-sm text-white/70">
+                                      {account.approvalRate !== null ? `${account.approvalRate}%` : '-'}
+                                    </div>
+                                    {/* Status & Link Button */}
+                                    <div className="col-span-3 text-center">
+                                      {account.linked ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
+                                          <CheckCircle2 className="w-3 h-3" />
+                                          Linked
+                                        </span>
                                       ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
-                                          <Smartphone className="w-6 h-6 text-white/60" />
-                                        </div>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            // Save current campaign data before redirecting
+                                            const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+                                            localStorage.setItem('campaignData', JSON.stringify({
+                                              ...currentData,
+                                              pendingMerchantId: account.id,
+                                              pendingMerchantName: account.name,
+                                              returnUrl: '/campaign/website-url'
+                                            }));
+                                            // Redirect to merchant linking page
+                                            window.location.href = '/integrations/google-merchant';
+                                          }}
+                                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/30 hover:bg-blue-500/50 text-blue-300 text-xs font-medium rounded-full transition-colors"
+                                        >
+                                          <LinkIcon className="w-3 h-3" />
+                                          Link
+                                        </button>
                                       )}
                                     </div>
-
-                                    {/* App Info */}
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-base font-semibold text-white truncate">{app.name}</p>
-                                      <p className="text-sm text-white/60 truncate">{app.developer} - {app.id}</p>
-                                    </div>
-
-                                    {/* Selection Indicator */}
-                                    {selectedApp?.id === app.id && (
-                                      <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <CheckCircle2 className="w-4 h-4 text-white" />
-                                      </div>
-                                    )}
                                   </div>
                                 ))}
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      </CardItem>
-                    )}
+                            ) : (
+                              <div className="text-center py-8 text-white/60 text-sm">
+                                <p>{language === 'ar' ? 'لا توجد حسابات Merchant Center متاحة' : 'No Merchant Center accounts available'}</p>
+                                <button
+                                  onClick={() => window.location.href = '/integrations/google-merchant'}
+                                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 text-sm font-medium rounded-lg transition-colors"
+                                >
+                                  <LinkIcon className="w-4 h-4" />
+                                  {language === 'ar' ? 'ربط حساب جديد' : 'Link New Account'}
+                                </button>
+                              </div>
+                            )}
 
-                    {/* Video Campaign Selection */}
-                    {detectedUrlType && (detectedUrlType.type === 'video' || detectedUrlType.suggestedCampaignType === 'VIDEO') && (
-                      <CardItem translateZ={35} as="div" className="!w-full">
-                        <div className="mt-4 p-4 bg-white/10 border border-purple-400/30 rounded-xl backdrop-blur-sm">
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                              <Video className="w-5 h-5 text-purple-300" />
-                              <p className="text-sm font-semibold text-white">
-                                {language === 'ar' ? 'اختيار فيديوهات YouTube' : 'Select YouTube Videos'} (Max 5)
-                              </p>
-                            </div>
-                            <span className="text-xs bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full border border-purple-500/30">
-                              {selectedVideos.length}/5
-                            </span>
-                          </div>
-
-                          {/* Video Search Input */}
-                          <div className="relative mb-4">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
-                            <input
-                              type="text"
-                              value={videoSearchQuery}
-                              onChange={(e) => setVideoSearchQuery(e.target.value)}
-                              placeholder={language === 'ar'
-                                ? 'البحث عن فيديو أو لصق عنوان URL'
-                                : 'Search video or paste YouTube URL'}
-                              className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
-                            />
-                            {isVideoSearching && (
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                <div className="w-4 h-4 border-2 border-purple-400/50 border-t-transparent rounded-full animate-spin" />
+                            {/* Selected Confirmation */}
+                            {selectedMerchant && (
+                              <div className="mt-3 p-3 bg-green-500/20 border border-green-400/30 rounded-lg flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-green-400" />
+                                <span className="text-sm text-green-200">
+                                  {language === 'ar' ? 'تم اختيار الحساب' : 'Account selected'}
+                                </span>
                               </div>
                             )}
                           </div>
+                        </CardItem>
+                      )}
 
-                          {/* Video Search Results */}
-                          {videoSearchResults.length > 0 ? (
-                            <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
-                              {videoSearchResults.map((video) => {
-                                const isSelected = selectedVideos.some(v => v.id === video.id);
-                                return (
-                                  <div
-                                    key={video.id}
-                                    onClick={() => {
-                                      if (isSelected) {
-                                        setSelectedVideos(prev => prev.filter(v => v.id !== video.id));
-                                      } else {
-                                        if (selectedVideos.length < 5) {
-                                          setSelectedVideos(prev => [...prev, video]);
-                                        }
-                                      }
-                                    }}
-                                    className={`p-2 rounded-lg cursor-pointer transition-all flex items-start gap-3 ${isSelected
-                                      ? 'bg-purple-500/30 border border-purple-400/70'
-                                      : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
-                                      }`}
-                                  >
-                                    <div className="w-20 h-14 rounded-md overflow-hidden flex-shrink-0 relative">
-                                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+                      {/* App Campaign Selection */}
+                      {detectedUrlType && detectedUrlType.type === 'app' && (
+                        <CardItem translateZ={35} as="div" className="!w-full">
+                          <div className="mt-4 p-4 bg-white/10 border border-orange-400/30 rounded-xl backdrop-blur-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Smartphone className="w-5 h-5 text-orange-300" />
+                              <p className="text-sm font-semibold text-white">
+                                {language === 'ar' ? 'إعدادات حملة التطبيق' : 'App Campaign Settings'}
+                              </p>
+                            </div>
+
+                            {/* OS Selection */}
+                            <div className="flex gap-3 mb-4">
+                              <button
+                                onClick={() => setSelectedOS('android')}
+                                className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${selectedOS === 'android'
+                                  ? 'bg-green-500/30 border border-green-400/50 text-green-200'
+                                  : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                                  }`}
+                              >
+                                <span className="text-sm font-medium">Android</span>
+                              </button>
+                              <button
+                                onClick={() => setSelectedOS('ios')}
+                                className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${selectedOS === 'ios'
+                                  ? 'bg-blue-500/30 border border-blue-400/50 text-blue-200'
+                                  : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                                  }`}
+                              >
+                                <span className="text-sm font-medium">iOS</span>
+                              </button>
+                            </div>
+
+                            {/* App Search */}
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                              <input
+                                type="text"
+                                value={appSearchQuery}
+                                onChange={(e) => setAppSearchQuery(e.target.value)}
+                                placeholder={language === 'ar'
+                                  ? 'ادخل اسم التطبيق أو اسم الحزمة أو URL'
+                                  : 'Enter app name, package name, or store URL'}
+                                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                              />
+                              {isSearchingApps && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                  <div className="w-4 h-4 border-2 border-orange-400/50 border-t-transparent rounded-full animate-spin" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* App Search Results */}
+                            {appSearchResults.length > 0 && (
+                              <div className="mt-4">
+                                {/* Results Header - Google Ads Style */}
+                                <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+                                  <p className="text-sm text-white/80">
+                                    {language === 'ar'
+                                      ? `نتائج البحث عن تطبيقات ${selectedOS === 'ios' ? 'iOS' : 'Android'} في ${selectedOS === 'ios' ? 'Apple Store' : 'Google Play'} (${appSearchResults.length})`
+                                      : `${selectedOS === 'ios' ? 'iOS' : 'Android'} apps from ${selectedOS === 'ios' ? 'Apple Store' : 'Google Play'} (${appSearchResults.length})`
+                                    }
+                                  </p>
+                                </div>
+
+                                {/* Results List */}
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                  {appSearchResults.map((app) => (
+                                    <div
+                                      key={app.id}
+                                      onClick={() => setSelectedApp(app)}
+                                      className={`p-3 rounded-lg cursor-pointer transition-all flex items-center gap-4 ${selectedApp?.id === app.id
+                                        ? 'bg-orange-500/30 border-2 border-orange-400/70'
+                                        : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                        }`}
+                                    >
+                                      {/* App Icon */}
+                                      <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+                                        {app.icon ? (
+                                          <img src={app.icon} alt={app.name} className="w-full h-full object-cover rounded-xl" />
+                                        ) : (
+                                          <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+                                            <Smartphone className="w-6 h-6 text-white/60" />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* App Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-base font-semibold text-white truncate">{app.name}</p>
+                                        <p className="text-sm text-white/60 truncate">{app.developer} - {app.id}</p>
+                                      </div>
+
+                                      {/* Selection Indicator */}
+                                      {selectedApp?.id === app.id && (
+                                        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                          <CheckCircle2 className="w-4 h-4 text-white" />
+                                        </div>
+                                      )}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-xs font-medium text-white line-clamp-2 leading-snug mb-1" title={video.title}>
-                                        {video.title}
-                                      </p>
-                                      <div className="flex items-center gap-2 text-[10px] text-white/50">
-                                        <span className="truncate max-w-[80px]">{video.channelTitle}</span>
-                                        <span>•</span>
-                                        <span>{Number(video.viewCount).toLocaleString()} views</span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardItem>
+                      )}
+
+                      {/* Video Campaign Selection */}
+                      {detectedUrlType && (detectedUrlType.type === 'video' || detectedUrlType.suggestedCampaignType === 'VIDEO') && (
+                        <CardItem translateZ={35} as="div" className="!w-full">
+                          <div className="mt-4 p-4 bg-white/10 border border-purple-400/30 rounded-xl backdrop-blur-sm">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <Video className="w-5 h-5 text-purple-300" />
+                                <p className="text-sm font-semibold text-white">
+                                  {language === 'ar' ? 'اختيار فيديوهات YouTube' : 'Select YouTube Videos'} (Max 5)
+                                </p>
+                              </div>
+                              <span className="text-xs bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full border border-purple-500/30">
+                                {selectedVideos.length}/5
+                              </span>
+                            </div>
+
+                            {/* Video Search Input */}
+                            <div className="relative mb-4">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                              <input
+                                type="text"
+                                value={videoSearchQuery}
+                                onChange={(e) => setVideoSearchQuery(e.target.value)}
+                                placeholder={language === 'ar'
+                                  ? 'البحث عن فيديو أو لصق عنوان URL'
+                                  : 'Search video or paste YouTube URL'}
+                                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                              />
+                              {isVideoSearching && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                  <div className="w-4 h-4 border-2 border-purple-400/50 border-t-transparent rounded-full animate-spin" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Video Search Results */}
+                            {videoSearchResults.length > 0 ? (
+                              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                                {videoSearchResults.map((video) => {
+                                  const isSelected = selectedVideos.some(v => v.id === video.id);
+                                  return (
+                                    <div
+                                      key={video.id}
+                                      onClick={() => {
+                                        if (isSelected) {
+                                          setSelectedVideos(prev => prev.filter(v => v.id !== video.id));
+                                        } else {
+                                          if (selectedVideos.length < 5) {
+                                            setSelectedVideos(prev => [...prev, video]);
+                                          }
+                                        }
+                                      }}
+                                      className={`p-2 rounded-lg cursor-pointer transition-all flex items-start gap-3 ${isSelected
+                                        ? 'bg-purple-500/30 border border-purple-400/70'
+                                        : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                        }`}
+                                    >
+                                      <div className="w-20 h-14 rounded-md overflow-hidden flex-shrink-0 relative">
+                                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium text-white line-clamp-2 leading-snug mb-1" title={video.title}>
+                                          {video.title}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-[10px] text-white/50">
+                                          <span className="truncate max-w-[80px]">{video.channelTitle}</span>
+                                          <span>•</span>
+                                          <span>{Number(video.viewCount).toLocaleString()} views</span>
+                                        </div>
+                                      </div>
+                                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-purple-500 border-purple-500' : 'border-white/30'}`}>
+                                        {isSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
                                       </div>
                                     </div>
-                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-purple-500 border-purple-500' : 'border-white/30'}`}>
-                                      {isSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            !isVideoSearching && (
-                              <div className="text-center py-6 text-white/40 text-xs">
-                                {videoSearchQuery.length > 2
-                                  ? (language === 'ar' ? 'لم يتم العثور على نتائج' : 'No videos found')
-                                  : (language === 'ar' ? 'ابدأ بالبحث أو الصق رابط الفيديو' : 'Start by searching or pasting a video link')
-                                }
+                                  );
+                                })}
                               </div>
-                            )
-                          )}
-                        </div>
-                      </CardItem>
-                    )}
-                  </div>
+                            ) : (
+                              !isVideoSearching && (
+                                <div className="text-center py-6 text-white/40 text-xs">
+                                  {videoSearchQuery.length > 2
+                                    ? (language === 'ar' ? 'لم يتم العثور على نتائج' : 'No videos found')
+                                    : (language === 'ar' ? 'ابدأ بالبحث أو الصق رابط الفيديو' : 'Start by searching or pasting a video link')
+                                  }
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </CardItem>
+                      )}
+                    </div>
 
-                </div>
-              </CardBody>
-            </CardContainer>
-            </div>
+                  </div>
+                </CardBody>
+              </CardContainer>
+            </GlowingBorderCard>
 
             {/* Phone Number Card - Only show for Call Ads */}
             {campaignType === 'Call Ads' && (

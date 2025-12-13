@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type GlowingBorderCardProps = {
@@ -6,6 +6,9 @@ type GlowingBorderCardProps = {
   fromColor: string;
   toColor: string;
   className?: string;
+  noBackground?: boolean;
+  rounded?: "lg" | "xl";
+  enable3D?: boolean;
 };
 
 // Map Tailwind color names to RGB values
@@ -41,14 +44,53 @@ export default function GlowingBorderCard({
   className,
   noBackground = false,
   rounded = "lg",
-}: GlowingBorderCardProps & { noBackground?: boolean; rounded?: "lg" | "xl" }) {
-  const fromRgb = colorMap[fromColor] || 'rgb(16, 185, 129)'; // Default to emerald-500
-  const toRgb = colorMap[toColor] || 'rgb(74, 222, 128)';     // Default to green-400
+  enable3D = false,
+}: GlowingBorderCardProps) {
+  const fromRgb = colorMap[fromColor] || 'rgb(16, 185, 129)';
+  const toRgb = colorMap[toColor] || 'rgb(74, 222, 128)';
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg)');
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!enable3D || !cardRef.current) return;
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Reduced rotation for subtle effect (max 8 degrees)
+    const rotateX = ((e.clientY - centerY) / (rect.height / 2)) * -8;
+    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 8;
+
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg)');
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
 
   return (
-    <div className={cn("relative group", className)}>
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={cn("relative group", className)}
+      style={enable3D ? {
+        transform,
+        transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.4s ease-out',
+        transformStyle: 'preserve-3d',
+      } : undefined}
+    >
       <div
-        className={`absolute -inset-0.5 rounded-${rounded} blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt`}
+        className={`absolute -inset-0.5 rounded-${rounded} blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200`}
         style={{
           background: `linear-gradient(to right, ${fromRgb}, ${toRgb})`
         }}
