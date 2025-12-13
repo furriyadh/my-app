@@ -1861,22 +1861,22 @@ def analyze_website_and_forecast():
         location_ids = []
         
         # Country code to geo_target_id mapping (fallback for countries)
-                    country_map = {
-                        'SA': '2682', 'AE': '2784', 'EG': '2818', 'US': '2840',
-                        'GB': '2826', 'DE': '2276', 'FR': '2250', 'IT': '2380',
-                        'ES': '2724', 'CA': '2124', 'AU': '2036', 'IN': '2356',
-                        'JP': '2392', 'BR': '2076', 'MX': '2484', 'AR': '2032',
-                        'CO': '2170', 'CL': '2152', 'PE': '2604', 'TR': '2792',
-                        'PL': '2616', 'NL': '2528', 'SE': '2752', 'NO': '2578',
-                        'DK': '2208', 'FI': '2246', 'CH': '2756', 'AT': '2040',
-                        'BE': '2056', 'GR': '2300', 'PT': '2620', 'IE': '2372',
-                        'NZ': '2554', 'SG': '2702', 'HK': '2344', 'MY': '2458',
-                        'TH': '2764', 'ID': '2360', 'PH': '2608', 'VN': '2704',
-                        'ZA': '2710', 'NG': '2566', 'KE': '2404', 'MA': '2504',
-                        'TN': '2788', 'DZ': '2012', 'JO': '2400', 'LB': '2422',
-                        'IQ': '2368', 'KW': '2414', 'OM': '2512', 'QA': '2634',
-                        'BH': '2048'
-                    }
+        country_map = {
+            'SA': '2682', 'AE': '2784', 'EG': '2818', 'US': '2840',
+            'GB': '2826', 'DE': '2276', 'FR': '2250', 'IT': '2380',
+            'ES': '2724', 'CA': '2124', 'AU': '2036', 'IN': '2356',
+            'JP': '2392', 'BR': '2076', 'MX': '2484', 'AR': '2032',
+            'CO': '2170', 'CL': '2152', 'PE': '2604', 'TR': '2792',
+            'PL': '2616', 'NL': '2528', 'SE': '2752', 'NO': '2578',
+            'DK': '2208', 'FI': '2246', 'CH': '2756', 'AT': '2040',
+            'BE': '2056', 'GR': '2300', 'PT': '2620', 'IE': '2372',
+            'NZ': '2554', 'SG': '2702', 'HK': '2344', 'MY': '2458',
+            'TH': '2764', 'ID': '2360', 'PH': '2608', 'VN': '2704',
+            'ZA': '2710', 'NG': '2566', 'KE': '2404', 'MA': '2504',
+            'TN': '2788', 'DZ': '2012', 'JO': '2400', 'LB': '2422',
+            'IQ': '2368', 'KW': '2414', 'OM': '2512', 'QA': '2634',
+            'BH': '2048'
+        }
         
         # Initialize Google Ads client for geo_target lookup
         try:
@@ -2083,42 +2083,42 @@ def analyze_website_and_forecast():
             
             for url_attempt in urls_to_try:
                 try:
-            keyword_ideas_request = client.get_type("GenerateKeywordIdeasRequest")
-            mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
-            keyword_ideas_request.customer_id = mcc_customer_id
-            keyword_ideas_request.language = language_rn
-            keyword_ideas_request.geo_target_constants = location_rns
-            keyword_ideas_request.include_adult_keywords = False
-            keyword_ideas_request.keyword_plan_network = (
-                client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
-            )
+                    keyword_ideas_request = client.get_type("GenerateKeywordIdeasRequest")
+                    mcc_customer_id = os.getenv('MCC_LOGIN_CUSTOMER_ID', '9252466178')
+                    keyword_ideas_request.customer_id = mcc_customer_id
+                    keyword_ideas_request.language = language_rn
+                    keyword_ideas_request.geo_target_constants = location_rns
+                    keyword_ideas_request.include_adult_keywords = False
+                    keyword_ideas_request.keyword_plan_network = (
+                        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
+                    )
             
                     # Use URL seed to generate keywords from website
                     keyword_ideas_request.url_seed.url = url_attempt
             
                     logger.info(f"🚀 Step 1: Generating keyword ideas from URL: {url_attempt}")
             
-            # Call API to get keyword ideas
-            keyword_ideas = keyword_plan_idea_service.generate_keyword_ideas(
-                request=keyword_ideas_request
-            )
+                    # Call API to get keyword ideas
+                    keyword_ideas = keyword_plan_idea_service.generate_keyword_ideas(
+                        request=keyword_ideas_request
+                    )
             
-            # Extract keywords and metrics
-            for idea in keyword_ideas:
-                keyword_text = idea.text
-                metrics = idea.keyword_idea_metrics
-                competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
+                    # Extract keywords and metrics
+                    for idea in keyword_ideas:
+                        keyword_text = idea.text
+                        metrics = idea.keyword_idea_metrics
+                        competition_value = metrics.competition.name if hasattr(metrics.competition, 'name') else 'UNSPECIFIED'
                 
-                keywords_list.append(keyword_text)
-                keywords_data.append({
-                    'keyword': keyword_text,
-                    'avg_monthly_searches': metrics.avg_monthly_searches,
-                    'competition': competition_value
-                })
+                        keywords_list.append(keyword_text)
+                        keywords_data.append({
+                            'keyword': keyword_text,
+                            'avg_monthly_searches': metrics.avg_monthly_searches,
+                            'competition': competition_value
+                        })
                 
-                # Limit to top 10 keywords
-                if len(keywords_list) >= 10:
-                    break
+                        # Limit to top 10 keywords
+                        if len(keywords_list) >= 10:
+                            break
                     
                     if keywords_list:
                         logger.info(f"✅ Successfully generated keywords from: {url_attempt}")
@@ -2332,11 +2332,11 @@ def detect_website_language():
         text_content = ''
         
         # Fetch the website (20 second timeout)
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept-Language': 'ar,en,fr,es,de,it,ja,ko,zh,*;q=0.9',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-            }
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
         
         # Try to fetch the website - with www fallback
         response = None
@@ -2357,7 +2357,7 @@ def detect_website_language():
                 logger.info(f"🔗 Fetching: {url_attempt}")
                 response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
                 if response.status_code == 200:
-            logger.info(f"✅ Website fetched successfully: {response.status_code}")
+                    logger.info(f"✅ Website fetched successfully: {response.status_code}")
                     break
             except Exception as fetch_error:
                 fetch_error_msg = str(fetch_error)
@@ -2378,12 +2378,12 @@ def detect_website_language():
                 'error_details': fetch_error_msg
             }), 400
             
-            soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, 'html.parser')
             
         # Get HTML lang attribute (for reference only)
         html_lang_attr = None
-            html_tag = soup.find('html')
-            if html_tag and html_tag.get('lang'):
+        html_tag = soup.find('html')
+        if html_tag and html_tag.get('lang'):
             html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
             logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
         
@@ -2491,8 +2491,8 @@ def detect_website_language():
             devanagari_chars = len(re.findall(r'[\u0900-\u097F]', text_content))
             latin_chars = len(re.findall(r'[a-zA-Z]', text_content))
             
-                total_chars = len(text_content)
-                
+            total_chars = len(text_content)
+            
             # Find the dominant script
             scripts = {
                 'ar': arabic_chars,
@@ -2541,7 +2541,7 @@ def detect_website_language():
             if persian_score > arabic_score and persian_score > 10:
                 detected_lang_code = 'fa'
                 logger.info(f"✅ PERSIAN confirmed (score: {persian_score} vs Arabic: {arabic_score})")
-                    else:
+            else:
                 detected_lang_code = 'ar'
                 logger.info(f"✅ ARABIC confirmed (score: {arabic_score} vs Persian: {persian_score})")
         
@@ -2552,7 +2552,7 @@ def detect_website_language():
             # Last resort: use HTML lang attribute if available
             if html_lang_attr:
                 detected_lang_code = html_lang_attr
-                        confidence = 'low'
+                confidence = 'low'
                 logger.info(f"⚠️ Using HTML lang attribute as last resort: {detected_lang_code}")
             else:
                 logger.error(f"❌ Could not determine language")
@@ -2877,7 +2877,7 @@ def launch_campaign():
                             if location_id not in location_ids:
                                 location_ids.append(location_id)
                             logger.info(f"✅ Using FULL COUNTRY targeting for: {location_name} (ID: {location_id})")
-                            else:
+                        else:
                             logger.warning(f"⚠️ Could not find country ID for: {location_name}")
                 
                 # CASE 2: REGION/STATE - Use location_id if available, search if not
@@ -2887,21 +2887,21 @@ def launch_campaign():
                     # For now, use country-level as fallback
                     if country_code and country_code in country_map:
                         location_id = country_map[country_code]
-                            if location_id not in location_ids:
-                                location_ids.append(location_id)
+                        if location_id not in location_ids:
+                            location_ids.append(location_id)
                         logger.info(f"   ℹ️ Using country-level targeting as fallback for region: {location_name}")
                         
                 # CASE 3: CITY/NEIGHBORHOOD - Use proximity targeting for precise targeting
                 elif location_type in ['city', 'locality', 'neighborhood', 'sublocality', 'مدينة', 'حي', 'منطقة فرعية']:
-                            if 'coordinates' in loc:
-                                coords = loc['coordinates']
-                                radius = loc.get('radius', 10)
-                                proximity_targets.append({
-                                    'latitude': coords.get('lat'),
-                                    'longitude': coords.get('lng'),
-                                    'radius_km': radius,
-                                    'name': location_name
-                                })
+                    if 'coordinates' in loc:
+                        coords = loc['coordinates']
+                        radius = loc.get('radius', 10)
+                        proximity_targets.append({
+                            'latitude': coords.get('lat'),
+                            'longitude': coords.get('lng'),
+                            'radius_km': radius,
+                            'name': location_name
+                        })
                         logger.info(f"✅ Using PROXIMITY targeting for city/neighborhood: {location_name} (radius: {radius}km)")
                     
                     # Also add country for Keyword Planner compatibility
@@ -2930,14 +2930,14 @@ def launch_campaign():
                         logger.info(f"✅ Detected as COUNTRY, using full targeting for: {location_name} (ID: {location_id})")
                     elif 'coordinates' in loc:
                         # Has coordinates but unknown type - use proximity
-                            coords = loc['coordinates']
-                            radius = loc.get('radius', 10)
-                            proximity_targets.append({
-                                'latitude': coords.get('lat'),
-                                'longitude': coords.get('lng'),
-                                'radius_km': radius,
+                        coords = loc['coordinates']
+                        radius = loc.get('radius', 10)
+                        proximity_targets.append({
+                            'latitude': coords.get('lat'),
+                            'longitude': coords.get('lng'),
+                            'radius_km': radius,
                             'name': location_name
-                            })
+                        })
                         logger.info(f"⚠️ Unknown location type for: {location_name}, using proximity targeting (radius: {radius}km)")
                         
                         # Add country for compatibility if available
@@ -3192,42 +3192,115 @@ def launch_campaign():
                     logger.error(f"   ❌ Failed to convert Real CPC: {e}")
                     logger.warning(f"   ⚠️ Using USD value for CPC: ${converted_real_cpc:.2f}")
             
-            # Initialize SearchCampaignCreator
-            logger.info(f"🚀 Account verified - proceeding with REAL campaign creation...")
-            campaign_creator = SearchCampaignCreator(client, customer_id)
+            # ═══════════════════════════════════════════════════════════════════
+            # CAMPAIGN TYPE ROUTING - SEARCH vs VIDEO
+            # ═══════════════════════════════════════════════════════════════════
+            logger.info(f"🚀 Account verified - proceeding with REAL {campaign_type} campaign creation...")
             
-            # Prepare ad_copies data from generated content
-            ad_copies_data = {
-                'headlines': generated_content.get('headlines', [])[:15] if generated_content else [],
-                'descriptions': generated_content.get('descriptions', [])[:4] if generated_content else [],
-                'keywords': generated_content.get('keywords', [])[:70] if generated_content else [],
-                'long_headline': generated_content.get('headlines', [''])[0] if generated_content else '',
-                'business_name': 'عملي',
-                'images': []
-            }
-            
-            logger.info(f"📦 Creating campaign with:")
-            logger.info(f"   - {len(ad_copies_data['headlines'])} headlines")
-            logger.info(f"   - {len(ad_copies_data['descriptions'])} descriptions")
-            logger.info(f"   - {len(ad_copies_data['keywords'])} keywords")
-            
-            # Create REAL campaign on Google Ads (NO SIMULATION)
-            logger.info(f"🚀 Calling Google Ads API to create campaign...")
-            logger.info(f"📍 Location IDs: {location_ids}")
-            logger.info(f"📍 Proximity Targets: {len(proximity_targets)} locations")
-            logger.info(f"💰 Budget: {converted_budget:.2f} {account_currency_code}")
-            try:
-                google_campaign_id = campaign_creator.create_search_campaign(
-                    campaign_name=campaign_name,
-                    daily_budget=converted_budget,  # Use converted budget in account currency
-                    target_locations=location_ids if location_ids else [],
-                    target_language=language_id,
-                    website_url=website_url,
-                    keywords=ad_copies_data['keywords'],
-                    ad_copies=ad_copies_data,
-                    proximity_targets=proximity_targets,
-                    real_cpc=converted_real_cpc  # Pass CONVERTED Real CPC in account currency
-                )
+            if campaign_type == 'VIDEO':
+                # ═══════════════════════════════════════════════════════════════
+                # VIDEO CAMPAIGN CREATION
+                # ═══════════════════════════════════════════════════════════════
+                from campaign_types.video_campaign import VideoCampaignCreator
+                
+                logger.info(f"🎬 Creating VIDEO campaign...")
+                campaign_creator = VideoCampaignCreator(client, customer_id)
+                
+                # Get video-specific data from request
+                video_ad_type = data.get('video_ad_type', 'VIDEO_RESPONSIVE_AD')
+                youtube_video_id = data.get('youtube_video_id')
+                
+                logger.info(f"   📺 Video Ad Type: {video_ad_type}")
+                logger.info(f"   🎥 YouTube Video ID: {youtube_video_id}")
+                
+                # Prepare ad_copies data for video campaigns
+                ad_copies_data = {
+                    'headlines': generated_content.get('headlines', [])[:5] if generated_content else [],
+                    'long_headlines': generated_content.get('long_headlines', generated_content.get('descriptions', []))[:5] if generated_content else [],
+                    'descriptions': generated_content.get('descriptions', [])[:5] if generated_content else [],
+                    'call_to_action': generated_content.get('call_to_action', 'اكتشف المزيد'),
+                    'action_button_label': generated_content.get('action_button_label', 'تعرف أكثر'),
+                    'action_headline': generated_content.get('action_headline', ''),
+                    'breadcrumb1': generated_content.get('breadcrumb1', ''),
+                    'breadcrumb2': generated_content.get('breadcrumb2', ''),
+                    'keywords': generated_content.get('keywords', [])[:20] if generated_content else [],
+                }
+                
+                logger.info(f"📦 Creating VIDEO campaign with:")
+                logger.info(f"   - {len(ad_copies_data['headlines'])} headlines")
+                logger.info(f"   - {len(ad_copies_data['descriptions'])} descriptions")
+                logger.info(f"   - Video Type: {video_ad_type}")
+                
+                # Create VIDEO campaign on Google Ads
+                logger.info(f"🚀 Calling Google Ads API to create VIDEO campaign...")
+                logger.info(f"📍 Location IDs: {location_ids}")
+                logger.info(f"💰 Budget: {converted_budget:.2f} {account_currency_code}")
+                
+                try:
+                    google_campaign_id = campaign_creator.create_video_campaign(
+                        campaign_name=campaign_name,
+                        daily_budget=converted_budget,
+                        target_locations=location_ids if location_ids else [],
+                        target_language=language_id,
+                        website_content={'keywords': ad_copies_data.get('keywords', [])},
+                        ad_copies=ad_copies_data,
+                        video_ad_type=video_ad_type,
+                        website_url=website_url,
+                        youtube_video_id=youtube_video_id
+                    )
+                except Exception as video_error:
+                    logger.error(f"❌ Video campaign creation error: {str(video_error)}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+                    raise video_error
+                    
+            else:
+                # ═══════════════════════════════════════════════════════════════
+                # SEARCH CAMPAIGN CREATION (Default)
+                # ═══════════════════════════════════════════════════════════════
+                from campaign_types.search_campaign import SearchCampaignCreator
+                
+                logger.info(f"🔍 Creating SEARCH campaign...")
+                campaign_creator = SearchCampaignCreator(client, customer_id)
+                
+                # Prepare ad_copies data from generated content
+                ad_copies_data = {
+                    'headlines': generated_content.get('headlines', [])[:15] if generated_content else [],
+                    'descriptions': generated_content.get('descriptions', [])[:4] if generated_content else [],
+                    'keywords': generated_content.get('keywords', [])[:70] if generated_content else [],
+                    'long_headline': generated_content.get('headlines', [''])[0] if generated_content else '',
+                    'business_name': 'عملي',
+                    'images': []
+                }
+                
+                logger.info(f"📦 Creating SEARCH campaign with:")
+                logger.info(f"   - {len(ad_copies_data['headlines'])} headlines")
+                logger.info(f"   - {len(ad_copies_data['descriptions'])} descriptions")
+                logger.info(f"   - {len(ad_copies_data['keywords'])} keywords")
+                
+                # Create SEARCH campaign on Google Ads (NO SIMULATION)
+                logger.info(f"🚀 Calling Google Ads API to create SEARCH campaign...")
+                logger.info(f"📍 Location IDs: {location_ids}")
+                logger.info(f"📍 Proximity Targets: {len(proximity_targets)} locations")
+                logger.info(f"💰 Budget: {converted_budget:.2f} {account_currency_code}")
+                
+                try:
+                    google_campaign_id = campaign_creator.create_search_campaign(
+                        campaign_name=campaign_name,
+                        daily_budget=converted_budget,
+                        target_locations=location_ids if location_ids else [],
+                        target_language=language_id,
+                        website_url=website_url,
+                        keywords=ad_copies_data['keywords'],
+                        ad_copies=ad_copies_data,
+                        proximity_targets=proximity_targets,
+                        real_cpc=converted_real_cpc
+                    )
+                except Exception as search_error:
+                    logger.error(f"❌ Search campaign creation error: {str(search_error)}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+                    raise search_error
                 
                 if google_campaign_id:
                     logger.info(f"✅ REAL Campaign created on Google Ads with ID: {google_campaign_id}")
@@ -3246,17 +3319,17 @@ def launch_campaign():
                         'message': 'فشل إنشاء الحملة - لم يتم إرجاع معرف الحملة'
                     }
                     
-            except Exception as campaign_error:
-                error_msg = str(campaign_error)
-                logger.error(f"❌ Campaign creation exception: {error_msg}")
-                import traceback
-                logger.error(traceback.format_exc())
-                
-                result = {
-                    'success': False,
-                    'error': error_msg,
-                    'message': f'خطأ في إنشاء الحملة: {error_msg}'
-                }
+        except Exception as campaign_error:
+            error_msg = str(campaign_error)
+            logger.error(f"❌ Campaign creation exception: {error_msg}")
+            import traceback
+            logger.error(traceback.format_exc())
+            
+            result = {
+                'success': False,
+                'error': error_msg,
+                'message': f'خطأ في إنشاء الحملة: {error_msg}'
+            }
             
             logger.info(f"✅ Campaign creation result: {result.get('success')}")
             
@@ -3480,3 +3553,204 @@ def convert_currency_endpoint():
             'error': str(e),
             'message': 'Error occurred while converting currency'
         }), 500
+
+
+@ai_campaign_creator_bp.route('/video-reach-forecast', methods=['POST'])
+def video_reach_forecast():
+    """
+    Get video reach forecast based on YouTube video data and budget.
+    Uses real YouTube video metrics to estimate campaign performance.
+    """
+    import re  # Import at function level to avoid scope issues
+    import requests
+    
+    try:
+        data = request.get_json()
+        
+        location_id = data.get('location_id', '2682')  # Default: Saudi Arabia
+        daily_budget_usd = float(data.get('daily_budget_usd', 15))
+        video_product = data.get('video_product', 'TRUEVIEW_IN_STREAM')
+        duration_days = int(data.get('duration_days', 30))
+        currency_code = data.get('currency_code', 'USD')
+        youtube_video_url = data.get('youtube_video_url', '')
+        youtube_video_id = data.get('youtube_video_id', '')
+        
+        # Extract video ID from URL if provided
+        if youtube_video_url and not youtube_video_id:
+            # Extract YouTube video ID from various URL formats
+            patterns = [
+                r'(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})',
+                r'youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})',
+            ]
+            for pattern in patterns:
+                match = re.search(pattern, youtube_video_url)
+                if match:
+                    youtube_video_id = match.group(1)
+                    break
+        
+        # Fetch real video data from YouTube oEmbed API
+        video_views = 0
+        video_title = ''
+        if youtube_video_id:
+            try:
+                # Try oEmbed for basic info
+                oembed_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={youtube_video_id}&format=json"
+                oembed_response = requests.get(oembed_url, timeout=5)
+                if oembed_response.status_code == 200:
+                    oembed_data = oembed_response.json()
+                    video_title = oembed_data.get('title', '')
+                    logger.info(f"   📺 YouTube Video: {video_title}")
+                
+                # Scrape video page for view count
+                video_page_url = f"https://www.youtube.com/watch?v={youtube_video_id}"
+                page_response = requests.get(video_page_url, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }, timeout=10)
+                if page_response.status_code == 200:
+                    html = page_response.text
+                    view_match = re.search(r'"viewCount":"(\d+)"', html)
+                    if view_match:
+                        video_views = int(view_match.group(1))
+                        logger.info(f"   👀 Current Video Views: {video_views:,}")
+            except Exception as e:
+                logger.warning(f"⚠️ Could not fetch YouTube video data: {e}")
+        
+        # Calculate total budget in micros
+        total_budget_usd = daily_budget_usd * duration_days
+        budget_micros = int(total_budget_usd * 1_000_000)
+        
+        logger.info(f"📹 Video Reach Forecast Request:")
+        logger.info(f"   📍 Location ID: {location_id}")
+        logger.info(f"   💰 Daily Budget: ${daily_budget_usd}")
+        logger.info(f"   📅 Duration: {duration_days} days")
+        logger.info(f"   🎬 Product: {video_product}")
+        logger.info(f"   🎥 YouTube Video ID: {youtube_video_id}")
+        logger.info(f"   💵 Total Budget: ${total_budget_usd} ({budget_micros} micros)")
+        
+        # CPV rates by video subtype (matching frontend values)
+        cpv_rates = {
+            'VIDEO_RESPONSIVE_AD': 0.06,           # $0.02 - $0.10, midpoint $0.06
+            'TRUEVIEW_IN_STREAM': 0.09,            # $0.03 - $0.15, midpoint $0.09
+            'VIDEO_TRUEVIEW_IN_STREAM_AD': 0.09,
+            'IN_FEED_VIDEO_AD': 0.03,              # $0.01 - $0.05, midpoint $0.03
+            'VIDEO_DISCOVERY': 0.03,
+            'VIDEO_BUMPER_AD': 0.00175,            # $0.50 - $3 CPM = midpoint $0.00175/view
+            'BUMPER': 0.00175,
+            'VIDEO_NON_SKIPPABLE_IN_STREAM_AD': 0.00275,  # $0.50 - $5 CPM = midpoint $0.00275/view
+            'VIDEO_NON_SKIPPABLE_IN_STREAM': 0.00275
+        }
+        
+        current_cpv = cpv_rates.get(video_product, 0.06)
+        
+        # Calculate engagement rate based on real video data if available
+        # If video has existing views, use that as a performance indicator
+        engagement_rate = 12  # Default engagement rate
+        if video_views > 0:
+            # Higher viewed videos tend to have better engagement
+            if video_views > 1000000:
+                engagement_rate = 15
+            elif video_views > 100000:
+                engagement_rate = 13
+            elif video_views > 10000:
+                engagement_rate = 11
+            else:
+                engagement_rate = 10
+        
+        # Initialize Google Ads client
+        from utils.google_ads_helper import get_google_ads_client
+        client = get_google_ads_client()
+        
+        if not client:
+            logger.warning("⚠️ Google Ads client not available, using estimated values based on video data")
+            # Return estimated values based on benchmarks and real video data
+            estimated_views = int(total_budget_usd / current_cpv)
+            estimated_impressions = int(estimated_views * 1.2)  # ~120% impressions to views
+            estimated_reach = int(estimated_views * 0.7)  # ~70% unique reach
+            
+            return jsonify({
+                'success': True,
+                'source': 'estimated_from_video',
+                'forecast': {
+                    'impressions': estimated_impressions,
+                    'views': estimated_views,
+                    'reach': estimated_reach,
+                    'cpv': current_cpv,
+                    'engagement_rate': engagement_rate
+                },
+                'budget': {
+                    'daily_usd': daily_budget_usd,
+                    'total_usd': total_budget_usd,
+                    'duration_days': duration_days
+                },
+                'video_info': {
+                    'video_id': youtube_video_id,
+                    'title': video_title,
+                    'current_views': video_views
+                }
+            })
+        
+        # Since ReachPlanService requires special Developer Token permissions,
+        # we use the real YouTube video data combined with CPV rates to estimate
+        logger.info(f"✅ Using YouTube video data for estimates (ReachPlanService not available)")
+        
+        # Calculate estimates based on budget and CPV
+        estimated_views = int(total_budget_usd / current_cpv)
+        estimated_impressions = int(estimated_views * 1.3)  # ~130% impressions to views
+        estimated_reach = int(estimated_views * 0.65)  # ~65% unique reach
+        
+        # Log the calculation
+        logger.info(f"   📊 Estimated Views: {estimated_views:,} (${total_budget_usd} / ${current_cpv} CPV)")
+        logger.info(f"   📊 Estimated Impressions: {estimated_impressions:,}")
+        logger.info(f"   👥 Estimated Reach: {estimated_reach:,}")
+        if video_views > 0:
+            logger.info(f"   📺 Video Current Views: {video_views:,}")
+            logger.info(f"   📈 Engagement Rate (based on video popularity): {engagement_rate}%")
+        
+        return jsonify({
+            'success': True,
+            'source': 'youtube_video_data',
+            'forecast': {
+                'impressions': estimated_impressions,
+                'views': estimated_views,
+                'reach': estimated_reach,
+                'cpv': current_cpv,
+                'engagement_rate': engagement_rate
+            },
+            'budget': {
+                'daily_usd': daily_budget_usd,
+                'total_usd': total_budget_usd,
+                'duration_days': duration_days
+            },
+            'video_info': {
+                'video_id': youtube_video_id,
+                'title': video_title,
+                'current_views': video_views
+            }
+        })
+            
+    except Exception as e:
+        logger.error(f"❌ Error in video reach forecast: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Return estimated values as fallback
+        total_budget_usd = float(data.get('daily_budget_usd', 15)) * int(data.get('duration_days', 30))
+        estimated_views = int(total_budget_usd / 0.05)
+        
+        return jsonify({
+            'success': True,
+            'source': 'fallback_estimate',
+            'forecast': {
+                'impressions': int(estimated_views * 1.5),
+                'views': estimated_views,
+                'reach': int(estimated_views * 0.7),
+                'cpv': 0.05,
+                'engagement_rate': 12
+            },
+            'budget': {
+                'daily_usd': float(data.get('daily_budget_usd', 15)),
+                'total_usd': total_budget_usd,
+                'duration_days': int(data.get('duration_days', 30))
+            },
+            'error': str(e)
+        })

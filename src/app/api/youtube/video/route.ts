@@ -90,10 +90,21 @@ export async function POST(request: NextRequest) {
                 video: video
             });
         } else {
+            // Fallback: create basic video from ID if oEmbed fails
+            console.log(`⚠️ oEmbed failed for ${videoId}, creating fallback response`);
+            const fallbackVideo: VideoResult = {
+                id: videoId,
+                title: 'YouTube Video',
+                channelTitle: 'Unknown',
+                thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+                publishedAt: '',
+                viewCount: '0',
+                description: ''
+            };
             return NextResponse.json({
-                success: false,
-                error: 'Video not found'
-            }, { status: 404 });
+                success: true,
+                video: fallbackVideo
+            });
         }
 
     } catch (error) {

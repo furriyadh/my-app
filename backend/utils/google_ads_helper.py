@@ -94,3 +94,27 @@ def get_google_ads_client_for_customer(customer_id: str = None):
     
     return client
 
+
+def get_customer_id() -> str:
+    """
+    Get the Google Ads customer ID from environment variables.
+    Returns the customer ID or None if not configured.
+    """
+    # Try specific customer ID first
+    customer_id = os.getenv('GOOGLE_ADS_CUSTOMER_ID')
+    
+    if customer_id:
+        # Remove dashes if present (e.g., 123-456-7890 -> 1234567890)
+        customer_id = customer_id.replace('-', '')
+        logger.info(f"🎯 Using customer ID from GOOGLE_ADS_CUSTOMER_ID: {customer_id}")
+        return customer_id
+    
+    # Fallback to MCC login customer ID
+    mcc_id = os.getenv('MCC_LOGIN_CUSTOMER_ID')
+    if mcc_id:
+        mcc_id = mcc_id.replace('-', '')
+        logger.info(f"🎯 Using customer ID from MCC_LOGIN_CUSTOMER_ID: {mcc_id}")
+        return mcc_id
+    
+    logger.warning("⚠️ No customer ID found in environment variables")
+    return None

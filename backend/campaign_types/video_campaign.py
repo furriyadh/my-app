@@ -57,62 +57,253 @@ class VideoCampaignCreator:
             "description": "حملات إعلانية  تظهر على YouTube ومواقع أخرى",
             "video_ad_types": {
                 "VIDEO_RESPONSIVE_AD": {
-                    "name": "إعلان  متجاوب",
-                    "description": "إعلان  مرن يتكيف مع مختلف المواضع والأحجام",
+                    "name": "إعلان فيديو متجاوب",
+                    "name_en": "Video Responsive Ad",
+                    "description": "إعلان فيديو مرن يتكيف مع مختلف المواضع والأحجام على YouTube وشركاء الفيديو",
+                    "description_en": "Flexible video ad that adapts to different placements on YouTube and Video Partners",
                     "required_assets": {
-                        "videos": "1-5 هات",
-                        "headlines": "5 عناوين (max 30 حرف)",
-                        "descriptions": "5 أوصاف (max 90 حرف)",
-                        "call_to_action": "اختياري"
+                        "headlines": {
+                            "type": "AdTextAsset[]",
+                            "min": 1,
+                            "max": 5,
+                            "max_length": 30,
+                            "current_limit": 1,  # حالياً قيمة واحدة فقط مدعومة
+                            "description": "عناوين قصيرة جذابة"
+                        },
+                        "long_headlines": {
+                            "type": "AdTextAsset[]",
+                            "min": 1,
+                            "max": 5,
+                            "max_length": 90,
+                            "current_limit": 1,  # حالياً قيمة واحدة فقط مدعومة
+                            "description": "عناوين طويلة للتفصيل"
+                        },
+                        "descriptions": {
+                            "type": "AdTextAsset[]",
+                            "min": 1,
+                            "max": 5,
+                            "max_length": 90,
+                            "current_limit": 1,  # حالياً قيمة واحدة فقط مدعومة
+                            "description": "أوصاف توضيحية"
+                        },
+                        "call_to_actions": {
+                            "type": "AdTextAsset[]",
+                            "required": False,
+                            "max": 1,
+                            "description": "زر الدعوة للإجراء (CTA)"
+                        },
+                        "videos": {
+                            "type": "AdVideoAsset[]",
+                            "min": 1,
+                            "max": 5,
+                            "current_limit": 1,  # حالياً قيمة واحدة فقط مدعومة
+                            "description": "فيديوهات YouTube"
+                        },
+                        "companion_banners": {
+                            "type": "AdImageAsset[]",
+                            "required": False,
+                            "max": 1,
+                            "description": "صور مرافقة (300x60)"
+                        },
+                        "breadcrumb1": {
+                            "type": "string",
+                            "required": False,
+                            "max_length": 15,
+                            "description": "الجزء الأول من URL المعروض"
+                        },
+                        "breadcrumb2": {
+                            "type": "string",
+                            "required": False,
+                            "max_length": 15,
+                            "description": "الجزء الثاني من URL المعروض"
+                        }
                     },
-                    "placements": ["YouTube", "Video Partners"],
+                    "ad_level_requirements": {
+                        "final_urls": {
+                            "required": True,
+                            "description": "رابط الموقع الوجهة"
+                        },
+                        "name": {
+                            "required": False,
+                            "description": "اسم الإعلان للتعريف"
+                        }
+                    },
+                    "placements": ["YouTube In-Stream", "YouTube Home", "YouTube Search", "Video Partners"],
+                    "ad_group_type": "VIDEO_RESPONSIVE",
+                    "bidding": ["TARGET_CPV", "TARGET_CPA", "MAXIMIZE_CONVERSIONS"],
                     "recommended": True
                 },
                 "VIDEO_BUMPER_AD": {
-                    "name": "إعلان  قصير (Bumper)",
-                    "description": "إعلان قصير 6 ثواني غير قابل للتخطي",
+                    "name": "إعلان بامبر قصير",
+                    "name_en": "Bumper Ad",
+                    "description": "إعلان قصير 6 ثواني غير قابل للتخطي - مثالي للوعي بالعلامة التجارية",
+                    "description_en": "Short 6-second non-skippable ad - ideal for brand awareness",
                     "required_assets": {
-                        "video": " واحد (6 ثواني بالضبط)",
-                        "companion_banner": "اختياري"
+                        "video": {
+                            "type": "AdVideoAsset",
+                            "required": True,
+                            "max_duration": 6,
+                            "description": "فيديو واحد (6 ثواني بالضبط)"
+                        },
+                        "companion_banner": {
+                            "type": "AdImageAsset",
+                            "required": False,
+                            "dimensions": "300x60",
+                            "description": "صورة مرافقة تظهر بجانب الفيديو"
+                        },
+                        "action_button_label": {
+                            "type": "string",
+                            "required": False,
+                            "description": "نص زر الدعوة للإجراء"
+                        },
+                        "action_headline": {
+                            "type": "string",
+                            "required": False,
+                            "description": "نص إضافي مع زر CTA"
+                        }
                     },
-                    "placements": ["YouTube", "Video Partners"],
-                    "best_for": "الوعي بالعلامة التجارية"
+                    "ad_level_requirements": {
+                        "final_urls": {
+                            "required": True,
+                            "description": "رابط الموقع الوجهة"
+                        }
+                    },
+                    "placements": ["YouTube In-Stream", "Video Partners"],
+                    "ad_group_type": "VIDEO_BUMPER",
+                    "bidding": ["TARGET_CPM"],
+                    "best_for": "الوعي بالعلامة التجارية والوصول الواسع"
                 },
                 "VIDEO_NON_SKIPPABLE_IN_STREAM_AD": {
-                    "name": "إعلان  غير قابل للتخطي",
-                    "description": "إعلان 15-20 ثانية غير قابل للتخطي",
+                    "name": "إعلان فيديو غير قابل للتخطي",
+                    "name_en": "Non-Skippable In-Stream Ad",
+                    "description": "إعلان 15-20 ثانية غير قابل للتخطي - رسالة كاملة مضمونة",
+                    "description_en": "15-20 second non-skippable ad - guaranteed full message delivery",
                     "required_assets": {
-                        "video": " واحد (15-20 ثانية)",
-                        "companion_banner": "اختياري"
+                        "video": {
+                            "type": "AdVideoAsset",
+                            "required": True,
+                            "min_duration": 15,
+                            "max_duration": 20,
+                            "description": "فيديو واحد (15-20 ثانية)"
+                        },
+                        "companion_banner": {
+                            "type": "AdImageAsset",
+                            "required": False,
+                            "dimensions": "300x60",
+                            "description": "صورة مرافقة"
+                        },
+                        "action_button_label": {
+                            "type": "string",
+                            "required": False,
+                            "description": "نص زر الدعوة للإجراء"
+                        },
+                        "action_headline": {
+                            "type": "string",
+                            "required": False,
+                            "description": "نص إضافي مع زر CTA"
+                        }
                     },
-                    "placements": ["YouTube", "Video Partners"],
-                    "best_for": "رسالة كاملة مضمونة"
+                    "ad_level_requirements": {
+                        "final_urls": {
+                            "required": True,
+                            "description": "رابط الموقع الوجهة"
+                        }
+                    },
+                    "placements": ["YouTube In-Stream", "Video Partners"],
+                    "ad_group_type": "VIDEO_NON_SKIPPABLE_IN_STREAM",
+                    "bidding": ["TARGET_CPM"],
+                    "best_for": "رسالة كاملة مضمونة وتأثير قوي"
                 },
                 "VIDEO_TRUEVIEW_IN_STREAM_AD": {
                     "name": "إعلان TrueView In-Stream",
-                    "description": "إعلان قابل للتخطي بعد 5 ثواني",
+                    "name_en": "TrueView In-Stream Ad",
+                    "description": "إعلان قابل للتخطي بعد 5 ثواني - ادفع فقط عند مشاهدة 30 ثانية أو التفاعل",
+                    "description_en": "Skippable after 5 seconds - pay only when viewers watch 30s or interact",
                     "required_assets": {
-                        "video": " واحد (أي طول)",
-                        "headline": "عنوان واحد",
-                        "description": "وصف واحد",
-                        "call_to_action": "دعوة لإجراء",
-                        "companion_banner": "اختياري"
+                        "video": {
+                            "type": "AdVideoAsset",
+                            "required": True,
+                            "min_duration": 12,
+                            "recommended_duration": "30-60 seconds",
+                            "description": "فيديو واحد (أي طول، يُفضل 30-60 ثانية)"
+                        },
+                        "action_button_label": {
+                            "type": "string",
+                            "required": True,  # مطلوب لحملات TrueView for Action
+                            "max_length": 10,
+                            "description": "نص زر الدعوة للإجراء (مثل: اشترِ الآن)"
+                        },
+                        "action_headline": {
+                            "type": "string",
+                            "required": True,
+                            "max_length": 15,
+                            "description": "نص إضافي يظهر مع زر CTA"
+                        },
+                        "companion_banner": {
+                            "type": "AdImageAsset",
+                            "required": False,
+                            "dimensions": "300x60",
+                            "description": "صورة مرافقة"
+                        }
                     },
-                    "placements": ["YouTube", "Video Partners"],
-                    "best_for": "التفاعل والتحويلات",
-                    "billing": "CPV (تدفع عند  30 ثانية أو التفاعل)"
+                    "ad_level_requirements": {
+                        "final_urls": {
+                            "required": True,
+                            "description": "رابط الموقع الوجهة"
+                        }
+                    },
+                    "placements": ["YouTube In-Stream", "Video Partners"],
+                    "ad_group_type": "VIDEO_TRUE_VIEW_IN_STREAM",
+                    "bidding": ["TARGET_CPV", "TARGET_CPA", "MAXIMIZE_CONVERSIONS"],
+                    "billing": "CPV (تدفع عند مشاهدة 30 ثانية أو التفاعل)",
+                    "best_for": "التفاعل والتحويلات والمبيعات"
                 },
                 "IN_FEED_VIDEO_AD": {
-                    "name": "إعلان   الخلاصة",
-                    "description": "إعلان يظهر  نتائج البحث والصفحة الرئيسية",
+                    "name": "إعلان فيديو في الخلاصة",
+                    "name_en": "In-Feed Video Ad",
+                    "description": "إعلان يظهر في نتائج البحث والصفحة الرئيسية - مثالي لزيادة المشاهدات",
+                    "description_en": "Ad appears in search results and home feed - ideal for views and subscribers",
                     "required_assets": {
-                        "video": " واحد",
-                        "headline": "عنوان (max 100 حرف)",
-                        "description_1": "وصف 1 (max 35 حرف)",
-                        "description_2": "وصف 2 (max 35 حرف)"
+                        "video": {
+                            "type": "AdVideoAsset",
+                            "required": True,
+                            "description": "فيديو YouTube واحد"
+                        },
+                        "headline": {
+                            "type": "string",
+                            "required": True,
+                            "max_length": 100,
+                            "description": "عنوان الإعلان الرئيسي"
+                        },
+                        "description1": {
+                            "type": "string",
+                            "required": True,
+                            "max_length": 35,
+                            "description": "السطر الأول من الوصف"
+                        },
+                        "description2": {
+                            "type": "string",
+                            "required": False,
+                            "max_length": 35,
+                            "description": "السطر الثاني من الوصف"
+                        },
+                        "thumbnail": {
+                            "type": "VideoThumbnail",
+                            "required": False,
+                            "options": ["THUMBNAIL_1", "THUMBNAIL_2", "THUMBNAIL_3", "AUTO"],
+                            "description": "صورة مصغرة للفيديو"
+                        }
+                    },
+                    "ad_level_requirements": {
+                        "final_urls": {
+                            "required": False,  # لا يتطلب URL - يوجه للفيديو مباشرة
+                            "description": "غير مطلوب - الإعلان يوجه لمشاهدة الفيديو"
+                        }
                     },
                     "placements": ["YouTube Home", "YouTube Search", "YouTube Watch Next"],
-                    "best_for": "الاكتشاف والوعي"
+                    "ad_group_type": "VIDEO_TRUE_VIEW_IN_DISPLAY",
+                    "bidding": ["TARGET_CPV", "MAX_CPV"],
+                    "best_for": "زيادة المشاهدات والمشتركين وتفاعل القناة"
                 }
             },
             "video_requirements": {
@@ -302,7 +493,7 @@ class VideoCampaignCreator:
             mobile_criterion.campaign = campaign_resource_name
             mobile_criterion.status = self.client.enums.CampaignCriterionStatusEnum.ENABLED
             mobile_criterion.device.type_ = self.client.enums.DeviceEnum.MOBILE
-            mobile_criterion.bid_modifier = 1.3  # زيادة 30% للموبايل
+            mobile_criterion.bid_modifier = 1.0  # بدون تعديل للموبايل (0%)
 
             # استهداف الأجهزة اللوحية
             tablet_operation = self.client.get_type("CampaignCriterionOperation")
@@ -800,7 +991,20 @@ class VideoCampaignCreator:
 
     def _create_video_ad(self, ad_group_resource_name: str, ad_copies: Dict[str, Any],
                         website_url: str, video_ad_type: str, youtube_video_id: str = None):
-        """ إعلان  واحد"""
+        """
+        إنشاء إعلان فيديو واحد بناءً على نوع الإعلان
+        
+        مرجع: google.ads.googleads.v21.common.types.ad_type_infos
+        
+        Args:
+            ad_group_resource_name: معرف مجموعة الإعلانات
+            ad_copies: بيانات النصوص الإعلانية
+            website_url: رابط الموقع الوجهة
+            video_ad_type: نوع إعلان الفيديو
+            youtube_video_id: معرف فيديو YouTube
+        """
+        print(f"\n🎬 إنشاء إعلان فيديو من نوع: {video_ad_type}")
+        
         ad_group_ad_service = self.client.get_service("AdGroupAdService")
         ad_group_ad_operation = self.client.get_type("AdGroupAdOperation")
         ad_group_ad = ad_group_ad_operation.create
@@ -808,126 +1012,217 @@ class VideoCampaignCreator:
         ad_group_ad.ad_group = ad_group_resource_name
         ad_group_ad.status = self.client.enums.AdGroupAdStatusEnum.ENABLED
 
-        # إضافة final_urls للإعلان (مطلوب)
-        ad_group_ad.ad.final_urls.append(website_url)
+        # إضافة final_urls للإعلان (مطلوب لمعظم الأنواع)
+        if website_url and video_ad_type != "IN_FEED_VIDEO_AD":
+            ad_group_ad.ad.final_urls.append(website_url)
         
         # إضافة اسم الإعلان
-        ad_group_ad.ad.name = "Video Campaign Ad"
+        ad_group_ad.ad.name = f"Video Ad - {video_ad_type}"
 
-        #  إعلان  بناءً على اوع
+        # ═══════════════════════════════════════════════════════════════════
+        # VIDEO_RESPONSIVE_AD - إعلان فيديو متجاوب
+        # المرجع: VideoResponsiveAdInfo
+        # ═══════════════════════════════════════════════════════════════════
         if video_ad_type == "VIDEO_RESPONSIVE_AD":
-            # استخدام VideoResponsiveAd للحملات العادية (الطريقة الصحيحة)
-            video_ad = ad_group_ad.ad.video_responsive_ad
-
-            # إضافة فيديو asset إذا كان متوفراً
-            if youtube_video_id:
-                # إنشاء فيديو asset أولاً
-                video_asset_resource_name = self._create_video_asset(youtube_video_id)
-                if video_asset_resource_name:
-                    video_asset_link = self.client.get_type("AdVideoAsset")
-                    video_asset_link.asset = video_asset_resource_name
-                    video_ad.videos.append(video_asset_link)
-
-            # إضافة العناوين (1-5 عناوين)
-            headlines = ad_copies.get('headlines', [])
-            for i, headline in enumerate(headlines[:5]):
-                ad_text_asset = self.client.get_type("AdTextAsset")
-                ad_text_asset.text = headline[:30]  # max 30 chars
-                video_ad.headlines.append(ad_text_asset)
-
-            # إضافة الأوصاف الطويلة (1-5 أوصاف)
-            long_headlines = ad_copies.get('long_headlines', ad_copies.get('descriptions', []))
-            for long_headline in long_headlines[:5]:
-                ad_text_asset = self.client.get_type("AdTextAsset")
-                ad_text_asset.text = long_headline[:90]  # max 90 chars
-                video_ad.long_headlines.append(ad_text_asset)
-
-            # إضافة الأوصاف القصيرة (1-5 أوصاف)
-            descriptions = ad_copies.get('descriptions', [])
-            for description in descriptions[:5]:
-                ad_text_asset = self.client.get_type("AdTextAsset")
-                ad_text_asset.text = description[:60]  # max 60 chars
-                video_ad.descriptions.append(ad_text_asset)
-
-        # إعلان TrueView In-Stream (قابل للتخطي)
-        elif video_ad_type == "VIDEO_TRUEVIEW_IN_STREAM_AD":
             video_ad = ad_group_ad.ad.video_responsive_ad
             
-            # إضافة فيديو asset إذا كان متوفراً
+            # 1. إضافة الفيديو (مطلوب - حالياً قيمة واحدة فقط مدعومة)
             if youtube_video_id:
                 video_asset_resource_name = self._create_video_asset(youtube_video_id)
                 if video_asset_resource_name:
                     video_asset_link = self.client.get_type("AdVideoAsset")
                     video_asset_link.asset = video_asset_resource_name
                     video_ad.videos.append(video_asset_link)
+                    print(f"   ✅ تم إضافة الفيديو: {youtube_video_id}")
 
-            # إضافة العناوين
+            # 2. إضافة العناوين القصيرة (max 30 chars - حالياً قيمة واحدة فقط)
             headlines = ad_copies.get('headlines', [])
-            if headlines:
+            for headline in headlines[:1]:  # حالياً قيمة واحدة فقط مدعومة
                 ad_text_asset = self.client.get_type("AdTextAsset")
-                ad_text_asset.text = headlines[0][:30]
+                ad_text_asset.text = str(headline)[:30]
                 video_ad.headlines.append(ad_text_asset)
+            print(f"   📝 العناوين القصيرة: {len(headlines[:1])}")
 
-            # إضافة الأوصاف الطويلة
-            long_headlines = ad_copies.get('long_headlines', ad_copies.get('descriptions', []))
-            if long_headlines:
+            # 3. إضافة العناوين الطويلة (max 90 chars - حالياً قيمة واحدة فقط)
+            long_headlines = ad_copies.get('long_headlines', [])
+            if not long_headlines:
+                long_headlines = ad_copies.get('descriptions', [])
+            for long_headline in long_headlines[:1]:  # حالياً قيمة واحدة فقط مدعومة
                 ad_text_asset = self.client.get_type("AdTextAsset")
-                ad_text_asset.text = long_headlines[0][:90]
+                ad_text_asset.text = str(long_headline)[:90]
                 video_ad.long_headlines.append(ad_text_asset)
+            print(f"   📝 العناوين الطويلة: {len(long_headlines[:1])}")
 
-        # إعلان Bumper (6 ثواني)
+            # 4. إضافة الأوصاف (max 90 chars - حالياً قيمة واحدة فقط)
+            descriptions = ad_copies.get('descriptions', [])
+            for description in descriptions[:1]:  # حالياً قيمة واحدة فقط مدعومة
+                ad_text_asset = self.client.get_type("AdTextAsset")
+                ad_text_asset.text = str(description)[:90]
+                video_ad.descriptions.append(ad_text_asset)
+            print(f"   📝 الأوصاف: {len(descriptions[:1])}")
+
+            # 5. إضافة زر الدعوة للإجراء (اختياري)
+            call_to_action = ad_copies.get('call_to_action')
+            if call_to_action:
+                cta_asset = self.client.get_type("AdTextAsset")
+                cta_asset.text = str(call_to_action)[:15]
+                video_ad.call_to_actions.append(cta_asset)
+                print(f"   🔘 CTA: {call_to_action}")
+
+            # 6. إضافة Breadcrumbs (اختياري - max 15 chars each)
+            breadcrumb1 = ad_copies.get('breadcrumb1', '')
+            breadcrumb2 = ad_copies.get('breadcrumb2', '')
+            if breadcrumb1:
+                video_ad.breadcrumb1 = str(breadcrumb1)[:15]
+            if breadcrumb2:
+                video_ad.breadcrumb2 = str(breadcrumb2)[:15]
+
+        # ═══════════════════════════════════════════════════════════════════
+        # VIDEO_TRUEVIEW_IN_STREAM_AD - إعلان TrueView قابل للتخطي
+        # المرجع: VideoTrueViewInStreamAdInfo (داخل VideoAdInfo)
+        # ═══════════════════════════════════════════════════════════════════
+        elif video_ad_type == "VIDEO_TRUEVIEW_IN_STREAM_AD":
+            video_ad = ad_group_ad.ad.video_ad
+            
+            # إضافة الفيديو
+            if youtube_video_id:
+                video_asset_resource_name = self._create_video_asset(youtube_video_id)
+                if video_asset_resource_name:
+                    video_ad.video.asset = video_asset_resource_name
+                    print(f"   ✅ تم إضافة الفيديو: {youtube_video_id}")
+            
+            # إعداد TrueView In-Stream format
+            trueview_ad = video_ad.in_stream
+            
+            # نص زر الدعوة للإجراء (مطلوب لـ TrueView for Action)
+            action_button = ad_copies.get('action_button_label', ad_copies.get('call_to_action', 'اكتشف المزيد'))
+            trueview_ad.action_button_label = str(action_button)[:10]
+            
+            # نص العنوان مع CTA
+            action_headline = ad_copies.get('action_headline', '')
+            if not action_headline and ad_copies.get('headlines'):
+                action_headline = ad_copies['headlines'][0]
+            trueview_ad.action_headline = str(action_headline)[:15]
+            
+            print(f"   🔘 Action Button: {action_button}")
+            print(f"   📝 Action Headline: {action_headline}")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # VIDEO_BUMPER_AD - إعلان بامبر (6 ثواني)
+        # المرجع: VideoBumperInStreamAdInfo (داخل VideoAdInfo)
+        # ═══════════════════════════════════════════════════════════════════
         elif video_ad_type == "VIDEO_BUMPER_AD":
             video_ad = ad_group_ad.ad.video_ad
             
-            # إضافة فيديو asset إذا كان متوفراً
+            # إضافة الفيديو (مطلوب - 6 ثواني بالضبط)
             if youtube_video_id:
                 video_asset_resource_name = self._create_video_asset(youtube_video_id)
                 if video_asset_resource_name:
                     video_ad.video.asset = video_asset_resource_name
+                    print(f"   ✅ تم إضافة الفيديو: {youtube_video_id}")
+            
+            # إعداد Bumper format
+            bumper_ad = video_ad.bumper
+            
+            # نص زر الدعوة للإجراء (اختياري)
+            action_button = ad_copies.get('action_button_label', ad_copies.get('call_to_action', ''))
+            if action_button:
+                bumper_ad.action_button_label = str(action_button)[:10]
+                print(f"   🔘 Action Button: {action_button}")
+            
+            # نص العنوان مع CTA (اختياري)
+            action_headline = ad_copies.get('action_headline', '')
+            if action_headline:
+                bumper_ad.action_headline = str(action_headline)[:15]
+                print(f"   📝 Action Headline: {action_headline}")
 
-        # إعلان غير قابل للتخطي
+        # ═══════════════════════════════════════════════════════════════════
+        # VIDEO_NON_SKIPPABLE_IN_STREAM_AD - إعلان غير قابل للتخطي
+        # المرجع: VideoNonSkippableInStreamAdInfo (داخل VideoAdInfo)
+        # ═══════════════════════════════════════════════════════════════════
         elif video_ad_type == "VIDEO_NON_SKIPPABLE_IN_STREAM_AD":
             video_ad = ad_group_ad.ad.video_ad
             
-            # إضافة فيديو asset إذا كان متوفراً
+            # إضافة الفيديو (مطلوب - 15-20 ثانية)
             if youtube_video_id:
                 video_asset_resource_name = self._create_video_asset(youtube_video_id)
                 if video_asset_resource_name:
                     video_ad.video.asset = video_asset_resource_name
-
-        # إعلان In-Feed
-        elif video_ad_type == "IN_FEED_VIDEO_AD":
-            video_ad = ad_group_ad.ad.in_feed_video_ad
+                    print(f"   ✅ تم إضافة الفيديو: {youtube_video_id}")
             
-            # إضافة فيديو asset إذا كان متوفراً
+            # إعداد Non-Skippable format
+            non_skippable_ad = video_ad.non_skippable
+            
+            # نص زر الدعوة للإجراء (اختياري)
+            action_button = ad_copies.get('action_button_label', ad_copies.get('call_to_action', ''))
+            if action_button:
+                non_skippable_ad.action_button_label = str(action_button)[:10]
+                print(f"   🔘 Action Button: {action_button}")
+            
+            # نص العنوان مع CTA (اختياري)
+            action_headline = ad_copies.get('action_headline', '')
+            if action_headline:
+                non_skippable_ad.action_headline = str(action_headline)[:15]
+                print(f"   📝 Action Headline: {action_headline}")
+
+        # ═══════════════════════════════════════════════════════════════════
+        # IN_FEED_VIDEO_AD - إعلان في الخلاصة
+        # المرجع: InFeedVideoAdInfo (داخل VideoAdInfo)
+        # ═══════════════════════════════════════════════════════════════════
+        elif video_ad_type == "IN_FEED_VIDEO_AD":
+            video_ad = ad_group_ad.ad.video_ad
+            
+            # إضافة الفيديو (مطلوب)
             if youtube_video_id:
                 video_asset_resource_name = self._create_video_asset(youtube_video_id)
                 if video_asset_resource_name:
                     video_ad.video.asset = video_asset_resource_name
-
-            # إضافة العنوان
+                    print(f"   ✅ تم إضافة الفيديو: {youtube_video_id}")
+            
+            # إعداد In-Feed format
+            in_feed_ad = video_ad.in_feed
+            
+            # العنوان (مطلوب - max 100 chars)
             headlines = ad_copies.get('headlines', [])
             if headlines:
-                video_ad.headline = headlines[0][:100]  # max 100 chars
-
-            # إضافة الأوصاف
+                in_feed_ad.headline = str(headlines[0])[:100]
+                print(f"   📝 العنوان: {headlines[0][:50]}...")
+            
+            # الوصف الأول (مطلوب - max 35 chars)
             descriptions = ad_copies.get('descriptions', [])
+            if descriptions:
+                in_feed_ad.description1 = str(descriptions[0])[:35]
+                print(f"   📝 الوصف 1: {descriptions[0][:35]}")
+            
+            # الوصف الثاني (اختياري - max 35 chars)
             if len(descriptions) >= 2:
-                video_ad.description1 = descriptions[0][:35]  # max 35 chars
-                video_ad.description2 = descriptions[1][:35]  # max 35 chars
+                in_feed_ad.description2 = str(descriptions[1])[:35]
+                print(f"   📝 الوصف 2: {descriptions[1][:35]}")
+            
+            # الصورة المصغرة (اختياري)
+            thumbnail = ad_copies.get('thumbnail', 'THUMBNAIL_DEFAULT')
+            try:
+                in_feed_ad.thumbnail = self.client.enums.VideoThumbnailEnum[thumbnail]
+            except:
+                pass  # استخدام الافتراضي
 
-        #  الإعلان
+        # ═══════════════════════════════════════════════════════════════════
+        # إنشاء الإعلان
+        # ═══════════════════════════════════════════════════════════════════
         try:
             response = ad_group_ad_service.mutate_ad_group_ads(
                 customer_id=self.customer_id,
                 operations=[ad_group_ad_operation]
             )
-            print(f"✅ تم إنشاء إعلان: {response.results[0].resource_name}")
-            print(f"   نوع الإعلان: {video_ad_type}")
+            print(f"✅ تم إنشاء إعلان الفيديو بنجاح: {response.results[0].resource_name}")
+            print(f"   📺 نوع الإعلان: {video_ad_type}")
+            return response.results[0].resource_name
         except GoogleAdsException as ex:
-            print(f"❌ تحذير: لم يتم إنشاء الإعلان")
-            print(f"   السبب: {ex}")
-            print(f"   الحملة والمجموعة الإعلانية تم إنشاؤها بنجاح")
+            print(f"❌ خطأ في إنشاء الإعلان: {video_ad_type}")
+            for error in ex.failure.errors:
+                print(f"   ❌ {error.message}")
+            print(f"   ⚠️ الحملة والمجموعة الإعلانية تم إنشاؤها بنجاح")
+            return None
 
     def _add_video_keywords_to_ad_group(self, ad_group_resource_name: str, keywords: List[str]):
         """إضافة كلمات مفتاحية لمجموعة الإعلانات (ل  نتائج البحث)"""

@@ -20,11 +20,11 @@ interface AdVariation {
 // Function to format customer ID with dashes (e.g., 123-456-7890)
 const formatCustomerId = (customerId: string): string => {
   const cleanId = customerId.replace(/[\s-]/g, '');
-  
+
   if (cleanId.length === 10) {
     return `${cleanId.slice(0, 3)}-${cleanId.slice(3, 6)}-${cleanId.slice(6)}`;
   }
-  
+
   return customerId;
 };
 
@@ -44,7 +44,7 @@ export default function CampaignPreviewPage() {
   const [publishProgress, setPublishProgress] = useState(0);
   const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  
+
   // Check if desktop on mount
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 1280);
@@ -52,7 +52,7 @@ export default function CampaignPreviewPage() {
     window.addEventListener('resize', checkDesktop);
     return () => window.removeEventListener('resize', checkDesktop);
   }, []);
-  
+
   // Announcement notifications state
   const [announcement, setAnnouncement] = useState<{
     show: boolean;
@@ -189,7 +189,7 @@ export default function CampaignPreviewPage() {
     // Get generated content from localStorage
     const campaignDataStr = localStorage.getItem('campaignData') || '{}';
     const campaignData = JSON.parse(campaignDataStr);
-    
+
     const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
     const generatedContent = JSON.parse(generatedContentStr);
 
@@ -201,10 +201,10 @@ export default function CampaignPreviewPage() {
 
     const url = campaignData.websiteUrl || '';
     setWebsiteUrl(url);
-    
+
     // Set campaign type
     setCampaignType(campaignData.campaignType || 'SEARCH');
-    
+
     // Extract domain from URL
     try {
       const domain = new URL(url).hostname.replace('www.', '');
@@ -214,19 +214,19 @@ export default function CampaignPreviewPage() {
     }
 
     // Create multiple variations from the generated content
-    if (generatedContent.headlines && generatedContent.headlines.length > 0 && 
-        generatedContent.descriptions && generatedContent.descriptions.length > 0) {
+    if (generatedContent.headlines && generatedContent.headlines.length > 0 &&
+      generatedContent.descriptions && generatedContent.descriptions.length > 0) {
       const variations: AdVariation[] = [];
       const totalHeadlines = generatedContent.headlines.length;
       const totalDescriptions = generatedContent.descriptions.length;
-      
+
       console.log('✅ Creating variations:', totalHeadlines, 'headlines,', totalDescriptions, 'descriptions');
-      
+
       // Create only 3 variations
       for (let i = 0; i < Math.min(3, totalHeadlines); i++) {
         const headlineStart = i % totalHeadlines;
         const descStart = i % totalDescriptions;
-        
+
         variations.push({
           headlines: [
             generatedContent.headlines[headlineStart],
@@ -244,13 +244,13 @@ export default function CampaignPreviewPage() {
       setAdVariations(variations);
     } else {
       console.warn('⚠️ No headlines or descriptions found - generating content...');
-      
+
       // Fallback: Generate content if missing
       const generateMissingContent = async () => {
         try {
           const targetLanguage = campaignData.selectedLanguageCode || campaignData.detectedLanguageCode || 'ar';
           const keywords = generatedContent.keywords || [];
-          
+
           const apiUrl = getApiUrl('/api/ai-campaign/generate-campaign-content');
           console.log('🔄 Generating missing ad content...');
           console.log('📡 API URL:', apiUrl);
@@ -260,7 +260,7 @@ export default function CampaignPreviewPage() {
             keywords_count: keywords.length,
             target_language: targetLanguage
           });
-          
+
           const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -271,13 +271,13 @@ export default function CampaignPreviewPage() {
               target_language: targetLanguage
             })
           });
-          
+
           console.log('📡 Response status:', response.status, response.statusText);
-          
+
           if (response.ok) {
             const result = await response.json();
             console.log('📦 API Response:', result);
-            
+
             if (result.success && result.content) {
               const newContent = {
                 ...generatedContent,
@@ -285,17 +285,17 @@ export default function CampaignPreviewPage() {
                 descriptions: result.content.descriptions || [],
                 keywords: keywords.length > 0 ? keywords : (result.content.keywords || [])
               };
-              
+
               localStorage.setItem('generatedContent', JSON.stringify(newContent));
               console.log('✅ Generated and saved content:', newContent.headlines.length, 'headlines,', newContent.descriptions.length, 'descriptions');
-              
+
               // Create variations from new content
               if (newContent.headlines.length > 0 && newContent.descriptions.length > 0) {
                 const newVariations: AdVariation[] = [];
                 for (let i = 0; i < Math.min(3, newContent.headlines.length); i++) {
                   const headlineStart = i % newContent.headlines.length;
                   const descStart = i % newContent.descriptions.length;
-                  
+
                   newVariations.push({
                     headlines: [
                       newContent.headlines[headlineStart],
@@ -324,7 +324,7 @@ export default function CampaignPreviewPage() {
           console.error('❌ Failed to generate content:', error);
         }
       };
-      
+
       generateMissingContent();
     }
   }, []);
@@ -352,7 +352,7 @@ export default function CampaignPreviewPage() {
       const allClientRequests = Array.isArray(result.data) ? result.data : [];
       console.log('📋 إجمالي الطلبات (حسب المستخدم الحالي):', allClientRequests.length);
       console.log('📋 جميع الطلبات:', allClientRequests);
-      
+
       if (allClientRequests.length === 0) {
         console.warn('⚠️ لا توجد أي طلبات في قاعدة البيانات!');
         setAnnouncement({
@@ -364,7 +364,7 @@ export default function CampaignPreviewPage() {
         setConnectedAccounts([]);
         return;
       }
-      
+
       // تجميع السجلات حسب customer_id واختيار أحدث سجل لكل حساب (نفس الطريقة في integrations)
       const clientRequestsMap = new Map();
       allClientRequests.forEach((req: any) => {
@@ -373,11 +373,11 @@ export default function CampaignPreviewPage() {
           clientRequestsMap.set(req.customer_id, req);
         }
       });
-      
+
       const clientRequests = Array.from(clientRequestsMap.values());
       console.log('📋 أحدث طلبات العملاء (مجمعة):', clientRequests.length);
       console.log('📋 تفاصيل الطلبات:', clientRequests);
-      
+
       // Get user email to filter accounts
       let userEmail = '';
       try {
@@ -390,46 +390,46 @@ export default function CampaignPreviewPage() {
       } catch (e) {
         console.warn('⚠️ Failed to get user email from localStorage:', e);
       }
-      
+
       if (!userEmail) {
         userEmail = localStorage.getItem('userEmail') || '';
         console.log('🔍 userEmail from localStorage:', userEmail);
       }
-      
+
       console.log('📧 البريد الإلكتروني للمستخدم الحالي:', userEmail);
-      
+
       // Debug: show all accounts with their status and user_email
       console.log('🔍 فحص جميع الحسابات:');
       clientRequests.forEach((req: any) => {
         console.log(`  - ${req.customer_id}: status=${req.status}, user_email=${req.user_email}`);
       });
-      
+
       // ⚡ OPTIMIZATION: Filter out non-linked accounts BEFORE checking status (faster!)
       const userAccounts = clientRequests.filter((req: any) => {
         // فلترة الحسابات الخاصة بهذا المستخدم فقط (حسب البريد المخزن مع الطلب)
         const isUserAccount = userEmail ? req.user_email === userEmail : true;
-        
+
         // 🚀 Pre-filter: Skip accounts that are clearly not linked in DB
         const dbStatus = req.status?.toUpperCase();
         const isLikelyLinked = !(
-          dbStatus === 'NOT_LINKED' || 
-          dbStatus === 'REJECTED' || 
+          dbStatus === 'NOT_LINKED' ||
+          dbStatus === 'REJECTED' ||
           dbStatus === 'CANCELLED' ||
           dbStatus === 'REMOVED'
         );
-        
+
         console.log(`  🔍 فحص ${req.customer_id}:`);
         console.log(`     - status: ${req.status}`);
         console.log(`     - user_email: ${req.user_email}`);
         console.log(`     - current user: ${userEmail}`);
         console.log(`     - isUserAccount: ${isUserAccount} (TEMP: showing all)`);
         console.log(`     - isLikelyLinked: ${isLikelyLinked} (pre-filter)`);
-        
+
         return isUserAccount && isLikelyLinked;
       });
-      
+
       console.log(`✅ وجدنا ${userAccounts.length} حساب محتمل الربط (بعد التصفية الأولية)`);
-      
+
       if (userAccounts.length === 0) {
         console.warn('⚠️ لا توجد حسابات للمستخدم الحالي');
         if (!userEmail) {
@@ -450,7 +450,7 @@ export default function CampaignPreviewPage() {
         setConnectedAccounts([]);
         return;
       }
-      
+
       // Transform to expected format
       let formattedAccounts = userAccounts.map((req: any) => ({
         customerId: req.customer_id,
@@ -462,26 +462,26 @@ export default function CampaignPreviewPage() {
         userName: req.user_name,
         userPicture: req.user_picture
       }));
-      
+
       console.log('📊 الحسابات من قاعدة البيانات:', formattedAccounts);
-      
+
       // ✅ استخدام البيانات من Supabase مباشرة (بدون استدعاء Google Ads API)
       // الحالة الفعلية تم تخزينها في Supabase من صفحة integrations/google-ads
       // للتحديث من Google Ads API، يجب الذهاب لصفحة integrations/google-ads والضغط على زر Refresh
-      
+
       // تحويل الحالة من Supabase إلى الحالة المتوقعة
       formattedAccounts = formattedAccounts.map((account: any) => {
         const dbStatus = account.status?.toUpperCase() || 'UNKNOWN';
-                  let mappedStatus = 'ACTIVE';
+        let mappedStatus = 'ACTIVE';
         let linkStatus = 'ACTIVE';
-                  
+
         switch (dbStatus) {
           case 'ACTIVE':
-                    mappedStatus = 'ACTIVE';
+            mappedStatus = 'ACTIVE';
             linkStatus = 'ACTIVE';
             break;
           case 'PENDING':
-                      mappedStatus = 'PENDING';
+            mappedStatus = 'PENDING';
             linkStatus = 'PENDING';
             break;
           case 'NOT_LINKED':
@@ -493,26 +493,26 @@ export default function CampaignPreviewPage() {
             linkStatus = dbStatus;
             break;
           default:
-                      mappedStatus = 'ACTIVE';
+            mappedStatus = 'ACTIVE';
             linkStatus = 'ACTIVE';
-                  }
-                  
+        }
+
         console.log(`📋 ${account.customerId}: db_status=${dbStatus}, mapped_status=${mappedStatus}, link_status=${linkStatus}`);
-                  
-                  return {
-                    ...account,
-                    status: mappedStatus,
+
+        return {
+          ...account,
+          status: mappedStatus,
           linkStatus: linkStatus
-                  };
+        };
       });
-      
+
       // تصفية الحسابات غير المرتبطة
-      formattedAccounts = formattedAccounts.filter((acc: any) => 
+      formattedAccounts = formattedAccounts.filter((acc: any) =>
         acc.linkStatus === 'ACTIVE' || acc.linkStatus === 'PENDING'
       );
-      
+
       console.log(`✅ الحسابات المرتبطة: ${formattedAccounts.length} حساب`);
-      
+
       // Check if no accounts after filtering
       if (formattedAccounts.length === 0) {
         console.warn('⚠️ لا توجد حسابات مرتبطة بالـ MCC');
@@ -525,10 +525,10 @@ export default function CampaignPreviewPage() {
         setConnectedAccounts([]);
         return;
       }
-      
+
       setConnectedAccounts(formattedAccounts);
       console.log('✅ تم تحميل الحسابات بنجاح (من Supabase):', formattedAccounts);
-      
+
     } catch (error) {
       console.error('❌ خطأ في جلب الحسابات:', error);
       setAnnouncement({
@@ -543,37 +543,37 @@ export default function CampaignPreviewPage() {
   // 🔄 STABLE: Supabase Realtime Subscription (always active - modal open or closed!)
   useEffect(() => {
     console.log('📡 الاشتراك في التحديثات الفورية من Supabase (دائماً نشط)...');
-    
+
     // Subscribe to real-time updates from Supabase (always active!)
     const subscription = subscribeToClientRequests((payload) => {
       console.log('🔄 تحديث فوري من Supabase:', payload);
       console.log('📊 نوع الحدث:', payload.eventType);
       console.log('📊 البيانات الجديدة:', payload.new);
       console.log('📊 البيانات القديمة:', payload.old);
-      
+
       // Re-fetch data from DB when UPDATE or INSERT happens
       if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
         console.log('📥 تحديث البيانات بسبب تغيير في قاعدة البيانات (تلقائي)');
         console.log('⏰ الوقت:', new Date().toLocaleTimeString());
-        
+
         // 🚀 INSTANT UPDATE: Update state directly from Supabase payload first!
         if (payload.new && payload.new.customer_id) {
           const updatedAccountFromDB = payload.new;
           const dbCustomerId = updatedAccountFromDB.customer_id;
           console.log('⚡ تحديث فوري للحساب:', dbCustomerId);
           console.log('📊 الحالة الجديدة:', updatedAccountFromDB.status);
-          
+
           // Show visual indicator
           setIsRefreshingStatus(true);
-          
+
           // Normalize customer_id (both with and without dashes)
           const normalizeId = (id: string) => id.replace(/-/g, '');
           const normalizedDbId = normalizeId(dbCustomerId);
-          
+
           // Update connectedAccounts state immediately with new data from Supabase
           setConnectedAccounts(prev => {
             console.log('📋 الحسابات الحالية قبل التحديث:', prev.map(a => `${a.customerId}: ${a.status}`).join(', '));
-            
+
             const updatedAccounts = prev.map(acc => {
               const normalizedAccId = normalizeId(acc.customerId);
               if (normalizedAccId === normalizedDbId) {
@@ -586,7 +586,7 @@ export default function CampaignPreviewPage() {
               }
               return acc;
             });
-            
+
             // If account doesn't exist, add it
             const accountExists = prev.some(acc => normalizeId(acc.customerId) === normalizedDbId);
             if (!accountExists && updatedAccountFromDB.status !== 'NOT_LINKED') {
@@ -602,21 +602,21 @@ export default function CampaignPreviewPage() {
                 userPicture: updatedAccountFromDB.user_picture
               });
             }
-            
+
             console.log('🔄 الحسابات المحدثة:', updatedAccounts.map(a => `${a.customerId}: ${a.status}`).join(', '));
             console.log('🎯 عدد الحسابات:', updatedAccounts.length);
             return updatedAccounts;
           });
-          
+
           console.log('✅ تم تحديث الـ state فوراً! (بدون انتظار API calls)');
           console.log('🎨 يجب أن تتحدث الواجهة الآن تلقائياً!');
-          
+
           // Hide visual indicator after a short delay
           setTimeout(() => {
             setIsRefreshingStatus(false);
           }, 1500);
         }
-        
+
         // Then re-fetch all data in background (for completeness)
         setTimeout(() => {
           console.log('🔄 إعادة جلب جميع البيانات في الخلفية (للتحقق النهائي)...');
@@ -633,7 +633,7 @@ export default function CampaignPreviewPage() {
       console.log('🔌 إلغاء الاشتراك في تحديثات Supabase');
       subscription?.unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // ✨ Empty array = always active, even when modal is closed!
 
   const handleEditAds = () => {
@@ -671,13 +671,13 @@ export default function CampaignPreviewPage() {
       console.log('⚠️ Already publishing, ignoring duplicate click');
       return;
     }
-    
+
     // ⚠️ Also check isLoading state as additional protection
     if (isLoading) {
       console.log('⚠️ Already publishing (state check), ignoring duplicate click');
       return;
     }
-    
+
     if (!selectedAccount) {
       setAnnouncement({
         show: true,
@@ -686,7 +686,7 @@ export default function CampaignPreviewPage() {
       });
       return;
     }
-    
+
     // Check if selected account is enabled
     const selectedAccountData = connectedAccounts.find(acc => acc.customerId === selectedAccount);
     if (selectedAccountData?.status !== 'ACTIVE') {
@@ -704,14 +704,14 @@ export default function CampaignPreviewPage() {
       setTimeout(() => setAnnouncement(prev => ({ ...prev, show: false })), 10000);
       return;
     }
-    
+
     console.log('🚀 Starting campaign publication...');
     isPublishingRef.current = true; // ✅ Set ref immediately to prevent double clicks
     setIsLoading(true);
     setShowAccountModal(false);
     setShowPublishingModal(true);
     setPublishProgress(0);
-    
+
     // Simulate progress - now goes slower and stops at 80%
     let progressInterval: NodeJS.Timeout;
     const startProgressSimulation = () => {
@@ -725,16 +725,16 @@ export default function CampaignPreviewPage() {
         });
       }, 500); // Slower interval (500ms instead of 300ms)
     };
-    
+
     startProgressSimulation();
-    
+
     try {
       // Get all required data from localStorage
       const campaignDataStr = localStorage.getItem('campaignData') || '{}';
       const selectedLocationsStr = localStorage.getItem('selectedLocations') || '[]';
       const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
       const cpcDataStr = localStorage.getItem('cpcData') || '{}';
-      
+
       const campaignData = JSON.parse(campaignDataStr);
       const selectedLocations = JSON.parse(selectedLocationsStr);
       const generatedContent = JSON.parse(generatedContentStr);
@@ -766,18 +766,28 @@ export default function CampaignPreviewPage() {
         generated_content: generatedContent,
         realCPC: campaignData.realCPC || null, // Real CPC from Google Ads Historical Metrics (USD)
         maxCpcBid: campaignData.maxCpcBid || campaignData.realCPC || null, // Max CPC Bid (USD)
+        // ═══════════════════════════════════════════════════════════════════
+        // VIDEO CAMPAIGN SPECIFIC DATA
+        // ═══════════════════════════════════════════════════════════════════
+        video_ad_type: campaignData.videoAdType || campaignData.videoSubtype || 'VIDEO_RESPONSIVE_AD',
+        youtube_video_id: campaignData.youtubeVideoId || campaignData.videoId || null,
+        // ═══════════════════════════════════════════════════════════════════
         adCreative: {
           headlines: generatedContent?.headlines || [],
           descriptions: generatedContent?.descriptions || [],
           keywords: generatedContent?.keywords || cpcData?.keywords || [],
-          phoneNumber: campaignData.phoneNumber || null
+          phoneNumber: campaignData.phoneNumber || null,
+          // Video-specific creative data
+          long_headlines: generatedContent?.long_headlines || generatedContent?.descriptions || [],
+          call_to_action: generatedContent?.call_to_action || 'اكتشف المزيد',
+          action_button_label: generatedContent?.action_button_label || 'تعرف أكثر',
         },
         user_id: 'test_user'
       };
 
       console.log('📦 Publishing campaign:', completeCampaignData);
       console.log('🎯 Selected customer_id:', selectedAccount);
-      
+
       const apiUrl = getApiUrl('/api/ai-campaign/launch-campaign');
       console.log('🌐 API URL:', apiUrl);
 
@@ -785,10 +795,10 @@ export default function CampaignPreviewPage() {
       let launchResponse: Response;
       try {
         launchResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(completeCampaignData)
-      });
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(completeCampaignData)
+        });
       } catch (fetchError) {
         console.error('❌ Fetch error details:', fetchError);
         console.error('❌ Error name:', (fetchError as Error).name);
@@ -804,10 +814,10 @@ export default function CampaignPreviewPage() {
       if (!launchResponse.ok) {
         const errorData = await launchResponse.json().catch(() => null);
         console.error('❌ Backend error:', errorData);
-        
+
         // Extract Arabic message if available
         const errorMessage = errorData?.message || errorData?.error || 'فشل في نشر الحملة';
-        
+
         // Check if it's an account not enabled error
         if (errorMessage.includes('غير مفعل') || errorMessage.includes('CUSTOMER_NOT_ENABLED') || errorMessage.includes('not yet enabled') || errorMessage.includes('ENABLED')) {
           const cleanCustomerId = selectedAccount.replace(/-/g, '');
@@ -838,31 +848,31 @@ export default function CampaignPreviewPage() {
 
       const result = await launchResponse.json();
       console.log('✅ Campaign launch result:', result);
-      
+
       // Smoothly complete progress to 100%
       setPublishProgress(95);
       await new Promise(resolve => setTimeout(resolve, 200));
       setPublishProgress(100);
-      
+
       // Keep modal open for 2 seconds to show success
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       if (result.success) {
         // Save result and redirect to final success page
         localStorage.setItem('launchedCampaign', JSON.stringify(result));
         localStorage.removeItem('creatingCampaign');
         localStorage.removeItem('selectedLocations');
-        
+
         // DON'T hide publishing modal - keep it open until redirect!
         // setShowPublishingModal(false); // ❌ Removed - modal stays open until redirect
-        
+
         // Show success announcement
         setAnnouncement({
           show: true,
           variant: 'success',
           message: '🎉 تم نشر الحملة بنجاح على Google Ads!'
         });
-        
+
         // Redirect to dashboard (modal will stay open during redirect)
         setTimeout(() => {
           router.push('/dashboard');
@@ -871,7 +881,7 @@ export default function CampaignPreviewPage() {
       } else {
         // Show user-friendly error message
         const errorMsg = result.message || result.error || 'فشل في نشر الحملة';
-        
+
         // Check if it's an account not enabled error
         if (errorMsg.includes('غير مفعل') || errorMsg.includes('CUSTOMER_NOT_ENABLED') || errorMsg.includes('not yet enabled') || errorMsg.includes('ENABLED')) {
           const cleanCustomerId = selectedAccount.replace(/-/g, '');
@@ -935,8 +945,8 @@ export default function CampaignPreviewPage() {
         return (
           <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-3 py-1.5 border border-gray-200 dark:border-gray-700">
             <svg className="w-3.5 h-3.5 text-black dark:text-gray-400" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
-              <path d="M9 9h6M9 13h4" stroke="currentColor" strokeWidth="2"/>
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
+              <path d="M9 9h6M9 13h4" stroke="currentColor" strokeWidth="2" />
             </svg>
             <span className="text-black dark:text-gray-400 text-[11px]">Display Ad</span>
           </div>
@@ -945,7 +955,7 @@ export default function CampaignPreviewPage() {
         return (
           <div className="flex items-center gap-2 bg-black dark:bg-gray-900 rounded-lg px-3 py-1.5 border border-gray-700 dark:border-gray-600">
             <svg className="w-3.5 h-3.5 text-red-600 dark:text-red-500" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 8.64L15.27 12 10 15.36V8.64M8 5v14l11-7L8 5z"/>
+              <path d="M10 8.64L15.27 12 10 15.36V8.64M8 5v14l11-7L8 5z" />
             </svg>
             <span className="text-white dark:text-gray-300 text-[11px] font-medium">YouTube</span>
           </div>
@@ -954,7 +964,7 @@ export default function CampaignPreviewPage() {
         return (
           <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-3 py-1.5 border border-gray-200 dark:border-gray-700">
             <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-500" viewBox="0 0 24 24" fill="none">
-              <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" strokeWidth="2" />
             </svg>
             <span className="text-black dark:text-gray-400 text-[11px]">Shopping</span>
           </div>
@@ -997,7 +1007,7 @@ export default function CampaignPreviewPage() {
               Sponsored
             </span>
           </div>
-          
+
           {/* Website Info */}
           <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
             <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
@@ -1017,28 +1027,28 @@ export default function CampaignPreviewPage() {
           {/* Headlines */}
           <div className="space-y-1 sm:space-y-1.5">
             {/* Mobile/Tablet: Single Headline */}
-            <h3 
+            <h3
               className="xl:hidden text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-2 sm:line-clamp-1"
               dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
             >
               {ad.headlines[0]}
             </h3>
-            
+
             {/* Desktop/Laptop: Two Headlines with separator */}
             {ad.headlines[1] && (
-              <h3 
+              <h3
                 className="hidden xl:block text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-1"
                 dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
               >
                 {ad.headlines[0]} <span className="text-gray-400 dark:text-gray-600 mx-1">|</span> {ad.headlines[1]}
               </h3>
             )}
-            
+
             {/* Descriptions */}
             <div className="space-y-0.5">
               {ad.descriptions.slice(0, 2).map((desc, idx) => (
-                <p 
-                  key={idx} 
+                <p
+                  key={idx}
                   className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-tight sm:leading-relaxed line-clamp-2 sm:line-clamp-1"
                   dir={isArabic(desc) ? 'rtl' : 'ltr'}
                 >
@@ -1069,260 +1079,258 @@ export default function CampaignPreviewPage() {
 
       <div className="min-h-screen bg-white dark:bg-black" dir="ltr">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
-          
+
           {/* Header */}
-        <div className="mb-3 sm:mb-6 md:mb-8 text-center">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2 md:mb-3 px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-            {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-4xl mx-auto px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-            {language === 'ar' 
-              ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك. شاهد المعاينات أدناه.'
-              : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience. View previews below."}
-          </p>
-        </div>
-
-        {/* Variations Counter */}
-        <div className="mb-3 sm:mb-4 md:mb-6">
-          <div className="inline-flex items-center gap-2">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
-            <span className="font-semibold text-sm sm:text-base text-purple-600 dark:text-purple-400">
-              {language === 'ar' ? `تم إنشاء ${totalVariations} نسخة إعلانية` : `${totalVariations} ad variations generated`}
-            </span>
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
+          <div className="mb-3 sm:mb-6 md:mb-8 text-center">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2 md:mb-3 px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-4xl mx-auto px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              {language === 'ar'
+                ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك. شاهد المعاينات أدناه.'
+                : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience. View previews below."}
+            </p>
           </div>
-        </div>
 
-        {/* Ad Preview Section - Centered Layout */}
-        <div className="flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
-          
-          {/* Card Stack - Centered */}
-          <div className="flex items-center justify-center w-full">
-            {cards.length > 0 ? (
-              <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]">
-                <CardStack items={cards} offset={10} scaleFactor={0.06} />
-              </div>
-            ) : (
-              <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] h-48 sm:h-64 md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-14 md:w-14 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">{language === 'ar' ? 'جاري تحميل الإعلانات...' : 'Loading ads...'}</p>
+          {/* Variations Counter */}
+          <div className="mb-3 sm:mb-4 md:mb-6">
+            <div className="inline-flex items-center gap-2">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
+              <span className="font-semibold text-sm sm:text-base text-purple-600 dark:text-purple-400">
+                {language === 'ar' ? `تم إنشاء ${totalVariations} نسخة إعلانية` : `${totalVariations} ad variations generated`}
+              </span>
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
+
+          {/* Ad Preview Section - Centered Layout */}
+          <div className="flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
+
+            {/* Card Stack - Centered */}
+            <div className="flex items-center justify-center w-full">
+              {cards.length > 0 ? (
+                <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]">
+                  <CardStack items={cards} offset={10} scaleFactor={0.06} />
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (
+                <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] h-48 sm:h-64 md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-14 md:w-14 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">{language === 'ar' ? 'جاري تحميل الإعلانات...' : 'Loading ads...'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          {/* Edit Button - Below Card */}
-          <div className="flex items-center justify-center">
-            <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            {/* Edit Button - Below Card */}
+            <div className="flex items-center justify-center">
+              <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
                 <button
                   onClick={handleEditAds}
                   className="inline-flex items-center gap-1 hover:underline font-semibold"
                 >
                   <span className="!text-blue-600 dark:!text-blue-500">{language === 'ar' ? 'تعديل الإعلانات' : 'Edit ads'}</span>
-                <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 !text-blue-600 dark:!text-blue-500" />
+                  <Edit2 className="w-3 h-3 sm:w-4 sm:h-4 !text-blue-600 dark:!text-blue-500" />
                 </button>
               </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-center mt-12">
+            <GlowButton
+              onClick={handlePublishClick}
+              variant="blue"
+              disabled={isLoading}
+            >
+              <span className="flex items-center gap-2">
+                {isLoading
+                  ? (language === 'ar' ? 'جاري النشر...' : 'Publishing...')
+                  : (language === 'ar' ? 'نشر الحملة' : 'Publish Campaign')}
+                <ArrowRight className="w-5 h-5" />
+              </span>
+            </GlowButton>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center mt-12">
-          <GlowButton
-            onClick={handlePublishClick}
-            variant="blue"
-            disabled={isLoading}
-          >
-            <span className="flex items-center gap-2">
-              {isLoading 
-                ? (language === 'ar' ? 'جاري النشر...' : 'Publishing...') 
-                : (language === 'ar' ? 'نشر الحملة' : 'Publish Campaign')}
-              <ArrowRight className="w-5 h-5" />
-            </span>
-          </GlowButton>
-        </div>
-      </div>
-
-      {/* Account Selection Modal - Dynamic colors based on campaign type */}
-      {showAccountModal && (
-        <div className="fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4" style={{
-          background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
-          paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
-          paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
-        }}>
-          {/* Animated Background Orbs */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className={`absolute top-1/4 left-1/4 w-[500px] h-[500px] ${modalColors.orb1.replace('/20', '/30')} rounded-full blur-3xl animate-pulse animate-float`}></div>
-            <div className={`absolute bottom-1/4 right-1/4 w-[500px] h-[500px] ${modalColors.orb2.replace('/20', '/30')} rounded-full blur-3xl animate-pulse delay-700`} style={{ animationDelay: '2s' }}></div>
-            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${modalColors.orb1.replace('/20', '/20')} rounded-full blur-3xl animate-pulse delay-1000`} style={{ animationDelay: '4s' }}></div>
-            <div className={`absolute top-[15%] right-[15%] w-[300px] h-[300px] ${modalColors.orb2.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
-            <div className={`absolute bottom-[15%] left-[15%] w-[350px] h-[350px] ${modalColors.orb1.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '3s' }}></div>
-            {/* Floating particles */}
-            <div className={`absolute top-[10%] left-[15%] w-4 h-4 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '8s' }}></div>
-            <div className={`absolute top-[30%] right-[20%] w-3 h-3 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '10s', animationDelay: '1s' }}></div>
-            <div className={`absolute bottom-[25%] left-[25%] w-5 h-5 ${modalColors.orb1.replace('/20', '/40')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '12s', animationDelay: '2s' }}></div>
-            <div className={`absolute top-[60%] right-[30%] w-4 h-4 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '9s', animationDelay: '3s' }}></div>
-            <div className={`absolute bottom-[40%] right-[15%] w-3 h-3 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '11s', animationDelay: '4s' }}></div>
-          </div>
-          
-          <div 
-            className="bg-white dark:bg-black rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden border border-gray-900 dark:border-white/10 relative z-10"
-            style={{ 
-            }}
-          >
-            {/* Header - Centered */}
-            <div className="px-6 py-5 border-b border-gray-900 dark:border-white/10">
-              <div className="flex flex-col items-center justify-center text-center gap-3" dir="ltr">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 border border-white/10">
-                  <img 
-                    src="/images/integrations/google-ads-logo.svg" 
-                    alt="Google Ads" 
-                    className="w-8 h-8"
-                  />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {language === 'ar' ? 'اختر حساب إعلانات جوجل' : 'Select Google Ads Account'}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-white/70 mt-0.5">
-                    {language === 'ar' ? 'اختر الحساب الذي تريد نشر هذه الحملة عليه' : 'Choose which account to publish this campaign to'}
-                  </p>
-                </div>
-              </div>
+        {/* Account Selection Modal - Dynamic colors based on campaign type */}
+        {showAccountModal && (
+          <div className="fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4" style={{
+            background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
+            paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
+            paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
+          }}>
+            {/* Animated Background Orbs */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className={`absolute top-1/4 left-1/4 w-[500px] h-[500px] ${modalColors.orb1.replace('/20', '/30')} rounded-full blur-3xl animate-pulse animate-float`}></div>
+              <div className={`absolute bottom-1/4 right-1/4 w-[500px] h-[500px] ${modalColors.orb2.replace('/20', '/30')} rounded-full blur-3xl animate-pulse delay-700`} style={{ animationDelay: '2s' }}></div>
+              <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${modalColors.orb1.replace('/20', '/20')} rounded-full blur-3xl animate-pulse delay-1000`} style={{ animationDelay: '4s' }}></div>
+              <div className={`absolute top-[15%] right-[15%] w-[300px] h-[300px] ${modalColors.orb2.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
+              <div className={`absolute bottom-[15%] left-[15%] w-[350px] h-[350px] ${modalColors.orb1.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '3s' }}></div>
+              {/* Floating particles */}
+              <div className={`absolute top-[10%] left-[15%] w-4 h-4 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '8s' }}></div>
+              <div className={`absolute top-[30%] right-[20%] w-3 h-3 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '10s', animationDelay: '1s' }}></div>
+              <div className={`absolute bottom-[25%] left-[25%] w-5 h-5 ${modalColors.orb1.replace('/20', '/40')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '12s', animationDelay: '2s' }}></div>
+              <div className={`absolute top-[60%] right-[30%] w-4 h-4 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '9s', animationDelay: '3s' }}></div>
+              <div className={`absolute bottom-[40%] right-[15%] w-3 h-3 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '11s', animationDelay: '4s' }}></div>
             </div>
 
-            {/* Accounts List - Scrollable for many accounts like integrations */}
-            <div className="p-6 overflow-y-auto max-h-[60vh] bg-white dark:bg-black custom-scrollbar" dir="ltr">
-              {/* Auto-refresh indicator */}
-              {isRefreshingStatus && (
-                <div className="mb-4 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800 animate-pulse">
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>{language === 'ar' ? '⚡ جاري التحديث السريع...' : '⚡ Refreshing...'}</span>
-                </div>
-              )}
-              
-              {connectedAccounts.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-white/5 border border-white/10">
-                    <img 
-                      src="/images/integrations/google-ads-logo.svg" 
-                      alt="Google Ads" 
-                      className="w-6 h-6 sm:w-8 sm:h-8 opacity-50"
+            <div
+              className="bg-white dark:bg-black rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden border border-gray-900 dark:border-white/10 relative z-10"
+              style={{
+              }}
+            >
+              {/* Header - Centered */}
+              <div className="px-6 py-5 border-b border-gray-900 dark:border-white/10">
+                <div className="flex flex-col items-center justify-center text-center gap-3" dir="ltr">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 border border-white/10">
+                    <img
+                      src="/images/integrations/google-ads-logo.svg"
+                      alt="Google Ads"
+                      className="w-8 h-8"
                     />
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {language === 'ar' ? 'لا توجد حسابات مرتبطة' : 'No Connected Accounts'}
-                  </h3>
-                  <p className="text-gray-600 dark:text-white/70 mb-4 sm:mb-6 max-w-sm mx-auto text-xs sm:text-sm">
-                    {language === 'ar' ? 'يرجى ربط حساب إعلانات جوجل لنشر حملاتك' : 'Please connect a Google Ads account to publish your campaigns'}
-                  </p>
-                  <button
-                    onClick={() => router.push('/integrations/google-ads')}
-                    className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm sm:text-base"
-                  >
-                    <span>{language === 'ar' ? 'ربط حساب' : 'Connect Account'}</span>
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {/* Accounts count */}
-                  {connectedAccounts.length > 5 && (
-                    <div className="mb-4 text-center">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {language === 'ar' 
-                          ? `عرض ${connectedAccounts.length} حساب مرتبط (مرر لرؤية الكل)` 
-                          : `Showing ${connectedAccounts.length} connected accounts (scroll to see all)`}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="space-y-3">
-                    {connectedAccounts.map((account, index) => {
-                      const isEnabled = account.status === 'ACTIVE';
-                      const activationUrl = `https://ads.google.com/aw/preferences?ocid=${account.customerId.replace(/-/g, '')}`;
-                      
-                      return (
-                      <div 
-                        key={account.customerId} 
-                          onClick={() => isEnabled && setSelectedAccount(account.customerId)}
-                          className={`relative w-full p-4 rounded-lg border transition-all ${
-                            !isEnabled 
-                              ? 'bg-transparent border-gray-300 dark:border-white/10 cursor-not-allowed opacity-70'
-                              : selectedAccount === account.customerId
-                                ? 'bg-blue-500/10 border-blue-500 cursor-pointer'
-                                : 'bg-transparent border-gray-300 dark:border-white/10 hover:border-blue-400 dark:hover:border-blue-400/50 cursor-pointer'
-                        }`}
-                        style={{
-                          animationDelay: `${index * 0.05}s`,
-                          animation: 'fadeInUp 0.3s ease-out forwards',
-                          opacity: 0
-                        }}
-                      >
-                          {/* Account Display */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                              selectedAccount === account.customerId
-                                ? 'bg-blue-500/20 border border-blue-500/50'
-                                : 'bg-white/5 border border-white/10'
-                            }`}>
-                              <img 
-                                src="/images/integrations/google-ads-logo.svg" 
-                                alt="Google Ads" 
-                                className="w-8 h-8"
-                              />
-                            </div>
-                              <div className="text-left">
-                              <p className="text-gray-900 dark:text-white font-medium text-sm">
-                                  {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className="text-gray-700 dark:text-gray-300 font-mono ml-2 text-sm">{formatCustomerId(account.customerId)}</span>
-                              </p>
-                            </div>
-                          </div>
-                          
-                            {/* Status Badge with Activation Button */}
-                            <div className="ml-4 flex items-center gap-2">
-                              {isEnabled ? (
-                            <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30">
-                              <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-400"></span>
-                                  {language === 'ar' ? 'نشط' : 'Active'}
-                            </div>
-                              ) : (
-                                <>
-                                  <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30">
-                                    <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-orange-400"></span>
-                                    {language === 'ar' ? 'غير مفعّل' : 'Not Enabled'}
-                          </div>
-                                  <a
-                                    href={activationUrl}
-                                    target="_blank"
-                                    rel="nofollow noopener noreferrer"
-                                    onClick={handleActivateClick}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-xs font-medium"
-                                    title={language === 'ar' ? 'تفعيل الحساب' : 'Activate Account'}
-                                  >
-                                    <span>{language === 'ar' ? 'تفعيل' : 'Activate'}</span>
-                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                  </a>
-                                </>
-                              )}
-                        </div>
-                      </div>
-                        </div>
-                      );
-                    })}
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {language === 'ar' ? 'اختر حساب إعلانات جوجل' : 'Select Google Ads Account'}
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-white/70 mt-0.5">
+                      {language === 'ar' ? 'اختر الحساب الذي تريد نشر هذه الحملة عليه' : 'Choose which account to publish this campaign to'}
+                    </p>
                   </div>
-                </>
-              )}
-            </div>
-            
-            {/* Add animation keyframes */}
-            <style jsx>{`
+                </div>
+              </div>
+
+              {/* Accounts List - Scrollable for many accounts like integrations */}
+              <div className="p-6 overflow-y-auto max-h-[60vh] bg-white dark:bg-black custom-scrollbar" dir="ltr">
+                {/* Auto-refresh indicator */}
+                {isRefreshingStatus && (
+                  <div className="mb-4 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800 animate-pulse">
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{language === 'ar' ? '⚡ جاري التحديث السريع...' : '⚡ Refreshing...'}</span>
+                  </div>
+                )}
+
+                {connectedAccounts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-white/5 border border-white/10">
+                      <img
+                        src="/images/integrations/google-ads-logo.svg"
+                        alt="Google Ads"
+                        className="w-6 h-6 sm:w-8 sm:h-8 opacity-50"
+                      />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {language === 'ar' ? 'لا توجد حسابات مرتبطة' : 'No Connected Accounts'}
+                    </h3>
+                    <p className="text-gray-600 dark:text-white/70 mb-4 sm:mb-6 max-w-sm mx-auto text-xs sm:text-sm">
+                      {language === 'ar' ? 'يرجى ربط حساب إعلانات جوجل لنشر حملاتك' : 'Please connect a Google Ads account to publish your campaigns'}
+                    </p>
+                    <button
+                      onClick={() => router.push('/integrations/google-ads')}
+                      className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm sm:text-base"
+                    >
+                      <span>{language === 'ar' ? 'ربط حساب' : 'Connect Account'}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Accounts count */}
+                    {connectedAccounts.length > 5 && (
+                      <div className="mb-4 text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {language === 'ar'
+                            ? `عرض ${connectedAccounts.length} حساب مرتبط (مرر لرؤية الكل)`
+                            : `Showing ${connectedAccounts.length} connected accounts (scroll to see all)`}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      {connectedAccounts.map((account, index) => {
+                        const isEnabled = account.status === 'ACTIVE';
+                        const activationUrl = `https://ads.google.com/aw/preferences?ocid=${account.customerId.replace(/-/g, '')}`;
+
+                        return (
+                          <div
+                            key={account.customerId}
+                            onClick={() => isEnabled && setSelectedAccount(account.customerId)}
+                            className={`relative w-full p-4 rounded-lg border transition-all ${!isEnabled
+                                ? 'bg-transparent border-gray-300 dark:border-white/10 cursor-not-allowed opacity-70'
+                                : selectedAccount === account.customerId
+                                  ? 'bg-blue-500/10 border-blue-500 cursor-pointer'
+                                  : 'bg-transparent border-gray-300 dark:border-white/10 hover:border-blue-400 dark:hover:border-blue-400/50 cursor-pointer'
+                              }`}
+                            style={{
+                              animationDelay: `${index * 0.05}s`,
+                              animation: 'fadeInUp 0.3s ease-out forwards',
+                              opacity: 0
+                            }}
+                          >
+                            {/* Account Display */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedAccount === account.customerId
+                                    ? 'bg-blue-500/20 border border-blue-500/50'
+                                    : 'bg-white/5 border border-white/10'
+                                  }`}>
+                                  <img
+                                    src="/images/integrations/google-ads-logo.svg"
+                                    alt="Google Ads"
+                                    className="w-8 h-8"
+                                  />
+                                </div>
+                                <div className="text-left">
+                                  <p className="text-gray-900 dark:text-white font-medium text-sm">
+                                    {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className="text-gray-700 dark:text-gray-300 font-mono ml-2 text-sm">{formatCustomerId(account.customerId)}</span>
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Status Badge with Activation Button */}
+                              <div className="ml-4 flex items-center gap-2">
+                                {isEnabled ? (
+                                  <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30">
+                                    <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-400"></span>
+                                    {language === 'ar' ? 'نشط' : 'Active'}
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30">
+                                      <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-orange-400"></span>
+                                      {language === 'ar' ? 'غير مفعّل' : 'Not Enabled'}
+                                    </div>
+                                    <a
+                                      href={activationUrl}
+                                      target="_blank"
+                                      rel="nofollow noopener noreferrer"
+                                      onClick={handleActivateClick}
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-xs font-medium"
+                                      title={language === 'ar' ? 'تفعيل الحساب' : 'Activate Account'}
+                                    >
+                                      <span>{language === 'ar' ? 'تفعيل' : 'Activate'}</span>
+                                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                      </svg>
+                                    </a>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Add animation keyframes */}
+              <style jsx>{`
               @keyframes fadeInUp {
                 from {
                   opacity: 0;
@@ -1367,117 +1375,117 @@ export default function CampaignPreviewPage() {
               }
             `}</style>
 
-            {/* Footer - GlowButton style like campaign pages */}
-            <div className="px-6 py-4 bg-white dark:bg-black border-t border-gray-900 dark:border-white/10 flex justify-between items-center gap-4">
-              <GlowButton
-                onClick={() => setShowAccountModal(false)}
-                variant="green"
-              >
-                <span className="flex items-center gap-2">
-                  <ArrowLeft className="w-5 h-5" />
-                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
-                </span>
-              </GlowButton>
+              {/* Footer - GlowButton style like campaign pages */}
+              <div className="px-6 py-4 bg-white dark:bg-black border-t border-gray-900 dark:border-white/10 flex justify-between items-center gap-4">
+                <GlowButton
+                  onClick={() => setShowAccountModal(false)}
+                  variant="green"
+                >
+                  <span className="flex items-center gap-2">
+                    <ArrowLeft className="w-5 h-5" />
+                    {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                  </span>
+                </GlowButton>
 
-              <div className="relative group">
-                {(() => {
-                  const selectedAccountData = selectedAccount 
-                    ? connectedAccounts.find(acc => acc.customerId === selectedAccount)
-                    : null;
-                  const isAccountActive = selectedAccountData?.status === 'ACTIVE';
-                  const isButtonDisabled = !selectedAccount || isLoading || !isAccountActive;
-                  
-                  console.log(`🔵 Button state: selected=${selectedAccount}, status=${selectedAccountData?.status}, disabled=${isButtonDisabled}`);
-                  
-                  return (
-                    <>
-              <GlowButton
-                onClick={handlePublish}
-                variant="blue"
-                        disabled={isButtonDisabled}
-                        className={isAccountActive ? 'animate-pulse-slow' : ''}
-              >
-                        <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                              {language === 'ar' ? 'جاري النشر...' : 'Publishing...'}
-                    </>
-                  ) : (
-                    <>
-                              {language === 'ar' ? 'نشر الحملة' : 'Publish Campaign'}
-                              {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
-                    </>
-                  )}
-                </span>
-              </GlowButton>
-                      
-                      {/* Tooltip for disabled state */}
-                      {!selectedAccount && (
-                        <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block">
-                          <div className="bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                            {language === 'ar' ? 'يرجى اختيار حساب أولاً' : 'Please select an account first'}
-            </div>
-                        </div>
-                      )}
-                      {selectedAccount && !isAccountActive && (
-                        <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block">
-                          <div className="bg-orange-600 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                            {language === 'ar' 
-                              ? `⚠️ يجب تفعيل الحساب أولاً (${selectedAccountData?.status || 'UNKNOWN'})` 
-                              : `⚠️ Account must be activated first (${selectedAccountData?.status || 'UNKNOWN'})`}
+                <div className="relative group">
+                  {(() => {
+                    const selectedAccountData = selectedAccount
+                      ? connectedAccounts.find(acc => acc.customerId === selectedAccount)
+                      : null;
+                    const isAccountActive = selectedAccountData?.status === 'ACTIVE';
+                    const isButtonDisabled = !selectedAccount || isLoading || !isAccountActive;
+
+                    console.log(`🔵 Button state: selected=${selectedAccount}, status=${selectedAccountData?.status}, disabled=${isButtonDisabled}`);
+
+                    return (
+                      <>
+                        <GlowButton
+                          onClick={handlePublish}
+                          variant="blue"
+                          disabled={isButtonDisabled}
+                          className={isAccountActive ? 'animate-pulse-slow' : ''}
+                        >
+                          <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            {isLoading ? (
+                              <>
+                                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {language === 'ar' ? 'جاري النشر...' : 'Publishing...'}
+                              </>
+                            ) : (
+                              <>
+                                {language === 'ar' ? 'نشر الحملة' : 'Publish Campaign'}
+                                {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                              </>
+                            )}
+                          </span>
+                        </GlowButton>
+
+                        {/* Tooltip for disabled state */}
+                        {!selectedAccount && (
+                          <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block">
+                            <div className="bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                              {language === 'ar' ? 'يرجى اختيار حساب أولاً' : 'Please select an account first'}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
+                        )}
+                        {selectedAccount && !isAccountActive && (
+                          <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block">
+                            <div className="bg-orange-600 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                              {language === 'ar'
+                                ? `⚠️ يجب تفعيل الحساب أولاً (${selectedAccountData?.status || 'UNKNOWN'})`
+                                : `⚠️ Account must be activated first (${selectedAccountData?.status || 'UNKNOWN'})`}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Publishing Progress Modal with Modern Loader */}
-      {showPublishingModal && (
-        <div 
-          className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
-          style={{ 
-            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
-            paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
-            paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
-          }}
-        >
-          <ModernLoader 
-            words={language === 'ar' ? [
-              'جاري الاتصال بـ Google Ads...',
-              'إنشاء الحملة...',
-              'إعداد الميزانية...',
-              'تكوين الاستهداف...',
-              'إضافة الكلمات المفتاحية...',
-              'إنشاء المجموعات الإعلانية...',
-              'رفع نص الإعلان...',
-              'إنهاء الإعدادات...',
-              'النشر على Google...',
-              'جاري الانتهاء...'
-            ] : [
-              'Connecting to Google Ads…',
-              'Creating campaign…',
-              'Setting up budget…',
-              'Configuring targeting…',
-              'Adding keywords…',
-              'Creating ad groups…',
-              'Uploading ad copy…',
-              'Finalizing settings…',
-              'Publishing to Google…',
-              'Almost done…'
-            ]}
-          />
-        </div>
-      )}
+        {/* Publishing Progress Modal with Modern Loader */}
+        {showPublishingModal && (
+          <div
+            className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
+            style={{
+              background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
+              paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
+              paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
+            }}
+          >
+            <ModernLoader
+              words={language === 'ar' ? [
+                'جاري الاتصال بـ Google Ads...',
+                'إنشاء الحملة...',
+                'إعداد الميزانية...',
+                'تكوين الاستهداف...',
+                'إضافة الكلمات المفتاحية...',
+                'إنشاء المجموعات الإعلانية...',
+                'رفع نص الإعلان...',
+                'إنهاء الإعدادات...',
+                'النشر على Google...',
+                'جاري الانتهاء...'
+              ] : [
+                'Connecting to Google Ads…',
+                'Creating campaign…',
+                'Setting up budget…',
+                'Configuring targeting…',
+                'Adding keywords…',
+                'Creating ad groups…',
+                'Uploading ad copy…',
+                'Finalizing settings…',
+                'Publishing to Google…',
+                'Almost done…'
+              ]}
+            />
+          </div>
+        )}
       </div>
     </>
   );

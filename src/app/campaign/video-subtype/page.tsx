@@ -25,9 +25,15 @@ interface VideoSubType {
     type: string;
     icon: React.ComponentType<any>;
     urlRequirement: 'required' | 'optional' | 'not_allowed';
+    description_ar: string;
+    description_en: string;
+    biddingStrategy: string;
+    recommendedBid: string;
+    bestFor_ar: string;
+    bestFor_en: string;
 }
 
-// Video sub-types data
+// Video sub-types data with bidding strategies
 const VIDEO_SUB_TYPES: VideoSubType[] = [
     {
         id: '1',
@@ -35,7 +41,13 @@ const VIDEO_SUB_TYPES: VideoSubType[] = [
         name_en: 'Video Responsive',
         type: 'VIDEO_RESPONSIVE_AD',
         icon: Sparkles,
-        urlRequirement: 'required'
+        urlRequirement: 'required',
+        description_ar: 'إعلان مرن يتكيف مع جميع المواضع على YouTube',
+        description_en: 'Flexible ad that adapts to all YouTube placements',
+        biddingStrategy: 'TARGET_CPV',
+        recommendedBid: '$0.02 - $0.10',
+        bestFor_ar: 'التحويلات والمبيعات',
+        bestFor_en: 'Conversions & Sales'
     },
     {
         id: '2',
@@ -43,7 +55,13 @@ const VIDEO_SUB_TYPES: VideoSubType[] = [
         name_en: 'TrueView In-Stream',
         type: 'VIDEO_TRUEVIEW_IN_STREAM_AD',
         icon: Target,
-        urlRequirement: 'required'
+        urlRequirement: 'required',
+        description_ar: 'قابل للتخطي بعد 5 ثواني - ادفع فقط عند المشاهدة',
+        description_en: 'Skippable after 5s - pay only when watched',
+        biddingStrategy: 'TARGET_CPV',
+        recommendedBid: '$0.03 - $0.15',
+        bestFor_ar: 'التفاعل والتحويلات',
+        bestFor_en: 'Engagement & Conversions'
     },
     {
         id: '3',
@@ -51,7 +69,13 @@ const VIDEO_SUB_TYPES: VideoSubType[] = [
         name_en: 'In-Feed Video',
         type: 'IN_FEED_VIDEO_AD',
         icon: Eye,
-        urlRequirement: 'not_allowed'
+        urlRequirement: 'not_allowed',
+        description_ar: 'يظهر في البحث والخلاصة - لزيادة المشاهدات',
+        description_en: 'Appears in search & feed - for more views',
+        biddingStrategy: 'TARGET_CPV',
+        recommendedBid: '$0.01 - $0.05',
+        bestFor_ar: 'مشاهدات ومشتركين',
+        bestFor_en: 'Views & Subscribers'
     },
     {
         id: '4',
@@ -59,7 +83,13 @@ const VIDEO_SUB_TYPES: VideoSubType[] = [
         name_en: 'Bumper Ad',
         type: 'VIDEO_BUMPER_AD',
         icon: Clock,
-        urlRequirement: 'optional'
+        urlRequirement: 'optional',
+        description_ar: '6 ثواني غير قابل للتخطي - للوعي بالعلامة',
+        description_en: '6 seconds non-skippable - for brand awareness',
+        biddingStrategy: 'TARGET_CPM',
+        recommendedBid: '$0.50 - $3 CPM',
+        bestFor_ar: 'الوعي بالعلامة التجارية',
+        bestFor_en: 'Brand Awareness'
     },
     {
         id: '5',
@@ -67,7 +97,13 @@ const VIDEO_SUB_TYPES: VideoSubType[] = [
         name_en: 'Non-Skippable',
         type: 'VIDEO_NON_SKIPPABLE_IN_STREAM_AD',
         icon: Play,
-        urlRequirement: 'optional'
+        urlRequirement: 'optional',
+        description_ar: '15-20 ثانية - رسالة كاملة مضمونة',
+        description_en: '15-20 seconds - guaranteed full message',
+        biddingStrategy: 'TARGET_CPM',
+        recommendedBid: '$0.50 - $5 CPM',
+        bestFor_ar: 'رسالة كاملة وتأثير قوي',
+        bestFor_en: 'Full Message & Strong Impact'
     }
 ];
 
@@ -82,21 +118,17 @@ export default function VideoSubtypePage() {
     const [showUrlModal, setShowUrlModal] = useState(false);
     const [pendingSubType, setPendingSubType] = useState<string | null>(null);
 
-    // Load saved data
+    // Load saved data - Only load video selection, NOT subtype (user should choose each time)
     useEffect(() => {
         const campaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
 
+        // Only restore video selection
         if (campaignData.selectedVideo) {
             setSelectedVideo(campaignData.selectedVideo);
         }
 
-        if (campaignData.conversionUrl) {
-            setConversionUrl(campaignData.conversionUrl.replace('https://', ''));
-        }
-
-        if (campaignData.videoSubType) {
-            setSelectedSubType(campaignData.videoSubType);
-        }
+        // Don't pre-fill URL - user should enter fresh each time
+        // Don't pre-select subtype - user should choose fresh each time
     }, []);
 
     // Disable scroll when modal is open
@@ -146,7 +178,8 @@ export default function VideoSubtypePage() {
             setConversionUrl(''); // Clear any URL
             window.dispatchEvent(new Event('campaignTypeChanged'));
         } else {
-            // For "required" or "optional", show modal
+            // For "required" or "optional", show modal with EMPTY URL field
+            setConversionUrl(''); // Clear URL for fresh input
             setPendingSubType(subType);
             setShowUrlModal(true);
         }
@@ -275,11 +308,21 @@ export default function VideoSubtypePage() {
         const campaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
         const updatedData = {
             ...campaignData,
+            // Video subtype and video data
             videoSubType: selectedSubType,
+            videoAdType: selectedSubType, // Backend expects this key
             selectedVideo: selectedVideo,
-            conversionUrl: conversionUrl ? `https://${conversionUrl}` : null
+            youtubeVideoId: selectedVideo?.id || null, // Backend expects this key
+            videoId: selectedVideo?.id || null, // Alternative key
+            conversionUrl: conversionUrl ? `https://${conversionUrl}` : null,
+            websiteUrl: conversionUrl ? `https://${conversionUrl}` : campaignData.websiteUrl || null,
         };
         localStorage.setItem('campaignData', JSON.stringify(updatedData));
+        console.log('📹 Video campaign data saved:', {
+            videoAdType: selectedSubType,
+            youtubeVideoId: selectedVideo?.id,
+            conversionUrl: updatedData.conversionUrl
+        });
 
         router.push('/campaign/location-targeting');
     }, [selectedSubType, selectedVideo, conversionUrl, router]);
@@ -491,7 +534,7 @@ export default function VideoSubtypePage() {
                                             type="text"
                                             value={conversionUrl}
                                             onChange={(e) => handleUrlChange(e.target.value)}
-                                            placeholder="https://yourwebsite.com"
+                                            placeholder="yourwebsite.com"
                                             className="flex-1 px-4 py-4 bg-transparent text-white text-base placeholder-white/30 focus:outline-none"
                                             autoFocus
                                         />

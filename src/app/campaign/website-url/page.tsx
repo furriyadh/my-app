@@ -1148,27 +1148,7 @@ const WebsiteUrlPage: React.FC = () => {
         position: 'relative',
         minHeight: '100dvh' // Use dynamic viewport height for mobile
       }}>
-        {/* Fullscreen PlasmaGlobe Detection Animation Modal - Outside all transform containers */}
-        {isDetecting && (
-          <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black" style={{ paddingLeft: '240px' }}>
-            {/* Large PlasmaGlobe Container - Centered */}
-            <div className="relative w-[50vw] h-[45vh] max-w-xl max-h-[350px]">
-              <PlasmaGlobe
-                speed={1.0}
-                intensity={1.3}
-              />
-            </div>
-            {/* Text below PlasmaGlobe */}
-            <div className="mt-6 text-center z-10">
-              <p className="text-white font-bold text-2xl md:text-3xl animate-pulse drop-shadow-lg">
-                {language === 'ar' ? '🔍 جاري تحليل الرابط بالذكاء الاصطناعي...' : '🔍 AI Analyzing URL...'}
-              </p>
-              <p className="text-white/70 text-lg mt-3 drop-shadow-md">
-                {language === 'ar' ? 'اكتشاف نوع الحملة المناسب' : 'Detecting optimal campaign type'}
-              </p>
-            </div>
-          </div>
-        )}
+
 
         {/* Campaign Progress */}
         <CampaignProgress currentStep={0} totalSteps={3} />
@@ -1216,12 +1196,10 @@ const WebsiteUrlPage: React.FC = () => {
                   position: 'relative',
                   zIndex: 3
                 }}>
-                  {!isDetecting && (
-                    <div className="!w-fit absolute top-4 right-6">
-                      <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
-                    </div>
-                  )}
-                  <div className={`space-y-6 ${isDetecting ? 'invisible' : ''}`}>
+                  <div className="!w-fit absolute top-4 right-6">
+                    <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
+                  </div>
+                  <div className="space-y-6">
                     {/* Input Field */}
                     <div>
                       <div>
