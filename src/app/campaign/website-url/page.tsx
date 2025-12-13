@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Globe, Link as LinkIcon, Shield, Sparkles, Zap, 
 import ReactCountryFlag from 'react-country-flag';
 import GlowButton from '@/components/ui/glow-button';
 import { VerifyBadge } from '@/components/ui/verify-badge';
-import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
+import { CardContainer, CardBody } from '@/components/ui/3d-card';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import Card3DWrapper from '@/components/ui/card-3d-wrapper';
 import { Progress } from '@/components/ui/progress';
@@ -1146,7 +1146,7 @@ const WebsiteUrlPage: React.FC = () => {
                       : effectiveCampaignType === 'SHOPPING' ? 'blue-500'
                         : effectiveCampaignType === 'VIDEO' ? 'red-500'
                           : effectiveCampaignType === 'APP' ? 'orange-500'
-                            : 'emerald-500'
+                            : 'purple-500'
                 }
                 toColor={
                   effectiveCampaignType === 'SEARCH' ? 'yellow-500'
@@ -1154,7 +1154,7 @@ const WebsiteUrlPage: React.FC = () => {
                       : effectiveCampaignType === 'SHOPPING' ? 'cyan-500'
                         : effectiveCampaignType === 'VIDEO' ? 'rose-500'
                           : effectiveCampaignType === 'APP' ? 'amber-500'
-                            : 'green-400'
+                            : 'violet-500'
                 }
                 noBackground={true}
                 rounded="xl"
@@ -1164,19 +1164,19 @@ const WebsiteUrlPage: React.FC = () => {
                   zIndex: 3
                 }}>
                   {!isDetecting && (
-                    <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
+                    <div className="!w-fit absolute top-4 right-6">
                       <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
-                    </CardItem>
+                    </div>
                   )}
                   <div className={`space-y-6 ${isDetecting ? 'invisible' : ''}`}>
                     {/* Input Field */}
                     <div>
-                      <CardItem translateZ={50}>
+                      <div>
                         <label className="block text-sm font-semibold text-white mb-3 drop-shadow-md text-left">
                           {language === 'ar' ? 'رابط موقعك الإلكتروني' : 'Your Website URL'}
                         </label>
-                      </CardItem>
-                      <CardItem translateZ={60} as="div" className="!w-full">
+                      </div>
+                      <div className="!w-full">
                         <div className="flex gap-3">
                           {/* HTTPS Prefix - Matches input border state */}
                           <div className={`w-28 px-4 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white flex items-center justify-center transition-all duration-200 ${!isValidUrl && websiteUrl
@@ -1238,11 +1238,11 @@ const WebsiteUrlPage: React.FC = () => {
                             )}
                           </div>
                         </div>
-                      </CardItem>
+                      </div>
 
                       {/* Error Message */}
                       {!isValidUrl && websiteUrl && urlErrorMessage && (
-                        <CardItem translateZ={40} as="div" className="!w-full">
+                        <div className="!w-full">
                           <div className="mt-3 p-3 bg-red-500/20 border border-red-300/30 rounded-lg flex items-start gap-2 backdrop-blur-sm">
                             <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
                             <div className="text-left">
@@ -1250,12 +1250,12 @@ const WebsiteUrlPage: React.FC = () => {
                               <p className="text-sm text-red-300">{urlErrorMessage}</p>
                             </div>
                           </div>
-                        </CardItem>
+                        </div>
                       )}
 
                       {/* Success Message - White style matching card */}
                       {isUrlVerified && (
-                        <CardItem translateZ={40} as="div" className="!w-full">
+                        <div className="!w-full">
                           <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg flex items-start gap-2 backdrop-blur-sm">
                             <CheckCircle2 className="w-5 h-5 text-white/80 flex-shrink-0 mt-0.5" />
                             <div className="text-left flex-1">
@@ -1286,12 +1286,12 @@ const WebsiteUrlPage: React.FC = () => {
                               </div>
                             )}
                           </div>
-                        </CardItem>
+                        </div>
                       )}
 
                       {/* Merchant Center Selection for Shopping Campaigns - Google Ads Style */}
                       {detectedUrlType && (detectedUrlType.type === 'store' || detectedUrlType.suggestedCampaignType === 'SHOPPING') && (
-                        <CardItem translateZ={35} as="div" className="!w-full">
+                        <div className="!w-full">
                           <div className="mt-4 p-5 bg-white/10 border border-cyan-400/30 rounded-xl backdrop-blur-sm">
                             {/* Info Message */}
                             <div className="flex items-start gap-3 mb-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
@@ -1425,12 +1425,12 @@ const WebsiteUrlPage: React.FC = () => {
                               </div>
                             )}
                           </div>
-                        </CardItem>
+                        </div>
                       )}
 
                       {/* App Campaign Selection */}
                       {detectedUrlType && detectedUrlType.type === 'app' && (
-                        <CardItem translateZ={35} as="div" className="!w-full">
+                        <div className="!w-full">
                           <div className="mt-4 p-4 bg-white/10 border border-orange-400/30 rounded-xl backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <Smartphone className="w-5 h-5 text-orange-300" />
@@ -1533,12 +1533,12 @@ const WebsiteUrlPage: React.FC = () => {
                               </div>
                             )}
                           </div>
-                        </CardItem>
+                        </div>
                       )}
 
                       {/* Video Campaign Selection */}
                       {detectedUrlType && (detectedUrlType.type === 'video' || detectedUrlType.suggestedCampaignType === 'VIDEO') && (
-                        <CardItem translateZ={35} as="div" className="!w-full">
+                        <div className="!w-full">
                           <div className="mt-4 p-4 bg-white/10 border border-purple-400/30 rounded-xl backdrop-blur-sm">
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-2">
@@ -1624,7 +1624,7 @@ const WebsiteUrlPage: React.FC = () => {
                               )
                             )}
                           </div>
-                        </CardItem>
+                        </div>
                       )}
                     </div>
 
