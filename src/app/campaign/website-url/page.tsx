@@ -1068,10 +1068,16 @@ const WebsiteUrlPage: React.FC = () => {
       const nextCampaignType = detectedUrlType?.suggestedCampaignType || campaignData.campaignType || 'SEARCH';
 
       if (nextCampaignType === 'VIDEO' && selectedVideos.length > 0) {
-        // Save selected video for video-subtype page
+        // Save selected video for video-subtype page with all video data
+        const video = selectedVideos[0];
         const videoData = {
           ...updatedData,
-          selectedVideo: selectedVideos[0] // video-subtype expects single video
+          selectedVideo: video,
+          youtubeVideoId: video.id,
+          youtubeVideoTitle: video.title,
+          youtubeVideoViews: video.view_count || 0,
+          youtubeChannelTitle: video.channelTitle,
+          youtubeVideoThumbnail: video.thumbnailUrl
         };
         localStorage.setItem('campaignData', JSON.stringify(videoData));
         router.push('/campaign/video-subtype');

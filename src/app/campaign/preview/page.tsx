@@ -35,6 +35,9 @@ export default function CampaignPreviewPage() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [websiteDomain, setWebsiteDomain] = useState('');
   const [campaignType, setCampaignType] = useState<string>('SEARCH');
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string>('');
+  const [youtubeVideoTitle, setYoutubeVideoTitle] = useState<string>('');
+  const [youtubeVideoViews, setYoutubeVideoViews] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const isPublishingRef = useRef(false); // ⚠️ Prevent double submission using ref
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -204,6 +207,34 @@ export default function CampaignPreviewPage() {
 
     // Set campaign type
     setCampaignType(campaignData.campaignType || 'SEARCH');
+
+    // Set YouTube video data for VIDEO campaigns
+    if (campaignData.campaignType === 'VIDEO') {
+      // Try to get video ID from various sources
+      let videoId = campaignData.youtubeVideoId || campaignData.videoId || '';
+
+      // Extract video ID from URL if not directly available
+      if (!videoId && url) {
+        const patterns = [
+          /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+          /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+        ];
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match) {
+            videoId = match[1];
+            break;
+          }
+        }
+      }
+
+      setYoutubeVideoId(videoId);
+      setYoutubeVideoTitle(campaignData.youtubeVideoTitle || generatedContent.headlines?.[0] || '');
+      setYoutubeVideoViews(campaignData.youtubeVideoViews || 0);
+
+      console.log('📹 YouTube Video ID:', videoId);
+      console.log('📹 YouTube Video Title:', campaignData.youtubeVideoTitle);
+    }
 
     // Extract domain from URL
     try {
@@ -994,70 +1025,172 @@ export default function CampaignPreviewPage() {
   const cards = adVariations.map((ad, index) => ({
     id: index,
     content: (
-      <div className="w-full h-full flex flex-col min-h-[200px] sm:min-h-[240px]">
+      <div className={`w-full h-full flex flex-col ${campaignType === 'VIDEO' ? 'min-h-[420px] sm:min-h-[480px]' : 'min-h-[200px] sm:min-h-[240px]'}`}>
         {/* Platform Bar */}
         <div className="bg-gray-50 dark:bg-black p-2 sm:p-2.5 border-b border-gray-200 dark:border-gray-800">
           {getPlatformBar()}
         </div>
 
-        {/* Ad Preview */}
-        <div className="p-3 sm:p-4 bg-white dark:bg-black flex-1 flex flex-col justify-center">
-          <div className="mb-1 sm:mb-1.5">
-            <span className="text-[9px] sm:text-[10px] font-bold text-gray-900 dark:text-white">
-              Sponsored
-            </span>
-          </div>
+        {/* Conditional Ad Preview based on Campaign Type */}
+        {campaignType === 'VIDEO' && youtubeVideoId ? (
+          // YouTube Video Ad Preview
+          <div className="flex-1 flex flex-col bg-black">
+            {/* Video Thumbnail with Overlays */}
+            <div className="relative aspect-video w-full bg-gray-900 overflow-hidden">
+              {/* YouTube Thumbnail */}
+              <img
+                src={`https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`}
+                alt="Video Thumbnail"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to hqdefault if maxresdefault not available
+                  (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`;
+                }}
+              />
 
-          {/* Website Info */}
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-[8px] sm:text-[10px] font-semibold text-gray-600 dark:text-gray-400">
-                {websiteDomain.charAt(0).toUpperCase()}
+              {/* Visit Advertiser Button - Top Left */}
+              <div className="absolute top-3 left-3">
+                <button className="bg-black/80 hover:bg-black text-white text-xs sm:text-sm px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-all">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  {language === 'ar' ? 'زيارة صفحة المعلن' : 'Visit Advertiser'}
+                </button>
+              </div>
+
+              {/* Skip Ad Button - Bottom Left */}
+              <div className="absolute bottom-3 left-3">
+                <button className="bg-yellow-500/90 hover:bg-yellow-500 text-black text-xs sm:text-sm px-4 py-2 rounded font-bold flex items-center gap-2 transition-all shadow-lg">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z" />
+                  </svg>
+                  {language === 'ar' ? 'تخطّي الإعلان' : 'Skip Ad'}
+                </button>
+              </div>
+
+              {/* Video Duration - Bottom Right */}
+              <div className="absolute bottom-3 right-3">
+                <span className="bg-black/80 text-white text-xs px-2 py-1 rounded font-mono">
+                  0:15
+                </span>
+              </div>
+
+              {/* Ad Badge - Top Right */}
+              <div className="absolute top-3 right-3">
+                <span className="bg-yellow-500 text-black text-[10px] px-2 py-0.5 rounded font-bold">
+                  {language === 'ar' ? 'إعلان' : 'Ad'}
+                </span>
+              </div>
+            </div>
+
+            {/* Video Info Section */}
+            <div className="p-3 sm:p-4 bg-gradient-to-b from-gray-900 to-black">
+              <div className="flex items-start gap-3">
+                {/* Channel Avatar */}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {youtubeVideoId && (
+                    <img
+                      src={`https://img.youtube.com/vi/${youtubeVideoId}/default.jpg`}
+                      alt="Channel"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  {/* Ad Label + Title */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-gray-700 text-gray-300 text-[10px] px-1.5 py-0.5 rounded">
+                      {language === 'ar' ? 'إعلان' : 'Ad'}
+                    </span>
+                    <span className="text-gray-400 text-xs">•</span>
+                    <span className="text-white text-sm font-medium truncate" dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}>
+                      {ad.headlines[0]}
+                    </span>
+                  </div>
+
+                  {/* Views Count */}
+                  <p className="text-gray-400 text-xs">
+                    {youtubeVideoViews > 0
+                      ? `${(youtubeVideoViews / 1000000).toFixed(1)} ${language === 'ar' ? 'مليون مرة مشاهدة' : 'M views'}`
+                      : (language === 'ar' ? 'جاري التحميل...' : 'Loading...')}
+                  </p>
+
+                  {/* Description */}
+                  <p className="text-gray-300 text-xs mt-1 line-clamp-2" dir={isArabic(ad.descriptions[0]) ? 'rtl' : 'ltr'}>
+                    {ad.descriptions[0]}
+                  </p>
+                </div>
+
+                {/* Menu Button */}
+                <button className="text-gray-400 hover:text-white p-1">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Original Search/Display Ad Preview
+          <div className="p-3 sm:p-4 bg-white dark:bg-black flex-1 flex flex-col justify-center">
+            <div className="mb-1 sm:mb-1.5">
+              <span className="text-[9px] sm:text-[10px] font-bold text-gray-900 dark:text-white">
+                Sponsored
               </span>
             </div>
-            <div className="text-[10px] sm:text-xs text-gray-900 dark:text-white font-medium truncate">
-              {websiteDomain}
+
+            {/* Website Info */}
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                <span className="text-[8px] sm:text-[10px] font-semibold text-gray-600 dark:text-gray-400">
+                  {websiteDomain.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="text-[10px] sm:text-xs text-gray-900 dark:text-white font-medium truncate">
+                {websiteDomain}
+              </div>
             </div>
-          </div>
 
-          <div className="text-[9px] sm:text-[10px] text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 truncate">
-            https://{websiteDomain}
-          </div>
+            <div className="text-[9px] sm:text-[10px] text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 truncate">
+              https://{websiteDomain}
+            </div>
 
-          {/* Headlines */}
-          <div className="space-y-1 sm:space-y-1.5">
-            {/* Mobile/Tablet: Single Headline */}
-            <h3
-              className="xl:hidden text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-2 sm:line-clamp-1"
-              dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
-            >
-              {ad.headlines[0]}
-            </h3>
-
-            {/* Desktop/Laptop: Two Headlines with separator */}
-            {ad.headlines[1] && (
+            {/* Headlines */}
+            <div className="space-y-1 sm:space-y-1.5">
+              {/* Mobile/Tablet: Single Headline */}
               <h3
-                className="hidden xl:block text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-1"
+                className="xl:hidden text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-2 sm:line-clamp-1"
                 dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
               >
-                {ad.headlines[0]} <span className="text-gray-400 dark:text-gray-600 mx-1">|</span> {ad.headlines[1]}
+                {ad.headlines[0]}
               </h3>
-            )}
 
-            {/* Descriptions */}
-            <div className="space-y-0.5">
-              {ad.descriptions.slice(0, 2).map((desc, idx) => (
-                <p
-                  key={idx}
-                  className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-tight sm:leading-relaxed line-clamp-2 sm:line-clamp-1"
-                  dir={isArabic(desc) ? 'rtl' : 'ltr'}
+              {/* Desktop/Laptop: Two Headlines with separator */}
+              {ad.headlines[1] && (
+                <h3
+                  className="hidden xl:block text-[11px] sm:text-xs md:text-sm font-normal text-blue-600 dark:text-blue-400 hover:underline cursor-pointer leading-tight sm:leading-snug line-clamp-1"
+                  dir={isArabic(ad.headlines[0]) ? 'rtl' : 'ltr'}
                 >
-                  {desc}
-                </p>
-              ))}
+                  {ad.headlines[0]} <span className="text-gray-400 dark:text-gray-600 mx-1">|</span> {ad.headlines[1]}
+                </h3>
+              )}
+
+              {/* Descriptions */}
+              <div className="space-y-0.5">
+                {ad.descriptions.slice(0, 2).map((desc, idx) => (
+                  <p
+                    key={idx}
+                    className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-tight sm:leading-relaxed line-clamp-2 sm:line-clamp-1"
+                    dir={isArabic(desc) ? 'rtl' : 'ltr'}
+                  >
+                    {desc}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     ),
   }));
@@ -1109,8 +1242,16 @@ export default function CampaignPreviewPage() {
             {/* Card Stack - Centered */}
             <div className="flex items-center justify-center w-full">
               {cards.length > 0 ? (
-                <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]">
-                  <CardStack items={cards} offset={10} scaleFactor={0.06} />
+                <div className={`w-full ${campaignType === 'VIDEO' ? 'max-w-[360px] sm:max-w-[450px] md:max-w-[550px] lg:max-w-[650px]' : 'max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px]'}`}>
+                  <CardStack
+                    items={cards}
+                    offset={10}
+                    scaleFactor={0.06}
+                    className={campaignType === 'VIDEO'
+                      ? 'h-[450px] w-full sm:h-[500px] md:h-[520px] lg:h-[560px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
+                      : 'h-64 w-96 md:h-80 md:w-[600px]'
+                    }
+                  />
                 </div>
               ) : (
                 <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] h-48 sm:h-64 md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-black">
@@ -1260,10 +1401,10 @@ export default function CampaignPreviewPage() {
                             key={account.customerId}
                             onClick={() => isEnabled && setSelectedAccount(account.customerId)}
                             className={`relative w-full p-4 rounded-lg border transition-all ${!isEnabled
-                                ? 'bg-transparent border-gray-300 dark:border-white/10 cursor-not-allowed opacity-70'
-                                : selectedAccount === account.customerId
-                                  ? 'bg-blue-500/10 border-blue-500 cursor-pointer'
-                                  : 'bg-transparent border-gray-300 dark:border-white/10 hover:border-blue-400 dark:hover:border-blue-400/50 cursor-pointer'
+                              ? 'bg-transparent border-gray-300 dark:border-white/10 cursor-not-allowed opacity-70'
+                              : selectedAccount === account.customerId
+                                ? 'bg-blue-500/10 border-blue-500 cursor-pointer'
+                                : 'bg-transparent border-gray-300 dark:border-white/10 hover:border-blue-400 dark:hover:border-blue-400/50 cursor-pointer'
                               }`}
                             style={{
                               animationDelay: `${index * 0.05}s`,
@@ -1275,8 +1416,8 @@ export default function CampaignPreviewPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedAccount === account.customerId
-                                    ? 'bg-blue-500/20 border border-blue-500/50'
-                                    : 'bg-white/5 border border-white/10'
+                                  ? 'bg-blue-500/20 border border-blue-500/50'
+                                  : 'bg-white/5 border border-white/10'
                                   }`}>
                                   <img
                                     src="/images/integrations/google-ads-logo.svg"

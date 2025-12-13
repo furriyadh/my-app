@@ -13,10 +13,12 @@ export const CardStack = ({
   items,
   offset,
   scaleFactor,
+  className,
 }: {
   items: Card[];
   offset?: number;
   scaleFactor?: number;
+  className?: string;
 }) => {
   const CARD_OFFSET = offset || 10;
   const SCALE_FACTOR = scaleFactor || 0.06;
@@ -47,15 +49,19 @@ export const CardStack = ({
     }, 5000);
   };
 
+  // Default dimensions
+  const defaultContainerClass = "h-64 w-96 md:h-80 md:w-[600px]";
+  const containerClass = className || defaultContainerClass;
+
   return (
-    <div className="relative h-64 w-96 md:h-80 md:w-[600px]">
+    <div className={`relative ${containerClass}`}>
       {cards.map((card, index) => {
         if (!card || !card.content) return null;
-        
+
         return (
           <motion.div
             key={card.id}
-            className="absolute dark:bg-black bg-white h-64 w-96 md:h-80 md:w-[600px] rounded-3xl p-0 shadow-xl border border-neutral-200 dark:border-white/[0.1] shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col overflow-hidden"
+            className={`absolute dark:bg-black bg-white ${containerClass} rounded-3xl p-0 shadow-xl border border-neutral-200 dark:border-white/[0.1] shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col overflow-hidden`}
             style={{
               transformOrigin: "top center",
             }}
@@ -65,7 +71,7 @@ export const CardStack = ({
               zIndex: cards.length - index, //  decrease z-index for the cards that are behind
             }}
           >
-            <div className="font-normal text-neutral-700 dark:text-neutral-200">
+            <div className="font-normal text-neutral-700 dark:text-neutral-200 h-full overflow-y-auto">
               {card.content}
             </div>
           </motion.div>
@@ -74,4 +80,3 @@ export const CardStack = ({
     </div>
   );
 };
-
