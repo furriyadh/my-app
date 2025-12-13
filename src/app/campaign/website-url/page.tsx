@@ -652,14 +652,14 @@ const WebsiteUrlPage: React.FC = () => {
         console.log('🎬 YouTube URL detected via pattern matching');
 
         // Extract video ID if present
-        let videoId = null;
+        let videoId: string | null = null;
         const videoMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
         if (videoMatch) {
           videoId = videoMatch[1];
         }
 
         // Extract channel ID if present
-        let channelId = null;
+        let channelId: string | null = null;
         const channelMatch = url.match(/youtube\.com\/(?:channel\/|c\/|@)([a-zA-Z0-9_-]+)/);
         if (channelMatch) {
           channelId = channelMatch[1];
@@ -673,6 +673,21 @@ const WebsiteUrlPage: React.FC = () => {
           details: { name: 'YouTube Video' }
         });
         setCampaignType('VIDEO');
+
+        // Auto-fetch video info and select it
+        if (videoId) {
+          console.log('🎥 Auto-fetching video info for:', videoId);
+          fetchVideoById(videoId).then(video => {
+            if (video) {
+              console.log('✅ Video auto-selected:', video.title);
+              setSelectedVideos([video]);
+              // Clear search results since we have the video
+              setVideoSearchResults([]);
+              setVideoSearchQuery('');
+            }
+          });
+        }
+
         localStorage.setItem('campaignData', JSON.stringify({
           ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
           campaignType: 'VIDEO',
@@ -962,6 +977,31 @@ const WebsiteUrlPage: React.FC = () => {
     }
   };
 
+  // Fetch single video by ID (for auto-detection)
+  const fetchVideoById = async (videoId: string) => {
+    try {
+      const response = await fetch('/api/youtube/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch video:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.video) {
+        return data.video as VideoResult;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching video by ID:', error);
+      return null;
+    }
+  };
+
   // Debounce Video Search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1024,7 +1064,20 @@ const WebsiteUrlPage: React.FC = () => {
       window.dispatchEvent(new Event('campaignTypeChanged'));
 
       // Navigate to campaign type selection (new flow: website-url → new)
-      router.push('/campaign/new');
+      // For VIDEO campaigns, go to video-subtype first
+      const nextCampaignType = detectedUrlType?.suggestedCampaignType || campaignData.campaignType || 'SEARCH';
+
+      if (nextCampaignType === 'VIDEO' && selectedVideos.length > 0) {
+        // Save selected video for video-subtype page
+        const videoData = {
+          ...updatedData,
+          selectedVideo: selectedVideos[0] // video-subtype expects single video
+        };
+        localStorage.setItem('campaignData', JSON.stringify(videoData));
+        router.push('/campaign/video-subtype');
+      } else {
+        router.push('/campaign/new');
+      }
 
       // ℹ️ Website analysis will be done in budget-scheduling page AFTER user selects locations
       // This ensures the API receives the correct target locations chosen by the user
@@ -1206,7 +1259,7 @@ const WebsiteUrlPage: React.FC = () => {
                               onChange={handleUrlChange}
                               onFocus={() => setIsFocused(true)}
                               onBlur={() => setIsFocused(false)}
-                              placeholder={language === 'ar' ? 'example.com' : 'www.example.com'}
+                              placeholder={language === 'ar' ? 'example.com' : 'https://example.com'}
                               dir="ltr"
                               className={`w-full px-4 pl-12 pr-12 py-6 bg-white/20 backdrop-blur-sm border-2 rounded-xl text-white text-base placeholder-white/70 
                         focus:outline-none focus:ring-4 focus:bg-white/25 
@@ -1539,89 +1592,143 @@ const WebsiteUrlPage: React.FC = () => {
                       {/* Video Campaign Selection */}
                       {detectedUrlType && (detectedUrlType.type === 'video' || detectedUrlType.suggestedCampaignType === 'VIDEO') && (
                         <div className="!w-full">
-                          <div className="mt-4 p-4 bg-white/10 border border-purple-400/30 rounded-xl backdrop-blur-sm">
+                          <div className="mt-4 p-4 bg-white/10 border border-red-400/30 rounded-xl backdrop-blur-sm">
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-2">
-                                <Video className="w-5 h-5 text-purple-300" />
+                                <Video className="w-5 h-5 text-red-300" />
                                 <p className="text-sm font-semibold text-white">
-                                  {language === 'ar' ? 'اختيار فيديوهات YouTube' : 'Select YouTube Videos'} (Max 5)
+                                  {language === 'ar' ? 'فيديو الحملة' : 'Campaign Video'}
                                 </p>
                               </div>
-                              <span className="text-xs bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full border border-purple-500/30">
-                                {selectedVideos.length}/5
-                              </span>
-                            </div>
-
-                            {/* Video Search Input */}
-                            <div className="relative mb-4">
-                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
-                              <input
-                                type="text"
-                                value={videoSearchQuery}
-                                onChange={(e) => setVideoSearchQuery(e.target.value)}
-                                placeholder={language === 'ar'
-                                  ? 'البحث عن فيديو أو لصق عنوان URL'
-                                  : 'Search video or paste YouTube URL'}
-                                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
-                              />
-                              {isVideoSearching && (
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                  <div className="w-4 h-4 border-2 border-purple-400/50 border-t-transparent rounded-full animate-spin" />
-                                </div>
+                              {selectedVideos.length > 0 && (
+                                <span className="text-xs bg-green-500/20 text-green-200 px-2 py-1 rounded-full border border-green-500/30 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  {language === 'ar' ? 'تم التحديد' : 'Selected'}
+                                </span>
                               )}
                             </div>
 
-                            {/* Video Search Results */}
-                            {videoSearchResults.length > 0 ? (
-                              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
-                                {videoSearchResults.map((video) => {
-                                  const isSelected = selectedVideos.some(v => v.id === video.id);
-                                  return (
-                                    <div
-                                      key={video.id}
-                                      onClick={() => {
-                                        if (isSelected) {
-                                          setSelectedVideos(prev => prev.filter(v => v.id !== video.id));
-                                        } else {
-                                          if (selectedVideos.length < 5) {
-                                            setSelectedVideos(prev => [...prev, video]);
-                                          }
-                                        }
-                                      }}
-                                      className={`p-2 rounded-lg cursor-pointer transition-all flex items-start gap-3 ${isSelected
-                                        ? 'bg-purple-500/30 border border-purple-400/70'
-                                        : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
-                                        }`}
-                                    >
-                                      <div className="w-20 h-14 rounded-md overflow-hidden flex-shrink-0 relative">
-                                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-white line-clamp-2 leading-snug mb-1" title={video.title}>
-                                          {video.title}
-                                        </p>
-                                        <div className="flex items-center gap-2 text-[10px] text-white/50">
-                                          <span className="truncate max-w-[80px]">{video.channelTitle}</span>
-                                          <span>•</span>
-                                          <span>{Number(video.viewCount).toLocaleString()} views</span>
+                            {/* Show Selected Video */}
+                            {selectedVideos.length > 0 ? (
+                              <div className="space-y-3">
+                                {/* Selected Video Preview */}
+                                <div className="p-3 rounded-lg bg-red-500/20 border border-red-400/50">
+                                  <div className="flex items-start gap-4">
+                                    <div className="w-32 h-20 rounded-lg overflow-hidden flex-shrink-0 relative">
+                                      <img
+                                        src={selectedVideos[0].thumbnail}
+                                        alt={selectedVideos[0].title}
+                                        className="w-full h-full object-cover"
+                                      />
+                                      {/* Play icon overlay */}
+                                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                        <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                                          <div className="w-0 h-0 border-l-[10px] border-l-white border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1" />
                                         </div>
                                       </div>
-                                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-purple-500 border-purple-500' : 'border-white/30'}`}>
-                                        {isSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-semibold text-white line-clamp-2 mb-1">
+                                        {selectedVideos[0].title}
+                                      </p>
+                                      <p className="text-xs text-white/60 mb-2">
+                                        {selectedVideos[0].channelTitle}
+                                      </p>
+                                      <div className="flex items-center gap-3 text-xs text-white/50">
+                                        <span>{Number(selectedVideos[0].viewCount).toLocaleString()} {language === 'ar' ? 'مشاهدة' : 'views'}</span>
                                       </div>
                                     </div>
-                                  );
-                                })}
+                                    {/* Remove button */}
+                                    <button
+                                      onClick={() => setSelectedVideos([])}
+                                      className="text-white/50 hover:text-white/80 transition-colors p-1"
+                                    >
+                                      <XCircle className="w-5 h-5" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Change Video button */}
+                                <button
+                                  onClick={() => setVideoSearchQuery(' ')}
+                                  className="w-full text-center py-2 text-xs text-white/60 hover:text-white/80 transition-colors"
+                                >
+                                  {language === 'ar' ? 'تغيير الفيديو' : 'Change video'}
+                                </button>
                               </div>
                             ) : (
-                              !isVideoSearching && (
-                                <div className="text-center py-6 text-white/40 text-xs">
-                                  {videoSearchQuery.length > 2
-                                    ? (language === 'ar' ? 'لم يتم العثور على نتائج' : 'No videos found')
-                                    : (language === 'ar' ? 'ابدأ بالبحث أو الصق رابط الفيديو' : 'Start by searching or pasting a video link')
-                                  }
+                              <>
+                                {/* Video Search Input */}
+                                <div className="relative mb-4">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                                  <input
+                                    type="text"
+                                    value={videoSearchQuery}
+                                    onChange={(e) => setVideoSearchQuery(e.target.value)}
+                                    placeholder={language === 'ar'
+                                      ? 'البحث عن فيديو أو لصق عنوان URL'
+                                      : 'Search video or paste YouTube URL'}
+                                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-red-400/50"
+                                  />
+                                  {isVideoSearching && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                      <div className="w-4 h-4 border-2 border-red-400/50 border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                  )}
                                 </div>
-                              )
+
+                                {/* Video Search Results */}
+                                {videoSearchResults.length > 0 ? (
+                                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                                    {videoSearchResults.map((video) => {
+                                      const isSelected = selectedVideos.some(v => v.id === video.id);
+                                      return (
+                                        <div
+                                          key={video.id}
+                                          onClick={() => {
+                                            if (isSelected) {
+                                              setSelectedVideos([]);
+                                            } else {
+                                              // Replace with this video (only 1 allowed)
+                                              setSelectedVideos([video]);
+                                            }
+                                          }}
+                                          className={`p-2 rounded-lg cursor-pointer transition-all flex items-start gap-3 ${isSelected
+                                            ? 'bg-red-500/30 border border-red-400/70'
+                                            : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                            }`}
+                                        >
+                                          <div className="w-20 h-14 rounded-md overflow-hidden flex-shrink-0 relative">
+                                            <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-medium text-white line-clamp-2 leading-snug mb-1" title={video.title}>
+                                              {video.title}
+                                            </p>
+                                            <div className="flex items-center gap-2 text-[10px] text-white/50">
+                                              <span className="truncate max-w-[80px]">{video.channelTitle}</span>
+                                              <span>•</span>
+                                              <span>{Number(video.viewCount).toLocaleString()} views</span>
+                                            </div>
+                                          </div>
+                                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-red-500 border-red-500' : 'border-white/30'}`}>
+                                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  !isVideoSearching && (
+                                    <div className="text-center py-6 text-white/40 text-xs">
+                                      {videoSearchQuery.length > 2
+                                        ? (language === 'ar' ? 'لم يتم العثور على نتائج' : 'No videos found')
+                                        : (language === 'ar' ? 'جاري تحميل الفيديو...' : 'Loading video...')
+                                      }
+                                    </div>
+                                  )
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
