@@ -8,6 +8,7 @@ import GlowButton from '@/components/ui/glow-button';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
+import Card3DWrapper from '@/components/ui/card-3d-wrapper';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
@@ -1136,32 +1137,29 @@ const WebsiteUrlPage: React.FC = () => {
             position: 'relative',
             zIndex: 2
           }}>
-            {/* GlowingBorderCard - Like integrations cards */}
-            <GlowingBorderCard
-              fromColor={
-                effectiveCampaignType === 'SEARCH' ? 'amber-500'
-                  : effectiveCampaignType === 'DISPLAY' ? 'emerald-500'
-                    : effectiveCampaignType === 'SHOPPING' ? 'blue-500'
-                      : effectiveCampaignType === 'VIDEO' ? 'red-500'
-                        : effectiveCampaignType === 'APP' ? 'orange-500'
-                          : 'purple-500'
-              }
-              toColor={
-                effectiveCampaignType === 'SEARCH' ? 'yellow-500'
-                  : effectiveCampaignType === 'DISPLAY' ? 'green-400'
-                    : effectiveCampaignType === 'SHOPPING' ? 'cyan-500'
-                      : effectiveCampaignType === 'VIDEO' ? 'rose-500'
-                        : effectiveCampaignType === 'APP' ? 'amber-500'
-                          : 'violet-500'
-              }
-              className="mb-8"
-              noBackground={true}
-              rounded="xl"
-              enable3D={true}
-            >
-              {/* URL Input Card - 3D rotation like integrations page */}
-              <CardContainer containerClassName="w-full" speed="medium">
-                <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
+            {/* 3D Card Wrapper - Same structure as integrations page */}
+            <Card3DWrapper className="mb-8">
+              <GlowingBorderCard
+                fromColor={
+                  effectiveCampaignType === 'SEARCH' ? 'amber-500'
+                    : effectiveCampaignType === 'DISPLAY' ? 'emerald-500'
+                      : effectiveCampaignType === 'SHOPPING' ? 'blue-500'
+                        : effectiveCampaignType === 'VIDEO' ? 'red-500'
+                          : effectiveCampaignType === 'APP' ? 'orange-500'
+                            : 'emerald-500'
+                }
+                toColor={
+                  effectiveCampaignType === 'SEARCH' ? 'yellow-500'
+                    : effectiveCampaignType === 'DISPLAY' ? 'green-400'
+                      : effectiveCampaignType === 'SHOPPING' ? 'cyan-500'
+                        : effectiveCampaignType === 'VIDEO' ? 'rose-500'
+                          : effectiveCampaignType === 'APP' ? 'amber-500'
+                            : 'green-400'
+                }
+                noBackground={true}
+                rounded="xl"
+              >
+                <div className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
                   position: 'relative',
                   zIndex: 3
                 }}>
@@ -1631,9 +1629,9 @@ const WebsiteUrlPage: React.FC = () => {
                     </div>
 
                   </div>
-                </CardBody>
-              </CardContainer>
-            </GlowingBorderCard>
+                </div>
+              </GlowingBorderCard>
+            </Card3DWrapper>
 
             {/* Phone Number Card - Only show for Call Ads */}
             {campaignType === 'Call Ads' && (
