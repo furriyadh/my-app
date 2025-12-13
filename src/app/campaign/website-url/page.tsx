@@ -7,10 +7,12 @@ import ReactCountryFlag from 'react-country-flag';
 import GlowButton from '@/components/ui/glow-button';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
+import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
+import PlasmaGlobe from '@/components/ui/plasma-globe';
 
 // Types for URL detection
 interface UrlDetectionResult {
@@ -43,6 +45,16 @@ interface AppResult {
   platform: 'android' | 'ios';
 }
 
+interface VideoResult {
+  id: string;
+  title: string;
+  thumbnail: string;
+  publishedAt: string;
+  viewCount: string;
+  channelTitle: string;
+  description: string;
+}
+
 const WebsiteUrlPage: React.FC = () => {
   const router = useRouter();
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -69,51 +81,67 @@ const WebsiteUrlPage: React.FC = () => {
   const [selectedApp, setSelectedApp] = useState<AppResult | null>(null);
   const [isSearchingApps, setIsSearchingApps] = useState(false);
 
+  // New state for Video Campaign
+  const [videoSearchQuery, setVideoSearchQuery] = useState('');
+  const [videoSearchResults, setVideoSearchResults] = useState<VideoResult[]>([]);
+  const [selectedVideos, setSelectedVideos] = useState<VideoResult[]>([]);
+  const [isVideoSearching, setIsVideoSearching] = useState(false);
+
   // Dynamic colors based on campaign type
-  const campaignTypeColors = {
-    'SEARCH': 'from-yellow-500 to-orange-600',
-    'DISPLAY': 'from-green-500 to-emerald-600',
-    'SHOPPING': 'from-blue-500 to-cyan-600',
-    'VIDEO': 'from-purple-500 to-pink-600',
-    'APP': 'from-orange-500 to-red-600',
-    'PERFORMANCE_MAX': 'from-pink-500 to-rose-600',
-    'DEMAND_GEN': 'from-red-500 to-pink-600'
+  const campaignTypeColors: Record<string, string> = {
+    '': 'from-purple-500 to-violet-600',              // Default/Initial - Purple
+    'DEFAULT': 'from-purple-500 to-violet-600',       // Default - Purple
+    'SEARCH': 'from-amber-500 to-yellow-600',         // Gold/Yellow
+    'DISPLAY': 'from-emerald-500 to-green-600',       // Green
+    'SHOPPING': 'from-blue-500 to-cyan-600',          // Blue
+    'VIDEO': 'from-red-500 to-rose-600',              // Red (YouTube)
+    'APP': 'from-orange-500 to-amber-600',            // Orange
+    'PERFORMANCE_MAX': 'from-purple-500 to-violet-600',
+    'DEMAND_GEN': 'from-pink-500 to-rose-600'
   };
 
   // Dynamic shadow colors based on campaign type (for light mode)
-  const campaignTypeShadowsLight = {
-    'SEARCH': 'shadow-orange-300/40',
-    'DISPLAY': 'shadow-emerald-300/40',
+  const campaignTypeShadowsLight: Record<string, string> = {
+    '': 'shadow-purple-300/40',
+    'DEFAULT': 'shadow-purple-300/40',
+    'SEARCH': 'shadow-yellow-300/40',
+    'DISPLAY': 'shadow-green-300/40',
     'SHOPPING': 'shadow-cyan-300/40',
-    'VIDEO': 'shadow-pink-300/40',
-    'APP': 'shadow-red-300/40',
-    'PERFORMANCE_MAX': 'shadow-rose-300/40',
-    'DEMAND_GEN': 'shadow-pink-300/40'
+    'VIDEO': 'shadow-red-300/40',
+    'APP': 'shadow-orange-300/40',
+    'PERFORMANCE_MAX': 'shadow-violet-300/40',
+    'DEMAND_GEN': 'shadow-rose-300/40'
   };
 
   // Dynamic shadow colors based on campaign type (for dark mode)
-  const campaignTypeShadowsDark = {
-    'SEARCH': 'dark:shadow-orange-500/30',
-    'DISPLAY': 'dark:shadow-emerald-500/30',
+  const campaignTypeShadowsDark: Record<string, string> = {
+    '': 'dark:shadow-purple-500/30',
+    'DEFAULT': 'dark:shadow-purple-500/30',
+    'SEARCH': 'dark:shadow-yellow-500/30',
+    'DISPLAY': 'dark:shadow-green-500/30',
     'SHOPPING': 'dark:shadow-cyan-500/30',
-    'VIDEO': 'dark:shadow-pink-500/30',
-    'APP': 'dark:shadow-red-500/30',
-    'PERFORMANCE_MAX': 'dark:shadow-rose-500/30',
-    'DEMAND_GEN': 'dark:shadow-pink-500/30'
+    'VIDEO': 'dark:shadow-red-500/30',
+    'APP': 'dark:shadow-orange-500/30',
+    'PERFORMANCE_MAX': 'dark:shadow-violet-500/30',
+    'DEMAND_GEN': 'dark:shadow-rose-500/30'
   };
 
   // Dynamic border colors
-  const campaignTypeBordersLight = {
-    'SEARCH': 'border-orange-300/50',
-    'DISPLAY': 'border-emerald-300/50',
+  const campaignTypeBordersLight: Record<string, string> = {
+    '': 'border-purple-300/50',
+    'DEFAULT': 'border-purple-300/50',
+    'SEARCH': 'border-yellow-300/50',
+    'DISPLAY': 'border-green-300/50',
     'SHOPPING': 'border-cyan-300/50',
-    'VIDEO': 'border-pink-300/50',
-    'APP': 'border-red-300/50',
-    'PERFORMANCE_MAX': 'border-rose-300/50',
-    'DEMAND_GEN': 'border-pink-300/50'
+    'VIDEO': 'border-red-300/50',
+    'APP': 'border-orange-300/50',
+    'PERFORMANCE_MAX': 'border-violet-300/50',
+    'DEMAND_GEN': 'border-rose-300/50'
   };
 
-  const campaignTypeBordersDark = {
+  const campaignTypeBordersDark: Record<string, string> = {
+    '': 'dark:border-purple-400/30',
+    'DEFAULT': 'dark:border-purple-400/30',
     'SEARCH': 'dark:border-orange-400/30',
     'DISPLAY': 'dark:border-emerald-400/30',
     'SHOPPING': 'dark:border-cyan-400/30',
@@ -123,11 +151,34 @@ const WebsiteUrlPage: React.FC = () => {
     'DEMAND_GEN': 'dark:border-pink-400/30'
   };
 
-  const cardGradient = campaignTypeColors[campaignType as keyof typeof campaignTypeColors] || 'from-blue-500 to-cyan-500';
-  const cardShadowLight = campaignTypeShadowsLight[campaignType as keyof typeof campaignTypeShadowsLight] || 'shadow-blue-300/40';
-  const cardShadowDark = campaignTypeShadowsDark[campaignType as keyof typeof campaignTypeShadowsDark] || 'dark:shadow-blue-500/30';
-  const cardBorderLight = campaignTypeBordersLight[campaignType as keyof typeof campaignTypeBordersLight] || 'border-blue-300/50';
-  const cardBorderDark = campaignTypeBordersDark[campaignType as keyof typeof campaignTypeBordersDark] || 'dark:border-blue-400/30';
+  // Get the effective campaign type from detection result or fallback
+  // When URL is empty, always show purple default
+  const effectiveCampaignType = !websiteUrl ? '' : (detectedUrlType?.suggestedCampaignType || campaignType || '');
+
+  const cardGradient = campaignTypeColors[effectiveCampaignType] || campaignTypeColors[''] || 'from-purple-500 to-violet-600';
+  const cardShadowLight = campaignTypeShadowsLight[effectiveCampaignType] || campaignTypeShadowsLight[''] || 'shadow-purple-300/40';
+  const cardShadowDark = campaignTypeShadowsDark[effectiveCampaignType] || campaignTypeShadowsDark[''] || 'dark:shadow-purple-500/30';
+  const cardBorderLight = campaignTypeBordersLight[effectiveCampaignType] || campaignTypeBordersLight[''] || 'border-purple-300/50';
+  const cardBorderDark = campaignTypeBordersDark[effectiveCampaignType] || campaignTypeBordersDark[''] || 'dark:border-purple-400/30';
+
+  // Sync campaign type to localStorage and dispatch event to update sidebar New Campaign button color
+  useEffect(() => {
+    // Always save current effective campaign type to localStorage
+    const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+    const newCampaignType = effectiveCampaignType || '';
+
+    // Always update localStorage with current campaign type
+    localStorage.setItem('campaignData', JSON.stringify({
+      ...currentData,
+      campaignType: newCampaignType
+    }));
+
+    // Always dispatch event to notify sidebar to update its color
+    window.dispatchEvent(new Event('campaignTypeChanged'));
+    
+    // Also trigger storage event for cross-tab sync
+    window.dispatchEvent(new Event('storage'));
+  }, [effectiveCampaignType]);
 
   // Dynamic modal colors based on campaign type
   const getModalColors = () => {
@@ -469,10 +520,12 @@ const WebsiteUrlPage: React.FC = () => {
     setUrlErrorMessage(validation.errorMessage);
     setIsUrlVerified(validation.isVerified);
 
-    // Reset detection when URL changes
+    // Reset detection and campaign type when URL changes - resets to purple default
     setDetectedUrlType(null);
+    setCampaignType('');
     setSelectedMerchant(null);
     setSelectedApp(null);
+    setSelectedVideos([]);
   };
 
   // Detect URL type when URL is verified
@@ -590,39 +643,162 @@ const WebsiteUrlPage: React.FC = () => {
         console.log('Merchant check skipped:', e);
       }
 
-      // Step 2: Fall back to API-based detection
-      const response = await fetch('/api/url/detect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
+      // Step 2: Client-side pattern matching for YouTube and App Store URLs
+      const urlLower = url.toLowerCase();
 
-      if (response.ok) {
-        const result = await response.json();
-        setDetectedUrlType(result);
+      // YouTube URL detection
+      if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+        console.log('🎬 YouTube URL detected via pattern matching');
 
-        // Auto-select campaign type based on URL detection
-        if (result.suggestedCampaignType) {
-          setCampaignType(result.suggestedCampaignType);
+        // Extract video ID if present
+        let videoId = null;
+        const videoMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (videoMatch) {
+          videoId = videoMatch[1];
+        }
+
+        // Extract channel ID if present
+        let channelId = null;
+        const channelMatch = url.match(/youtube\.com\/(?:channel\/|c\/|@)([a-zA-Z0-9_-]+)/);
+        if (channelMatch) {
+          channelId = channelMatch[1];
+        }
+
+        setDetectedUrlType({
+          type: 'video',
+          videoId: videoId || undefined,
+          channelId: channelId || undefined,
+          suggestedCampaignType: 'VIDEO',
+          details: { name: 'YouTube Video' }
+        });
+        setCampaignType('VIDEO');
+        localStorage.setItem('campaignData', JSON.stringify({
+          ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
+          campaignType: 'VIDEO',
+          detectedUrlType: 'video',
+          videoId
+        }));
+        setIsDetecting(false);
+        return;
+      }
+
+      // Google Play Store App detection
+      if (urlLower.includes('play.google.com/store/apps')) {
+        console.log('📱 Android App URL detected via pattern matching');
+        const appIdMatch = url.match(/id=([a-zA-Z0-9._]+)/);
+        const appId = appIdMatch ? appIdMatch[1] : null;
+
+        setDetectedUrlType({
+          type: 'app',
+          platform: 'android',
+          appId: appId || undefined,
+          suggestedCampaignType: 'APP',
+          details: { name: appId || 'Android App' }
+        });
+        setCampaignType('APP');
+        setSelectedOS('android');
+        if (appId) setAppSearchQuery(appId);
+        localStorage.setItem('campaignData', JSON.stringify({
+          ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
+          campaignType: 'APP',
+          detectedUrlType: 'app',
+          platform: 'android',
+          appId
+        }));
+        setIsDetecting(false);
+        return;
+      }
+
+      // iOS App Store detection
+      if (urlLower.includes('apps.apple.com') || urlLower.includes('itunes.apple.com')) {
+        console.log('🍎 iOS App URL detected via pattern matching');
+        const iosAppMatch = url.match(/\/id(\d+)/);
+        const appId = iosAppMatch ? iosAppMatch[1] : null;
+
+        setDetectedUrlType({
+          type: 'app',
+          platform: 'ios',
+          appId: appId || undefined,
+          suggestedCampaignType: 'APP',
+          details: { name: appId ? `iOS App ${appId}` : 'iOS App' }
+        });
+        setCampaignType('APP');
+        setSelectedOS('ios');
+        if (appId) setAppSearchQuery(appId);
+        localStorage.setItem('campaignData', JSON.stringify({
+          ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
+          campaignType: 'APP',
+          detectedUrlType: 'app',
+          platform: 'ios',
+          appId
+        }));
+        setIsDetecting(false);
+        return;
+      }
+
+      // Step 3: Fall back to API-based detection for other URLs
+      try {
+        const response = await fetch('/api/url/detect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setDetectedUrlType(result);
+
+          // Auto-select campaign type based on URL detection
+          if (result.suggestedCampaignType) {
+            setCampaignType(result.suggestedCampaignType);
+            localStorage.setItem('campaignData', JSON.stringify({
+              ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
+              campaignType: result.suggestedCampaignType,
+              detectedUrlType: result.type
+            }));
+          }
+
+          // Fetch Merchant accounts if store detected - filtered by URL domain
+          if (result.type === 'store' || result.suggestedCampaignType === 'SHOPPING') {
+            fetchMerchantAccounts(url);
+          }
+
+          // Set app info if app detected
+          if (result.type === 'app' && result.platform) {
+            setSelectedOS(result.platform);
+            if (result.appId) {
+              setAppSearchQuery(result.appId);
+            }
+          }
+        } else {
+          // API failed or returned error - default to SEARCH/website
+          console.log('⚠️ API detection failed, defaulting to SEARCH campaign type');
+          setDetectedUrlType({
+            type: 'website',
+            suggestedCampaignType: 'SEARCH',
+            details: { name: url }
+          });
+          setCampaignType('SEARCH');
           localStorage.setItem('campaignData', JSON.stringify({
             ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
-            campaignType: result.suggestedCampaignType,
-            detectedUrlType: result.type
+            campaignType: 'SEARCH',
+            detectedUrlType: 'website'
           }));
         }
-
-        // Fetch Merchant accounts if store detected - filtered by URL domain
-        if (result.type === 'store' || result.suggestedCampaignType === 'SHOPPING') {
-          fetchMerchantAccounts(url);
-        }
-
-        // Set app info if app detected
-        if (result.type === 'app' && result.platform) {
-          setSelectedOS(result.platform);
-          if (result.appId) {
-            setAppSearchQuery(result.appId);
-          }
-        }
+      } catch (apiError) {
+        // API error (404, network error, etc.) - default to SEARCH/website
+        console.log('⚠️ API detection error, defaulting to SEARCH campaign type:', apiError);
+        setDetectedUrlType({
+          type: 'website',
+          suggestedCampaignType: 'SEARCH',
+          details: { name: url }
+        });
+        setCampaignType('SEARCH');
+        localStorage.setItem('campaignData', JSON.stringify({
+          ...JSON.parse(localStorage.getItem('campaignData') || '{}'),
+          campaignType: 'SEARCH',
+          detectedUrlType: 'website'
+        }));
       }
     } catch (error) {
       console.error('URL detection error:', error);
@@ -755,6 +931,47 @@ const WebsiteUrlPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [appSearchQuery, selectedOS]);
 
+  // Search Videos Function
+  const searchVideos = async (query: string) => {
+    if (!query || query.length < 3) return;
+
+    setIsVideoSearching(true);
+    try {
+      // Use relative URL to hit Next.js API (port 3000) instead of Python backend (port 5000)
+      const response = await fetch('/api/youtube/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.videos) {
+        // Filter out videos that are already selected
+        setVideoSearchResults(data.videos);
+      }
+    } catch (error) {
+      console.error('Error searching videos:', error);
+      setVideoSearchResults([]);
+    } finally {
+      setIsVideoSearching(false);
+    }
+  };
+
+  // Debounce Video Search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (videoSearchQuery) {
+        searchVideos(videoSearchQuery);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [videoSearchQuery]);
+
   const handleNext = async () => {
     if (!websiteUrl) {
       return; // Button is disabled, but double-check
@@ -793,6 +1010,8 @@ const WebsiteUrlPage: React.FC = () => {
           platform: selectedApp.platform,
           icon: selectedApp.icon
         } : null,
+        // Save Video selection for Video campaigns
+        selectedVideos: selectedVideos.length > 0 ? selectedVideos : null,
         selectedOS: selectedOS,
         // Auto-set campaign type based on detection
         campaignType: detectedUrlType?.suggestedCampaignType || campaignData.campaignType || 'SEARCH'
@@ -875,6 +1094,28 @@ const WebsiteUrlPage: React.FC = () => {
         position: 'relative',
         minHeight: '100dvh' // Use dynamic viewport height for mobile
       }}>
+        {/* Fullscreen PlasmaGlobe Detection Animation Modal - Outside all transform containers */}
+        {isDetecting && (
+          <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black" style={{ paddingLeft: '240px' }}>
+            {/* Large PlasmaGlobe Container - Centered */}
+            <div className="relative w-[50vw] h-[45vh] max-w-xl max-h-[350px]">
+              <PlasmaGlobe
+                speed={1.0}
+                intensity={1.3}
+              />
+            </div>
+            {/* Text below PlasmaGlobe */}
+            <div className="mt-6 text-center z-10">
+              <p className="text-white font-bold text-2xl md:text-3xl animate-pulse drop-shadow-lg">
+                {language === 'ar' ? '🔍 جاري تحليل الرابط بالذكاء الاصطناعي...' : '🔍 AI Analyzing URL...'}
+              </p>
+              <p className="text-white/70 text-lg mt-3 drop-shadow-md">
+                {language === 'ar' ? 'اكتشاف نوع الحملة المناسب' : 'Detecting optimal campaign type'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Campaign Progress */}
         <CampaignProgress currentStep={0} totalSteps={3} />
 
@@ -895,16 +1136,37 @@ const WebsiteUrlPage: React.FC = () => {
             position: 'relative',
             zIndex: 2
           }}>
-            {/* URL Input Card - 3D rotation like integrations page */}
-            <CardContainer containerClassName="w-full mb-8" speed="medium">
-              <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
-                position: 'relative',
-                zIndex: 3
-              }}>
-                <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
-                  <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
-                </CardItem>
-                <div className="space-y-6">
+            {/* Dynamic Border Glow Effect - Like integrations cards */}
+            <div className="relative group mb-8">
+              {/* Glowing border effect */}
+              <div 
+                className="absolute -inset-0.5 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
+                style={{
+                  background: effectiveCampaignType === 'SEARCH' 
+                    ? 'linear-gradient(to right, rgb(245, 158, 11), rgb(234, 179, 8))'
+                    : effectiveCampaignType === 'DISPLAY'
+                      ? 'linear-gradient(to right, rgb(16, 185, 129), rgb(74, 222, 128))'
+                      : effectiveCampaignType === 'SHOPPING'
+                        ? 'linear-gradient(to right, rgb(59, 130, 246), rgb(6, 182, 212))'
+                        : effectiveCampaignType === 'VIDEO'
+                          ? 'linear-gradient(to right, rgb(239, 68, 68), rgb(244, 63, 94))'
+                          : effectiveCampaignType === 'APP'
+                            ? 'linear-gradient(to right, rgb(249, 115, 22), rgb(245, 158, 11))'
+                            : 'linear-gradient(to right, rgb(168, 85, 247), rgb(139, 92, 246))', // Default purple
+                }}
+              />
+              {/* URL Input Card - 3D rotation like integrations page */}
+              <CardContainer containerClassName="w-full" speed="medium">
+                <CardBody className={`!h-auto !w-full relative rounded-xl bg-gradient-to-br ${cardGradient} shadow-2xl ${cardShadowLight} ${cardShadowDark} border ${cardBorderLight} ${cardBorderDark} p-10 transition-all duration-300`} style={{
+                  position: 'relative',
+                  zIndex: 3
+                }}>
+                  {!isDetecting && (
+                  <CardItem translateZ={80} className="!w-fit absolute top-4 right-6">
+                    <Globe className="w-12 h-12 text-white/70 dark:text-white/60" strokeWidth={1.5} />
+                  </CardItem>
+                )}
+                <div className={`space-y-6 ${isDetecting ? 'invisible' : ''}`}>
                   {/* Input Field */}
                   <div>
                     <CardItem translateZ={50}>
@@ -1271,11 +1533,103 @@ const WebsiteUrlPage: React.FC = () => {
                         </div>
                       </CardItem>
                     )}
+
+                    {/* Video Campaign Selection */}
+                    {detectedUrlType && (detectedUrlType.type === 'video' || detectedUrlType.suggestedCampaignType === 'VIDEO') && (
+                      <CardItem translateZ={35} as="div" className="!w-full">
+                        <div className="mt-4 p-4 bg-white/10 border border-purple-400/30 rounded-xl backdrop-blur-sm">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <Video className="w-5 h-5 text-purple-300" />
+                              <p className="text-sm font-semibold text-white">
+                                {language === 'ar' ? 'اختيار فيديوهات YouTube' : 'Select YouTube Videos'} (Max 5)
+                              </p>
+                            </div>
+                            <span className="text-xs bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full border border-purple-500/30">
+                              {selectedVideos.length}/5
+                            </span>
+                          </div>
+
+                          {/* Video Search Input */}
+                          <div className="relative mb-4">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                            <input
+                              type="text"
+                              value={videoSearchQuery}
+                              onChange={(e) => setVideoSearchQuery(e.target.value)}
+                              placeholder={language === 'ar'
+                                ? 'البحث عن فيديو أو لصق عنوان URL'
+                                : 'Search video or paste YouTube URL'}
+                              className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                            />
+                            {isVideoSearching && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-purple-400/50 border-t-transparent rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Video Search Results */}
+                          {videoSearchResults.length > 0 ? (
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                              {videoSearchResults.map((video) => {
+                                const isSelected = selectedVideos.some(v => v.id === video.id);
+                                return (
+                                  <div
+                                    key={video.id}
+                                    onClick={() => {
+                                      if (isSelected) {
+                                        setSelectedVideos(prev => prev.filter(v => v.id !== video.id));
+                                      } else {
+                                        if (selectedVideos.length < 5) {
+                                          setSelectedVideos(prev => [...prev, video]);
+                                        }
+                                      }
+                                    }}
+                                    className={`p-2 rounded-lg cursor-pointer transition-all flex items-start gap-3 ${isSelected
+                                      ? 'bg-purple-500/30 border border-purple-400/70'
+                                      : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                      }`}
+                                  >
+                                    <div className="w-20 h-14 rounded-md overflow-hidden flex-shrink-0 relative">
+                                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-medium text-white line-clamp-2 leading-snug mb-1" title={video.title}>
+                                        {video.title}
+                                      </p>
+                                      <div className="flex items-center gap-2 text-[10px] text-white/50">
+                                        <span className="truncate max-w-[80px]">{video.channelTitle}</span>
+                                        <span>•</span>
+                                        <span>{Number(video.viewCount).toLocaleString()} views</span>
+                                      </div>
+                                    </div>
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-purple-500 border-purple-500' : 'border-white/30'}`}>
+                                      {isSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            !isVideoSearching && (
+                              <div className="text-center py-6 text-white/40 text-xs">
+                                {videoSearchQuery.length > 2
+                                  ? (language === 'ar' ? 'لم يتم العثور على نتائج' : 'No videos found')
+                                  : (language === 'ar' ? 'ابدأ بالبحث أو الصق رابط الفيديو' : 'Start by searching or pasting a video link')
+                                }
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </CardItem>
+                    )}
                   </div>
 
                 </div>
               </CardBody>
             </CardContainer>
+            </div>
 
             {/* Phone Number Card - Only show for Call Ads */}
             {campaignType === 'Call Ads' && (
@@ -1398,18 +1752,12 @@ const WebsiteUrlPage: React.FC = () => {
             )}
           </div>
 
-          {/* Navigation Buttons - Outside card */}
-          <div className="flex justify-between items-center max-w-2xl mx-auto mt-8">
-            <GlowButton
-              onClick={handleBack}
-              variant="green"
-            >
-              <span className="flex items-center gap-2">
-                <ArrowLeft className="w-5 h-5" />
-                {language === 'ar' ? 'السابق' : 'Previous'}
-              </span>
-            </GlowButton>
 
+
+
+
+          {/* Navigation Buttons - Outside card */}
+          <div className="flex justify-center items-center max-w-2xl mx-auto mt-8">
             <GlowButton
               onClick={handleNext}
               disabled={!websiteUrl || !isValidUrl || !isUrlVerified}

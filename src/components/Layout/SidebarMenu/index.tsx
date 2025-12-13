@@ -118,10 +118,10 @@ const SidebarMenu: React.FC = React.memo(() => {
   // State for Recent Pages
   const [recentPages, setRecentPages] = React.useState<{ path: string; name: string }[]>([]);
 
-  // State for selected campaign type color
+  // State for selected campaign type color - default to purple (matches card default)
   const [campaignTypeColor, setCampaignTypeColor] = React.useState({
-    gradient: 'from-yellow-500 to-orange-600',
-    hoverGradient: 'from-yellow-400 to-orange-500'
+    gradient: 'from-purple-500 to-violet-600',
+    hoverGradient: 'from-purple-400 to-violet-500'
   });
 
   // Toggle sidebar and save to localStorage
@@ -405,39 +405,47 @@ const SidebarMenu: React.FC = React.memo(() => {
 
           // Map campaign types to colors (same as campaign/new page)
           const colorMap: { [key: string]: { gradient: string; hoverGradient: string } } = {
+            '': {
+              gradient: 'from-purple-500 to-violet-600',
+              hoverGradient: 'from-purple-400 to-violet-500'
+            },
+            'DEFAULT': {
+              gradient: 'from-purple-500 to-violet-600',
+              hoverGradient: 'from-purple-400 to-violet-500'
+            },
             'SEARCH': {
-              gradient: 'from-yellow-500 to-orange-600',
-              hoverGradient: 'from-yellow-400 to-orange-500'
+              gradient: 'from-amber-500 to-yellow-600',
+              hoverGradient: 'from-amber-400 to-yellow-500'
             },
             'DISPLAY': {
-              gradient: 'from-green-500 to-emerald-600',
-              hoverGradient: 'from-green-400 to-emerald-500'
+              gradient: 'from-emerald-500 to-green-600',
+              hoverGradient: 'from-emerald-400 to-green-500'
             },
             'SHOPPING': {
               gradient: 'from-blue-500 to-cyan-600',
               hoverGradient: 'from-blue-400 to-cyan-500'
             },
             'VIDEO': {
-              gradient: 'from-purple-500 to-pink-600',
-              hoverGradient: 'from-purple-400 to-pink-500'
+              gradient: 'from-red-500 to-rose-600',
+              hoverGradient: 'from-red-400 to-rose-500'
             },
             'APP': {
-              gradient: 'from-orange-500 to-red-600',
-              hoverGradient: 'from-orange-400 to-red-500'
+              gradient: 'from-orange-500 to-amber-600',
+              hoverGradient: 'from-orange-400 to-amber-500'
             },
             'PERFORMANCE_MAX': {
-              gradient: 'from-pink-500 to-rose-600',
-              hoverGradient: 'from-pink-400 to-rose-500'
+              gradient: 'from-purple-500 to-violet-600',
+              hoverGradient: 'from-purple-400 to-violet-500'
             },
             'DEMAND_GEN': {
-              gradient: 'from-red-500 to-pink-600',
-              hoverGradient: 'from-red-400 to-pink-500'
+              gradient: 'from-pink-500 to-rose-600',
+              hoverGradient: 'from-pink-400 to-rose-500'
             }
           };
 
-          if (campaignType && colorMap[campaignType]) {
-            setCampaignTypeColor(colorMap[campaignType]);
-          }
+          // Use color from map, or default to purple if campaign type is empty/unknown
+          const color = colorMap[campaignType || ''] || colorMap[''];
+          setCampaignTypeColor(color);
         }
       } catch (error) {
         console.error('Error reading campaign type:', error);
@@ -889,8 +897,8 @@ const SidebarMenu: React.FC = React.memo(() => {
           }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           className={`fixed top-0 w-[360px] flex flex-col z-[100] px-6 pb-6 pt-3 border-gray-800 shadow-2xl overflow-hidden ${isRTL
-              ? 'right-0 border-l'
-              : 'left-0 border-r'
+            ? 'right-0 border-l'
+            : 'left-0 border-r'
             }`}
           style={{
             backgroundColor: '#000000',
