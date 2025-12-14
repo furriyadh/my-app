@@ -1300,10 +1300,211 @@ Base ALL content on the keywords from Google Keyword Planner and adapt to the sp
         }
         return requirements.get(campaign_type.upper(), requirements["DISPLAY"])
     
-    def generate_complete_ad_content(self, product_service: str, website_url: str, service_type: str = None, target_language: str = "ar", website_content: str = None, campaign_type: str = "DISPLAY", keywords_list: list = None) -> Dict[str, Any]:
+    def _get_video_ad_requirements(self, video_ad_type: str) -> dict:
+        """Get specific requirements for each YouTube video ad type"""
+        video_requirements = {
+            "VIDEO_RESPONSIVE_AD": {
+                "name": "Video Responsive Ad",
+                "name_ar": "إعلان فيديو متجاوب",
+                "fields": {
+                    "headlines": {"count": 5, "max_length": 30, "required": True},
+                    "long_headlines": {"count": 5, "max_length": 90, "required": True},
+                    "descriptions": {"count": 5, "max_length": 90, "required": True},
+                    "call_to_action": {"max_length": 10, "required": False}
+                },
+                "prompt_instructions": """
+Generate for VIDEO RESPONSIVE AD:
+- 5 Headlines (max 30 chars each)
+- 5 Long Headlines (max 90 chars each)
+- 5 Descriptions (max 90 chars each, MUST end with CTA)
+- 1 Call-to-Action button text (max 10 chars)
+"""
+            },
+            "VIDEO_TRUEVIEW_IN_STREAM_AD": {
+                "name": "TrueView In-Stream Ad",
+                "name_ar": "إعلان TrueView",
+                "fields": {
+                    "action_button_label": {"max_length": 10, "required": True},
+                    "action_headline": {"max_length": 15, "required": True}
+                },
+                "prompt_instructions": """
+Generate for TRUEVIEW IN-STREAM AD (Skippable after 5 seconds):
+- 1 Action Button Label (max 10 chars) - e.g., "Buy Now", "Learn More", "Sign Up", "اشترِ الآن", "تعرف أكثر"
+- 1 Action Headline (max 15 chars) - Short compelling text shown with button
+These appear as an overlay on the video. Be concise and action-oriented.
+"""
+            },
+            "IN_FEED_VIDEO_AD": {
+                "name": "In-Feed Video Ad",
+                "name_ar": "إعلان فيديو في الخلاصة",
+                "fields": {
+                    "headlines": {"count": 1, "max_length": 100, "required": True},
+                    "descriptions": {"count": 2, "max_length": 35, "required": True}
+                },
+                "prompt_instructions": """
+Generate for IN-FEED VIDEO AD (Appears in YouTube search & home feed):
+- 1 Headline (max 100 chars) - This is the main title that makes users want to click
+- 2 Descriptions (max 35 chars EACH) - Very short lines shown below the headline
+The goal is to drive video views and subscribers. Be compelling but concise.
+"""
+            },
+            "VIDEO_BUMPER_AD": {
+                "name": "Bumper Ad",
+                "name_ar": "إعلان بامبر",
+                "fields": {
+                    "action_button_label": {"max_length": 10, "required": False},
+                    "action_headline": {"max_length": 15, "required": False}
+                },
+                "prompt_instructions": """
+Generate for BUMPER AD (6 seconds, non-skippable):
+- 1 Action Button Label (max 10 chars, OPTIONAL) - Short CTA if user wants to add one
+- 1 Action Headline (max 15 chars, OPTIONAL) - Short text shown with button
+Bumper ads are for brand awareness. Keep it simple and memorable.
+"""
+            },
+            "VIDEO_NON_SKIPPABLE_IN_STREAM_AD": {
+                "name": "Non-Skippable In-Stream Ad",
+                "name_ar": "إعلان غير قابل للتخطي",
+                "fields": {
+                    "action_button_label": {"max_length": 10, "required": False},
+                    "action_headline": {"max_length": 15, "required": False}
+                },
+                "prompt_instructions": """
+Generate for NON-SKIPPABLE IN-STREAM AD (15-20 seconds):
+- 1 Action Button Label (max 10 chars, OPTIONAL) - CTA button
+- 1 Action Headline (max 15 chars, OPTIONAL) - Text shown with button
+Viewers must watch the full video. Content should be engaging throughout.
+"""
+            }
+        }
+        return video_requirements.get(video_ad_type, video_requirements["VIDEO_RESPONSIVE_AD"])
+    
+    def _generate_specialized_video_content(self, video_ad_type: str, website_url: str, target_language: str = "ar", website_content: str = None, keywords_list: list = None) -> Dict[str, Any]:
+        """Generate specialized content for specific video ad types (TrueView, In-Feed, Bumper, Non-Skippable)"""
+        try:
+            self.logger.info(f"🎬 Generating specialized content for: {video_ad_type}")
+            
+            # Fetch website content if not provided
+            if not website_content:
+                website_content = self._fetch_website_content(website_url)
+            
+            # Get video type requirements
+            video_reqs = self._get_video_ad_requirements(video_ad_type)
+            
+            # Language mapping
+            language_map = {
+                'ar': 'Arabic', 'en': 'English', 'fr': 'French', 'de': 'German',
+                'es': 'Spanish', 'it': 'Italian', 'pt': 'Portuguese', 'ru': 'Russian',
+                'ja': 'Japanese', 'ko': 'Korean', 'zh-CN': 'Chinese', 'tr': 'Turkish'
+            }
+            language_name = language_map.get(target_language, 'English')
+            
+            # Keywords
+            keywords_line = ', '.join(keywords_list[:10]) if keywords_list else ''
+            
+            # Build type-specific prompt
+            if video_ad_type == "VIDEO_TRUEVIEW_IN_STREAM_AD":
+                prompt = f"""Generate YouTube TrueView In-Stream Ad content in {language_name}.
+
+Website: {website_url}
+Keywords: {keywords_line}
+Website Content: {website_content[:1000]}
+
+REQUIREMENTS (Google Ads API):
+- action_button_label: EXACTLY 1 text, max 10 characters (e.g., "Buy Now", "Sign Up", "اشترِ الآن")
+- action_headline: EXACTLY 1 text, max 15 characters (short compelling text)
+
+ALL content MUST be in {language_name}. Be concise and action-oriented.
+
+Return ONLY valid JSON:
+{{"action_button_label": "CTA text here", "action_headline": "Headline here", "headlines": [], "descriptions": []}}"""
+
+            elif video_ad_type == "IN_FEED_VIDEO_AD":
+                prompt = f"""Generate YouTube In-Feed Video Ad content in {language_name}.
+
+Website: {website_url}
+Keywords: {keywords_line}
+Website Content: {website_content[:1000]}
+
+REQUIREMENTS (Google Ads API - In-Feed appears in YouTube search & home feed):
+- headline: EXACTLY 1 text, max 100 characters (main title to attract clicks)
+- descriptions: EXACTLY 2 texts, max 35 characters EACH (short lines below headline)
+
+ALL content MUST be in {language_name}. Goal: drive video views and subscribers.
+
+Return ONLY valid JSON:
+{{"headlines": ["Main headline up to 100 chars"], "descriptions": ["Short desc 1 max 35 chars", "Short desc 2 max 35 chars"], "action_button_label": "", "action_headline": ""}}"""
+
+            elif video_ad_type in ["VIDEO_BUMPER_AD", "VIDEO_NON_SKIPPABLE_IN_STREAM_AD"]:
+                ad_name = "Bumper Ad (6 seconds)" if video_ad_type == "VIDEO_BUMPER_AD" else "Non-Skippable Ad (15-20 seconds)"
+                prompt = f"""Generate YouTube {ad_name} content in {language_name}.
+
+Website: {website_url}
+Keywords: {keywords_line}
+Website Content: {website_content[:1000]}
+
+REQUIREMENTS (Google Ads API - These fields are OPTIONAL for brand awareness):
+- action_button_label: 1 text, max 10 characters (OPTIONAL CTA button)
+- action_headline: 1 text, max 15 characters (OPTIONAL text with button)
+
+If you generate them, they MUST be in {language_name}. Focus on brand awareness.
+
+Return ONLY valid JSON:
+{{"action_button_label": "CTA or empty", "action_headline": "Text or empty", "headlines": [], "descriptions": []}}"""
+            else:
+                # Fallback to responsive format
+                return None
+            
+            # Call AI
+            ai_response = self._call_cometapi(prompt)
+            
+            if ai_response.get("success"):
+                content = ai_response.get("content", "{}")
+                parsed_result = self._parse_json_response(content)
+                
+                self.logger.info(f"✅ Generated specialized video content: {parsed_result}")
+                
+                return {
+                    "success": True,
+                    "headlines": parsed_result.get("headlines", []),
+                    "descriptions": parsed_result.get("descriptions", []),
+                    "action_button_label": parsed_result.get("action_button_label", ""),
+                    "action_headline": parsed_result.get("action_headline", ""),
+                    "long_headlines": [],
+                    "call_to_action": parsed_result.get("action_button_label", ""),
+                    "keywords": keywords_list or [],
+                    "video_ad_type": video_ad_type,
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                self.logger.error(f"❌ AI call failed for {video_ad_type}")
+                return {
+                    "success": False,
+                    "error": ai_response.get("error", "AI generation failed")
+                }
+                
+        except Exception as e:
+            self.logger.error(f"❌ Error generating specialized video content: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    def generate_complete_ad_content(self, product_service: str, website_url: str, service_type: str = None, target_language: str = "ar", website_content: str = None, campaign_type: str = "DISPLAY", keywords_list: list = None, video_ad_type: str = None) -> Dict[str, Any]:
         """توليد المحتوى الإعلاني الكامل بناءً على نوع الحملة وتعليمات Google Ads"""
         try:
             self.logger.info(f"🚀 بدء توليد المحتوى الإعلاني - نوع الحملة: {campaign_type}")
+            if campaign_type == 'VIDEO' and video_ad_type:
+                self.logger.info(f"📹 Video Ad Type: {video_ad_type}")
+                # Use specialized video content generation for non-responsive types
+                if video_ad_type != 'VIDEO_RESPONSIVE_AD':
+                    return self._generate_specialized_video_content(
+                        video_ad_type=video_ad_type,
+                        website_url=website_url,
+                        target_language=target_language,
+                        website_content=website_content,
+                        keywords_list=keywords_list
+                    )
             
             # استخدام website_content إذا تم تمريره، وإلا جلبه
             if not website_content:

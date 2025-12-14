@@ -2010,6 +2010,7 @@ const BudgetSchedulingPage: React.FC = () => {
                     body: JSON.stringify({
                       website_url: latestCampaignData.websiteUrl || campaignData.websiteUrl,
                       campaign_type: campaignType,
+                      video_ad_type: latestCampaignData.videoSubType || latestCampaignData.videoAdType || 'VIDEO_RESPONSIVE_AD',
                       budget: selectedBudgetUSD,
                       keywords_list: keywordsList,
                       target_language: targetLanguage

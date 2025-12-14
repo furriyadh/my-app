@@ -247,6 +247,7 @@ def generate_campaign_content():
         budget = data.get('budget', 15)
         keywords_list = data.get('keywords_list', [])
         target_language = data.get('target_language', 'ar')  # Get language from frontend
+        video_ad_type = data.get('video_ad_type', 'VIDEO_RESPONSIVE_AD')  # Video ad sub-type
         
         if not website_url:
             return jsonify({
@@ -262,17 +263,20 @@ def generate_campaign_content():
         
         logger.info(f"🚀 Generating campaign content for: {website_url}")
         logger.info(f"   Campaign Type: {campaign_type}")
+        if campaign_type == 'VIDEO':
+            logger.info(f"   Video Ad Type: {video_ad_type}")
         logger.info(f"   Budget: ${budget}")
         logger.info(f"   Keywords: {len(keywords_list)}")
         logger.info(f"   Language: {target_language}")
         
-        # Generate ad content using AI (with target language)
+        # Generate ad content using AI (with target language and video type)
         result = ai_content_generator.generate_complete_ad_content(
             product_service=f"Campaign {campaign_type}",
             website_url=website_url,
             campaign_type=campaign_type,
             keywords_list=keywords_list,
-            target_language=target_language  # Pass language to AI
+            target_language=target_language,  # Pass language to AI
+            video_ad_type=video_ad_type if campaign_type == 'VIDEO' else None  # Pass video type
         )
         
         if result.get("success"):

@@ -300,11 +300,13 @@ export default function CampaignPreviewPage() {
           const keywords = generatedContent.keywords || [];
 
           const apiUrl = getApiUrl('/api/ai-campaign/generate-campaign-content');
+          const currentVideoAdType = campaignData.videoSubType || campaignData.videoAdType || 'VIDEO_RESPONSIVE_AD';
           console.log('🔄 Generating missing ad content...');
           console.log('📡 API URL:', apiUrl);
           console.log('📦 Request data:', {
             website_url: url,
             campaign_type: campaignData.campaignType || 'SEARCH',
+            video_ad_type: currentVideoAdType,
             keywords_count: keywords.length,
             target_language: targetLanguage
           });
@@ -315,6 +317,7 @@ export default function CampaignPreviewPage() {
             body: JSON.stringify({
               website_url: url,
               campaign_type: campaignData.campaignType || 'SEARCH',
+              video_ad_type: currentVideoAdType,
               keywords_list: keywords,
               target_language: targetLanguage
             })
@@ -817,7 +820,7 @@ export default function CampaignPreviewPage() {
         // ═══════════════════════════════════════════════════════════════════
         // VIDEO CAMPAIGN SPECIFIC DATA
         // ═══════════════════════════════════════════════════════════════════
-        video_ad_type: campaignData.videoAdType || campaignData.videoSubtype || 'VIDEO_RESPONSIVE_AD',
+        video_ad_type: campaignData.videoSubType || campaignData.videoAdType || campaignData.videoSubtype || 'VIDEO_RESPONSIVE_AD',
         youtube_video_id: campaignData.youtubeVideoId || campaignData.videoId || null,
         // ═══════════════════════════════════════════════════════════════════
         adCreative: {
@@ -829,6 +832,7 @@ export default function CampaignPreviewPage() {
           long_headlines: generatedContent?.long_headlines || generatedContent?.descriptions || [],
           call_to_action: generatedContent?.call_to_action || 'اكتشف المزيد',
           action_button_label: generatedContent?.action_button_label || 'تعرف أكثر',
+          action_headline: generatedContent?.action_headline || '',
         },
         user_id: 'test_user'
       };
