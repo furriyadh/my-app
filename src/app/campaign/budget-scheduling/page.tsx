@@ -1972,7 +1972,23 @@ const BudgetSchedulingPage: React.FC = () => {
                 // Re-read campaignData from localStorage to get the latest detected language
                 const latestCampaignDataStr = localStorage.getItem('campaignData') || '{}';
                 const latestCampaignData = JSON.parse(latestCampaignDataStr);
-                const targetLanguage = latestCampaignData.selectedLanguageCode || latestCampaignData.detectedLanguageCode || 'ar';
+
+                // For VIDEO campaigns, prioritize videoDetectedLanguage (from video title)
+                // This ensures English videos get English ads, Arabic videos get Arabic ads
+                let targetLanguage = 'ar'; // Default
+                const currentCampaignType = latestCampaignData.campaignType || campaignData?.campaignType || 'SEARCH';
+
+                if (currentCampaignType === 'VIDEO') {
+                  // Priority: 1) videoDetectedLanguage (from video-metadata), 2) selected, 3) detected from URL
+                  targetLanguage = latestCampaignData.videoDetectedLanguage ||
+                    latestCampaignData.selectedLanguageCode ||
+                    latestCampaignData.detectedLanguageCode || 'ar';
+                  console.log('🎬 VIDEO Campaign - using video language:', targetLanguage);
+                } else {
+                  // For other campaigns, use website language
+                  targetLanguage = latestCampaignData.selectedLanguageCode ||
+                    latestCampaignData.detectedLanguageCode || 'ar';
+                }
 
                 console.log('🌍 Target language for ad generation:', targetLanguage);
 

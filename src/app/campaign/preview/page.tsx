@@ -279,7 +279,22 @@ export default function CampaignPreviewPage() {
       // Fallback: Generate content if missing
       const generateMissingContent = async () => {
         try {
-          const targetLanguage = campaignData.selectedLanguageCode || campaignData.detectedLanguageCode || 'ar';
+          // For VIDEO campaigns, use the detected language from the video itself
+          // This ensures ads are generated in the same language as the video
+          let targetLanguage = 'ar'; // Default
+
+          if (campaignData.campaignType === 'VIDEO') {
+            // Priority: 1) Video detected language, 2) Selected language, 3) Detected from URL, 4) Default
+            targetLanguage = campaignData.videoDetectedLanguage ||
+              campaignData.detectedLanguage ||
+              campaignData.selectedLanguageCode ||
+              campaignData.detectedLanguageCode || 'ar';
+            console.log('🎬 VIDEO Campaign - Using video language:', targetLanguage);
+          } else {
+            // For other campaigns, use website/selected language
+            targetLanguage = campaignData.selectedLanguageCode || campaignData.detectedLanguageCode || 'ar';
+          }
+
           const keywords = generatedContent.keywords || [];
 
           const apiUrl = getApiUrl('/api/ai-campaign/generate-campaign-content');
@@ -1112,7 +1127,15 @@ export default function CampaignPreviewPage() {
                   {/* Views Count */}
                   <p className="text-gray-400 text-xs">
                     {youtubeVideoViews > 0
-                      ? `${(youtubeVideoViews / 1000000).toFixed(1)} ${language === 'ar' ? 'مليون مرة مشاهدة' : 'M views'}`
+                      ? (() => {
+                        const views = youtubeVideoViews;
+                        if (views >= 1_000_000) {
+                          return `${(views / 1_000_000).toFixed(1).replace(/\.0$/, '')}M ${language === 'ar' ? 'مشاهدة' : 'views'}`;
+                        } else if (views >= 1_000) {
+                          return `${(views / 1_000).toFixed(1).replace(/\.0$/, '')}K ${language === 'ar' ? 'مشاهدة' : 'views'}`;
+                        }
+                        return `${views.toLocaleString()} ${language === 'ar' ? 'مشاهدة' : 'views'}`;
+                      })()
                       : (language === 'ar' ? 'جاري التحميل...' : 'Loading...')}
                   </p>
 

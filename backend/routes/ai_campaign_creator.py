@@ -2330,74 +2330,121 @@ def detect_website_language():
         detected_lang_code = None
         confidence = 'none'
         text_content = ''
+        html_lang_attr = None  # Initialize here to avoid UnboundLocalError for YouTube URLs
         
-        # Fetch the website (20 second timeout)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'ar,en,fr,es,de,it,ja,ko,zh,*;q=0.9',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-        }
+        # ============================================================
+        # SPECIAL HANDLING FOR YOUTUBE URLS
+        # YouTube pages have Arabic UI elements, so we need to extract
+        # the video title directly and detect its language
+        # ============================================================
+        url_lower = website_url.lower()
+        is_youtube_url = any(domain in url_lower for domain in ['youtube.com', 'youtu.be'])
         
-        # Try to fetch the website - with www fallback
-        response = None
-        urls_to_try = [website_url]
-        
-        # Add www variant if not present
-        parsed = urlparse(website_url)
-        if parsed.netloc and not parsed.netloc.startswith('www.'):
-            www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
-            if parsed.query:
-                www_url += f"?{parsed.query}"
-            urls_to_try.append(www_url)
-        
-        fetch_error_msg = None
-        response = None
-        for url_attempt in urls_to_try:
-            try:
-                logger.info(f"🔗 Fetching: {url_attempt}")
-                response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
-                if response.status_code == 200:
-                    logger.info(f"✅ Website fetched successfully: {response.status_code}")
-                    break
-            except Exception as fetch_error:
-                fetch_error_msg = str(fetch_error)
-                logger.warning(f"⚠️ Failed to fetch {url_attempt}: {fetch_error}")
-                response = None
-                continue
-        
-        if not response or response.status_code != 200:
-            logger.error(f"❌ Could not fetch website from any URL variant")
-            return jsonify({
-                'success': False,
-                'error': 'Could not fetch website',
-                'message': f'لم نتمكن من الوصول للموقع لتحليل اللغة. تأكد من صحة الرابط وأن الموقع يعمل.',
-                'detected_language': None,
-                'language_id': None,
-                'confidence': 'none',
-                'suggestion': 'جرب إضافة www. للرابط أو تأكد من أن الموقع يعمل',
-                'error_details': fetch_error_msg
-            }), 400
+        if is_youtube_url:
+            logger.info("🎬 YouTube URL detected - using video title for language detection")
             
-        soup = BeautifulSoup(response.content, 'html.parser')
+            # Extract video ID
+            video_id = None
+            if 'youtu.be/' in url_lower:
+                video_id = website_url.split('youtu.be/')[-1].split('?')[0].split('&')[0]
+            elif 'v=' in url_lower:
+                video_id = website_url.split('v=')[-1].split('&')[0].split('?')[0]
+            elif '/shorts/' in url_lower:
+                video_id = website_url.split('/shorts/')[-1].split('?')[0].split('&')[0]
             
-        # Get HTML lang attribute (for reference only)
-        html_lang_attr = None
-        html_tag = soup.find('html')
-        if html_tag and html_tag.get('lang'):
-            html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
-            logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
+            if video_id:
+                logger.info(f"   📹 Video ID: {video_id}")
+                
+                # Use oEmbed API to get video title (language-neutral)
+                try:
+                    oembed_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
+                    oembed_response = http_requests.get(oembed_url, timeout=10)
+                    
+                    if oembed_response.status_code == 200:
+                        oembed_data = oembed_response.json()
+                        video_title = oembed_data.get('title', '')
+                        channel_title = oembed_data.get('author_name', '')
+                        text_content = f"{video_title} {channel_title}"
+                        
+                        logger.info(f"   📺 Video Title: {video_title}")
+                        logger.info(f"   📺 Channel: {channel_title}")
+                        logger.info(f"   📝 Text for analysis: {text_content}")
+                except Exception as oembed_error:
+                    logger.warning(f"   ⚠️ oEmbed failed: {oembed_error}")
         
-        # Remove script, style, and navigation elements for cleaner text
-        for element in soup(['script', 'style', 'nav', 'noscript', 'iframe', 'svg', 'header', 'footer']):
-            element.decompose()
+        # ============================================================
+        # NORMAL WEBSITE FETCH (for non-YouTube URLs or if oEmbed failed)
+        # ============================================================
+        if not text_content:
+            # Fetch the website (20 second timeout)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',  # Request English version to avoid localized UI
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            }
         
-        # Get main content text
-        text_content = soup.get_text(separator=' ', strip=True)
-        # Clean up the text - remove extra whitespace
-        text_content = re.sub(r'\s+', ' ', text_content).strip()
+            # Try to fetch the website - with www fallback
+            response = None
+            urls_to_try = [website_url]
+            
+            # Add www variant if not present
+            parsed = urlparse(website_url)
+            if parsed.netloc and not parsed.netloc.startswith('www.'):
+                www_url = f"{parsed.scheme}://www.{parsed.netloc}{parsed.path}"
+                if parsed.query:
+                    www_url += f"?{parsed.query}"
+                urls_to_try.append(www_url)
+            
+            fetch_error_msg = None
+            response = None
+            for url_attempt in urls_to_try:
+                try:
+                    logger.info(f"🔗 Fetching: {url_attempt}")
+                    response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
+                    if response.status_code == 200:
+                        logger.info(f"✅ Website fetched successfully: {response.status_code}")
+                        break
+                except Exception as fetch_error:
+                    fetch_error_msg = str(fetch_error)
+                    logger.warning(f"⚠️ Failed to fetch {url_attempt}: {fetch_error}")
+                    response = None
+                    continue
+            
+            if not response or response.status_code != 200:
+                logger.error(f"❌ Could not fetch website from any URL variant")
+                return jsonify({
+                    'success': False,
+                    'error': 'Could not fetch website',
+                    'message': f'لم نتمكن من الوصول للموقع لتحليل اللغة. تأكد من صحة الرابط وأن الموقع يعمل.',
+                    'detected_language': None,
+                    'language_id': None,
+                    'confidence': 'none',
+                    'suggestion': 'جرب إضافة www. للرابط أو تأكد من أن الموقع يعمل',
+                    'error_details': fetch_error_msg
+                }), 400
+                
+            soup = BeautifulSoup(response.content, 'html.parser')
+                
+            # Get HTML lang attribute (for reference only)
+            html_lang_attr = None
+            html_tag = soup.find('html')
+            if html_tag and html_tag.get('lang'):
+                html_lang_attr = html_tag.get('lang', '').lower().strip().split('-')[0]
+                logger.info(f"📋 HTML lang attribute: {html_lang_attr}")
+            
+            # Remove script, style, and navigation elements for cleaner text
+            for element in soup(['script', 'style', 'nav', 'noscript', 'iframe', 'svg', 'header', 'footer']):
+                element.decompose()
+            
+            # Get main content text
+            text_content = soup.get_text(separator=' ', strip=True)
+            # Clean up the text - remove extra whitespace
+            text_content = re.sub(r'\s+', ' ', text_content).strip()
+        
+        # Log extracted text (works for both YouTube and normal websites)
         logger.info(f"📝 Extracted {len(text_content)} chars of text content")
         
-        if len(text_content) < 50:
+        if len(text_content) < 10:  # Reduced from 50 since video titles are short
             logger.error(f"❌ Not enough text content to analyze language")
             return jsonify({
                 'success': False,

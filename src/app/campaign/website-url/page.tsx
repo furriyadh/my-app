@@ -49,11 +49,36 @@ interface AppResult {
 interface VideoResult {
   id: string;
   title: string;
-  thumbnail: string;
+  thumbnail?: string;  // Legacy field
+  thumbnailUrl?: string; // New field from metadata API
   publishedAt: string;
-  viewCount: string;
+  viewCount?: string;  // Legacy field
+  view_count?: number; // New field from metadata API
   channelTitle: string;
   description: string;
+  // New fields from YouTube Data API v3
+  tags?: string[];
+  categoryName?: string;
+  detectedLanguage?: string;
+  generatedKeywords?: string[];
+}
+
+// Helper function to format view count (442409 → "442K")
+function formatViewCount(count: number | string | undefined): string {
+  if (count === undefined || count === null) return '0';
+  const num = typeof count === 'string' ? parseInt(count, 10) : count;
+  if (isNaN(num)) return '0';
+
+  if (num >= 1_000_000_000) {
+    return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  }
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (num >= 1_000) {
+    return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  return num.toString();
 }
 
 const WebsiteUrlPage: React.FC = () => {
@@ -977,23 +1002,57 @@ const WebsiteUrlPage: React.FC = () => {
     }
   };
 
-  // Fetch single video by ID (for auto-detection)
+  // Fetch single video by ID (for auto-detection) - Uses YouTube Data API v3
   const fetchVideoById = async (videoId: string) => {
     try {
-      const response = await fetch('/api/youtube/video', {
+      // Try new metadata endpoint first (has complete data: tags, description, category, language)
+      const response = await fetch('/api/youtube/video-metadata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId })
       });
 
-      if (!response.ok) {
-        console.error('Failed to fetch video:', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.video) {
+          console.log('✅ Video metadata fetched:', data.video.title);
+          console.log('   🏷️ Tags:', data.video.tags?.length || 0);
+          console.log('   🌍 Language:', data.video.detectedLanguage);
+
+          // Convert to VideoResult format
+          return {
+            id: data.video.id,
+            title: data.video.title,
+            channelTitle: data.video.channelTitle,
+            thumbnailUrl: data.video.thumbnailUrl,
+            publishedAt: data.video.publishedAt,
+            view_count: data.video.viewCount,
+            description: data.video.description,
+            // Additional metadata for ad creation
+            tags: data.video.tags,
+            categoryName: data.video.categoryName,
+            detectedLanguage: data.video.detectedLanguage,
+            generatedKeywords: data.video.generatedKeywords
+          } as VideoResult;
+        }
+      }
+
+      // Fallback to old endpoint
+      console.log('⚠️ Falling back to basic video endpoint');
+      const fallbackResponse = await fetch('/api/youtube/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId })
+      });
+
+      if (!fallbackResponse.ok) {
+        console.error('Failed to fetch video:', fallbackResponse.status);
         return null;
       }
 
-      const data = await response.json();
-      if (data.video) {
-        return data.video as VideoResult;
+      const fallbackData = await fallbackResponse.json();
+      if (fallbackData.video) {
+        return fallbackData.video as VideoResult;
       }
       return null;
     } catch (error) {
@@ -1077,8 +1136,19 @@ const WebsiteUrlPage: React.FC = () => {
           youtubeVideoTitle: video.title,
           youtubeVideoViews: video.view_count || 0,
           youtubeChannelTitle: video.channelTitle,
-          youtubeVideoThumbnail: video.thumbnailUrl
+          youtubeVideoThumbnail: video.thumbnailUrl,
+          // Video language and content for ad generation
+          videoDetectedLanguage: video.detectedLanguage || 'ar',
+          youtubeVideoDescription: video.description || '',
+          youtubeVideoTags: video.tags || [],
+          youtubeVideoCategory: video.categoryName || '',
+          youtubeVideoKeywords: video.generatedKeywords || []
         };
+        console.log('🎬 Saving VIDEO campaign data:', {
+          language: videoData.videoDetectedLanguage,
+          tags: videoData.youtubeVideoTags?.length || 0,
+          keywords: videoData.youtubeVideoKeywords?.length || 0
+        });
         localStorage.setItem('campaignData', JSON.stringify(videoData));
         router.push('/campaign/video-subtype');
       } else {
@@ -1600,7 +1670,7 @@ const WebsiteUrlPage: React.FC = () => {
                                   <div className="flex items-start gap-4">
                                     <div className="w-32 h-20 rounded-lg overflow-hidden flex-shrink-0 relative">
                                       <img
-                                        src={selectedVideos[0].thumbnail}
+                                        src={selectedVideos[0].thumbnailUrl || selectedVideos[0].thumbnail || `https://i.ytimg.com/vi/${selectedVideos[0].id}/hqdefault.jpg`}
                                         alt={selectedVideos[0].title}
                                         className="w-full h-full object-cover"
                                       />
@@ -1619,7 +1689,7 @@ const WebsiteUrlPage: React.FC = () => {
                                         {selectedVideos[0].channelTitle}
                                       </p>
                                       <div className="flex items-center gap-3 text-xs text-white/50">
-                                        <span>{Number(selectedVideos[0].viewCount).toLocaleString()} {language === 'ar' ? 'مشاهدة' : 'views'}</span>
+                                        <span>{formatViewCount(selectedVideos[0].view_count || selectedVideos[0].viewCount)} {language === 'ar' ? 'مشاهدة' : 'views'}</span>
                                       </div>
                                     </div>
                                     {/* Remove button */}
