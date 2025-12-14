@@ -57,11 +57,13 @@ const YOUTUBE_CATEGORIES: { [key: string]: string } = {
     '44': 'Trailers',
 };
 
-// Detect language from text
+// Detect language from text - supports multiple languages
 function detectLanguage(text: string): string {
     if (!text) return 'unknown';
 
-    // Arabic detection
+    const lowerText = text.toLowerCase();
+
+    // Arabic detection (includes Urdu, Persian, Pashto scripts)
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
     if (arabicRegex.test(text)) return 'ar';
 
@@ -69,15 +71,15 @@ function detectLanguage(text: string): string {
     const hebrewRegex = /[\u0590-\u05FF]/;
     if (hebrewRegex.test(text)) return 'he';
 
-    // Chinese detection
-    const chineseRegex = /[\u4E00-\u9FFF]/;
+    // Chinese detection (Simplified & Traditional)
+    const chineseRegex = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
     if (chineseRegex.test(text)) return 'zh';
 
-    // Japanese detection
+    // Japanese detection (Hiragana, Katakana, Kanji)
     const japaneseRegex = /[\u3040-\u30FF\u31F0-\u31FF]/;
     if (japaneseRegex.test(text)) return 'ja';
 
-    // Korean detection
+    // Korean detection (Hangul)
     const koreanRegex = /[\uAC00-\uD7AF\u1100-\u11FF]/;
     if (koreanRegex.test(text)) return 'ko';
 
@@ -85,11 +87,77 @@ function detectLanguage(text: string): string {
     const cyrillicRegex = /[\u0400-\u04FF]/;
     if (cyrillicRegex.test(text)) return 'ru';
 
+    // Greek detection
+    const greekRegex = /[\u0370-\u03FF]/;
+    if (greekRegex.test(text)) return 'el';
+
+    // Hindi/Devanagari detection
+    const hindiRegex = /[\u0900-\u097F]/;
+    if (hindiRegex.test(text)) return 'hi';
+
     // Thai detection
     const thaiRegex = /[\u0E00-\u0E7F]/;
     if (thaiRegex.test(text)) return 'th';
 
-    // Default to English if Latin characters
+    // ============================================================
+    // LATIN-BASED LANGUAGES - Order matters! More specific first
+    // ============================================================
+
+    // French detection - BEFORE Vietnamese because 'à' is shared
+    // Use unique French characters and common French words
+    const frenchCharsRegex = /[éèêëçœûùï]/i;  // Unique French characters
+    const frenchWords = ['le', 'la', 'les', 'de', 'des', 'un', 'une', 'et', 'est', 'en', 'que', 'pour', 'dans', 'sur', 'avec', 'pas', 'plus', 'tout', 'comme', 'mais', "l'", "d'", 'à', 'ou', 'heure', 'débutant', 'expert', 'formation', 'cours', 'gratuit'];
+    const frenchWordCount = frenchWords.filter(word =>
+        lowerText.includes(` ${word} `) ||
+        lowerText.includes(`${word}'`) ||
+        lowerText.includes(` ${word}`) ||
+        lowerText.startsWith(`${word} `)
+    ).length;
+    if (frenchCharsRegex.test(text) && frenchWordCount >= 1) return 'fr';
+    if (frenchWordCount >= 2) return 'fr';
+
+    // Vietnamese detection - use ONLY unique Vietnamese chars (not shared with French)
+    const vietnameseRegex = /[ăđơưảẩẫậắằẳẵặẻẽẹếềểễệỉĩịỏốồổỗộớờởỡợủũụứừửữự]/i;
+    if (vietnameseRegex.test(text)) return 'vi';
+
+    // Turkish detection
+    const turkishWords = ['ve', 'bir', 'bu', 'için', 'ile', 'olan', 'nasıl', 'gibi', 'çok', 'daha'];
+    const turkishChars = /[ğışöü]/i;
+    if (turkishChars.test(text) || turkishWords.some(word => lowerText.includes(` ${word} `))) return 'tr';
+
+    // German detection
+    const germanCharsRegex = /[äöüß]/i;
+    const germanWords = ['und', 'der', 'die', 'das', 'ist', 'nicht', 'ein', 'eine', 'mit', 'für', 'auf', 'werden'];
+    if (germanCharsRegex.test(text) && germanWords.some(word => lowerText.includes(` ${word} `))) return 'de';
+    if (germanWords.filter(word => lowerText.includes(` ${word} `)).length >= 2) return 'de';
+
+    // Spanish detection
+    const spanishCharsRegex = /[ñ¿¡]/i;
+    const spanishWords = ['el', 'la', 'los', 'las', 'de', 'un', 'una', 'es', 'que', 'por', 'para', 'con', 'como', 'más', 'pero'];
+    if (spanishCharsRegex.test(text)) return 'es';
+    if (spanishWords.filter(word => lowerText.includes(` ${word} `)).length >= 2) return 'es';
+
+    // Portuguese detection
+    const portugueseCharsRegex = /[ãõç]/i;
+    const portugueseWords = ['o', 'a', 'os', 'as', 'de', 'um', 'uma', 'é', 'que', 'por', 'para', 'com', 'como', 'não'];
+    if (portugueseCharsRegex.test(text) && portugueseWords.some(word => lowerText.includes(` ${word} `))) return 'pt';
+    if (portugueseWords.filter(word => lowerText.includes(` ${word} `)).length >= 2) return 'pt';
+
+    // Italian detection
+    const italianWords = ['il', 'la', 'le', 'di', 'un', 'una', 'è', 'che', 'per', 'con', 'come', 'non', 'sono'];
+    if (italianWords.filter(word => lowerText.includes(` ${word} `)).length >= 2) return 'it';
+
+    // Dutch detection
+    const dutchWords = ['de', 'het', 'een', 'en', 'van', 'is', 'op', 'te', 'voor', 'met', 'dat', 'niet'];
+    if (dutchWords.filter(word => lowerText.includes(` ${word} `)).length >= 2) return 'nl';
+
+    // Polish detection
+    const polishCharsRegex = /[ąćęłńóśźż]/i;
+    const polishWords = ['i', 'w', 'na', 'do', 'z', 'się', 'jest', 'to', 'nie', 'że', 'jak', 'ale'];
+    if (polishCharsRegex.test(text)) return 'pl';
+    if (polishWords.filter(word => lowerText.includes(` ${word} `)).length >= 2) return 'pl';
+
+    // Default to English if Latin characters present
     const latinRegex = /[a-zA-Z]/;
     if (latinRegex.test(text)) return 'en';
 

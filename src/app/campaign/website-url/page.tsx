@@ -1701,14 +1701,6 @@ const WebsiteUrlPage: React.FC = () => {
                                     </button>
                                   </div>
                                 </div>
-
-                                {/* Change Video button */}
-                                <button
-                                  onClick={() => setVideoSearchQuery(' ')}
-                                  className="w-full text-center py-2 text-xs text-white/60 hover:text-white/80 transition-colors"
-                                >
-                                  {language === 'ar' ? 'تغيير الفيديو' : 'Change video'}
-                                </button>
                               </div>
                             ) : (
                               <>
