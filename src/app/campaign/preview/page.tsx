@@ -35,6 +35,7 @@ export default function CampaignPreviewPage() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [websiteDomain, setWebsiteDomain] = useState('');
   const [campaignType, setCampaignType] = useState<string>('SEARCH');
+  const [videoSubType, setVideoSubType] = useState<string>('VIDEO_RESPONSIVE_AD');
   const [youtubeVideoId, setYoutubeVideoId] = useState<string>('');
   const [youtubeVideoTitle, setYoutubeVideoTitle] = useState<string>('');
   const [youtubeVideoViews, setYoutubeVideoViews] = useState<number>(0);
@@ -205,8 +206,9 @@ export default function CampaignPreviewPage() {
     const url = campaignData.websiteUrl || '';
     setWebsiteUrl(url);
 
-    // Set campaign type
+    // Set campaign type and video sub-type
     setCampaignType(campaignData.campaignType || 'SEARCH');
+    setVideoSubType(campaignData.videoSubType || 'VIDEO_RESPONSIVE_AD');
 
     // Set YouTube video data for VIDEO campaigns
     if (campaignData.campaignType === 'VIDEO') {
