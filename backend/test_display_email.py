@@ -25,7 +25,7 @@ test_data = {
 }
 
 # Send test email
-target_email = 'hossam675r4e3@gmail.com'
+target_email = 'maxon272000@gmail.com'
 print(f'📤 Sending DISPLAY campaign test email to {target_email}...')
 result = email_service.send_campaign_confirmation(target_email, test_data)
 

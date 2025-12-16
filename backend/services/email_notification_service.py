@@ -1,8 +1,7 @@
 """
 Professional Email Service for Campaign Notifications
 Works for ALL campaign types: Search, Display, Video, Shopping, App, etc.
-Embeds local logo image for perfect display in all email clients.
-DARK MODE EDITION 🌑
+DARK MODE EDITION with Logo from URL
 """
 
 import os
@@ -10,10 +9,8 @@ import smtplib
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.image import MIMEImage
 from typing import Dict, Any
 from datetime import datetime
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -22,43 +19,43 @@ CAMPAIGN_TYPE_INFO = {
     'SEARCH': {
         'ar': 'حملة البحث',
         'en': 'Search Campaign',
-        'color': '#8ab4f8',  # Lighter Blue for Dark Mode
+        'color': '#8ab4f8',
         'icon': '🔍'
     },
     'DISPLAY': {
         'ar': 'حملة الشبكة الإعلانية',
         'en': 'Display Campaign',
-        'color': '#81c995',  # Lighter Green for Dark Mode
+        'color': '#81c995',
         'icon': '🖼️'
     },
     'VIDEO': {
         'ar': 'حملة الفيديو',
         'en': 'Video Campaign',
-        'color': '#f28b82',  # Lighter Red for Dark Mode
+        'color': '#f28b82',
         'icon': '🎬'
     },
     'SHOPPING': {
         'ar': 'حملة التسوق',
         'en': 'Shopping Campaign',
-        'color': '#8ab4f8',  # Blue
+        'color': '#8ab4f8',
         'icon': '🛒'
     },
     'APP': {
         'ar': 'حملة التطبيقات',
         'en': 'App Campaign',
-        'color': '#fdd663',  # Lighter Yellow for Dark Mode
+        'color': '#fdd663',
         'icon': '📱'
     },
     'PERFORMANCE_MAX': {
         'ar': 'حملة الأداء الأقصى',
         'en': 'Performance Max',
-        'color': '#f28b82',  # Red
+        'color': '#f28b82',
         'icon': '🚀'
     },
     'DEMAND_GEN': {
         'ar': 'حملة توليد الطلب',
         'en': 'Demand Gen',
-        'color': '#c58af9',  # Lighter Purple for Dark Mode
+        'color': '#c58af9',
         'icon': '✨'
     }
 }
@@ -82,11 +79,8 @@ class EmailNotificationService:
         self.sender_email = os.getenv('EMAIL_SENDER_EMAIL', 'ads@furriyadh.com')
         self.sender_password = os.getenv('EMAIL_SENDER_PASSWORD')
         self.sender_name = 'Furriyadh Ads'
-        
-        # Path to logo image - adjusted relative to backend/ directory
-        # Assuming backend is running from C:\Users\DELL\my-site\backend
-        self.logo_image_name = 'furriyadh-logo.png' 
-        self.logo_path = Path(__file__).parent.parent.parent / 'public' / 'images' / self.logo_image_name
+        # Logo URL from production site
+        self.logo_url = "https://furriyadh.com/images/logo-big.svg"
     
     def is_configured(self) -> bool:
         return bool(self.sender_email and self.sender_password)
@@ -104,15 +98,26 @@ class EmailNotificationService:
             return False
         
         try:
-            # Enforce Logic: Only VIDEO is manual (24-48h delay), others are immediate
+            # Extract campaign data
+            campaign_name = campaign_data.get('campaign_name', 'Your Campaign')
+            campaign_type = campaign_data.get('campaign_type', 'SEARCH').upper()
+            daily_budget = campaign_data.get('daily_budget', 0)
+            currency = campaign_data.get('currency', 'USD')
+            customer_id = campaign_data.get('customer_id', 'N/A')
+            website_url = campaign_data.get('website_url', '')
+            youtube_video_id = campaign_data.get('youtube_video_id', '')
+            video_ad_type = campaign_data.get('video_ad_type', '')
+            
+            # STRICT LOGIC: Only VIDEO campaigns require manual review (24-48h)
+            # All other campaign types are launched immediately
             is_manual_upload = (campaign_type == 'VIDEO')
             
             # Get campaign type info
             type_info = CAMPAIGN_TYPE_INFO.get(campaign_type, CAMPAIGN_TYPE_INFO['SEARCH'])
             video_ad_type_ar = VIDEO_AD_TYPE_ARABIC.get(video_ad_type, '') if video_ad_type and campaign_type == 'VIDEO' else ''
             
-            # Create MIMEMultipart message with 'related' type to support embedded images
-            msg = MIMEMultipart('related')
+            # Create message
+            msg = MIMEMultipart('alternative')
             msg['Subject'] = f"✅ {type_info['icon']} {campaign_name} - {'Request Received' if is_manual_upload else 'Campaign Active'}"
             msg['From'] = f'{self.sender_name} <{self.sender_email}>'
             msg['To'] = customer_email
@@ -139,10 +144,7 @@ Questions? Contact us at ads@furriyadh.com
 
 Furriyadh Ads Team
 """
-            msg_alternative = MIMEMultipart('alternative')
-            msg.attach(msg_alternative)
-            
-            msg_alternative.attach(MIMEText(plain_text, 'plain', 'utf-8'))
+            msg.attach(MIMEText(plain_text, 'plain', 'utf-8'))
             
             # HTML version
             html_content = self._generate_html_email(
@@ -157,24 +159,7 @@ Furriyadh Ads Team
                 video_ad_type_ar=video_ad_type_ar,
                 is_manual_upload=is_manual_upload
             )
-            msg_alternative.attach(MIMEText(html_content, 'html', 'utf-8'))
-            
-            # Embed logo image
-            if self.logo_path.exists():
-                try:
-                    with open(self.logo_path, 'rb') as f:
-                        logo_data = f.read()
-                    
-                    logo_image = MIMEImage(logo_data)
-                    logo_image.add_header('Content-ID', '<logo_image>')
-                    logo_image.add_header('Content-Disposition', 'inline', filename='furriyadh-logo.png')
-                    msg.attach(logo_image)
-                    logger.info(f"Using local logo from: {self.logo_path}")
-                except Exception as e:
-                    logger.warning(f"Failed to attach logo: {e}")
-            else:
-                 logger.warning(f"Logo file not found at: {self.logo_path}")
-
+            msg.attach(MIMEText(html_content, 'html', 'utf-8'))
             
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
                 server.starttls()
@@ -210,33 +195,28 @@ Furriyadh Ads Team
         accent_color = type_info.get('color', '#8ab4f8')
         campaign_icon = type_info.get('icon', '📊')
         
-        # Decide status title and description based on STRICT logic
+        # Decide status title and description
         if is_manual_upload:
             status_title = "Request Received"
-            status_desc = "Your campaign is under review and will be uploaded within 24-48 hours."
-            status_color = "#f28b82" # Soft Red
-            hero_icon_bg = "rgba(242, 139, 130, 0.1)"
-            hero_icon_color = "#f28b82"
-            check_icon = "⏳"
+            status_desc = "Your campaign is under review and will be uploaded within <strong>24-48 hours</strong>."
+            status_color = "#f28b82"
+            hero_icon_bg = "linear-gradient(135deg,#ef4444,#f97316)"
+            check_icon = "✓"
         else:
             status_title = "Campaign Active"
-            status_desc = "Your campaign has been successfully launched and is now live on Google Ads."
-            status_color = "#81c995" # Soft Green
-            hero_icon_bg = "rgba(129, 201, 149, 0.1)"
-            hero_icon_color = "#81c995"
-            check_icon = "✅"
-            
-        # Logo Source: CID if attached, fallback to URL
-        logo_src = "cid:logo_image"
+            status_desc = "Your campaign has been successfully launched and is now <strong>live</strong> on Google Ads."
+            status_color = "#81c995"
+            hero_icon_bg = "linear-gradient(135deg,#22c55e,#16a34a)"
+            check_icon = "✓"
         
         # Additional info section
         additional_info = ""
         if campaign_type == 'VIDEO' and video_ad_type_ar:
             additional_info = f"""
                 <tr>
-                    <td style="padding: 16px 24px; border-bottom: 1px solid #333333;">
-                        <span style="color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Ad Type</span>
-                        <p style="margin: 6px 0 0; color: #ffffff; font-size: 15px;">{video_ad_type_ar}</p>
+                    <td style="padding:16px 24px;border-bottom:1px solid #333333;">
+                        <span style="color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Ad Type</span>
+                        <p style="margin:6px 0 0;color:#ffffff;font-size:14px;font-weight:bold;">{video_ad_type_ar}</p>
                     </td>
                 </tr>
             """
@@ -244,9 +224,9 @@ Furriyadh Ads Team
             display_url = website_url.replace('https://', '').replace('http://', '').split('/')[0]
             additional_info = f"""
                 <tr>
-                    <td style="padding: 16px 24px; border-bottom: 1px solid #333333;">
-                        <span style="color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Website</span>
-                        <p style="margin: 6px 0 0; color: #ffffff; font-size: 15px;">{display_url}</p>
+                    <td style="padding:16px 24px;border-bottom:1px solid #333333;">
+                        <span style="color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Website</span>
+                        <p style="margin:6px 0 0;color:#ffffff;font-size:14px;font-weight:bold;">{display_url}</p>
                     </td>
                 </tr>
             """
@@ -256,12 +236,12 @@ Furriyadh Ads Team
         if campaign_type == 'VIDEO' and youtube_video_id:
             video_section = f"""
                 <tr>
-                    <td style="padding: 0 40px 30px;">
-                        <div style="border-radius: 12px; overflow: hidden; border: 1px solid #333333; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-                            <a href="https://youtube.com/watch?v={youtube_video_id}" style="display: block; position: relative; text_decoration: none;">
-                                <img src="{thumbnail_url}" alt="Video" style="display: block; width: 100%; height: auto; opacity: 0.9;">
-                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; background: rgba(255,0,0,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <span style="color: white; font-size: 24px;">▶</span>
+                    <td style="padding:0 32px 24px;">
+                        <div style="border-radius:12px;overflow:hidden;border:1px solid #333333;">
+                            <a href="https://youtube.com/watch?v={youtube_video_id}" style="display:block;position:relative;text-decoration:none;">
+                                <img src="{thumbnail_url}" alt="Video" style="display:block;width:100%;height:auto;opacity:0.9;">
+                                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:rgba(255,0,0,0.9);border-radius:50%;text-align:center;line-height:56px;">
+                                    <span style="color:white;font-size:24px;margin-left:4px;">▶</span>
                                 </div>
                             </a>
                         </div>
@@ -269,8 +249,34 @@ Furriyadh Ads Team
                 </tr>
             """
         
-        # PREMIUM DARK MODE HTML TEMPLATE
-        # Using #000000 background, #111111 cards, refined borders and spacing
+        # Next Steps Section
+        if is_manual_upload:
+            next_steps = """
+                <tr>
+                    <td style="padding:0 32px 32px;">
+                        <table width="100%" style="background:#0a0a0a;border-radius:12px;border:1px solid #222222;">
+                            <tr>
+                                <td style="padding:20px;">
+                                    <p style="color:#ffffff;font-size:14px;font-weight:bold;margin:0 0 16px;">
+                                        <span style="display:inline-block;width:3px;height:16px;background:#ef4444;border-radius:2px;margin-right:8px;vertical-align:middle;"></span>
+                                        Next Steps
+                                    </p>
+                                    <table width="100%">
+                                        <tr><td style="color:#888888;font-size:13px;padding:6px 0;">1. Team review of campaign details</td></tr>
+                                        <tr><td style="color:#888888;font-size:13px;padding:6px 0;">2. Upload to Google Ads</td></tr>
+                                        <tr><td style="color:#888888;font-size:13px;padding:6px 0;">3. Email notification when live</td></tr>
+                                        <tr><td style="color:#888888;font-size:13px;padding:6px 0;">4. Your ad starts showing on YouTube</td></tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            """
+        else:
+            next_steps = ""
+        
+        # PREMIUM DARK MODE HTML TEMPLATE with Logo from URL
         html = f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -278,80 +284,70 @@ Furriyadh Ads Team
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #000000; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e0e0e0;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #000000; min-height: 100vh;">
+<body style="margin:0;padding:0;background-color:#000000;font-family:Arial,Helvetica,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#000000;padding:40px 20px;">
         <tr>
-            <td align="center" style="padding: 40px 20px;">
-                
-                <!-- Main Container -->
-                <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width: 600px; width: 100%; background-color: #111111; border-radius: 16px; overflow: hidden; border: 1px solid #222222; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#111111;border-radius:16px;overflow:hidden;border:1px solid #333333;">
                     
-                    <!-- Header -->
+                    <!-- Top Gradient Line -->
                     <tr>
-                        <td style="padding: 30px 40px; border-bottom: 1px solid #222222;">
-                            <table width="100%" cellspacing="0" cellpadding="0">
+                        <td style="height:4px;background:linear-gradient(90deg,#ef4444,#f97316,#ef4444);"></td>
+                    </tr>
+                    
+                    <!-- Header with Logo -->
+                    <tr>
+                        <td style="padding:24px 32px;border-bottom:1px solid #222222;">
+                            <table width="100%">
                                 <tr>
                                     <td>
-                                        <img src="{logo_src}" alt="Furriyadh" width="130" style="display: block; max-width: 130px; height: auto;">
+                                        <img src="{self.logo_url}" alt="Furriyadh" style="height:32px;filter:brightness(0) invert(1);">
                                     </td>
                                     <td align="right">
-                                        <span style="color: #666666; font-size: 12px; font-family: monospace;">ID: {customer_id}</span>
+                                        <span style="background:#1a1a1a;color:{accent_color};padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid #333;">● {type_info['en']}</span>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     
-                    <!-- Main Title Area -->
+                    <!-- Main Content -->
                     <tr>
-                        <td style="padding: 50px 40px 30px; text-align: center;">
-                            <!-- Animated-ish Icon -->
-                            <div style="display: inline-block; width: 64px; height: 64px; border-radius: 50%; background-color: {hero_icon_bg}; text-align: center; line-height: 64px; font-size: 32px; margin-bottom: 24px; border: 1px solid {hero_icon_color}; box-shadow: 0 0 20px {hero_icon_bg};">
-                                {check_icon}
-                            </div>
+                        <td style="padding:48px 32px;text-align:center;">
+                            <!-- Success Icon -->
+                            <table cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
+                                <tr>
+                                    <td style="width:80px;height:80px;background:{hero_icon_bg};border-radius:50%;text-align:center;vertical-align:middle;">
+                                        <span style="color:#ffffff;font-size:40px;font-weight:bold;">{check_icon}</span>
+                                    </td>
+                                </tr>
+                            </table>
                             
-                            <h1 style="margin: 0 0 16px; font-size: 28px; font-weight: 600; color: #ffffff; letter-spacing: -0.5px;">
-                                {campaign_name}
-                            </h1>
+                            <h1 style="color:#ffffff;font-size:32px;margin:0 0 12px;font-weight:bold;letter-spacing:-0.5px;">{status_title}</h1>
                             
-                            <p style="margin: 0 0 8px; font-size: 18px; color: {status_color}; font-weight: 500;">
-                                {status_title}
-                            </p>
-                            
-                            <p style="margin: 0; font-size: 15px; color: #888888; line-height: 1.6; max-width: 400px; display: inline-block;">
+                            <p style="color:#888888;font-size:15px;margin:0 0 32px;line-height:1.6;">
                                 {status_desc}
                             </p>
-                        </td>
-                    </tr>
-                    
-                    <!-- CTA Button -->
-                    <tr>
-                        <td align="center" style="padding: 0 40px 40px;">
-                            <a href="https://furriyadh.com/dashboard" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, {accent_color} 0%, {status_color} 100%); color: #000000; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 15px {hero_icon_bg};">
-                                Go to Dashboard
-                            </a>
-                        </td>
-                    </tr>
-                    
-                    {video_section}
-                    
-                    <!-- Info Card -->
-                    <tr>
-                        <td style="padding: 0 40px 40px;">
-                            <table width="100%" cellspacing="0" cellpadding="0" style="background-color: #1a1a1a; border-radius: 12px; overflow: hidden; border: 1px solid #333333;">
+                            
+                            <!-- Info Card -->
+                            <table width="100%" style="background:#1a1a1a;border-radius:12px;border:1px solid #333333;margin-bottom:32px;text-align:left;">
                                 <tr>
-                                    <td style="padding: 16px 24px; border-bottom: 1px solid #333333;">
-                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                    <td style="padding:16px 24px;border-bottom:1px solid #333333;">
+                                        <span style="color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Campaign Name</span>
+                                        <p style="margin:6px 0 0;color:#ffffff;font-size:16px;font-weight:bold;">{campaign_name}</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:16px 24px;border-bottom:1px solid #333333;">
+                                        <table width="100%">
                                             <tr>
                                                 <td width="50%">
-                                                    <span style="color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Campaign Type</span>
-                                                    <p style="margin: 6px 0 0; color: {accent_color}; font-size: 15px; font-weight: 500;">
-                                                        {type_info['icon']} {type_info['en']}
-                                                    </p>
+                                                    <span style="color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Customer ID</span>
+                                                    <p style="margin:6px 0 0;color:#ffffff;font-size:14px;font-weight:bold;font-family:monospace;">{customer_id}</p>
                                                 </td>
                                                 <td width="50%">
-                                                    <span style="color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Daily Budget</span>
-                                                    <p style="margin: 6px 0 0; color: #ffffff; font-size: 15px; font-weight: 600;">${daily_budget} {currency}</p>
+                                                    <span style="color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Daily Budget</span>
+                                                    <p style="margin:6px 0 0;color:#ffffff;font-size:14px;font-weight:bold;">${daily_budget} {currency}</p>
                                                 </td>
                                             </tr>
                                         </table>
@@ -359,34 +355,31 @@ Furriyadh Ads Team
                                 </tr>
                                 {additional_info}
                             </table>
+                            
+                            <!-- CTA Button -->
+                            <a href="https://furriyadh.com/dashboard" style="display:inline-block;padding:16px 48px;background:#ffffff;color:#000000;text-decoration:none;border-radius:12px;font-weight:bold;font-size:16px;">Go to Dashboard →</a>
                         </td>
                     </tr>
                     
-                    <!-- Steps / Footer Info -->
+                    {video_section}
+                    
+                    {next_steps}
+                    
+                    <!-- Footer -->
                     <tr>
-                        <td style="padding: 30px 40px; background-color: #0d0d0d; border-top: 1px solid #222222;">
-                             <p style="margin: 0 0 20px; color: #666666; font-size: 13px; text-align: center;">
-                                Need help? Reply to this email or visit our <a href="https://furriyadh.com/support" style="color: {accent_color}; text-decoration: none;">Help Center</a>.
-                             </p>
-                             
-                            <table width="100%" cellspacing="0" cellpadding="0" style="border-top: 1px solid #1a1a1a; padding-top: 20px;">
+                        <td style="padding:24px 32px;background:#050505;border-top:1px solid #222222;">
+                            <table width="100%">
                                 <tr>
-                                    <td align="center">
-                                        <p style="margin: 0; color: #444444; font-size: 11px;">
-                                            © {current_year} Furriyadh Ads. All rights reserved.<br>
-                                            Riyadh, Saudi Arabia.
-                                        </p>
+                                    <td style="color:#666666;font-size:12px;">© {current_year} Furriyadh Inc.</td>
+                                    <td align="right">
+                                        <a href="mailto:ads@furriyadh.com" style="color:#666666;font-size:12px;text-decoration:none;margin-right:16px;">Support</a>
+                                        <a href="https://furriyadh.com" style="color:#666666;font-size:12px;text-decoration:none;">Privacy</a>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
-                    
                 </table>
-                
-                <!-- Spacing -->
-                <div style="height: 40px;"></div>
-                
             </td>
         </tr>
     </table>
