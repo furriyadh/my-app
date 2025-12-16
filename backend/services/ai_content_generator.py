@@ -24,6 +24,7 @@ backend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(backend_path)
 
 from cometapi_config import CometAPIConfig
+from services.industry_targeting_config import detect_industry, get_industry_config
 
 logger = logging.getLogger(__name__)
 
@@ -632,7 +633,72 @@ Return results in JSON format:
             
             # ✅ KEY FIX: استخدام response.content مباشرة - مثل detect_website_language!
             soup = BeautifulSoup(response.content, 'html.parser')
-            
+
+            # 📹 Special handling for YouTube
+            if 'youtube.com' in website_url or 'youtu.be' in website_url:
+                self.logger.info("📹 YouTube URL detected - attempting to extract video metadata")
+                
+                video_title = ""
+                video_description = ""
+                
+                # 1. Try Open Graph tags (Most reliable for YouTube)
+                og_title = soup.find("meta", property="og:title")
+                if og_title: video_title = og_title.get("content", "")
+                
+                og_desc = soup.find("meta", property="og:description")
+                if og_desc: video_description = og_desc.get("content", "")
+                
+                # 2. Fallback to standard meta tags
+                if not video_title:
+                    meta_title = soup.find("meta", attrs={"name": "title"})
+                    if meta_title: video_title = meta_title.get("content", "")
+                
+                if not video_description:
+                    meta_desc = soup.find("meta", attrs={"name": "description"})
+                    if meta_desc: video_description = meta_desc.get("content", "")
+                
+                # 3. Fallback to Title tag
+                if not video_title and soup.title:
+                    video_title = soup.title.string
+
+                if video_title:
+                    self.logger.info(f"✅ Extracted YouTube Metadata: {video_title}")
+                    
+                    # 4. Try to fetch Transcript (Subtitles) - THE GAME CHANGER 🚀
+                    transcript_text = ""
+                    try:
+                        from youtube_transcript_api import YouTubeTranscriptApi
+                        
+                        # Extract Video ID
+                        video_id = None
+                        if 'v=' in website_url:
+                            video_id = website_url.split('v=')[1].split('&')[0]
+                        elif 'youtu.be/' in website_url:
+                            video_id = website_url.split('youtu.be/')[1].split('?')[0]
+                        
+                        if video_id:
+                            self.logger.info(f"📜 Attempting to fetch transcript for video: {video_id}")
+                            # Try to get transcript in Arabic, correct english or any available
+                            transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['ar', 'en'])
+                            
+                            # Combine text
+                            full_transcript = " ".join([item['text'] for item in transcript_list])
+                            
+                            # Limit to 3000 chars to avoid token limits but keep enough context
+                            transcript_text = full_transcript[:3000]
+                            self.logger.info(f"✅ Successfully fetched transcript: {len(transcript_text)} chars")
+                    except Exception as trans_error:
+                        self.logger.warning(f"⚠️ Could not fetch transcript: {trans_error}")
+                    
+                    # Return rich context for the AI
+                    combined_context = f"Video Title: {video_title}\n\nVideo Description: {video_description}\n\n"
+                    if transcript_text:
+                        combined_context += f"Video Script/Transcript (IMPORTANT - USE THIS FOR CONTENT):\n{transcript_text}\n\n"
+                    else:
+                        combined_context += "(YouTube Video Content)\n"
+                        
+                    return combined_context
+
             # Remove script, style, and navigation elements for cleaner text
             for element in soup(['script', 'style', 'nav', 'noscript', 'iframe', 'svg', 'header', 'footer']):
                 element.decompose()
@@ -1379,7 +1445,7 @@ Viewers must watch the full video. Content should be engaging throughout.
         }
         return video_requirements.get(video_ad_type, video_requirements["VIDEO_RESPONSIVE_AD"])
     
-    def _generate_specialized_video_content(self, video_ad_type: str, website_url: str, target_language: str = "ar", website_content: str = None, keywords_list: list = None) -> Dict[str, Any]:
+    def _generate_specialized_video_content(self, video_ad_type: str, website_url: str, target_language: str = "ar", website_content: str = None, keywords_list: list = None, industry_config: Dict = None) -> Dict[str, Any]:
         """Generate specialized content for specific video ad types (TrueView, In-Feed, Bumper, Non-Skippable)"""
         try:
             self.logger.info(f"🎬 Generating specialized content for: {video_ad_type}")
@@ -1402,16 +1468,31 @@ Viewers must watch the full video. Content should be engaging throughout.
             # Keywords
             keywords_line = ', '.join(keywords_list[:10]) if keywords_list else ''
             
+            # Industry Context
+            industry_context = ""
+            if industry_config:
+                ind_name = industry_config.get('name_en', 'General')
+                ind_name_ar = industry_config.get('name_ar', 'عام')
+                industry_context = f"\nINDUSTRY CONTEXT: {ind_name} ({ind_name_ar})\nThis ad is for the '{ind_name}' industry. Adjust tone and CTA accordingly."
+
             # Build type-specific prompt
             if video_ad_type == "VIDEO_TRUEVIEW_IN_STREAM_AD":
                 prompt = f"""Generate YouTube TrueView In-Stream Ad content in {language_name}.
+{industry_context}
 
 Website: {website_url}
 Keywords: {keywords_line}
 Website Content: {website_content[:1000]}
 
 REQUIREMENTS (Google Ads API):
-- action_button_label: EXACTLY 1 text, max 10 characters (e.g., "Buy Now", "Sign Up", "اشترِ الآن")
+- action_button_label: EXACTLY 1 text, max 10 characters. CRITICAL: Choose based on INDUSTRY, VIDEO CONTENT, TITLE, and GOAL:
+  (Analyze the provided 'Website Content' which contains the Video Title and Description)
+  * Education/Content/News/Entertainment: "Subscribe", "Watch Now", "Learn More"
+  * E-commerce/Retail/Products: "Buy Now", "Shop Now", "Order Now"
+  * Apps/Software/Tools: "Download", "Install", "Sign Up"
+  * Services/B2B/Consulting: "Contact Us", "Get Quote", "Book Now"
+  * If the video title implies learning (e.g. "What is...", "How to...", "Explanation"): YOU MUST USE "Watch Now" or "Subscribe".
+  * If the video title implies a product offer: USE "Buy Now" or "Shop Now".
 - action_headline: EXACTLY 1 text, max 15 characters (short compelling text)
 
 ALL content MUST be in {language_name}. Be concise and action-oriented.
@@ -1421,6 +1502,7 @@ Return ONLY valid JSON:
 
             elif video_ad_type == "IN_FEED_VIDEO_AD":
                 prompt = f"""Generate YouTube In-Feed Video Ad content in {language_name}.
+{industry_context}
 
 Website: {website_url}
 Keywords: {keywords_line}
@@ -1438,6 +1520,7 @@ Return ONLY valid JSON:
             elif video_ad_type in ["VIDEO_BUMPER_AD", "VIDEO_NON_SKIPPABLE_IN_STREAM_AD"]:
                 ad_name = "Bumper Ad (6 seconds)" if video_ad_type == "VIDEO_BUMPER_AD" else "Non-Skippable Ad (15-20 seconds)"
                 prompt = f"""Generate YouTube {ad_name} content in {language_name}.
+{industry_context}
 
 Website: {website_url}
 Keywords: {keywords_line}
@@ -1489,29 +1572,48 @@ Return ONLY valid JSON:
                 "success": False,
                 "error": str(e)
             }
-    
+
     def generate_complete_ad_content(self, product_service: str, website_url: str, service_type: str = None, target_language: str = "ar", website_content: str = None, campaign_type: str = "DISPLAY", keywords_list: list = None, video_ad_type: str = None) -> Dict[str, Any]:
         """توليد المحتوى الإعلاني الكامل بناءً على نوع الحملة وتعليمات Google Ads"""
         try:
             self.logger.info(f"🚀 بدء توليد المحتوى الإعلاني - نوع الحملة: {campaign_type}")
-            if campaign_type == 'VIDEO' and video_ad_type:
-                self.logger.info(f"📹 Video Ad Type: {video_ad_type}")
-                # Use specialized video content generation for non-responsive types
-                if video_ad_type != 'VIDEO_RESPONSIVE_AD':
-                    return self._generate_specialized_video_content(
-                        video_ad_type=video_ad_type,
-                        website_url=website_url,
-                        target_language=target_language,
-                        website_content=website_content,
-                        keywords_list=keywords_list
-                    )
-            
-            # استخدام website_content إذا تم تمريره، وإلا جلبه
+            # 1. جلب محتوى الموقع أولاً (مطلوب للكشف عن الصناعة)
             if not website_content:
                 website_content = self._fetch_website_content(website_url)
                 print(f"✅ تم جلب محتوى الموقع: {len(website_content)} حرف")
             else:
                 print(f"✅ استخدام محتوى الموقع الممرر: {len(website_content)} حرف")
+
+            # 2. 🎯 اكتشاف الصناعة وتجهيز إعدادات الاستهداف الذكي (لجميع الأنواع)
+            detected_industry = detect_industry(website_content)
+            industry_config = get_industry_config(detected_industry)
+            self.logger.info(f"🎯 Detected Industry: {detected_industry} ({industry_config.get('name_ar')})")
+            
+            smart_targeting_data = {
+                "industry": detected_industry,
+                "industry_name_ar": industry_config.get("name_ar"),
+                "age_ranges": industry_config.get("age_ranges", []),
+                "gender": industry_config.get("gender"),
+                "device_modifiers": industry_config.get("device_modifiers", {}),
+                "frequency_cap": industry_config.get("frequency_cap", {}),
+                "industry_keywords": industry_config.get("keywords", [])
+            }
+
+            if campaign_type == 'VIDEO' and video_ad_type:
+                self.logger.info(f"📹 Video Ad Type: {video_ad_type}")
+                # Use specialized video content generation for non-responsive types
+                if video_ad_type != 'VIDEO_RESPONSIVE_AD':
+                    specialized_result = self._generate_specialized_video_content(
+                        video_ad_type=video_ad_type,
+                        website_url=website_url,
+                        target_language=target_language,
+                        website_content=website_content,
+                        keywords_list=keywords_list,
+                        industry_config=industry_config # ✅ PASS INDUSTRY CONFIG
+                    )
+                    # دمج بيانات الاستهداف الذكي مع النتيجة
+                    specialized_result["smart_targeting"] = smart_targeting_data
+                    return specialized_result
             
             # التحقق من جودة المحتوى المستخرج
             if not website_content or len(website_content) < 100:
@@ -1805,6 +1907,7 @@ Return VALID JSON (use the keywords provided above):
                 
                 result = {
                     "success": True,
+                    "smart_targeting": smart_targeting_data,
                     "product_service": product_service,
                     "website_url": website_url,
                     "headlines": cleaned_headlines,

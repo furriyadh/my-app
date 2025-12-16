@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
     domains: ['furriyadh.com', 'www.furriyadh.com', 'localhost', 'flagcdn.com'],
   },
-  
+
   // إعدادات البيئة
   env: {
     CUSTOM_KEY: process.env.NODE_ENV,
@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-  
+
   // إعدادات الإنتاج
   ...(process.env.NODE_ENV === 'production' && {
     // output: 'standalone', // معطل لحل مشكلة symlink في Windows
@@ -27,12 +27,12 @@ const nextConfig: NextConfig = {
     poweredByHeader: false,
     generateEtags: true,
   }),
-  
+
   // إعدادات مرنة للتطوير
   typescript: {
     ignoreBuildErrors: true, // مؤقت لحل مشاكل TypeScript
   },
-  
+
   eslint: {
     ignoreDuringBuilds: true, // مؤقت لحل مشاكل ESLint
   },
@@ -46,24 +46,24 @@ const nextConfig: NextConfig = {
       net: false,
       tls: false,
     };
-    
+
     // تحسين الأداء في development mode
     if (dev) {
       config.cache = {
         type: 'filesystem',
       };
-      
+
       // تقليل عدد workers في development
       config.parallelism = 1;
-      
+
       // تحسين resolve
       config.resolve.symlinks = false;
     }
-    
+
     return config;
   },
-  
-  
+
+
   // تحسينات إضافية للـ performance
   experimental: {
     // optimizeCss: true, // تعطيل مؤقت لحل مشكلة critters
@@ -72,14 +72,49 @@ const nextConfig: NextConfig = {
       allowedOrigins: ['localhost:3000', 'furriyadh.com'],
     },
   },
-  
+
   // تكوين turbopack الجديد
   turbopack: {
     rules: {
       '*.js': ['swc-loader'],
-      '*.tsx': ['swc-loader'], 
+      '*.tsx': ['swc-loader'],
       '*.ts': ['swc-loader'],
     },
+  },
+
+  // Rewrites to proxy requests to Python Backend
+  async rewrites() {
+    return [
+      {
+        source: '/api/youtube/:path*',
+        destination: 'http://127.0.0.1:5000/api/youtube/:path*',
+      },
+      {
+        source: '/api/ai-campaign/:path*',
+        destination: 'http://127.0.0.1:5000/api/ai-campaign/:path*',
+      },
+      {
+        source: '/api/ai-campaign-flow/:path*',
+        destination: 'http://127.0.0.1:5000/api/ai-campaign-flow/:path*',
+      },
+      {
+        source: '/api/user/accounts',
+        destination: 'http://127.0.0.1:5000/api/user/accounts',
+      },
+      // Add other backend routes if needed (merchant, gtm, etc.)
+      {
+        source: '/api/merchant/:path*',
+        destination: 'http://127.0.0.1:5000/api/merchant/:path*',
+      },
+      {
+        source: '/api/gtm/:path*',
+        destination: 'http://127.0.0.1:5000/api/gtm/:path*',
+      },
+      {
+        source: '/api/analytics/:path*',
+        destination: 'http://127.0.0.1:5000/api/analytics/:path*',
+      }
+    ];
   },
 };
 

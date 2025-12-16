@@ -5,12 +5,12 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-export const supabase = supabaseUrl && supabaseAnonKey 
+export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
 
 // Service role client for admin operations (bypasses RLS)
-export const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+export const supabaseAdmin = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null
 
@@ -20,7 +20,7 @@ export async function saveUserProfile(userInfo: any): Promise<UserProfile | null
     console.error('Supabase admin not configured');
     return null;
   }
-  
+
   try {
     // تحويل Google ID إلى UUID format
     const generateUUID = (googleId: string) => {
@@ -45,9 +45,10 @@ export async function saveUserProfile(userInfo: any): Promise<UserProfile | null
         .insert([{
           id: userId,
           email: userInfo.email,
+          name: userInfo.name || 'User', // إضافة الاسم لتجنب خطأ not-null
           // تعيين قيم آمنة للمستخدمين القادمين من Google لتجنب قيود NOT NULL
           password: 'oauth_user',
-          auth_provider: 'google',
+          // auth_provider: 'google',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }]);
@@ -183,15 +184,15 @@ export async function getClientRequests(): Promise<ClientRequest[]> {
 
 // Function to update client request status
 export async function updateClientRequestStatus(
-  customerId: string, 
-  status: ClientRequest['status'], 
+  customerId: string,
+  status: ClientRequest['status'],
   linkDetails?: any
 ): Promise<boolean> {
   if (!supabase) {
     console.error('Supabase not configured');
     return false;
   }
-  
+
   try {
     const updateData: any = {
       status,

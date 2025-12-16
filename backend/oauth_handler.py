@@ -243,6 +243,32 @@ def create_oauth_handler(config: Dict[str, Any]) -> GoogleOAuthHandler:
     """
     return GoogleOAuthHandler(config)
 
+# إنشاء نسخة عامة للاستخدام في التطبيق
+# استخدام متغيرات البيئة مباشرة لتجنب مشاكل الاستيراد الدائري
+try:
+    oauth_config = {
+        'google_client_id': os.getenv('GOOGLE_ADS_CLIENT_ID'),
+        'google_client_secret': os.getenv('GOOGLE_ADS_CLIENT_SECRET'),
+        'redirect_uri': os.getenv('OAUTH_REDIRECT_URI', 'http://localhost:3000/api/oauth/google/callback'),
+        'scopes': os.getenv('GOOGLE_OAUTH_SCOPES', '').split(' ') if os.getenv('GOOGLE_OAUTH_SCOPES') else [
+            'https://www.googleapis.com/auth/adwords',
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/youtube.readonly',
+            'https://www.googleapis.com/auth/youtube.force-ssl'
+        ]
+    }
+    
+    # تحديث redirect_uri للإنتاج
+    if os.getenv('NODE_ENV') == 'production':
+        oauth_config['redirect_uri'] = 'https://furriyadh.com/api/oauth/google/callback'
+        
+    oauth_manager = create_oauth_handler(oauth_config)
+    logger.info("✅ تم تهيئة oauth_manager بنجاح")
+except Exception as e:
+    logger.error(f"❌ فشل تهيئة oauth_manager: {e}")
+    oauth_manager = None
+
 # مثال على الاستخدام
 if __name__ == "__main__":
     # إعدادات تجريبية

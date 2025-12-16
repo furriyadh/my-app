@@ -38,6 +38,7 @@ const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/tagmanager.readonly', // Google Tag Manager (قراءة فقط)
   'https://www.googleapis.com/auth/tagmanager.manage.users', // إدارة مستخدمي GTM (لإضافة Admin)
   'https://www.googleapis.com/auth/content',             // Google Merchant Center (Content API)
+  'https://www.googleapis.com/auth/youtube.readonly',    // YouTube Data API (قراءة القنوات)
   'openid',                                            // OpenID Connect (حسب Google Identity Platform)
   'profile',                                           // معلومات الملف الشخصي الأساسية
   'email'                                              // معلومات البريد الإلكتروني الأساسية

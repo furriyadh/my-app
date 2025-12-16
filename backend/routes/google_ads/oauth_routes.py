@@ -53,11 +53,25 @@ def authorize():
         # معالجة OAuth بتهيئة
         oauth_handler = OAuthHandler()
         
+        # تحديد النطاقات الإضافية بناءً على الطلب
+        requested_scope_key = request.args.get('scope')
+        additional_scopes = []
+        
+        scope_mapping = {
+            'youtube': ['https://www.googleapis.com/auth/youtube.readonly'],
+            'analytics': ['https://www.googleapis.com/auth/analytics.readonly'],
+            'merchant': ['https://www.googleapis.com/auth/content'] 
+        }
+        
+        if requested_scope_key and requested_scope_key in scope_mapping:
+            additional_scopes = scope_mapping[requested_scope_key]
+        
         # إنشاء رابط التفويض
         auth_result = oauth_handler.create_authorization_url(
             user_id=user_id,
             ip_address=request.remote_addr,
-            user_agent=request.headers.get('User-Agent', 'Unknown')
+            user_agent=request.headers.get('User-Agent', 'Unknown'),
+            additional_scopes=additional_scopes
         )
         
         if not auth_result.get('success'):

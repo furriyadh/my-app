@@ -113,9 +113,22 @@ try:
 except Exception as e:
     logger.error(f"❌ فشل تسجيل AI Campaign Flow Blueprint: {e}")
 
-# إعداد Supabase مع إصدار محدث (باستخدام متغيرات البيئة فقط بدون قيم افتراضية حساسة)
 try:
-    from supabase import create_client, Client
+    from routes.youtube_routes import youtube_bp
+    app.register_blueprint(youtube_bp, url_prefix='/api/youtube')
+    logger.info("✅ تم تسجيل YouTube Integration Blueprint")
+except Exception as e:
+    logger.error(f"❌ فشل تسجيل YouTube Integration Blueprint: {e}")
+
+try:
+    from routes.accounts import accounts_bp
+    app.register_blueprint(accounts_bp, url_prefix='/api/user/accounts')
+    logger.info("✅ تم تسجيل User Accounts Blueprint")
+except Exception as e:
+    logger.error(f"❌ فشل تسجيل User Accounts Blueprint: {e}")
+
+try:
+    # إعداد Supabase مع إصدار محدث (باستخدام متغيرات البيئة فقط بدون قيم افتراضية حساسة)
     SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
     SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 

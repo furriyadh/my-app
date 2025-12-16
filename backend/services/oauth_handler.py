@@ -52,7 +52,7 @@ class OAuthHandler:
     # إنشاء روابط التفويض
     # ===========================================
     
-    def create_authorization_url(self, user_id: str, ip_address: str, user_agent: str) -> Dict[str, Any]:
+    def create_authorization_url(self, user_id: str, ip_address: str, user_agent: str, additional_scopes: List[str] = None) -> Dict[str, Any]:
         """إنشاء رابط تفويض Google Ads API"""
         if not all([self.client_id, self.redirect_uri]):
             self.logger.error("معرف العميل أو URI إعادة التوجيه مفقود")
@@ -73,11 +73,19 @@ class OAuthHandler:
         }
         self.logger.info(f"تم إنشاء جلسة OAuth جديدة: {session_id}")
 
+        # دمج النطاقات الإضافية
+        current_scopes = self.scopes.copy()
+        if additional_scopes:
+            current_scopes.extend(additional_scopes)
+        
+        # إزالة التكرار
+        unique_scopes = list(set(current_scopes))
+
         params = {
             "client_id": self.client_id,
             "redirect_uri": self.redirect_uri,
             "response_type": "code",
-            "scope": " ".join(self.scopes),
+            "scope": " ".join(unique_scopes),
             "access_type": "offline",
             # إزالة prompt تماماً
             "code_challenge": code_challenge,

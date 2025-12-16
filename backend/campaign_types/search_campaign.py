@@ -1487,14 +1487,14 @@ class SearchCampaignCreator:
                 print(f"✅ استخدام Callouts المولدة من AI: {callouts}")
             else:
                 # fallback فقط إذا فشل التوليد
-            callouts = [
+                callouts = [
                     "خدمة متميزة",
-                "جودة عالية",
+                    "جودة عالية",
                     "أسعار مناسبة",
-                "فريق محترف",
+                    "فريق محترف",
                     "خبرة واسعة",
                     "رضا العملاء"
-            ]
+                ]
                 print(f"⚠️ استخدام Callouts الافتراضية (لم تُولَّد من AI)")
             
             for callout_text in callouts:

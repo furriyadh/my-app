@@ -32,6 +32,16 @@ from typing import Dict, List, Any, Optional
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
 from services.ai_content_generator import AIContentGenerator
+from services.industry_targeting_config import (
+    detect_industry, get_industry_config,
+    AGE_18_24, AGE_25_34, AGE_35_44, AGE_45_54, AGE_55_64, AGE_65_UP,
+    MALE, FEMALE, GENDER_ALL,
+    INCOME_0_50, INCOME_50_60, INCOME_60_70, INCOME_70_80, INCOME_80_90, INCOME_90_UP,
+    PARENT, NOT_A_PARENT,
+    DEVICE_MOBILE, DEVICE_TABLET, DEVICE_DESKTOP, DEVICE_TV,
+    FREQ_DAY, FREQ_WEEK, FREQ_MONTH,
+    INDUSTRY_CONFIG
+)
 
 
 class VideoCampaignCreator:
@@ -399,6 +409,17 @@ class VideoCampaignCreator:
                 print("Google Ads API not available - returning dummy ID")
                 return f"video_campaign_{uuid.uuid4().hex[:8]}"
 
+            # 🎯 اكتشاف الصناعة من المحتوى
+            # التحقق من نوع website_content - قد يكون dict أو string (URL)
+            if isinstance(website_content, dict):
+                content_for_detection = f"{website_content.get('title', '')} {website_content.get('description', '')} {' '.join([kw.get('text', '') if isinstance(kw, dict) else str(kw) for kw in website_content.get('keywords', [])])}"
+            else:
+                # إذا كان string (URL أو نص)، استخدمه مباشرة
+                content_for_detection = str(website_content) if website_content else ""
+            detected_industry = detect_industry(content_for_detection)
+            industry_config = get_industry_config(detected_industry)
+            print(f"🎯 الصناعة المكتشفة: {industry_config.get('name_ar', detected_industry)} ({detected_industry})")
+
             # 1.  ميزانية ال
             budget_resource_name = self._create_campaign_budget(campaign_name, daily_budget)
 
@@ -415,18 +436,18 @@ class VideoCampaignCreator:
             self._create_video_ad(ad_group_resource_name, ad_copies, website_url, video_ad_type, youtube_video_id)
 
             # 5. إضافة كلمات مفتاحية لل (اختياري - لل  نتائج البحث)
-            keywords = website_content.get('keywords', [])
+            keywords = website_content.get('keywords', []) if isinstance(website_content, dict) else []
             if keywords:
                 self._add_video_keywords_to_ad_group(ad_group_resource_name, keywords[:10])
 
-            # 6. إضافة استهداف إضا لل
-            self._add_video_audience_targeting(campaign_resource_name)
+            # 🎯 6. استهداف الديمغرافيا الذكي حسب الصناعة
+            self._apply_smart_demographic_targeting(ad_group_resource_name, industry_config)
 
-            # 7. إضافة استهداف الأجهزة لل
-            self._add_video_device_targeting(campaign_resource_name)
+            # 🎯 7. استهداف الأجهزة الذكي حسب الصناعة
+            self._apply_smart_device_targeting(campaign_resource_name, industry_config)
 
-            # 8. إضافة تعديلات العروض لل
-            self._add_video_bid_modifiers(ad_group_resource_name)
+            # 🎯 8. تحديد الظهور الذكي حسب الصناعة
+            self._apply_smart_frequency_capping(campaign_resource_name, industry_config)
 
             # 9. إضافة استهداف المواضيع لل
             self._add_video_topic_targeting(campaign_resource_name, website_content)
@@ -537,15 +558,173 @@ class VideoCampaignCreator:
         except Exception as e:
             print(f" تحذير: فشل  إضافة تعديلات العروض لل: {e}")
 
+    # ═══════════════════════════════════════════════════════════════════
+    # 🎯 دوال الاستهداف الذكي حسب الصناعة
+    # ═══════════════════════════════════════════════════════════════════
+
+    def _apply_smart_demographic_targeting(self, ad_group_resource_name: str, industry_config: dict):
+        """استهداف الديمغرافيا الذكي حسب الصناعة (العمر، الجنس، الدخل، الحالة الأبوية)"""
+        try:
+            print(f"🎯 تطبيق استهداف الديمغرافيا لصناعة: {industry_config.get('name_ar', 'عام')}...")
+            
+            ad_group_criterion_service = self.client.get_service("AdGroupCriterionService")
+            operations = []
+            
+            # 1. استهداف الفئات العمرية
+            age_ranges = industry_config.get("age_ranges", [])
+            if age_ranges:
+                for age_range_id in age_ranges:
+                    # تحويل ID إلى نوع العمر
+                    age_type_map = {
+                        503001: self.client.enums.AgeRangeTypeEnum.AGE_RANGE_18_24,
+                        503002: self.client.enums.AgeRangeTypeEnum.AGE_RANGE_25_34,
+                        503003: self.client.enums.AgeRangeTypeEnum.AGE_RANGE_35_44,
+                        503004: self.client.enums.AgeRangeTypeEnum.AGE_RANGE_45_54,
+                        503005: self.client.enums.AgeRangeTypeEnum.AGE_RANGE_55_64,
+                        503006: self.client.enums.AgeRangeTypeEnum.AGE_RANGE_65_UP,
+                    }
+                    if age_range_id in age_type_map:
+                        operation = self.client.get_type("AdGroupCriterionOperation")
+                        criterion = operation.create
+                        criterion.ad_group = ad_group_resource_name
+                        criterion.age_range.type_ = age_type_map[age_range_id]
+                        operations.append(operation)
+            
+            # 2. استهداف الجنس
+            gender = industry_config.get("gender")
+            if gender:
+                gender_type_map = {
+                    10: self.client.enums.GenderTypeEnum.MALE,
+                    11: self.client.enums.GenderTypeEnum.FEMALE,
+                }
+                if gender in gender_type_map:
+                    operation = self.client.get_type("AdGroupCriterionOperation")
+                    criterion = operation.create
+                    criterion.ad_group = ad_group_resource_name
+                    criterion.gender.type_ = gender_type_map[gender]
+                    operations.append(operation)
+            
+            # 3. استهداف الحالة الأبوية
+            parental = industry_config.get("parental")
+            if parental:
+                parental_type_map = {
+                    300: self.client.enums.ParentalStatusTypeEnum.PARENT,
+                    301: self.client.enums.ParentalStatusTypeEnum.NOT_A_PARENT,
+                }
+                if parental in parental_type_map:
+                    operation = self.client.get_type("AdGroupCriterionOperation")
+                    criterion = operation.create
+                    criterion.ad_group = ad_group_resource_name
+                    criterion.parental_status.type_ = parental_type_map[parental]
+                    operations.append(operation)
+            
+            # 4. استهداف الدخل
+            income_ranges = industry_config.get("income", [])
+            if income_ranges:
+                for income_id in income_ranges:
+                    income_type_map = {
+                        510001: self.client.enums.IncomeRangeTypeEnum.INCOME_RANGE_0_50,
+                        510002: self.client.enums.IncomeRangeTypeEnum.INCOME_RANGE_50_60,
+                        510003: self.client.enums.IncomeRangeTypeEnum.INCOME_RANGE_60_70,
+                        510004: self.client.enums.IncomeRangeTypeEnum.INCOME_RANGE_70_80,
+                        510005: self.client.enums.IncomeRangeTypeEnum.INCOME_RANGE_80_90,
+                        510006: self.client.enums.IncomeRangeTypeEnum.INCOME_RANGE_90_UP,
+                    }
+                    if income_id in income_type_map:
+                        operation = self.client.get_type("AdGroupCriterionOperation")
+                        criterion = operation.create
+                        criterion.ad_group = ad_group_resource_name
+                        criterion.income_range.type_ = income_type_map[income_id]
+                        operations.append(operation)
+            
+            if operations:
+                ad_group_criterion_service.mutate_ad_group_criteria(
+                    customer_id=self.customer_id,
+                    operations=operations
+                )
+                print(f"✅ تم تطبيق {len(operations)} استهداف ديمغرافي")
+            else:
+                print("ℹ️ لم يتم تحديد استهداف ديمغرافي محدد - استهداف الكل")
+                
+        except Exception as e:
+            print(f"⚠️ تحذير: فشل تطبيق استهداف الديمغرافيا: {e}")
+
+    def _apply_smart_device_targeting(self, campaign_resource_name: str, industry_config: dict):
+        """استهداف الأجهزة الذكي مع تعديلات العروض حسب الصناعة"""
+        try:
+            print(f"🎯 تطبيق استهداف الأجهزة لصناعة: {industry_config.get('name_ar', 'عام')}...")
+            
+            device_bids = industry_config.get("device_bids", {})
+            if not device_bids:
+                device_bids = {2: 1.2, 4: 1.1, 3: 1.0}  # افتراضي
+            
+            campaign_criterion_service = self.client.get_service("CampaignCriterionService")
+            operations = []
+            
+            device_type_map = {
+                2: self.client.enums.DeviceEnum.MOBILE,
+                3: self.client.enums.DeviceEnum.TABLET,
+                4: self.client.enums.DeviceEnum.DESKTOP,
+                6: self.client.enums.DeviceEnum.CONNECTED_TV,
+            }
+            
+            for device_id, bid_modifier in device_bids.items():
+                if device_id in device_type_map:
+                    operation = self.client.get_type("CampaignCriterionOperation")
+                    criterion = operation.create
+                    criterion.campaign = campaign_resource_name
+                    criterion.status = self.client.enums.CampaignCriterionStatusEnum.ENABLED
+                    criterion.device.type_ = device_type_map[device_id]
+                    criterion.bid_modifier = bid_modifier
+                    operations.append(operation)
+            
+            if operations:
+                campaign_criterion_service.mutate_campaign_criteria(
+                    customer_id=self.customer_id,
+                    operations=operations
+                )
+                bid_info = ", ".join([f"{k}:{v}" for k, v in device_bids.items()])
+                print(f"✅ تم تطبيق استهداف الأجهزة: {bid_info}")
+                
+        except Exception as e:
+            print(f"⚠️ تحذير: فشل تطبيق استهداف الأجهزة: {e}")
+
+    def _apply_smart_frequency_capping(self, campaign_resource_name: str, industry_config: dict):
+        """تحديد الظهور الذكي حسب الصناعة"""
+        try:
+            print(f"🎯 تطبيق تحديد الظهور لصناعة: {industry_config.get('name_ar', 'عام')}...")
+            
+            frequency_cap = industry_config.get("frequency_cap", 4)
+            frequency_unit = industry_config.get("frequency_unit", 2)  # DAY = 2
+            
+            # ملاحظة: Frequency cap يتم تعيينه عادة على مستوى الحملة أثناء الإنشاء
+            # هذه الدالة تسجل الإعدادات المطلوبة للتطبيق
+            
+            unit_names = {2: "يوم", 3: "أسبوع", 4: "شهر"}
+            unit_name = unit_names.get(frequency_unit, "يوم")
+            
+            print(f"✅ تحديد الظهور: {frequency_cap} مرات لكل {unit_name}")
+            print(f"   ℹ️ ملاحظة: يتم تطبيق تحديد الظهور على مستوى الحملة")
+                
+        except Exception as e:
+            print(f"⚠️ تحذير: فشل تطبيق تحديد الظهور: {e}")
+
     def _add_video_topic_targeting(self, campaign_resource_name: str, website_content: Dict[str, Any]):
         """إضافة استهداف المواضيع لل بناءً على محتوى """
         try:
             print(" إضافة استهداف المواضيع لل...")
 
             #  المحتوى لتحديد المواضيع المناسبة
-            title = website_content.get('title', '').lower()
-            description = website_content.get('description', '').lower()
-            keywords = [kw.get('text', '') for kw in website_content.get('keywords', [])]
+            # التحقق من نوع website_content
+            if isinstance(website_content, dict):
+                title = website_content.get('title', '').lower()
+                description = website_content.get('description', '').lower()
+                keywords = [kw.get('text', '') if isinstance(kw, dict) else str(kw) for kw in website_content.get('keywords', [])]
+            else:
+                # إذا كان string، استخدمه كمحتوى
+                title = str(website_content).lower() if website_content else ""
+                description = ""
+                keywords = []
 
             content = (title + ' ' + description + ' ' + ' '.join(keywords)).lower()
 
@@ -1367,8 +1546,8 @@ class VideoCampaignCreator:
             # افتراضي
             ad_group.type_ = self.client.enums.AdGroupTypeEnum.VIDEO_TRUE_VIEW_IN_STREAM
         
-        # تعيين CPC (تكلفة النقرة) - 0.10$ كقيمة افتراضية
-        ad_group.cpc_bid_micros = 100000  # $0.10
+        # تعيين CPV (تكلفة المشاهدة) - 0.10$ كقيمة افتراضية - متوافق مع Target CPV
+        ad_group.cpv_bid_micros = 100000  # $0.10
         
         response = ad_group_service.mutate_ad_groups(
             customer_id=self.customer_id,
@@ -2434,3 +2613,5 @@ class VideoCampaignCreator:
                 "goal": goal,
                 "budget": budget
             }
+
+

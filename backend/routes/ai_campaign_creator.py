@@ -180,6 +180,40 @@ def health_check():
         "image_generation_service": image_generation_service is not None
     })
 
+@ai_campaign_creator_bp.route('/test-email', methods=['POST'])
+def test_email():
+    """اختبار إرسال إيميل تأكيد"""
+    try:
+        from services.email_notification_service import email_service
+        
+        data = request.get_json() or {}
+        email = data.get('email', '')
+        
+        if not email:
+            return jsonify({'success': False, 'error': 'Email required'}), 400
+        
+        test_data = {
+            'campaign_name': 'Test Video Campaign',
+            'daily_budget': 15,
+            'currency': 'USD',
+            'youtube_video_id': 'SpxF571pRXk',
+            'video_ad_type': 'IN_FEED_VIDEO_AD',
+            'customer_id': '9048409219'
+        }
+        
+        logger.info(f"📧 Sending test email to {email}...")
+        result = email_service.send_video_campaign_confirmation(email, test_data)
+        
+        return jsonify({
+            'success': result,
+            'email': email,
+            'message': 'Email sent successfully!' if result else 'Failed to send email'
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Test email error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @ai_campaign_creator_bp.route('/generate-content', methods=['POST'])
 def generate_ad_content():
     """توليد المحتوى الإعلاني الكامل"""
@@ -290,7 +324,8 @@ def generate_campaign_content():
                     "descriptions": result.get("descriptions", []),
                     "keywords": result.get("keywords", keywords_list),
                     "colors": result.get("colors", {"primary": "#1A1A1A", "secondary": "#00BFA5"}),
-                    "brand_style": result.get("brand_style", "modern professional")
+                    "brand_style": result.get("brand_style", "modern professional"),
+                    "smart_targeting": result.get("smart_targeting", {})
                 }
             }
             
@@ -2561,11 +2596,19 @@ def detect_website_language():
             best_script = max(scripts, key=scripts.get)
             best_count = scripts[best_script]
             
-            if best_count > 50:
+        if best_count > 50 or (is_youtube_url and best_count > 0):
                 detected_lang_code = best_script
-                confidence = 'medium'
+                confidence = 'medium' if best_count > 50 else 'low'
                 logger.info(f"✅ FALLBACK: {detected_lang_code} ({best_count} chars)")
-        
+
+        # Rescue: If detection failed but we have Arabic characters, default to Arabic
+        if not detected_lang_code and text_content:
+             # Check for Arabic characters - very common in MENA region to have mixed EN/AR titles
+             if re.search(r'[\u0600-\u06FF]', text_content):
+                 detected_lang_code = 'ar'
+                 confidence = 'low'
+                 logger.info("✅ Fallback: Detected Arabic characters -> Force Arabic")
+
         # ============================================================
         # SPECIAL HANDLING: Arabic vs Persian
         # ============================================================
@@ -3250,12 +3293,10 @@ def launch_campaign():
             
             if campaign_type == 'VIDEO':
                 # ═══════════════════════════════════════════════════════════════
-                # VIDEO CAMPAIGN CREATION
+                # VIDEO CAMPAIGN - حفظ طلب يدوي (Google Ads API لا يدعم Video)
                 # ═══════════════════════════════════════════════════════════════
-                from campaign_types.video_campaign import VideoCampaignCreator
-                
-                logger.info(f"🎬 Creating VIDEO campaign...")
-                campaign_creator = VideoCampaignCreator(client, customer_id)
+                logger.info(f"🎬 معالجة طلب حملة VIDEO...")
+                logger.info(f"⚠️ Google Ads API لا يدعم إنشاء حملات الفيديو - سيتم حفظ الطلب للرفع اليدوي")
                 
                 # Get video-specific data from request
                 video_ad_type = data.get('video_ad_type', 'VIDEO_RESPONSIVE_AD')
@@ -3277,33 +3318,158 @@ def launch_campaign():
                     'keywords': generated_content.get('keywords', [])[:20] if generated_content else [],
                 }
                 
-                logger.info(f"📦 Creating VIDEO campaign with:")
-                logger.info(f"   - {len(ad_copies_data['headlines'])} headlines")
-                logger.info(f"   - {len(ad_copies_data['descriptions'])} descriptions")
-                logger.info(f"   - Video Type: {video_ad_type}")
-                
-                # Create VIDEO campaign on Google Ads
-                logger.info(f"🚀 Calling Google Ads API to create VIDEO campaign...")
-                logger.info(f"📍 Location IDs: {location_ids}")
-                logger.info(f"💰 Budget: {converted_budget:.2f} {account_currency_code}")
-                
+                # ═══════════════════════════════════════════════════════════════
+                # 1. حفظ طلب الحملة في قاعدة البيانات
+                # ═══════════════════════════════════════════════════════════════
                 try:
-                    google_campaign_id = campaign_creator.create_video_campaign(
-                        campaign_name=campaign_name,
-                        daily_budget=converted_budget,
-                        target_locations=location_ids if location_ids else [],
-                        target_language=language_id,
-                        website_content={'keywords': ad_copies_data.get('keywords', [])},
-                        ad_copies=ad_copies_data,
-                        video_ad_type=video_ad_type,
-                        website_url=website_url,
-                        youtube_video_id=youtube_video_id
-                    )
-                except Exception as video_error:
-                    logger.error(f"❌ Video campaign creation error: {str(video_error)}")
-                    import traceback
-                    logger.error(traceback.format_exc())
-                    raise video_error
+                    from utils.supabase_config import supabase_config
+                    import uuid
+                    
+                    # إعداد بيانات الطلب
+                    request_id = str(uuid.uuid4())
+                    campaign_request_data = {
+                        'id': request_id,
+                        'customer_id': customer_id,
+                        'request_type': 'video_campaign',
+                        'account_name': account_name,
+                        'status': 'PENDING_MANUAL_UPLOAD',
+                        'oauth_data': {
+                            'customer_email': data.get('customer_email', ''),
+                        },
+                        'link_details': {
+                            'campaign_name': campaign_name,
+                            'campaign_type': 'VIDEO',
+                            'video_ad_type': video_ad_type,
+                            'youtube_video_id': youtube_video_id,
+                            'youtube_url': f"https://youtube.com/watch?v={youtube_video_id}" if youtube_video_id else '',
+                            'website_url': website_url,
+                            'daily_budget': daily_budget,
+                            'converted_budget': converted_budget,
+                            'currency': account_currency_code,
+                            'target_locations': target_locations,
+                            'location_ids': location_ids,
+                            'language': language_code,
+                            'language_id': language_id,
+                            'headlines': ad_copies_data.get('headlines', []),
+                            'descriptions': ad_copies_data.get('descriptions', []),
+                            'keywords': ad_copies_data.get('keywords', []),
+                            'call_to_action': ad_copies_data.get('call_to_action', ''),
+                            'action_button_label': ad_copies_data.get('action_button_label', ''),
+                            'action_headline': ad_copies_data.get('action_headline', ''),
+                        }
+                    }
+                    
+                    # حفظ في قاعدة البيانات
+                    if supabase_config.is_connected():
+                        db_result = supabase_config.client.table('client_requests').upsert(
+                            campaign_request_data,
+                            on_conflict='customer_id,request_type'
+                        ).execute()
+                        logger.info(f"✅ تم حفظ طلب الحملة في قاعدة البيانات: {request_id}")
+                    else:
+                        logger.warning("⚠️ Supabase غير متصل - لم يتم حفظ الطلب في قاعدة البيانات")
+                        
+                except Exception as db_error:
+                    logger.error(f"❌ خطأ في حفظ الطلب: {db_error}")
+                
+                # ═══════════════════════════════════════════════════════════════
+                # 2. إرسال إشعار Telegram
+                # ═══════════════════════════════════════════════════════════════
+                try:
+                    from services.telegram_notification_service import telegram_service
+                    
+                    telegram_data = {
+                        'customer_id': customer_id,
+                        'customer_email': data.get('customer_email', 'N/A'),
+                        'campaign_name': campaign_name,
+                        'campaign_type': 'VIDEO',
+                        'video_ad_type': video_ad_type,
+                        'youtube_video_id': youtube_video_id,
+                        'website_url': website_url,
+                        'daily_budget': daily_budget,
+                        'currency': account_currency_code,
+                        'target_locations': target_locations,
+                        'language': language_code,
+                        'headlines': ad_copies_data.get('headlines', []),
+                        'descriptions': ad_copies_data.get('descriptions', []),
+                        'keywords': ad_copies_data.get('keywords', []),
+                        'call_to_action': ad_copies_data.get('call_to_action', ''),
+                        'action_button_label': ad_copies_data.get('action_button_label', ''),
+                        'action_headline': ad_copies_data.get('action_headline', ''),
+                        'created_at': datetime.now().isoformat()
+                    }
+                    
+                    if telegram_service.is_configured():
+                        telegram_sent = telegram_service.send_video_campaign_request(telegram_data)
+                        if telegram_sent:
+                            logger.info("✅ تم إرسال إشعار Telegram بنجاح")
+                        else:
+                            logger.warning("⚠️ فشل إرسال إشعار Telegram")
+                    else:
+                        logger.warning("⚠️ Telegram غير مكون - لم يتم إرسال الإشعار")
+                        logger.info("💡 أضف TELEGRAM_BOT_TOKEN و TELEGRAM_CHANNEL_ID في .env")
+                        
+                except Exception as telegram_error:
+                    logger.error(f"❌ خطأ في إرسال Telegram: {telegram_error}")
+                
+                # ═══════════════════════════════════════════════════════════════
+                # 3. إرسال إيميل تأكيد للعميل
+                # ═══════════════════════════════════════════════════════════════
+                try:
+                    from services.email_notification_service import email_service
+                    
+                    customer_email = data.get('customer_email', '')
+                    if customer_email and email_service.is_configured():
+                        email_data = {
+                            'campaign_name': campaign_name,
+                            'daily_budget': daily_budget,
+                            'currency': account_currency_code,
+                            'youtube_video_id': youtube_video_id,
+                            'video_ad_type': video_ad_type,
+                            'customer_id': customer_id
+                        }
+                        email_sent = email_service.send_video_campaign_confirmation(customer_email, email_data)
+                        if email_sent:
+                            logger.info(f"✅ تم إرسال إيميل تأكيد إلى {customer_email}")
+                        else:
+                            logger.warning(f"⚠️ فشل إرسال إيميل التأكيد إلى {customer_email}")
+                    else:
+                        if not customer_email:
+                            logger.info("📧 لا يوجد إيميل للعميل - تخطي إرسال الإيميل")
+                        else:
+                            logger.warning("⚠️ خدمة الإيميل غير مكونة")
+                            
+                except Exception as email_error:
+                    logger.error(f"❌ خطأ في إرسال الإيميل: {email_error}")
+                
+                # ═══════════════════════════════════════════════════════════════
+                # 4. إرجاع استجابة ناجحة للعميل
+                # ═══════════════════════════════════════════════════════════════
+                logger.info(f"✅ تم استلام طلب حملة الفيديو وسيتم رفعها يدوياً")
+                
+                return jsonify({
+                    'success': True,
+                    'campaign_id': request_id,
+                    'campaign_name': campaign_name,
+                    'campaign_type': 'VIDEO',
+                    'status': 'PENDING_MANUAL_UPLOAD',
+                    'google_campaign_created': False,
+                    'manual_upload_required': True,
+                    'daily_budget': daily_budget,
+                    'currency': currency,
+                    'target_locations': target_locations,
+                    'website_url': website_url,
+                    'youtube_video_id': youtube_video_id,
+                    'video_ad_type': video_ad_type,
+                    'generated_content': generated_content,
+                    'adCreative': {
+                        'headlines': ad_copies_data.get('headlines', []),
+                        'descriptions': ad_copies_data.get('descriptions', []),
+                        'keywords': ad_copies_data.get('keywords', []),
+                    },
+                    'created_at': datetime.now().isoformat(),
+                    'message': '🎬 تم استلام طلب حملة الفيديو بنجاح! سيتم مراجعتها ورفعها خلال 24 ساعة.'
+                }), 201
                     
             else:
                 # ═══════════════════════════════════════════════════════════════

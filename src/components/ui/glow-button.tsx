@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 interface GlowButtonProps {
   children: React.ReactNode;
-  variant?: "blue" | "pink" | "green" | "purple";
+  variant?: "blue" | "pink" | "green" | "purple" | "red";
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
@@ -102,6 +102,30 @@ const variants = {
       blobShadow: "rgba(138, 43, 226, 0.18)",
       innerGlow: "rgba(138, 43, 226, 0.07)",
       innerHighlight: "rgba(177, 156, 217, 0.1)",
+      outerBg: "radial-gradient(circle 80px at 80% -10%, #ffffff, #181b1b)",
+      innerBg: "radial-gradient(circle 80px at 80% -50%, #777777, #0f1111)",
+      textColor: "#ffffff",
+    },
+  },
+  red: {
+    light: {
+      outerGlow: "rgba(239, 68, 68, 0.4)",
+      blobGlow: "rgba(239, 68, 68, 0.6)",
+      blobHighlight: "#f87171",
+      blobShadow: "rgba(239, 68, 68, 0.25)",
+      innerGlow: "rgba(239, 68, 68, 0.1)",
+      innerHighlight: "rgba(254, 202, 202, 0.15)",
+      outerBg: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
+      innerBg: "linear-gradient(135deg, #ffffff 0%, #fef2f2 100%)",
+      textColor: "#991b1b",
+    },
+    dark: {
+      outerGlow: "rgba(255, 200, 200, 0.4)",
+      blobGlow: "rgba(255, 0, 0, 0.5)",
+      blobHighlight: "#ff6666",
+      blobShadow: "rgba(255, 0, 0, 0.18)",
+      innerGlow: "rgba(255, 0, 0, 0.07)",
+      innerHighlight: "rgba(255, 100, 100, 0.1)",
       outerBg: "radial-gradient(circle 80px at 80% -10%, #ffffff, #181b1b)",
       innerBg: "radial-gradient(circle 80px at 80% -50%, #777777, #0f1111)",
       textColor: "#ffffff",

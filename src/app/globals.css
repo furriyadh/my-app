@@ -128,6 +128,16 @@ html.dark body {
   --footer-bg: #000000;
 }
 
+/* Prevent scroll chaining - scrollable elements won't propagate to page */
+[class*="overflow-y-auto"],
+[class*="overflow-auto"],
+.sidebar-area,
+.modal-scroll,
+[style*="overflow: auto"],
+[style*="overflow-y: auto"] {
+  overscroll-behavior: contain;
+}
+
 /** Clean Dashboard - AnimatedWave Background Only */
 .main-wrapper-content {
   background-color: #ffffff !important;

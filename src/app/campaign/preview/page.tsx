@@ -834,7 +834,14 @@ export default function CampaignPreviewPage() {
           action_button_label: generatedContent?.action_button_label || 'تعرف أكثر',
           action_headline: generatedContent?.action_headline || '',
         },
-        user_id: 'test_user'
+        user_id: 'test_user',
+        // Customer email for notifications (from OAuth user info)
+        customer_email: (() => {
+          try {
+            const userInfo = JSON.parse(localStorage.getItem('oauth_user_info') || '{}');
+            return userInfo.email || '';
+          } catch { return ''; }
+        })()
       };
 
       console.log('📦 Publishing campaign:', completeCampaignData);
@@ -918,18 +925,40 @@ export default function CampaignPreviewPage() {
         // DON'T hide publishing modal - keep it open until redirect!
         // setShowPublishingModal(false); // ❌ Removed - modal stays open until redirect
 
-        // Show success announcement
-        setAnnouncement({
-          show: true,
-          variant: 'success',
-          message: '🎉 تم نشر الحملة بنجاح على Google Ads!'
-        });
+        // Check if this is a VIDEO campaign with manual upload required
+        if (result.manual_upload_required || result.campaign_type === 'VIDEO') {
+          // Show success announcement for video campaigns
+          setAnnouncement({
+            show: true,
+            variant: 'success',
+            message: '🎉 Request submitted! Your video campaign is being reviewed.'
+          });
 
-        // Redirect to dashboard (modal will stay open during redirect)
-        setTimeout(() => {
-          router.push('/dashboard');
-          // Modal will disappear automatically when page changes
-        }, 2000);
+          // Redirect to video request submitted page (modal will stay open during redirect)
+          const campaignDataStr = localStorage.getItem('campaignData') || '{}';
+          const campaignDataForUrl = JSON.parse(campaignDataStr);
+          const videoId = result.youtube_video_id || campaignDataForUrl.youtubeVideoId || '';
+          const budget = result.daily_budget || campaignDataForUrl.dailyBudget || 15;
+          const currency = result.currency || campaignDataForUrl.currency || 'USD';
+          const campaignName = result.campaign_name || 'Video Campaign';
+          
+          setTimeout(() => {
+            router.push(`/campaign/video-request-submitted?campaign=${encodeURIComponent(campaignName)}&video=${videoId}&budget=${budget}&currency=${currency}`);
+          }, 1500);
+        } else {
+          // Regular campaigns - redirect to dashboard
+          setAnnouncement({
+            show: true,
+            variant: 'success',
+            message: '🎉 تم نشر الحملة بنجاح على Google Ads!'
+          });
+
+          // Redirect to dashboard (modal will stay open during redirect)
+          setTimeout(() => {
+            router.push('/dashboard');
+            // Modal will disappear automatically when page changes
+          }, 2000);
+        }
       } else {
         // Show user-friendly error message
         const errorMsg = result.message || result.error || 'فشل في نشر الحملة';

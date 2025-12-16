@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import GlowingBorderCard from '@/components/ui/glowingbordercard';
 import { InteractiveInput } from '@/components/ui/interactive-input';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { toast } from '@/hooks/use-toast';
 
 // Smart Notification Manager
 const NotificationManager = dynamic(() => import('@/components/NotificationManager'), {
@@ -39,6 +40,8 @@ const getIntegrationColors = (title: string): { from: string; to: string } => {
       return { from: 'emerald-500', to: 'green-400' }; // Green like sidebar
     case 'Google Tag Manager integration':
       return { from: 'emerald-500', to: 'green-400' }; // Green like sidebar
+    case 'YouTube Channel':
+      return { from: 'red-500', to: 'red-600' }; // YouTube Red
     default:
       return { from: 'emerald-500', to: 'green-400' }; // Green default
   }
@@ -236,6 +239,19 @@ const IntegrationsPage: React.FC = () => {
             </div>
           ),
           status: 'not-connected'
+        },
+        {
+          id: 'youtube-channel',
+          title: 'YouTube Channel',
+          description: 'Link your YouTube channel to Google Ads.',
+          icon: (
+            <div className="w-12 h-12 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-10 h-10" fill="#FF0000">
+                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+              </svg>
+            </div>
+          ),
+          status: 'not-connected' // Will be updated dynamically
         },
         {
           id: 'microsoft-ads',
@@ -547,6 +563,11 @@ const IntegrationsPage: React.FC = () => {
       // Google Merchant Center
       console.log('🔗 Starting Google Merchant Center OAuth...');
       window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/integrations/google-merchant');
+    } else if (integrationId === 'youtube-channel') {
+      // YouTube Channel Linking
+      console.log('🔗 Starting YouTube Channel OAuth...');
+      // Requesting YouTube Readonly scope to list channels + Google Ads scope (default)
+      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/integrations/youtube-channel') + '&scope=youtube';
     } else if (integrationId === 'meta-ads') {
       // Meta Ads (Facebook)
       console.log('🔗 Starting Meta Ads OAuth...');
@@ -558,7 +579,45 @@ const IntegrationsPage: React.FC = () => {
   };
 
 
-  // Optimized connection check - reduced API calls
+  // INSTANT: Load cached integration statuses on mount (no loading delay)
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('cached_integration_statuses');
+      if (cached) {
+        const statuses: Record<string, 'connected' | 'not-connected'> = JSON.parse(cached);
+
+        // Apply cached statuses immediately
+        setIntegrations(prev => prev.map(int => ({
+          ...int,
+          status: statuses[int.id] || int.status
+        })));
+
+        setIntegrationCategories(prev => prev.map(cat => ({
+          ...cat,
+          integrations: cat.integrations.map(int => ({
+            ...int,
+            status: statuses[int.id] || int.status
+          }))
+        })));
+      }
+    } catch (e) {
+      console.warn('Cache parse error:', e);
+    }
+  }, []);
+
+  // Helper function to save statuses to cache
+  const saveStatusToCache = (integrationId: string, status: 'connected' | 'not-connected') => {
+    try {
+      const cached = localStorage.getItem('cached_integration_statuses');
+      const statuses: Record<string, 'connected' | 'not-connected'> = cached ? JSON.parse(cached) : {};
+      statuses[integrationId] = status;
+      localStorage.setItem('cached_integration_statuses', JSON.stringify(statuses));
+    } catch (e) {
+      console.warn('Cache save error:', e);
+    }
+  };
+
+  // Optimized connection check - reduced API calls (runs in background)
   useEffect(() => {
     const checkGoogleAdsConnection = async () => {
       try {
@@ -599,6 +658,9 @@ const IntegrationsPage: React.FC = () => {
             )
           }))
         );
+
+        // Cache the status for instant loading next time
+        saveStatusToCache('google-ads', hasGoogleAdsConnection ? 'connected' : 'not-connected');
       } catch (error) {
         console.warn('⚠️ خطأ في فحص حالة Google Ads:', error);
       }
@@ -641,6 +703,9 @@ const IntegrationsPage: React.FC = () => {
             )
           }))
         );
+
+        // Cache the status for instant loading next time
+        saveStatusToCache('google-analytics', hasAnalyticsConnection ? 'connected' : 'not-connected');
       } catch (error) {
         console.warn('⚠️ خطأ في فحص حالة Google Analytics:', error);
       }
@@ -683,6 +748,9 @@ const IntegrationsPage: React.FC = () => {
             )
           }))
         );
+
+        // Cache the status for instant loading next time
+        saveStatusToCache('google-tag-manager', hasGTMConnection ? 'connected' : 'not-connected');
       } catch (error) {
         console.warn('⚠️ خطأ في فحص حالة GTM:', error);
       }
@@ -725,6 +793,9 @@ const IntegrationsPage: React.FC = () => {
             )
           }))
         );
+
+        // Cache the status for instant loading next time
+        saveStatusToCache('google-merchant', hasMerchantConnection ? 'connected' : 'not-connected');
       } catch (error) {
         console.warn('⚠️ خطأ في فحص حالة Merchant:', error);
       }
@@ -735,7 +806,35 @@ const IntegrationsPage: React.FC = () => {
       checkGoogleAdsConnection(),
       checkGoogleAnalyticsConnection(),
       checkGTMConnection(),
-      checkMerchantConnection()
+      checkMerchantConnection(),
+
+      // YouTube Channel Check
+      (async () => {
+        try {
+          const response = await fetch('/api/youtube/channels');
+          if (response.ok) {
+            const data = await response.json();
+            // If we can fetch channels, we are connected
+            const isConnected = data.success && Array.isArray(data.channels);
+
+            setIntegrations(prev => prev.map(int =>
+              int.id === 'youtube-channel' ? { ...int, status: isConnected ? 'connected' : 'not-connected' } : int
+            ));
+
+            setIntegrationCategories(prev => prev.map(cat => ({
+              ...cat,
+              integrations: cat.integrations.map(int =>
+                int.id === 'youtube-channel' ? { ...int, status: isConnected ? 'connected' : 'not-connected' } : int
+              )
+            })));
+
+            // Cache the status for instant loading next time
+            saveStatusToCache('youtube-channel', isConnected ? 'connected' : 'not-connected');
+          }
+        } catch (e) {
+          console.warn('⚠️ Failed to check YouTube connection', e);
+        }
+      })()
     ]);
   }, []);
 

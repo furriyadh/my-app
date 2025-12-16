@@ -124,6 +124,12 @@ const SidebarMenu: React.FC = React.memo(() => {
     hoverGradient: 'from-purple-400 to-violet-500'
   });
 
+  // State for integrations color - changes based on current integration page
+  const [integrationColor, setIntegrationColor] = React.useState({
+    gradient: 'from-green-600 to-emerald-600',
+    hoverGradient: 'from-green-500 to-emerald-500'
+  });
+
   // Toggle sidebar and save to localStorage
   const toggleSidebar = React.useCallback(() => {
     setIsSidebarOpen(prev => {
@@ -467,6 +473,50 @@ const SidebarMenu: React.FC = React.memo(() => {
     };
   }, []);
 
+  // Update integration color based on current page path
+  React.useEffect(() => {
+    if (!pathname) return;
+
+    // Map integration paths to colors
+    if (pathname.includes('/integrations/youtube-channel')) {
+      setIntegrationColor({
+        gradient: 'from-red-600 to-rose-600',
+        hoverGradient: 'from-red-500 to-rose-500'
+      });
+    } else if (pathname.includes('/integrations/meta-ads')) {
+      setIntegrationColor({
+        gradient: 'from-blue-600 to-indigo-600',
+        hoverGradient: 'from-blue-500 to-indigo-500'
+      });
+    } else if (pathname.includes('/integrations/google-analytics')) {
+      setIntegrationColor({
+        gradient: 'from-orange-600 to-amber-600',
+        hoverGradient: 'from-orange-500 to-amber-500'
+      });
+    } else if (pathname.includes('/integrations/google-tag-manager')) {
+      setIntegrationColor({
+        gradient: 'from-cyan-600 to-blue-600',
+        hoverGradient: 'from-cyan-500 to-blue-500'
+      });
+    } else if (pathname.includes('/integrations/google-merchant')) {
+      setIntegrationColor({
+        gradient: 'from-blue-600 to-teal-600',
+        hoverGradient: 'from-blue-500 to-teal-500'
+      });
+    } else if (pathname.includes('/integrations/google-ads')) {
+      setIntegrationColor({
+        gradient: 'from-green-600 to-emerald-600',
+        hoverGradient: 'from-green-500 to-emerald-500'
+      });
+    } else {
+      // Default green for main integrations page
+      setIntegrationColor({
+        gradient: 'from-green-600 to-emerald-600',
+        hoverGradient: 'from-green-500 to-emerald-500'
+      });
+    }
+  }, [pathname]);
+
 
   // Auto-open submenu if user is on a related page
   React.useEffect(() => {
@@ -681,8 +731,8 @@ const SidebarMenu: React.FC = React.memo(() => {
       href: '/integrations',
       isActive: isIntegrationsActive,
       hasSubmenu: false,
-      gradient: 'from-green-600 to-emerald-600',
-      hoverGradient: 'from-green-500 to-emerald-500',
+      gradient: integrationColor.gradient,
+      hoverGradient: integrationColor.hoverGradient,
       badge: { text: '3', color: 'bg-green-500' },
       tooltip: t.sidebar.manageIntegrations || 'Manage your connected integrations'
     },
@@ -749,7 +799,7 @@ const SidebarMenu: React.FC = React.memo(() => {
       badge: null,
       tooltip: t.sidebar.configurePreferences || 'Configure your preferences'
     }
-  ], [pathname, t, isOverviewActive, isCampaignActive, isCampaignsActive, isIntegrationsActive, isActiveSection, isBillingActive, isAccountsActive, isNotificationsActive, isSettingsActive, campaignsSubItems, billingSubItems, accountsSubItems, settingsSubItems, campaignTypeColor]);
+  ], [pathname, t, isOverviewActive, isCampaignActive, isCampaignsActive, isIntegrationsActive, isActiveSection, isBillingActive, isAccountsActive, isNotificationsActive, isSettingsActive, campaignsSubItems, billingSubItems, accountsSubItems, settingsSubItems, campaignTypeColor, integrationColor]);
 
   // Filter tabs based on search query
   const filteredTabs = React.useMemo(() => {

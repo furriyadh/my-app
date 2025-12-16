@@ -55,6 +55,7 @@ interface VideoResult {
   viewCount?: string;  // Legacy field
   view_count?: number; // New field from metadata API
   channelTitle: string;
+  channelId?: string; // For In-Feed ad channel validation
   description: string;
   // New fields from YouTube Data API v3
   tags?: string[];
@@ -112,6 +113,8 @@ const WebsiteUrlPage: React.FC = () => {
   const [videoSearchResults, setVideoSearchResults] = useState<VideoResult[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<VideoResult[]>([]);
   const [isVideoSearching, setIsVideoSearching] = useState(false);
+  // Linked YouTube channels for validation
+  const [linkedChannelIds, setLinkedChannelIds] = useState<string[]>([]);
 
   // Dynamic colors based on campaign type
   const campaignTypeColors: Record<string, string> = {
@@ -350,10 +353,22 @@ const WebsiteUrlPage: React.FC = () => {
 
   const modalColors = getModalColors();
 
-  // Load campaign type from localStorage
+  // Load campaign type and linked channels from localStorage
   React.useEffect(() => {
     const campaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
     setCampaignType(campaignData.campaignType || '');
+
+    // Load linked YouTube channel IDs for In-Feed ad validation
+    try {
+      const linkedChannels = localStorage.getItem('youtube_linked_channels');
+      if (linkedChannels) {
+        const ids = JSON.parse(linkedChannels);
+        setLinkedChannelIds(ids);
+        console.log('📺 Loaded linked channel IDs:', ids);
+      }
+    } catch (e) {
+      console.log('Failed to load linked channels');
+    }
   }, []);
 
 
@@ -1024,6 +1039,7 @@ const WebsiteUrlPage: React.FC = () => {
             id: data.video.id,
             title: data.video.title,
             channelTitle: data.video.channelTitle,
+            channelId: data.video.channelId, // For In-Feed ad validation
             thumbnailUrl: data.video.thumbnailUrl,
             publishedAt: data.video.publishedAt,
             view_count: data.video.viewCount,
@@ -1087,6 +1103,9 @@ const WebsiteUrlPage: React.FC = () => {
       return;
     }
 
+    // NOTE: Channel linking is NOT required for all VIDEO campaign types.
+    // Only IN_FEED_VIDEO_AD requires linked channel - this is validated in video-subtype page.
+
     try {
       // Save all data including detected type, Merchant, and App selections
       const campaignData = JSON.parse(localStorage.getItem('campaignData') || '{}');
@@ -1136,6 +1155,7 @@ const WebsiteUrlPage: React.FC = () => {
           youtubeVideoTitle: video.title,
           youtubeVideoViews: video.view_count || 0,
           youtubeChannelTitle: video.channelTitle,
+          youtubeChannelId: video.channelId || '', // For In-Feed ad channel validation
           youtubeVideoThumbnail: video.thumbnailUrl,
           // Video language and content for ad generation
           videoDetectedLanguage: video.detectedLanguage || 'ar',
@@ -1701,6 +1721,31 @@ const WebsiteUrlPage: React.FC = () => {
                                     </button>
                                   </div>
                                 </div>
+
+                                {/* Channel Linked Status - Full Width Alert */}
+                                {selectedVideos[0].channelId && linkedChannelIds.includes(selectedVideos[0].channelId) ? (
+                                  <div className="p-3 rounded-lg bg-green-500/20 border border-green-500/40 flex items-center justify-center gap-2">
+                                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                                    <span className="text-sm font-semibold text-green-400">
+                                      {language === 'ar' ? 'القناة مرتبطة بحسابك ✓' : 'Channel is linked to your account ✓'}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="p-3 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-between animate-pulse">
+                                    <div className="flex items-center gap-2">
+                                      <AlertCircle className="w-5 h-5 text-orange-400" />
+                                      <span className="text-sm font-semibold text-orange-400">
+                                        {language === 'ar' ? 'القناة غير مرتبطة!' : 'Channel not linked!'}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => router.push('/integrations')}
+                                      className="text-xs px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-semibold transition-colors"
+                                    >
+                                      {language === 'ar' ? 'ربط الآن' : 'Link Now'}
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <>
@@ -1925,7 +1970,7 @@ const WebsiteUrlPage: React.FC = () => {
             </GlowButton>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 };
