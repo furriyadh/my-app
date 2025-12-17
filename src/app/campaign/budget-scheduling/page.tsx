@@ -2252,38 +2252,38 @@ const BudgetSchedulingPage: React.FC = () => {
       {/* Modern Loader Modal - Centered with sidebar offset */}
       {isGeneratingContent && (
         <div
-          className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
+          className={`fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`}
           style={{
             background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
-            paddingLeft: '0',
-            paddingRight: isDesktop ? '280px' : '0'
           }}
         >
-          <ModernLoader
-            words={language === 'ar' ? [
-              'جاري التفكير...',
-              'كتابة نص الإعلان...',
-              'تحليل الموقع...',
-              'إنشاء العناوين...',
-              'تحسين الأوصاف...',
-              'جلب الكلمات المفتاحية...',
-              'تحضير الحملة...',
-              'معالجة الذكاء الاصطناعي...',
-              'تلميع المحتوى...',
-              'جاري الانتهاء...'
-            ] : [
-              'Thinking…',
-              'Writing ad copy…',
-              'Analyzing website…',
-              'Generating headlines…',
-              'Optimizing descriptions…',
-              'Fetching keywords…',
-              'Preparing campaign…',
-              'AI processing…',
-              'Polishing content…',
-              'Almost ready…'
-            ]}
-          />
+          <div className="w-full max-w-4xl">
+            <ModernLoader
+              words={language === 'ar' ? [
+                'جاري التفكير...',
+                'كتابة نص الإعلان...',
+                'تحليل الموقع...',
+                'إنشاء العناوين...',
+                'تحسين الأوصاف...',
+                'جلب الكلمات المفتاحية...',
+                'تحضير الحملة...',
+                'معالجة الذكاء الاصطناعي...',
+                'تلميع المحتوى...',
+                'جاري الانتهاء...'
+              ] : [
+                'Thinking…',
+                'Writing ad copy…',
+                'Analyzing website…',
+                'Generating headlines…',
+                'Optimizing descriptions…',
+                'Fetching keywords…',
+                'Preparing campaign…',
+                'AI processing…',
+                'Polishing content…',
+                'Almost ready…'
+              ]}
+            />
+          </div>
         </div>
       )}
     </div>

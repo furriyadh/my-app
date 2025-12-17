@@ -44,6 +44,16 @@ const GOOGLE_OAUTH_SCOPES = [
   'email'                                              // معلومات البريد الإلكتروني الأساسية
 ];
 
+// YouTube-only scopes to avoid "Service unavailable" for Brand Accounts
+const YOUTUBE_SCOPES = [
+  'https://www.googleapis.com/auth/youtube.readonly',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+  'openid',
+  'profile',
+  'email'
+];
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🔗 بدء OAuth مع Google (حسب Google Ads API Documentation)...');
@@ -52,8 +62,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const mcc_customer_id = searchParams.get('mcc_customer_id');
     const redirect_after = searchParams.get('redirect_after');
+    const scopeParam = searchParams.get('scope');
 
-    console.log('📊 معاملات الطلب:', { mcc_customer_id, redirect_after });
+    console.log('📊 معاملات الطلب:', { mcc_customer_id, redirect_after, scope: scopeParam });
 
     // التحقق من وجود client_id (مطلوب حسب Google Ads API Documentation)
     const clientId = process.env.GOOGLE_ADS_CLIENT_ID;
@@ -118,12 +129,16 @@ export async function GET(request: NextRequest) {
     };
     const state = Buffer.from(JSON.stringify(stateData)).toString('base64');
 
+    // تحديد Scopes المطلوبة بناءً على الباراميتر
+    const scopesToUse = scopeParam === 'youtube' ? YOUTUBE_SCOPES : GOOGLE_OAUTH_SCOPES;
+    console.log('🔒 Requesting scopes for:', scopeParam || 'all-services');
+
     // بناء رابط المصادقة مع Google (حسب Google Identity Platform)
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.set('client_id', clientId);
     authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('scope', GOOGLE_OAUTH_SCOPES.join(' '));
+    authUrl.searchParams.set('scope', scopesToUse.join(' '));
     authUrl.searchParams.set('state', state);
     authUrl.searchParams.set('code_challenge', codeChallenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');

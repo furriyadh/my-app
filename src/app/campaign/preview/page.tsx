@@ -1381,10 +1381,8 @@ export default function CampaignPreviewPage() {
 
         {/* Account Selection Modal - Dynamic colors based on campaign type */}
         {showAccountModal && (
-          <div className="fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4" style={{
+          <div className={`fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4 ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`} style={{
             background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
-            paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
-            paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
           }}>
             {/* Animated Background Orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1677,11 +1675,9 @@ export default function CampaignPreviewPage() {
         {/* Publishing Progress Modal with Modern Loader */}
         {showPublishingModal && (
           <div
-            className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
+            className={`fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`}
             style={{
               background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
-              paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
-              paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
             }}
           >
             <ModernLoader
