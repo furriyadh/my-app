@@ -4,13 +4,6 @@ import { Sparkles, ArrowRight, Brain } from "lucide-react";
 import Link from "next/link";
 import Script from "next/script";
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "spline-viewer": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { url?: string }, HTMLElement>;
-    }
-  }
-}
 
 
 export default function HowItWorksSection() {
@@ -42,6 +35,7 @@ export default function HowItWorksSection() {
           type="module"
           src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"
         />
+        {/* @ts-ignore */}
         <spline-viewer
           url="https://prod.spline.design/tL7CW-xbEZH6023h/scene.splinecode"
           className="w-full h-full"
