@@ -1,13 +1,20 @@
 "use client";
 
-import OptimizedSplineScene from './OptimizedSplineScene';
+
 import SplineHeroOverlay from './SplineHeroOverlay';
+import Script from "next/script";
+
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            "spline-viewer": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { url?: string }, HTMLElement>;
+        }
+    }
+}
 
 export default function SplineHero() {
 
-    // IMPORTANT: Replace this URL with your own from Spline (Export > Code > Public URL)
-    // This is a placeholder URL for testing.
-    const SPLINE_SCENE_URL = "https://prod.spline.design/e8ASZthol2ayKeFD/scene.splinecode";
+
 
     return (
         <section className="relative w-full min-h-screen bg-transparent overflow-hidden flex items-center justify-center">
@@ -16,9 +23,14 @@ export default function SplineHero() {
             {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(24,24,27,1)_0%,rgba(0,0,0,1)_100%)] z-0" /> */}
 
             {/* 3D Scene */}
-            <div className="w-full h-full relative z-10">
-                <OptimizedSplineScene
-                    scene={SPLINE_SCENE_URL}
+            <div className="absolute inset-0 z-0">
+                <Script
+                    type="module"
+                    src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"
+                />
+                <spline-viewer
+                    url="https://prod.spline.design/e8ASZthol2ayKeFD/scene.splinecode"
+                    className="w-full h-full"
                 />
             </div>
 

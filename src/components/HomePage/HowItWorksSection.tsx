@@ -2,7 +2,16 @@
 
 import { Sparkles, ArrowRight, Brain } from "lucide-react";
 import Link from "next/link";
-import OptimizedSplineScene from "@/components/HomePage/OptimizedSplineScene";
+import Script from "next/script";
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "spline-viewer": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { url?: string }, HTMLElement>;
+    }
+  }
+}
+
 
 export default function HowItWorksSection() {
   return (
@@ -29,8 +38,12 @@ export default function HowItWorksSection() {
 
       {/* Full Width Spline 3D Scene */}
       <div className="relative w-full h-[600px] md:h-[800px] -mt-40">
-        <OptimizedSplineScene
-          scene="https://prod.spline.design/ggK-xX0PC9BdmTqp/scene.splinecode?v=2"
+        <Script
+          type="module"
+          src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"
+        />
+        <spline-viewer
+          url="https://prod.spline.design/tL7CW-xbEZH6023h/scene.splinecode"
           className="w-full h-full"
         />
       </div>
