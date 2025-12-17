@@ -1317,7 +1317,7 @@ export default function CampaignPreviewPage() {
           </div>
 
           {/* Ad Preview Section - Centered Layout */}
-          <div className={`flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8 ${isRTL ? 'lg:ml-[140px]' : 'lg:mr-[140px]'}`}>
+          <div className={`flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8 lg:mr-[140px]`}>
 
             {/* Card Stack - Centered */}
             <div className="flex items-center justify-center w-full">
@@ -1348,7 +1348,7 @@ export default function CampaignPreviewPage() {
             </div>
 
             {/* Edit Button - Below Card */}
-            <div className={`flex items-center justify-center ${isRTL ? 'lg:ml-[140px]' : 'lg:mr-[140px]'}`}>
+            <div className={`flex items-center justify-center lg:mr-[140px]`}>
               <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
                 <button
