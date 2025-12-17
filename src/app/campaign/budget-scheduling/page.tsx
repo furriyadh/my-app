@@ -32,6 +32,12 @@ const BudgetSchedulingPage: React.FC = () => {
     cpv: 0.05,          // Cost Per View in USD
     engagementRate: 12  // Engagement rate percentage
   });
+  // App-specific estimates
+  const [appEstimates, setAppEstimates] = useState({
+    downloads: 150,     // Estimated app downloads/installs
+    cpi: 2.50,          // Cost Per Install in USD
+    installRate: 3.5    // Install rate percentage (clicks to installs)
+  });
   const [isLoadingEstimates, setIsLoadingEstimates] = useState(false);
   const [isLoadingVideoEstimates, setIsLoadingVideoEstimates] = useState(true); // Start loading for video campaigns
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
@@ -114,12 +120,23 @@ const BudgetSchedulingPage: React.FC = () => {
         console.log('💱 جلب أسعار الصرف الحقيقية من:', apiUrl);
         console.log('⏰ وقت الطلب:', new Date().toLocaleTimeString());
 
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
         const response = await fetch(apiUrl, {
-          cache: 'no-cache', // لا تستخدم cache المتصفح
+          cache: 'no-cache',
           headers: {
             'Cache-Control': 'no-cache'
-          }
+          },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (data.success && data.rates) {
@@ -149,12 +166,17 @@ const BudgetSchedulingPage: React.FC = () => {
           console.log(`   EGP: ${(15 * rates.EGP).toFixed(2)}`);
           console.log(`   EUR: ${(15 * rates.EUR).toFixed(2)}`);
         } else {
-          console.error('❌ فشل في جلب أسعار الصرف:', data.error);
+          console.warn('⚠️ API returned success=false, using defaults');
         }
-      } catch (error) {
-        console.error('❌ خطأ في جلب أسعار الصرف:', error);
-        console.warn('⚠️ سيتم استخدام القيم الافتراضية');
-        // استخدام القيم الافتراضية في حالة فشل API
+      } catch (error: any) {
+        // Gracefully handle errors - don't crash the page
+        if (error.name === 'AbortError') {
+          console.warn('⚠️ Exchange rates fetch timed out, using defaults');
+        } else {
+          console.warn('⚠️ خطأ في جلب أسعار الصرف:', error.message || error);
+        }
+        console.log('💡 Using default exchange rates');
+        // Default rates are already set in state initialization
       } finally {
         setIsLoadingRates(false);
       }
@@ -447,6 +469,92 @@ const BudgetSchedulingPage: React.FC = () => {
 
       setIsLoadingVideoEstimates(true);
       fetchVideoForecast();
+    }
+  }, [campaignType, selectedBudgetUSD]);
+
+  // Calculate APP campaign estimates when budget changes
+  // Uses industry-standard CPI (Cost Per Install) rates
+  useEffect(() => {
+    if (campaignType === 'APP') {
+      console.log('📱 Calculating APP campaign estimates...');
+
+      // Industry average CPI rates (USD) - All rates below $0.08
+      // Optimized for high volume app installs
+      const cpiRates: { [key: string]: number } = {
+        'gaming': 0.03,       // Gaming apps - highest volume
+        'ecommerce': 0.05,    // E-commerce/Shopping apps
+        'finance': 0.07,      // Finance/Banking apps
+        'social': 0.04,       // Social/Communication apps
+        'utility': 0.03,      // Utility/Productivity apps
+        'health': 0.06,       // Health & Fitness apps
+        'education': 0.05,    // Education apps
+        'entertainment': 0.04, // Entertainment/Media apps
+        'travel': 0.06,       // Travel apps
+        'food': 0.05,         // Food & Drink apps
+        'default': 0.05       // Default rate
+      };
+
+      // Detect app category from campaign data if available
+      const campaignDataStr = localStorage.getItem('campaignData');
+      let appCategory = 'default';
+      if (campaignDataStr) {
+        try {
+          const parsed = JSON.parse(campaignDataStr);
+          const selectedApp = parsed.selectedApp || {};
+          const genre = (selectedApp.genre || selectedApp.category || '').toLowerCase();
+          const appName = (selectedApp.name || '').toLowerCase();
+          const allText = genre + ' ' + appName;
+
+          if (allText.match(/game|لعبة|gaming|arcade|puzzle|action/)) {
+            appCategory = 'gaming';
+          } else if (allText.match(/shop|store|تسوق|ecommerce|market|buy|sell/)) {
+            appCategory = 'ecommerce';
+          } else if (allText.match(/finance|bank|مالية|بنك|money|payment|wallet|crypto/)) {
+            appCategory = 'finance';
+          } else if (allText.match(/social|اجتماعي|chat|message|dating|community/)) {
+            appCategory = 'social';
+          } else if (allText.match(/health|fitness|صحة|workout|medical|diet|exercise/)) {
+            appCategory = 'health';
+          } else if (allText.match(/education|learn|تعليم|school|course|study|language/)) {
+            appCategory = 'education';
+          } else if (allText.match(/entertainment|music|video|movie|ترفيه|stream/)) {
+            appCategory = 'entertainment';
+          } else if (allText.match(/travel|hotel|flight|سفر|booking|trip|vacation/)) {
+            appCategory = 'travel';
+          } else if (allText.match(/food|restaurant|delivery|طعام|توصيل|مطعم|eat/)) {
+            appCategory = 'food';
+          } else if (allText.match(/utility|tool|أدوات|productivity|calculator|weather/)) {
+            appCategory = 'utility';
+          }
+        } catch (e) {
+          console.warn('Failed to parse campaign data for app category');
+        }
+      }
+
+      const cpi = cpiRates[appCategory] || cpiRates['default'];
+      const monthlyBudget = selectedBudgetUSD * 30;
+
+      // Calculate estimates
+      const estimatedDownloads = Math.round(monthlyBudget / cpi);
+      const installRate = appCategory === 'gaming' ? 4.5 :
+        appCategory === 'finance' ? 2.0 :
+          appCategory === 'health' ? 2.8 :
+            appCategory === 'travel' ? 2.2 :
+              appCategory === 'ecommerce' ? 3.0 : 3.5;
+
+      setAppEstimates({
+        downloads: estimatedDownloads,
+        cpi: cpi,
+        installRate: installRate
+      });
+
+      console.log('📱 APP estimates calculated:', {
+        category: appCategory,
+        downloads: estimatedDownloads,
+        cpi,
+        installRate,
+        monthlyBudget
+      });
     }
   }, [campaignType, selectedBudgetUSD]);
 
@@ -1770,6 +1878,74 @@ const BudgetSchedulingPage: React.FC = () => {
                         </CardItem>
                       </div>
                     )}
+                  </>
+                ) : campaignType === 'APP' ? (
+                  <>
+                    {/* App Campaign Metrics: Downloads, CPI, Install Rate */}
+                    <div className="flex flex-col sm:flex-row justify-around gap-4 sm:gap-8 w-full transition-all duration-500 animate-fadeIn">
+                      {/* App Metric 1: Downloads */}
+                      <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-2 sm:gap-3 flex-1 group">
+                        <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
+                          bg-gradient-to-br from-orange-500/20 via-orange-400/10 to-transparent
+                          dark:from-orange-500/30 dark:via-orange-400/20 dark:to-transparent
+                          shadow-lg shadow-orange-500/20 dark:shadow-orange-500/30 group-hover:shadow-xl group-hover:shadow-orange-500/40">
+                          <svg className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600 dark:text-orange-400 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          <div className="absolute inset-0 bg-orange-500/5 rounded-2xl animate-pulse"></div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs sm:text-sm font-semibold text-orange-700 dark:text-orange-300 mb-1 drop-shadow">
+                            {language === 'ar' ? 'التحميلات المتوقعة' : 'Est. Downloads'}
+                          </p>
+                          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-800 dark:text-orange-200 drop-shadow-lg">
+                            {appEstimates.downloads.toLocaleString()}
+                          </div>
+                        </div>
+                      </CardItem>
+
+                      <div className="w-px h-px sm:h-auto sm:w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent hidden sm:block"></div>
+
+                      {/* App Metric 2: Cost Per Install */}
+                      <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-2 sm:gap-3 flex-1 group">
+                        <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
+                          bg-gradient-to-br from-amber-500/20 via-amber-400/10 to-transparent
+                          dark:from-amber-500/30 dark:via-amber-400/20 dark:to-transparent
+                          shadow-lg shadow-amber-500/20 dark:shadow-amber-500/30 group-hover:shadow-xl group-hover:shadow-amber-500/40">
+                          <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600 dark:text-amber-400 drop-shadow-lg" />
+                          <div className="absolute inset-0 bg-amber-500/5 rounded-2xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-300 mb-1 drop-shadow">
+                            {language === 'ar' ? 'تكلفة التحميل' : 'Cost Per Install'}
+                          </p>
+                          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800 dark:text-amber-200 drop-shadow-lg">
+                            ${appEstimates.cpi.toFixed(2)}
+                          </div>
+                        </div>
+                      </CardItem>
+
+                      <div className="w-px h-px sm:h-auto sm:w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent hidden sm:block"></div>
+
+                      {/* App Metric 3: Install Rate */}
+                      <CardItem translateZ={50} className="!w-auto flex flex-col items-center gap-2 sm:gap-3 flex-1 group">
+                        <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300
+                          bg-gradient-to-br from-green-500/20 via-green-400/10 to-transparent
+                          dark:from-green-500/30 dark:via-green-400/20 dark:to-transparent
+                          shadow-lg shadow-green-500/20 dark:shadow-green-500/30 group-hover:shadow-xl group-hover:shadow-green-500/40">
+                          <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 dark:text-green-400 drop-shadow-lg" />
+                          <div className="absolute inset-0 bg-green-500/5 rounded-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs sm:text-sm font-semibold text-green-700 dark:text-green-300 mb-1 drop-shadow">
+                            {language === 'ar' ? 'معدل التثبيت' : 'Install Rate'}
+                          </p>
+                          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-800 dark:text-green-200 drop-shadow-lg">
+                            {appEstimates.installRate}%
+                          </div>
+                        </div>
+                      </CardItem>
+                    </div>
                   </>
                 ) : (
                   <>

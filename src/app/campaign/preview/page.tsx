@@ -11,6 +11,8 @@ import { subscribeToClientRequests } from '@/lib/supabase';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { getApiUrl } from '@/lib/config';
 import ModernLoader from '@/components/ui/modern-loader';
+import ShoppingPreview from '@/components/campaigns/ShoppingPreview';
+import AppPreview from '@/components/campaigns/AppPreview';
 
 interface AdVariation {
   headlines: string[];
@@ -941,7 +943,7 @@ export default function CampaignPreviewPage() {
           const budget = result.daily_budget || campaignDataForUrl.dailyBudget || 15;
           const currency = result.currency || campaignDataForUrl.currency || 'USD';
           const campaignName = result.campaign_name || 'Video Campaign';
-          
+
           setTimeout(() => {
             router.push(`/campaign/video-request-submitted?campaign=${encodeURIComponent(campaignName)}&video=${videoId}&budget=${budget}&currency=${currency}`);
           }, 1500);
@@ -1075,14 +1077,34 @@ export default function CampaignPreviewPage() {
   const cards = adVariations.map((ad, index) => ({
     id: index,
     content: (
-      <div className={`w-full h-full flex flex-col ${campaignType === 'VIDEO' ? 'min-h-[420px] sm:min-h-[480px]' : 'min-h-[200px] sm:min-h-[240px]'}`}>
+      <div className={`w-full h-full flex flex-col ${campaignType === 'VIDEO' ? 'min-h-[420px] sm:min-h-[480px]' : campaignType === 'SHOPPING' ? 'min-h-[700px] sm:min-h-[800px] lg:min-h-[850px]' : campaignType === 'APP' ? 'min-h-[380px] sm:min-h-[420px]' : 'min-h-[200px] sm:min-h-[240px]'}`}>
         {/* Platform Bar */}
         <div className="bg-gray-50 dark:bg-black p-2 sm:p-2.5 border-b border-gray-200 dark:border-gray-800">
           {getPlatformBar()}
         </div>
 
         {/* Conditional Ad Preview based on Campaign Type */}
-        {campaignType === 'VIDEO' && youtubeVideoId ? (
+        {campaignType === 'APP' ? (
+          // App Campaign Preview
+          <div className="p-4 bg-gradient-to-b from-gray-900 to-black flex-1">
+            <AppPreview
+              headlines={ad.headlines}
+              descriptions={ad.descriptions}
+            />
+          </div>
+        ) : campaignType === 'SHOPPING' ? (
+          // Shopping Campaign Preview
+          <div className="p-4 bg-gradient-to-b from-gray-900 to-black flex-1">
+            <ShoppingPreview
+              merchantName={websiteDomain}
+              headlines={ad.headlines}
+              descriptions={ad.descriptions}
+              dailyBudget={15}
+              currency="USD"
+              websiteUrl={websiteUrl}
+            />
+          </div>
+        ) : campaignType === 'VIDEO' && youtubeVideoId ? (
           // YouTube Video Ad Preview
           <div className="flex-1 flex flex-col bg-black">
             {/* Video Thumbnail with Overlays */}
@@ -1295,7 +1317,7 @@ export default function CampaignPreviewPage() {
           </div>
 
           {/* Ad Preview Section - Centered Layout */}
-          <div className="flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8">
+          <div className={`flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6 md:mt-8 ${isRTL ? 'lg:ml-[140px]' : 'lg:mr-[140px]'}`}>
 
             {/* Card Stack - Centered */}
             <div className="flex items-center justify-center w-full">
@@ -1307,7 +1329,11 @@ export default function CampaignPreviewPage() {
                     scaleFactor={0.06}
                     className={campaignType === 'VIDEO'
                       ? 'h-[450px] w-full sm:h-[500px] md:h-[520px] lg:h-[560px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
-                      : 'h-64 w-96 md:h-80 md:w-[600px]'
+                      : campaignType === 'APP'
+                        ? 'h-[350px] w-full sm:h-[380px] md:h-[400px] lg:h-[420px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
+                        : campaignType === 'SHOPPING'
+                          ? 'h-[480px] w-full sm:h-[520px] md:h-[560px] lg:h-[600px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
+                          : 'h-64 w-96 md:h-80 md:w-[600px]'
                     }
                   />
                 </div>
@@ -1322,7 +1348,7 @@ export default function CampaignPreviewPage() {
             </div>
 
             {/* Edit Button - Below Card */}
-            <div className="flex items-center justify-center">
+            <div className={`flex items-center justify-center ${isRTL ? 'lg:ml-[140px]' : 'lg:mr-[140px]'}`}>
               <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
                 <button

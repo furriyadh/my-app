@@ -71,7 +71,7 @@ export const CardStack = ({
               zIndex: cards.length - index, //  decrease z-index for the cards that are behind
             }}
           >
-            <div className="font-normal text-neutral-700 dark:text-neutral-200 h-full overflow-y-auto">
+            <div className="font-normal text-neutral-700 dark:text-neutral-200 h-full">
               {card.content}
             </div>
           </motion.div>

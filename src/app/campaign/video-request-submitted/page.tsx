@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { CheckCircle, Mail, ArrowRight, Youtube, Rocket, FileCheck, Play } from 'lucide-react';
+import { CheckCircle, Clock, Mail, ArrowRight, Youtube, Rocket, FileCheck, Play } from 'lucide-react';
 
 function VideoRequestContent() {
     const router = useRouter();
@@ -20,14 +20,20 @@ function VideoRequestContent() {
             setCountdown((prev) => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    router.push('/dashboard');
                     return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [router]);
+    }, []);
+
+    // Separate effect to handle redirect when countdown reaches 0
+    useEffect(() => {
+        if (countdown === 0) {
+            router.push('/dashboard');
+        }
+    }, [countdown, router]);
 
     const steps = [
         { icon: FileCheck, text: 'Team review of campaign details', color: '#3b82f6' },

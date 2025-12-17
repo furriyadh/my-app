@@ -44,6 +44,9 @@ interface AppResult {
   developer: string;
   packageName: string;
   platform: 'android' | 'ios';
+  rating?: number;
+  downloads?: string;
+  category?: string;
 }
 
 interface VideoResult {
@@ -933,6 +936,33 @@ const WebsiteUrlPage: React.FC = () => {
 
             console.log('✅ Matching accounts after filter:', matchingAccounts.length);
             setMerchantAccounts(matchingAccounts);
+
+            // Fetch products from the first matching account (ONE request only)
+            if (matchingAccounts.length > 0) {
+              const selectedAccount = matchingAccounts[0];
+              console.log('🛒 Fetching products from selected account:', selectedAccount.id);
+              try {
+                const productsRes = await fetch(`/api/merchant/products?merchantId=${selectedAccount.id}`, {
+                  credentials: 'include'
+                });
+                if (productsRes.ok) {
+                  const productsData = await productsRes.json();
+                  if (productsData.success && productsData.products) {
+                    console.log('✅ Fetched', productsData.products.length, 'products');
+                    // Store products in localStorage for preview page
+                    const currentData = JSON.parse(localStorage.getItem('campaignData') || '{}');
+                    localStorage.setItem('campaignData', JSON.stringify({
+                      ...currentData,
+                      merchantProducts: productsData.products,
+                      selectedMerchantId: selectedAccount.id,
+                      selectedMerchantName: selectedAccount.name
+                    }));
+                  }
+                }
+              } catch (err) {
+                console.log('Could not fetch products:', err);
+              }
+            }
           } else {
             console.log('✅ All merchant accounts (no filter):', mappedAccounts.length);
             setMerchantAccounts(mappedAccounts);
@@ -1103,6 +1133,12 @@ const WebsiteUrlPage: React.FC = () => {
       return;
     }
 
+    // Check app selection for APP campaigns
+    if (campaignType === 'APP' && !selectedApp) {
+      alert('Please select an app before continuing');
+      return;
+    }
+
     // NOTE: Channel linking is NOT required for all VIDEO campaign types.
     // Only IN_FEED_VIDEO_AD requires linked channel - this is validated in video-subtype page.
 
@@ -1127,7 +1163,11 @@ const WebsiteUrlPage: React.FC = () => {
           name: selectedApp.name,
           packageName: selectedApp.packageName,
           platform: selectedApp.platform,
-          icon: selectedApp.icon
+          icon: selectedApp.icon,
+          rating: selectedApp.rating || 4.5,
+          downloads: selectedApp.downloads || '1M+',
+          category: selectedApp.category || 'App',
+          developer: selectedApp.developer || 'Developer'
         } : null,
         // Save Video selection for Video campaigns
         selectedVideos: selectedVideos.length > 0 ? selectedVideos : null,
@@ -1138,8 +1178,9 @@ const WebsiteUrlPage: React.FC = () => {
 
       localStorage.setItem('campaignData', JSON.stringify(updatedData));
 
-      // Dispatch event to update sidebar
+      // Dispatch events to update components
       window.dispatchEvent(new Event('campaignTypeChanged'));
+      window.dispatchEvent(new Event('campaignDataUpdated'));
 
       // Navigate to campaign type selection (new flow: website-url → new)
       // For VIDEO campaigns, go to video-subtype first
@@ -1172,7 +1213,8 @@ const WebsiteUrlPage: React.FC = () => {
         localStorage.setItem('campaignData', JSON.stringify(videoData));
         router.push('/campaign/video-subtype');
       } else {
-        router.push('/campaign/new');
+        // Skip campaign type selection - type is already auto-detected from URL
+        router.push('/campaign/location-targeting');
       }
 
       // ℹ️ Website analysis will be done in budget-scheduling page AFTER user selects locations
@@ -1625,7 +1667,7 @@ const WebsiteUrlPage: React.FC = () => {
                                   {appSearchResults.map((app) => (
                                     <div
                                       key={app.id}
-                                      onClick={() => setSelectedApp(app)}
+                                      onClick={() => setSelectedApp(selectedApp?.id === app.id ? null : app)}
                                       className={`p-3 rounded-lg cursor-pointer transition-all flex items-center gap-4 ${selectedApp?.id === app.id
                                         ? 'bg-orange-500/30 border-2 border-orange-400/70'
                                         : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
@@ -1634,7 +1676,20 @@ const WebsiteUrlPage: React.FC = () => {
                                       {/* App Icon */}
                                       <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
                                         {app.icon ? (
-                                          <img src={app.icon} alt={app.name} className="w-full h-full object-cover rounded-xl" />
+                                          <img
+                                            src={app.icon}
+                                            alt={app.name}
+                                            className="w-full h-full object-cover rounded-xl"
+                                            referrerPolicy="no-referrer"
+                                            crossOrigin="anonymous"
+                                            onError={(e) => {
+                                              console.error('❌ Image load failed:', app.icon);
+                                              // Show fallback
+                                              (e.target as HTMLImageElement).style.display = 'none';
+                                              (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center rounded-xl"><span class="text-white text-xl font-bold">' + (app.name?.charAt(0) || 'A') + '</span></div>';
+                                            }}
+                                            onLoad={() => console.log('✅ Image loaded:', app.name)}
+                                          />
                                         ) : (
                                           <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
                                             <Smartphone className="w-6 h-6 text-white/60" />
@@ -1960,7 +2015,7 @@ const WebsiteUrlPage: React.FC = () => {
           <div className="flex justify-center items-center max-w-2xl mx-auto mt-8">
             <GlowButton
               onClick={handleNext}
-              disabled={!websiteUrl || !isValidUrl || !isUrlVerified}
+              disabled={!websiteUrl || !isValidUrl || !isUrlVerified || (campaignType === 'APP' && !selectedApp)}
               variant="blue"
             >
               <span className="flex items-center gap-2">
