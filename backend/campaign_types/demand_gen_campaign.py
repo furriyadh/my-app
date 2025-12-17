@@ -256,7 +256,7 @@ class DemandGenCampaignCreator:
         
         campaign_budget.name = f"{campaign_name} - Budget {uuid.uuid4()}"
         campaign_budget.delivery_method = self.client.enums.BudgetDeliveryMethodEnum.STANDARD
-        campaign_budget.amount_micros = int(daily_budget * 1_000_000)
+        campaign_budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         campaign_budget.resource_name = self.client.get_service("CampaignBudgetService").campaign_budget_path(
             self.customer_id,
             self._BUDGET_TEMPORARY_ID
@@ -270,9 +270,10 @@ class DemandGenCampaignCreator:
         campaign = mutate_operation.campaign_operation.create
         campaign_service = self.client.get_service("CampaignService")
         
-        campaign.name = f"{campaign_name} {uuid.uuid4()}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        campaign.name = f"{campaign_name} #{short_id}"
         campaign.advertising_channel_type = self.client.enums.AdvertisingChannelTypeEnum.DEMAND_GEN
-        campaign.status = self.client.enums.CampaignStatusEnum.PAUSED
+        campaign.status = self.client.enums.CampaignStatusEnum.ENABLED
         campaign.campaign_budget = self.client.get_service("CampaignBudgetService").campaign_budget_path(
             self.customer_id,
             self._BUDGET_TEMPORARY_ID
@@ -280,6 +281,14 @@ class DemandGenCampaignCreator:
         campaign.resource_name = campaign_service.campaign_path(
             self.customer_id,
             self._CAMPAIGN_TEMPORARY_ID
+        )
+        
+        # Set geo targeting type: PRESENCE_OR_INTEREST
+        campaign.geo_target_type_setting.positive_geo_target_type = (
+            self.client.enums.PositiveGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
+        campaign.geo_target_type_setting.negative_geo_target_type = (
+            self.client.enums.NegativeGeoTargetTypeEnum.PRESENCE_OR_INTEREST
         )
         
         # Bidding strategy
@@ -294,7 +303,8 @@ class DemandGenCampaignCreator:
         ad_group_service = self.client.get_service("AdGroupService")
         campaign_service = self.client.get_service("CampaignService")
         
-        ad_group.name = f"Demand Gen ad group {uuid.uuid4()}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        ad_group.name = f"Demand Gen - Ad Group #{short_id}"
         ad_group.campaign = campaign_service.campaign_path(
             self.customer_id,
             self._CAMPAIGN_TEMPORARY_ID
@@ -421,7 +431,7 @@ class DemandGenCampaignCreator:
         
         budget.name = f"{campaign_name} - الميزانية"
         budget.delivery_method = self.client.enums.BudgetDeliveryMethodEnum.STANDARD
-        budget.amount_micros = int(daily_budget * 1_000_000)
+        budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         
         budget_response = budget_service.mutate_campaign_budgets(
             customer_id=self.customer_id,
@@ -439,7 +449,7 @@ class DemandGenCampaignCreator:
         
         campaign.name = campaign_name
         campaign.advertising_channel_type = AdvertisingChannelTypeEnum.DEMAND_GEN
-        campaign.status = self.client.enums.CampaignStatusEnum.PAUSED
+        campaign.status = self.client.enums.CampaignStatusEnum.ENABLED
         campaign.campaign_budget = budget_resource_name
         
         # إعداد الشبكة

@@ -1,2 +1,0 @@
-Status: 400
-Response: {"ok":false,"error_code":400,"description":"Bad Request: need administrator rights in the channel chat"}

@@ -406,7 +406,7 @@ class ShoppingCampaignCreator:
         
         budget.name = f"{campaign_name} - الميزانية"
         budget.delivery_method = BudgetDeliveryMethodEnum.STANDARD
-        budget.amount_micros = int(daily_budget * 1_000_000)
+        budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         
         budget_response = budget_service.mutate_campaign_budgets(
             customer_id=self.customer_id,
@@ -424,7 +424,7 @@ class ShoppingCampaignCreator:
         
         campaign.name = campaign_name
         campaign.advertising_channel_type = AdvertisingChannelTypeEnum.SHOPPING
-        campaign.status = CampaignStatusEnum.PAUSED
+        campaign.status = CampaignStatusEnum.ENABLED
         campaign.campaign_budget = budget_resource_name
         
         # إعداد الشبكة
@@ -432,6 +432,14 @@ class ShoppingCampaignCreator:
         campaign.network_settings.target_search_network = True
         campaign.network_settings.target_content_network = False
         campaign.network_settings.target_partner_search_network = False
+        
+        # إعداد خيارات الموقع الجغرافي (PRESENCE_OR_INTEREST)
+        campaign.geo_target_type_setting.positive_geo_target_type = (
+            self.client.enums.PositiveGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
+        campaign.geo_target_type_setting.negative_geo_target_type = (
+            self.client.enums.NegativeGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
         
         # إعداد اللغة والموقع
         campaign.language_constants.append(f"languageConstants/{target_language}")

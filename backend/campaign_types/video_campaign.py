@@ -1085,7 +1085,7 @@ class VideoCampaignCreator:
         campaign_budget.delivery_method = (
             self.client.enums.BudgetDeliveryMethodEnum.STANDARD
         )
-        campaign_budget.amount_micros = int(daily_budget * 1_000_000)
+        campaign_budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         
         response = campaign_budget_service.mutate_campaign_budgets(
             customer_id=self.customer_id,
@@ -1113,7 +1113,8 @@ class VideoCampaignCreator:
         # اسم فريد لتجنب التكرار
         import time
         timestamp = int(time.time())
-        campaign.name = f"{campaign_name} {timestamp}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        campaign.name = f"{campaign_name} #{short_id}"
         campaign.campaign_budget = budget_resource_name
 
         # تعيين حقل contains_eu_political_advertising (مطلوب  v21)
@@ -1122,7 +1123,7 @@ class VideoCampaignCreator:
         )
 
         campaign.advertising_channel_type = self.client.enums.AdvertisingChannelTypeEnum.VIDEO
-        campaign.status = self.client.enums.CampaignStatusEnum.PAUSED
+        campaign.status = self.client.enums.CampaignStatusEnum.ENABLED
 
         # إضافة Tracking Template و Final URL Suffix للتتبع الصحيح
         campaign.tracking_url_template = "{lpurl}?utm_source=youtube&utm_medium=cpc&utm_campaign={campaignid}"

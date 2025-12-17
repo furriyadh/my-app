@@ -2378,6 +2378,101 @@ def detect_website_language():
         # ============================================================
         url_lower = website_url.lower()
         is_youtube_url = any(domain in url_lower for domain in ['youtube.com', 'youtu.be'])
+        is_app_store_url = any(domain in url_lower for domain in ['apps.apple.com', 'play.google.com'])
+        
+        # ============================================================
+        # SPECIAL HANDLING FOR APP STORE URLS
+        # App Store URLs contain language parameter: ?l=ar or ?l=en
+        # ============================================================
+        if is_app_store_url:
+            logger.info("📱 App Store URL detected - extracting language from URL parameter")
+            
+            # Extract language from URL parameter ?l=xx
+            from urllib.parse import parse_qs
+            parsed_url = urlparse(website_url)
+            query_params = parse_qs(parsed_url.query)
+            
+            # Check for ?l= parameter (common in both App Store and Play Store)
+            url_lang = query_params.get('l', query_params.get('hl', [None]))[0]
+            
+            if url_lang:
+                # Clean the language code (e.g., "ar" or "en-US" -> take first part)
+                url_lang = url_lang.split('-')[0].lower()
+                
+                logger.info(f"   🌍 Language from URL parameter: {url_lang}")
+                
+                # Map common codes to Google Ads language IDs (40+ languages - same as search campaigns)
+                app_store_lang_map = {
+                    'ar': ('ar', '1019'),  # Arabic
+                    'en': ('en', '1000'),  # English
+                    'fr': ('fr', '1002'),  # French
+                    'de': ('de', '1001'),  # German
+                    'es': ('es', '1003'),  # Spanish
+                    'it': ('it', '1004'),  # Italian
+                    'ja': ('ja', '1005'),  # Japanese
+                    'th': ('th', '1006'),  # Thai
+                    'zh': ('zh-CN', '1017'),  # Chinese (Simplified)
+                    'tw': ('zh-TW', '1018'),  # Chinese (Traditional)
+                    'da': ('da', '1009'),  # Danish
+                    'nl': ('nl', '1010'),  # Dutch
+                    'fi': ('fi', '1011'),  # Finnish
+                    'ko': ('ko', '1012'),  # Korean
+                    'no': ('no', '1013'),  # Norwegian
+                    'nb': ('no', '1013'),  # Norwegian Bokmål
+                    'pt': ('pt', '1014'),  # Portuguese
+                    'ru': ('ru', '1015'),  # Russian
+                    'sv': ('sv', '1016'),  # Swedish
+                    'bg': ('bg', '1020'),  # Bulgarian
+                    'el': ('el', '1022'),  # Greek
+                    'hi': ('hi', '1023'),  # Hindi
+                    'hu': ('hu', '1024'),  # Hungarian
+                    'id': ('id', '1025'),  # Indonesian
+                    'is': ('is', '1026'),  # Icelandic
+                    'he': ('he', '1027'),  # Hebrew
+                    'iw': ('he', '1027'),  # Hebrew (old code)
+                    'lv': ('lv', '1028'),  # Latvian
+                    'lt': ('lt', '1029'),  # Lithuanian
+                    'pl': ('pl', '1030'),  # Polish
+                    'cs': ('cs', '1031'),  # Czech
+                    'ro': ('ro', '1032'),  # Romanian
+                    'sr': ('sr', '1033'),  # Serbian
+                    'sk': ('sk', '1034'),  # Slovak
+                    'sl': ('sl', '1035'),  # Slovenian
+                    'uk': ('uk', '1036'),  # Ukrainian
+                    'tr': ('tr', '1037'),  # Turkish
+                    'ca': ('ca', '1038'),  # Catalan
+                    'vi': ('vi', '1040'),  # Vietnamese
+                    'ur': ('ur', '1041'),  # Urdu
+                    'fil': ('fil', '1042'),  # Filipino
+                    'tl': ('fil', '1042'),  # Tagalog (→ Filipino)
+                    'et': ('et', '1043'),  # Estonian
+                    'ta': ('ta', '1044'),  # Tamil
+                    'te': ('te', '1045'),  # Telugu
+                    'gu': ('gu', '1047'),  # Gujarati
+                    'kn': ('kn', '1048'),  # Kannada
+                    'ml': ('ml', '1049'),  # Malayalam
+                    'ms': ('ms', '1050'),  # Malay
+                    'mr': ('mr', '1051'),  # Marathi
+                    'bn': ('bn', '1056'),  # Bengali
+                    'fa': ('fa', '1064'),  # Persian
+                    'af': ('af', '1078'),  # Afrikaans
+                    'sw': ('sw', '1089'),  # Swahili
+                    'hr': ('hr', '1039'),  # Croatian
+                }
+                
+                if url_lang in app_store_lang_map:
+                    lang_code, lang_id = app_store_lang_map[url_lang]
+                    logger.info(f"   ✅ APP STORE LANGUAGE DETECTED: {lang_code} (ID: {lang_id})")
+                    
+                    return jsonify({
+                        'success': True,
+                        'language_code': lang_code,
+                        'language_id': lang_id,
+                        'confidence': 'high',
+                        'detection_method': 'app_store_url_parameter'
+                    })
+                else:
+                    logger.info(f"   ⚠️ Unknown language code: {url_lang}, will use content detection")
         
         if is_youtube_url:
             logger.info("🎬 YouTube URL detected - using video title for language detection")
@@ -2596,7 +2691,7 @@ def detect_website_language():
             best_script = max(scripts, key=scripts.get)
             best_count = scripts[best_script]
             
-        if best_count > 50 or (is_youtube_url and best_count > 0):
+            if best_count > 50 or (is_youtube_url and best_count > 0):
                 detected_lang_code = best_script
                 confidence = 'medium' if best_count > 50 else 'low'
                 logger.info(f"✅ FALLBACK: {detected_lang_code} ({best_count} chars)")
@@ -3470,6 +3565,85 @@ def launch_campaign():
                     'created_at': datetime.now().isoformat(),
                     'message': '🎬 تم استلام طلب حملة الفيديو بنجاح! سيتم مراجعتها ورفعها خلال 24 ساعة.'
                 }), 201
+                    
+            elif campaign_type == 'APP':
+                # ═══════════════════════════════════════════════════════════════
+                # APP CAMPAIGN CREATION
+                # ═══════════════════════════════════════════════════════════════
+                from campaign_types.app_campaign import AppCampaignCreator
+                
+                logger.info(f"📱 Creating APP campaign...")
+                campaign_creator = AppCampaignCreator(client, customer_id)
+                
+                # Get app-specific data from request
+                selected_app = data.get('selectedApp', {}) or {}
+                app_id = selected_app.get('packageName') or selected_app.get('id') or data.get('appId')
+                app_platform = selected_app.get('platform', 'android')
+                
+                # Fallback: Extract app_id from Play Store/App Store URL
+                if not app_id:
+                    website_url = data.get('website_url', '')
+                    import re
+                    # Google Play Store: play.google.com/store/apps/details?id=com.example.app
+                    play_store_match = re.search(r'play\.google\.com/store/apps/details\?id=([^&\s]+)', website_url)
+                    if play_store_match:
+                        app_id = play_store_match.group(1)
+                        app_platform = 'android'
+                        logger.info(f"   📦 Extracted App ID from Play Store URL: {app_id}")
+                    # Apple App Store: apps.apple.com/.../id123456789
+                    app_store_match = re.search(r'apps\.apple\.com/.*/id(\d+)', website_url)
+                    if app_store_match:
+                        app_id = app_store_match.group(1)
+                        app_platform = 'ios'
+                        logger.info(f"   📦 Extracted App ID from App Store URL: {app_id}")
+                
+                logger.info(f"   📦 App ID: {app_id}")
+                logger.info(f"   📱 Platform: {app_platform}")
+                
+                # Prepare ad_copies data for app campaigns
+                ad_copies_data = {
+                    'headlines': generated_content.get('headlines', [])[:5] if generated_content else [],
+                    'descriptions': generated_content.get('descriptions', [])[:5] if generated_content else [],
+                }
+                
+                logger.info(f"📦 Creating APP campaign with:")
+                logger.info(f"   - {len(ad_copies_data['headlines'])} headlines")
+                logger.info(f"   - {len(ad_copies_data['descriptions'])} descriptions")
+                
+                try:
+                    # Convert platform to app_store format
+                    app_store = 'GOOGLE_PLAY' if app_platform == 'android' else 'APPLE_APP_STORE'
+                    
+                    google_campaign_id = campaign_creator.create_app_campaign(
+                        campaign_name=campaign_name,
+                        daily_budget=converted_budget,
+                        app_id=app_id,
+                        app_store=app_store,
+                        target_locations=location_ids if location_ids else [],
+                        target_language=language_id,
+                        headlines=ad_copies_data['headlines'],
+                        descriptions=ad_copies_data['descriptions']
+                    )
+                except Exception as app_error:
+                    logger.error(f"❌ App campaign creation error: {str(app_error)}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+                    raise app_error
+                
+                logger.info(f"✅ App campaign created: {google_campaign_id}")
+                
+                return jsonify({
+                    'success': True,
+                    'campaign_id': google_campaign_id,
+                    'campaign_name': campaign_name,
+                    'campaign_type': 'APP',
+                    'status': 'CREATED',
+                    'google_campaign_created': True,
+                    'daily_budget': daily_budget,
+                    'currency': account_currency_code,
+                    'app_id': app_id,
+                    'message': '📱 تم إنشاء حملة التطبيق بنجاح!'
+                }), 200
                     
             else:
                 # ═══════════════════════════════════════════════════════════════

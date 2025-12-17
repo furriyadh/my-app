@@ -137,7 +137,7 @@ class AppCampaignCreator:
         campaign_budget = campaign_budget_operation.create
         timestamp = int(time.time())
         campaign_budget.name = f"{campaign_name} Budget #{timestamp}"
-        campaign_budget.amount_micros = int(daily_budget * 1_000_000)
+        campaign_budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         campaign_budget.delivery_method = self.client.enums.BudgetDeliveryMethodEnum.STANDARD
         # App campaigns cannot use shared budgets
         campaign_budget.explicitly_shared = False
@@ -162,18 +162,28 @@ class AppCampaignCreator:
         
         campaign = campaign_operation.create
         timestamp = int(time.time())
-        campaign.name = f"{campaign_name} #{timestamp}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        campaign.name = f"{campaign_name} #{short_id}"
         campaign.campaign_budget = budget_resource_name
         
-        # Set campaign status to PAUSED
-        campaign.status = self.client.enums.CampaignStatusEnum.PAUSED
+        # Set campaign status to ENABLED (مفعلة)
+        campaign.status = self.client.enums.CampaignStatusEnum.ENABLED
         
         # App campaigns have MULTI_CHANNEL type
         campaign.advertising_channel_type = self.client.enums.AdvertisingChannelTypeEnum.MULTI_CHANNEL
         campaign.advertising_channel_sub_type = self.client.enums.AdvertisingChannelSubTypeEnum.APP_CAMPAIGN
         
-        # Set bidding strategy: Target CPA
-        campaign.target_cpa.target_cpa_micros = 1000000  # $1 per install
+        # Set bidding strategy: Target CPA ($0.03 per install for all categories)
+        campaign.target_cpa.target_cpa_micros = 30000  # $0.03 per install
+        
+        # Set geo targeting type: PRESENCE (customers in your included locations)
+        # Options: PRESENCE_OR_INTEREST, PRESENCE, SEARCH_INTEREST
+        campaign.geo_target_type_setting.positive_geo_target_type = (
+            self.client.enums.PositiveGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
+        campaign.geo_target_type_setting.negative_geo_target_type = (
+            self.client.enums.NegativeGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
         
         # Configure App Campaign Settings
         campaign.app_campaign_setting.app_id = app_id
@@ -196,9 +206,9 @@ class AppCampaignCreator:
             self.client.enums.EuPoliticalAdvertisingStatusEnum.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
         )
         
-        # Set dates
+        # Set start date (tomorrow) - no end date = runs indefinitely
         campaign.start_date = (datetime.now() + timedelta(1)).strftime("%Y%m%d")
-        campaign.end_date = (datetime.now() + timedelta(365)).strftime("%Y%m%d")
+        # end_date not set = غير محدد (runs indefinitely)
         
         response = campaign_service.mutate_campaigns(
             customer_id=self.customer_id,
@@ -249,7 +259,9 @@ class AppCampaignCreator:
         ad_group_operation = self.client.get_type("AdGroupOperation")
         
         ad_group = ad_group_operation.create
-        ad_group.name = f"{campaign_name} Ad Group {uuid.uuid4().hex[:8]}"
+        # Smart naming: use campaign name + short unique ID
+        short_id = uuid.uuid4().hex[:4].upper()
+        ad_group.name = f"{campaign_name} - Ad Group #{short_id}"
         ad_group.status = self.client.enums.AdGroupStatusEnum.ENABLED
         ad_group.campaign = campaign_resource_name
         

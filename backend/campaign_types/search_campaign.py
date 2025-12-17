@@ -438,7 +438,7 @@ class SearchCampaignCreator:
         timestamp = int(time.time())
         budget.name = f"ميزانية {campaign_name} {timestamp}"
         budget.delivery_method = self.client.enums.BudgetDeliveryMethodEnum.STANDARD
-        budget.amount_micros = int(daily_budget * 1_000_000)
+        budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents, then convert to micros
         
         # جعل الميزانية فردية (غير مشتركة) - explicitly_shared = False
         budget.explicitly_shared = False
@@ -467,7 +467,8 @@ class SearchCampaignCreator:
         # اسم فريد لتجنب التكرار
         import time
         timestamp = int(time.time())
-        campaign.name = f"{campaign_name} {timestamp}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        campaign.name = f"{campaign_name} #{short_id}"
         campaign.campaign_budget = budget_resource_name
         # تعيين حقل contains_eu_political_advertising
         # هذا الحقل REQUIRED في Google Ads API v21

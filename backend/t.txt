@@ -1,1 +1,0 @@
-200 {"ok":true,"result":{"message_id":5,"author_signature":"Furriyadh Ads","sender_chat":{"id":-1003402888480,"title":"Furriyadh.com","type":"channel"},"chat":{"id":-1003402888480,"title":"Furriyadh.com","type":"channel"},"date":1765841427,"text":"Test 2"}}

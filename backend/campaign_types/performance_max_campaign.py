@@ -409,7 +409,7 @@ class PerformanceMaxCampaignCreator:
         
         campaign_budget.name = f"Performance Max Budget #{uuid.uuid4()}"
         campaign_budget.delivery_method = self.client.enums.BudgetDeliveryMethodEnum.STANDARD
-        campaign_budget.amount_micros = int(daily_budget * 1_000_000)
+        campaign_budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         # Performance Max campaigns cannot use a shared campaign budget
         campaign_budget.explicitly_shared = False
         campaign_budget.resource_name = self.client.get_service("CampaignBudgetService").campaign_budget_path(
@@ -427,9 +427,10 @@ class PerformanceMaxCampaignCreator:
         campaign = mutate_operation.campaign_operation.create
         campaign_service = self.client.get_service("CampaignService")
         
-        campaign.name = f"Performance Max Campaign #{uuid.uuid4()}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        campaign.name = f"Performance Max #{short_id}"
         # Set campaign status as PAUSED
-        campaign.status = self.client.enums.CampaignStatusEnum.PAUSED
+        campaign.status = self.client.enums.CampaignStatusEnum.ENABLED
         # All Performance Max campaigns have PERFORMANCE_MAX type
         campaign.advertising_channel_type = self.client.enums.AdvertisingChannelTypeEnum.PERFORMANCE_MAX
         
@@ -439,6 +440,14 @@ class PerformanceMaxCampaignCreator:
         
         # Set Final URL expansion opt out
         campaign.url_expansion_opt_out = False
+        
+        # Set geo targeting type: PRESENCE_OR_INTEREST
+        campaign.geo_target_type_setting.positive_geo_target_type = (
+            self.client.enums.PositiveGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
+        campaign.geo_target_type_setting.negative_geo_target_type = (
+            self.client.enums.NegativeGeoTargetTypeEnum.PRESENCE_OR_INTEREST
+        )
         
         campaign.campaign_budget = self.client.get_service("CampaignBudgetService").campaign_budget_path(
             self.customer_id,
@@ -714,7 +723,7 @@ class PerformanceMaxCampaignCreator:
         
         budget.name = f"{campaign_name} - الميزانية"
         budget.delivery_method = BudgetDeliveryMethodEnum.STANDARD
-        budget.amount_micros = int(daily_budget * 1_000_000)
+        budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         
         budget_response = budget_service.mutate_campaign_budgets(
             customer_id=self.customer_id,
@@ -732,7 +741,7 @@ class PerformanceMaxCampaignCreator:
         
         campaign.name = campaign_name
         campaign.advertising_channel_type = AdvertisingChannelTypeEnum.PERFORMANCE_MAX
-        campaign.status = CampaignStatusEnum.PAUSED
+        campaign.status = CampaignStatusEnum.ENABLED
         campaign.campaign_budget = budget_resource_name
         campaign.contains_eu_political_advertising = False
         

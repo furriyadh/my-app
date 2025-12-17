@@ -169,7 +169,7 @@ class DisplayCampaignCreator:
         campaign_budget = campaign_budget_operation.create
         timestamp = int(time.time())
         campaign_budget.name = f"{campaign_name} Budget #{timestamp}"
-        campaign_budget.amount_micros = int(daily_budget * 1_000_000)
+        campaign_budget.amount_micros = int(round(daily_budget * 100) * 10000)  # Round to cents
         campaign_budget.delivery_method = self.client.enums.BudgetDeliveryMethodEnum.STANDARD
         campaign_budget.explicitly_shared = False
         
@@ -191,13 +191,14 @@ class DisplayCampaignCreator:
         
         campaign = campaign_operation.create
         timestamp = int(time.time())
-        campaign.name = f"{campaign_name} #{timestamp}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        campaign.name = f"{campaign_name} #{short_id}"
         
         # Set Display channel type
         campaign.advertising_channel_type = self.client.enums.AdvertisingChannelTypeEnum.DISPLAY
         
         # Set campaign status to PAUSED
-        campaign.status = self.client.enums.CampaignStatusEnum.PAUSED
+        campaign.status = self.client.enums.CampaignStatusEnum.ENABLED
         
         # Set budget
         campaign.campaign_budget = budget_resource_name
@@ -264,7 +265,8 @@ class DisplayCampaignCreator:
         ad_group_operation = self.client.get_type("AdGroupOperation")
         
         ad_group = ad_group_operation.create
-        ad_group.name = f"{campaign_name} - Ad Group {uuid.uuid4().hex[:8]}"
+        short_id = uuid.uuid4().hex[:4].upper()
+        ad_group.name = f"{campaign_name} - Ad Group #{short_id}"
         ad_group.campaign = campaign_resource_name
         ad_group.status = self.client.enums.AdGroupStatusEnum.ENABLED
         
