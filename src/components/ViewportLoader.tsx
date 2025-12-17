@@ -9,13 +9,12 @@ export default function ViewportLoader({ children, minHeight = "500px" }: { chil
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
+                // If it's intersecting, show it.
+                // If it stops intersecting, HIDE it to free up GPU/WebGL context.
+                setIsVisible(entry.isIntersecting);
             },
             {
-                rootMargin: "200px", // Start loading 200px before it comes into view
+                rootMargin: "600px", // Increased to 600px to start loading much earlier
             }
         );
 

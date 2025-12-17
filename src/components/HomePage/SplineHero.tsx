@@ -1,4 +1,6 @@
-import Spline from '@splinetool/react-spline/next';
+"use client";
+
+import OptimizedSplineScene from './OptimizedSplineScene';
 import SplineHeroOverlay from './SplineHeroOverlay';
 
 export default function SplineHero() {
@@ -15,7 +17,7 @@ export default function SplineHero() {
 
             {/* 3D Scene */}
             <div className="w-full h-full relative z-10">
-                <Spline
+                <OptimizedSplineScene
                     scene={SPLINE_SCENE_URL}
                 />
             </div>
