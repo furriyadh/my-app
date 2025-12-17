@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Edit2, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit2, Sparkles, X } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
 import { CardStack } from '@/components/ui/card-stack';
 import Announcement from '@/components/seraui/Announcement';
@@ -1382,70 +1382,39 @@ export default function CampaignPreviewPage() {
         {/* Account Selection Modal - Dynamic colors based on campaign type */}
         {showAccountModal && (
           <div className={`fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4 ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`} style={{
-            background: `radial-gradient(circle at 40% 40%, ${modalColors.bgGradient.replace('0.15', '0.3')}, rgba(0, 0, 0, 0.95))`,
+            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
           }}>
-            {/* Animated Background Orbs */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className={`absolute top-1/4 left-1/4 w-[500px] h-[500px] ${modalColors.orb1.replace('/20', '/30')} rounded-full blur-3xl animate-pulse animate-float`}></div>
-              <div className={`absolute bottom-1/4 right-1/4 w-[500px] h-[500px] ${modalColors.orb2.replace('/20', '/30')} rounded-full blur-3xl animate-pulse delay-700`} style={{ animationDelay: '2s' }}></div>
-              <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${modalColors.orb1.replace('/20', '/20')} rounded-full blur-3xl animate-pulse delay-1000`} style={{ animationDelay: '4s' }}></div>
-              <div className={`absolute top-[15%] right-[15%] w-[300px] h-[300px] ${modalColors.orb2.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
-              <div className={`absolute bottom-[15%] left-[15%] w-[350px] h-[350px] ${modalColors.orb1.replace('/20', '/25')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '3s' }}></div>
-              {/* Floating particles */}
-              <div className={`absolute top-[10%] left-[15%] w-4 h-4 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '8s' }}></div>
-              <div className={`absolute top-[30%] right-[20%] w-3 h-3 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '10s', animationDelay: '1s' }}></div>
-              <div className={`absolute bottom-[25%] left-[25%] w-5 h-5 ${modalColors.orb1.replace('/20', '/40')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '12s', animationDelay: '2s' }}></div>
-              <div className={`absolute top-[60%] right-[30%] w-4 h-4 ${modalColors.orb2.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '9s', animationDelay: '3s' }}></div>
-              <div className={`absolute bottom-[40%] right-[15%] w-3 h-3 ${modalColors.orb1.replace('/20', '/50')} rounded-full animate-float shadow-lg`} style={{ animationDuration: '11s', animationDelay: '4s' }}></div>
-            </div>
 
-            <div
-              className="bg-white dark:bg-black rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden border border-gray-900 dark:border-white/10 relative z-10"
-              style={{
-              }}
-            >
-              {/* Header - Centered */}
-              <div className="px-6 py-5 border-b border-gray-900 dark:border-white/10">
-                <div className="flex flex-col items-center justify-center text-center gap-3" dir="ltr">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 border border-white/10">
-                    <img
-                      src="/images/integrations/google-ads-logo.svg"
-                      alt="Google Ads"
-                      className="w-8 h-8"
-                    />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {language === 'ar' ? 'اختر حساب إعلانات جوجل' : 'Select Google Ads Account'}
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-white/70 mt-0.5">
-                      {language === 'ar' ? 'اختر الحساب الذي تريد نشر هذه الحملة عليه' : 'Choose which account to publish this campaign to'}
-                    </p>
-                  </div>
+
+            <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-2xl w-full max-w-2xl relative z-50 shadow-2xl">
+              <div className="relative mb-8 flex items-center justify-center">
+                <div className="text-center">
+                  <h2 className={`text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${modalColors.title}`}>
+                    {language === 'ar' ? 'اختر حساب إعلانات جوجل' : 'Select Google Ads Account'}
+                  </h2>
+                  <p className="text-gray-400 mt-2">
+                    {language === 'ar' ? 'اختر الحساب الذي تريد نشر هذه الحملة عليه' : 'Choose which account to publish this campaign to'}
+                  </p>
                 </div>
+                <button
+                  onClick={() => setShowAccountModal(false)}
+                  className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-0' : 'right-0'} p-2 hover:bg-white/10 rounded-full transition-colors`}
+                >
+                  <X className="w-6 h-6 text-gray-400" />
+                </button>
               </div>
 
-              {/* Accounts List - Scrollable for many accounts like integrations */}
-              <div className="p-6 overflow-y-auto max-h-[60vh] bg-white dark:bg-black custom-scrollbar" dir="ltr">
-                {/* Auto-refresh indicator */}
-                {isRefreshingStatus && (
-                  <div className="mb-4 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800 animate-pulse">
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>{language === 'ar' ? '⚡ جاري التحديث السريع...' : '⚡ Refreshing...'}</span>
+              {/* Account Selection Content */}
+              <div className="custom-scrollbar max-h-[400px] overflow-y-auto pr-2">
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                    <p className="text-gray-400">{language === 'ar' ? 'جاري جلب الحسابات...' : 'Loading accounts...'}</p>
                   </div>
-                )}
-
-                {connectedAccounts.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-white/5 border border-white/10">
-                      <img
-                        src="/images/integrations/google-ads-logo.svg"
-                        alt="Google Ads"
-                        className="w-6 h-6 sm:w-8 sm:h-8 opacity-50"
-                      />
+                ) : connectedAccounts.length === 0 ? (
+                  <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <img src="/images/integrations/google-ads-logo.svg" alt="Google Ads" className="w-8 h-8 opacity-50" />
                     </div>
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
                       {language === 'ar' ? 'لا توجد حسابات مرتبطة' : 'No Connected Accounts'}
@@ -1508,8 +1477,11 @@ export default function CampaignPreviewPage() {
                                   />
                                 </div>
                                 <div className="text-left">
-                                  <p className="text-gray-900 dark:text-white font-medium text-sm">
-                                    {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'} <span className="text-gray-700 dark:text-gray-300 font-mono ml-2 text-sm">{formatCustomerId(account.customerId)}</span>
+                                  <p className="text-gray-900 dark:text-white font-medium text-sm flex items-center gap-2">
+                                    {language === 'ar' ? 'حساب إعلانات جوجل' : 'Google Ads Account'}
+                                    <span dir="ltr" className="text-gray-700 dark:text-gray-300 font-mono text-sm inline-block">
+                                      {formatCustomerId(account.customerId)}
+                                    </span>
                                   </p>
                                 </div>
                               </div>
@@ -1628,7 +1600,7 @@ export default function CampaignPreviewPage() {
                           disabled={isButtonDisabled}
                           className={isAccountActive ? 'animate-pulse-slow' : ''}
                         >
-                          <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <span className="flex items-center gap-2">
                             {isLoading ? (
                               <>
                                 <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -1637,10 +1609,17 @@ export default function CampaignPreviewPage() {
                                 </svg>
                                 {language === 'ar' ? 'جاري النشر...' : 'Publishing...'}
                               </>
-                            ) : (
+                            ) : language === 'ar' ? (
+                              // Arabic: Text -> Arrow on Left (End of RTL line)
                               <>
-                                {language === 'ar' ? 'نشر الحملة' : 'Publish Campaign'}
-                                {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                                نشر الحملة
+                                <ArrowRight className="w-5 h-5" />
+                              </>
+                            ) : (
+                              // English: Text -> Arrow on Right (End of LTR)
+                              <>
+                                Publish Campaign
+                                <ArrowRight className="w-5 h-5" />
                               </>
                             )}
                           </span>

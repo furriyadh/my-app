@@ -13,8 +13,18 @@ import { MotionGrid } from "@/components/ui/motion-grid";
 const MinimalPlaceholder = () => <div className="min-h-[200px]" />;
 
 // Lazy Load HomePage Sections - SSR true for instant display
+const SplineHero = dynamic(() => import("@/components/HomePage/SplineHero"), {
+  ssr: false, // 3D components should be client-side only
+  loading: () => <div className="h-screen bg-black" />, // Fallback
+});
+
 const HeroSection = dynamic(() => import("@/components/HomePage/HeroSection"), {
   ssr: true,
+});
+
+const SplineAIEngine = dynamic(() => import("@/components/HomePage/SplineAIEngine"), {
+  ssr: false,
+  loading: () => <MinimalPlaceholder />,
 });
 
 
@@ -76,7 +86,7 @@ const ScrollProgressBar = () => {
 
   useEffect(() => {
     let ticking = false;
-    
+
     const updateProgress = () => {
       if (progressRef.current) {
         const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -95,16 +105,16 @@ const ScrollProgressBar = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     updateProgress();
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[9999] h-1.5 bg-black/20 backdrop-blur-sm">
-      <div 
+      <div
         ref={progressRef}
         className="h-full bg-gradient-to-r from-purple-500 via-pink-500 via-50% to-cyan-400 relative will-change-[width]"
-        style={{ 
+        style={{
           width: '0%',
           boxShadow: '0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(236, 72, 153, 0.6), 0 0 60px rgba(34, 211, 238, 0.4)'
         }}
@@ -166,7 +176,7 @@ const FloatingChatWidget = () => {
             className="absolute bottom-20 right-0 w-80 bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
           >
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
-                    <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-white" />
                 </div>
@@ -176,13 +186,13 @@ const FloatingChatWidget = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-4 h-48 overflow-y-auto">
               <div className="bg-white/10 rounded-2xl rounded-tl-none p-3 mb-3">
                 <p className="text-gray-300 text-sm">👋 Hi! How can we help you today?</p>
               </div>
             </div>
-            
+
             <div className="p-4">
               <div className="flex items-center gap-2">
                 <input
@@ -191,7 +201,7 @@ const FloatingChatWidget = () => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-                      />
+                />
                 <button className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity">
                   <Send className="w-4 h-4 text-white" />
                 </button>
@@ -213,7 +223,7 @@ const FloatingChatWidget = () => {
           <MessageCircle className="w-6 h-6 text-white" />
         )}
       </motion.button>
-                </div>
+    </div>
   );
 };
 
@@ -266,52 +276,48 @@ export default function Home() {
     <>
       {/* Progress Bar */}
       <ScrollProgressBar />
-                    
+
       {/* Back to Top Button */}
       <BackToTopButton />
-      
-      <div className="front-page-body overflow-hidden bg-black min-h-screen text-white relative" dir="ltr">
-        {/* Global Motion Grid Background */}
-        <div className="fixed inset-0 z-0">
-          <MotionGrid
-            speed="3s"
-            opacity={0.15}
-            enableGlow={true}
-            lineColor="147, 51, 234"
-            backgroundColor="#000000"
-            gridSpacing="20px"
-            className="w-full h-full"
-          />
-                  </div>
-                  
+
+      <div className="front-page-body overflow-hidden bg-[#020617] min-h-screen text-white relative" dir="ltr">
+        {/* Global Dark Gradient - Modern AI Aesthetic */}
+        <div className="fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_0%,rgba(15,23,42,1)_0%,rgba(2,6,23,1)_80%)]" />
+
         <Navbar />
-        
+
         <main className="min-h-screen bg-transparent text-white relative z-10">
           {/* Optimized Section Order for Maximum Conversion */}
-          
+
           {/* 1. Hero - First Impression + AI Chat */}
+          {/* 1. Hero - 3D Robot Experience */}
+          <SplineHero />
+
+          {/* 1.5. Original Hero Section */}
           <HeroSection />
-          
+
           {/* 2. Live Demo - Show the Product Immediately! */}
           <LiveDemoSection />
-                    
+
           {/* 3. Globe - Global Reach & Credibility */}
           <GlobeSection />
-                    
+
+          {/* 3.5. AI Engine - The Brain */}
+          <SplineAIEngine />
+
           {/* 4. How It Works - 3 Simple Steps */}
           <HowItWorksSection />
 
           {/* 5. Comparison - Why Choose Us vs Others */}
           <ComparisonSection />
-          
+
           {/* 6. Charts - Results & ROI Proof */}
           <ChartsSection />
-          
+
           {/* 7. Testimonials - Customer Success Stories */}
           <TestimonialsSection />
-          
-          {/* 8. Pricing - Convert Visitors */}
-          <PricingSection />
+
+
 
           {/* 9. FAQ - Answer Objections */}
           <FAQSection />
@@ -321,7 +327,7 @@ export default function Home() {
         </main>
 
         <Footer />
-        
+
         {/* Floating Chat Widget */}
         <FloatingChatWidget />
 

@@ -18,6 +18,7 @@ const Navbar: React.FC = () => {
   const NAV_ITEMS = [
     { name: t.navbar.home, path: "/" },
     { name: t.navbar.features, path: "/front-pages/features/" },
+    { name: "Pricing", path: "/pricing/" },
     { name: t.navbar.team, path: "/front-pages/team/" },
     { name: t.navbar.faq, path: "/front-pages/faq/" },
     { name: t.navbar.contact, path: "/front-pages/contact/" },
@@ -27,7 +28,7 @@ const Navbar: React.FC = () => {
   // Switch language function
   const switchLanguage = (langCode: string) => {
     setLanguage(langCode as SupportedLanguage);
-    
+
     // إلغاء المؤقت وإغلاق القائمة فوراً
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -43,7 +44,7 @@ const Navbar: React.FC = () => {
       closeTimeoutRef.current = null;
     }
     setLanguageDropdownOpen(true);
-    
+
     // إغلاق تلقائي بعد 2 ثانية
     closeTimeoutRef.current = setTimeout(() => {
       setLanguageDropdownOpen(false);
@@ -138,7 +139,7 @@ const Navbar: React.FC = () => {
               <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? 'rotate-45 translate-y-[9px]' : ''}`}></span>
               <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
               <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`}></span>
-              
+
               {/* AI Glow Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300 pointer-events-none"></div>
             </button>
@@ -150,19 +151,18 @@ const Navbar: React.FC = () => {
                   <li key={item.path}>
                     <Link
                       href={item.path}
-                      className={`font-medium transition-all hover:text-primary-600 text-[15px] xl:text-md dark:text-gray-400 ${
-                        pathname === item.path
+                      className={`font-medium transition-all hover:text-primary-600 text-[15px] xl:text-md dark:text-gray-400 ${pathname === item.path
                           ? "text-primary-600 dark:text-primary-600"
                           : ""
-                      }`}
+                        }`}
                     >
                       {item.name}
                     </Link>
                   </li>
                 ))}
-                
+
                 {/* Languages Dropdown */}
-                <li 
+                <li
                   className="relative"
                   onMouseEnter={handleLanguageMouseEnter}
                   onMouseLeave={handleLanguageMouseLeave}
@@ -175,7 +175,7 @@ const Navbar: React.FC = () => {
                       expand_more
                     </i>
                   </button>
-                  
+
                   {/* Dropdown Menu */}
                   {isLanguageDropdownOpen && (
                     <div className="absolute top-full left-0 mt-2 w-[280px] bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
@@ -184,15 +184,14 @@ const Navbar: React.FC = () => {
                           <button
                             key={lang.code}
                             onClick={() => switchLanguage(lang.code)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
-                              language === lang.code ? 'bg-blue-50 dark:bg-blue-900/30' : ''
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                              }`}
                           >
-                            <Image 
-                              src={lang.flag} 
-                              alt={lang.name} 
-                              width={28} 
-                              height={28} 
+                            <Image
+                              src={lang.flag}
+                              alt={lang.name}
+                              width={28}
+                              height={28}
                               className="rounded-sm"
                             />
                             <span className="text-base font-medium text-gray-900 dark:text-white">
@@ -235,9 +234,8 @@ const Navbar: React.FC = () => {
 
             {/* For Resposive */}
             <div
-              className={`fixed left-0 right-0 top-[76px] bg-black/95 dark:bg-black/95 backdrop-blur-xl border-t border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl shadow-purple-500/10 max-h-[calc(100vh-76px)] overflow-y-auto z-[999] ${
-                isMenuOpen ? "block" : "hidden"
-              }`}
+              className={`fixed left-0 right-0 top-[76px] bg-black/95 dark:bg-black/95 backdrop-blur-xl border-t border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl shadow-purple-500/10 max-h-[calc(100vh-76px)] overflow-y-auto z-[999] ${isMenuOpen ? "block" : "hidden"
+                }`}
               id="navbar-collapse"
             >
               <ul>
@@ -248,15 +246,14 @@ const Navbar: React.FC = () => {
                   >
                     <Link
                       href={item.path}
-                      className={`font-medium dark:text-primary-600 transition-all hover:text-primary-600 ${
-                        pathname === item.path ? "text-primary-600" : ""
-                      }`}
+                      className={`font-medium dark:text-primary-600 transition-all hover:text-primary-600 ${pathname === item.path ? "text-primary-600" : ""
+                        }`}
                     >
                       {item.name}
                     </Link>
                   </li>
                 ))}
-                
+
                 {/* Languages for Mobile - Collapsible */}
                 <li className="my-[14px] md:my-[16px]">
                   <button
@@ -268,38 +265,37 @@ const Navbar: React.FC = () => {
                         language
                       </i>
                       <span>{t.common.languages}</span>
-                  </div>
+                    </div>
                     <i className={`material-symbols-outlined !text-[20px] transition-transform duration-300 ${isMobileLanguageOpen ? 'rotate-180' : ''}`}>
                       expand_more
                     </i>
                   </button>
-                  
+
                   {/* Dropdown Content */}
                   <div className={`overflow-hidden transition-all duration-300 ${isMobileLanguageOpen ? 'max-h-[600px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
                     <div className="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar pl-2">
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
+                      {SUPPORTED_LANGUAGES.map((lang) => (
+                        <button
+                          key={lang.code}
                           onClick={() => {
                             switchLanguage(lang.code);
                             setMobileLanguageOpen(false);
                           }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${
-                            language === lang.code ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-600' : ''
-                        }`}
-                      >
-                        <Image 
-                          src={lang.flag} 
-                          alt={lang.name} 
-                          width={24} 
-                          height={24} 
-                          className="rounded-sm"
-                        />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {lang.name}
-                        </span>
-                      </button>
-                    ))}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${language === lang.code ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-600' : ''
+                            }`}
+                        >
+                          <Image
+                            src={lang.flag}
+                            alt={lang.name}
+                            width={24}
+                            height={24}
+                            className="rounded-sm"
+                          />
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {lang.name}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </li>

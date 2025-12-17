@@ -562,9 +562,10 @@ const BudgetSchedulingPage: React.FC = () => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       try {
-        router.push('/campaign/creating');
+        // Redirect directly to preview page (skipping creating page as requested)
+        router.push('/campaign/preview');
       } catch (e) {
-        console.error('❌ Failed to redirect to campaign creating page:', e);
+        console.error('❌ Failed to redirect to campaign preview page:', e);
       }
     }, 5 * 60 * 1000); // 5 دقائق
 
@@ -2110,14 +2111,6 @@ const BudgetSchedulingPage: React.FC = () => {
 
           <GlowButton
             onClick={async () => {
-              // Show loading modal immediately
-              setIsGeneratingContent(true);
-              console.log('🚀 Starting content generation - showing loader...');
-
-              // Track start time to ensure minimum 5 seconds display
-              const startTime = Date.now();
-              const MIN_LOADER_TIME = 5000; // 5 seconds minimum
-
               try {
                 // Get real CPC from localStorage (calculated from real Google Ads data)
                 const realCPC = localStorage.getItem('realCPC');
@@ -2140,101 +2133,13 @@ const BudgetSchedulingPage: React.FC = () => {
 
                 localStorage.setItem('campaignData', JSON.stringify(updatedData));
 
-                // Get keywords from localStorage
-                const generatedContentStr = localStorage.getItem('generatedContent') || '{}';
-                const generatedContent = JSON.parse(generatedContentStr);
-                const keywordsList = generatedContent.keywords || [];
-
-                // Re-read campaignData from localStorage to get the latest detected language
-                const latestCampaignDataStr = localStorage.getItem('campaignData') || '{}';
-                const latestCampaignData = JSON.parse(latestCampaignDataStr);
-
-                // For VIDEO campaigns, prioritize videoDetectedLanguage (from video title)
-                // This ensures English videos get English ads, Arabic videos get Arabic ads
-                let targetLanguage = 'ar'; // Default
-                const currentCampaignType = latestCampaignData.campaignType || campaignData?.campaignType || 'SEARCH';
-
-                if (currentCampaignType === 'VIDEO') {
-                  // Priority: 1) videoDetectedLanguage (from video-metadata), 2) selected, 3) detected from URL
-                  targetLanguage = latestCampaignData.videoDetectedLanguage ||
-                    latestCampaignData.selectedLanguageCode ||
-                    latestCampaignData.detectedLanguageCode || 'ar';
-                  console.log('🎬 VIDEO Campaign - using video language:', targetLanguage);
-                } else {
-                  // For other campaigns, use website language
-                  targetLanguage = latestCampaignData.selectedLanguageCode ||
-                    latestCampaignData.detectedLanguageCode || 'ar';
-                }
-
-                console.log('🌍 Target language for ad generation:', targetLanguage);
-
-                // ═══════════════════════════════════════════════════════════════════
-                // CONTENT GENERATION FOR SEARCH AND VIDEO CAMPAIGNS
-                // ═══════════════════════════════════════════════════════════════════
-                const campaignType = campaignData?.campaignType || 'SEARCH';
-                const needsContentGeneration =
-                  (campaignType === 'SEARCH' || campaignType === 'VIDEO') &&
-                  (!generatedContent.headlines || generatedContent.headlines.length === 0 ||
-                    !generatedContent.descriptions || generatedContent.descriptions.length === 0);
-
-                if (needsContentGeneration) {
-                  console.log(`🎨 Generating ad content for ${campaignType} campaign...`);
-
-                  const contentResponse = await fetch(getApiUrl('/api/ai-campaign/generate-campaign-content'), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      website_url: latestCampaignData.websiteUrl || campaignData.websiteUrl,
-                      campaign_type: campaignType,
-                      video_ad_type: latestCampaignData.videoSubType || latestCampaignData.videoAdType || 'VIDEO_RESPONSIVE_AD',
-                      budget: selectedBudgetUSD,
-                      keywords_list: keywordsList,
-                      target_language: targetLanguage
-                    })
-                  });
-
-                  if (contentResponse.ok) {
-                    const contentResult = await contentResponse.json();
-                    console.log('✅ Ad content generated:', contentResult);
-
-                    if (contentResult.success && contentResult.content) {
-                      const updatedGeneratedContent = {
-                        ...generatedContent,
-                        headlines: contentResult.content.headlines || [],
-                        descriptions: contentResult.content.descriptions || [],
-                        // VIDEO-specific content
-                        long_headlines: contentResult.content.long_headlines || contentResult.content.descriptions || [],
-                        call_to_action: contentResult.content.call_to_action || 'اكتشف المزيد',
-                        action_button_label: contentResult.content.action_button_label || 'تعرف أكثر',
-                        keywords: keywordsList.length > 0 ? keywordsList : (contentResult.content.keywords || [])
-                      };
-
-                      localStorage.setItem('generatedContent', JSON.stringify(updatedGeneratedContent));
-                      console.log('💾 Saved generated content for', campaignType, 'campaign');
-                    }
-                  }
-                } else {
-                  console.log('ℹ️ Content already exists, skipping generation');
-                }
-
-                // Ensure loader shows for at least 5 seconds
-                const elapsedTime = Date.now() - startTime;
-                if (elapsedTime < MIN_LOADER_TIME) {
-                  const remainingTime = MIN_LOADER_TIME - elapsedTime;
-                  console.log(`⏳ Waiting ${remainingTime}ms to complete 5 seconds...`);
-                  await new Promise(resolve => setTimeout(resolve, remainingTime));
-                }
-
-                // Set flag and navigate
-                localStorage.setItem('creatingCampaign', 'true');
-                console.log('✅ Done! Navigating to preview...');
+                // Directly navigate to preview page
+                // We skip content generation here to prevent the "Thinking" popup
+                console.log('🚀 Navigating directly to preview page...');
                 router.push('/campaign/preview');
               } catch (error) {
-                console.error('❌ Error:', error);
-                localStorage.setItem('creatingCampaign', 'true');
+                console.error('❌ Error saving data:', error);
                 router.push('/campaign/preview');
-              } finally {
-                setIsGeneratingContent(false);
               }
             }}
             variant="purple"

@@ -43,19 +43,19 @@ function AIConnectingLines() {
             <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>
           <filter id="glow1">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
         {/* Static Line */}
-        <path 
-          d="M 0 30 Q 100 10 200 30" 
-          stroke="url(#gradient1)" 
-          strokeWidth="2" 
-          fill="none" 
+        <path
+          d="M 0 30 Q 100 10 200 30"
+          stroke="url(#gradient1)"
+          strokeWidth="2"
+          fill="none"
           strokeOpacity="0.3"
           strokeDasharray="8 4"
         />
@@ -81,19 +81,19 @@ function AIConnectingLines() {
             <stop offset="100%" stopColor="#22c55e" />
           </linearGradient>
           <filter id="glow2">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
         {/* Static Line */}
-        <path 
-          d="M 0 30 Q 100 50 200 30" 
-          stroke="url(#gradient2)" 
-          strokeWidth="2" 
-          fill="none" 
+        <path
+          d="M 0 30 Q 100 50 200 30"
+          stroke="url(#gradient2)"
+          strokeWidth="2"
+          fill="none"
           strokeOpacity="0.3"
           strokeDasharray="8 4"
         />
@@ -116,7 +116,7 @@ function AIConnectingLines() {
         <Zap className="w-3 h-3 text-pink-400 animate-pulse" />
         <span className="text-[10px] text-pink-300 font-medium">AI Processing</span>
       </div>
-      
+
       <div className="absolute top-[85px] left-[57%] flex items-center gap-1 bg-gray-900/80 backdrop-blur-sm px-2 py-1 rounded-full border border-green-500/30">
         <Zap className="w-3 h-3 text-green-400 animate-pulse" />
         <span className="text-[10px] text-green-300 font-medium">Auto Deploy</span>
@@ -187,9 +187,9 @@ export default function HowItWorksSection() {
                   <ul className="space-y-1.5 mt-auto">
                     {step.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-xs text-gray-300">
-                        <CheckCircle 
-                          className="w-3.5 h-3.5 flex-shrink-0" 
-                          style={{ color: step.glowColor }} 
+                        <CheckCircle
+                          className="w-3.5 h-3.5 flex-shrink-0"
+                          style={{ color: step.glowColor }}
                         />
                         <span>{feature}</span>
                       </li>
