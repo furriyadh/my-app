@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
-import ViewportLoader from "@/components/ViewportLoader";
+
 import { MessageCircle, X, Send, ChevronUp } from "lucide-react";
 
 // --- Components & Imports ---

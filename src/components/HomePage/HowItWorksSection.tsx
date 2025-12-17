@@ -28,7 +28,7 @@ export default function HowItWorksSection() {
       </div>
 
       {/* Full Width Spline 3D Scene */}
-      <div className="relative w-full h-[600px] md:h-[800px] -mt-10">
+      <div className="relative w-full h-[600px] md:h-[800px] -mt-40">
         <OptimizedSplineScene
           scene="https://prod.spline.design/ggK-xX0PC9BdmTqp/scene.splinecode?v=2"
           className="w-full h-full"
