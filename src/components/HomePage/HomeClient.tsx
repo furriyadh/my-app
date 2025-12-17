@@ -4,20 +4,20 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
+import ViewportLoader from "@/components/ViewportLoader"; // Single correct import
 import { MessageCircle, X, Send, ChevronUp } from "lucide-react";
 
 // Minimal placeholder
 const MinimalPlaceholder = () => <div className="min-h-[200px]" />;
 
-// Dynamic imports for client-heavy sections
-const HeroSection = dynamic(() => import("@/components/HomePage/HeroSection"), { ssr: true });
-const GlobeSection = dynamic(() => import("@/components/Globe/GlobeSection").then(mod => ({ default: mod.GlobeSection })), { loading: () => <MinimalPlaceholder />, ssr: false });
-const HowItWorksSection = dynamic(() => import("@/components/HomePage/HowItWorksSection"), { loading: () => <MinimalPlaceholder />, ssr: true });
-const LiveDemoSection = dynamic(() => import("@/components/HomePage/LiveDemoSection"), { loading: () => <MinimalPlaceholder />, ssr: true });
-const ComparisonSection = dynamic(() => import("@/components/HomePage/ComparisonSection"), { loading: () => <MinimalPlaceholder />, ssr: true });
-const ChartsSection = dynamic(() => import("@/components/HomePage/ChartsSection"), { loading: () => <MinimalPlaceholder />, ssr: false });
-const TestimonialsSection = dynamic(() => import("@/components/HomePage/TestimonialsSection"), { loading: () => <MinimalPlaceholder />, ssr: true });
-const NotificationManager = dynamic(() => import("@/components/NotificationManager"), { ssr: false });
+// Dynamic imports for client-heavy sections - GLOBE and SPLINE are handled via ViewportLoader now.
+const GlobeSection = dynamic(() => import("@/components/Globe/GlobeSection").then(mod => ({ default: mod.GlobeSection })), { loading: () => <MinimalPlaceholder /> });
+const HowItWorksSection = dynamic(() => import("@/components/HomePage/HowItWorksSection"), { loading: () => <MinimalPlaceholder /> });
+const LiveDemoSection = dynamic(() => import("@/components/HomePage/LiveDemoSection"), { loading: () => <MinimalPlaceholder /> });
+const ComparisonSection = dynamic(() => import("@/components/HomePage/ComparisonSection"), { loading: () => <MinimalPlaceholder /> });
+const ChartsSection = dynamic(() => import("@/components/HomePage/ChartsSection"), { loading: () => <MinimalPlaceholder /> });
+const TestimonialsSection = dynamic(() => import("@/components/HomePage/TestimonialsSection"), { loading: () => <MinimalPlaceholder /> });
+const NotificationManager = dynamic(() => import("@/components/NotificationManager"));
 
 // Progress Bar Component
 const ScrollProgressBar = () => {
@@ -217,9 +217,11 @@ export default function HomeClient({ children, splineEngineSlot }: { children: R
             <main className="min-h-screen bg-transparent text-white relative z-10">
                 {children}
 
-                <HeroSection />
                 <LiveDemoSection />
-                <GlobeSection />
+
+                <ViewportLoader minHeight="600px">
+                    <GlobeSection />
+                </ViewportLoader>
 
                 {splineEngineSlot}
 

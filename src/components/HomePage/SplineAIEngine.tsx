@@ -1,4 +1,5 @@
 import Spline from '@splinetool/react-spline/next';
+import ViewportLoader from '@/components/ViewportLoader';
 
 export default function SplineAIEngine() {
     // User provided AI Engine / Neural Network Scene
@@ -19,9 +20,11 @@ export default function SplineAIEngine() {
 
             {/* 3D Scene - Takes remaining space */}
             <div className="w-full flex-grow relative z-10 scale-100 min-h-[500px]">
-                <Spline
-                    scene={SPLINE_SCENE_URL}
-                />
+                <ViewportLoader minHeight="500px">
+                    <Spline
+                        scene={SPLINE_SCENE_URL}
+                    />
+                </ViewportLoader>
             </div>
 
         </section>
