@@ -1330,7 +1330,7 @@ export default function CampaignPreviewPage() {
                     className={campaignType === 'VIDEO'
                       ? 'h-[450px] w-full sm:h-[500px] md:h-[520px] lg:h-[560px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
                       : campaignType === 'APP'
-                        ? 'h-[350px] w-full sm:h-[380px] md:h-[400px] lg:h-[420px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
+                        ? 'h-[420px] w-full sm:h-[460px] md:h-[440px] lg:h-[400px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
                         : campaignType === 'SHOPPING'
                           ? 'h-[480px] w-full sm:h-[520px] md:h-[560px] lg:h-[600px] sm:w-[450px] md:w-[550px] lg:w-[650px]'
                           : 'h-64 w-96 md:h-80 md:w-[600px]'
@@ -1348,8 +1348,8 @@ export default function CampaignPreviewPage() {
             </div>
 
             {/* Edit Button - Below Card */}
-            <div className={`flex items-center justify-center lg:mr-[140px]`}>
-              <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            <div className="flex items-center justify-center w-full">
+              <p className={`text-gray-700 dark:text-gray-300 text-sm sm:text-base lg:text-lg text-center ${isRTL ? 'lg:translate-x-[75px]' : 'lg:translate-x-[75px]'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'هل تريد تغيير محتوى الإعلانات؟ ' : "Want to change the ads' content? "}
                 <button
                   onClick={handleEditAds}

@@ -2255,8 +2255,8 @@ const BudgetSchedulingPage: React.FC = () => {
           className="fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center"
           style={{
             background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
-            paddingLeft: isDesktop ? (isRTL ? '0' : '280px') : '0',
-            paddingRight: isDesktop ? (isRTL ? '280px' : '0') : '0'
+            paddingLeft: '0',
+            paddingRight: isDesktop ? '280px' : '0'
           }}
         >
           <ModernLoader

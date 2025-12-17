@@ -16,22 +16,22 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const colors = useMemo(
-  () => ["bg-gray-500", "bg-teal-500", "bg-blue-500", "bg-gray-600", "bg-pink-500"],
+    () => ["bg-gray-500", "bg-teal-500", "bg-blue-500", "bg-gray-600", "bg-pink-500"],
     []
   );
   const BUFFER = 20;
   const MAX_LINES = 100;
 
   const generateLines = useCallback((count = 20) =>
-      Array.from({ length: count }, (_, idx) => ({
-        id: Date.now() + idx,
-    segments: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
-            width: `${Math.floor(Math.random() * 80) + 50}px`,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            isCircle: Math.random() > 0.93,
-            indent: Math.random() > 0.7 ? 1 : 0,
-    })),
+    Array.from({ length: count }, (_, idx) => ({
+      id: Date.now() + idx,
+      segments: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
+        width: `${Math.floor(Math.random() * 80) + 50}px`,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        isCircle: Math.random() > 0.93,
+        indent: Math.random() > 0.7 ? 1 : 0,
       })),
+    })),
     [colors]
   );
 
@@ -87,12 +87,12 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
   const visibleLines = lines.slice(visibleStart, visibleEnd);
 
   return (
-    <div className="w-full max-w-xl mx-auto p-4">
+    <div className="w-full max-w-4xl mx-auto p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative bg-background h-[380px] rounded-2xl shadow-2xl overflow-hidden border border-border"
+        className="relative bg-background h-[600px] rounded-2xl shadow-2xl overflow-hidden border border-border"
       >
         <div className="px-4 py-3 flex items-center z-10 relative">
           <div className="flex items-center gap-1.5">
