@@ -279,6 +279,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 export default function RootLayout({
   children,
 }: {
@@ -291,7 +293,7 @@ export default function RootLayout({
           name="google-site-verification"
           content="afQfdE-n6JYLJ8w-AW3SBPAIuEdf6fZJjh8T2JcQwhA"
         />
-        
+
         {/* JSON-LD Structured Data for SEO */}
         <script
           type="application/ld+json"
@@ -800,13 +802,13 @@ export default function RootLayout({
         {/* Preload critical resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* Google Maps API - Load globally (باستخدام متغير البيئة فقط بدون مفتاح افتراضي في الكود) */}
-        <script 
+        <script
           async
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`}
         />
-        
+
         {/* CRITICAL: Prevent sidebar-open from causing black screen - Inline CSS for maximum priority */}
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -859,7 +861,7 @@ export default function RootLayout({
             }
           `
         }} />
-        
+
       </head>
       <body className={inter.variable} suppressHydrationWarning>
         <GoogleTagManager gtmId="GTM-M3P8KJ2R" />
@@ -868,6 +870,7 @@ export default function RootLayout({
             {children}
           </LayoutProvider>
         </CampaignProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
