@@ -15,7 +15,7 @@ export default function LiveDemoSection() {
       <ContainerScroll
         titleComponent={
           <>
-            <div className="flex flex-col items-center justify-center mb-10">
+            <div className="flex flex-col items-center justify-center mb-2">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600/10 border border-cyan-500/20 rounded-full mb-6">
                 <Sparkles className="w-4 h-4 text-cyan-400" />
                 <span className="text-sm text-cyan-300">See It In Action</span>
@@ -42,7 +42,7 @@ export default function LiveDemoSection() {
             src="/dashboard-preview.png"
             alt="Furriyadh AI Dashboard - Google Ads Management Platform"
             fill
-            className="object-contain object-center"
+            className="object-cover object-left md:object-top"
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           />
