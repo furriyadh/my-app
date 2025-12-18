@@ -15,7 +15,7 @@ export default function LiveDemoSection() {
       <ContainerScroll
         titleComponent={
           <>
-            <div className="flex flex-col items-center justify-center mb-2">
+            <div className="flex flex-col items-center justify-center mb-20 -mt-16 md:-mt-24">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600/10 border border-cyan-500/20 rounded-full mb-6">
                 <Sparkles className="w-4 h-4 text-cyan-400" />
                 <span className="text-sm text-cyan-300">See It In Action</span>
@@ -26,7 +26,7 @@ export default function LiveDemoSection() {
                   Command Center
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mt-4">
+              <p className="text-lg md:text-xl text-gray-400 max-w-4xl mx-auto mt-4">
                 One dashboard to rule them all. Monitor, optimize, and scale your Google Ads campaigns with AI intelligence.
               </p>
             </div>

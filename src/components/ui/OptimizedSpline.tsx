@@ -16,20 +16,26 @@ export default function OptimizedSpline({ scene, className, onLoad }: OptimizedS
     useEffect(() => {
         if (!canvasRef.current) return;
 
-        let app: Application;
+        let app: Application | null = null;
+        let isMounted = true;
 
         import('@splinetool/runtime').then(({ Application }) => {
-            app = new Application(canvasRef.current!);
+            if (!isMounted || !canvasRef.current) return;
+
+            app = new Application(canvasRef.current);
             app.load(scene).then(() => {
-                setIsLoading(false);
-                if (onLoad) onLoad();
+                if (isMounted) {
+                    setIsLoading(false);
+                    if (onLoad) onLoad();
+                }
+            }).catch(err => {
+                console.error("Spline error:", err);
+                if (isMounted) setIsLoading(false);
             });
-        }).catch(err => {
-            console.error("Spline error:", err);
-            setIsLoading(false);
         });
 
         return () => {
+            isMounted = false;
             if (app) app.dispose();
         };
     }, [scene, onLoad]);
