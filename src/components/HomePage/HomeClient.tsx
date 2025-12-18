@@ -115,7 +115,14 @@ interface HomeClientProps {
 
 export default function HomeClient({ heroSlot, howItWorksSlot, children }: HomeClientProps) {
     useEffect(() => {
-        const lenis = new Lenis({ duration: 1.0, smoothWheel: true, autoResize: true });
+        const lenis = new Lenis({
+            duration: 2.5, // Increased from 1.5 to 2.5 for very slow, smooth inertia
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential easing
+            smoothWheel: true,
+            wheelMultiplier: 0.8, // Reduced from 1.2 adds "weight" or "heaviness" to the scroll
+            touchMultiplier: 2,
+            autoResize: true,
+        });
         function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
         requestAnimationFrame(raf);
         return () => lenis.destroy();
@@ -135,9 +142,9 @@ export default function HomeClient({ heroSlot, howItWorksSlot, children }: HomeC
                     <LiveDemoSection />
                     <GlobeConnectSection />
 
-                    {howItWorksSlot}
-
                     <ComparisonSection />
+
+                    {howItWorksSlot}
 
                     {/* Any legacy children passed */}
                     {children}

@@ -24,6 +24,7 @@ export default function SplineHero() {
                 />
                 {/* @ts-ignore */}
                 <spline-viewer
+                    loading="eager"
                     url="https://prod.spline.design/e8ASZthol2ayKeFD/scene.splinecode"
                     className="w-full h-full"
                 />

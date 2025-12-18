@@ -1,5 +1,6 @@
 "use client";
 
+import ScrollFloat from '@/components/ui/ScrollFloat';
 import { motion } from 'framer-motion';
 
 export default function SplineHeroOverlay() {
@@ -10,9 +11,18 @@ export default function SplineHeroOverlay() {
             transition={{ delay: 1, duration: 0.8 }}
             className="absolute bottom-10 left-0 right-0 z-30 pointer-events-none text-center px-4"
         >
-            <h1 className="text-3xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-400 mb-2 md:mb-4 tracking-tighter">
-                AI-Powered Ad Intelligence
-            </h1>
+            <div className="mb-2 md:mb-4">
+                <ScrollFloat
+                    animationDuration={1}
+                    ease='back.inOut(2)'
+                    scrollStart='center bottom+=50%'
+                    scrollEnd='bottom bottom-=40%'
+                    stagger={0.03}
+                    textClassName="text-3xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-400 tracking-tighter"
+                >
+                    AI-Powered Ad Intelligence
+                </ScrollFloat>
+            </div>
             <p className="text-white/60 text-sm md:text-xl font-light max-w-2xl mx-auto mb-6 md:mb-8 text-shadow-sm">
                 Automate, optimize, and scale your Google Ads campaigns with next-generation AI.
             </p>

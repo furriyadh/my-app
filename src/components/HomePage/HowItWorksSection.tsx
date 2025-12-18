@@ -3,12 +3,32 @@
 import { Sparkles, ArrowRight, Brain } from "lucide-react";
 import Link from "next/link";
 import Script from "next/script";
+import { useState, useEffect, useRef } from "react";
+import ScrollFloat from "@/components/ui/ScrollFloat";
 
 
 
 export default function HowItWorksSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "200px" }
+    );
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-10 relative overflow-hidden">
+    <section ref={sectionRef} className="py-10 relative overflow-hidden">
 
       {/* Header Container */}
       <div className="container mx-auto max-w-6xl relative z-10 px-4">
@@ -17,12 +37,18 @@ export default function HowItWorksSection() {
             <Sparkles className="w-4 h-4 text-purple-400" />
             <span className="text-sm text-purple-300">Simple 3-Step Process</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            <span className="text-white">How </span>
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              It Works
-            </span>
-          </h2>
+          <div className="mb-3">
+            <ScrollFloat
+              animationDuration={1}
+              ease='back.inOut(2)'
+              scrollStart='center bottom+=50%'
+              scrollEnd='bottom bottom-=40%'
+              stagger={0.03}
+              textClassName="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+            >
+              How It Works
+            </ScrollFloat>
+          </div>
           <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto">
             Launch your first AI-powered Google Ads campaign in minutes, not days
           </p>
@@ -31,15 +57,20 @@ export default function HowItWorksSection() {
 
       {/* Full Width Spline 3D Scene */}
       <div className="relative w-full h-[600px] md:h-[800px] -mt-40">
-        <Script
-          type="module"
-          src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"
-        />
-        {/* @ts-ignore */}
-        <spline-viewer
-          url="https://prod.spline.design/tL7CW-xbEZH6023h/scene.splinecode"
-          className="w-full h-full"
-        />
+        {isVisible && (
+          <>
+            <Script
+              type="module"
+              src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"
+            />
+            {/* @ts-ignore */}
+            <spline-viewer
+              loading="lazy"
+              url="https://prod.spline.design/tL7CW-xbEZH6023h/scene.splinecode"
+              className="w-full h-full"
+            />
+          </>
+        )}
       </div>
 
       {/* Bottom CTA Container */}
