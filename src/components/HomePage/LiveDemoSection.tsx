@@ -21,13 +21,13 @@ export default function LiveDemoSection() {
                 <span className="text-sm text-cyan-300">See It In Action</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white dark:text-white">
-                Your AI-Powered <br />
+                The Ultimate Google Ads <br />
                 <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Command Center
+                  AI Dashboard
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-gray-400 max-w-4xl mx-auto mt-4">
-                One dashboard to rule them all. Monitor, optimize, and scale your Google Ads campaigns with AI intelligence.
+                Launch professional campaigns in 30 seconds. Experience a unified platform where artificial intelligence drives your growth and maximizes ROI.
               </p>
             </div>
           </>

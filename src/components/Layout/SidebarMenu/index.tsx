@@ -30,6 +30,7 @@ import {
   Search,
   Clock
 } from "lucide-react";
+import { useMediaQuery } from "react-responsive";
 
 const SidebarMenu: React.FC = React.memo(() => {
   const pathname = usePathname();
@@ -67,50 +68,43 @@ const SidebarMenu: React.FC = React.memo(() => {
   const [isHydrated, setIsHydrated] = React.useState(false);
 
   // Initialize sidebar state after hydration (client-side only)
+  // Check for mobile/xl breakpoint using react-responsive
+  // 1280px is the xl breakpoint in Tailwind
+  const isXlQuery = useMediaQuery({ minWidth: 1280 });
+  const [isDesktop, setIsDesktop] = React.useState(true); // Default to desktop for SSR match if possible, or handle via effect
+
+  // Sync media query with state to prevent hydration mismatch
+  React.useEffect(() => {
+    setIsDesktop(isXlQuery);
+  }, [isXlQuery]);
+
+  // Derived isMobile state for internal logic
+  const isMobile = !isDesktop;
+
+  // Cleanup logic
   React.useEffect(() => {
     // Mark as hydrated
     setIsHydrated(true);
 
-    // CRITICAL: Always clean up classes first to prevent black screen on refresh
     const cleanup = () => {
       document.body.classList.remove('sidebar-open');
       document.documentElement.classList.remove('sidebar-open');
-      document.body.style.top = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.bottom = '';
-      document.body.style.overflow = '';
-      document.body.style.overflowX = '';
-      document.body.style.overflowY = '';
-      document.documentElement.style.overflow = '';
-      document.documentElement.style.height = '';
+      document.body.removeAttribute('style');
+      document.documentElement.removeAttribute('style');
     };
 
-    // Run cleanup immediately
     cleanup();
 
-    const isMobile = window.innerWidth < 1280; // xl breakpoint
-
-    // On mobile, always start closed to prevent black screen
     if (isMobile) {
-      // Remove from localStorage on mobile
       localStorage.removeItem('sidebarOpen');
       setIsSidebarOpen(false);
     } else {
-      // On desktop, open sidebar by default
       localStorage.removeItem('sidebarOpen');
       setIsSidebarOpen(true);
     }
 
-    // Run cleanup multiple times to ensure it sticks
     setTimeout(cleanup, 0);
-    setTimeout(cleanup, 10);
-    setTimeout(cleanup, 50);
-    setTimeout(cleanup, 100);
-  }, []);
+  }, [isMobile]); // Re-run if screen size changes across breakpoint
 
   // State for Quick Search
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -136,7 +130,8 @@ const SidebarMenu: React.FC = React.memo(() => {
       const newState = !prev;
       // Save to localStorage (only for desktop, but don't apply classes)
       if (typeof window !== 'undefined') {
-        const isMobile = window.innerWidth < 1280;
+        // USE REACT-RESPONSIVE STATE
+        // const isMobile = window.innerWidth < 1280;
 
         // CRITICAL: On desktop, NEVER save to localStorage to prevent black screen
         // Only save on mobile (but it will be removed on refresh anyway)
@@ -202,23 +197,24 @@ const SidebarMenu: React.FC = React.memo(() => {
       }
       return newState;
     });
-  }, []);
+  }, [isMobile]);
 
   // Remove auto-close on resize - sidebar only closes when X button is clicked
   // No useEffect for auto-closing sidebar
 
   // Handle link click - close sidebar on mobile/tablet only
   const handleLinkClick = React.useCallback(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+    if (isMobile) {
       // Only close on mobile/tablet, not on desktop
       setIsSidebarOpen(false);
     }
-  }, []);
+  }, [isMobile]);
 
-  // Clean up on mount to prevent black screen on mobile/desktop refresh
+  // Clean up on mount and when interactions happen
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isMobile = window.innerWidth < 1280;
+      // Use state instead of manual check
+      // const isMobile = window.innerWidth < 1280;
 
       // Always clean up any leftover classes from previous session (both mobile and desktop)
       const cleanup = () => {
@@ -304,13 +300,11 @@ const SidebarMenu: React.FC = React.memo(() => {
         }
       }
     }
-  }, []); // Only run on mount
+  }, [isSidebarOpen, isMobile]); // Only run on mount or when sidebar state/mobile state changes
 
   // Ensure body scroll is disabled when sidebar opens on mobile
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isMobile = window.innerWidth < 1280;
-
       // CRITICAL: On desktop, NEVER apply classes - always remove them aggressively
       if (!isMobile) {
         // Force remove classes on desktop - run continuously
@@ -385,7 +379,6 @@ const SidebarMenu: React.FC = React.memo(() => {
     return () => {
       // Cleanup on unmount - always clean up
       if (typeof window !== 'undefined') {
-        const isMobile = window.innerWidth < 1280;
         if (!isMobile) {
           // On desktop, always clean up
           document.body.classList.remove('sidebar-open');
@@ -398,7 +391,7 @@ const SidebarMenu: React.FC = React.memo(() => {
         }
       }
     };
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, isMobile]);
 
   // Update campaign color based on selected campaign type
   React.useEffect(() => {

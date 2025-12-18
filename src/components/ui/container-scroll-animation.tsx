@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 import { useScroll, useTransform, motion, MotionValue } from "framer-motion";
+import { useMediaQuery } from "react-responsive";
 
 export const ContainerScroll = ({
     titleComponent,
@@ -13,30 +14,32 @@ export const ContainerScroll = ({
     const { scrollYProgress } = useScroll({
         target: containerRef,
     });
+
+    // Use library for robust media query handling
+    const isMobileQuery = useMediaQuery({ maxWidth: 768 });
     const [isMobile, setIsMobile] = useState(false);
 
+    // Handle hydration mismatch safely
     useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-        return () => {
-            window.removeEventListener("resize", checkMobile);
-        };
-    }, []);
+        setIsMobile(isMobileQuery);
+    }, [isMobileQuery]);
 
     const scaleDimensions = () => {
         return isMobile ? [0.7, 0.9] : [1.05, 1];
     };
 
-    const rotate = useTransform(scrollYProgress, [0, 1], [15, 0]);
+    const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
+
+    // Mobile: Flat (0) -> Curved (20) to show content clearly first
+    // Desktop: Curved (20) -> Flat (0) for dramatic reveal
+    const mobileRotate = useTransform(scrollYProgress, [0, 1], [0, 20]);
+
     const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
-    const translate = useTransform(scrollYProgress, [0, 1], [0, isMobile ? -30 : -100]);
+    const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
     return (
         <div
-            className="h-[80rem] md:h-[120rem] flex items-start justify-center relative p-2 md:p-20 pt-20 md:pt-40"
+            className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
             ref={containerRef}
         >
             <div
@@ -46,7 +49,11 @@ export const ContainerScroll = ({
                 }}
             >
                 <Header translate={translate} titleComponent={titleComponent} />
-                <Card rotate={rotate} translate={translate} scale={scale}>
+                <Card
+                    rotate={isMobile ? mobileRotate : rotate}
+                    translate={translate}
+                    scale={scale}
+                >
                     {children}
                 </Card>
             </div>
@@ -87,7 +94,7 @@ export const Card = ({
                 boxShadow:
                     "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
             }}
-            className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[30px] shadow-2xl translate-x-2 md:translate-x-0"
+            className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] max-h-[55vh] md:max-h-[80vh] w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[30px] shadow-2xl"
         >
             <div className=" h-full w-full overflow-hidden rounded-2xl bg-black md:rounded-2xl">
                 {children}

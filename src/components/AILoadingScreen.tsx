@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  Zap, 
-  Activity, 
-  Cpu, 
+import {
+  Brain,
+  Zap,
+  Activity,
+  Cpu,
   Network,
   Eye,
   Sparkles,
@@ -74,30 +74,36 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
   }, [loadingStage]);
 
   // Generate floating particles
-  const generateParticles = () => {
-    return Array.from({ length: 50 }, (_, i) => (
-      <motion.div
-        key={i}
-        className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-60"
-        initial={{
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          scale: 0
-        }}
-        animate={{
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          scale: [0, 1, 0],
-          opacity: [0, 1, 0]
-        }}
-        transition={{
-          duration: Math.random() * 3 + 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-    ));
-  };
+  // Generate floating particles safely on client side
+  const [particles, setParticles] = useState<React.ReactNode[]>([]);
+
+  useEffect(() => {
+    if (showParticles) {
+      const newParticles = Array.from({ length: 50 }, (_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-60"
+          initial={{
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            scale: 0
+          }}
+          animate={{
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            scale: [0, 1, 0],
+            opacity: [0, 1, 0]
+          }}
+          transition={{
+            duration: Math.random() * 3 + 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      ));
+      setParticles(newParticles);
+    }
+  }, [showParticles]);
 
   const CurrentIcon = loadingStage < loadingStages.length ? loadingStages[loadingStage].icon : Sparkles;
 
@@ -122,7 +128,7 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
                   r="2"
                   fill="#60A5FA"
                   initial={{ opacity: 0 }}
-                  animate={{ 
+                  animate={{
                     opacity: [0, 1, 0],
                     scale: [1, 1.5, 1]
                   }}
@@ -143,8 +149,8 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
                   stroke="#60A5FA"
                   strokeWidth="1"
                   initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ 
-                    pathLength: 1, 
+                  animate={{
+                    pathLength: 1,
                     opacity: [0, 0.5, 0]
                   }}
                   transition={{
@@ -158,7 +164,7 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
           </div>
 
           {/* Floating Particles */}
-          {showParticles && generateParticles()}
+          {particles}
 
           {/* Matrix Rain Effect */}
           <div className="absolute inset-0 opacity-10">
@@ -187,8 +193,8 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
           <motion.div
             className="mb-8"
             initial={{ scale: 0, rotate: 0 }}
-            animate={{ 
-              scale: 1, 
+            animate={{
+              scale: 1,
               rotate: 360,
               boxShadow: [
                 "0 0 20px rgba(59, 130, 246, 0.5)",
@@ -196,7 +202,7 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
                 "0 0 20px rgba(59, 130, 246, 0.5)"
               ]
             }}
-            transition={{ 
+            transition={{
               scale: { duration: 1 },
               rotate: { duration: 20, repeat: Infinity, ease: "linear" },
               boxShadow: { duration: 2, repeat: Infinity }
@@ -209,18 +215,18 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
-              
+
               {/* Inner Ring */}
               <motion.div
                 className="absolute inset-4 rounded-full border-2 border-purple-400"
                 animate={{ rotate: -360 }}
                 transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
               />
-              
+
               {/* Center Icon */}
               <motion.div
                 className="absolute inset-0 flex items-center justify-center"
-                animate={{ 
+                animate={{
                   scale: [1, 1.2, 1],
                   color: ["#60A5FA", "#A855F7", "#60A5FA"]
                 }}
@@ -321,7 +327,7 @@ const AILoadingScreen: React.FC<AILoadingScreenProps> = ({ onComplete }) => {
                   />
                 </motion.div>
               </div>
-              
+
               {/* Progress Text */}
               <div className="flex justify-between mt-2 text-sm text-gray-400">
                 <span>Initializing AI Systems</span>
