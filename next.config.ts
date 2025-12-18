@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       'lh3.googleusercontent.com',       // Google general images
     ],
   },
+  // Fix Spline/ESM module issues
+  transpilePackages: ['@splinetool/react-spline', '@splinetool/runtime'],
 
   // إعدادات البيئة
   env: {
