@@ -21,6 +21,9 @@ const LiveDemoSection = dynamic(() => import("@/components/HomePage/LiveDemoSect
 const ComparisonSection = dynamic(() => import("@/components/HomePage/ComparisonSection"), {
     loading: () => <MinimalPlaceholder />
 });
+const GlobeConnectSection = dynamic(() => import("@/components/HomePage/GlobeConnectSection"), {
+    loading: () => <MinimalPlaceholder />
+});
 
 
 const NotificationManager = dynamic(() => import("@/components/NotificationManager"));
@@ -128,8 +131,9 @@ export default function HomeClient({ heroSlot, howItWorksSlot, children }: HomeC
                 {heroSlot}
 
                 {/* 2. Content Sections (Lazy Loaded on Viewport) */}
-                <div className="relative z-20 space-y-20 md:space-y-32 pb-20">
+                <div className="relative z-20 space-y-0 pb-10">
                     <LiveDemoSection />
+                    <GlobeConnectSection />
 
                     {howItWorksSlot}
 

@@ -22,6 +22,7 @@ export default function SplineHero() {
                     type="module"
                     src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"
                 />
+                {/* @ts-ignore */}
                 <spline-viewer
                     url="https://prod.spline.design/e8ASZthol2ayKeFD/scene.splinecode"
                     className="w-full h-full"
