@@ -6,7 +6,7 @@ import Script from "next/script";
 
 export default function GlobeConnectSection() {
     return (
-        <section className="pt-10 pb-0 relative overflow-hidden">
+        <section className="-mt-20 md:-mt-32 pb-0 relative z-20 overflow-hidden">
 
             {/* Header Container */}
             <div className="container mx-auto max-w-6xl relative z-10 px-4">
