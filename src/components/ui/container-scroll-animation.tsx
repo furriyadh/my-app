@@ -81,6 +81,7 @@ export const Card = ({
     return (
         <motion.div
             style={{
+                translateY: translate,
                 rotateX: rotate,
                 scale,
                 boxShadow:
