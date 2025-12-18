@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize Supabase only when needed to prevent build errors
+const getSupabase = () => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error('Supabase environment variables are missing');
+    }
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+};
 
 interface MerchantAccount {
     id: string;
@@ -33,6 +39,7 @@ export async function GET(request: NextRequest) {
         const userEmail = user.email;
 
         // 1. First, get linked accounts from database
+        const supabase = getSupabase();
         const { data: linkedAccounts, error: dbError } = await supabase
             .from('merchant_accounts')
             .select('*')

@@ -1,8 +1,8 @@
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
-import HomeClient from "@/components/HomePage/HomeClient";
-import SplineHero from "@/components/HomePage/SplineHero";
-import HowItWorksSection from "@/components/HomePage/HowItWorksSection";
+
+import LiveDemoSection from "@/components/HomePage/LiveDemoSection";
+import ComparisonSection from "@/components/HomePage/ComparisonSection";
 
 
 export default function Home() {
@@ -14,16 +14,19 @@ export default function Home() {
       <Navbar />
 
       {/* 
-        HomeClient handles all client-side logic (scroll, animations).
-        We pass Server Components (SplineHero, SplineAIEngine) as props/children 
-        to avoid them becoming Client Components implicitly.
+        Direct Rendering - Optimized for Performance
       */}
-      <HomeClient
-        heroSlot={<SplineHero />}
-        howItWorksSlot={<HowItWorksSection />}
-      />
+      <main className="min-h-screen bg-transparent text-white relative z-10 selection:bg-purple-500/30 selection:text-white">
+
+
+        <div className="relative z-20 space-y-0 pb-10">
+          <LiveDemoSection />
+          <ComparisonSection />
+        </div>
+      </main>
 
       <Footer />
+
     </div>
   );
 }
