@@ -69,7 +69,8 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
           scroller,
           start: scrollStart,
           end: scrollEnd,
-          scrub: true
+          toggleActions: 'play none none reverse'
+          // scrub: true - Removed to improve performance with 3D elements
         }
       }
     );
