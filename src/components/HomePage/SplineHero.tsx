@@ -27,6 +27,13 @@ export default function SplineHero() {
                     loading="eager"
                     url="https://prod.spline.design/e8ASZthol2ayKeFD/scene.splinecode"
                     className="w-full h-full"
+                    style={{
+                        display: 'block',
+                        transform: 'translateZ(0)',
+                        willChange: 'transform, opacity',
+                        backfaceVisibility: 'hidden',
+                        WebkitFontSmoothing: 'antialiased'
+                    }}
                 />
             </div>
 

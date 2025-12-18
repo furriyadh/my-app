@@ -66,6 +66,13 @@ export default function GlobeConnectSection() {
                             loading="lazy"
                             url="https://prod.spline.design/zTnimMO3iilg2dyz/scene.splinecode"
                             className="w-full h-full"
+                            style={{
+                                display: 'block',
+                                transform: 'translateZ(0)',
+                                willChange: 'transform, opacity',
+                                backfaceVisibility: 'hidden',
+                                WebkitFontSmoothing: 'antialiased'
+                            }}
                         />
                     </>
                 )}

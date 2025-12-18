@@ -116,10 +116,10 @@ interface HomeClientProps {
 export default function HomeClient({ heroSlot, howItWorksSlot, children }: HomeClientProps) {
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 2.5, // Increased from 1.5 to 2.5 for very slow, smooth inertia
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential easing
+            duration: 1.8, // Adjusted from 2.5 for better responsiveness (less "drag" feeling)
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             smoothWheel: true,
-            wheelMultiplier: 0.8, // Reduced from 1.2 adds "weight" or "heaviness" to the scroll
+            wheelMultiplier: 1.0, // Balanced weight
             touchMultiplier: 2,
             autoResize: true,
         });

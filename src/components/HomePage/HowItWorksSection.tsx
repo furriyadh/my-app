@@ -68,6 +68,13 @@ export default function HowItWorksSection() {
               loading="lazy"
               url="https://prod.spline.design/tL7CW-xbEZH6023h/scene.splinecode"
               className="w-full h-full"
+              style={{
+                display: 'block',
+                transform: 'translateZ(0)',
+                willChange: 'transform, opacity',
+                backfaceVisibility: 'hidden',
+                WebkitFontSmoothing: 'antialiased'
+              }}
             />
           </>
         )}
