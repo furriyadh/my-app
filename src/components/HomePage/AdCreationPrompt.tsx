@@ -140,7 +140,7 @@ export default function AdCreationPrompt() {
                     <div
                         className="pointer-events-none absolute -inset-px rounded-[3rem] opacity-0 transition duration-300 group-hover:opacity-100"
                         style={{
-                            background: isDesktop
+                            background: isMounted && isDesktop
                                 ? `radial-gradient(1000px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.1), transparent 40%)`
                                 : 'none'
                         }}
