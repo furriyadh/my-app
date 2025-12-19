@@ -11,9 +11,14 @@ import ComparisonSection from "@/components/HomePage/ComparisonSection";
 
 export default function Home() {
   return (
-    <div className="front-page-body overflow-hidden bg-[#020617] min-h-screen text-white relative" dir="ltr">
-      {/* Global Dark Gradient Background */}
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_0%,rgba(15,23,42,1)_0%,rgba(2,6,23,1)_80%)]" />
+    <div className="front-page-body overflow-hidden min-h-screen w-full bg-[#020617] relative text-white" dir="ltr">
+      {/* Purple Radial Glow Background */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `radial-gradient(circle 500px at 50% 100px, rgba(139,92,246,0.4), transparent)`,
+        }}
+      />
 
       <Navbar />
 

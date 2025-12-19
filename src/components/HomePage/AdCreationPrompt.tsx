@@ -3,7 +3,7 @@ import GlowButton from '@/components/ui/glow-button';
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, ArrowRight, Wand2, Loader2, Bot, MessageCircle, User } from "lucide-react";
+import { Search, Sparkles, MessageCircle, ArrowRight, ArrowUp, Loader2, Paperclip, Globe, Bell, Zap, Wand2, PenTool, User, Bot } from 'lucide-react';
 import { createClient } from "@/utils/supabase/client";
 import { useMediaQuery } from "react-responsive";
 import AvatarGroup from "@/components/ui/avatar-group";
@@ -46,6 +46,13 @@ export default function AdCreationPrompt() {
         "Art gallery exhibition ticket sales", "Pest control local experts", "Video production agency showcase",
         "Cryptocurrency exchange registration", "Vegan meal prep delivery", "Music streaming app premium sub",
         "Industrial machinery B2B sales", "Virtual assistant service leads"
+    ];
+
+    // Short industries for dynamic buttons
+    const INDUSTRIES = [
+        "Real Estate", "Coffee Shop", "SaaS App", "Dental Clinic",
+        "Fashion Store", "Fitness Gym", "Local Bakery", "Law Firm",
+        "Online Course", "Travel Agency", "Pet Store", "Car Rental"
     ];
 
     const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
@@ -153,23 +160,10 @@ export default function AdCreationPrompt() {
             <div className="mx-auto w-full max-w-[95rem] transition-all duration-300">
                 <div
                     ref={containerRef}
-                    className="group relative rounded-[3rem] bg-[#0A0A0A] p-[1px] shadow-2xl transition-all duration-500 hover:shadow-[0_0_100px_-20px_rgba(168,85,247,0.4)]"
+                    className="relative w-full max-w-4xl mx-auto bg-[#020617]/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 transition-all duration-300 hover:shadow-3xl overflow-hidden"
                 >
-                    {/* Animated Gradient Border */}
-                    <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-20 blur-xl transition-opacity duration-500 group-hover:opacity-40" />
-
-                    {/* Spotlight Gradient - Desktop Only */}
-                    <div
-                        className="pointer-events-none absolute -inset-px rounded-[3rem] opacity-0 transition duration-300 group-hover:opacity-100"
-                        style={{
-                            background: isMounted && isDesktop
-                                ? `radial-gradient(1000px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.1), transparent 40%)`
-                                : 'none'
-                        }}
-                    />
-
                     {/* Content Container */}
-                    <div className={`relative flex flex-col items-center rounded-[3rem] bg-[#0A0A0A]/90 backdrop-blur-xl ${isMobile ? 'p-6 py-8' : 'p-10 md:p-12'}`}>
+                    <div className={`relative flex flex-col items-center w-full h-[85vh] max-h-[900px] min-h-[500px] ${isMobile ? 'p-6 py-8' : 'p-12 md:p-20'}`}>
 
                         {/* Header - Only show when no messages */}
                         {messages.length === 0 && (
@@ -191,31 +185,31 @@ export default function AdCreationPrompt() {
                                 </div>
 
                                 {/* 2. Main Title */}
-                                <h1 className={`mb-6 text-center font-bold tracking-tight text-white leading-[1.1] ${isMobile ? 'text-3xl' : 'text-5xl md:text-6xl lg:text-7xl'}`}>
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-400">
+                                <h1 className={`text-center font-bold tracking-tight leading-[1.1] ${isMobile ? 'text-4xl mb-4' : 'text-5xl md:text-6xl lg:text-7xl mb-8'}`}>
+                                    <span className="text-white">
                                         Build your Google Ads in seconds
                                     </span>
                                     <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 animate-gradient-x">
+                                    <span className="text-gray-500 dark:text-gray-500">
                                         with AI magic
                                     </span>
                                 </h1>
 
-                                {/* 3. Quick Suggestion Chips */}
-                                <div className="mb-6 flex flex-wrap justify-center gap-3">
+                                {/* 3. Quick Suggestion Chips - Dynamic & Short */}
+                                <div className="flex flex-wrap justify-center gap-3 w-full my-3 md:my-8">
                                     {[
-                                        "I want to create a campaign with minimal budget",
-                                        "How do I start with Google Ads without experience?",
-                                        "What campaign type suits my restaurant?"
-                                    ].map((q, i) => (
+                                        { icon: Zap, text: `Promote ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}`, prompt: `Create a high-converting ad campaign for a ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` },
+                                        { icon: Search, text: `${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]} KW`, prompt: `Find the best high-intent keywords for ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` },
+                                        { icon: PenTool, text: `Ad Copy`, prompt: `Write compelling ad headlines and descriptions for ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` }
+                                    ].map((item, i) => (
                                         <button
                                             key={i}
                                             type="button"
-                                            onClick={() => setPrompt(q)}
-                                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-purple-500/30 transition-all text-sm md:text-base"
+                                            onClick={() => setPrompt(item.prompt)}
+                                            className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#1e1e2d] border border-white/5 text-gray-300 hover:bg-[#252536] hover:border-purple-500/30 transition-all text-sm md:text-base font-medium group active:scale-95"
                                         >
-                                            <MessageCircle className="w-4 h-4 text-purple-400" />
-                                            {q}
+                                            <item.icon className="w-4 h-4 text-blue-400 group-hover:text-purple-400 transition-colors" />
+                                            <span>{item.text}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -224,7 +218,15 @@ export default function AdCreationPrompt() {
 
                         {/* Chat Messages Area - Scrollable */}
                         {messages.length > 0 && (
-                            <div className="w-full max-w-4xl mb-6 max-h-[60vh] overflow-y-auto space-y-4 px-2 scroll-smooth">
+                            <div
+                                className="flex-1 w-full max-w-4xl mb-4 overflow-y-auto space-y-4 px-2 custom-scrollbar overscroll-contain [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
+                                style={{
+                                    scrollBehavior: 'auto',
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'rgba(255,255,255,0.3) rgba(255,255,255,0.1)'
+                                }}
+                                data-lenis-prevent="true"
+                            >
                                 <AnimatePresence>
                                     {messages.map((message, index) => (
                                         <motion.div
@@ -282,98 +284,88 @@ export default function AdCreationPrompt() {
                             </div>
                         )}
 
-                        {/* Input Form - Fixed at Bottom */}
-                        <form onSubmit={handleSendMessage} className={`w-full max-w-4xl relative group/input z-20 sticky ${isMobile ? 'bottom-20' : 'bottom-6'}`}>
-                            <div className={`
-                                relative flex items-center overflow-hidden rounded-2xl border transition-all duration-300
-                                ${isFocused
-                                    ? "border-purple-500/50 bg-white/[0.03] shadow-[0_0_50px_-10px_rgba(168,85,247,0.3)]"
-                                    : "border-white/10 bg-white/[0.02]"
-                                }
-                                ${isMobile ? 'flex-col p-3 gap-3 h-auto min-h-[80px]' : 'h-16 md:h-16'} 
-                            `}>
-                                {!isMobile && (
-                                    <div className="pl-6 text-gray-400">
-                                        <Sparkles className={`h-5 w-5 transition-colors duration-300 ${isFocused ? "text-purple-400 animate-pulse" : "text-gray-500"}`} />
+                        {/* Input Form - Sticky Footer Integrated */}
+                        <form onSubmit={handleSendMessage} className={`w-full mt-auto relative z-20 sticky ${isMobile ? 'bottom-0' : 'bottom-0'}`}>
+
+                            <div className={`bg-[#1e1e2d] backdrop-blur-xl border border-white/5 ${isMobile ? 'p-1 rounded-2xl' : 'p-3 rounded-3xl'} shadow-lg transition-all duration-300`}>
+                                {/* Input Area - Textarea */}
+                                <textarea
+                                    value={prompt}
+                                    onChange={(e) => setPrompt(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSendMessage(e);
+                                        }
+                                    }}
+                                    onFocus={() => setIsFocused(true)}
+                                    onBlur={() => setIsFocused(false)}
+                                    disabled={isLoading}
+                                    placeholder={messages.length === 0 ? "Describe your ads..." : "Type your question here..."}
+                                    rows={2}
+                                    className="w-full p-2 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none text-base font-medium leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+                                />
+
+                                {/* Controls */}
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+                                    {/* Left side controls */}
+                                    <div className="flex flex-wrap items-center gap-2 pl-1">
+                                        {/* Tools Button */}
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                        >
+                                            <Paperclip size={18} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                                            <span className="font-medium text-sm">Tools</span>
+                                        </button>
+
+                                        {/* Search Button */}
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                        >
+                                            <Globe size={18} className="group-hover:text-blue-400 transition-colors" />
+                                            <span className="font-medium text-sm">Search</span>
+                                        </button>
                                     </div>
-                                )}
 
-                                <div className="relative flex-1 h-full">
-                                    <input
-                                        type="text"
-                                        value={prompt}
-                                        onChange={(e) => setPrompt(e.target.value)}
-                                        onFocus={() => setIsFocused(true)}
-                                        onBlur={() => setIsFocused(false)}
-                                        disabled={isLoading}
-                                        placeholder={messages.length === 0 ? "" : "Type your question here..."}
-                                        className={`
-                                            w-full h-full bg-transparent text-white outline-none 
-                                            ${isMobile ? 'px-4 py-3 text-base placeholder:text-gray-500' : 'px-4 md:px-6 placeholder:text-gray-500 text-sm md:text-base'}
-                                            disabled:opacity-50 disabled:cursor-not-allowed
-                                        `}
-                                    />
-
-                                    {/* Dynamic Placeholder - Only when no messages */}
-                                    {!prompt && messages.length === 0 && (
-                                        <div className={`absolute inset-0 flex items-center pointer-events-none ${isMobile ? 'px-4 flex-wrap' : 'px-6'}`}>
-                                            <span className={`text-gray-500 ${isMobile ? 'text-sm' : 'text-base'} mr-2 whitespace-nowrap`}>
-                                                Describe your ads,
-                                            </span>
-                                            <div className={`relative h-6 overflow-hidden ${isMobile ? 'w-full' : 'flex-1'}`}>
-                                                <div
-                                                    key={currentExampleIndex}
-                                                    className={`animate-in fade-in slide-in-from-bottom-2 duration-500 text-gray-400 italic font-medium text-sm ${isMobile ? '' : 'whitespace-nowrap'}`}
-                                                >
-                                                    "{INDUSTRY_EXAMPLES[currentExampleIndex]}"
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className={isMobile ? 'w-full' : 'pr-2'}>
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading || !prompt.trim()}
-                                        className={`
-                                            relative z-20 inline-flex items-center justify-center gap-2 font-semibold text-white shadow-lg transition-all duration-300 
-                                            bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500
-                                            disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale
-                                            ${isMobile ? 'w-full h-12 rounded-xl text-base' : 'h-12 px-6 rounded-xl text-base hover:scale-[1.02] hover:shadow-purple-500/25'}
-                                        `}
-                                    >
-                                        {isLoading ? (
-                                            <div className="flex items-center gap-2">
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                                <span>Analyzing...</span>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {messages.length === 0 ? "Generate" : "Send"}
-                                                <ArrowRight className="h-4 w-4" />
-                                            </>
-                                        )}
-                                    </button>
+                                    {/* Right side controls */}
+                                    <div className="flex items-center gap-3 w-full md:w-auto justify-end mt-3 md:mt-0">
+                                        {/* Bell Icon */}
+                                        <button
+                                            type="button"
+                                            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all active:scale-95"
+                                        >
+                                            <Bell size={20} />
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading || !prompt.trim()}
+                                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${prompt.trim() && !isLoading
+                                                ? 'bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] text-white shadow-purple-500/20'
+                                                : 'bg-gradient-to-br from-gray-800 to-gray-700 text-gray-500 cursor-not-allowed'
+                                                }`}
+                                        >
+                                            {isLoading ? (
+                                                <Loader2 size={22} className="animate-spin" />
+                                            ) : (
+                                                <ArrowUp size={22} />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </form>
 
+                        {/* Privacy Notice */}
+                        <p className="mt-4 text-center text-xs text-gray-500">
+                            AI may make mistakes. We recommend checking important information. <a href="#" className="underline hover:text-gray-400">Privacy Notice</a>
+                        </p>
+
                         {/* CTA Buttons - Show only when there are messages */}
                         {messages.length > 0 && (
                             <div className="mt-6 w-full max-w-4xl flex flex-col sm:flex-row justify-center gap-4">
-                                <GlowButton
-                                    onClick={() => window.location.href = '/pricing'}
-                                    variant="purple"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                        </svg>
-                                        View Pricing
-                                    </span>
-                                </GlowButton>
+
                                 <GlowButton
                                     onClick={handleCreateCampaign}
                                     variant="blue"
