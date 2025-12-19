@@ -72,6 +72,7 @@
 		"react-dom": "^19.1.0",
 		"react-flip-toolkit": "^7.2.4",
 		"react-i18next": "^15.5.3",
+		"react-markdown": "^10.1.0",
 		"react-responsive": "^10.0.1",
 		"react-simple-wysiwyg": "^3.2.2",
 		"react-spring": "^10.0.1",
