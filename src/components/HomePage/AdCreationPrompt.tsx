@@ -163,7 +163,7 @@ export default function AdCreationPrompt() {
                     className="relative w-full max-w-4xl mx-auto bg-[#020617]/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 transition-all duration-300 hover:shadow-3xl overflow-hidden"
                 >
                     {/* Content Container */}
-                    <div className={`relative flex flex-col items-center w-full h-[85vh] max-h-[900px] min-h-[500px] ${isMobile ? 'p-6 py-8' : 'p-12 md:p-20'}`}>
+                    <div className={`relative flex flex-col items-center w-full h-auto max-h-[85vh] min-h-[400px] ${isMobile ? 'p-3 py-4' : 'p-6 md:p-10'}`}>
 
                         {/* Header - Only show when no messages */}
                         {messages.length === 0 && (
@@ -219,7 +219,7 @@ export default function AdCreationPrompt() {
                         {/* Chat Messages Area - Scrollable */}
                         {messages.length > 0 && (
                             <div
-                                className="flex-1 w-full max-w-4xl mb-4 overflow-y-auto space-y-4 px-2 custom-scrollbar overscroll-contain [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
+                                className="flex-1 w-full max-w-4xl mb-2 overflow-y-auto space-y-4 px-2 custom-scrollbar overscroll-contain [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
                                 style={{
                                     scrollBehavior: 'auto',
                                     scrollbarWidth: 'thin',
@@ -287,7 +287,7 @@ export default function AdCreationPrompt() {
                         {/* Input Form - Sticky Footer Integrated */}
                         <form onSubmit={handleSendMessage} className={`w-full mt-auto relative z-20 sticky ${isMobile ? 'bottom-0' : 'bottom-0'}`}>
 
-                            <div className={`bg-[#1e1e2d] backdrop-blur-xl border border-white/5 ${isMobile ? 'p-1 rounded-2xl' : 'p-3 rounded-3xl'} shadow-lg transition-all duration-300`}>
+                            <div className={`bg-[#1e1e2d] backdrop-blur-xl border border-white/5 ${isMobile ? 'p-3 rounded-2xl' : 'p-5 rounded-3xl'} shadow-lg transition-all duration-300`}>
                                 {/* Input Area - Textarea */}
                                 <textarea
                                     value={prompt}
@@ -307,30 +307,30 @@ export default function AdCreationPrompt() {
                                 />
 
                                 {/* Controls */}
-                                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+                                <div className="flex flex-row items-center justify-between gap-2">
                                     {/* Left side controls */}
                                     <div className="flex flex-wrap items-center gap-2 pl-1">
                                         {/* Tools Button */}
                                         <button
                                             type="button"
-                                            className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                            className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
                                         >
-                                            <Paperclip size={18} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                                            <Paperclip size={20} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
                                             <span className="font-medium text-sm">Tools</span>
                                         </button>
 
                                         {/* Search Button */}
                                         <button
                                             type="button"
-                                            className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                            className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
                                         >
-                                            <Globe size={18} className="group-hover:text-blue-400 transition-colors" />
+                                            <Globe size={20} className="group-hover:text-blue-400 transition-colors" />
                                             <span className="font-medium text-sm">Search</span>
                                         </button>
                                     </div>
 
                                     {/* Right side controls */}
-                                    <div className="flex items-center gap-3 w-full md:w-auto justify-end mt-3 md:mt-0">
+                                    <div className="flex items-center gap-2 md:gap-3">
                                         {/* Bell Icon */}
                                         <button
                                             type="button"
@@ -341,15 +341,15 @@ export default function AdCreationPrompt() {
                                         <button
                                             type="submit"
                                             disabled={isLoading || !prompt.trim()}
-                                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${prompt.trim() && !isLoading
-                                                ? 'bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] text-white shadow-purple-500/20'
+                                            className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${prompt.trim() && !isLoading
+                                                ? 'bg-[#3b82f6] hover:bg-[#2563eb] text-white shadow-blue-500/20'
                                                 : 'bg-gradient-to-br from-gray-800 to-gray-700 text-gray-500 cursor-not-allowed'
                                                 }`}
                                         >
                                             {isLoading ? (
-                                                <Loader2 size={22} className="animate-spin" />
+                                                <Loader2 size={20} className="animate-spin" />
                                             ) : (
-                                                <ArrowUp size={22} />
+                                                <ArrowRight size={20} className="text-white" />
                                             )}
                                         </button>
                                     </div>
