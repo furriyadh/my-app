@@ -3,7 +3,7 @@ import GlowButton from '@/components/ui/glow-button';
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, MessageCircle, ArrowRight, ArrowUp, Loader2, Paperclip, Globe, Bell, Zap, Wand2, PenTool, User, Bot } from 'lucide-react';
+import { Search, Sparkles, MessageCircle, ArrowRight, ArrowUp, Loader2, Paperclip, Globe, Bell, Zap, Wand2, PenTool, User, Bot, Mic, X, Image as ImageIcon } from 'lucide-react';
 import { createClient } from "@/utils/supabase/client";
 import { useMediaQuery } from "react-responsive";
 import AvatarGroup from "@/components/ui/avatar-group";
@@ -14,6 +14,7 @@ type Message = {
     role: 'user' | 'assistant';
     content: string;
     timestamp: number;
+    images?: string[];
 };
 
 export default function AdCreationPrompt() {
@@ -23,8 +24,13 @@ export default function AdCreationPrompt() {
     const [isFocused, setIsFocused] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
+    const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const [isRecording, setIsRecording] = useState(false);
+    // New ref for the scrollable chat container
+    const chatContainerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
 
     // 50 Diverse Industry Examples for Google Ads
@@ -93,18 +99,95 @@ export default function AdCreationPrompt() {
         return () => container.removeEventListener("mousemove", handleMouseMove);
     }, [isDesktop]);
 
+    useEffect(() => {
+        // Scroll the chat container to bottom when messages update
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: "smooth"
+            });
+        }
+    }, [messages]);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setSelectedImages(prev => [...prev, ...Array.from(e.target.files!)]);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const toggleRecording = () => {
+        if (isRecording) {
+            setIsRecording(false);
+            (window as any).speechRecognitionInstance?.stop();
+        } else {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'ar-SA'; // Default to Arabic as requested context implies, or 'en-US'
+
+                recognition.onstart = () => setIsRecording(true);
+                recognition.onend = () => {
+                    if (isRecording) setIsRecording(false);
+                };
+
+                recognition.onresult = (event: any) => {
+                    const transcript = event.results[0][0].transcript;
+                    setPrompt(prev => prev + (prev ? " " : "") + transcript);
+                };
+
+                recognition.start();
+                (window as any).speechRecognitionInstance = recognition;
+            } else {
+                alert("Speech recognition is not supported in this browser.");
+            }
+        }
+    };
+
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!prompt.trim() || isLoading) return;
+        if ((!prompt.trim() && selectedImages.length === 0) || isLoading) return;
+
+        // Process images - Upload to Supabase Storage via Backend API (Bypassing RLS)
+        const uploadPromises = selectedImages.map(async (file) => {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const data = await response.json();
+                return data.publicUrl;
+            } catch (err) {
+                console.error("Image upload processing error:", err);
+                return "";
+            }
+        });
+
+        const imageUrls = (await Promise.all(uploadPromises)).filter(url => url !== "");
 
         const userMessage: Message = {
             role: 'user',
             content: prompt.trim(),
+            images: imageUrls.length > 0 ? imageUrls : undefined,
             timestamp: Date.now()
         };
 
         setMessages(prev => [...prev, userMessage]);
         setPrompt("");
+        setSelectedImages([]);
         setIsLoading(true);
 
         try {
@@ -219,11 +302,13 @@ export default function AdCreationPrompt() {
                         {/* Chat Messages Area - Scrollable */}
                         {messages.length > 0 && (
                             <div
+                                ref={chatContainerRef}
                                 className="flex-1 w-full max-w-4xl mb-2 overflow-y-auto space-y-4 px-2 custom-scrollbar overscroll-contain [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
                                 style={{
                                     scrollBehavior: 'auto',
                                     scrollbarWidth: 'thin',
-                                    scrollbarColor: 'rgba(255,255,255,0.3) rgba(255,255,255,0.1)'
+                                    scrollbarColor: 'rgba(255,255,255,0.3) rgba(255,255,255,0.1)',
+                                    overscrollBehavior: 'auto' // Allow page scroll when boundary reached
                                 }}
                                 data-lenis-prevent="true"
                             >
@@ -231,9 +316,9 @@ export default function AdCreationPrompt() {
                                     {messages.map((message, index) => (
                                         <motion.div
                                             key={index}
-                                            initial={{ opacity: 0, y: 20 }}
+                                            initial={{ opacity: 0, y: 10 }} // Reduced motion distance for smoother feel
                                             animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -20 }}
+                                            exit={{ opacity: 0, y: -10 }}
                                             className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                         >
                                             {message.role === 'assistant' && (
@@ -277,6 +362,15 @@ export default function AdCreationPrompt() {
                                                     </div>
                                                 </div>
                                             )}
+
+                                            {/* Render Attached Images if any */}
+                                            {message.images && message.images.length > 0 && (
+                                                <div className="flex gap-2 mt-2 flex-wrap justify-end w-full">
+                                                    {message.images.map((img, i) => (
+                                                        <img key={i} src={img} alt="Attached" className="w-24 h-24 object-cover rounded-lg border border-white/10 shadow-md" />
+                                                    ))}
+                                                </div>
+                                            )}
                                         </motion.div>
                                     ))}
                                 </AnimatePresence>
@@ -288,6 +382,41 @@ export default function AdCreationPrompt() {
                         <form onSubmit={handleSendMessage} className={`w-full mt-auto relative z-20 sticky ${isMobile ? 'bottom-0' : 'bottom-0'}`}>
 
                             <div className={`bg-[#1e1e2d] backdrop-blur-xl border border-white/5 ${isMobile ? 'p-3 rounded-2xl' : 'p-5 rounded-3xl'} shadow-lg transition-all duration-300`}>
+
+                                {/* Image Preview Area - Refined */}
+                                {selectedImages.length > 0 && (
+                                    <div className="mb-3 px-2">
+                                        <h3 className="text-gray-500 text-[10px] font-normal mb-2 flex items-center gap-1.5 opacity-70">
+                                            <Paperclip size={10} />
+                                            Extract only text from images and files.
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedImages.map((file, idx) => (
+                                                <div key={idx} className="relative group bg-white/5 border border-white/10 rounded-xl p-2 flex items-center gap-3 pr-8">
+                                                    <img
+                                                        src={URL.createObjectURL(file)}
+                                                        alt="preview"
+                                                        className="w-10 h-10 object-cover rounded-lg"
+                                                    />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm text-gray-200 font-medium truncate max-w-[120px]">{file.name}</span>
+                                                        <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(0)} KB • Uploading...</span>
+                                                    </div>
+                                                    <div className="hidden group-hover:flex absolute right-2 top-1/2 -translate-y-1/2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(idx)}
+                                                            className="text-gray-400 hover:text-red-400 transition-colors"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Input Area - Textarea */}
                                 <textarea
                                     value={prompt}
@@ -313,11 +442,20 @@ export default function AdCreationPrompt() {
                                         {/* Tools Button */}
                                         <button
                                             type="button"
+                                            onClick={() => fileInputRef.current?.click()}
                                             className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
                                         >
                                             <Paperclip size={20} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
                                             <span className="font-medium text-sm">Tools</span>
                                         </button>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleFileSelect}
+                                        />
 
                                         {/* Search Button */}
                                         <button
@@ -332,16 +470,18 @@ export default function AdCreationPrompt() {
                                     {/* Right side controls */}
                                     <div className="flex items-center gap-2 md:gap-3">
                                         {/* Bell Icon */}
+                                        {/* Mic Icon */}
                                         <button
                                             type="button"
-                                            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all active:scale-95"
+                                            onClick={toggleRecording}
+                                            className={`p-2 rounded-lg transition-all active:scale-95 ${isRecording ? 'text-red-500 bg-red-500/10 animate-pulse' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                                         >
-                                            <Bell size={20} />
+                                            <Mic size={20} />
                                         </button>
                                         <button
                                             type="submit"
-                                            disabled={isLoading || !prompt.trim()}
-                                            className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${prompt.trim() && !isLoading
+                                            disabled={isLoading || (!prompt.trim() && selectedImages.length === 0)}
+                                            className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${(prompt.trim() || selectedImages.length > 0) && !isLoading
                                                 ? 'bg-[#3b82f6] hover:bg-[#2563eb] text-white shadow-blue-500/20'
                                                 : 'bg-gradient-to-br from-gray-800 to-gray-700 text-gray-500 cursor-not-allowed'
                                                 }`}

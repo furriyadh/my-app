@@ -31,6 +31,7 @@ const PROVIDERS = {
 type Message = {
     role: string;
     content: string;
+    images?: string[]; // Base64 strings
 };
 
 export async function POST(req: NextRequest) {
@@ -55,6 +56,20 @@ PLATFORM STRENGTHS (always highlight):
 ✨ No expertise needed
 ✨ Budget starts at just SR 19/day ($5/day)
 ✨ Professional results like big brands get
+
+⛔ IMPORTANT RULES (CRITICAL):
+1. WE ONLY SUPPORT GOOGLE ADS (Search, Youtube, Display, Maps).
+2. WE DO NOT SUPPORT: Facebook, Instagram, TikTok, Snapchat, Twitter, LinkedIn.
+3. If user asks for Facebook/Instagram/etc, explicitly state: "غير مدعوم بالوقت الحالي" (Not supported at the moment).
+4. Then briefly pivot to Google Ads (e.g., "But we can help you reach customers actively searching on Google!").
+5. BUDGET REALITY CHECK (CRITICAL):
+   - Minimum daily budget: ~20 SAR ($5).
+   - Minimum monthly budget: ~600 SAR ($150).
+   - IF USER SAYS "100 SAR" or anything < 600 SAR/month:
+     - YOU MUST politely explain that this is too low for Google Ads to be effective.
+     - DO NOT say "Good budget". Say "Verified Truth: 100 SAR is likely too low to see results."
+     - Recommend the minimum: "Starting with 600 SAR/month (20 SAR/day) allows Google's AI to find customers effectively."
+     - BE HONEST. Do not misleadingly encourage extremely low budgets.
 
 PRICING PLANS (mention when asked about pricing or plans):
 
@@ -370,8 +385,93 @@ async function callProvider(provider: keyof typeof PROVIDERS | "google2" | "goog
 
 async function callGoogleAI(apiKey: string, messages: Message[], model: string): Promise<string | null> {
     try {
-        // Convert messages to Google's format
-        const lastMessage = messages[messages.length - 1];
+        // Combine messages into a single prompt to preserve context and system instructions
+        // Handle multimodal content (text + images) correctly for Gemini
+        const contents = messages.map(msg => {
+            const parts: any[] = [{ text: `[${msg.role.toUpperCase()}]: ${msg.content}` }];
+
+            // Add images if present
+            if (msg.images && msg.images.length > 0) {
+                msg.images.forEach(img => {
+                    // Extract base64 data and mime type
+                    // Expected format: "data:image/jpeg;base64,/9j/4AAQSw..."
+                    const matches = img.match(/^data:(.+);base64,(.+)$/);
+                    if (matches) {
+                        parts.push({
+                            inline_data: {
+                                mime_type: matches[1],
+                                data: matches[2]
+                            }
+                        });
+                    }
+                });
+            }
+            return { parts };
+        });
+
+        // For v1beta generateContent with history, we essentially strictly send 'contents'
+        // But since we are concatenating history manually in the previous approach (due to statelessness assumption or single turn refactor),
+        // let's stick to the "single big prompt" approach but enhanced with images.
+        // HOWEVER, Gemini API `contents` field expects a list of turn-by-turn messages if we want chat mode,
+        // OR we can squash everything. Squashing images is trickier. 
+        // Best approach for "stateless" REST API with history is to pass the full `contents` array structure.
+
+        // Let's refactor to send standard Gemini chat structure instead of squashing string
+        // Mapped messages above `contents` is ALMOST correct but roles need to be 'user' or 'model'.
+        // 'system' role is supported in Gemini 1.5/2.0 as a separate field or implicit.
+
+        // Let's revert to a simpler "Append images to the LAST user message" strategy for now 
+        // and keep the "Squashed Text" history for context, because rewriting full history mapping is risky without testing.
+
+        // BETTER STRATEGY: 
+        // 1. Construct text context from history.
+        // 2. Attach images from the CURRENT prompt (last user message) to the request.
+
+        const lastMsg = messages[messages.length - 1];
+        const textContext = messages.map(msg => `[${msg.role.toUpperCase()}]: ${msg.content}`).join("\n\n");
+
+        const requestParts: any[] = [{ text: textContext }];
+
+        if (lastMsg.images && lastMsg.images.length > 0) {
+            // Fetch images server-side to avoid CORS or direct URL issues with Gemini if it expects inline
+            // Actually Gemini API supports fileData from Google File API, but for 'inline_data' it wants base64.
+            // Since we upload to Supabase public URL, let's fetch it here and convert to base64.
+
+            for (const imgUrl of lastMsg.images) {
+                try {
+                    // Check if it's already base64 (fallback) or URL
+                    if (imgUrl.startsWith("data:")) {
+                        const matches = imgUrl.match(/^data:(.+);base64,(.+)$/);
+                        if (matches) {
+                            requestParts.push({
+                                inline_data: {
+                                    mime_type: matches[1],
+                                    data: matches[2]
+                                }
+                            });
+                        }
+                    } else if (imgUrl.startsWith("http")) {
+                        // Fetch from URL
+                        const imgRes = await fetch(imgUrl);
+                        if (!imgRes.ok) throw new Error(`Failed to fetch image: ${imgUrl}`);
+                        const arrayBuffer = await imgRes.arrayBuffer();
+                        const buffer = Buffer.from(arrayBuffer);
+                        const base64Data = buffer.toString('base64');
+                        const mimeType = imgRes.headers.get("content-type") || "image/jpeg";
+
+                        requestParts.push({
+                            inline_data: {
+                                mime_type: mimeType,
+                                data: base64Data
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error processing image for backend:", err);
+                    // Skip image if failed
+                }
+            }
+        }
 
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -380,7 +480,7 @@ async function callGoogleAI(apiKey: string, messages: Message[], model: string):
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     contents: [{
-                        parts: [{ text: lastMessage.content }]
+                        parts: requestParts
                     }]
                 })
             }
