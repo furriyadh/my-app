@@ -17,16 +17,8 @@ export default function Home() {
       {/* Custom Scrollbar Styles for this page - Handled by Client Component */}
       <LavenderScrollbar />
 
-      {/* Indigo Cosmos Background with Top & Bottom Glow */}
-      <div
-        className="fixed inset-0 z-0 bg-[#030014]"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25) 0%, transparent 60%),
-            radial-gradient(circle at 80% 90%, rgba(124, 58, 237, 0.15) 0%, transparent 50%)
-          `,
-        }}
-      />
+      {/* Neutral Dark Background - Slate 950 */}
+      <div className="fixed inset-0 z-0 bg-slate-950" />
 
       {/* Content */}
       <div className="relative z-10">
