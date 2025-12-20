@@ -152,8 +152,8 @@ const Navbar: React.FC = () => {
                     <Link
                       href={item.path}
                       className={`font-medium transition-all hover:text-primary-600 text-[15px] xl:text-md dark:text-gray-400 ${pathname === item.path
-                          ? "text-primary-600 dark:text-primary-600"
-                          : ""
+                        ? "text-primary-600 dark:text-primary-600"
+                        : ""
                         }`}
                     >
                       {item.name}
@@ -325,6 +325,7 @@ const Navbar: React.FC = () => {
                     {t.common.register}
                   </span>
                 </Link>
+
               </div>
             </div>
           </div>

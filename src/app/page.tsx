@@ -9,43 +9,39 @@ import GoogleOneTap from "@/components/Authentication/GoogleOneTap";
 import ComparisonSection from "@/components/HomePage/ComparisonSection";
 
 
+import LavenderScrollbar from "@/components/Theme/LavenderScrollbar";
+
 export default function Home() {
   return (
-    <div className="min-h-screen w-full bg-white relative overflow-hidden" dir="ltr">
-      {/* Lime Center Glow */}
+    <div className="min-h-screen w-full relative" dir="ltr">
+      {/* Custom Scrollbar Styles for this page - Handled by Client Component */}
+      <LavenderScrollbar />
+
+      {/* Indigo Cosmos Background with Top Glow */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="absolute inset-0 z-0 text-indigo-500"
         style={{
-          backgroundImage: `
-            radial-gradient(circle at center, #84cc16, transparent)
-          `,
+          background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.25), transparent 70%), #000000",
         }}
       />
 
-      <Navbar />
+      {/* Content */}
+      <div className="relative z-10">
+        <Navbar />
 
-      {/* 
-        Direct Rendering - Optimized for Performance
-      */}
-      <main className="min-h-screen bg-transparent text-white relative z-10 selection:bg-purple-500/30 selection:text-white">
+        <main className="min-h-screen bg-transparent relative selection:bg-purple-500/30 selection:text-white">
+          <SmoothScrollManager />
+          <Hero />
+          <AdCreationPrompt />
+          <GoogleOneTap />
 
-        {/* Scroll Control */}
-        <SmoothScrollManager />
+          <div className="relative space-y-0 pb-10">
+            <ComparisonSection />
+          </div>
+        </main>
 
-        {/* New 3D Hero */}
-        <Hero />
-
-        {/* AI Ad Prompt */}
-        <AdCreationPrompt />
-        <GoogleOneTap />
-
-        <div className="relative z-20 space-y-0 pb-10">
-          <ComparisonSection />
-        </div>
-      </main>
-
-      <Footer />
-
+        <Footer />
+      </div>
     </div>
   );
 }

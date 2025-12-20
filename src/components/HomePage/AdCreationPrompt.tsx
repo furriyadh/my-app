@@ -17,6 +17,14 @@ type Message = {
     images?: string[];
 };
 
+// User Avatars for consistent identity per session (Dynamic selection)
+const USER_AVATARS = [
+    { src: "https://i.pravatar.cc/150?u=a042581f4e29026024d", alt: "Google Ads Expert" },
+    { src: "https://i.pravatar.cc/150?u=a04258a2462d826712d", alt: "Strategist" },
+    { src: "https://i.pravatar.cc/150?u=a042581f4e29026704d", alt: "AI Advisor" },
+    { src: "https://i.pravatar.cc/150?u=a04258114e29026302d", alt: "Analyst" },
+];
+
 export default function AdCreationPrompt() {
     const [prompt, setPrompt] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
@@ -26,6 +34,14 @@ export default function AdCreationPrompt() {
     const router = useRouter();
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [isRecording, setIsRecording] = useState(false);
+    // State for dynamic user avatar
+    const [userAvatar, setUserAvatar] = useState(USER_AVATARS[0]);
+
+    useEffect(() => {
+        // Randomly select an avatar on mount to simulate different users/conversations
+        setUserAvatar(USER_AVATARS[Math.floor(Math.random() * USER_AVATARS.length)]);
+    }, []);
+
     // New ref for the scrollable chat container
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -60,6 +76,8 @@ export default function AdCreationPrompt() {
         "Fashion Store", "Fitness Gym", "Local Bakery", "Law Firm",
         "Online Course", "Travel Agency", "Pet Store", "Car Rental"
     ];
+
+
 
     const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
 
@@ -100,12 +118,42 @@ export default function AdCreationPrompt() {
     }, [isDesktop]);
 
     useEffect(() => {
-        // Scroll the chat container to bottom when messages update
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTo({
-                top: chatContainerRef.current.scrollHeight,
-                behavior: "smooth"
-            });
+        // Scroll logic: Anchor the latest user message to the top to show the Q&A flow clearly
+        const lastMessageIndex = messages.length - 1;
+        if (lastMessageIndex >= 0) {
+            const lastMessage = messages[lastMessageIndex];
+
+            // If User sends: Scroll User Message to Top
+            // If Assistant sends: Scroll Previous Message (User Message) to Top to keep context
+            let targetIndex = -1;
+
+            if (lastMessage.role === 'user') {
+                targetIndex = lastMessageIndex;
+            } else if (lastMessage.role === 'assistant' && lastMessageIndex > 0) {
+                targetIndex = lastMessageIndex - 1;
+            }
+
+            if (targetIndex !== -1) {
+                const element = document.getElementById(`message-${targetIndex}`);
+                if (element && chatContainerRef.current) {
+                    // setTimeout ensures DOM is ready after render
+                    setTimeout(() => {
+                        const container = chatContainerRef.current;
+                        if (!container) return;
+
+                        const containerRect = container.getBoundingClientRect();
+                        const elementRect = element.getBoundingClientRect();
+
+                        // Current scroll + distance from top of container
+                        const relativeTop = elementRect.top - containerRect.top;
+
+                        container.scrollTo({
+                            top: container.scrollTop + relativeTop - 10, // -10 for a little padding
+                            behavior: 'smooth'
+                        });
+                    }, 100);
+                }
+            }
         }
     }, [messages]);
 
@@ -243,281 +291,298 @@ export default function AdCreationPrompt() {
             <div className="mx-auto w-full max-w-[95rem] transition-all duration-300">
                 <div
                     ref={containerRef}
-                    className="relative w-full max-w-4xl mx-auto bg-[#020617]/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 transition-all duration-300 hover:shadow-3xl overflow-hidden"
+                    className="relative max-w-6xl mx-auto h-[40rem] md:h-[45rem] w-full bg-transparent transition-all duration-300 hover:shadow-3xl overflow-visible"
                 >
                     {/* Content Container */}
-                    <div className={`relative flex flex-col items-center w-full h-auto max-h-[85vh] min-h-[400px] ${isMobile ? 'p-3 py-4' : 'p-6 md:p-10'}`}>
+                    <div className="h-full w-full overflow-hidden rounded-2xl bg-[#0f0f0f] md:rounded-2xl relative flex flex-col">
+                        {/* Mac Window Header */}
+                        <div className="h-10 w-full bg-[#1e1e1e]/50 border-b border-white/5 flex items-center px-4 gap-2 flex-shrink-0">
+                            <div className="h-3 w-3 rounded-full bg-[#FF5F56]"></div>
+                            <div className="h-3 w-3 rounded-full bg-[#FFBD2E]"></div>
+                            <div className="h-3 w-3 rounded-full bg-[#27C93F]"></div>
+                        </div>
 
-                        {/* Header - Only show when no messages */}
-                        {messages.length === 0 && (
-                            <>
-                                {/* 1. AvatarGroup */}
-                                <div className="mb-6 flex flex-col items-center gap-3">
-                                    <div className="flex items-center gap-3">
-                                        <AvatarGroup
-                                            limit={4}
-                                            avatarData={[
-                                                { src: "https://i.pravatar.cc/150?u=a042581f4e29026024d", alt: "Google Ads Expert" },
-                                                { src: "https://i.pravatar.cc/150?u=a04258a2462d826712d", alt: "Strategist" },
-                                                { src: "https://i.pravatar.cc/150?u=a042581f4e29026704d", alt: "AI Advisor" },
-                                                { src: "https://i.pravatar.cc/150?u=a04258114e29026302d", alt: "Analyst" },
-                                            ]}
-                                        />
-                                        <span className="text-gray-400 text-sm font-medium">+10k Campaigns Managed</span>
-                                    </div>
-                                </div>
+                        {/* Main App Area */}
+                        <div className={`flex-1 flex flex-col items-center w-full h-full overflow-hidden ${isMobile ? 'p-3 py-4' : 'p-6 md:p-10'}`}>
 
-                                {/* 2. Main Title */}
-                                <h1 className={`text-center font-bold tracking-tight leading-[1.1] ${isMobile ? 'text-4xl mb-4' : 'text-5xl md:text-6xl lg:text-7xl mb-8'}`}>
-                                    <span className="text-white">
-                                        Build your Google Ads in seconds
-                                    </span>
-                                    <br />
-                                    <span className="text-gray-500 dark:text-gray-500">
-                                        with AI magic
-                                    </span>
-                                </h1>
-
-                                {/* 3. Quick Suggestion Chips - Dynamic & Short */}
-                                <div className="flex flex-wrap justify-center gap-3 w-full my-3 md:my-8">
-                                    {[
-                                        { icon: Zap, text: `Promote ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}`, prompt: `Create a high-converting ad campaign for a ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` },
-                                        { icon: Search, text: `${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]} KW`, prompt: `Find the best high-intent keywords for ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` },
-                                        { icon: PenTool, text: `Ad Copy`, prompt: `Write compelling ad headlines and descriptions for ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` }
-                                    ].map((item, i) => (
-                                        <button
-                                            key={i}
-                                            type="button"
-                                            onClick={() => setPrompt(item.prompt)}
-                                            className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#1e1e2d] border border-white/5 text-gray-300 hover:bg-[#252536] hover:border-purple-500/30 transition-all text-sm md:text-base font-medium group active:scale-95"
-                                        >
-                                            <item.icon className="w-4 h-4 text-blue-400 group-hover:text-purple-400 transition-colors" />
-                                            <span>{item.text}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-
-                        {/* Chat Messages Area - Scrollable */}
-                        {messages.length > 0 && (
-                            <div
-                                ref={chatContainerRef}
-                                className="flex-1 w-full max-w-4xl mb-2 overflow-y-auto space-y-4 px-2 custom-scrollbar overscroll-contain [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
-                                style={{
-                                    scrollBehavior: 'auto',
-                                    scrollbarWidth: 'thin',
-                                    scrollbarColor: 'rgba(255,255,255,0.3) rgba(255,255,255,0.1)',
-                                    overscrollBehavior: 'auto' // Allow page scroll when boundary reached
-                                }}
-                                data-lenis-prevent="true"
-                            >
-                                <AnimatePresence>
-                                    {messages.map((message, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, y: 10 }} // Reduced motion distance for smoother feel
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                        >
-                                            {message.role === 'assistant' && (
-                                                <div className="flex-shrink-0">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/50 ring-2 ring-purple-400/30">
-                                                        <Sparkles className="w-5 h-5 text-white" />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div className={`
-                                                max-w-[80%] rounded-2xl p-4 shadow-lg
-                                                ${message.role === 'user'
-                                                    ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-purple-500/20'
-                                                    : 'bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-sm border border-purple-500/20 text-gray-100 shadow-purple-500/10'
-                                                }
-                                            `}>
-                                                {message.role === 'assistant' ? (
-                                                    <div
-                                                        className="prose prose-invert prose-sm max-w-none [&>p]:leading-relaxed [&>ul]:my-2 [&>ul>li]:my-1"
-                                                        dir={/[\u0600-\u06FF]/.test(message.content) ? 'rtl' : 'ltr'}
-                                                        style={{ textAlign: /[\u0600-\u06FF]/.test(message.content) ? 'right' : 'left' }}
-                                                    >
-                                                        <ReactMarkdown>{message.content}</ReactMarkdown>
-                                                    </div>
-                                                ) : (
-                                                    <p
-                                                        className="text-sm md:text-base leading-relaxed"
-                                                        dir={/[\u0600-\u06FF]/.test(message.content) ? 'rtl' : 'ltr'}
-                                                        style={{ textAlign: /[\u0600-\u06FF]/.test(message.content) ? 'right' : 'left' }}
-                                                    >
-                                                        {message.content}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {message.role === 'user' && (
-                                                <div className="flex-shrink-0">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/50 ring-2 ring-blue-400/30">
-                                                        <User className="w-5 h-5 text-white" />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Render Attached Images if any */}
-                                            {message.images && message.images.length > 0 && (
-                                                <div className="flex gap-2 mt-2 flex-wrap justify-end w-full">
-                                                    {message.images.map((img, i) => (
-                                                        <img key={i} src={img} alt="Attached" className="w-24 h-24 object-cover rounded-lg border border-white/10 shadow-md" />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-                                <div ref={messagesEndRef} />
-                            </div>
-                        )}
-
-                        {/* Input Form - Sticky Footer Integrated */}
-                        <form onSubmit={handleSendMessage} className={`w-full mt-auto relative z-20 sticky ${isMobile ? 'bottom-0' : 'bottom-0'}`}>
-
-                            <div className={`bg-[#1e1e2d] backdrop-blur-xl border border-white/5 ${isMobile ? 'p-3 rounded-2xl' : 'p-5 rounded-3xl'} shadow-lg transition-all duration-300`}>
-
-                                {/* Image Preview Area - Refined */}
-                                {selectedImages.length > 0 && (
-                                    <div className="mb-3 px-2">
-                                        <h3 className="text-gray-500 text-[10px] font-normal mb-2 flex items-center gap-1.5 opacity-70">
-                                            <Paperclip size={10} />
-                                            Extract only text from images and files.
-                                        </h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {selectedImages.map((file, idx) => (
-                                                <div key={idx} className="relative group bg-white/5 border border-white/10 rounded-xl p-2 flex items-center gap-3 pr-8">
-                                                    <img
-                                                        src={URL.createObjectURL(file)}
-                                                        alt="preview"
-                                                        className="w-10 h-10 object-cover rounded-lg"
-                                                    />
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm text-gray-200 font-medium truncate max-w-[120px]">{file.name}</span>
-                                                        <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(0)} KB • Uploading...</span>
-                                                    </div>
-                                                    <div className="hidden group-hover:flex absolute right-2 top-1/2 -translate-y-1/2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeImage(idx)}
-                                                            className="text-gray-400 hover:text-red-400 transition-colors"
-                                                        >
-                                                            <X size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
+                            {/* Header - Only show when no messages */}
+                            {messages.length === 0 && (
+                                <>
+                                    {/* 1. AvatarGroup */}
+                                    <div className="mb-6 flex flex-col items-center gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <AvatarGroup
+                                                limit={4}
+                                                avatarData={[
+                                                    { src: "https://i.pravatar.cc/150?u=a042581f4e29026024d", alt: "Google Ads Expert" },
+                                                    { src: "https://i.pravatar.cc/150?u=a04258a2462d826712d", alt: "Strategist" },
+                                                    { src: "https://i.pravatar.cc/150?u=a042581f4e29026704d", alt: "AI Advisor" },
+                                                    { src: "https://i.pravatar.cc/150?u=a04258114e29026302d", alt: "Analyst" },
+                                                ]}
+                                            />
+                                            <span className="text-gray-400 text-sm font-medium">+10k Campaigns Managed</span>
                                         </div>
                                     </div>
-                                )}
 
-                                {/* Input Area - Textarea */}
-                                <textarea
-                                    value={prompt}
-                                    onChange={(e) => setPrompt(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSendMessage(e);
-                                        }
-                                    }}
-                                    onFocus={() => setIsFocused(true)}
-                                    onBlur={() => setIsFocused(false)}
-                                    disabled={isLoading}
-                                    placeholder={messages.length === 0 ? "Describe your ads..." : "Type your question here..."}
-                                    rows={2}
-                                    className="w-full p-2 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none text-base font-medium leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed mb-2"
-                                />
+                                    {/* 2. Main Title */}
+                                    <h1 className={`text-center font-bold tracking-tight leading-[1.1] ${isMobile ? 'text-4xl mb-4' : 'text-5xl md:text-6xl lg:text-7xl mb-8'}`}>
+                                        <span className="text-white">
+                                            Build your Google Ads in seconds
+                                        </span>
+                                        <br />
+                                        <span className="text-gray-500 dark:text-gray-500">
+                                            with AI magic
+                                        </span>
+                                    </h1>
 
-                                {/* Controls */}
-                                <div className="flex flex-row items-center justify-between gap-2">
-                                    {/* Left side controls */}
-                                    <div className="flex flex-wrap items-center gap-2 pl-1">
-                                        {/* Tools Button */}
-                                        <button
-                                            type="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
-                                        >
-                                            <Paperclip size={20} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
-                                            <span className="font-medium text-sm">Tools</span>
-                                        </button>
-                                        <input
-                                            type="file"
-                                            ref={fileInputRef}
-                                            className="hidden"
-                                            accept="image/*"
-                                            multiple
-                                            onChange={handleFileSelect}
-                                        />
-
-                                        {/* Search Button */}
-                                        <button
-                                            type="button"
-                                            className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
-                                        >
-                                            <Globe size={20} className="group-hover:text-blue-400 transition-colors" />
-                                            <span className="font-medium text-sm">Search</span>
-                                        </button>
+                                    {/* 3. Quick Suggestion Chips - Dynamic & Short */}
+                                    <div className="flex flex-wrap justify-center gap-3 w-full my-3 md:my-8">
+                                        {[
+                                            { icon: Zap, text: `Promote ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}`, prompt: `Create a high-converting ad campaign for a ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` },
+                                            { icon: Search, text: `${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]} KW`, prompt: `Find the best high-intent keywords for ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` },
+                                            { icon: PenTool, text: `Ad Copy`, prompt: `Write compelling ad headlines and descriptions for ${INDUSTRIES[currentExampleIndex % INDUSTRIES.length]}` }
+                                        ].map((item, i) => (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => setPrompt(item.prompt)}
+                                                className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#1e1e2d] border border-white/5 text-gray-300 hover:bg-[#252536] hover:border-purple-500/30 transition-all text-sm md:text-base font-medium group active:scale-95"
+                                            >
+                                                <item.icon className="w-4 h-4 text-blue-400 group-hover:text-purple-400 transition-colors" />
+                                                <span>{item.text}</span>
+                                            </button>
+                                        ))}
                                     </div>
+                                </>
+                            )}
 
-                                    {/* Right side controls */}
-                                    <div className="flex items-center gap-2 md:gap-3">
-                                        {/* Bell Icon */}
-                                        {/* Mic Icon */}
-                                        <button
-                                            type="button"
-                                            onClick={toggleRecording}
-                                            className={`p-2 rounded-lg transition-all active:scale-95 ${isRecording ? 'text-red-500 bg-red-500/10 animate-pulse' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                                        >
-                                            <Mic size={20} />
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={isLoading || (!prompt.trim() && selectedImages.length === 0)}
-                                            className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${(prompt.trim() || selectedImages.length > 0) && !isLoading
-                                                ? 'bg-[#3b82f6] hover:bg-[#2563eb] text-white shadow-blue-500/20'
-                                                : 'bg-gradient-to-br from-gray-800 to-gray-700 text-gray-500 cursor-not-allowed'
-                                                }`}
-                                        >
-                                            {isLoading ? (
-                                                <Loader2 size={20} className="animate-spin" />
-                                            ) : (
-                                                <ArrowRight size={20} className="text-white" />
-                                            )}
-                                        </button>
+                            {/* Chat Messages Area - Scrollable */}
+                            {messages.length > 0 && (
+                                <div
+                                    ref={chatContainerRef}
+                                    className="flex-1 w-full max-w-7xl mb-2 overflow-y-auto space-y-4 px-2 custom-scrollbar overscroll-contain [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
+                                    style={{
+                                        scrollBehavior: 'auto',
+                                        scrollbarWidth: 'thin',
+                                        scrollbarColor: 'rgba(255,255,255,0.3) rgba(255,255,255,0.1)',
+                                        overscrollBehavior: 'auto' // Allow page scroll when boundary reached
+                                    }}
+                                    data-lenis-prevent="true"
+                                >
+                                    <AnimatePresence>
+                                        {messages.map((message, index) => (
+                                            <motion.div
+                                                key={index}
+                                                id={`message-${index}`}
+                                                initial={{ opacity: 0, y: 10 }} // Reduced motion distance for smoother feel
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                {message.role === 'assistant' && (
+                                                    <Bot className="w-9 h-9 text-[#8b5cf6] drop-shadow-sm flex-shrink-0" />
+                                                )}
+
+                                                <div className={`
+                                                max-w-[85%] rounded-2xl p-3 shadow-md relative overflow-hidden
+                                                ${message.role === 'user'
+                                                        ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-purple-500/10 rounded-tr-sm'
+                                                        : 'bg-[#1a1a2e]/95 backdrop-blur-md border border-purple-500/20 text-gray-100 shadow-purple-500/5 rounded-tl-sm'
+                                                    }
+                                                group transition-all duration-300 hover:shadow-lg
+                                            `}>
+                                                    {/* Decorative subtle glow for AI messages */}
+                                                    {message.role === 'assistant' && (
+                                                        <div className="absolute -top-10 -left-10 w-16 h-16 bg-purple-500/5 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/10 transition-all duration-500"></div>
+                                                    )}
+
+                                                    {message.role === 'assistant' ? (
+                                                        <div
+                                                            className="prose prose-invert prose-sm max-w-none [&>p]:leading-relaxed [&>ul]:my-1 [&>ul>li]:my-0.5 font-light tracking-wide"
+                                                            dir={/[\u0600-\u06FF]/.test(message.content) ? 'rtl' : 'ltr'}
+                                                            style={{ textAlign: /[\u0600-\u06FF]/.test(message.content) ? 'right' : 'left' }}
+                                                        >
+                                                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                                                        </div>
+                                                    ) : (
+                                                        <p
+                                                            className="text-sm leading-relaxed font-medium"
+                                                            dir={/[\u0600-\u06FF]/.test(message.content) ? 'rtl' : 'ltr'}
+                                                            style={{ textAlign: /[\u0600-\u06FF]/.test(message.content) ? 'right' : 'left' }}
+                                                        >
+                                                            {message.content}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {message.role === 'user' && (
+                                                    <div className="flex-shrink-0">
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-md shadow-blue-500/30 ring-1 ring-blue-400/50 overflow-hidden">
+                                                            <img
+                                                                src={userAvatar.src}
+                                                                alt={userAvatar.alt}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Render Attached Images if any */}
+                                                {message.images && message.images.length > 0 && (
+                                                    <div className="flex gap-2 mt-2 flex-wrap justify-end w-full">
+                                                        {message.images.map((img, i) => (
+                                                            <img key={i} src={img} alt="Attached" className="w-24 h-24 object-cover rounded-lg border border-white/10 shadow-md" />
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                    <div ref={messagesEndRef} />
+                                </div>
+                            )}
+
+                            {/* Input Form - Sticky Footer Integrated */}
+                            <form onSubmit={handleSendMessage} className={`w-full mt-auto relative z-20 sticky ${isMobile ? 'bottom-0' : 'bottom-0'}`}>
+
+                                <div className={`bg-[#1e1e2d] backdrop-blur-xl border border-white/5 ${isMobile ? 'p-2 rounded-xl' : 'px-4 py-3 rounded-2xl'} shadow-lg transition-all duration-300`}>
+
+                                    {/* Image Preview Area - Refined */}
+                                    {selectedImages.length > 0 && (
+                                        <div className="mb-3 px-2">
+                                            <h3 className="text-gray-500 text-[10px] font-normal mb-2 flex items-center gap-1.5 opacity-70">
+                                                <Paperclip size={10} />
+                                                Extract only text from images and files.
+                                            </h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedImages.map((file, idx) => (
+                                                    <div key={idx} className="relative group bg-white/5 border border-white/10 rounded-xl p-2 flex items-center gap-3 pr-8">
+                                                        <img
+                                                            src={URL.createObjectURL(file)}
+                                                            alt="preview"
+                                                            className="w-10 h-10 object-cover rounded-lg"
+                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm text-gray-200 font-medium truncate max-w-[120px]">{file.name}</span>
+                                                            <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(0)} KB • Uploading...</span>
+                                                        </div>
+                                                        <div className="hidden group-hover:flex absolute right-2 top-1/2 -translate-y-1/2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeImage(idx)}
+                                                                className="text-gray-400 hover:text-red-400 transition-colors"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Input Area - Textarea */}
+                                    <textarea
+                                        value={prompt}
+                                        onChange={(e) => setPrompt(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSendMessage(e);
+                                            }
+                                        }}
+                                        onFocus={() => setIsFocused(true)}
+                                        onBlur={() => setIsFocused(false)}
+                                        disabled={isLoading}
+                                        placeholder={messages.length === 0 ? "Describe your ads..." : "Type your question here..."}
+                                        rows={1}
+                                        className="w-full p-2 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none text-base font-medium leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed mb-0"
+                                    />
+
+                                    {/* Controls */}
+                                    <div className="flex flex-row items-center justify-between gap-2">
+                                        {/* Left side controls */}
+                                        <div className="flex flex-wrap items-center gap-2 pl-1">
+                                            {/* Tools Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                            >
+                                                <Paperclip size={20} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                                                <span className="font-medium text-sm">Tools</span>
+                                            </button>
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                className="hidden"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={handleFileSelect}
+                                            />
+
+                                            {/* Search Button */}
+                                            <button
+                                                type="button"
+                                                className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                            >
+                                                <Globe size={20} className="group-hover:text-blue-400 transition-colors" />
+                                                <span className="font-medium text-sm">Search</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Right side controls */}
+                                        <div className="flex items-center gap-2 md:gap-3">
+                                            {/* Bell Icon */}
+                                            {/* Mic Icon */}
+                                            <button
+                                                type="button"
+                                                onClick={toggleRecording}
+                                                className={`p-2 rounded-lg transition-all active:scale-95 ${isRecording ? 'text-red-500 bg-red-500/10 animate-pulse' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                                            >
+                                                <Mic size={20} />
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={isLoading || (!prompt.trim() && selectedImages.length === 0)}
+                                                className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl ${(prompt.trim() || selectedImages.length > 0) && !isLoading
+                                                    ? 'bg-[#3b82f6] hover:bg-[#2563eb] text-white shadow-blue-500/20'
+                                                    : 'bg-gradient-to-br from-gray-800 to-gray-700 text-gray-500 cursor-not-allowed'
+                                                    }`}
+                                            >
+                                                {isLoading ? (
+                                                    <Loader2 size={20} className="animate-spin" />
+                                                ) : (
+                                                    <ArrowRight size={20} className="text-white" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
 
-                        {/* Privacy Notice */}
-                        <p className="mt-4 text-center text-xs text-gray-500">
-                            AI may make mistakes. We recommend checking important information. <a href="#" className="underline hover:text-gray-400">Privacy Notice</a>
-                        </p>
+                            {/* Privacy Notice */}
+                            <p className="mt-4 text-center text-xs text-gray-500">
+                                AI may make mistakes. We recommend checking important information. <a href="#" className="underline hover:text-gray-400">Privacy Notice</a>
+                            </p>
 
-                        {/* CTA Buttons - Show only when there are messages */}
-                        {messages.length > 0 && (
-                            <div className="mt-6 w-full max-w-4xl flex flex-col sm:flex-row justify-center gap-4">
+                            {/* CTA Buttons - Show only when there are messages */}
+                            {messages.length > 0 && (
+                                <div className="mt-6 w-full max-w-4xl flex flex-col sm:flex-row justify-center gap-4">
 
-                                <GlowButton
-                                    onClick={handleCreateCampaign}
-                                    variant="blue"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <Sparkles className="h-5 w-5" />
-                                        Start Campaign
-                                        <ArrowRight className="h-5 w-5" />
-                                    </span>
-                                </GlowButton>
-                            </div>
-                        )}
+                                    <GlowButton
+                                        onClick={handleCreateCampaign}
+                                        variant="blue"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <Sparkles className="h-5 w-5" />
+                                            Start Campaign
+                                            <ArrowRight className="h-5 w-5" />
+                                        </span>
+                                    </GlowButton>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

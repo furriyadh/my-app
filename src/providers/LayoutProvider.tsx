@@ -48,7 +48,7 @@ const PurpleLoader = () => {
 // Dynamic import للـ supabase client لتجنب مشاكل prerendering
 const useSupabaseClient = () => {
   const [supabase, setSupabase] = useState<any>(null);
-  
+
   useEffect(() => {
     // تحميل supabase client فقط في المتصفح
     if (typeof window !== 'undefined') {
@@ -57,7 +57,7 @@ const useSupabaseClient = () => {
       });
     }
   }, []);
-  
+
   return supabase;
 };
 
@@ -72,14 +72,14 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const [sidebarActive, setSidebarActive] = useState(false);
 
   // تحديد الصفحات التي لا تحتاج إلى dashboard layout
-  const isAuthPage = pathname?.startsWith('/authentication') || 
-                     pathname === '/login' || 
-                     pathname === '/register' || 
-                     pathname === '/forgot-password';
-  
+  const isAuthPage = pathname?.startsWith('/authentication') ||
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/forgot-password';
+
   // تحديد صفحة الـ home page (الصفحة الرئيسية للزوار)
   const isHomePage = pathname === '/';
-  
+
   // تحديد صفحات الـ dashboard
   const isDashboardPage = pathname?.startsWith('/dashboard');
 
@@ -88,27 +88,17 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     setSidebarActive(!sidebarActive);
   };
 
-  // تطبيق الوضع الليلي بقوة على كل الموقع
-  useEffect(() => {
-    if (!isAuthPage) {
-      // إضافة الوضع الليلي على كل صفحات الموقع (الداشبورد و Campaign و Home)
-      console.log('✅ Forcing dark mode on entire site');
-      document.documentElement.classList.add('dark');
-      // منع أي محاولة لإزالة الوضع الليلي
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      // إزالة الوضع الليلي فقط من صفحات Auth
-      document.documentElement.classList.remove('dark');
-      document.documentElement.style.colorScheme = '';
-    }
-  }, [pathname, isAuthPage, isHomePage]);
+  // Removed forced dark mode logic to allow ThemeProvider to handle it
+  // useEffect(() => {
+  //   if (!isAuthPage) { ... }
+  // }, ...);
 
   useEffect(() => {
     // التحقق من حالة المصادقة فقط للصفحات المحمية (dashboard) وبعد تحميل supabase
     if (isDashboardPage && supabase) {
       const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
           router.push('/authentication/sign-in');
         }
@@ -137,13 +127,13 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
         {/* Background glow effect */}
-        <div 
+        <div
           className="absolute inset-0 opacity-40"
           style={{
             background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)'
           }}
         />
-        
+
         {/* Purple Loader */}
         <div className="relative z-10">
           <PurpleLoader />

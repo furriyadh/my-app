@@ -279,6 +279,7 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "../providers/ThemeProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function RootLayout({
@@ -293,6 +294,8 @@ export default function RootLayout({
           name="google-site-verification"
           content="afQfdE-n6JYLJ8w-AW3SBPAIuEdf6fZJjh8T2JcQwhA"
         />
+        {/* ... existing meta ... */}
+
 
         {/* JSON-LD Structured Data for SEO */}
         <script
@@ -865,11 +868,13 @@ export default function RootLayout({
       </head>
       <body className={inter.variable} suppressHydrationWarning>
         <GoogleTagManager gtmId="GTM-M3P8KJ2R" />
-        <CampaignProvider>
-          <LayoutProvider>
-            {children}
-          </LayoutProvider>
-        </CampaignProvider>
+        <ThemeProvider>
+          <CampaignProvider>
+            <LayoutProvider>
+              {children}
+            </LayoutProvider>
+          </CampaignProvider>
+        </ThemeProvider>
         <SpeedInsights />
       </body>
     </html>
