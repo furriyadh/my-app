@@ -26,9 +26,9 @@ export default function ComparisonSection() {
         </div>
 
         {/* Comparison Table */}
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/10 bg-white/5">
+          <div className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/20 bg-white/5">
             <div className="text-gray-400 text-[10px] md:text-xs font-medium">Metric</div>
             <div className="text-center">
               <div className="flex flex-col items-center gap-0.5">
@@ -69,7 +69,7 @@ export default function ComparisonSection() {
           ].map((row, i) => (
             <div
               key={i}
-              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/5 hover:bg-white/5 transition-colors"
+              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/10 hover:bg-white/5 transition-colors"
             >
               <div className="text-white font-medium text-[10px] md:text-xs">{row.metric}</div>
               <div className={`text-center text-[10px] md:text-xs ${row.freelancerColor}`}>{row.freelancer}</div>
@@ -98,7 +98,7 @@ export default function ComparisonSection() {
                   <p className="text-green-400 text-xs">Save up to 90% vs Agencies with better results</p>
                 </div>
               </div>
-              <Link 
+              <Link
                 href="/auth/register"
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-green-500/25 transition-all flex items-center gap-2 hover:scale-105 active:scale-95"
               >
