@@ -1,4 +1,4 @@
-import ContactsTable from "@/components/CRM/Contacts/ContactsTable";
+﻿import ContactsTable from "@/components/CRM/Contacts/ContactsTable";
 import Link from "next/link";
 
 export default function Page() {

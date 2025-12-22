@@ -1,4 +1,4 @@
-import WritePrescription from "@/components/Doctor/WritePrescription";
+﻿import WritePrescription from "@/components/Doctor/WritePrescription";
 import Link from "next/link";
 
 export default function Page() {

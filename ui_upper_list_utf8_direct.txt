@@ -1,0 +1,100 @@
+﻿
+
+    Directory: C:\Users\DELL\my-site\src\components\UI
+
+
+Mode                 LastWriteTime         Length Name     
+----                 -------------         ------ ----     
+-a----        12/12/2025  10:11 PM           6239 3d-card.t
+                                                  sx       
+-a----         12/8/2025   1:23 AM           7083 3d-carous
+                                                  el.tsx   
+-a----          7/9/2025   3:29 PM           2063 alert.tsx
+-a----         12/9/2025   5:56 PM          12293 animated-
+                                                  notificat
+                                                  ion.tsx  
+-a----        12/21/2025   5:50 PM           3776 animated-
+                                                  testimoni
+                                                  als.tsx  
+-a----        12/19/2025   3:44 PM           1688 avatar-gr
+                                                  oup.tsx  
+-a----          7/9/2025   3:30 PM           1080 badge.tsx
+-a----         9/12/2025   3:36 AM           1295 Button.ts
+                                                  x        
+-a----        11/30/2025   1:39 PM           4199 campaign-
+                                                  progress.
+                                                  tsx      
+-a----        12/13/2025  11:58 AM           1898 card-3d-w
+                                                  rapper.ts
+                                                  x        
+-a----        12/16/2025   2:46 PM           2342 card-stac
+                                                  k.tsx    
+-a----        11/27/2025  12:23 AM           6257 card-swap
+                                                  .tsx     
+-a----        11/26/2025  10:15 PM            451 Card.tsx 
+-a----        11/15/2025   2:51 AM           7137 CardSwap.
+                                                  tsx      
+-a----        12/21/2025   4:08 PM          20087 CircularG
+                                                  allery.ts
+                                                  x        
+-a----        12/18/2025   8:21 PM           3325 container
+                                                  -scroll-a
+                                                  nimation.
+                                                  tsx      
+-a----          7/9/2025   3:52 PM          24226 dialog.ts
+                                                  x        
+-a----         12/9/2025   4:09 PM           9036 electro-b
+                                                  order.tsx
+-a----        11/26/2025  11:35 PM           8811 globe.tsx
+-a----        12/14/2025   6:36 PM           7972 glow-butt
+                                                  on.tsx   
+-a----        12/13/2025   3:29 AM           3441 glowingbo
+                                                  rdercard.
+                                                  tsx      
+-a----          7/9/2025   3:29 PM            688 Input.tsx
+-a----          9/1/2025   7:56 PM           3826 interacti
+                                                  ve-input.
+                                                  tsx      
+-a----         12/7/2025  11:35 PM          20372 laser-flo
+                                                  w.tsx    
+-a----        11/26/2025   9:50 PM           3889 logo-step
+                                                  per.tsx  
+-a----        12/22/2025   1:55 AM           7591 modern-lo
+                                                  ader.tsx 
+-a----         12/8/2025   3:22 AM           2368 motion-gr
+                                                  id.tsx   
+-a----        12/13/2025   2:20 AM           9416 plasma-gl
+                                                  obe.tsx  
+-a----        11/15/2025   3:44 AM           1424 progress.
+                                                  tsx      
+-a----        11/30/2025   5:06 PM           6708 scroll-li
+                                                  st.tsx   
+-a----        11/27/2025   9:39 AM          10958 scroll-st
+                                                  ack.tsx  
+-a----        12/18/2025   3:33 PM           2360 ScrollFlo
+                                                  at.tsx   
+-a----          7/9/2025   4:01 PM          14425 select.ts
+                                                  x        
+-a----          7/9/2025   3:30 PM            753 separator
+                                                  .tsx     
+-a----          9/1/2025  12:35 PM           2829 shimmer.t
+                                                  sx       
+-a----          7/9/2025   3:52 PM          13218 slider.ts
+                                                  x        
+-a----        12/18/2025   7:09 PM            991 SmoothScr
+                                                  ollManage
+                                                  r.tsx    
+-a----          7/9/2025   3:51 PM          23091 table.tsx
+-a----        11/15/2025   2:13 AM           5111 tabs-view
+                                                  -classic.
+                                                  tsx      
+-a----          7/9/2025   4:01 PM          20423 tabs.tsx 
+-a----          7/9/2025   4:01 PM          19228 toast.tsx
+-a----        11/26/2025  10:49 PM           2039 trusted-u
+                                                  sers.tsx 
+-a----         12/8/2025   3:44 AM           1396 typeanima
+                                                  tion.tsx 
+-a----        11/15/2025   2:13 AM           8398 verify-ba
+                                                  dge.tsx  
+
+

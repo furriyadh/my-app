@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -221,11 +221,11 @@ const BillingPage: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-              {language === 'ar' ? 'الفواتير والمدفوعات' : 'Billing & Payments'}
+              {language === 'ar' ? 'Ø§Ù„ÙÙˆØ§ØªÙŠØ± ÙˆØ§Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª' : 'Billing & Payments'}
             </h1>
             <p className="text-gray-400 text-lg" dir={language === 'ar' ? 'rtl' : 'ltr'}>
               {language === 'ar' 
-                ? 'إدارة اشتراكك والمدفوعات وسجل الفواتير' 
+                ? 'Ø¥Ø¯Ø§Ø±Ø© Ø§Ø´ØªØ±Ø§ÙƒÙƒ ÙˆØ§Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª ÙˆØ³Ø¬Ù„ Ø§Ù„ÙÙˆØ§ØªÙŠØ±' 
                 : 'Manage your subscription, payments, and billing history'}
             </p>
           </div>
@@ -438,7 +438,7 @@ const BillingPage: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-white font-medium">{invoice.description}</p>
-                        <p className="text-gray-400 text-sm">{invoice.id} • {new Date(invoice.date).toLocaleDateString()}</p>
+                        <p className="text-gray-400 text-sm">{invoice.id} â€¢ {new Date(invoice.date).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -490,7 +490,7 @@ const BillingPage: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <p className="text-white font-bold text-lg mb-1">{method.brand}</p>
-                      <p className="text-gray-400">•••• •••• •••• {method.last4}</p>
+                      <p className="text-gray-400">â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ {method.last4}</p>
                       <p className="text-gray-500 text-sm mt-2">
                         Expires {method.expiryMonth.toString().padStart(2, '0')}/{method.expiryYear}
                       </p>

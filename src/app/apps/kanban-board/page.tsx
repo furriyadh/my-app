@@ -1,4 +1,4 @@
-import KanbanBoard from "@/components/Apps/KanbanBoard";
+﻿import KanbanBoard from "@/components/Apps/KanbanBoard";
 import Link from "next/link";
 
 export default function Page() {

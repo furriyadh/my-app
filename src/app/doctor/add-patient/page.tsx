@@ -1,4 +1,4 @@
- 
+﻿ 
 import AddPatientForm from "@/components/Doctor/AddPatientForm";
 import Link from "next/link";
 

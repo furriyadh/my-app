@@ -1,4 +1,4 @@
-import CustomerSatisfactionRate from "@/components/Dashboard/BeautySalon/CustomerSatisfactionRate";
+﻿import CustomerSatisfactionRate from "@/components/Dashboard/BeautySalon/CustomerSatisfactionRate";
 import CustomersFromChannels from "@/components/Dashboard/BeautySalon/CustomersFromChannels";
 import FeaturedServices from "@/components/Dashboard/BeautySalon/FeaturedServices";
 import NewCustomersThisMonth from "@/components/Dashboard/BeautySalon/NewCustomersThisMonth";

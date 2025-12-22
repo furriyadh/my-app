@@ -1,4 +1,4 @@
-import FaqContent from "@/components/Faq/FaqContent";
+﻿import FaqContent from "@/components/Faq/FaqContent";
 import Link from "next/link";
 
 export default function Page() {

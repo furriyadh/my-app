@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -78,25 +78,25 @@ export default function NotFound() {
               href="/authentication/sign-in"
               className="text-blue-600 hover:text-blue-800 text-left py-2 px-3 rounded hover:bg-blue-50 transition-colors duration-200"
             >
-              → Sign In
+              â†’ Sign In
             </Link>
             <Link
               href="/authentication/sign-up"
               className="text-blue-600 hover:text-blue-800 text-left py-2 px-3 rounded hover:bg-blue-50 transition-colors duration-200"
             >
-              → Create Account
+              â†’ Create Account
             </Link>
             <Link
               href="/dashboard"
               className="text-blue-600 hover:text-blue-800 text-left py-2 px-3 rounded hover:bg-blue-50 transition-colors duration-200"
             >
-              → Dashboard
+              â†’ Dashboard
             </Link>
             <Link
               href="/authentication/forgot-password"
               className="text-blue-600 hover:text-blue-800 text-left py-2 px-3 rounded hover:bg-blue-50 transition-colors duration-200"
             >
-              → Reset Password
+              â†’ Reset Password
             </Link>
           </div>
         </div>

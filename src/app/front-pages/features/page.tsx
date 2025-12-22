@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Cta from "@/components/FrontPage/Cta";
 import Features from "@/components/FrontPage/Features";

@@ -1,4 +1,4 @@
-import AssetAllocation from "@/components/Dashboard/CryptoTrader/AssetAllocation";
+﻿import AssetAllocation from "@/components/Dashboard/CryptoTrader/AssetAllocation";
 import GainersLosers from "@/components/Dashboard/CryptoTrader/GainersLosers";
 import LivePriceTracker from "@/components/Dashboard/CryptoTrader/LivePriceTracker";
 import MarketSentimentIndicator from "@/components/Dashboard/CryptoTrader/MarketSentimentIndicator";

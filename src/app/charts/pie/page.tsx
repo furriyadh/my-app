@@ -1,4 +1,4 @@
- 
+﻿ 
 import BasicPieChart from "@/components/Charts/Pie/BasicPieChart";
 import PieDonutChart from "@/components/Charts/Pie/PieDonutChart";
 import PieMonochromeChart from "@/components/Charts/Pie/PieMonochromeChart";

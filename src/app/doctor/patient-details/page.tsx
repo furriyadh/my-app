@@ -1,4 +1,4 @@
-import PatientDetails from "@/components/Doctor/PatientDetails";
+﻿import PatientDetails from "@/components/Doctor/PatientDetails";
 import Link from "next/link";
 
 export default function Page() {

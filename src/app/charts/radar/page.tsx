@@ -1,4 +1,4 @@
-import BasicRadarChart from "@/components/Charts/Radar/BasicRadarChart";
+﻿import BasicRadarChart from "@/components/Charts/Radar/BasicRadarChart";
 import MultipleRadarChart from "@/components/Charts/Radar/MultipleRadarChart";
 import PolygonRadarChart from "@/components/Charts/Radar/PolygonRadarChart";
 import Link from "next/link";

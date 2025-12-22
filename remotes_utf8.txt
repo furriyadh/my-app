@@ -1,2 +1,0 @@
-﻿origin	https://github.com/furriyadh/my-app (fetch)
-origin	https://github.com/furriyadh/my-app (push)

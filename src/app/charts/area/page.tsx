@@ -1,4 +1,4 @@
-import BasicAreaChart from "@/components/Charts/Area/BasicAreaChart";
+﻿import BasicAreaChart from "@/components/Charts/Area/BasicAreaChart";
 import DatetimeAreaChart from "@/components/Charts/Area/DatetimeAreaChart";
 import MissingNullValuesAreaChart from "@/components/Charts/Area/MissingNullValuesAreaChart";
 import NegativeValuesAreaChart from "@/components/Charts/Area/NegativeValuesAreaChart";

@@ -1,4 +1,4 @@
- 
+﻿ 
 import BasicPolarChart from "@/components/Charts/Polar/BasicPolarChart";
 import MonochromePolarChart from "@/components/Charts/Polar/MonochromePolarChart";
 import Link from "next/link";

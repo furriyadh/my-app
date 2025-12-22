@@ -1,4 +1,4 @@
-import ActiveTotalProperty from "@/components/Dashboard/RealEstate/ActiveTotalProperty";
+﻿import ActiveTotalProperty from "@/components/Dashboard/RealEstate/ActiveTotalProperty";
 import CustomerReviews from "@/components/Dashboard/RealEstate/CustomerReviews";
 import MostSalesLocation from "@/components/Dashboard/RealEstate/MostSalesLocation";
 import NewCustomersThisMonth from "@/components/Dashboard/RealEstate/NewCustomersThisMonth";

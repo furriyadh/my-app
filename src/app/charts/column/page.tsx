@@ -1,4 +1,4 @@
- 
+﻿ 
 import BasicColumnChart from "@/components/Charts/Column/BasicColumnChart";
 import DataLabelsColumnChart from "@/components/Charts/Column/DataLabelsColumnChart";
 import DistributedColumnChart from "@/components/Charts/Column/DistributedColumnChart";

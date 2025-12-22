@@ -1,4 +1,4 @@
-import PatientsListTable from "@/components/Doctor/PatientsListTable";
+﻿import PatientsListTable from "@/components/Doctor/PatientsListTable";
 import Link from "next/link";
 
 export default function Page() {

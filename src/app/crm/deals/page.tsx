@@ -1,4 +1,4 @@
-import DealsTable from "@/components/CRM/Deals/DealsTable";
+﻿import DealsTable from "@/components/CRM/Deals/DealsTable";
 import Link from "next/link";
 
 export default function Page() {

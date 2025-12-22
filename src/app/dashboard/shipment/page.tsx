@@ -1,4 +1,4 @@
-import AverageDeliveryTime from "@/components/Dashboard/Shipment/AverageDeliveryTime";
+﻿import AverageDeliveryTime from "@/components/Dashboard/Shipment/AverageDeliveryTime";
 import Chat from "@/components/Dashboard/Shipment/Chat";
 import LiveShipmentStatus from "@/components/Dashboard/Shipment/LiveShipmentStatus";
 import OnTimeDelivery from "@/components/Dashboard/Shipment/OnTimeDelivery";

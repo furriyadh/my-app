@@ -1,4 +1,4 @@
-import Courses from "@/components/Dashboard/LMS/Courses";
+﻿import Courses from "@/components/Dashboard/LMS/Courses";
 import CoursesSales from "@/components/Dashboard/LMS/CoursesSales";
 import EnrolledByCountries from "@/components/Dashboard/LMS/EnrolledByCountries";
 import GroupLessons from "@/components/Dashboard/LMS/GroupLessons";

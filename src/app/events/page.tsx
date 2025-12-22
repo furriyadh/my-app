@@ -1,4 +1,4 @@
-import EventsGrid from "@/components/Events/EventsGrid";
+﻿import EventsGrid from "@/components/Events/EventsGrid";
 import Link from "next/link";
 
 export default function Page() {

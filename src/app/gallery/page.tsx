@@ -1,4 +1,4 @@
-import GalleryStyle1 from "@/components/Gallery/GalleryStyle1";
+﻿import GalleryStyle1 from "@/components/Gallery/GalleryStyle1";
 import GalleryStyle2 from "@/components/Gallery/GalleryStyle2";
 import PopupGallery from "@/components/Gallery/PopupGallery";
 import Link from "next/link";

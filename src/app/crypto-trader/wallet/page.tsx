@@ -1,4 +1,4 @@
-import WalletTable from "@/components/CryptoTrader/WalletTable";
+﻿import WalletTable from "@/components/CryptoTrader/WalletTable";
 import Link from "next/link";
 
 export default function Page() {

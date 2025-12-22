@@ -1,4 +1,4 @@
-import ConfirmEmailContent from "@/components/Authentication/ConfirmEmailContent";
+﻿import ConfirmEmailContent from "@/components/Authentication/ConfirmEmailContent";
 
 export default function Page() {
   return (

@@ -1,4 +1,4 @@
-import AverageOrderValue from "@/components/Dashboard/PosSystem/AverageOrderValue";
+﻿import AverageOrderValue from "@/components/Dashboard/PosSystem/AverageOrderValue";
 import Categories from "@/components/Dashboard/PosSystem/Categories";
 import CustomerSegmentation from "@/components/Dashboard/PosSystem/CustomerSegmentation";
 import OrderDetails from "@/components/Dashboard/PosSystem/OrderDetails";

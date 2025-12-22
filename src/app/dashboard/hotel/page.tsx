@@ -1,4 +1,4 @@
-import CustomerRatings from "@/components/Dashboard/Hotel/CustomerRatings";
+﻿import CustomerRatings from "@/components/Dashboard/Hotel/CustomerRatings";
 import GuestActivity from "@/components/Dashboard/Hotel/GuestActivity";
 import PopularRooms from "@/components/Dashboard/Hotel/PopularRooms";
 import RecentBookings from "@/components/Dashboard/Hotel/RecentBookings";

@@ -1,4 +1,4 @@
-import LockScreenContent from "@/components/Authentication/LockScreenContent";
+﻿import LockScreenContent from "@/components/Authentication/LockScreenContent";
 
 export default function Page() {
   return (

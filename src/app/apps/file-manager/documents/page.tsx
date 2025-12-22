@@ -1,4 +1,4 @@
-import DocumentsContent from "@/components/Apps/FileManager/DocumentsContent";
+﻿import DocumentsContent from "@/components/Apps/FileManager/DocumentsContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

@@ -1,4 +1,4 @@
-import CustomerVisits from "@/components/Dashboard/StoreAnalysis/CustomerVisits";
+﻿import CustomerVisits from "@/components/Dashboard/StoreAnalysis/CustomerVisits";
 import GrossRevenue from "@/components/Dashboard/StoreAnalysis/GrossRevenue";
 import RecentSales from "@/components/Dashboard/StoreAnalysis/RecentSales";
 import SalesByCategory from "@/components/Dashboard/StoreAnalysis/SalesByCategory";

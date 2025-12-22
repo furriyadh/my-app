@@ -1,4 +1,4 @@
-import CategoriesTable from "@/components/eCommerce/Categories/CategoriesTable";
+﻿import CategoriesTable from "@/components/eCommerce/Categories/CategoriesTable";
 import Link from "next/link";
 
 export default function Page() {

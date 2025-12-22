@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
@@ -92,10 +92,10 @@ export default function Page() {
 
                   <div className="my-[17px] md:my-[25px]">
                     <h1 className="!font-semibold !text-[22px] md:!text-xl lg:!text-2xl 2xl:!text-4xl !mb-[5px] md:!mb-[12px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                      {language === 'ar' ? 'نحن نعمل على الإطلاق قريباً، ترقبوا!' : "We're working on launching soon, stay tuned!"}
+                      {language === 'ar' ? 'Ù†Ø­Ù† Ù†Ø¹Ù…Ù„ Ø¹Ù„Ù‰ Ø§Ù„Ø¥Ø·Ù„Ø§Ù‚ Ù‚Ø±ÙŠØ¨Ø§Ù‹ØŒ ØªØ±Ù‚Ø¨ÙˆØ§!' : "We're working on launching soon, stay tuned!"}
                     </h1>
                     <p className="font-medium leading-[1.5] lg:text-md" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                      {language === 'ar' ? 'قريباً جداً..' : "We're coming soon.."}
+                      {language === 'ar' ? 'Ù‚Ø±ÙŠØ¨Ø§Ù‹ Ø¬Ø¯Ø§Ù‹..' : "We're coming soon.."}
                     </p>
                   </div>
 

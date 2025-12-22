@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Checkbox from "@/components/Forms/CheckboxesAndRadios/Checkbox";
 import DisabledCheckbox from "@/components/Forms/CheckboxesAndRadios/DisabledCheckbox";
@@ -27,7 +27,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-[25px] md:flex items-center justify-between" dir="ltr">
-        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'مربعات الاختيار والخيارات' : 'Checkboxes & Radios'}</h5>
+        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'Ù…Ø±Ø¨Ø¹Ø§Øª Ø§Ù„Ø§Ø®ØªÙŠØ§Ø± ÙˆØ§Ù„Ø®ÙŠØ§Ø±Ø§Øª' : 'Checkboxes & Radios'}</h5>
 
         <ol className="breadcrumb mt-[12px] md:mt-0">
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import MultipleFileUploader from "@/components/Forms/FileUploader/MultipleFileUploader";
 import SimpleFileUploader from "@/components/Forms/FileUploader/SimpleFileUploader";
@@ -25,7 +25,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-[25px] md:flex items-center justify-between" dir="ltr">
-        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'رفع الملفات' : 'File Uploader'}</h5>
+        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'Ø±ÙØ¹ Ø§Ù„Ù…Ù„ÙØ§Øª' : 'File Uploader'}</h5>
 
         <ol className="breadcrumb mt-[12px] md:mt-0">
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
