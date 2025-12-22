@@ -1,15 +1,15 @@
 "use client";
-import GlowButton from "@/components/UI/glow-button";
-import GlowingBorderCard from "@/components/UI/glowingbordercard";
-import { InteractiveInput } from "@/components/UI/interactive-input";
-import ModernLoader from "@/components/UI/modern-loader";
+import GlowButton from "@/components/ui/glow-button";
+import GlowingBorderCard from "@/components/ui/glowingbordercard";
+import { InteractiveInput } from "@/components/ui/interactive-input";
+import ModernLoader from "@/components/ui/modern-loader";
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Sparkles, ArrowRight, Loader2, Paperclip, Globe, Zap, PenTool, Bot, Mic, X, Play, ArrowUp } from 'lucide-react';
 import { createClient } from "@/utils/supabase/client";
 import { useMediaQuery } from "react-responsive";
-import AvatarGroup from "@/components/UI/avatar-group";
+import AvatarGroup from "@/components/ui/avatar-group";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrustedUsers } from "@/components/ui/trusted-users";

@@ -16,10 +16,10 @@ import {
     AlertCircle,
     Smartphone
 } from 'lucide-react';
-import GlowButton from '@/components/UI/glow-button';
+import GlowButton from '@/components/ui/glow-button';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import CampaignProgress from '@/components/UI/campaign-progress';
-import ScrollList from '@/components/UI/scroll-list';
+import CampaignProgress from '@/components/ui/campaign-progress';
+import ScrollList from '@/components/ui/scroll-list';
 
 // --- DATA ---
 const VIDEO_SUB_TYPES = [

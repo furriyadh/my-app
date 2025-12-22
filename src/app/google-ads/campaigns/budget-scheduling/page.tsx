@@ -4,13 +4,13 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Calendar, DollarSign, BarChart2, CheckCircle2, AlertCircle, Clock, Zap, X, Eye, MousePointer, Check, Star } from 'lucide-react';
 import { CountUp } from '@/components/lightswind/count-up';
-import GlowButton from '@/components/UI/glow-button';
-import { CardContainer, CardBody, CardItem } from '@/components/UI/3d-card';
-import { Progress } from '@/components/UI/progress';
+import GlowButton from '@/components/ui/glow-button';
+import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
+import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import CampaignProgress from '@/components/UI/campaign-progress';
+import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
-import ModernLoader from '@/components/UI/modern-loader';
+import ModernLoader from '@/components/ui/modern-loader';
 
 const BudgetSchedulingPage: React.FC = () => {
   const router = useRouter();

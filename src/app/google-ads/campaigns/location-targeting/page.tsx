@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, MapPin, Search, X, Plus, Trash2, ArrowRight, CheckCircle, ChevronDown } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import { getCode, getName, getData } from 'country-list';
-import GlowButton from '@/components/UI/glow-button';
-import { CardContainer, CardBody } from '@/components/UI/3d-card';
+import GlowButton from '@/components/ui/glow-button';
+import { CardContainer, CardBody } from '@/components/ui/3d-card';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import CampaignProgress from '@/components/UI/campaign-progress';
+import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
 
 interface Location {

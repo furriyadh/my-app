@@ -2,10 +2,10 @@
 
 import { Brain, Sparkles, Target, Zap, BarChart3, Wand2, ArrowRight, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import ModernLoader from "@/components/UI/modern-loader";
+import ModernLoader from "@/components/ui/modern-loader";
 import dynamic from "next/dynamic";
 
-const CircularGallery = dynamic(() => import("@/components/UI/CircularGallery"), { ssr: false });
+const CircularGallery = dynamic(() => import("@/components/ui/CircularGallery"), { ssr: false });
 
 export default function AIShowcaseSection() {
   return (

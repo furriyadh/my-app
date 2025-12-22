@@ -6,8 +6,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useRouter } from 'next/navigation';
 import { CampaignProvider, useCampaignContext } from '@/lib/context/CampaignContext';
-import { Button } from "@/components/UI/Button";
-import { Progress } from "@/components/UI/progress";
+import { Button } from "@/components/ui/Button";
+import { Progress } from "@/components/ui/progress";
 import { ProgressIndicator } from '@/components/Common/ProgressIndicator';
 import { CampaignData, AdType } from '@/lib/types/campaign';
 

@@ -3,14 +3,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Edit2, Sparkles, X } from 'lucide-react';
-import GlowButton from '@/components/UI/glow-button';
-import { CardStack } from '@/components/UI/card-stack';
+import GlowButton from '@/components/ui/glow-button';
+import { CardStack } from '@/components/ui/card-stack';
 import Announcement from '@/components/seraui/Announcement';
-import { Progress } from '@/components/UI/progress';
+import { Progress } from '@/components/ui/progress';
 import { subscribeToClientRequests } from '@/lib/supabase';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { getApiUrl } from '@/lib/config';
-import ModernLoader from '@/components/UI/modern-loader';
+import ModernLoader from '@/components/ui/modern-loader';
 import ShoppingPreview from '@/components/GoogleAds/ShoppingPreview';
 import AppPreview from '@/components/GoogleAds/AppPreview';
 

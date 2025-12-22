@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Edit2, Sparkles, RefreshCw, Save, Play, Eye } from 'lucide-react';
-import GlowButton from '@/components/UI/glow-button';
-import { CardStack } from '@/components/UI/card-stack';
+import GlowButton from '@/components/ui/glow-button';
+import { CardStack } from '@/components/ui/card-stack';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { getApiUrl } from '@/lib/config';
 

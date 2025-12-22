@@ -2,8 +2,8 @@
 
 import React, { useEffect } from 'react';
 import { CheckCircle, X, ExternalLink, BarChart3 } from 'lucide-react';
-import { Button } from '../UI/Button';
-import { Card } from '../UI/Card';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 import { CampaignData } from '../../lib/types/campaign';
 
 interface SuccessModalProps {

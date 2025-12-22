@@ -3,10 +3,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ArrowLeft, Check, Search, Monitor, ShoppingCart, Video, Smartphone, Zap, TrendingUp, Crown, Sparkles, Award, TrendingUp as TrendingIcon } from 'lucide-react';
-import GlowButton from '@/components/UI/glow-button';
+import GlowButton from '@/components/ui/glow-button';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import ScrollList from '@/components/UI/scroll-list';
-import CampaignProgress from '@/components/UI/campaign-progress';
+import ScrollList from '@/components/ui/scroll-list';
+import CampaignProgress from '@/components/ui/campaign-progress';
 
 interface CampaignType {
   id: string;

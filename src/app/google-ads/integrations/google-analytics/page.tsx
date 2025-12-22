@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check } from 'lucide-react';
-import GlowButton from '@/components/UI/glow-button';
+import GlowButton from '@/components/ui/glow-button';
 
 // CSS styles for visual effects
 const styles = `

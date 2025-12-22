@@ -4,16 +4,16 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Globe, Link as LinkIcon, Shield, Sparkles, Zap, Phone, Search, ChevronDown, AlertCircle, CheckCircle2, XCircle, ShoppingCart, Smartphone, Video, Monitor, Store } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
-import GlowButton from '@/components/UI/glow-button';
-import { VerifyBadge } from '@/components/UI/verify-badge';
-import { CardContainer, CardBody } from '@/components/UI/3d-card';
-import GlowingBorderCard from '@/components/UI/glowingbordercard';
-import Card3DWrapper from '@/components/UI/card-3d-wrapper';
-import { Progress } from '@/components/UI/progress';
+import GlowButton from '@/components/ui/glow-button';
+import { VerifyBadge } from '@/components/ui/verify-badge';
+import { CardContainer, CardBody } from '@/components/ui/3d-card';
+import GlowingBorderCard from '@/components/ui/glowingbordercard';
+import Card3DWrapper from '@/components/ui/card-3d-wrapper';
+import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import CampaignProgress from '@/components/UI/campaign-progress';
+import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
-import PlasmaGlobe from '@/components/UI/plasma-globe';
+import PlasmaGlobe from '@/components/ui/plasma-globe';
 
 // Types for URL detection
 interface UrlDetectionResult {

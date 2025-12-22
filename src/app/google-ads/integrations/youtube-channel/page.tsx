@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Youtube, Link as LinkIcon, X, ExternalLink } from 'lucide-react';
-import GlowButton from '@/components/UI/glow-button';
+import GlowButton from '@/components/ui/glow-button';
 import { toast } from '@/hooks/use-toast';
 
 // CSS styles for visual effects (Adapted to Red/YouTube Theme)

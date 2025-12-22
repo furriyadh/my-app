@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ExternalLink, Check, AlertCircle, Plus, LayoutGrid, Settings, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import GlowingBorderCard from '@/components/UI/glowingbordercard';
-import GlowButton from '@/components/UI/glow-button';
-import { InteractiveInput } from '@/components/UI/interactive-input';
+import GlowingBorderCard from '@/components/ui/glowingbordercard';
+import GlowButton from '@/components/ui/glow-button';
+import { InteractiveInput } from '@/components/ui/interactive-input';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { toast } from '@/hooks/use-toast';
 

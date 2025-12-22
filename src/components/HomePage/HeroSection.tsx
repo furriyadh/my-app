@@ -6,8 +6,8 @@ import {
   Plus, ChevronDown, Mic, ArrowUp, Sparkles, Brain, ArrowRight, Play
 } from "lucide-react";
 import Link from "next/link";
-import { ContainerScroll } from "@/components/UI/container-scroll-animation";
-import { Button } from "@/components/UI/Button";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import { Button } from "@/components/ui/Button";
 
 // Typewriter Component
 const TypewriterText = ({ texts, className }: { texts: string[], className?: string }) => {

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Globe, Languages, Check, ChevronDown } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
-import GlowButton from '@/components/UI/glow-button';
+import GlowButton from '@/components/ui/glow-button';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { getApiUrl } from '@/lib/config';
 
