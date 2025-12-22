@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatedTestimonials } from "@/components/UI/animated-testimonials";
+import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 
 const testimonials = [
   {

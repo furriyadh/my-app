@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import TypeAnimation from "@/components/UI/typeanimation";
+import TypeAnimation from "@/components/ui/typeanimation";
 
 interface ModernLoaderProps {
   words?: string[];
