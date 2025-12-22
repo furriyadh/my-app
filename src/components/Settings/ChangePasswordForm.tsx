@@ -60,7 +60,7 @@ const ChangePasswordForm: React.FC = () => {
               Change Password
             </span>
           </button>
-          
+
           <Link
             href="/authentication/forgot-password/"
             className="inline-block text-danger-500 ltr:ml-[23px] rtl:mr-[23px]"

@@ -11,11 +11,11 @@ const Footer: React.FC = () => {
         <p>
           © <span className="text-purple-500">Trezo</span> is Proudly Owned by{" "}
           <a
-            href="https://envytheme.com/"
+            href="https://furriyadh.com/"
             target="_blank"
             className="text-primary-500 transition-all hover:underline"
           >
-            EnvyTheme
+            Furriyadh
           </a>
         </p>
       </footer>

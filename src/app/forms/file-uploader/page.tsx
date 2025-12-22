@@ -1,12 +1,31 @@
+"use client";
+
 import MultipleFileUploader from "@/components/Forms/FileUploader/MultipleFileUploader";
 import SimpleFileUploader from "@/components/Forms/FileUploader/SimpleFileUploader";
 import Link from "next/link";
+import { useState, useEffect } from 'react';
 
 export default function Page() {
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
+
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
+  }, []);
+
   return (
     <>
-      <div className="mb-[25px] md:flex items-center justify-between">
-        <h5 className="!mb-0">File Uploader</h5>
+      <div className="mb-[25px] md:flex items-center justify-between" dir="ltr">
+        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'رفع الملفات' : 'File Uploader'}</h5>
 
         <ol className="breadcrumb mt-[12px] md:mt-0">
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">

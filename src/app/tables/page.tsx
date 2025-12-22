@@ -14,7 +14,9 @@ import Link from "next/link";
 
 export default function Page() {
   return (
-    <>
+    <div className="min-h-screen">
+      <div className="p-6">
+        <>
       <div className="mb-[25px] md:flex items-center justify-between">
         <h5 className="!mb-0">Tables</h5>
 
@@ -90,6 +92,8 @@ export default function Page() {
           <ToDoList />
         </div>
       </div>
-    </>
+        </>
+      </div>
+    </div>
   );
 }

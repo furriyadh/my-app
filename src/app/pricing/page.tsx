@@ -1,38 +1,42 @@
-import PricingStyle1 from "@/components/Pricing/PricingStyle1";
-import PricingStyle2 from "@/components/Pricing/PricingStyle2";
-import PricingStyle3 from "@/components/Pricing/PricingStyle3";
-import Link from "next/link"; 
+"use client";
 
-export default function Page() {
-  return (
-    <>
-      <div className="mb-[25px] md:flex items-center justify-between">
-        <h5 className="!mb-0">Pricing</h5>
+import Navbar from "@/components/FrontPage/Navbar";
+import Footer from "@/components/FrontPage/Footer";
+import PricingSection from "@/components/HomePage/PricingSection";
+import Image from "next/image";
 
-        <ol className="breadcrumb mt-[12px] md:mt-0">
-          <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <Link
-              href="/dashboard/ecommerce/"
-              className="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500"
-            >
-              <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
-                home
-              </i>
-              Dashboard
-            </Link>
-          </li>
-  
-          <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Pricing
-          </li>
-        </ol>
-      </div>
+export default function PricingPage() {
+    return (
+        <div className="front-page-body overflow-hidden bg-[#0a0e19] text-white" dir="ltr">
+            <Navbar />
 
-      <PricingStyle1 />
+            <div className="relative z-[1]">
+                {/* Background Shapes */}
+                <div className="absolute top-0 w-full h-full -z-[1] overflow-hidden pointer-events-none">
+                    <div className="absolute bottom-0 -z-[1] ltr:-right-[30px] rtl:-left-[30px] blur-[250px]">
+                        <Image
+                            src="/images/front-pages/shape3.png"
+                            alt="shape3"
+                            width={685}
+                            height={685}
+                        />
+                    </div>
+                    <div className="absolute -top-[220px] -z-[1] ltr:-left-[50px] rtl:-right-[50px] blur-[150px]">
+                        <Image
+                            src="/images/front-pages/shape5.png"
+                            alt="shape3"
+                            width={658}
+                            height={656}
+                        />
+                    </div>
+                </div>
 
-      <PricingStyle2 />
+                <main className="relative pt-20">
+                    <PricingSection />
+                </main>
+            </div>
 
-      <PricingStyle3 />
-    </>
-  );
+            <Footer />
+        </div>
+    );
 }

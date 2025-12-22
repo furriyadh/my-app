@@ -1,10 +1,62 @@
 "use client";
 
-import React, { useState, ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import React, { useState, useEffect, ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import SidebarMenu from "@/components/Layout/SidebarMenu";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
+import { motion } from "motion/react";
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+
+// ✨ Purple Loader Component
+const PurpleLoader = () => {
+  const transition = (x: number) => {
+    return {
+      duration: 1,
+      repeat: Infinity,
+      repeatType: "loop" as const,
+      delay: x * 0.2,
+      ease: "easeInOut" as const,
+    };
+  };
+  return (
+    <div className="flex items-center gap-3">
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: [0, 12, 0] }}
+        transition={transition(0)}
+        className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-400 to-violet-500 shadow-lg shadow-purple-500/60"
+      />
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: [0, 12, 0] }}
+        transition={transition(1)}
+        className="h-5 w-5 rounded-full border border-violet-300 bg-gradient-to-b from-violet-400 to-purple-600 shadow-lg shadow-violet-500/60"
+      />
+      <motion.div
+        initial={{ y: 0 }}
+        animate={{ y: [0, 12, 0] }}
+        transition={transition(2)}
+        className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/60"
+      />
+    </div>
+  );
+};
+
+// Dynamic import for supabase client
+const useSupabaseClient = () => {
+  const [supabase, setSupabase] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+
+  return supabase;
+};
 
 interface LayoutProviderProps {
   children: ReactNode;
@@ -12,6 +64,8 @@ interface LayoutProviderProps {
 
 const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = useSupabaseClient();
 
   const [active, setActive] = useState<boolean>(false);
 
@@ -19,39 +73,60 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     setActive(!active);
   };
 
-  const isAuthPage = [
-    "/authentication/sign-in/",
-    "/authentication/sign-up/",
-    "/authentication/forgot-password/",
-    "/authentication/reset-password/",
-    "/authentication/confirm-email/",
-    "/authentication/lock-screen/",
-    "/authentication/logout/",
-    "/coming-soon/",
-    "/",
-    "/front-pages/features/",
-    "/front-pages/team/",
-    "/front-pages/faq/",
-    "/front-pages/contact/",
-  ].includes(pathname);
+  // Define public/auth pages (No Sidebar/Header/Footer)
+  const isPublicModule =
+    pathname === "/" ||
+    pathname === "/coming-soon" ||
+    pathname?.startsWith("/authentication/") ||
+    pathname?.startsWith("/front-pages/") ||
+    pathname?.startsWith("/pdf/") ||
+    pathname?.startsWith("/extra-pages/"); // Add any other public path prefixes here
+
+  useEffect(() => {
+    // Auth Check for Protected Pages
+    if (!isPublicModule && supabase) {
+      const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/authentication/sign-in');
+        }
+      };
+
+      checkAuth();
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+        if (event === 'SIGNED_OUT') {
+          router.push('/authentication/sign-in');
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [isPublicModule, router, supabase]);
+
+  // Loading State
+  if (!isPublicModule && !supabase) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
+        <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)' }} />
+        <div className="relative z-10"><PurpleLoader /></div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <div
-        className={`main-content-wrap transition-all ${active ? "active" : ""}`}
-      >
-        {!isAuthPage && (
+      <div className={`main-content-wrap transition-all ${active ? "active" : ""}`}>
+        {!isPublicModule && (
           <>
             <SidebarMenu toggleActive={toggleActive} />
-
             <Header toggleActive={toggleActive} />
           </>
         )}
 
-        <div className="main-content transition-all flex flex-col overflow-hidden min-h-screen">
+        <div className={`main-content transition-all flex flex-col overflow-hidden min-h-screen ${!isPublicModule ? '' : 'public-page-content'}`}>
           {children}
-
-          {!isAuthPage && <Footer />}
+          {!isPublicModule && <Footer />}
         </div>
       </div>
     </>
@@ -59,3 +134,4 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 };
 
 export default LayoutProvider;
+

@@ -20,7 +20,7 @@ export default function Page() {
               Dashboard
             </Link>
           </li>
- 
+
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             Settings
           </li>
@@ -37,3 +37,4 @@ export default function Page() {
     </>
   );
 }
+

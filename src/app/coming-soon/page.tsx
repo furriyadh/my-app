@@ -4,6 +4,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 
 export default function Page() {
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [isRTL, setIsRTL] = useState(false);
+
   // Memoizing the target date to prevent unnecessary re-renders
   const targetDate = useMemo(() => new Date("2025-12-31T23:59:59"), []);
 
@@ -14,6 +17,20 @@ export default function Page() {
     minutes: "00",
     seconds: "00",
   });
+
+  // Listen for language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
+      if (savedLanguage) {
+        setLanguage(savedLanguage);
+        setIsRTL(savedLanguage === 'ar');
+      }
+    };
+    updateLanguage();
+    window.addEventListener('languageChange', updateLanguage);
+    return () => window.removeEventListener('languageChange', updateLanguage);
+  }, []);
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -42,7 +59,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="coming-soon-content bg-white dark:bg-[#0a0e19] py-[30px] h-screen overflow-x-hidden">
+      <div className="coming-soon-content bg-white dark:bg-[#0a0e19] py-[30px] h-screen overflow-x-hidden" dir="ltr">
         <div className="w-full h-full table">
           <div className="table-cell align-middle">
             <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
@@ -74,11 +91,11 @@ export default function Page() {
                   />
 
                   <div className="my-[17px] md:my-[25px]">
-                    <h1 className="!font-semibold !text-[22px] md:!text-xl lg:!text-2xl 2xl:!text-4xl !mb-[5px] md:!mb-[12px]">
-                      We&apos;re working on launching soon, stay tuned!
+                    <h1 className="!font-semibold !text-[22px] md:!text-xl lg:!text-2xl 2xl:!text-4xl !mb-[5px] md:!mb-[12px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                      {language === 'ar' ? 'نحن نعمل على الإطلاق قريباً، ترقبوا!' : "We're working on launching soon, stay tuned!"}
                     </h1>
-                    <p className="font-medium leading-[1.5] lg:text-md">
-                      We&apos;re coming soon..
+                    <p className="font-medium leading-[1.5] lg:text-md" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                      {language === 'ar' ? 'قريباً جداً..' : "We're coming soon.."}
                     </p>
                   </div>
 

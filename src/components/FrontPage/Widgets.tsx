@@ -2,36 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
-
-interface Widget {
-  title: string;
-  description: string;
-}
-
-const widgetsData: Widget[] = [
-  {
-    title: "Tailored Display",
-    description:
-      "Easily arrange, resize, and configure widgets to showcase the data most relevant to your workflow.",
-  },
-  {
-    title: "Personalized Insights",
-    description:
-      "Customize widget content and visualization options to match your specific preferences and priorities.",
-  },
-  {
-    title: "Flexibility and Versatility",
-    description:
-      "Adapt widgets to evolving business needs by adjusting layouts, styles, and data sources with ease.",
-  },
-  {
-    title: "Seamless Integration",
-    description:
-      "Integrate widgets seamlessly with other dashboard components and external systems for a cohesive user experience.",
-  },
-];
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 const Widgets: React.FC = () => {
+  const { t, isRTL } = useTranslation();
   return (
     <>
       <div className="pb-[60px] md:pb-[80px] lg:pb-[100px] xl:pb-[150px]">
@@ -59,12 +33,12 @@ const Widgets: React.FC = () => {
             </div>
 
             <div>
-              <h2 className="!leading-[1.2] !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] !mb-[15px] !-tracking-[.5px] md:!-tracking-[.6px] lg:!-tracking-[.8px] xl:!-tracking-[1px]">
-                Tailor Your Dashboard: Unleash the Power of Customizable Widgets
+              <h2 className="!leading-[1.2] !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] !mb-[15px] !-tracking-[.5px] md:!-tracking-[.6px] lg:!-tracking-[.8px] xl:!-tracking-[1px]" dir={isRTL ? 'rtl' : 'ltr'}>
+                {t.widgets.title}
               </h2>
 
               <ul className="ltr:xl:pl-[18px] rtl:xl:pr-[18px] mt-[25px] md:mt-[30px] lg:mt-[35px] xl:mt-[65px]">
-                {widgetsData.map((widget, index) => (
+                {[0, 1, 2, 3].map((index) => (
                   <li
                     key={index}
                     className="relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[28px] rtl:md:pr-[28px] ltr:lg:pl-[30px] rtl:lg:pr-[30px] mb-[25px] xl:mb-[32px] last:mb-0"
@@ -72,11 +46,17 @@ const Widgets: React.FC = () => {
                     <i className="material-symbols-outlined absolute text-primary-600 !text-[17px] md:!text-[18px] lg:!text-[20px] ltr:left-0 rtl:right-0 top-0">
                       done_outline
                     </i>
-                    <h3 className="!text-[15px] md:!text-[16px] lg:!text-[17px] xl:!text-lg !mb-[8px] md:!mb-[10px] !font-semibold !leading-[1.2]">
-                      {widget.title}
+                    <h3 className="!text-[15px] md:!text-[16px] lg:!text-[17px] xl:!text-lg !mb-[8px] md:!mb-[10px] !font-semibold !leading-[1.2]" dir={isRTL ? 'rtl' : 'ltr'}>
+                      {index === 0 && t.widgets.widget1Title}
+                      {index === 1 && t.widgets.widget2Title}
+                      {index === 2 && t.widgets.widget3Title}
+                      {index === 3 && t.widgets.widget4Title}
                     </h3>
-                    <p className="leading-[1.6] md:max-w-[458px]">
-                      {widget.description}
+                    <p className="leading-[1.6] md:max-w-[458px]" dir={isRTL ? 'rtl' : 'ltr'}>
+                      {index === 0 && t.widgets.widget1Desc}
+                      {index === 1 && t.widgets.widget2Desc}
+                      {index === 2 && t.widgets.widget3Desc}
+                      {index === 3 && t.widgets.widget4Desc}
                     </p>
                   </li>
                 ))}

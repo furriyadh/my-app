@@ -1,0 +1,41 @@
+# Flask والمكتبات الأساسية
+flask>=3.0.0
+flask-cors==4.0.0
+flask-jwt-extended==4.5.3
+
+# Google APIs
+google-ads
+google-auth==2.23.4
+google-auth-oauthlib==1.1.0
+google-generativeai==0.3.0
+
+# قاعدة البيانات
+supabase==2.0.0
+
+# أدوات مساعدة
+python-dotenv==1.0.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+aiohttp==3.9.0
+lxml==4.9.3
+
+# معالجة البيانات
+pandas==2.3.1
+numpy==1.24.0
+nltk==3.8.1
+
+# المعالجة المتوازية
+celery==5.3.4
+redis==5.0.1
+
+# الأمان والتشفير
+cryptography==41.0.4
+bcrypt==4.0.1
+
+# التحقق من البيانات
+marshmallow==3.20.1
+email-validator==2.0.0
+
+# المراقبة والسجلات
+gunicorn==21.2.0
+python-json-logger==2.0.7

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار OAuth2 - Furriyadh</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .info { border-left: 4px solid #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 اختبار OAuth2 الشامل</h1>
+        <p>اختبار عملية ربط الحساب الإعلاني مع Google</p>
+        
+        <div>
+            <button onclick="testOAuth2Direct()">🚀 اختبار OAuth2 مباشر</button>
+            <button onclick="testOAuth2Popup()">🪟 اختبار OAuth2 منبثق</button>
+            <button onclick="testEndpoints()">🔍 فحص Endpoints</button>
+            <button onclick="clearResults()">🗑️ مسح النتائج</button>
+        </div>
+        
+        <div id="results" class="result info">
+            جاهز للاختبار... اضغط على أي زر أعلاه
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            const results = document.getElementById('results');
+            results.className = `result ${type}`;
+            results.textContent += `[${timestamp}] ${message}\n`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').textContent = 'تم مسح النتائج... جاهز للاختبار\n';
+            document.getElementById('results').className = 'result info';
+        }
+
+        function testOAuth2Direct() {
+            log('🚀 بدء اختبار OAuth2 مباشر...', 'info');
+            
+            // الذهاب مباشرة إلى OAuth2 endpoint
+            window.location.href = '/api/oauth2/google';
+        }
+
+        function testOAuth2Popup() {
+            log('🪟 بدء اختبار OAuth2 منبثق...', 'info');
+            
+            const popup = window.open(
+                "/api/oauth2/google", 
+                "_blank", 
+                "width=600,height=700,scrollbars=yes,resizable=yes"
+            );
+            
+            const messageListener = (event) => {
+                if (event.source === popup && event.data.type === 'oauth2Success') {
+                    log('🎉 تم استقبال oauth2Success!', 'success');
+                    log(`📧 البريد: ${event.data.data.user.email}`, 'success');
+                    log(`🏢 الحسابات: ${event.data.data.accounts.length}`, 'success');
+                    
+                    // حفظ البيانات
+                    localStorage.setItem('oauth2_user_data', JSON.stringify(event.data.data.user));
+                    localStorage.setItem('oauth2_accounts', JSON.stringify(event.data.data.accounts));
+                    localStorage.setItem('oauth2_session_token', event.data.data.sessionToken);
+                    
+                    log('💾 تم حفظ البيانات في localStorage', 'success');
+                    
+                    window.removeEventListener('message', messageListener);
+                    if (popup && !popup.closed) {
+                        popup.close();
+                    }
+                }
+            };
+            
+            window.addEventListener('message', messageListener);
+            
+            // مراقبة إغلاق النافذة
+            const checkClosed = setInterval(() => {
+                if (popup?.closed) {
+                    clearInterval(checkClosed);
+                    window.removeEventListener('message', messageListener);
+                    log('🪟 تم إغلاق النافذة المنبثقة', 'info');
+                }
+            }, 1000);
+        }
+
+        async function testEndpoints() {
+            log('🔍 فحص جميع OAuth2 endpoints...', 'info');
+            
+            const endpoints = [
+                '/api/oauth2/google',
+                '/api/oauth2/callback', 
+                '/api/oauth2/refresh',
+                '/api/oauth2/revoke',
+                '/api/oauth2/status'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    log(`🔍 اختبار ${endpoint}...`);
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (response.status === 307 || response.status === 302) {
+                        log(`✅ ${endpoint}: redirect صحيح (${response.status})`, 'success');
+                    } else if (response.status === 400 || response.status === 401) {
+                        log(`✅ ${endpoint}: خطأ متوقع (${response.status})`, 'success');
+                    } else if (response.status === 500) {
+                        const errorText = await response.text();
+                        log(`❌ ${endpoint}: خطأ خادم (500) - ${errorText.substring(0, 100)}...`, 'error');
+                    } else {
+                        log(`⚠️ ${endpoint}: status غير متوقع (${response.status})`, 'info');
+                    }
+                    
+                } catch (error) {
+                    log(`❌ ${endpoint}: خطأ اتصال - ${error.message}`, 'error');
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            log('🏁 انتهى فحص endpoints', 'info');
+        }
+
+        // رسالة ترحيب
+        window.addEventListener('load', () => {
+            log('🌟 مرحباً بك في اختبار OAuth2!', 'success');
+            log('📝 اختر نوع الاختبار من الأزرار أعلاه', 'info');
+            log('🔧 تأكد من تشغيل الخادم على localhost:3000', 'info');
+        });
+    </script>
+</body>
+</html>

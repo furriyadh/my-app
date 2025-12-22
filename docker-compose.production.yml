@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js Application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: furriyadh_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=https://furriyadh.com
+      - NEXT_PUBLIC_API_URL=https://my-app-production-28d2.up.railway.app/api
+      - BACKEND_API_URL=https://my-app-production-28d2.up.railway.app
+      - GOOGLE_REDIRECT_URI=https://furriyadh.com/api/oauth/google/callback
+    env_file:
+      - .env.production
+    restart: unless-stopped
+    networks:
+      - furriyadh_network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend - Flask Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: furriyadh_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - FLASK_ENV=production
+      - FLASK_DEBUG=False
+      - BACKEND_API_URL=https://my-app-production-28d2.up.railway.app
+      - FRONTEND_URL=https://furriyadh.com
+    env_file:
+      - .env.production
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/google_ads_data:/app/google_ads_data
+    restart: unless-stopped
+    networks:
+      - furriyadh_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: furriyadh_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - furriyadh_network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for Caching (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: furriyadh_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.production.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - furriyadh_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  furriyadh_network:
+    driver: bridge
