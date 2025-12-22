@@ -40,7 +40,7 @@ const getPresetDates = (preset: typeof PRESETS[0]): { startDate: Date; endDate: 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const endOfToday = new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1);
-  
+
   if (preset.days !== undefined) {
     if (preset.days === 0) {
       return { startDate: today, endDate: endOfToday };
@@ -52,7 +52,7 @@ const getPresetDates = (preset: typeof PRESETS[0]): { startDate: Date; endDate: 
       return { startDate, endDate: endOfToday };
     }
   }
-  
+
   switch (preset.type) {
     case 'thisMonth':
       return { startDate: new Date(now.getFullYear(), now.getMonth(), 1), endDate: endOfToday };
@@ -69,17 +69,17 @@ const getPresetDates = (preset: typeof PRESETS[0]): { startDate: Date; endDate: 
       const currentQuarter = Math.floor(now.getMonth() / 3);
       const lastQuarter = currentQuarter === 0 ? 3 : currentQuarter - 1;
       const year = currentQuarter === 0 ? now.getFullYear() - 1 : now.getFullYear();
-      return { 
-        startDate: new Date(year, lastQuarter * 3, 1), 
-        endDate: new Date(year, lastQuarter * 3 + 3, 0, 23, 59, 59, 999) 
+      return {
+        startDate: new Date(year, lastQuarter * 3, 1),
+        endDate: new Date(year, lastQuarter * 3 + 3, 0, 23, 59, 59, 999)
       };
     }
     case 'thisYear':
       return { startDate: new Date(now.getFullYear(), 0, 1), endDate: endOfToday };
     case 'lastYear':
-      return { 
-        startDate: new Date(now.getFullYear() - 1, 0, 1), 
-        endDate: new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999) 
+      return {
+        startDate: new Date(now.getFullYear() - 1, 0, 1),
+        endDate: new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999)
       };
     default:
       return { startDate: today, endDate: endOfToday };
@@ -93,7 +93,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const { t, isRTL } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // قراءة القيمة المحفوظة مباشرة (client-side)
   const getSavedLabel = (): string => {
     if (typeof window === 'undefined') return 'Today';
@@ -108,10 +108,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           }
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return isRTL ? 'اليوم' : 'Today';
   };
-  
+
   const getSavedDates = (): { startDate: Date; endDate: Date } => {
     if (typeof window === 'undefined') return getPresetDates(PRESETS[0]);
     try {
@@ -125,16 +125,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           }
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return getPresetDates(PRESETS[0]);
   };
-  
+
   // الـ state
   const [displayLabel, setDisplayLabel] = useState<string>(getSavedLabel);
   const [selectedDates, setSelectedDates] = useState<{ startDate: Date; endDate: Date }>(getSavedDates);
   const [compareEnabled, setCompareEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
+
   // تحديث بعد mount للتأكد من قراءة localStorage
   useEffect(() => {
     setMounted(true);
@@ -143,7 +143,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setDisplayLabel(label);
     setSelectedDates(dates);
   }, []);
-  
+
   // تحديث الـ label عند تغيير اللغة
   useEffect(() => {
     if (!mounted) return;
@@ -157,20 +157,20 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const handlePresetSelect = (preset: typeof PRESETS[0]) => {
     const dates = getPresetDates(preset);
     const newLabel = isRTL ? preset.labelAr : preset.label;
-    
+
     console.log('🔄 تغيير الفترة إلى:', newLabel);
-    
+
     // تحديث الـ state فوراً
     setDisplayLabel(newLabel);
     setSelectedDates(dates);
-    
+
     // حفظ في localStorage (بالإنجليزي دائماً)
     localStorage.setItem('dashboard_date_range', JSON.stringify({
       label: preset.label, // نحفظ بالإنجليزي
       startDate: dates.startDate.toISOString(),
       endDate: dates.endDate.toISOString()
     }));
-    
+
     // إرسال التغيير للـ parent
     const range: DateRange = { ...dates, label: newLabel };
     if (compareEnabled) {
@@ -183,7 +183,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     } else {
       onDateRangeChange(range);
     }
-    
+
     setIsOpen(false);
   };
 
@@ -191,7 +191,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const handleComparisonToggle = () => {
     const newCompareEnabled = !compareEnabled;
     setCompareEnabled(newCompareEnabled);
-    
+
     const range: DateRange = { ...selectedDates, label: displayLabel };
     if (newCompareEnabled) {
       const duration = selectedDates.endDate.getTime() - selectedDates.startDate.getTime();
@@ -217,8 +217,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   // تحقق إذا كان نفس اليوم
   const isSameDay = (date1: Date, date2: Date): boolean => {
     return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate();
   };
 
   // عرض نطاق التاريخ بشكل ذكي
@@ -246,11 +246,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-900/50 rounded-lg text-purple-200 text-sm transition-all backdrop-blur-sm"
+        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm transition-all backdrop-blur-sm"
       >
         <Calendar className="w-4 h-4" />
         <span className="font-medium">{displayLabel}</span>
-        <span className="text-purple-400 text-xs">
+        <span className="text-gray-500 dark:text-gray-400 text-xs">
           ({formatDateRange()})
         </span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -258,14 +258,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
       {/* Dropdown */}
       {isOpen && (
-        <div 
-          className="absolute top-full mt-2 right-0 w-80 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl"
+        <div
+          className="absolute top-full mt-2 right-0 w-80 bg-white dark:bg-[#0c1427] border border-gray-100 dark:border-[#172036] rounded-xl shadow-2xl z-50 backdrop-blur-xl"
           style={{ direction: isRTL ? 'rtl' : 'ltr' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-purple-900/30">
-            <h3 className="text-white font-semibold flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-purple-400" />
+          <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+            <h3 className="text-gray-900 dark:text-white font-semibold flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               {isRTL ? 'نطاق التاريخ' : 'Date Range'}
             </h3>
             <button
@@ -282,16 +282,15 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               {PRESETS.map((preset, index) => {
                 const presetLabel = isRTL ? preset.labelAr : preset.label;
                 const isSelected = displayLabel === presetLabel || displayLabel === preset.label || displayLabel === preset.labelAr;
-                
+
                 return (
                   <button
                     key={index}
                     onClick={() => handlePresetSelect(preset)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
-                      isSelected
-                        ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-                        : 'text-gray-300 hover:bg-purple-900/20 hover:text-white'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all ${isSelected
+                      ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
                   >
                     {presetLabel}
                   </button>
@@ -302,7 +301,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
           {/* Comparison Toggle */}
           {enableComparison && (
-            <div className="p-4 border-t border-purple-900/30">
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800">
               <label className="flex items-center gap-3 cursor-pointer">
                 <div className="relative">
                   <input
@@ -311,12 +310,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     onChange={handleComparisonToggle}
                     className="sr-only"
                   />
-                  <div className={`w-10 h-5 rounded-full transition-colors ${
-                    compareEnabled ? 'bg-purple-600' : 'bg-gray-700'
-                  }`}>
-                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                      compareEnabled ? 'translate-x-5' : 'translate-x-0'
-                    }`} />
+                  <div className={`w-10 h-5 rounded-full transition-colors ${compareEnabled ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-700'
+                    }`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${compareEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`} />
                   </div>
                 </div>
                 <span className="text-gray-300 text-sm">

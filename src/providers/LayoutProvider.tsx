@@ -8,8 +8,8 @@ import Footer from "@/components/Layout/Footer";
 import { motion } from "motion/react";
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
-// ✨ Purple Loader Component
-const PurpleLoader = () => {
+// ✨ Primary Loader Component
+const PrimaryLoader = () => {
   const transition = (x: number) => {
     return {
       duration: 1,
@@ -25,23 +25,24 @@ const PurpleLoader = () => {
         initial={{ y: 0 }}
         animate={{ y: [0, 12, 0] }}
         transition={transition(0)}
-        className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-400 to-violet-500 shadow-lg shadow-purple-500/60"
+        className="h-5 w-5 rounded-full border border-primary-300 bg-gradient-to-b from-primary-400 to-indigo-500 shadow-lg shadow-primary-500/60"
       />
       <motion.div
         initial={{ y: 0 }}
         animate={{ y: [0, 12, 0] }}
         transition={transition(1)}
-        className="h-5 w-5 rounded-full border border-violet-300 bg-gradient-to-b from-violet-400 to-purple-600 shadow-lg shadow-violet-500/60"
+        className="h-5 w-5 rounded-full border border-indigo-300 bg-gradient-to-b from-indigo-400 to-primary-600 shadow-lg shadow-indigo-500/60"
       />
       <motion.div
         initial={{ y: 0 }}
         animate={{ y: [0, 12, 0] }}
         transition={transition(2)}
-        className="h-5 w-5 rounded-full border border-purple-300 bg-gradient-to-b from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/60"
+        className="h-5 w-5 rounded-full border border-primary-300 bg-gradient-to-b from-primary-500 to-blue-500 shadow-lg shadow-primary-500/60"
       />
     </div>
   );
 };
+
 
 // Dynamic import for supabase client
 const useSupabaseClient = () => {
@@ -108,8 +109,8 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   if (!isPublicModule && !supabase) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
-        <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%)' }} />
-        <div className="relative z-10"><PurpleLoader /></div>
+        <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(96, 93, 255, 0.3) 0%, rgba(59, 130, 246, 0.15) 40%, transparent 70%)' }} />
+        <div className="relative z-10"><PrimaryLoader /></div>
       </div>
     );
   }

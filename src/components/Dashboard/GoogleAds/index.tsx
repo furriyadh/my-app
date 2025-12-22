@@ -7,7 +7,7 @@ const CreditsComponent: React.FC = () => {
   const { t, isRTL } = useTranslation();
   const [promoCode, setPromoCode] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
-  
+
   // Simulate user payment status and billing date
   const [userHasPaid, setUserHasPaid] = useState(false); // Change this to true to simulate paid user
   const [spentAmount, setSpentAmount] = useState(0);
@@ -91,18 +91,18 @@ const CreditsComponent: React.FC = () => {
           {/* Left Side - Balance */}
           <div className="space-y-6">
             {/* Balance Card */}
-            <div className="bg-white/15 backdrop-blur-md border border-purple-300/30 rounded-lg p-6">
+            <div className="bg-white/15 backdrop-blur-md border border-blue-300/30 rounded-lg p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4Z" fill="#FFFFFF"/>
-                    <path d="M18 9H6C5.44772 9 5 9.44772 5 10V14C5 14.5523 5.44772 15 6 15H18C18.5523 15 19 14.5523 19 14V10C19 9.44772 18.5523 9 18 9Z" fill="#FFFFFF"/>
-                    <path d="M9 12C9 11.4477 8.55228 11 8 11H6C5.44772 11 5 11.4477 5 12C5 12.5523 5.44772 13 6 13H8C8.55228 13 9 12.5523 9 12Z" fill="#FFFFFF"/>
+                    <path d="M20 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4Z" fill="#FFFFFF" />
+                    <path d="M18 9H6C5.44772 9 5 9.44772 5 10V14C5 14.5523 5.44772 15 6 15H18C18.5523 15 19 14.5523 19 14V10C19 9.44772 18.5523 9 18 9Z" fill="#FFFFFF" />
+                    <path d="M9 12C9 11.4477 8.55228 11 8 11H6C5.44772 11 5 11.4477 5 12C5 12.5523 5.44772 13 6 13H8C8.55228 13 9 12.5523 9 12Z" fill="#FFFFFF" />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-black dark:text-gray-800">{t.billing?.balance || 'Balance'}</h3>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">SPENT</p>
@@ -121,7 +121,7 @@ const CreditsComponent: React.FC = () => {
                     <span className="text-gray-800 text-xs">?</span>
                   </div>
                 </div>
-                <p className="text-lg font-semibold text-black dark:text-gray-800">{getNextBillingDate( )}</p>
+                <p className="text-lg font-semibold text-black dark:text-gray-800">{getNextBillingDate()}</p>
               </div>
 
               <button className="w-full bg-blue-600 hover:bg-blue-700 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors">
@@ -134,7 +134,7 @@ const CreditsComponent: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-4 uppercase tracking-wide">
                 EVERYTHING YOU NEED TO KNOW
               </h3>
-              
+
               <div className="space-y-4">
                 {faqItems.map((item, index) => (
                   <div key={index} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 pb-4 last:pb-0">
@@ -174,8 +174,8 @@ const CreditsComponent: React.FC = () => {
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
                   <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clipRule="evenodd"/>
-                    <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"/>
+                    <path fillRule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clipRule="evenodd" />
+                    <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-black dark:text-gray-800">Get free credit</h3>
@@ -187,10 +187,10 @@ const CreditsComponent: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6">
                       <svg viewBox="0 0 24 24" className="w-full h-full">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                       </svg>
                     </div>
                     <span className="font-medium text-black dark:text-gray-800">Google Welcome Credit</span>
@@ -212,7 +212,7 @@ const CreditsComponent: React.FC = () => {
               <div className="bg-white/10 backdrop-blur-md border border-blue-200/30 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
                       <span className="text-gray-800 text-xs font-bold">F</span>
                     </div>
                     <span className="font-medium text-black dark:text-gray-800">Furriyadh Welcome Credit</span>
@@ -236,10 +236,10 @@ const CreditsComponent: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6">
                       <svg viewBox="0 0 24 24" className="w-full h-full">
-                        <path fill="#F25022" d="M1 1h10v10H1z"/>
-                        <path fill="#00A4EF" d="M13 1h10v10H13z"/>
-                        <path fill="#7FBA00" d="M1 13h10v10H1z"/>
-                        <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                        <path fill="#F25022" d="M1 1h10v10H1z" />
+                        <path fill="#00A4EF" d="M13 1h10v10H13z" />
+                        <path fill="#7FBA00" d="M1 13h10v10H1z" />
+                        <path fill="#FFB900" d="M13 13h10v10H13z" />
                       </svg>
                     </div>
                     <span className="font-medium text-black dark:text-gray-800">Microsoft Welcome Bonus</span>
@@ -262,7 +262,7 @@ const CreditsComponent: React.FC = () => {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/>
+                      <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <span className="font-medium text-black dark:text-gray-800">Unlock free credit with code</span>

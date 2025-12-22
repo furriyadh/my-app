@@ -167,11 +167,10 @@ const CampaignPreview = () => {
   // Ad preview component
   const AdPreview = ({ ad, device }) => {
     const isMobile = device === "mobile";
-    
+
     return (
-      <div className={`bg-white/15 backdrop-blur-md rounded-lg border border-blue-200/30 p-4 ${
-        isMobile ? "text-sm" : ""
-      }`}>
+      <div className={`bg-white/15 backdrop-blur-md rounded-lg border border-blue-200/30 p-4 ${isMobile ? "text-sm" : ""
+        }`}>
         <div className="flex items-start space-x-3">
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-gray-800 font-bold text-sm">
             Ad
@@ -186,7 +185,7 @@ const CampaignPreview = () => {
             <div className="text-gray-700 dark:text-gray-300 mt-1">
               {ad.description}
             </div>
-            
+
             {/* Sitelinks */}
             <div className="flex flex-wrap gap-2 mt-3">
               {ad.sitelinks.map((link, index) => (
@@ -259,11 +258,10 @@ const CampaignPreview = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? 'text-green-200 drop-shadow-sm border-b-2 border-green-400 bg-green-500/20 backdrop-blur-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${activeTab === tab.id
+                  ? 'text-green-200 drop-shadow-sm border-b-2 border-green-400 bg-green-500/20 backdrop-blur-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 <span className="hidden md:inline">{tab.label}</span>
@@ -284,31 +282,28 @@ const CampaignPreview = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setPreviewMode("desktop")}
-                    className={`p-2 rounded-lg transition-colors ${
-                      previewMode === "desktop"
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${previewMode === "desktop"
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                      }`}
                   >
                     <Monitor className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setPreviewMode("tablet")}
-                    className={`p-2 rounded-lg transition-colors ${
-                      previewMode === "tablet"
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${previewMode === "tablet"
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                      }`}
                   >
                     <Tablet className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setPreviewMode("mobile")}
-                    className={`p-2 rounded-lg transition-colors ${
-                      previewMode === "mobile"
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${previewMode === "mobile"
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                      }`}
                   >
                     <Smartphone className="w-5 h-5" />
                   </button>
@@ -378,27 +373,27 @@ const CampaignPreview = () => {
                 </div>
 
                 {/* Targeting */}
-                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                  <h4 className="font-semibold text-purple-900 dark:text-purple-400 mb-3 flex items-center">
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4">
+                  <h4 className="font-semibold text-indigo-900 dark:text-indigo-400 mb-3 flex items-center">
                     <Target className="w-5 h-5 mr-2" />
                     Targeting
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-purple-800 dark:text-purple-300">Locations:</span>
-                      <div className="font-medium text-purple-900 dark:text-purple-400">
+                      <span className="text-indigo-800 dark:text-indigo-300">Locations:</span>
+                      <div className="font-medium text-indigo-900 dark:text-indigo-400">
                         {campaignData.targeting.locations.join(", ")}
                       </div>
                     </div>
                     <div>
-                      <span className="text-purple-800 dark:text-purple-300">Age Range:</span>
-                      <div className="font-medium text-purple-900 dark:text-purple-400">
+                      <span className="text-indigo-800 dark:text-indigo-300">Age Range:</span>
+                      <div className="font-medium text-indigo-900 dark:text-indigo-400">
                         {campaignData.targeting.demographics.age}
                       </div>
                     </div>
                     <div>
-                      <span className="text-purple-800 dark:text-purple-300">Devices:</span>
-                      <div className="font-medium text-purple-900 dark:text-purple-400">
+                      <span className="text-indigo-800 dark:text-indigo-300">Devices:</span>
+                      <div className="font-medium text-indigo-900 dark:text-indigo-400">
                         {campaignData.targeting.devices.join(", ")}
                       </div>
                     </div>
@@ -462,7 +457,7 @@ const CampaignPreview = () => {
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Impressions</div>
                 </div>
-                
+
                 <div className="text-center p-6 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
                   <div className="text-lg font-bold text-green-600 dark:text-green-400">
@@ -470,15 +465,15 @@ const CampaignPreview = () => {
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Clicks</div>
                 </div>
-                
-                <div className="text-center p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                  <Star className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                  <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+
+                <div className="text-center p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                  <Star className="w-8 h-8 text-indigo-500 mx-auto mb-2" />
+                  <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                     {performanceEstimates.conversions}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Conversions</div>
                 </div>
-                
+
                 <div className="text-center p-6 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                   <TrendingUp className="w-8 h-8 text-orange-500 mx-auto mb-2" />
                   <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
@@ -495,14 +490,14 @@ const CampaignPreview = () => {
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Expected CTR</div>
                 </div>
-                
+
                 <div className="text-center p-4 bg-white/15 backdrop-blur-md rounded-lg">
                   <div className="text-xl font-bold text-gray-900 dark:text-gray-800">
                     {performanceEstimates.cpc}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Expected CPC</div>
                 </div>
-                
+
                 <div className="text-center p-4 bg-white/15 backdrop-blur-md rounded-lg">
                   <div className="text-xl font-bold text-gray-900 dark:text-gray-800">
                     {performanceEstimates.cpa}
@@ -519,7 +514,7 @@ const CampaignPreview = () => {
                       Performance Estimates
                     </h4>
                     <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                      These estimates are based on historical data and current market conditions. 
+                      These estimates are based on historical data and current market conditions.
                       Actual performance may vary depending on competition, seasonality, and other factors.
                     </p>
                   </div>
@@ -548,11 +543,10 @@ const CampaignPreview = () => {
                     ) : (
                       <AlertCircle className="w-5 h-5 text-yellow-500" />
                     )}
-                    <span className={`flex-1 ${
-                      check.completed 
-                        ? 'text-gray-900 dark:text-gray-800' 
-                        : 'text-yellow-800 dark:text-yellow-300'
-                    }`}>
+                    <span className={`flex-1 ${check.completed
+                      ? 'text-gray-900 dark:text-gray-800'
+                      : 'text-yellow-800 dark:text-yellow-300'
+                      }`}>
                       {check.item}
                     </span>
                     {!check.completed && (
@@ -589,18 +583,18 @@ const CampaignPreview = () => {
             <Edit className="w-4 h-4" />
             <span>Edit Campaign</span>
           </button>
-          
+
           <button className="flex items-center space-x-2 px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             <Download className="w-4 h-4" />
             <span>Export Preview</span>
           </button>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <button className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors">
             Save as Draft
           </button>
-          
+
           <button
             onClick={launchCampaign}
             disabled={isLaunching}

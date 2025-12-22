@@ -299,7 +299,7 @@ const RecentCampaigns = () => {
               <TypeIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-800 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {campaign.name}
               </h3>
               <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
@@ -336,7 +336,7 @@ const RecentCampaigns = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="text-gray-600 dark:text-gray-400">Budget Usage</span>
-            <span className="font-medium text-gray-900 dark:text-gray-800">
+            <span className="font-medium text-gray-900 dark:text-gray-100">
               {formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}
             </span>
           </div>
@@ -358,7 +358,7 @@ const RecentCampaigns = () => {
             <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-1">
               <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {formatNumber(campaign.impressions)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Impressions</div>
@@ -368,38 +368,38 @@ const RecentCampaigns = () => {
             <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-1">
               <MousePointer className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {formatNumber(campaign.clicks)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Clicks</div>
           </div>
 
           <div className="text-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg mx-auto mb-1">
-              <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
+            <button className="p-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors border border-gray-200 dark:border-gray-700 group mx-auto mb-1">
+              <Edit3 className="w-4 h-4 text-primary-500 group-hover:text-primary-600" />
+            </button>
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {campaign.conversions}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Conversions</div>
           </div>
 
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {campaign.ctr}%
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">CTR</div>
           </div>
 
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {formatCurrency(campaign.cpc)}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">CPC</div>
           </div>
 
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-800">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {campaign.roas}x
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">ROAS</div>
@@ -446,7 +446,7 @@ const RecentCampaigns = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-800 mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {t.dashboard?.recentCampaigns || 'Recent Campaigns'}
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
@@ -473,7 +473,7 @@ const RecentCampaigns = () => {
             placeholder="Search campaigns..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-800 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -482,7 +482,7 @@ const RecentCampaigns = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -494,7 +494,7 @@ const RecentCampaigns = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg  dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="date">Sort by Date</option>
             <option value="name">Sort by Name</option>

@@ -62,7 +62,7 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
       setIsLoading(true);
       const response = await fetch(`/api/campaigns/insights?customerId=${customerId || ''}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setInsights(data.insights);
       }
@@ -78,7 +78,7 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
       opportunity: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
       warning: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
       success: 'bg-green-500/10 border-green-500/30 text-green-400',
-      insight: 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+      insight: 'bg-primary-500/10 border-primary-500/30 text-primary-500'
     };
     return styles[type as keyof typeof styles] || styles.insight;
   };
@@ -100,18 +100,18 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
 
   if (isLoading) {
     return (
-      <div className="backdrop-blur-sm p-5 border border-solid transition-all duration-300 ease-in-out hover:-translate-y-0.5" style={{ backgroundColor: '#060010', borderColor: '#392e4e', borderRadius: '20px', fontWeight: 300 }}>
+      <div className="bg-white dark:bg-[#0c1427] p-5 border border-gray-100 dark:border-[#172036] transition-all duration-300 ease-in-out hover:-translate-y-0.5 rounded-[20px]" style={{ fontWeight: 300 }}>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-purple-500/20 rounded-lg">
-            <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
+          <div className="p-2 bg-primary-500/10 rounded-lg">
+            <Sparkles className="w-5 h-5 text-primary-500 animate-pulse" />
           </div>
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {(t.dashboard as any)?.aiInsights || '🤖 AI Insights'}
           </h2>
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 animate-pulse" style={{ backgroundColor: 'rgba(57, 46, 78, 0.3)', borderRadius: '16px' }} />
+            <div key={i} className="h-20 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-[16px]" />
           ))}
         </div>
       </div>
@@ -119,29 +119,30 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
   }
 
   return (
-    <div className="backdrop-blur-sm p-5 border border-solid shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(46,24,78,0.4)]" style={{ backgroundColor: '#060010', borderColor: '#392e4e', borderRadius: '20px', fontWeight: 300 }}>
+    <div className="bg-white dark:bg-[#0c1427] p-5 border border-gray-100 dark:border-[#172036] shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-0.5 rounded-[20px]"
+      style={{ fontWeight: 300 }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/20 rounded-lg">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+          <div className="p-2 bg-primary-500/10 rounded-lg">
+            <Sparkles className="w-5 h-5 text-primary-500" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {(t.dashboard as any)?.aiInsights || '🤖 AI Insights'}
             </h2>
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-gray-900 dark:text-white/60">
               {(t.dashboard as any)?.aiInsightsDesc || 'Smart recommendations powered by AI'}
             </p>
           </div>
         </div>
-        
+
         <button
           onClick={() => fetchInsights()}
-          className="p-2 hover:bg-[#392e4e]/30 rounded-lg transition-colors group"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group"
           title="Refresh insights"
         >
-          <Sparkles className="w-5 h-5 text-white/60 group-hover:text-purple-400 transition-colors" />
+          <Sparkles className="w-5 h-5 text-gray-900 dark:text-white/60 group-hover:text-primary-500 transition-colors" />
         </button>
       </div>
 
@@ -150,11 +151,11 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
         {displayedInsights.map((insight) => {
           const IconComponent = iconMap[insight.icon] || Info;
           const typeStyles = getTypeStyles(insight.type);
-          
+
           return (
             <div
               key={insight.id}
-              className={`group relative p-4 border ${typeStyles} hover:bg-[#392e4e]/20 transition-all duration-300 ease-in-out cursor-pointer hover:-translate-y-0.5`}
+              className={`group relative p-4 border ${typeStyles} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 ease-in-out cursor-pointer hover:-translate-y-0.5`}
               style={{ borderRadius: '16px' }}
               onClick={() => setSelectedInsight(insight)}
             >
@@ -162,25 +163,25 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
                 <div className={`p-2 rounded-lg ${typeStyles}`}>
                   <IconComponent className="w-5 h-5" />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-sm font-semibold text-white truncate">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {insight.title}
                     </h3>
                     {getPriorityBadge(insight.priority)}
                   </div>
-                  
-                  <p className="text-xs text-white/60 mb-2 line-clamp-2">
+
+                  <p className="text-xs text-gray-900 dark:text-white/60 mb-2 line-clamp-2">
                     {insight.description}
                   </p>
-                  
+
                   {insight.actionable && (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-white/50">
+                      <span className="text-xs text-gray-900 dark:text-white/50">
                         💡 {insight.recommendation}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white/60 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-900 dark:text-white/40 group-hover:text-gray-900 dark:text-white/60 transition-colors" />
                     </div>
                   )}
                 </div>
@@ -194,9 +195,9 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
       {insights.length > 3 && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="w-full mt-4 py-2 text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors"
+          className="w-full mt-4 py-2 text-sm text-primary-500 hover:text-purple-300 font-medium transition-colors"
         >
-          {showAll 
+          {showAll
             ? `${(t.dashboard as any)?.showLess || 'Show Less'} ↑`
             : `${(t.dashboard as any)?.showMore || `Show ${insights.length - 3} More`} ↓`
           }
@@ -205,12 +206,12 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
 
       {/* Insight Detail Modal */}
       {selectedInsight && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedInsight(null)}
         >
-          <div 
-            className="p-6 max-w-lg w-full border border-solid shadow-2xl" style={{ backgroundColor: '#060010', borderColor: '#392e4e', borderRadius: '20px', fontWeight: 300 }}
+          <div
+            className="p-6 max-w-lg w-full bg-white dark:bg-[#0c1427] border border-gray-100 dark:border-[#172036] shadow-2xl rounded-[20px]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">
@@ -224,42 +225,42 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
                   );
                 })()}
                 <div>
-                  <h3 className="text-lg font-bold text-white mb-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
                     {selectedInsight.title}
                   </h3>
                   {getPriorityBadge(selectedInsight.priority)}
                 </div>
               </div>
-              
+
               <button
                 onClick={() => setSelectedInsight(null)}
-                className="p-2 hover:bg-[#392e4e]/30 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-white/60" />
+                <X className="w-5 h-5 text-gray-900 dark:text-white/60" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <h4 className="text-sm font-semibold text-white/80 mb-2">Description</h4>
-                <p className="text-sm text-white/60">{selectedInsight.description}</p>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white/80 mb-2">Description</h4>
+                <p className="text-sm text-gray-900 dark:text-white/60">{selectedInsight.description}</p>
               </div>
-              
+
               <div>
-                <h4 className="text-sm font-semibold text-white/80 mb-2">Recommendation</h4>
-                <p className="text-sm text-white/60">{selectedInsight.recommendation}</p>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white/80 mb-2">Recommendation</h4>
+                <p className="text-sm text-gray-900 dark:text-white/60">{selectedInsight.recommendation}</p>
               </div>
-              
+
               {selectedInsight.metrics && (
                 <div>
-                  <h4 className="text-sm font-semibold text-white/80 mb-2">Metrics</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white/80 mb-2">Metrics</h4>
                   <div className="rounded-lg p-3 space-y-2" style={{ backgroundColor: 'rgba(57, 46, 78, 0.3)' }}>
                     {Object.entries(selectedInsight.metrics).map(([key, value]) => (
                       <div key={key} className="flex justify-between items-center">
-                        <span className="text-xs text-white/50 capitalize">
+                        <span className="text-xs text-gray-900 dark:text-white/50 capitalize">
                           {key.replace(/([A-Z])/g, ' $1').trim()}
                         </span>
-                        <span className="text-sm font-medium text-white/90">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white/90">
                           {typeof value === 'number' ? value.toLocaleString() : String(value)}
                         </span>
                       </div>
@@ -267,14 +268,14 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ customerId, onApplyAc
                   </div>
                 </div>
               )}
-              
+
               {selectedInsight.actionable && (
                 <button
                   onClick={() => {
                     onApplyAction?.(selectedInsight.action);
                     setSelectedInsight(null);
                   }}
-                  className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+                  className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-gray-900 dark:text-white font-medium rounded-lg transition-colors"
                 >
                   Apply Recommendation
                 </button>

@@ -206,10 +206,10 @@ const QuickActions = () => {
     },
     purple: {
       bg: "bg-white/15 backdrop-blur-md",
-      border: "border-purple-300/30",
-      text: "text-purple-100 drop-shadow-sm",
-      icon: "text-purple-200 drop-shadow-sm",
-      hover: "hover:bg-purple-500/20"
+      border: "border-indigo-300/30",
+      text: "text-indigo-100 drop-shadow-sm",
+      icon: "text-indigo-200 drop-shadow-sm",
+      hover: "hover:bg-indigo-500/20"
     },
     green: {
       bg: "bg-white/15 backdrop-blur-md",
@@ -493,16 +493,14 @@ const QuickActions = () => {
               {notifications.map(notification => (
                 <div key={notification.id} className="p-4 hover:bg-white/20 backdrop-blur-sm transition-colors">
                   <div className="flex items-start space-x-3">
-                    <div className={`p-1 rounded-full ${
-                      notification.type === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                      notification.type === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
-                      'bg-blue-100 dark:bg-blue-900/30'
-                    }`}>
-                      <Bell className={`w-3 h-3 ${
-                        notification.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400' :
-                        notification.type === 'success' ? 'text-green-600 dark:text-green-400' :
-                        'text-blue-600 dark:text-blue-400'
-                      }`} />
+                    <div className={`p-1 rounded-full ${notification.type === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                        notification.type === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
+                          'bg-blue-100 dark:bg-blue-900/30'
+                      }`}>
+                      <Bell className={`w-3 h-3 ${notification.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400' :
+                          notification.type === 'success' ? 'text-green-600 dark:text-green-400' :
+                            'text-blue-600 dark:text-blue-400'
+                        }`} />
                     </div>
                     <div className="flex-1">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-gray-800">

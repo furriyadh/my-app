@@ -49,37 +49,37 @@ const GoalsPanel: React.FC<GoalsPanelProps> = ({ metrics }) => {
   };
 
   return (
-    <div className="backdrop-blur-sm rounded-[20px] p-5 border border-solid" style={{ backgroundColor: '#060010', borderColor: '#392e4e' }}>
+    <div className="bg-white dark:bg-[#0c1427] rounded-[20px] p-5 border border-gray-100 dark:border-[#172036]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Target className="w-5 h-5 text-purple-400" />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <Target className="w-5 h-5 text-primary-500" />
           {isRTL ? 'الأهداف والغايات' : 'Goals & Targets'}
         </h3>
-        <button className="p-2 bg-purple-600/20 hover:bg-purple-600/30 rounded-lg transition-colors">
-          <Plus className="w-4 h-4 text-purple-400" />
+        <button className="p-2 bg-primary-500/10 hover:bg-primary-500/20 rounded-lg transition-colors">
+          <Plus className="w-4 h-4 text-primary-500" />
         </button>
       </div>
 
       <div className="space-y-3">
         {goals.map((goal) => {
           const progress = calculateProgress(goal.current, goal.target);
-          
+
           return (
             <div
               key={goal.id}
-              className="p-4 bg-purple-900/10 border border-purple-900/20 rounded-lg hover:bg-purple-900/20 transition-all"
+              className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-medium">{goal.metric}</span>
+                  <span className="text-gray-900 dark:text-white font-medium">{goal.metric}</span>
                   <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(goal.status)}`}>
                     {getStatusIcon(goal.status)}
                     {goal.status.replace('-', ' ')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-1 hover:bg-purple-900/30 rounded transition-colors">
-                    <Edit2 className="w-3 h-3 text-gray-400 hover:text-white" />
+                  <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors">
+                    <Edit2 className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white" />
                   </button>
                   <button className="p-1 hover:bg-red-500/20 rounded transition-colors">
                     <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-400" />
@@ -88,22 +88,21 @@ const GoalsPanel: React.FC<GoalsPanelProps> = ({ metrics }) => {
               </div>
 
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-400">{isRTL ? 'الحالي' : 'Current'}: <span className="text-white font-semibold">{goal.current.toFixed(2)}</span></span>
-                <span className="text-gray-400">{isRTL ? 'الهدف' : 'Target'}: <span className="text-purple-400 font-semibold">{goal.target.toFixed(2)}</span></span>
+                <span className="text-gray-500 dark:text-gray-400">{isRTL ? 'الحالي' : 'Current'}: <span className="text-gray-900 dark:text-white font-semibold">{goal.current.toFixed(2)}</span></span>
+                <span className="text-gray-500 dark:text-gray-400">{isRTL ? 'الهدف' : 'Target'}: <span className="text-primary-500 font-semibold">{goal.target.toFixed(2)}</span></span>
               </div>
 
-              <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div className="relative h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  className={`absolute left-0 top-0 h-full transition-all duration-500 ${
-                    progress >= 100 ? 'bg-green-500' :
+                  className={`absolute left-0 top-0 h-full transition-all duration-500 ${progress >= 100 ? 'bg-green-500' :
                     progress >= 75 ? 'bg-blue-500' :
-                    progress >= 50 ? 'bg-yellow-500' :
-                    'bg-red-500'
-                  }`}
+                      progress >= 50 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                    }`}
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="text-right text-xs text-gray-400 mt-1">{progress.toFixed(1)}%</div>
+              <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">{progress.toFixed(1)}%</div>
             </div>
           );
         })}

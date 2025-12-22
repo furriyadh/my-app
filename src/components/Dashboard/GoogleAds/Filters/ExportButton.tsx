@@ -22,7 +22,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   // Export to CSV
   const exportToCSV = () => {
     setIsExporting(true);
-    
+
     try {
       // Create CSV content
       const headers = ['Campaign ID', 'Name', 'Type', 'Status', 'Impressions', 'Clicks', 'CTR', 'Conversions', 'Spend', 'ROAS'];
@@ -38,12 +38,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         (campaign.cost || 0).toFixed(2),
         (campaign.roas || 0).toFixed(2)
       ]);
-      
+
       const csvContent = [
         headers.join(','),
         ...rows.map(row => row.join(','))
       ].join('\n');
-      
+
       // Create and download file
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
@@ -54,7 +54,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setIsOpen(false);
     } catch (error) {
       console.error('Error exporting to CSV:', error);
@@ -67,7 +67,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   // Export to Excel (TSV format for Excel compatibility)
   const exportToExcel = () => {
     setIsExporting(true);
-    
+
     try {
       // Create TSV content (Excel-compatible)
       const headers = ['Campaign ID', 'Name', 'Type', 'Status', 'Impressions', 'Clicks', 'CTR (%)', 'Conversions', 'Spend ($)', 'ROAS'];
@@ -83,12 +83,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         (campaign.cost || 0).toFixed(2),
         (campaign.roas || 0).toFixed(2)
       ]);
-      
+
       const tsvContent = [
         headers.join('\t'),
         ...rows.map(row => row.join('\t'))
       ].join('\n');
-      
+
       // Create and download file
       const blob = new Blob([tsvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
       const link = document.createElement('a');
@@ -99,7 +99,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setIsOpen(false);
     } catch (error) {
       console.error('Error exporting to Excel:', error);
@@ -112,7 +112,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   // Export to PDF
   const exportToPDF = async () => {
     setIsExporting(true);
-    
+
     try {
       // Create PDF content using HTML
       const htmlContent = `
@@ -203,7 +203,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 </body>
 </html>
       `;
-      
+
       // Create blob and download
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
       const link = document.createElement('a');
@@ -214,9 +214,9 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setIsOpen(false);
-      
+
       // Open in new window for printing as PDF
       const printWindow = window.open('', '_blank');
       if (printWindow) {
@@ -240,7 +240,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isExporting}
-        className="flex items-center gap-2 px-4 py-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-900/50 rounded-lg text-purple-200 text-sm transition-all backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm transition-all backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isExporting ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -254,18 +254,18 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       {isOpen && !isExporting && (
         <>
           {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Dropdown Menu */}
-          <div className="absolute top-full mt-2 right-0 w-56 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl overflow-hidden">
+          <div className="absolute top-full mt-2 right-0 w-56 bg-white dark:bg-[#0c1427] border border-gray-100 dark:border-[#172036] rounded-xl shadow-2xl z-50 backdrop-blur-xl overflow-hidden">
             <div className="p-2">
               {/* CSV */}
               <button
                 onClick={exportToCSV}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-300 hover:bg-purple-900/20 hover:text-white rounded-lg transition-all"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-purple-900/20 hover:text-gray-900 dark:hover:text-white rounded-lg transition-all"
               >
                 <FileSpreadsheet className="w-5 h-5 text-green-400" />
                 <div>
@@ -277,11 +277,11 @@ const ExportButton: React.FC<ExportButtonProps> = ({
                   </div>
                 </div>
               </button>
-              
+
               {/* Excel */}
               <button
                 onClick={exportToExcel}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-300 hover:bg-purple-900/20 hover:text-white rounded-lg transition-all mt-1"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-purple-900/20 hover:text-gray-900 dark:hover:text-white rounded-lg transition-all mt-1"
               >
                 <FileText className="w-5 h-5 text-blue-400" />
                 <div>
@@ -293,11 +293,11 @@ const ExportButton: React.FC<ExportButtonProps> = ({
                   </div>
                 </div>
               </button>
-              
+
               {/* PDF */}
               <button
                 onClick={exportToPDF}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-300 hover:bg-purple-900/20 hover:text-white rounded-lg transition-all mt-1"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-purple-900/20 hover:text-gray-900 dark:hover:text-white rounded-lg transition-all mt-1"
               >
                 <FileImage className="w-5 h-5 text-red-400" />
                 <div>

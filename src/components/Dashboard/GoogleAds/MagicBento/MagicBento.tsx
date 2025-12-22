@@ -5,7 +5,7 @@ import { gsap } from 'gsap';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { Target, TrendingUp, Activity, Zap, DollarSign, Eye } from 'lucide-react';
 
-const DEFAULT_GLOW_COLOR = '132, 0, 255'; // Keep glow for effect, but background will be standard
+const DEFAULT_GLOW_COLOR = '96, 93, 255'; // Primary-500 equivalent
 
 export interface BentoCardProps {
   color?: string;
@@ -509,7 +509,7 @@ const MagicBento: React.FC<BentoProps> = ({
   // Default card data if no campaigns provided
   const defaultCards: BentoCardProps[] = [
     {
-      color: '#060010',
+      color: '#0c1427',
       title: t.dashboard.totalCampaigns || 'Total Campaigns',
       description: t.dashboard.allActiveCampaigns || 'All active campaigns',
       label: t.dashboard.overview || 'Overview',
@@ -517,7 +517,7 @@ const MagicBento: React.FC<BentoProps> = ({
       value: '0'
     },
     {
-      color: '#060010',
+      color: '#0c1427',
       title: t.dashboard.performance || 'Performance',
       description: t.dashboard.campaignPerformance || 'Campaign performance metrics',
       label: t.dashboard.metrics || 'Metrics',
@@ -525,7 +525,7 @@ const MagicBento: React.FC<BentoProps> = ({
       value: '0%'
     },
     {
-      color: '#060010',
+      color: '#0c1427',
       title: t.dashboard.impressions || 'Impressions',
       description: t.dashboard.totalImpressions || 'Total ad impressions',
       label: t.dashboard.reach || 'Reach',
@@ -533,7 +533,7 @@ const MagicBento: React.FC<BentoProps> = ({
       value: '0'
     },
     {
-      color: '#060010',
+      color: '#0c1427',
       title: t.dashboard.clicks || 'Clicks',
       description: t.dashboard.totalClicks || 'Total clicks received',
       label: t.dashboard.engagement || 'Engagement',
@@ -541,7 +541,7 @@ const MagicBento: React.FC<BentoProps> = ({
       value: '0'
     },
     {
-      color: '#060010',
+      color: '#0c1427',
       title: t.dashboard.spend || 'Ad Spend',
       description: t.dashboard.totalSpent || 'Total advertising expenditure',
       label: t.dashboard.budget || 'Budget',
@@ -549,7 +549,7 @@ const MagicBento: React.FC<BentoProps> = ({
       value: '$0'
     },
     {
-      color: '#060010',
+      color: '#0c1427',
       title: t.dashboard.conversions || 'Conversions',
       description: t.dashboard.totalConversions || 'Total conversions achieved',
       label: t.dashboard.results || 'Results',

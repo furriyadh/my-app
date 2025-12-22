@@ -62,9 +62,9 @@ const NotificationsPanel: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-900/50 rounded-lg transition-all backdrop-blur-sm"
+        className="relative p-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg transition-all backdrop-blur-sm"
       >
-        <Bell className="w-5 h-5 text-purple-300" />
+        <Bell className="w-5 h-5 text-primary-500" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
             {unreadCount}
@@ -75,12 +75,12 @@ const NotificationsPanel: React.FC = () => {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          
-          <div className="absolute top-full mt-2 right-0 w-96 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl z-50 backdrop-blur-xl max-h-[500px] overflow-y-auto">
-            <div className="sticky top-0 bg-[#060010] p-4 border-b border-purple-900/30">
+
+          <div className="absolute top-full mt-2 right-0 w-96 bg-white dark:bg-[#0c1427] border border-gray-100 dark:border-[#172036] rounded-xl shadow-2xl z-50 max-h-[500px] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-[#0c1427] p-4 border-b border-gray-100 dark:border-[#172036]">
               <div className="flex items-center justify-between">
-                <h3 className="text-white font-semibold">{isRTL ? 'الإشعارات' : 'Notifications'}</h3>
-                <button onClick={() => setNotifications([])} className="text-xs text-purple-400 hover:text-purple-300">
+                <h3 className="text-gray-900 dark:text-white font-semibold">{isRTL ? 'الإشعارات' : 'Notifications'}</h3>
+                <button onClick={() => setNotifications([])} className="text-xs text-primary-500 hover:text-primary-600">
                   {isRTL ? 'مسح الكل' : 'Clear All'}
                 </button>
               </div>
@@ -96,22 +96,22 @@ const NotificationsPanel: React.FC = () => {
                 notifications.map((notif) => (
                   <div
                     key={notif.id}
-                    className="p-3 hover:bg-purple-900/20 rounded-lg transition-colors mb-2"
+                    className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors mb-2"
                   >
                     <div className="flex gap-3">
                       <div className="flex-shrink-0 mt-1">{getIcon(notif.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-white font-medium text-sm">{notif.title}</p>
+                          <p className="text-gray-900 dark:text-white font-medium text-sm">{notif.title}</p>
                           <button
                             onClick={() => setNotifications(prev => prev.filter(n => n.id !== notif.id))}
-                            className="flex-shrink-0 text-gray-400 hover:text-white"
+                            className="flex-shrink-0 text-gray-400 hover:text-gray-900 dark:hover:text-white"
                           >
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                        <p className="text-gray-400 text-xs mt-1">{notif.message}</p>
-                        <p className="text-gray-500 text-xs mt-2">{getTimeAgo(notif.timestamp)}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">{notif.message}</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-xs mt-2">{getTimeAgo(notif.timestamp)}</p>
                       </div>
                     </div>
                   </div>

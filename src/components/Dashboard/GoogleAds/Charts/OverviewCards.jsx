@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { getBackendUrl } from "@/lib/config";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Users, 
-  Eye, 
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Users,
+  Eye,
   MousePointer,
   Target,
   BarChart3,
@@ -100,7 +100,7 @@ const OverviewCards = () => {
 
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           setMetricsData({
             totalSpend: calculateMetric(result.data.totalSpend, result.data.previousSpend),
@@ -328,7 +328,7 @@ const OverviewCards = () => {
     const isPositiveTrend = config.trend === 'up';
 
     return (
-      <div 
+      <div
         className={`
             rounded-xl p-6 border transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer
           ${colors.border} ${colors.bg}
@@ -341,11 +341,11 @@ const OverviewCards = () => {
           <div className={`p-3 rounded-lg ${colors.iconBg}`}>
             <Icon className={`w-6 h-6 ${colors.icon}`} />
           </div>
-          <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-            isPositiveTrend 
-              ? 'bg-green-500/20 text-green-200 backdrop-blur-sm border border-green-300/20 drop-shadow-sm' 
-              : 'bg-red-500/20 text-red-200 backdrop-blur-sm border border-red-300/20 drop-shadow-sm'
-          }`}>
+          <div className={`p-3 rounded-xl ${index === 0 ? 'bg-primary-500/10 text-primary-500' :
+              index === 1 ? 'bg-primary-500/10 text-primary-500' :
+                index === 2 ? 'bg-blue-500/10 text-blue-500' :
+                  'bg-orange-500/10 text-orange-500'
+            }`}>
             <TrendIcon className="w-3 h-3" />
             <span>{formatPercentage(Math.abs(config.change))}</span>
           </div>

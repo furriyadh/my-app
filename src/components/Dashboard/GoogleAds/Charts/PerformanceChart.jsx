@@ -93,7 +93,7 @@ const PerformanceChart = () => {
       const backendUrl = `${getBackendUrl()}/api`;
 
       const selectedRange = timeRanges.find(range => range.value === timeRange);
-      
+
       const params = new URLSearchParams({
         days: selectedRange.days.toString()
       });
@@ -110,7 +110,7 @@ const PerformanceChart = () => {
 
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           const formattedData = formatPerformanceData(result.data, selectedRange.days);
           setChartData(formattedData);
@@ -153,11 +153,11 @@ const PerformanceChart = () => {
   const generateFallbackData = (days) => {
     const data = [];
     const baseDate = new Date();
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(baseDate);
       date.setDate(date.getDate() - i);
-      
+
       data.push({
         date: date.toISOString().split('T')[0],
         displayDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -184,7 +184,7 @@ const PerformanceChart = () => {
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
     if (!chartData.length) return {};
-    
+
     const totalImpressions = chartData.reduce((sum, item) => sum + item.impressions, 0);
     const totalClicks = chartData.reduce((sum, item) => sum + item.clicks, 0);
     const totalSpend = chartData.reduce((sum, item) => sum + item.spend, 0);
@@ -207,7 +207,7 @@ const PerformanceChart = () => {
   // Pie chart data for distribution
   const pieChartData = useMemo(() => {
     if (!chartData.length) return [];
-    
+
     const totalSpend = chartData.reduce((sum, item) => sum + item.spend, 0);
     return [
       { name: 'Search Campaigns', value: totalSpend * 0.45, color: '#3B82F6' },
@@ -225,14 +225,14 @@ const PerformanceChart = () => {
           <p className="font-semibold text-gray-900 dark:text-gray-800 mb-2">{label}</p>
           {payload.map((entry, index) => (
             <div key={index} className="flex items-center space-x-2 text-sm">
-              <div 
-                className="w-3 h-3 rounded-full" 
+              <div
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: entry.color }}
               ></div>
               <span className="text-gray-600 dark:text-gray-400">{entry.name}:</span>
               <span className="font-medium text-gray-900 dark:text-gray-800">
-                {typeof entry.value === 'number' && entry.value > 1000 
-                  ? entry.value.toLocaleString() 
+                {typeof entry.value === 'number' && entry.value > 1000
+                  ? entry.value.toLocaleString()
                   : entry.value}
               </span>
             </div>
@@ -266,27 +266,27 @@ const PerformanceChart = () => {
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis 
-                dataKey="displayDate" 
+              <XAxis
+                dataKey="displayDate"
                 stroke="#6B7280"
                 fontSize={12}
               />
               <YAxis stroke="#6B7280" fontSize={12} />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="impressions" 
-                stroke="#3B82F6" 
+              <Line
+                type="monotone"
+                dataKey="impressions"
+                stroke="#3B82F6"
                 strokeWidth={3}
                 name="Impressions"
                 dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2 }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="clicks" 
-                stroke="#10B981" 
+              <Line
+                type="monotone"
+                dataKey="clicks"
+                stroke="#10B981"
                 strokeWidth={3}
                 name="Clicks"
                 dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
@@ -317,8 +317,8 @@ const PerformanceChart = () => {
                 type="monotone"
                 dataKey="conversions"
                 stackId="2"
-                stroke="#8B5CF6"
-                fill="#EDE9FE"
+                stroke="#6366f1"
+                fill="#e0e7ff"
                 name="Conversions"
               />
             </AreaChart>
@@ -359,7 +359,7 @@ const PerformanceChart = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   formatter={(value) => [`$${value.toLocaleString()}`, 'Spend']}
                 />
               </PieChart>
@@ -384,7 +384,7 @@ const PerformanceChart = () => {
             Detailed performance metrics and trends analysis
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {/* Time Range Selector */}
           <select
@@ -408,11 +408,11 @@ const PerformanceChart = () => {
           >
             <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
-          
+
           <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Download Report">
             <Download className="w-5 h-5" />
           </button>
-          
+
           <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-800 transition-colors" title="Fullscreen">
             <Maximize2 className="w-5 h-5" />
           </button>
@@ -427,11 +427,10 @@ const PerformanceChart = () => {
             <button
               key={type.id}
               onClick={() => setActiveChart(type.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeChart === type.id
-                  ? 'bg-blue-500/30 text-blue-200 backdrop-blur-sm border border-blue-300/30 drop-shadow-sm'
-                  : 'bg-white/10 text-blue-100 backdrop-blur-sm border border-blue-200/20 hover:bg-white/20 drop-shadow-sm'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChart === type.id
+                ? 'bg-blue-500/30 text-blue-200 backdrop-blur-sm border border-blue-300/30 drop-shadow-sm'
+                : 'bg-white/10 text-blue-100 backdrop-blur-sm border border-blue-200/20 hover:bg-white/20 drop-shadow-sm'
+                }`}
             >
               <Icon className="w-4 h-4" />
               <span>{type.name}</span>
@@ -456,7 +455,7 @@ const PerformanceChart = () => {
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Impressions</div>
         </div>
-        
+
         <div className="text-center">
           <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-2">
             <MousePointer className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -466,7 +465,7 @@ const PerformanceChart = () => {
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Clicks</div>
         </div>
-        
+
         <div className="text-center">
           <div className="flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mx-auto mb-2">
             <DollarSign className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
@@ -476,31 +475,31 @@ const PerformanceChart = () => {
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Spend</div>
         </div>
-        
+
         <div className="text-center">
-          <div className="flex items-center justify-center w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg mx-auto mb-2">
-            <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg mx-auto mb-2">
+            <Target className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.totalConversions}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Conversions</div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.avgCTR}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Avg CTR</div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.avgCPC}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Avg CPC</div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-lg font-semibold text-gray-900 dark:text-gray-800">
             {summaryStats.avgROAS}

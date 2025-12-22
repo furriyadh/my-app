@@ -116,14 +116,14 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       {/* Filter Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex items-center gap-2 px-4 py-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-900/50 rounded-lg text-purple-200 text-sm transition-all backdrop-blur-sm"
+        className="relative flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm transition-all backdrop-blur-sm"
       >
         <Filter className="w-4 h-4" />
         <span className="hidden sm:inline">{isRTL ? 'تصفية' : 'Filters'}</span>
 
         {/* Active Filters Badge */}
         {hasActiveFilters && (
-          <span className="absolute -top-2 -right-2 w-5 h-5 bg-purple-600 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+          <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
             {activeFiltersCount || (
               filters.campaignTypes.length +
               filters.statuses.length +
@@ -146,13 +146,13 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
           {/* Panel */}
           <div
-            className={`absolute top-full mt-2 w-96 bg-[#060010] border border-purple-900/50 rounded-xl shadow-2xl shadow-purple-900/20 z-50 backdrop-blur-xl max-h-[600px] overflow-y-auto custom-scrollbar ${isRTL ? 'right-0' : 'left-0'
+            className={`absolute top-full mt-2 w-96 bg-white dark:bg-[#0c1427] border border-gray-100 dark:border-[#172036] rounded-xl shadow-2xl z-50 backdrop-blur-xl max-h-[600px] overflow-y-auto custom-scrollbar ${isRTL ? 'right-0' : 'left-0'
               }`}
             style={{ direction: isRTL ? 'rtl' : 'ltr' }}
           >
             {/* Header */}
-            <div className="sticky top-0 bg-[#060010] z-10 flex items-center justify-between p-4 border-b border-purple-900/30">
-              <h3 className="text-white font-semibold flex items-center gap-2">
+            <div className="sticky top-0 bg-white dark:bg-[#0c1427] z-10 flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#172036]">
+              <h3 className="text-gray-900 dark:text-white font-semibold flex items-center gap-2">
                 <Filter className="w-4 h-4 text-purple-400" />
                 {isRTL ? 'خيارات التصفية' : 'Filter Options'}
               </h3>
@@ -186,7 +186,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                   value={filters.searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder={isRTL ? 'ابحث بالاسم...' : 'Search by name...'}
-                  className="w-full pl-10 pr-4 py-2 bg-purple-900/20 border border-purple-900/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 transition-colors"
                 />
               </div>
             </div>
@@ -206,8 +206,8 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                       key={type.value}
                       onClick={() => handleTypeToggle(type.value)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${isSelected
-                        ? 'bg-purple-600/20 border border-purple-500/30 text-white'
-                        : 'bg-purple-900/10 border border-transparent text-gray-300 hover:bg-purple-900/20'
+                        ? 'bg-primary-500/10 border border-primary-500/30 text-primary-500'
+                        : 'bg-gray-100 dark:bg-gray-800 border border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                     >
                       <Icon className={`w-4 h-4 ${type.color}`} />
@@ -236,8 +236,8 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                       key={status.value}
                       onClick={() => handleStatusToggle(status.value)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${isSelected
-                        ? 'bg-purple-600/20 border border-purple-500/30 text-white'
-                        : 'bg-purple-900/10 border border-transparent text-gray-300 hover:bg-purple-900/20'
+                        ? 'bg-primary-500/10 border border-primary-500/30 text-primary-500'
+                        : 'bg-gray-100 dark:bg-gray-800 border border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                     >
                       <Icon className={`w-4 h-4 ${status.color}`} />
