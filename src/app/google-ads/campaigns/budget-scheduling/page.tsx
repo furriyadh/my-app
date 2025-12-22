@@ -1772,7 +1772,7 @@ const BudgetSchedulingPage: React.FC = () => {
               </p>
             </CardItem>
             {isLoadingEstimates ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-6">
+              <div className="flex flex-col items-center justify-center py-12 gap-6 bg-[#0a0e19]">
                 {/* AI Loading Animation */}
                 <div className="relative">
                   {/* Outer rotating ring */}
@@ -2158,7 +2158,7 @@ const BudgetSchedulingPage: React.FC = () => {
       {/* Modern Loader Modal - Centered with sidebar offset */}
       {isGeneratingContent && (
         <div
-          className={`fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center bg-white/90 dark:bg-black/90 ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`}
+          className={`fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center bg-[#0a0e19] ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`}
           style={{}}
         >
           <div className="w-full max-w-4xl">

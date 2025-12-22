@@ -96,7 +96,7 @@ const ModernLoader: React.FC<ModernLoaderProps> = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative bg-background h-[400px] rounded-2xl shadow-2xl overflow-hidden border border-border"
+        className="relative bg-[#0a0e19] h-[400px] rounded-2xl shadow-2xl overflow-hidden border border-border"
       >
         <div className="px-4 py-3 flex items-center z-10 relative">
           <div className="flex items-center gap-1.5">
