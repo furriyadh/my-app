@@ -291,8 +291,134 @@ export async function GET(request: NextRequest) {
             console.warn('⚠️ خطأ في حفظ OAuth tokens:', tokenDbError);
           }
 
-          // Skip background account saving for now - accounts will be fetched on demand
-          console.log('⚡ تم تخطي حفظ الحسابات في الخلفية - سيتم جلبها عند الطلب')
+          // ✅ Auto-discover and save Google Ads accounts after OAuth
+          if (redirectAfter?.includes('/google-ads')) {
+            console.log('🔄 اكتشاف حسابات Google Ads تلقائياً بعد OAuth...');
+            try {
+              const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
+              if (developerToken) {
+                // 1. جلب قائمة الحسابات المتاحة
+                const listResponse = await fetch('https://googleads.googleapis.com/v21/customers:listAccessibleCustomers', {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': `Bearer ${tokenData.access_token}`,
+                    'developer-token': developerToken,
+                    'Content-Type': 'application/json'
+                  },
+                  signal: AbortSignal.timeout(15000)
+                });
+
+                if (listResponse.ok) {
+                  const listData = await listResponse.json();
+                  const resourceNames = listData.resourceNames || [];
+                  console.log(`📋 تم اكتشاف ${resourceNames.length} حساب Google Ads`);
+
+                  // 2. حفظ كل حساب في Supabase
+                  for (const resourceName of resourceNames) {
+                    const customerId = resourceName.split('/').pop();
+                    if (!customerId) continue;
+
+                    try {
+                      // جلب تفاصيل الحساب
+                      const loginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || '').replace(/-/g, '');
+                      const detailsResponse = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${tokenData.access_token}`,
+                          'developer-token': developerToken,
+                          'login-customer-id': loginCustomerId,
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                          query: `SELECT customer.id, customer.descriptive_name, customer.status FROM customer LIMIT 1`
+                        }),
+                        signal: AbortSignal.timeout(10000)
+                      });
+
+                      let accountName = `Account ${customerId}`;
+                      let accountStatus = 'ENABLED';
+
+                      if (detailsResponse.ok) {
+                        const detailsData = await detailsResponse.json();
+                        const results = detailsData.results || [];
+                        if (results.length > 0) {
+                          accountName = results[0].customer?.descriptiveName || accountName;
+                          accountStatus = results[0].customer?.status || 'ENABLED';
+                        }
+                      }
+
+                      // 3. حفظ في Supabase
+                      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+                      const supabaseForAccounts = createSupabaseClient(
+                        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                        process.env.SUPABASE_SERVICE_ROLE_KEY!
+                      );
+
+                      // التحقق من وجود الحساب أولاً
+                      const { data: existingAccount } = await supabaseForAccounts
+                        .from('client_requests')
+                        .select('id')
+                        .eq('customer_id', customerId)
+                        .eq('user_id', userInfo.id)
+                        .single();
+
+                      let saveError;
+                      if (existingAccount) {
+                        // تحديث الحساب الموجود
+                        const result = await supabaseForAccounts
+                          .from('client_requests')
+                          .update({
+                            account_name: accountName,
+                            link_details: {
+                              discovered_at: new Date().toISOString(),
+                              source: 'oauth_callback',
+                              account_status: accountStatus
+                            },
+                            updated_at: new Date().toISOString()
+                          })
+                          .eq('id', existingAccount.id);
+                        saveError = result.error;
+                      } else {
+                        // إدخال حساب جديد
+                        const result = await supabaseForAccounts
+                          .from('client_requests')
+                          .insert({
+                            customer_id: customerId,
+                            user_id: userInfo.id,
+                            user_email: userInfo.email,
+                            account_name: accountName,
+                            request_type: 'auto_discovery',
+                            status: 'NOT_LINKED',
+                            link_details: {
+                              discovered_at: new Date().toISOString(),
+                              source: 'oauth_callback',
+                              account_status: accountStatus
+                            },
+                            updated_at: new Date().toISOString()
+                          });
+                        saveError = result.error;
+                      }
+
+                      if (!saveError) {
+                        console.log(`✅ تم حفظ الحساب ${customerId} (${accountName})`);
+                      } else {
+                        console.warn(`⚠️ خطأ في حفظ الحساب ${customerId}:`, saveError.message);
+                      }
+                    } catch (accError) {
+                      console.warn(`⚠️ فشل حفظ الحساب ${customerId}:`, accError);
+                    }
+                  }
+                  console.log(`✅ تم اكتشاف وحفظ ${resourceNames.length} حساب Google Ads`);
+                } else {
+                  console.warn('⚠️ فشل جلب قائمة الحسابات:', listResponse.status);
+                }
+              }
+            } catch (discoveryError) {
+              console.warn('⚠️ فشل اكتشاف الحسابات:', discoveryError);
+            }
+          } else {
+            console.log('ℹ️ ليس OAuth لـ Google Ads - تخطي اكتشاف الحسابات');
+          }
         }
       } catch (userError) {
         console.warn('⚠️ فشل في الحصول على معلومات المستخدم:', userError);

@@ -422,6 +422,9 @@ const GoogleAdsContent: React.FC = () => {
             }
             delete pollingIntervalsRef.current[customerId];
             setPollingAccounts(prev => ({ ...prev, [customerId]: false }));
+
+            // ✅ إغلاق الإشعار (المودال) عند توقف الفحص لأي سبب
+            setLinkNotification(null);
         };
 
         // ✅ بدء الفحص الدوري
@@ -2256,9 +2259,31 @@ const GoogleAdsContent: React.FC = () => {
 
             // فحص الحالة الحالية قبل الربط (من النظام الحالي)
             const currentAccount = accounts.find(acc => normalizeCustomerId(acc.customerId) === normalizeCustomerId(customerId));
+            const isAlreadyPending = currentAccount?.displayStatus === 'Pending';
+
             if (currentAccount?.displayStatus === 'Connected') {
                 console.log('✅ الحساب مربوط بالفعل!');
                 setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
+                return;
+            }
+
+            // ✅ إذا كانت الحالة Pending بالفعل، لا نرسل طلباً جديداً لـ Google Ads
+            // فقط نفتح الـ Polling ونظهر الإشعار لمساعدة العميل
+            if (isAlreadyPending) {
+                console.log('⏳ الحساب في حالة Pending بالفعل - تخطي إرسال طلب جديد وبدء الفحص');
+
+                setLinkNotification({
+                    show: true,
+                    customerId: customerId,
+                    accountName: accountName
+                });
+
+                await startPollingForAcceptance(customerId);
+
+                setTimeout(() => {
+                    setLinkingAccounts(prev => ({ ...prev, [customerId]: false }));
+                    setLoadingAccounts(prev => ({ ...prev, [customerId]: false }));
+                }, 100);
                 return;
             }
 
