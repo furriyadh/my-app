@@ -101,6 +101,12 @@ const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { t, isRTL } = useTranslation();
 
+  // دالة توحيد شكل المعرف الرقمي (إزالة الشرطات)
+  const normalizeCustomerId = (id: string) => {
+    if (!id) return '';
+    return id.toString().replace(/-/g, '').trim();
+  };
+
   // State
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthChecked, setIsAuthChecked] = useState(false); // ✅ للتحقق من اكتمال فحص المصادقة
@@ -210,16 +216,12 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchExchangeRates = async () => {
       try {
-        const response = await fetch('/api/ai-campaign/get-live-exchange-rates', {
-          cache: 'no-cache'
-        });
-        const data = await response.json();
+        // const response = await fetch('/api/ai-campaign/get-live-exchange-rates', {
+        //   cache: 'no-cache'
+        // });
+        throw new Error("Endpoint missing");
 
-        if (data.success && data.rates) {
-          const rates: Record<string, number> = { 'USD': 1.0, ...data.rates };
-          setExchangeRates(rates);
-          console.log('💱 Exchange rates loaded:', Object.keys(rates).length, 'currencies');
-        }
+
       } catch (error) {
         console.warn('⚠️ Failed to fetch exchange rates, using defaults');
       }
@@ -673,7 +675,7 @@ const DashboardPage: React.FC = () => {
         console.log(`🎯 Fetching data for specific campaign: ${selectedCampaignFilter}`);
       }
 
-      const response = await fetch(`/api/dashboard-data?${params.toString()}`);
+      const response = await fetch(`/api/google-ads/dashboard-data?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
@@ -788,7 +790,7 @@ const DashboardPage: React.FC = () => {
         },
         body: JSON.stringify({
           campaignId,
-          customerId,
+          customerId: normalizeCustomerId(customerId || ''),
           status: newStatus
         })
       });
@@ -1674,7 +1676,7 @@ const DashboardPage: React.FC = () => {
   const fetchGoogleRecommendations = async () => {
     setLoadingRecommendations(true);
     try {
-      const response = await fetch('/api/campaigns/recommendations');
+      const response = await fetch('/api/google-ads/campaigns/recommendations');
       const data = await response.json();
       if (data.success) {
         setGoogleRecommendations(data.recommendations || []);
@@ -1689,7 +1691,7 @@ const DashboardPage: React.FC = () => {
   // Apply recommendation
   const applyRecommendation = async (recommendation: any) => {
     try {
-      const response = await fetch('/api/campaigns/recommendations', {
+      const response = await fetch('/api/google-ads/campaigns/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -49,46 +49,55 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   }
 }
 
-// دالة للحصول على Access Token - تستخدم MCC Token أولاً
+
+// دالة للحصول على Access Token - تعطي الأولوية لـ User Token (لاكتشاف حسابات المستخدم)
 async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
-  // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
-  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-  
-  if (mccRefreshToken) {
-    console.log('🔑 محاولة استخدام MCC Token من البيئة...');
-    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
-    if (mccAccessToken) {
-      console.log('✅ تم الحصول على MCC Access Token بنجاح');
-      return mccAccessToken;
-    }
-    console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
-  }
-  
-  // 2. ثانياً: نحاول User OAuth Token كـ fallback
+  // 1. أولاً: نحاول User OAuth Token (الأصح لاكتشاف حسابات المستخدم الشخصية)
   if (userRefreshToken) {
-    console.log('🔑 محاولة استخدام User OAuth Token...');
+    console.log('🔑 محاولة استخدام User OAuth Token (User Context)...');
     const userAccessToken = await refreshAccessToken(userRefreshToken);
     if (userAccessToken) {
       console.log('✅ تم الحصول على User Access Token بنجاح');
       return userAccessToken;
     }
+    console.warn('⚠️ فشل User Token، سنحاول MCC Token كاحتياطي...');
   }
-  
+
+  // 2. ثانياً: نحاول استخدام MCC refresh token من البيئة (System Context)
+  // هذا مفيد إذا كنا نريد عرض الحسابات المرتبطة بالفعل بالمدير
+  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+
+  if (mccRefreshToken) {
+    console.log('🔑 محاولة استخدام MCC Token من البيئة (System Context)...');
+    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
+    if (mccAccessToken) {
+      console.log('✅ تم الحصول على MCC Access Token بنجاح');
+      return mccAccessToken;
+    }
+  }
+
   console.error('❌ فشل الحصول على أي Access Token صالح');
   return null;
 }
 
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Fetching Google Ads accounts (حسب Google Ads API Documentation)...');
-    
+
     // الحصول على refresh token من cookies
     const cookieStore = await cookies();
-    const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
-    
+
+    // استخدام توكن مخصص للإعلانات أولاً
+    const adsRefreshToken = cookieStore.get('ads_refresh_token')?.value;
+    const genericRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    const userRefreshToken = adsRefreshToken || genericRefreshToken;
+
+    console.log('🔑 Token Source:', adsRefreshToken ? 'ads_refresh_token (Specific)' : 'oauth_refresh_token (Generic)');
+
     // 🔑 الحصول على Access Token - MCC أولاً
     const accessToken = await getValidAccessToken(userRefreshToken);
-    
+
     if (!accessToken) {
       console.error('❌ No valid access token available');
       return NextResponse.json({
@@ -113,9 +122,9 @@ export async function GET(request: NextRequest) {
 
     // الحصول على حسابات Google Ads باستخدام Google Ads API
     const accounts = await getGoogleAdsAccounts(accessToken, developerToken);
-    
+
     console.log(`✅ Found ${accounts.length} Google Ads accounts`);
-    
+
     return NextResponse.json({
       success: true,
       accounts: accounts,
@@ -137,9 +146,9 @@ export async function GET(request: NextRequest) {
 async function getGoogleAdsAccounts(accessToken: string, developerToken: string): Promise<GoogleAdsAccount[]> {
   try {
     console.log('📊 جلب الحسابات مباشرة من Google Ads API...');
-    
+
     const loginCustomerId = (process.env.MCC_LOGIN_CUSTOMER_ID || process.env.GOOGLE_ADS_MCC_ID || '').replace(/-/g, '');
-    
+
     // جلب قائمة الحسابات المتاحة
     const listResponse = await fetch('https://googleads.googleapis.com/v21/customers:listAccessibleCustomers', {
       method: 'GET',
@@ -159,21 +168,21 @@ async function getGoogleAdsAccounts(accessToken: string, developerToken: string)
     const listData = await listResponse.json();
     const resourceNames = listData.resourceNames || [];
     console.log(`📋 عدد الحسابات المتاحة: ${resourceNames.length}`);
-    
+
     const accounts: GoogleAdsAccount[] = [];
-    
+
     for (const resourceName of resourceNames) {
       const customerId = resourceName.split('/').pop();
-      
+
       try {
         // جلب تفاصيل كل حساب
         const detailsResponse = await fetch(`https://googleads.googleapis.com/v21/customers/${customerId}/googleAds:search`, {
           method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'developer-token': developerToken,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'developer-token': developerToken,
             'login-customer-id': loginCustomerId,
-      'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             query: `
@@ -191,11 +200,11 @@ async function getGoogleAdsAccounts(accessToken: string, developerToken: string)
           }),
           signal: AbortSignal.timeout(10000)
         });
-        
+
         if (detailsResponse.ok) {
           const detailsData = await detailsResponse.json();
           const results = detailsData.results || [];
-          
+
           if (results.length > 0) {
             const customer = results[0].customer;
             accounts.push({
@@ -208,7 +217,7 @@ async function getGoogleAdsAccounts(accessToken: string, developerToken: string)
               status: customer.status || 'ENABLED',
               resourceName: resourceName
             });
-}
+          }
         } else {
           // إضافة الحساب حتى لو فشل جلب التفاصيل
           accounts.push({
@@ -227,23 +236,23 @@ async function getGoogleAdsAccounts(accessToken: string, developerToken: string)
         accounts.push({
           customerId: customerId,
           descriptiveName: `Account ${customerId}`,
-        currencyCode: 'USD',
+          currencyCode: 'USD',
           timeZone: 'UTC',
-        manager: false,
-        testAccount: false,
+          manager: false,
+          testAccount: false,
           status: 'ENABLED',
           resourceName: resourceName
         });
+      }
     }
-    }
-    
+
     console.log(`✅ تم جلب ${accounts.length} حساب`);
     return accounts;
 
   } catch (error) {
     console.error('❌ Error in getGoogleAdsAccounts:', error);
     return [];
-}
+  }
 }
 
 

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendUrl } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('🔗 جلب التكاملات المنصات...');
-    
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('oauth_access_token')?.value;
-    
+
     if (!accessToken) {
       return NextResponse.json({
         success: false,
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
         message: 'لم يتم العثور على access token'
       }, { status: 401 });
     }
-    
+
     // الاتصال بالباك اند لجلب التكاملات
     const response = await fetch(`${getBackendUrl()}/api/oauth/platform-integrations`, {
       method: 'GET',
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       }
     });
-    
+
     if (!response.ok) {
       console.error('❌ فشل في جلب التكاملات:', response.status, response.statusText);
       return NextResponse.json({
@@ -33,9 +34,9 @@ export async function GET(request: NextRequest) {
         message: 'فشل في جلب التكاملات'
       }, { status: 500 });
     }
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       console.log('✅ تم جلب التكاملات بنجاح:', data.integrations?.length || 0, 'تكامل');
       return NextResponse.json({
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
         message: data.message || 'فشل في جلب التكاملات'
       }, { status: 400 });
     }
-    
+
   } catch (error) {
     console.error('❌ خطأ في جلب التكاملات:', error);
     return NextResponse.json({
@@ -65,10 +66,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     console.log('🔗 إنشاء تكامل منصة جديد...');
-    
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('oauth_access_token')?.value;
-    
+
     if (!accessToken) {
       return NextResponse.json({
         success: false,
@@ -76,9 +77,9 @@ export async function POST(request: NextRequest) {
         message: 'لم يتم العثور على access token'
       }, { status: 401 });
     }
-    
+
     const { platform_name, platform_type, credentials } = await request.json();
-    
+
     if (!platform_name || !platform_type) {
       return NextResponse.json({
         success: false,
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
         message: 'اسم المنصة ونوعها مطلوبان'
       }, { status: 400 });
     }
-    
+
     // الاتصال بالباك اند لإنشاء التكامل
     const response = await fetch(`${getBackendUrl()}/api/oauth/platform-integrations`, {
       method: 'POST',
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
         credentials
       })
     });
-    
+
     if (!response.ok) {
       console.error('❌ فشل في إنشاء التكامل:', response.status, response.statusText);
       return NextResponse.json({
@@ -109,9 +110,9 @@ export async function POST(request: NextRequest) {
         message: 'فشل في إنشاء التكامل'
       }, { status: 500 });
     }
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       console.log('✅ تم إنشاء التكامل بنجاح');
       return NextResponse.json({
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
         message: data.message || 'فشل في إنشاء التكامل'
       }, { status: 400 });
     }
-    
+
   } catch (error) {
     console.error('❌ خطأ في إنشاء التكامل:', error);
     return NextResponse.json({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendUrl } from '@/lib/config';
 
 /**
  * Google OAuth2 Revoke Handler - يتبع الممارسات الرسمية من Google Identity Platform
@@ -11,11 +12,11 @@ import { cookies } from 'next/headers';
 export async function POST(request: NextRequest) {
   try {
     console.log('🚫 إلغاء OAuth (حسب Google Identity Platform)...');
-    
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('oauth_access_token')?.value;
     const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
-    
+
     // إلغاء tokens في Google (حسب Google Identity Platform)
     if (accessToken) {
       try {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
             token: accessToken,
           }),
         });
-        
+
         if (revokeResponse.ok) {
           console.log('✅ تم إلغاء access token في Google بنجاح (حسب Google Identity Platform)');
         } else {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
         console.warn('📋 راجع: https://developers.google.com/identity/protocols/oauth2/web-server#tokenrevoke');
       }
     }
-    
+
     // إلغاء refresh token أيضاً (حسب الممارسات الرسمية)
     if (refreshToken) {
       try {
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
             token: refreshToken,
           }),
         });
-        
+
         if (revokeRefreshResponse.ok) {
           console.log('✅ تم إلغاء refresh token في Google بنجاح');
         } else {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
         console.warn('⚠️ خطأ في إلغاء refresh token في Google:', revokeError);
       }
     }
-    
+
     // الاتصال بالباك اند لإلغاء OAuth (حسب Google Ads API Documentation)
     try {
       console.log('🔄 إلغاء OAuth في الباك اند...');
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
           refresh_token: refreshToken
         })
       });
-      
+
       if (backendResponse.ok) {
         console.log('✅ تم إلغاء OAuth في الباك اند بنجاح');
       } else {
@@ -89,14 +90,14 @@ export async function POST(request: NextRequest) {
       console.warn('⚠️ فشل في الاتصال بالباك اند لإلغاء OAuth:', backendError);
       console.warn('📋 راجع: https://developers.google.com/google-ads/api/docs/oauth/overview');
     }
-    
+
     // حذف جميع cookies المتعلقة بـ OAuth (حسب الممارسات الرسمية)
     const response = NextResponse.json({
       success: true,
       message: 'تم إلغاء OAuth بنجاح - يتبع Google Identity Platform',
       docs: 'https://developers.google.com/identity/protocols/oauth2/web-server#tokenrevoke'
     });
-    
+
     // حذف cookies (حسب الممارسات الرسمية)
     response.cookies.delete('oauth_access_token');
     response.cookies.delete('oauth_refresh_token');
@@ -107,11 +108,11 @@ export async function POST(request: NextRequest) {
     response.cookies.delete('oauth_state');
     response.cookies.delete('oauth_mcc_customer_id');
     response.cookies.delete('oauth_redirect_after');
-    
+
     console.log('✅ تم حذف جميع بيانات OAuth بنجاح (حسب الممارسات الرسمية)');
-    
+
     return response;
-    
+
   } catch (error) {
     console.error('❌ خطأ في إلغاء OAuth:', error);
     console.error('📋 راجع: https://developers.google.com/identity/protocols/oauth2/web-server#tokenrevoke');

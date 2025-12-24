@@ -189,9 +189,39 @@ export async function GET(request: NextRequest) {
         console.log('🔍 Token length:', tokenData.access_token.length);
         console.log('🔍 Token preview:', tokenData.access_token.substring(0, 50) + '...');
 
-        // حفظ OAuth access token في HttpOnly cookie
+        // حفظ OAuth access token في HttpOnly cookie (Generic)
         // 🔧 استخدام getCookieOptions للحصول على الإعدادات الصحيحة مع domain في الإنتاج
         successResponse.cookies.set('oauth_access_token', tokenData.access_token, getCookieOptions(7 * 24 * 3600));
+
+        // ✅ حفظ Token مخصص للخدمة (Service-Specific Token Isolation)
+        // هذا يمنع تداخل الصلاحيات عند استخدام خدمات متعددة (مثل Analytics و YouTube)
+        if (redirectAfter) {
+          if (redirectAfter.includes('/youtube')) {
+            console.log('🎯 Detected YouTube Auth -> Saving youtube_oauth_token');
+            successResponse.cookies.set('youtube_oauth_token', tokenData.access_token, getCookieOptions(7 * 24 * 3600));
+            if (tokenData.refresh_token) {
+              successResponse.cookies.set('youtube_refresh_token', tokenData.refresh_token, getCookieOptions(180 * 24 * 3600));
+            }
+          } else if (redirectAfter.includes('/google-analytics') || redirectAfter.includes('/analytics')) {
+            console.log('🎯 Detected Analytics Auth -> Saving analytics_oauth_token');
+            successResponse.cookies.set('analytics_oauth_token', tokenData.access_token, getCookieOptions(7 * 24 * 3600));
+            if (tokenData.refresh_token) {
+              successResponse.cookies.set('analytics_refresh_token', tokenData.refresh_token, getCookieOptions(180 * 24 * 3600));
+            }
+          } else if (redirectAfter.includes('/google-tag-manager') || redirectAfter.includes('/gtm')) {
+            console.log('🎯 Detected GTM Auth -> Saving gtm_oauth_token');
+            successResponse.cookies.set('gtm_oauth_token', tokenData.access_token, getCookieOptions(7 * 24 * 3600));
+            if (tokenData.refresh_token) {
+              successResponse.cookies.set('gtm_refresh_token', tokenData.refresh_token, getCookieOptions(180 * 24 * 3600));
+            }
+          } else if (redirectAfter.includes('/google-ads')) {
+            console.log('🎯 Detected Google Ads Auth -> Saving ads_oauth_token');
+            successResponse.cookies.set('ads_oauth_token', tokenData.access_token, getCookieOptions(7 * 24 * 3600));
+            if (tokenData.refresh_token) {
+              successResponse.cookies.set('ads_refresh_token', tokenData.refresh_token, getCookieOptions(180 * 24 * 3600));
+            }
+          }
+        }
 
         // إضافة cookie لحالة الاتصال (غير HttpOnly للوصول من JavaScript)
         successResponse.cookies.set('google_ads_connected', 'true', getCookieOptions(365 * 24 * 3600, false));

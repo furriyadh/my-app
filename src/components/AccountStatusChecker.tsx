@@ -31,13 +31,19 @@ interface AccountStatusCheckerProps {
   onStatusChange?: (status: AccountStatus) => void;
 }
 
-const AccountStatusChecker: React.FC<AccountStatusCheckerProps> = ({ 
-  userEmail, 
-  onStatusChange 
+const AccountStatusChecker: React.FC<AccountStatusCheckerProps> = ({
+  userEmail,
+  onStatusChange
 }) => {
   const [status, setStatus] = useState<AccountStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // دالة توحيد شكل المعرف الرقمي (إزالة الشرطات)
+  const normalizeId = (id: string) => {
+    if (!id) return '';
+    return id.toString().replace(/-/g, '').trim();
+  };
 
   const checkAccountStatus = async () => {
     setLoading(true);
@@ -115,11 +121,11 @@ const AccountStatusChecker: React.FC<AccountStatusCheckerProps> = ({
           {status.oauth.is_valid ? (
             <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-yellow-500 mr-2" />
+            <AlertCircle className="w-5 h-5 text-blue-500 mr-2" />
           )}
           <span className="font-medium">OAuth Tokens</span>
         </div>
-        <span className={`text-sm ${status.oauth.is_valid ? 'text-green-600' : 'text-yellow-600'}`}>
+        <span className={`text-sm ${status.oauth.is_valid ? 'text-green-600' : 'text-blue-600'}`}>
           {status.oauth.is_valid ? 'صالح' : 'منتهي الصلاحية'}
         </span>
       </div>
@@ -154,7 +160,7 @@ const AccountStatusChecker: React.FC<AccountStatusCheckerProps> = ({
             {status.accounts.accounts.map((account, index) => (
               <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded">
                 <span className="text-sm font-medium">{account.account_name}</span>
-                <span className="text-xs text-gray-500">{account.account_id}</span>
+                <span className="text-xs text-gray-500">{normalizeId(account.account_id)}</span>
               </div>
             ))}
           </div>

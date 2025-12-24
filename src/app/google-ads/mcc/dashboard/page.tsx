@@ -54,6 +54,12 @@ export default function MCCDashboard() {
   const [processing, setProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // دالة توحيد شكل المعرف الرقمي (إزالة الشرطات)
+  const normalizeId = (id: string) => {
+    if (!id) return '';
+    return id.toString().replace(/-/g, '').trim();
+  };
+
   useEffect(() => {
     loadUserData();
     loadMCCData();
@@ -105,7 +111,11 @@ export default function MCCDashboard() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setAccounts(data.accounts || []);
+          const normalizedAccounts = (data.accounts || []).map((acc: any) => ({
+            ...acc,
+            customer_id: normalizeId(acc.customer_id || acc.id)
+          }));
+          setAccounts(normalizedAccounts);
           setStats(data.statistics || null);
         } else {
           setError(data.error || 'فشل في تحميل بيانات MCC');
@@ -121,16 +131,17 @@ export default function MCCDashboard() {
     }
   };
 
-  const handleAccountSelection = (customerId: string) => {
+  const handleAccountSelection = (rawCustomerId: string) => {
+    const customerId = normalizeId(rawCustomerId);
     setSelectedAccounts(prev =>
       prev.includes(customerId)
-        ? prev.filter(id => id !== customerId)
+        ? prev.filter(id => normalizeId(id) !== customerId)
         : [...prev, customerId]
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedAccounts(accounts.map(account => account.customer_id));
+    setSelectedAccounts(accounts.map(account => normalizeId(account.customer_id)));
   };
 
   const handleDeselectAll = () => {
@@ -297,8 +308,8 @@ export default function MCCDashboard() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 font-medium rounded-t-lg transition-colors ${activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
                   }`}
               >
                 {tab === 'overview' && 'نظرة عامة'}
@@ -348,7 +359,7 @@ export default function MCCDashboard() {
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">النشاط الأخير</h3>
                 <div className="space-y-3">
                   {accounts.slice(0, 5).map((account) => (
-                    <div key={account.customer_id} className="flex items-center justify-between p-3  rounded-lg shadow-sm">
+                    <div key={normalizeId(account.customer_id)} className="flex items-center justify-between p-3  rounded-lg shadow-sm">
                       <div>
                         <p className="font-medium text-gray-800">{account.descriptive_name}</p>
                         <p className="text-sm text-gray-600">آخر تحديث: {new Date(account.last_updated).toLocaleDateString('ar-SA')}</p>
@@ -423,17 +434,17 @@ export default function MCCDashboard() {
               <div className="space-y-4">
                 {accounts.map((account) => (
                   <div
-                    key={account.customer_id}
-                    className={`border rounded-lg p-4 transition-all ${selectedAccounts.includes(account.customer_id)
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                    key={normalizeId(account.customer_id)}
+                    className={`border rounded-lg p-4 transition-all ${selectedAccounts.includes(normalizeId(account.customer_id))
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <input
                           type="checkbox"
-                          checked={selectedAccounts.includes(account.customer_id)}
+                          checked={selectedAccounts.includes(normalizeId(account.customer_id))}
                           onChange={() => handleAccountSelection(account.customer_id)}
                           className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                         />
@@ -441,7 +452,7 @@ export default function MCCDashboard() {
                           <h3 className="font-semibold text-gray-800">
                             {account.descriptive_name || account.name}
                           </h3>
-                          <p className="text-sm text-gray-600">ID: {account.customer_id}</p>
+                          <p className="text-sm text-gray-600">ID: {normalizeId(account.customer_id)}</p>
                           <div className="flex gap-4 mt-1">
                             <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                               {account.currency_code}
@@ -450,8 +461,8 @@ export default function MCCDashboard() {
                               {account.time_zone}
                             </span>
                             <span className={`text-xs px-2 py-1 rounded ${account.status === 'ACTIVE'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
                               }`}>
                               {account.status === 'ACTIVE' ? 'نشط' : 'غير نشط'}
                             </span>

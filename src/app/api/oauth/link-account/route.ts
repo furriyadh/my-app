@@ -33,7 +33,7 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
   // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
   const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-  
+
   if (mccRefreshToken) {
     console.log('🔑 محاولة استخدام MCC Token من البيئة...');
     const mccAccessToken = await refreshAccessToken(mccRefreshToken);
@@ -43,7 +43,7 @@ async function getValidAccessToken(userRefreshToken?: string): Promise<string | 
     }
     console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
   }
-  
+
   // 2. ثانياً: نحاول User OAuth Token كـ fallback
   if (userRefreshToken) {
     console.log('🔑 محاولة استخدام User OAuth Token...');
@@ -53,7 +53,7 @@ async function getValidAccessToken(userRefreshToken?: string): Promise<string | 
       return userAccessToken;
     }
   }
-  
+
   console.error('❌ فشل الحصول على أي Access Token صالح');
   return null;
 }
@@ -61,13 +61,13 @@ async function getValidAccessToken(userRefreshToken?: string): Promise<string | 
 export async function POST(request: NextRequest) {
   try {
     console.log('🔗 ربط الحساب الإعلاني...');
-    
+
     const cookieStore = await cookies();
     const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
-    
+
     // 🔑 الحصول على Access Token - MCC أولاً
     const accessToken = await getValidAccessToken(userRefreshToken);
-    
+
     if (!accessToken) {
       return NextResponse.json({
         success: false,
@@ -75,9 +75,9 @@ export async function POST(request: NextRequest) {
         message: 'لم يتم العثور على رمز وصول صالح'
       }, { status: 401 });
     }
-    
+
     const { customer_id, account_name } = await request.json();
-    
+
     if (!customer_id) {
       return NextResponse.json({
         success: false,
@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
         message: 'معرف العميل مطلوب'
       }, { status: 400 });
     }
-    
+
     // الاتصال بالباك اند لربط الحساب (باستخدام متغيرات البيئة فقط)
     const backendUrl = getBackendUrl();
-    
+
     const response = await fetch(`${backendUrl}/api/link-customer`, {
       method: 'POST',
       headers: {
@@ -100,18 +100,30 @@ export async function POST(request: NextRequest) {
         account_name
       })
     });
-    
+
     if (!response.ok) {
-      console.error('❌ فشل في ربط الحساب:', response.status, response.statusText);
+      // ✅ قراءة الخطأ الفعلي من Flask بدلاً من رسالة عامة
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        errorData = { error: 'Unknown error', message: 'خطأ غير معروف' };
+      }
+
+      console.error('❌ فشل في ربط الحساب:', response.status, errorData);
+
+      // تمرير الخطأ الفعلي للـ Frontend
       return NextResponse.json({
         success: false,
-        error: 'Failed to link account',
-        message: 'فشل في ربط الحساب'
-      }, { status: 500 });
+        error: errorData.error || 'Failed to link account',
+        message: errorData.message || 'فشل في ربط الحساب',
+        errors: errorData.errors, // ✅ تمرير تفاصيل الأخطاء
+        error_type: errorData.error_type || 'UNKNOWN'
+      }, { status: response.status });
     }
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       console.log('✅ تم ربط الحساب بنجاح');
       return NextResponse.json({
@@ -126,7 +138,7 @@ export async function POST(request: NextRequest) {
         message: data.message || 'فشل في ربط الحساب'
       }, { status: 400 });
     }
-    
+
   } catch (error) {
     console.error('❌ خطأ في ربط الحساب:', error);
     return NextResponse.json({

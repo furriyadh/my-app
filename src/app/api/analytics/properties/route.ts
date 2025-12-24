@@ -8,8 +8,17 @@ export async function GET(request: NextRequest) {
         console.log('📊 جلب Google Analytics Properties...');
 
         const cookieStore = await cookies();
-        const accessToken = cookieStore.get('oauth_access_token')?.value;
-        const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+
+        // استخدام توكن مخصص للتحليلات أولاً
+        const analyticsToken = cookieStore.get('analytics_oauth_token')?.value;
+        const genericToken = cookieStore.get('oauth_access_token')?.value;
+        const accessToken = analyticsToken || genericToken;
+
+        const analyticsRefreshToken = cookieStore.get('analytics_refresh_token')?.value;
+        const genericRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+        const refreshToken = analyticsRefreshToken || genericRefreshToken;
+
+        console.log('🔑 Using token:', analyticsToken ? 'analytics_option (Specific)' : 'oauth_option (Generic)');
 
         if (!accessToken) {
             return NextResponse.json({

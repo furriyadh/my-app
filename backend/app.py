@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # تحديد مسار ملف البيئة - فقط للتطوير المحلي
-env_path = Path(__file__).parent / '.env.development'
+env_path = Path(__file__).parent.parent / '.env.development'
 if env_path.exists() and os.getenv('RAILWAY_ENVIRONMENT') is None:
     # تحميل ملف .env فقط في التطوير المحلي، وليس في Railway
     try:
@@ -46,10 +46,11 @@ else:
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'google_ads_lib'))
 
 # استيراد المكتبة الرسمية
-from google_ads_lib.client import GoogleAdsClient
-from google_ads_lib.config import load_from_env
-from google_ads_lib.errors import GoogleAdsException
-from google_ads_lib import oauth2, config
+from google.ads.googleads.client import GoogleAdsClient
+from google.ads.googleads.errors import GoogleAdsException
+from google.oauth2.credentials import Credentials  # ✅ Import Credentials
+import supabase
+from supabase import create_client, Client
 
 # إعداد التسجيل
 logging.basicConfig(
@@ -219,23 +220,49 @@ if not all([MCC_CUSTOMER_ID, DEVELOPER_TOKEN, CLIENT_ID, CLIENT_SECRET, REFRESH_
 else:
     logger.info("✅ جميع الإعدادات المطلوبة متوفرة")
 
-def get_google_ads_client():
-    """إنشاء عميل Google Ads باستخدام المكتبة الرسمية"""
+def get_google_ads_client(access_token=None):
+    """
+    إنشاء عميل Google Ads باستخدام المكتبة الرسمية.
+    إذا تم تمرير access_token، يتم استخدامه مباشرة للمصادقة (نيابة عن المستخدم).
+    طالما لم يتم تمريره، يتم استخدام refresh_token من البيئة (MCC).
+    """
     try:
-        # إعداد التكوين
-        config_data = {
-            'developer_token': DEVELOPER_TOKEN,
-            'client_id': CLIENT_ID,
-            'client_secret': CLIENT_SECRET,
-            'refresh_token': REFRESH_TOKEN,
-            'login_customer_id': MCC_CUSTOMER_ID,
-            'use_proto_plus': True
-        }
-        
-        # إنشاء العميل باستخدام المكتبة الرسمية
-        client = GoogleAdsClient.load_from_dict(config_data, version='v21')
-        logger.info("✅ تم إنشاء Google Ads Client بنجاح")
-        return client
+        if access_token:
+            logger.info("🔑 استخدام Access Token الممرر من الطلب للمصادقة")
+            # 1. إنشاء Credential Object باستخدام الـ Token الممرر
+            credentials = Credentials(token=access_token)
+
+            # 2. تحميل الإعدادات الأساسية (بدون refresh token)
+            # ملاحظة: عند استخدام credentials مباشرة، نحتاج فقط لـ developer_token و login_customer_id
+            try:
+                client = GoogleAdsClient(
+                    credentials=credentials, 
+                    developer_token=DEVELOPER_TOKEN, 
+                    login_customer_id=MCC_CUSTOMER_ID,
+                    version='v21'
+                )
+                logger.info("✅ تم إنشاء Google Ads Client باستخدام Access Token")
+                return client
+            except Exception as client_err:
+                logger.warning(f"⚠️ فشل إنشاء Client باستخدام Credentials مباشرة: {client_err}")
+                # Fallback to load_from_dict if needed, but usually constructing with credentials is standard
+                raise client_err
+        else:
+            # استخدام Refresh Token من البيئة (الطريقة القديمة)
+            logger.info("ℹ️ استخدام Refresh Token من البيئة للمصادقة")
+            config_data = {
+                'developer_token': DEVELOPER_TOKEN,
+                'client_id': CLIENT_ID,
+                'client_secret': CLIENT_SECRET,
+                'refresh_token': REFRESH_TOKEN,
+                'login_customer_id': MCC_CUSTOMER_ID,
+                'use_proto_plus': True
+            }
+            
+            # إنشاء العميل باستخدام المكتبة الرسمية
+            client = GoogleAdsClient.load_from_dict(config_data, version='v21')
+            logger.info("✅ تم إنشاء Google Ads Client بنجاح (Environment Config)")
+            return client
         
     except Exception as e:
         logger.error(f"❌ فشل في إنشاء Google Ads Client: {e}")
@@ -445,8 +472,15 @@ def link_customer():
         
         logger.info(f"🔗 محاولة ربط الحساب {clean_customer_id} بـ MCC {MCC_CUSTOMER_ID}")
         
-        # استخدام المكتبة الرسمية لربط الحساب
-        client = get_google_ads_client()
+        # استخراج Access Token من الهيدر (إذا وجد)
+        auth_header = request.headers.get('Authorization')
+        access_token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            access_token = auth_header.split(' ')[1]
+            logger.info("🔑 تم اكتشاف Authorization Header")
+
+        # استخدام المكتبة الرسمية لربط الحساب (تمرير التوكن إذا وجد)
+        client = get_google_ads_client(access_token)
         
         # إنشاء خدمة ربط العملاء
         customer_client_link_service = client.get_service("CustomerClientLinkService")
@@ -454,20 +488,15 @@ def link_customer():
         # إنشاء عملية ربط العميل
         customer_client_link_operation = client.get_type("CustomerClientLinkOperation")
         
-        # إنشاء رابط العميل
-        customer_client_link = client.get_type("CustomerClientLink")
-        customer_client_link.client_customer = f"customers/{clean_customer_id}"
-        customer_client_link.status = client.enums.ManagerLinkStatusEnum.PENDING
+        # إنشاء رابط العميل مباشرة داخل العملية (الطريقة الصحيحة لـ proto-plus)
+        customer_client_link_operation.create.client_customer = f"customers/{clean_customer_id}"
+        customer_client_link_operation.create.status = client.enums.ManagerLinkStatusEnum.PENDING
         
-        # إعداد العملية
-        customer_client_link_operation.create = customer_client_link
-        
-        # تنفيذ العملية
-        mutate_request = client.get_type("MutateCustomerClientLinkRequest")
-        mutate_request.customer_id = MCC_CUSTOMER_ID
-        mutate_request.operation = customer_client_link_operation
-        
-        response = customer_client_link_service.mutate_customer_client_link(request=mutate_request)
+        # تنفيذ العملية مباشرة (بدون MutateRequest منفصل)
+        response = customer_client_link_service.mutate_customer_client_link(
+            customer_id=MCC_CUSTOMER_ID,
+            operation=customer_client_link_operation
+        )
         
         logger.info(f"✅ تم إرسال طلب ربط الحساب {customer_id} بنجاح")
         logger.info(f"📋 Response: {response}")
@@ -523,6 +552,142 @@ def link_customer():
                 'message': 'خطأ في ربط الحساب'
             }), 500
 
+
+@app.route('/api/unlink-customer', methods=['POST'])
+def unlink_customer():
+    """إلغاء ربط حساب عميل من MCC باستخدام المكتبة الرسمية"""
+    try:
+        data = request.get_json()
+        # دعم كلا الصيغتين: customer_id و customerId
+        customer_id = data.get('customer_id') or data.get('customerId')
+        
+        if not customer_id:
+            return jsonify({
+                'success': False,
+                'error': 'Missing customer ID',
+                'message': 'معرف العميل مطلوب'
+            }), 400
+        
+        # تنظيف معرف العميل
+        clean_customer_id = str(customer_id).replace('-', '').strip()
+        
+        if not clean_customer_id.isdigit() or len(clean_customer_id) != 10:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid customer ID format',
+                'message': 'معرف العميل يجب أن يكون 10 أرقام'
+            }), 400
+        
+        logger.info(f"🔓 محاولة إلغاء ربط الحساب {clean_customer_id} من MCC {MCC_CUSTOMER_ID}")
+        
+        # ⚠️ مهم: إلغاء الربط يجب أن يتم من جهة العميل (Client) وليس من MCC
+        # نستخدم CustomerManagerLink من جهة العميل مع access_token الخاص بالمستخدم
+        auth_header = request.headers.get('Authorization')
+        access_token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            access_token = auth_header.split(' ')[1]
+            logger.info("🔑 تم اكتشاف Authorization Header - استخدام توكن المستخدم")
+        
+        if not access_token:
+            logger.error("❌ لا يوجد access_token - مطلوب لإلغاء الربط من جهة العميل")
+            return jsonify({
+                'success': False,
+                'error': 'Access token required',
+                'message': 'التوكن مطلوب لإلغاء ربط الحساب'
+            }), 401
+        
+        # إنشاء عميل باستخدام توكن المستخدم (بدون login_customer_id لأننا نستعلم من جهة العميل)
+        client = get_google_ads_client(access_token)
+        
+        # أولاً: البحث عن CustomerManagerLink من جهة العميل
+        ga_service = client.get_service("GoogleAdsService")
+        
+        query = f"""
+            SELECT 
+                customer_manager_link.resource_name,
+                customer_manager_link.manager_customer,
+                customer_manager_link.status
+            FROM customer_manager_link 
+            WHERE customer_manager_link.manager_customer = 'customers/{MCC_CUSTOMER_ID}'
+        """
+        
+        search_request = client.get_type("SearchGoogleAdsRequest")
+        search_request.customer_id = clean_customer_id  # الاستعلام من جهة العميل
+        search_request.query = query
+        
+        try:
+            response = ga_service.search(request=search_request)
+        except Exception as search_err:
+            logger.error(f"❌ فشل البحث عن CustomerManagerLink: {search_err}")
+            # إذا فشل البحث، نحاول بطريقة بديلة (إزالة من DB فقط)
+            return jsonify({
+                'success': False,
+                'error': 'Cannot access client account',
+                'message': 'لا يمكن الوصول إلى حساب العميل. يرجى إلغاء الربط من Google Ads مباشرة.',
+                'fallback_url': f'https://ads.google.com/aw/accountaccess/managers?ocid={clean_customer_id}'
+            }), 403
+        
+        resource_name = None
+        current_status = None
+        for row in response:
+            if hasattr(row, 'customer_manager_link'):
+                link = row.customer_manager_link
+                resource_name = link.resource_name
+                current_status = link.status.name if hasattr(link.status, 'name') else str(link.status)
+                logger.info(f"📍 وجدنا CustomerManagerLink: {resource_name} - الحالة: {current_status}")
+                break
+        
+        if not resource_name:
+            logger.warning(f"⚠️ لم يتم العثور على رابط للحساب {clean_customer_id}")
+            return jsonify({
+                'success': False,
+                'error': 'Link not found',
+                'message': 'لم يتم العثور على رابط بين الحساب والـ MCC'
+            }), 404
+        
+        # ثانياً: تحديث حالة الرابط إلى INACTIVE (إلغاء الربط) من جهة العميل
+        customer_manager_link_service = client.get_service("CustomerManagerLinkService")
+        
+        # إنشاء عملية التحديث
+        customer_manager_link_operation = client.get_type("CustomerManagerLinkOperation")
+        
+        # تعيين الحقول مباشرة
+        customer_manager_link_operation.update.resource_name = resource_name
+        customer_manager_link_operation.update.status = client.enums.ManagerLinkStatusEnum.INACTIVE
+        
+        # تعيين field mask
+        customer_manager_link_operation.update_mask.paths.append("status")
+        
+        # تنفيذ العملية من جهة العميل
+        unlink_response = customer_manager_link_service.mutate_customer_manager_link(
+            customer_id=clean_customer_id,  # من جهة العميل
+            operations=[customer_manager_link_operation]
+        )
+        
+        logger.info(f"✅ تم إلغاء ربط الحساب {customer_id} بنجاح")
+        logger.info(f"📋 Response: {unlink_response}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم إلغاء ربط الحساب بنجاح',
+            'customer_id': customer_id,
+            'mcc_customer_id': MCC_CUSTOMER_ID,
+            'status': 'UNLINKED',
+            'source': 'google_ads_official_library_v21'
+        })
+        
+    except GoogleAdsException as e:
+        logger.error(f"❌ خطأ Google Ads API في إلغاء الربط: {e}")
+        return jsonify(handle_google_ads_exception(e)), 400
+        
+    except Exception as e:
+        logger.error(f"❌ خطأ عام في unlink_customer: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_type': 'GENERAL_ERROR',
+            'message': 'خطأ في إلغاء ربط الحساب'
+        }), 500
 
 @app.route('/api/mcc/invitations', methods=['GET'])
 def get_mcc_invitations():
@@ -938,6 +1103,36 @@ def sync_account_status(customer_id):
 
         logger.info(f"🔄 مزامنة حالة الحساب {clean_customer_id} مع MCC {MCC_CUSTOMER_ID}")
 
+        # التحقق من وجود Token مرسل من الـ Frontend (User Context)
+        user_refresh_token = request.headers.get('X-Google-Refresh-Token')
+        client = None
+        
+        if user_refresh_token:
+            logger.info("🔑 تم اكتشاف X-Google-Refresh-Token في الترويسات - محاولة استخدام User Context")
+            try:
+                # إنشاء عميل مخصص لهذا الطلب باستخدام توكن المستخدم
+                # ❗ لا نستخدم login_customer_id لأن المستخدم عادي وليس مدير MCC
+                config_data = {
+                    'developer_token': DEVELOPER_TOKEN,
+                    'client_id': CLIENT_ID,
+                    'client_secret': CLIENT_SECRET,
+                    'refresh_token': user_refresh_token,
+                    # 'login_customer_id' محذوف - المستخدم سيستعلم مباشرة على حسابه
+                    'use_proto_plus': True
+                }
+                client = GoogleAdsClient.load_from_dict(config_data, version='v21')
+                logger.info("✅ تم إنشاء Google Ads Client باستخدام توكن المستخدم (بدون MCC)")
+                # ✅ علامة أننا نستخدم User Context
+                using_user_context = True
+            except Exception as auth_e:
+                logger.warning(f"⚠️ فشل إنشاء Client بتوكن المستخدم: {auth_e} - سيتم استخدام Default Client")
+                client = get_google_ads_client()
+                using_user_context = False
+        else:
+            client = get_google_ads_client()
+            using_user_context = False
+
+
         # الحالة الحالية في قاعدة البيانات (Supabase)
         db_status = 'NOT_LINKED'
         last_request = None
@@ -957,38 +1152,142 @@ def sync_account_status(customer_id):
         }
 
         try:
-            client = get_google_ads_client()
+            # ✅ استخدام الـ client المُنشأ من توكن المستخدم (إذا وجد)
+            # إذا لم يكن هناك client، استخدم الـ MCC default
+            if client is None:
+                logger.info("⚠️ لا يوجد client - استخدام MCC default client")
+                client = get_google_ads_client()
+                using_user_context = False
             ga_service = client.get_service("GoogleAdsService")
 
-            # الطريقة 1: البحث في customer_client_link من MCC
-            query = f"""
-                SELECT
-                    customer_client_link.client_customer,
-                    customer_client_link.status
-                FROM customer_client_link
-                WHERE customer_client_link.client_customer = 'customers/{clean_customer_id}'
-            """
+            # ✅ إذا كنا نستخدم User Context، نستعلم على الحساب مباشرة
+            if using_user_context:
+                logger.info(f"🔍 استخدام User Context - استعلام مباشر على الحساب {clean_customer_id}")
+                # استعلام مباشر على الحساب (لأن المستخدم يملك هذا الحساب)
+                query = """
+                    SELECT
+                        customer.id,
+                        customer.descriptive_name,
+                        customer.status
+                    FROM customer
+                    LIMIT 1
+                """
+                search_request = client.get_type("SearchGoogleAdsRequest")
+                search_request.customer_id = clean_customer_id  # ✅ استعلام على الحساب مباشرة
+                search_request.query = query
+                
+                try:
+                    # 1. أولاً: التحقق من حالة الحساب نفسه
+                    response = ga_service.search(request=search_request)
+                    account_is_enabled = False
+                    
+                    for row in response:
+                        customer_status = row.customer.status.name if row.customer.status else 'UNKNOWN'
+                        link_details.update({
+                            'customer_status': customer_status,
+                            'customer_name': row.customer.descriptive_name,
+                            'method': 'direct_customer_query'
+                        })
+                        
+                        if customer_status == 'ENABLED':
+                            account_is_enabled = True
+                            api_status = 'ACTIVE' # مبدئياً نحسبه نشط حتى نتحقق من الربط
+                        else:
+                            api_status = customer_status
+                        
+                        logger.info(f"✅ User Context: الحساب {clean_customer_id} حالته {customer_status}")
 
-            search_request = client.get_type("SearchGoogleAdsRequest")
-            search_request.customer_id = MCC_CUSTOMER_ID
-            search_request.query = query
+                    # 2. ثانياً: التحقق من الربط مع MCC الخاص بنا (إذا كان الحساب يعمل)
+                    if account_is_enabled:
+                        link_query = f"""
+                            SELECT
+                                customer_manager_link.manager_customer,
+                                customer_manager_link.status
+                            FROM
+                                customer_manager_link
+                            WHERE
+                                customer_manager_link.manager_customer = 'customers/{MCC_CUSTOMER_ID}'
+                        """
+                        link_request = client.get_type("SearchGoogleAdsRequest")
+                        link_request.customer_id = clean_customer_id
+                        link_request.query = link_query
+                        
+                        link_response = ga_service.search(request=link_request)
+                        is_linked = False
+                        
+                        for link_row in link_response:
+                            manager_link_status = link_row.customer_manager_link.status.name
+                            # logger.info(f"🔗 وجدنا ربط مع MCC للحساب {clean_customer_id}: {manager_link_status}") # تقليل الضجيج كما طلب المستخدم
+                            
+                            if manager_link_status == 'ACTIVE':
+                                api_status = 'ACTIVE'
+                                is_linked = True
+                            elif manager_link_status == 'PENDING':
+                                api_status = 'PENDING'
+                                is_linked = True
+                            elif manager_link_status == 'INACTIVE':
+                                api_status = 'DISCONNECTED'
+                            else:
+                                api_status = manager_link_status
+                            
+                            link_details['manager_link_status'] = manager_link_status
 
-            response = ga_service.search(request=search_request)
-            found_link = False
+                        if not is_linked:
+                            logger.warning(f"⚠️ الحساب {clean_customer_id} يعمل لكنه غير مرتبط بـ MCC {MCC_CUSTOMER_ID}")
+                            api_status = 'NOT_LINKED'
 
-            raw_link_status = None
-            for row in response:
-                link = row.customer_client_link
-                if link.client_customer and link.client_customer.endswith(clean_customer_id):
-                    raw_link_status = link.status.name if link.status else 'UNKNOWN'
+                    # ✅ تعيين found_link لتخطي الكود القديم
+                    found_link = True
+                    raw_link_status = api_status
+                except Exception as user_query_error:
+                    logger.error(f"❌ فشل استعلام User Context للحساب {clean_customer_id}: {user_query_error}")
+                    api_status = 'ERROR'
+            else:
+                # الطريقة القديمة: البحث في customer_client_link من MCC
+                query = f"""
+                    SELECT
+                        customer_client_link.client_customer,
+                        customer_client_link.status
+                    FROM customer_client_link
+                    WHERE customer_client_link.client_customer = 'customers/{clean_customer_id}'
+                """
+
+                search_request = client.get_type("SearchGoogleAdsRequest")
+                search_request.customer_id = MCC_CUSTOMER_ID
+                search_request.query = query
+
+                response = ga_service.search(request=search_request)
+                found_link = False
+
+                # ✅ إصلاح: تكرار جميع النتائج واختيار أفضل حالة
+                # الأولوية: ACTIVE > PENDING > أي حالة أخرى
+                raw_link_status = None
+                all_statuses = []
+                
+                for row in response:
+                    link = row.customer_client_link
+                    if link.client_customer and link.client_customer.endswith(clean_customer_id):
+                        status = link.status.name if link.status else 'UNKNOWN'
+                        all_statuses.append(status)
+                        found_link = True
+                        # logger.info(f"🔗 وجدنا رابط للحساب {clean_customer_id}: {status}") # تم إخفاؤه لتقليل الضجيج كما طلب المستخدم
+                
+                # اختيار أفضل حالة
+                if 'ACTIVE' in all_statuses:
+                    raw_link_status = 'ACTIVE'
+                elif 'PENDING' in all_statuses:
+                    raw_link_status = 'PENDING'
+                elif all_statuses:
+                    raw_link_status = all_statuses[0]  # أول حالة (قد تكون INACTIVE)
+                
+                if raw_link_status:
                     link_details.update({
                         'link_status': raw_link_status,
                         'raw_status': raw_link_status,
+                        'all_statuses': all_statuses,
                         'method': 'customer_client_link'
                     })
-                    found_link = True
-                    logger.info(f"🔗 وجدنا رابط للحساب {clean_customer_id} عبر customer_client_link: {raw_link_status}")
-                    break
+                    logger.info(f"📊 الحالة المختارة للحساب {clean_customer_id}: {raw_link_status} (من بين {all_statuses})")
             
             # الطريقة 2: تحديد الحالة بناءً على raw_link_status
             if found_link:
@@ -1504,8 +1803,15 @@ def check_link_status(customer_id):
     try:
         logger.info(f"🔍 فحص حالة ربط الحساب {customer_id} مع MCC {MCC_CUSTOMER_ID}")
         
-        # إنشاء Google Ads client
-        client = get_google_ads_client()
+        # استخراج Access Token من الهيدر (إذا وجد)
+        auth_header = request.headers.get('Authorization')
+        access_token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            access_token = auth_header.split(' ')[1]
+            logger.info("🔑 تم اكتشاف Authorization Header في check_link_status")
+        
+        # إنشاء Google Ads client (مع التوكن إذا وجد)
+        client = get_google_ads_client(access_token)
         
         # الحصول على خدمة GoogleAds
         googleads_service = client.get_service("GoogleAdsService")
@@ -1533,18 +1839,50 @@ def check_link_status(customer_id):
         link_status = "NOT_LINKED"
         link_details = None
         
+        # ✅ معالجة جميع النتائج - الأولوية للـ ACTIVE
+        found_any = False
+        best_status = None
+        best_details = None
+        
         for row in response:
             if hasattr(row, 'customer_client_link'):
                 link = row.customer_client_link
-                link_status = link.status.name if hasattr(link.status, 'name') else str(link.status)
-                link_details = {
+                # ✅ تحويل الحالة إلى نص (بدلاً من أرقام)
+                raw_status = str(link.status)
+                if hasattr(link.status, 'name'):
+                    current_status = link.status.name  # ACTIVE, PENDING, INACTIVE, etc.
+                else:
+                    # خريطة تحويل الأرقام إلى نصوص
+                    status_map = {
+                        '0': 'UNSPECIFIED', '1': 'UNKNOWN', '2': 'ACTIVE',
+                        '3': 'PENDING', '4': 'INACTIVE', '5': 'CANCELED', '6': 'REFUSED'
+                    }
+                    current_status = status_map.get(raw_status, raw_status)
+                
+                current_details = {
                     'client_customer': link.client_customer,
                     'manager_customer': MCC_CUSTOMER_ID,
-                    'status': link_status,
+                    'status': current_status,
                     'resource_name': link.resource_name
                 }
-                logger.info(f"✅ تم العثور على ربط client: {link_details}")
-                break
+                logger.info(f"🔍 وجدنا ربط client: {current_details}")
+                
+                found_any = True
+                
+                # ✅ الأولوية: ACTIVE > PENDING > غيرها
+                if current_status == 'ACTIVE':
+                    best_status = current_status
+                    best_details = current_details
+                    break  # ACTIVE هو الأفضل، لا نحتاج البحث أكثر
+                elif best_status != 'ACTIVE':
+                    if current_status == 'PENDING' or best_status is None:
+                        best_status = current_status
+                        best_details = current_details
+        
+        if found_any and best_status:
+            link_status = best_status
+            link_details = best_details
+            logger.info(f"✅ أفضل حالة للحساب {customer_id}: {link_status}")
         
         # إذا لم نجد في customer_client_link، ابحث في customer_manager_link
         if link_status == "NOT_LINKED":
@@ -1569,7 +1907,17 @@ def check_link_status(customer_id):
                 for row in manager_response:
                     if hasattr(row, 'customer_manager_link'):
                         link = row.customer_manager_link
-                        link_status = link.status.name if hasattr(link.status, 'name') else str(link.status)
+                        # ✅ تحويل الحالة إلى نص
+                        raw_status = str(link.status)
+                        if hasattr(link.status, 'name'):
+                            link_status = link.status.name
+                        else:
+                            status_map = {
+                                '0': 'UNSPECIFIED', '1': 'UNKNOWN', '2': 'ACTIVE',
+                                '3': 'PENDING', '4': 'INACTIVE', '5': 'CANCELED', '6': 'REFUSED'
+                            }
+                            link_status = status_map.get(raw_status, raw_status)
+                        
                         link_details = {
                             'client_customer': f'customers/{customer_id}',
                             'manager_customer': link.manager_customer,
@@ -1584,12 +1932,20 @@ def check_link_status(customer_id):
         if link_status == "NOT_LINKED":
             logger.info(f"📋 لا يوجد ربط للحساب {customer_id}")
         
+        # ✅ إضافة flags للكشف عن الحالة الفعلية
+        has_active = (link_status == 'ACTIVE')
+        has_pending = (link_status == 'PENDING')
+        is_effectively_linked = has_active  # الحساب مرتبط فقط إذا كان ACTIVE
+        
         return jsonify({
             'success': True,
             'customer_id': customer_id,
             'link_status': link_status,
             'link_details': link_details,
             'mcc_customer_id': MCC_CUSTOMER_ID,
+            'has_active': has_active,
+            'has_pending': has_pending,
+            'is_effectively_linked': is_effectively_linked,
             'message': f'تم فحص حالة الربط للحساب {customer_id}'
         })
         

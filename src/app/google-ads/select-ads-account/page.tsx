@@ -27,6 +27,12 @@ const SelectAdsAccountContent: React.FC = () => {
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
   const [isRTL, setIsRTL] = useState(false);
 
+  // دالة توحيد شكل المعرف الرقمي (إزالة الشرطات)
+  const normalizeCustomerId = (id: string) => {
+    if (!id) return '';
+    return id.toString().replace(/-/g, '').trim();
+  };
+
   useEffect(() => {
     fetchGoogleAdsAccounts();
   }, []);
@@ -59,9 +65,13 @@ const SelectAdsAccountContent: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setAccounts(data.accounts || []);
+        const normalizedAccounts = (data.accounts || []).map((acc: any) => ({
+          ...acc,
+          customerId: normalizeCustomerId(acc.customerId || acc.id)
+        }));
+        setAccounts(normalizedAccounts);
 
-        if (data.accounts.length === 0) {
+        if (normalizedAccounts.length === 0) {
           setError('لم يتم العثور على حسابات Google Ads مرتبطة بهذا الإيميل');
         }
       } else {
@@ -75,8 +85,9 @@ const SelectAdsAccountContent: React.FC = () => {
     }
   };
 
-  const handleAccountSelect = async (customerId: string) => {
+  const handleAccountSelect = async (rawCustomerId: string) => {
     try {
+      const customerId = normalizeCustomerId(rawCustomerId);
       setConnecting(true);
       setSelectedAccount(customerId);
 
@@ -98,7 +109,7 @@ const SelectAdsAccountContent: React.FC = () => {
         // حفظ معلومات الحساب المختار
         localStorage.setItem('selectedGoogleAdsAccount', JSON.stringify({
           customerId,
-          descriptiveName: accounts.find(acc => acc.customerId === customerId)?.descriptiveName,
+          descriptiveName: accounts.find(acc => normalizeCustomerId(acc.customerId) === customerId)?.descriptiveName,
           connectedAt: new Date().toISOString()
         }));
 

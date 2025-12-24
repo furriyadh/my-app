@@ -8,8 +8,17 @@ export async function GET(request: NextRequest) {
         console.log('📦 جلب Google Tag Manager Containers...');
 
         const cookieStore = await cookies();
-        const accessToken = cookieStore.get('oauth_access_token')?.value;
-        const refreshToken = cookieStore.get('oauth_refresh_token')?.value;
+
+        // استخدام توكن مخصص لـ GTM أولاً
+        const gtmToken = cookieStore.get('gtm_oauth_token')?.value;
+        const genericToken = cookieStore.get('oauth_access_token')?.value;
+        const accessToken = gtmToken || genericToken;
+
+        const gtmRefreshToken = cookieStore.get('gtm_refresh_token')?.value;
+        const genericRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+        const refreshToken = gtmRefreshToken || genericRefreshToken;
+
+        console.log('🔑 Using token:', gtmToken ? 'gtm_oauth_token (Specific)' : 'oauth_access_token (Generic)');
 
         if (!accessToken) {
             return NextResponse.json({
