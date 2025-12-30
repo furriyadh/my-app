@@ -1512,7 +1512,7 @@ const BudgetSchedulingPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen overflow-x-hidden" dir="ltr">
+    <div className="overflow-x-hidden" dir="ltr">
       {/* Campaign Progress */}
       <CampaignProgress currentStep={2} totalSteps={3} />
 
@@ -1520,9 +1520,9 @@ const BudgetSchedulingPage: React.FC = () => {
 
         {/* Header */}
         <div className="text-center mb-3 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          <h5 className="!mb-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
             {language === 'ar' ? 'أطلق إعلاناتك باختيار ميزانية إعلانية يومية' : 'Launch your ads by selecting a daily ad budget'}
-          </h2>
+          </h5>
         </div>
 
         {/* Currency Tabs */}
@@ -1532,8 +1532,8 @@ const BudgetSchedulingPage: React.FC = () => {
               key={curr}
               onClick={() => setCurrency(curr)}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base transition-all duration-200 ${currency === curr
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/40 scale-105 ring-2 ring-blue-400/50'
-                : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 hover:scale-105 border border-gray-300/50 dark:border-gray-600/50'
+                ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/40 scale-105 ring-2 ring-primary-400/50'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-105 border border-gray-200 dark:border-gray-700'
                 }`}
             >
               {curr}
@@ -1541,7 +1541,7 @@ const BudgetSchedulingPage: React.FC = () => {
           ))}
           <button
             onClick={() => setShowCustomModal(true)}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base ml-1 sm:ml-2 transition-all duration-200 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/40 hover:shadow-xl hover:shadow-cyan-500/40 hover:scale-110 active:scale-95 ring-1 ring-blue-400/30"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base ml-1 sm:ml-2 transition-all duration-200 bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-500/40 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-110 active:scale-95 ring-1 ring-primary-400/30"
           >
             {language === 'ar' ? 'ميزانية مخصصة' : 'Custom budget'}
           </button>
@@ -1620,9 +1620,9 @@ const BudgetSchedulingPage: React.FC = () => {
                   )}
 
                   <CardItem translateZ={50} className="text-center w-full">
-                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3 drop-shadow-md">
+                    <div className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 drop-shadow-md">
                       {getCurrencySymbol(currency)}{option.amount}
-                      <span className="text-sm sm:text-base md:text-lg font-normal text-white/90">{language === 'ar' ? '/يوم' : '/day'}</span>
+                      <span className="text-sm font-normal text-white/90">{language === 'ar' ? '/يوم' : '/day'}</span>
                     </div>
                     <p className="text-xs sm:text-sm text-white/90 leading-relaxed sm:leading-relaxed drop-shadow">
                       {language === 'ar' ? option.labelAr : option.label}
@@ -1657,15 +1657,15 @@ const BudgetSchedulingPage: React.FC = () => {
               <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm rounded-xl"></div>
               <CardContainer containerClassName="w-[450px] max-w-[90%]">
                 <CardBody
-                  className="!h-auto !w-full relative bg-white dark:bg-[#1e293b] rounded-xl p-8 shadow-2xl dark:shadow-pink-500/20 border border-gray-200 dark:border-gray-700"
+                  className="!h-auto !w-full relative bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-gray-700"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <CardItem translateZ={50}>
                     {/* Modal Header */}
                     <div className="flex justify-between items-center mb-8">
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
+                      <h5 className="!mb-0 text-lg font-bold text-gray-900 dark:text-white">
                         {language === 'ar' ? 'ميزانية مخصصة' : 'Custom Budget'}
-                      </h2>
+                      </h5>
                       <button
                         onClick={() => {
                           setShowCustomModal(false);
@@ -1683,7 +1683,7 @@ const BudgetSchedulingPage: React.FC = () => {
                   <div className="mb-8">
                     <CardItem translateZ={60} as="div" className="!w-full">
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-3xl text-gray-400 dark:text-gray-500 pointer-events-none">{getCurrencySymbol(currency)}</span>
+                        <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-xl text-gray-400 dark:text-gray-500 pointer-events-none">{getCurrencySymbol(currency)}</span>
                         <input
                           type="number"
                           value={customBudget}
@@ -1702,9 +1702,9 @@ const BudgetSchedulingPage: React.FC = () => {
                           }}
                           placeholder="0"
                           dir="ltr"
-                          className={`w-full pl-12 pr-4 py-4 text-3xl text-center border-2 rounded-xl focus:outline-none focus:ring-4 bg-gray-50 dark:bg-black/20 text-gray-900 dark:text-white font-bold placeholder-gray-300 dark:placeholder-gray-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none cursor-text ${customBudgetError
+                          className={`w-full pl-12 pr-4 py-4 text-xl text-center border-2 rounded-xl focus:outline-none focus:ring-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold placeholder-gray-300 dark:placeholder-gray-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none cursor-text ${customBudgetError
                             ? 'border-red-500 dark:border-red-400 focus:ring-red-200 dark:focus:ring-red-900/30'
-                            : 'border-gray-200 dark:border-gray-700 focus:ring-purple-100 dark:focus:ring-purple-900/30'
+                            : 'border-gray-200 dark:border-gray-700 focus:ring-primary-100 dark:focus:ring-primary-900/30'
                             }`}
                           autoFocus
                         />
@@ -1730,7 +1730,7 @@ const BudgetSchedulingPage: React.FC = () => {
                     <div className="flex flex-col gap-3">
                       <button
                         onClick={handleCustomBudgetSave}
-                        className="w-full py-4 bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-500 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                        className="w-full py-4 bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
                         {language === 'ar' ? 'حفظ' : 'Save'}
                       </button>
@@ -1754,10 +1754,9 @@ const BudgetSchedulingPage: React.FC = () => {
 
         {/* Estimated Results */}
         <CardContainer containerClassName="max-w-4xl mx-auto mb-8 w-full px-4 sm:px-0">
-          <CardBody className="!h-auto !w-full relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-2xl hover:shadow-3xl transition-all duration-500
-            bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 
-            dark:from-gray-900 dark:via-blue-950/20 dark:to-purple-950/20
-            border-2 border-blue-200/40 dark:border-blue-800/30 backdrop-blur-xl">
+          <CardBody className="!h-auto !w-full relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-500
+            bg-white dark:bg-gray-900
+            border border-gray-200 dark:border-gray-700">
 
             {/* Animated Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400/5 via-purple-400/5 to-pink-400/5 animate-gradient-xy"></div>
@@ -1767,12 +1766,12 @@ const BudgetSchedulingPage: React.FC = () => {
             <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
 
             <CardItem translateZ={30} className="!w-full relative z-10">
-              <p className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-sm">
+              <h6 className="text-base font-semibold mb-6 text-center text-gray-900 dark:text-white">
                 {language === 'ar' ? 'النتائج الشهرية المقدرة' : 'Estimated Monthly Results'}
-              </p>
+              </h6>
             </CardItem>
             {isLoadingEstimates ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-6 bg-[#0a0e19]">
+              <div className="flex flex-col items-center justify-center py-12 gap-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 {/* AI Loading Animation */}
                 <div className="relative">
                   {/* Outer rotating ring */}
@@ -1964,7 +1963,7 @@ const BudgetSchedulingPage: React.FC = () => {
                         <p className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1 drop-shadow">
                           {language === 'ar' ? 'مرات الظهور' : 'Impressions'}
                         </p>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-800 dark:text-blue-200 drop-shadow-lg">
+                        <div className="text-lg sm:text-xl font-bold text-blue-800 dark:text-blue-200 drop-shadow-lg">
                           {estimates.impressions.toLocaleString()}
                         </div>
                       </div>
@@ -1985,7 +1984,7 @@ const BudgetSchedulingPage: React.FC = () => {
                         <p className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1 drop-shadow">
                           {language === 'ar' ? 'النقرات' : 'Clicks'}
                         </p>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-800 dark:text-purple-200 drop-shadow-lg">
+                        <div className="text-lg sm:text-xl font-bold text-purple-800 dark:text-purple-200 drop-shadow-lg">
                           {estimates.clicks.toLocaleString()}
                         </div>
                       </div>
@@ -2006,7 +2005,7 @@ const BudgetSchedulingPage: React.FC = () => {
                         <p className="text-xs sm:text-sm font-semibold text-green-700 dark:text-green-300 mb-1 drop-shadow">
                           {language === 'ar' ? 'التحويلات' : 'Conversions'}
                         </p>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-800 dark:text-green-200 drop-shadow-lg">
+                        <div className="text-lg sm:text-xl font-bold text-green-800 dark:text-green-200 drop-shadow-lg">
                           {estimates.conversions.toLocaleString()}
                         </div>
                       </div>
@@ -2134,12 +2133,18 @@ const BudgetSchedulingPage: React.FC = () => {
 
                 localStorage.setItem('campaignData', JSON.stringify(updatedData));
 
-                // Directly navigate to preview page
-                // We skip content generation here to prevent the "Thinking" popup
-                console.log('🚀 Navigating directly to preview page...');
-                router.push('/google-ads/campaigns/preview');
+                // Show loading modal then navigate to preview
+                setIsGeneratingContent(true);
+
+                // Simulate content generation time, then navigate
+                setTimeout(() => {
+                  setIsGeneratingContent(false);
+                  router.push('/google-ads/campaigns/preview');
+                }, 5000); // 5 seconds loading animation
+
               } catch (error) {
                 console.error('❌ Error saving data:', error);
+                setIsGeneratingContent(false);
                 router.push('/google-ads/campaigns/preview');
               }
             }}
@@ -2158,8 +2163,7 @@ const BudgetSchedulingPage: React.FC = () => {
       {/* Modern Loader Modal - Centered with sidebar offset */}
       {isGeneratingContent && (
         <div
-          className={`fixed inset-0 z-[9999] backdrop-blur-xl flex items-center justify-center bg-[#0a0e19] ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`}
-          style={{}}
+          className={`fixed inset-0 z-[9999] backdrop-blur-sm flex items-center justify-center bg-white/90 dark:bg-gray-900/95 ${isRTL ? 'lg:pr-[250px]' : 'lg:pl-[250px]'}`}
         >
           <div className="w-full max-w-4xl">
             <ModernLoader

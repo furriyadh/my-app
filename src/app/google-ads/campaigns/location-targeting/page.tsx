@@ -2183,9 +2183,8 @@ const LocationTargetingPage: React.FC = () => {
         }
       `}</style>
 
-      <div className="min-h-screen overflow-x-hidden" dir="ltr" style={{
-        position: 'relative',
-        minHeight: '100dvh' // Use dynamic viewport height for mobile
+      <div className="overflow-x-hidden" dir="ltr" style={{
+        position: 'relative'
       }}>
         {/* Campaign Progress */}
         <CampaignProgress currentStep={1} totalSteps={3} />
@@ -2196,7 +2195,7 @@ const LocationTargetingPage: React.FC = () => {
         }}>
           {/* Header */}
           <div className="text-center mb-3 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+            <h5 className="!mb-0 text-lg font-bold text-gray-900 dark:text-white flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
               {language === 'ar' ? 'أين تريد أن تظهر إعلاناتك؟' : 'Where do you want your ads to show up?'}
               {isInitializing && (
                 <span className="inline-flex items-center gap-2 px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">
@@ -2204,11 +2203,11 @@ const LocationTargetingPage: React.FC = () => {
                   {language === 'ar' ? 'جاري التحميل' : 'Loading'}
                 </span>
               )}
-            </h2>
+            </h5>
           </div>
 
           {/* Main Card */}
-          <div className="bg-white dark:bg-black rounded-xl shadow-2xl border-2 border-gray-300 dark:border-white p-3 sm:p-6 max-w-3xl mx-auto mb-4 sm:mb-8" style={{ overflow: 'visible' }}>
+          <div className="trezo-card p-3 sm:p-6 max-w-3xl mx-auto mb-4 sm:mb-8" style={{ overflow: 'visible' }}>
             {/* Location Search Section */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3 drop-shadow-sm text-left">
@@ -2227,7 +2226,7 @@ const LocationTargetingPage: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   disabled={!isGoogleMapsReady}
-                  className="w-full pl-12 pr-4 py-3 bg-white dark:bg-black border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
                   dir="ltr"
                   suppressHydrationWarning={true}
                   style={{
@@ -2252,7 +2251,7 @@ const LocationTargetingPage: React.FC = () => {
                   {selectedLocations.map((location) => (
                     <div
                       key={location.id}
-                      className="flex items-center space-x-2 bg-white dark:bg-black backdrop-blur-md rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-200 relative"
+                      className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 relative"
                       onClick={() => focusOnLocation(location)}
                       style={{ overflow: 'visible' }}
                     >
@@ -2276,7 +2275,7 @@ const LocationTargetingPage: React.FC = () => {
                                 e.stopPropagation();
                                 setOpenRadiusDropdown(openRadiusDropdown === location.id ? null : location.id);
                               }}
-                              className="text-xs bg-white dark:bg-gray-800 backdrop-blur-md border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-1 min-w-[70px] justify-between"
+                              className="text-xs bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-gray-900 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer flex items-center gap-1 min-w-[70px] justify-between"
                             >
                               <span>{location.radius}km+</span>
                               <ChevronDown className={`w-3 h-3 transition-transform ${openRadiusDropdown === location.id ? 'rotate-180' : ''}`} />
@@ -2285,7 +2284,7 @@ const LocationTargetingPage: React.FC = () => {
                             {/* Custom Dropdown */}
                             {openRadiusDropdown === location.id && (
                               <div
-                                className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-lg shadow-2xl z-[9999] min-w-[70px] overflow-hidden radius-dropdown-container"
+                                className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[9999] min-w-[70px] overflow-hidden radius-dropdown-container"
                                 onClick={(e) => e.stopPropagation()}
                                 style={{
                                   position: 'absolute',
@@ -2300,7 +2299,7 @@ const LocationTargetingPage: React.FC = () => {
                                       setOpenRadiusDropdown(null);
                                     }}
                                     className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors ${location.radius === radius
-                                      ? 'bg-blue-500 text-white dark:bg-blue-600 dark:text-white'
+                                      ? 'bg-primary-500 text-white dark:bg-primary-600 dark:text-white'
                                       : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                                       }`}
                                   >
@@ -2350,7 +2349,7 @@ const LocationTargetingPage: React.FC = () => {
                         onClick={() => !isAlreadySelected && addCountryFromList(country)}
                         className={`p-3 rounded-lg border transition-colors cursor-pointer ${isAlreadySelected
                           ? 'bg-gray-200 dark:bg-gray-900 backdrop-blur-md border-gray-300 dark:border-gray-600 opacity-50 cursor-not-allowed'
-                          : 'bg-white dark:bg-black backdrop-blur-md border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-900'
+                          : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                       >
                         <div className="flex items-center justify-between">
@@ -2408,7 +2407,7 @@ const LocationTargetingPage: React.FC = () => {
                         onClick={() => !isAlreadySelected && addLocation(result, selectedRadius)}
                         className={`p-3 rounded-lg border transition-colors cursor-pointer ${isAlreadySelected
                           ? 'bg-gray-200 dark:bg-gray-900 backdrop-blur-md border-gray-300 dark:border-gray-600 opacity-50 cursor-not-allowed'
-                          : 'bg-white dark:bg-black backdrop-blur-md border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-900'
+                          : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                       >
                         <div className="flex items-center justify-between">

@@ -356,12 +356,12 @@ export default function EditAdsPage() {
     label_ar: string,
     required: boolean = false
   ) => (
-    <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800 mb-4">
-      <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 mb-4">
+      <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          <h6 className="text-base font-semibold text-gray-900 dark:text-white">
             {language === 'ar' ? label_ar : label}
-          </h2>
+          </h6>
           {required && <span className="text-red-500 text-xs">*</span>}
           <span className="text-xs text-gray-500">{maxLength} {language === 'ar' ? 'حرف كحد أقصى' : 'chars max'}</span>
         </div>
@@ -411,13 +411,13 @@ export default function EditAdsPage() {
 
         {/* Headlines */}
         {config.fields.headlines && (
-          <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
             <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  <h6 className="text-base font-semibold text-gray-900 dark:text-white">
                     {language === 'ar' ? 'العناوين' : 'Headlines'}
-                  </h2>
+                  </h6>
                   <span className="text-xs text-gray-500">{config.fields.headlines.maxLength} {language === 'ar' ? 'حرف كحد أقصى' : 'chars max'}</span>
                 </div>
                 <span className="text-xs font-semibold text-blue-600">
@@ -436,13 +436,13 @@ export default function EditAdsPage() {
 
         {/* Long Headlines */}
         {config.fields.long_headlines && (
-          <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
             <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  <h6 className="text-base font-semibold text-gray-900 dark:text-white">
                     {language === 'ar' ? 'العناوين الطويلة' : 'Long Headlines'}
-                  </h2>
+                  </h6>
                   <span className="text-xs text-gray-500">{config.fields.long_headlines.maxLength} {language === 'ar' ? 'حرف كحد أقصى' : 'chars max'}</span>
                 </div>
                 <span className="text-xs font-semibold text-blue-600">
@@ -461,13 +461,13 @@ export default function EditAdsPage() {
 
         {/* Descriptions */}
         {config.fields.descriptions && (
-          <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
             <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  <h6 className="text-base font-semibold text-gray-900 dark:text-white">
                     {language === 'ar' ? 'الأوصاف' : 'Descriptions'}
-                  </h2>
+                  </h6>
                   <span className="text-xs text-gray-500">{config.fields.descriptions.maxLength} {language === 'ar' ? 'حرف كحد أقصى' : 'chars max'}</span>
                 </div>
                 <span className="text-xs font-semibold text-blue-600">
@@ -514,13 +514,13 @@ export default function EditAdsPage() {
   const renderSearchForm = () => (
     <div className="space-y-6">
       {/* Headlines */}
-      <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
         <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h6 className="text-base font-semibold text-gray-900 dark:text-white">
                 {language === 'ar' ? 'عناوين الإعلانات' : 'Ad Headlines'}
-              </h2>
+              </h6>
               <span className="text-xs text-gray-500">{language === 'ar' ? 'الحد الأقصى 30 حرف' : '30 characters max.'}</span>
             </div>
             <span className="text-xs font-semibold text-blue-600">
@@ -537,13 +537,13 @@ export default function EditAdsPage() {
       </div>
 
       {/* Descriptions */}
-      <div className="bg-white dark:bg-gray-900/50 rounded-lg shadow border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
         <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h6 className="text-base font-semibold text-gray-900 dark:text-white">
                 {language === 'ar' ? 'أوصاف الإعلانات' : 'Ad Descriptions'}
-              </h2>
+              </h6>
               <span className="text-xs text-gray-500">{language === 'ar' ? 'الحد الأقصى 90 حرف' : '90 characters max.'}</span>
             </div>
             <span className="text-xs font-semibold text-blue-600">
@@ -568,7 +568,7 @@ export default function EditAdsPage() {
   const getPlatformBar = () => {
     if (campaignType === 'VIDEO') {
       return (
-        <div className="flex items-center gap-2 bg-black rounded-lg px-3 py-1.5 border border-gray-700">
+        <div className="flex items-center gap-2 bg-gray-900 dark:bg-gray-950 rounded-lg px-3 py-1.5 border border-gray-700">
           <svg className="w-3.5 h-3.5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
             <path d="M10 8.64L15.27 12 10 15.36V8.64M8 5v14l11-7L8 5z" />
           </svg>
@@ -589,7 +589,7 @@ export default function EditAdsPage() {
 
   // Video preview card
   const renderVideoPreviewCard = (index: number) => (
-    <div className="w-full h-full flex flex-col bg-gray-900 rounded-lg overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-gray-800 dark:bg-gray-900 rounded-lg overflow-hidden">
       {/* Video Thumbnail */}
       <div className="relative">
         {youtubeVideoThumbnail ? (
@@ -635,10 +635,10 @@ export default function EditAdsPage() {
   // Search preview card
   const renderSearchPreviewCard = (index: number) => (
     <div className="w-full h-full flex flex-col">
-      <div className="bg-gray-50 dark:bg-black p-2.5 border-b border-gray-200 dark:border-gray-800">
+      <div className="bg-gray-50 dark:bg-gray-800 p-2.5 border-b border-gray-200 dark:border-gray-700">
         {getPlatformBar()}
       </div>
-      <div className="p-4 bg-white dark:bg-black flex-1 flex flex-col justify-center">
+      <div className="p-4 bg-white dark:bg-gray-800 flex-1 flex flex-col justify-center">
         <div className="mb-1.5">
           <span className="text-[10px] font-bold text-gray-900 dark:text-white">
             {language === 'ar' ? 'إعلان ممول' : 'Sponsored'}
@@ -683,14 +683,14 @@ export default function EditAdsPage() {
   // ============================================================
 
   return (
-    <div className="min-h-screen" dir="ltr">
+    <div className="" dir="ltr">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
 
         {/* Header */}
-        <div className="mb-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="text-center mb-3 sm:mb-6">
+          <h5 className="!mb-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
             {language === 'ar' ? 'أنشأ الذكاء الاصطناعي أفضل الإعلانات لك' : 'Furriyadh AI has created the best ads for you'}
-          </h1>
+          </h5>
           {campaignType === 'VIDEO' && (
             <p className="text-gray-500 dark:text-gray-400 mt-2">
               {language === 'ar' ? getVideoConfig()?.name_ar : getVideoConfig()?.name}

@@ -1079,14 +1079,14 @@ export default function CampaignPreviewPage() {
     content: (
       <div className={`w-full h-full flex flex-col ${campaignType === 'VIDEO' ? 'min-h-[420px] sm:min-h-[480px]' : campaignType === 'SHOPPING' ? 'min-h-[700px] sm:min-h-[800px] lg:min-h-[850px]' : campaignType === 'APP' ? 'min-h-[380px] sm:min-h-[420px]' : 'min-h-[200px] sm:min-h-[240px]'}`}>
         {/* Platform Bar */}
-        <div className="bg-gray-50 dark:bg-[#1e293b] p-2 sm:p-2.5 border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-gray-50 dark:bg-gray-800 p-2 sm:p-2.5 border-b border-gray-200 dark:border-gray-700">
           {getPlatformBar()}
         </div>
 
         {/* Conditional Ad Preview based on Campaign Type */}
         {campaignType === 'APP' ? (
           // App Campaign Preview
-          <div className="p-4 bg-gradient-to-b from-gray-900 to-black flex-1">
+          <div className="p-4 bg-gray-100 dark:bg-gray-900 flex-1">
             <AppPreview
               headlines={ad.headlines}
               descriptions={ad.descriptions}
@@ -1094,7 +1094,7 @@ export default function CampaignPreviewPage() {
           </div>
         ) : campaignType === 'SHOPPING' ? (
           // Shopping Campaign Preview
-          <div className="p-4 bg-gradient-to-b from-gray-900 to-black flex-1">
+          <div className="p-4 bg-gray-100 dark:bg-gray-900 flex-1">
             <ShoppingPreview
               merchantName={websiteDomain}
               headlines={ad.headlines}
@@ -1106,7 +1106,7 @@ export default function CampaignPreviewPage() {
           </div>
         ) : campaignType === 'VIDEO' && youtubeVideoId ? (
           // YouTube Video Ad Preview
-          <div className="flex-1 flex flex-col bg-black">
+          <div className="flex-1 flex flex-col bg-gray-900 dark:bg-gray-950">
             {/* Video Thumbnail with Overlays */}
             <div className="relative aspect-video w-full bg-gray-900 overflow-hidden">
               {/* YouTube Thumbnail */}
@@ -1156,7 +1156,7 @@ export default function CampaignPreviewPage() {
             </div>
 
             {/* Video Info Section */}
-            <div className="p-3 sm:p-4 bg-gradient-to-b from-gray-900 to-black">
+            <div className="p-3 sm:p-4 bg-gray-800 dark:bg-gray-900">
               <div className="flex items-start gap-3">
                 {/* Channel Avatar */}
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -1213,7 +1213,7 @@ export default function CampaignPreviewPage() {
           </div>
         ) : (
           // Original Search/Display Ad Preview
-          <div className="p-3 sm:p-4 bg-white dark:bg-[#1e293b] flex-1 flex flex-col justify-center">
+          <div className="p-3 sm:p-4 bg-white dark:bg-gray-800 flex-1 flex flex-col justify-center">
             <div className="mb-1 sm:mb-1.5">
               <span className="text-[9px] sm:text-[10px] font-bold text-gray-900 dark:text-white">
                 Sponsored
@@ -1290,18 +1290,18 @@ export default function CampaignPreviewPage() {
         </div>
       )}
 
-      <div className="min-h-screen" dir="ltr">
+      <div className="" dir="ltr">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
 
           {/* Header */}
-          <div className="mb-3 sm:mb-6 md:mb-8 text-center">
-            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2 md:mb-3 px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="text-center mb-3 sm:mb-6">
+            <h5 className="!mb-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white" dir={language === 'ar' ? 'rtl' : 'ltr'}>
               {language === 'ar' ? 'معاينة الإعلانات التي أنشأها الذكاء الاصطناعي لك' : 'Preview the ads Furriyadh AI has generated for you'}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-4xl mx-auto px-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            </h5>
+            <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm max-w-4xl mx-auto mt-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
               {language === 'ar'
-                ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك. شاهد المعاينات أدناه.'
-                : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience. View previews below."}
+                ? 'تم إنشاء عناوين وأوصاف ووسائط متعددة. سيتم اختبارها للعثور على الإعلانات الأكثر فعالية لجمهورك.'
+                : "Multiple headlines, descriptions, and media have been generated. They'll be A/B tested to find the most effective ads for your audience."}
             </p>
           </div>
 
@@ -1338,7 +1338,7 @@ export default function CampaignPreviewPage() {
                   />
                 </div>
               ) : (
-                <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] h-48 sm:h-64 md:h-80 rounded-3xl border border-gray-200 dark:border-gray-800 flex items-center justify-center bg-white dark:bg-[#1e293b]">
+                <div className="w-full max-w-[320px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] h-48 sm:h-64 md:h-80 rounded-3xl border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-gray-800">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-14 md:w-14 border-b-2 border-blue-600 mx-auto mb-4"></div>
                     <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400">{language === 'ar' ? 'جاري تحميل الإعلانات...' : 'Loading ads...'}</p>
@@ -1381,18 +1381,21 @@ export default function CampaignPreviewPage() {
 
         {/* Account Selection Modal - Dynamic colors based on campaign type */}
         {showAccountModal && (
-          <div className={`fixed inset-0 backdrop-blur-3xl flex items-center justify-center z-50 p-4 ${isRTL ? 'lg:pr-[340px]' : 'lg:pl-[340px]'}`} style={{
-            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.1), rgba(0, 0, 0, 0.98))',
-          }}>
+          <div
+            className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4 ${isRTL ? 'lg:pr-[250px]' : 'lg:pl-[250px]'}`}
+            style={{
+              background: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
 
 
-            <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-2xl w-full max-w-2xl relative z-50 shadow-2xl">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-2xl relative z-50 shadow-lg">
               <div className="relative mb-8 flex items-center justify-center">
                 <div className="text-center">
-                  <h2 className={`text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${modalColors.title}`}>
+                  <h5 className="!mb-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                     {language === 'ar' ? 'اختر حساب إعلانات جوجل' : 'Select Google Ads Account'}
-                  </h2>
-                  <p className="text-gray-400 mt-2">
+                  </h5>
+                  <p className="text-gray-500 dark:text-gray-400 mt-2 text-xs sm:text-sm">
                     {language === 'ar' ? 'اختر الحساب الذي تريد نشر هذه الحملة عليه' : 'Choose which account to publish this campaign to'}
                   </p>
                 </div>
@@ -1412,8 +1415,8 @@ export default function CampaignPreviewPage() {
                     <p className="text-gray-400">{language === 'ar' ? 'جاري جلب الحسابات...' : 'Loading accounts...'}</p>
                   </div>
                 ) : connectedAccounts.length === 0 ? (
-                  <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
-                    <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                       <img src="/images/integrations/google-ads-logo.svg" alt="Google Ads" className="w-8 h-8 opacity-50" />
                     </div>
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -1452,10 +1455,10 @@ export default function CampaignPreviewPage() {
                             key={account.customerId}
                             onClick={() => isEnabled && setSelectedAccount(account.customerId)}
                             className={`relative w-full p-4 rounded-lg border transition-all ${!isEnabled
-                              ? 'bg-transparent border-gray-300 dark:border-white/10 cursor-not-allowed opacity-70'
+                              ? 'bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 cursor-not-allowed opacity-70'
                               : selectedAccount === account.customerId
-                                ? 'bg-blue-500/10 border-blue-500 cursor-pointer'
-                                : 'bg-transparent border-gray-300 dark:border-white/10 hover:border-blue-400 dark:hover:border-blue-400/50 cursor-pointer'
+                                ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500 cursor-pointer'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-400/50 cursor-pointer'
                               }`}
                             style={{
                               animationDelay: `${index * 0.05}s`,
@@ -1467,8 +1470,8 @@ export default function CampaignPreviewPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedAccount === account.customerId
-                                  ? 'bg-blue-500/20 border border-blue-500/50'
-                                  : 'bg-white/5 border border-white/10'
+                                  ? 'bg-primary-100 dark:bg-primary-900/30 border border-primary-500/50'
+                                  : 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
                                   }`}>
                                   <img
                                     src="/images/integrations/google-ads-logo.svg"
@@ -1571,7 +1574,7 @@ export default function CampaignPreviewPage() {
             `}</style>
 
               {/* Footer - GlowButton style like campaign pages */}
-              <div className="px-6 py-4 bg-white dark:bg-[#1e293b] border-t border-gray-900 dark:border-white/10 flex justify-between items-center gap-4">
+              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center gap-4">
                 <GlowButton
                   onClick={() => setShowAccountModal(false)}
                   variant="green"

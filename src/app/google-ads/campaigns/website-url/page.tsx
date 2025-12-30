@@ -1282,9 +1282,8 @@ const WebsiteUrlPage: React.FC = () => {
         }
       `}</style>
 
-      <div className="min-h-screen overflow-x-hidden" style={{
-        position: 'relative',
-        minHeight: '100dvh' // Use dynamic viewport height for mobile
+      <div className="relative" style={{
+        position: 'relative'
       }}>
 
 
@@ -1298,9 +1297,9 @@ const WebsiteUrlPage: React.FC = () => {
 
           {/* Header */}
           <div className="text-center mb-3 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
+            <h5 className="!mb-0 text-lg sm:text-xl font-bold text-gray-800 dark:text-white">
               {language === 'ar' ? 'ما هو رابط موقعك الإلكتروني؟' : 'What is your website URL?'}
-            </h2>
+            </h5>
           </div>
 
           {/* Main Content */}
@@ -2025,7 +2024,7 @@ const WebsiteUrlPage: React.FC = () => {
             </GlowButton>
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 };

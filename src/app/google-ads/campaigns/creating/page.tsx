@@ -103,7 +103,7 @@ export default function CampaignCreatingPage() {
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4" dir="ltr">
+    <div className="flex items-center justify-center p-4" dir="ltr">
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
@@ -112,19 +112,19 @@ export default function CampaignCreatingPage() {
 
       <div className="relative z-10 w-full max-w-2xl">
         {/* Main Card */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8 md:p-12">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 md:p-12">
 
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg shadow-blue-500/50 animate-pulse">
+            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg shadow-primary-500/30 animate-pulse">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            <h5 className="!mb-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white" dir={language === 'ar' ? 'rtl' : 'ltr'}>
               {language === 'ar' ? 'جاري إنشاء حملتك' : 'Creating Your Campaign'}
-            </h1>
+            </h5>
 
-            <p className="text-gray-600 dark:text-gray-400 text-lg" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
               {language === 'ar'
                 ? 'الذكاء الاصطناعي يقوم بتحسين حملتك للحصول على أفضل النتائج'
                 : 'AI is optimizing your campaign for the best results'}
@@ -144,7 +144,7 @@ export default function CampaignCreatingPage() {
 
             <div className="relative w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="absolute top-0 h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 rounded-full transition-all duration-1000 ease-out"
+                className="absolute top-0 h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${progress}%`,
                   left: isRTL ? 'auto' : '0',
@@ -221,7 +221,7 @@ export default function CampaignCreatingPage() {
 
           {/* Campaign Info */}
           {campaignData && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 rounded-2xl border border-blue-200 dark:border-gray-600">
+            <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600 dark:text-gray-400 mb-1">
