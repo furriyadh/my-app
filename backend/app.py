@@ -334,6 +334,7 @@ def convert_status_to_db_safe(api_status: str) -> str:
         'REFUSED': 'REJECTED',
         'CANCELED': 'REJECTED',
         'CANCELLED': 'REJECTED',
+        'REJECTED': 'REJECTED', # ✅ Added REJECTED explicit mapping
         'UNKNOWN': 'NOT_LINKED',
         'UNSPECIFIED': 'NOT_LINKED',
         # في حالة الأخطاء العامة نعتبرها NOT_LINKED لتفادي تعارض مع الـ constraint
@@ -1259,35 +1260,47 @@ def sync_account_status(customer_id):
                 response = ga_service.search(request=search_request)
                 found_link = False
 
-                # ✅ إصلاح: تكرار جميع النتائج واختيار أفضل حالة
-                # الأولوية: ACTIVE > PENDING > أي حالة أخرى
-                raw_link_status = None
-                all_statuses = []
+                # ✅ إصلاح: تكرار جميع النتائج واختيار أحدث حالة بناءً على Link ID
+                # هذا يضمن أننا نتعامل مع آخر تفاعل (دعوة جديدة أو رفض حديث)
+                links_found = []
                 
                 for row in response:
                     link = row.customer_client_link
                     if link.client_customer and link.client_customer.endswith(clean_customer_id):
                         status = link.status.name if link.status else 'UNKNOWN'
-                        all_statuses.append(status)
+                        resource_name = link.resource_name
+                        
+                        # استخراج Link ID من resource_name (customers/{mcc}/customerClientLinks/{client}~{id})
+                        link_id = 0
+                        try:
+                            if '~' in resource_name:
+                                link_id = int(resource_name.split('~')[1])
+                        except:
+                            link_id = 0
+                            
+                        links_found.append({
+                            'status': status,
+                            'link_id': link_id,
+                            'resource_name': resource_name
+                        })
                         found_link = True
-                        # logger.info(f"🔗 وجدنا رابط للحساب {clean_customer_id}: {status}") # تم إخفاؤه لتقليل الضجيج كما طلب المستخدم
                 
-                # اختيار أفضل حالة
-                if 'ACTIVE' in all_statuses:
-                    raw_link_status = 'ACTIVE'
-                elif 'PENDING' in all_statuses:
-                    raw_link_status = 'PENDING'
-                elif all_statuses:
-                    raw_link_status = all_statuses[0]  # أول حالة (قد تكون INACTIVE)
+                # فرز الروابط حسب ID تنازلياً (الأحدث أولاً)
+                links_found.sort(key=lambda x: x['link_id'], reverse=True)
                 
-                if raw_link_status:
+                # اختيار الحالة الأحدث
+                if links_found:
+                    latest_link = links_found[0]
+                    raw_link_status = latest_link['status']
+                    
                     link_details.update({
                         'link_status': raw_link_status,
                         'raw_status': raw_link_status,
-                        'all_statuses': all_statuses,
-                        'method': 'customer_client_link'
+                        'latest_link_id': latest_link['link_id'],
+                        'method': 'customer_client_link_sorted_by_id'
                     })
-                    logger.info(f"📊 الحالة المختارة للحساب {clean_customer_id}: {raw_link_status} (من بين {all_statuses})")
+                    logger.info(f"📊 الحالة الأحدث للحساب {clean_customer_id}: {raw_link_status} (ID: {latest_link['link_id']})")
+                
             
             # الطريقة 2: تحديد الحالة بناءً على raw_link_status
             if found_link:
@@ -1380,7 +1393,7 @@ def sync_account_status(customer_id):
                             })
                             logger.info(f"⏳ الحساب {clean_customer_id} - دعوة معلقة (خطأ عام)")
                 elif raw_link_status == 'INACTIVE':
-                    # ❌ INACTIVE = الرابط غير نشط (مُلغى/منتهي/مرفوض)
+                    # ❌ INACTIVE = الرابط غير نشط (مُلغى/منتهي/مرفوض قديم) -> NOT_LINKED
                     # نتحقق من الوصول المباشر للتأكد
                     logger.info(f"🔍 التحقق من الوصول الفعلي للحساب {clean_customer_id} (link_status=INACTIVE)...")
                     try:
@@ -1447,8 +1460,18 @@ def sync_account_status(customer_id):
                                 'needs_activation': False
                             })
                             logger.info(f"❌ الحساب {clean_customer_id} - الربط مُلغى (INACTIVE + خطأ عام)")
+                elif raw_link_status in ['REFUSED', 'CANCELED', 'CANCELLED', 'REJECTED']:
+                    # ❌ تم رفض الدعوة أو إلغاؤها بشكل صريح
+                    api_status = 'REJECTED'
+                    link_details.update({
+                        'verified': False,
+                        'is_disabled': False,
+                        'needs_activation': False,
+                        'rejection_reason': f"Invitation was {raw_link_status}"
+                    })
+                    logger.info(f"❌ الحساب {clean_customer_id} تم رفض الدعوة (link_status={raw_link_status})")
                 else:
-                    # أي حالة أخرى (REFUSED, CANCELED, CANCELLED, UNKNOWN, etc.) = غير مرتبط
+                    # أي حالة أخرى (UNKNOWN, etc.) = غير مرتبط
                     api_status = 'NOT_LINKED'
                     link_details.update({
                         'verified': False,
@@ -1643,7 +1666,9 @@ def save_client_request_to_db(customer_id, request_type, account_name=None, oaut
             
         # التحقق من وجود أي طلب سابق لهذا الحساب (بغض النظر عن request_type)
         # هذا يضمن تحديث نفس السجل بدلاً من إنشاء سجلات متعددة
-        existing = supabase.table('client_requests').select('id, request_type').eq('customer_id', customer_id).order('created_at', desc=True).limit(1).execute()
+        # ✅ تعديل: جلب جميع السجلات لترتيبها وحذف القديم منها
+        existing_response = supabase.table('client_requests').select('id, request_type').eq('customer_id', customer_id).order('created_at', desc=True).execute()
+        existing_rows = existing_response.data if existing_response.data else []
         
         # إعداد البيانات
         data = {
@@ -1661,10 +1686,19 @@ def save_client_request_to_db(customer_id, request_type, account_name=None, oaut
         if link_details:
             data['link_details'] = link_details
         
-        if existing.data:
-            # تحديث الطلب الموجود
-            result = supabase.table('client_requests').update(data).eq('id', existing.data[0]['id']).execute()
+        if existing_rows:
+            # تحديث أحدث طلب (الأول في القائمة)
+            latest_id = existing_rows[0]['id']
+            result = supabase.table('client_requests').update(data).eq('id', latest_id).execute()
             logger.info(f"🔄 تم تحديث طلب العميل {customer_id} في Supabase - الحالة: {status or 'لم تتغير'}")
+            
+            # 🗑️ حذف السجلات القديمة المكررة (إذا وجدت)
+            if len(existing_rows) > 1:
+                old_ids = [row['id'] for row in existing_rows[1:]]
+                if old_ids:
+                    logger.info(f"🗑️ جاري حذف {len(old_ids)} سجل قديم للحساب {customer_id}")
+                    # حذف دفعة واحدة
+                    supabase.table('client_requests').delete().in_('id', old_ids).execute()
         else:
             # إنشاء طلب جديد
             data.update({
