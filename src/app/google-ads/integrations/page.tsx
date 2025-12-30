@@ -218,7 +218,7 @@ const IntegrationsPage: React.FC = () => {
           title: 'Google Analytics',
           description: 'Track website visitors and behavior.',
           icon: (
-            <img src="/images/icons/google-analytics.svg" alt="GA" className="w-6 h-6 object-contain" />
+            <img src="/images/integrations/google-analytics-logo.svg" alt="GA" className="w-6 h-6 object-contain" />
           ),
           status: 'not-connected'
         },
