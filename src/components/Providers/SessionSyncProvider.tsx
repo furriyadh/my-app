@@ -32,8 +32,33 @@ export default function SessionSyncProvider({
                     // التحقق من وجود oauth_user_info cookie
                     const hasOAuthCookie = document.cookie.includes('oauth_user_info');
 
-                    if (!hasOAuthCookie) {
-                        console.log("🔄 Session found but OAuth cookie missing, syncing...");
+                    // 🔧 التحقق من أن الـ cookie للمستخدم الصحيح
+                    let needsSync = !hasOAuthCookie;
+
+                    if (hasOAuthCookie) {
+                        try {
+                            const cookieStr = document.cookie
+                                .split('; ')
+                                .find(row => row.startsWith('oauth_user_info='));
+
+                            if (cookieStr) {
+                                const cookieValue = decodeURIComponent(cookieStr.split('=')[1]);
+                                const cookieUser = JSON.parse(cookieValue);
+
+                                // 🔑 مقارنة الـ email - إذا كان مختلف، نحتاج مزامنة!
+                                if (cookieUser.email !== session.user.email) {
+                                    console.log('⚠️ User changed! Cookie:', cookieUser.email, 'Session:', session.user.email);
+                                    needsSync = true;
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('⚠️ Error parsing oauth_user_info cookie:', e);
+                            needsSync = true;
+                        }
+                    }
+
+                    if (needsSync) {
+                        console.log("🔄 Session found but OAuth cookie missing/outdated, syncing...");
 
                         // جلب Google ID من identities أو user_metadata
                         const user = session.user;
@@ -43,7 +68,7 @@ export default function SessionSyncProvider({
                             user.user_metadata?.sub ||
                             user.id;
 
-                        console.log("🔑 Using ID for sync:", { supabaseId: user.id, googleId });
+                        console.log("🔑 Using ID for sync:", { supabaseId: user.id, googleId, email: user.email });
 
                         await fetch('/api/auth/sync-session', {
                             method: 'POST',

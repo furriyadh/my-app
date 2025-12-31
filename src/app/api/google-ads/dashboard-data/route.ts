@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase for platform campaigns filtering
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
  * 🎯 Dashboard Data API - Unified Endpoint
  * 
  * يجلب جميع بيانات الداشبورد في طلب واحد:
- * - الحملات (Campaigns)
+ * - الحملات (Campaigns) - فقط المنشأة من المنصة
  * - بيانات الأداء (Performance Data)
  * - AI Insights
  * - التوصيات (Recommendations)
  * 
  * هذا يقلل من استهلاك الكوتا بنسبة 75%
  */
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -115,17 +122,62 @@ export async function GET(request: NextRequest) {
       console.error('❌ Recommendations fetch failed:', recommendationsRes.reason);
     }
 
+    // 🎯 فلترة الحملات المنشأة من المنصة فقط
+    let filteredCampaigns = campaigns.campaigns || [];
+    let platformCampaignIds: string[] = [];
+
+    // جلب الحملات المنشأة من المنصة من Supabase
+    try {
+      const { data: platformCampaigns, error } = await supabase
+        .from('platform_created_campaigns')
+        .select('google_campaign_id')
+        .eq('status', 'active');
+
+      if (!error && platformCampaigns && platformCampaigns.length > 0) {
+        platformCampaignIds = platformCampaigns.map(c => c.google_campaign_id);
+        console.log(`🎯 Platform campaigns found: ${platformCampaignIds.length}`);
+
+        // فلترة الحملات لإظهار المنصة فقط
+        filteredCampaigns = filteredCampaigns.filter((campaign: any) =>
+          platformCampaignIds.includes(campaign.id?.toString())
+        );
+
+        console.log(`✅ Filtered to ${filteredCampaigns.length} platform campaigns (from ${(campaigns.campaigns || []).length} total)`);
+      } else {
+        console.log('⚠️ No platform campaigns found or error:', error?.message);
+        // إذا لم توجد حملات منصة، نعرض قائمة فارغة
+        filteredCampaigns = [];
+      }
+    } catch (filterError) {
+      console.error('❌ Error filtering platform campaigns:', filterError);
+      // في حالة الخطأ، نعرض قائمة فارغة للأمان
+      filteredCampaigns = [];
+    }
+
+    // إعادة حساب المقاييس بناءً على الحملات المفلترة
+    const recalculatedMetrics = {
+      totalCampaigns: filteredCampaigns.length,
+      activeCampaigns: filteredCampaigns.filter((c: any) => c.status === 'ENABLED').length,
+      pausedCampaigns: filteredCampaigns.filter((c: any) => c.status === 'PAUSED').length,
+      totalSpend: filteredCampaigns.reduce((sum: number, c: any) => sum + (c.cost || 0), 0),
+      impressions: filteredCampaigns.reduce((sum: number, c: any) => sum + (c.impressions || 0), 0),
+      clicks: filteredCampaigns.reduce((sum: number, c: any) => sum + (c.clicks || 0), 0),
+      conversions: filteredCampaigns.reduce((sum: number, c: any) => sum + (c.conversions || 0), 0),
+    };
+
     // إرجاع جميع البيانات في استجابة واحدة
     const response = {
       success: true,
       timestamp: new Date().toISOString(),
       data: {
-        campaigns: campaigns.campaigns || [],
-        metrics: campaigns.metrics || {},
+        campaigns: filteredCampaigns,
+        metrics: recalculatedMetrics,
         currency: campaigns.currency || 'USD',
         performanceData: performance,
         aiInsights: aiInsights,
         recommendations: recommendations.recommendations || [],
+        platformOnly: true, // علامة أننا نعرض حملات المنصة فقط
+        totalExternalCampaigns: (campaigns.campaigns || []).length - filteredCampaigns.length,
       },
       meta: {
         timeRange,

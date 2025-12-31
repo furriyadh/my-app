@@ -209,6 +209,14 @@ export default function CampaignPreviewPage() {
     console.log('📦 Headlines count:', generatedContent.headlines?.length || 0);
     console.log('📦 Descriptions count:', generatedContent.descriptions?.length || 0);
 
+    // Load saved billing mode
+    const savedBillingMode = localStorage.getItem('billing_mode');
+    if (savedBillingMode === 'furriyadh_managed') {
+      setPublishMode('managed');
+    } else {
+      setPublishMode('my_account');
+    }
+
     const url = campaignData.websiteUrl || '';
     setWebsiteUrl(url);
 
@@ -709,6 +717,92 @@ export default function CampaignPreviewPage() {
     setShowAccountModal(false);
   };
 
+  // 🔄 Handle billing mode change and save to database
+  const handleBillingModeChange = async (mode: 'my_account' | 'managed') => {
+    setPublishMode(mode);
+
+    // Map mode to database billing_mode
+    const billingMode = mode === 'my_account' ? 'self_managed' : 'furriyadh_managed';
+
+    // Get user info from multiple sources
+    let userId = null;
+    let userEmail = null;
+
+    // Try localStorage 'user' key first
+    const userDataStr = localStorage.getItem('user');
+    if (userDataStr) {
+      try {
+        const userData = JSON.parse(userDataStr);
+        userId = userData?.id || userData?.user?.id;
+        userEmail = userData?.email || userData?.user?.email;
+      } catch (e) {
+        console.warn('Failed to parse user data');
+      }
+    }
+
+    // Fallback: Try Supabase auth token
+    if (!userId) {
+      const authTokenStr = localStorage.getItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '').split('.')[0] + '-auth-token');
+      if (authTokenStr) {
+        try {
+          const authToken = JSON.parse(authTokenStr);
+          userId = authToken?.user?.id;
+          userEmail = authToken?.user?.email;
+        } catch (e) {
+          console.warn('Failed to parse auth token');
+        }
+      }
+    }
+
+    // Fallback 2: Try any key containing user info
+    if (!userId) {
+      for (const key of Object.keys(localStorage)) {
+        if (key.includes('auth') || key.includes('supabase')) {
+          try {
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            if (data?.user?.id) {
+              userId = data.user.id;
+              userEmail = data.user.email;
+              break;
+            }
+          } catch (e) {
+            // Skip non-JSON values
+          }
+        }
+      }
+    }
+
+    if (!userId) {
+      console.warn('⚠️ No user ID found, skipping billing mode save');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/billing-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, userEmail, billingMode })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Billing mode saved:', billingMode);
+        // Store locally for quick access
+        localStorage.setItem('billing_mode', billingMode);
+
+        // If managed mode and account assigned, store it
+        if (result.assignedAccount) {
+          localStorage.setItem('managed_account', JSON.stringify(result.assignedAccount));
+        }
+      } else {
+        console.error('❌ Failed to save billing mode:', result.error);
+      }
+    } catch (error) {
+      console.error('❌ Error saving billing mode:', error);
+    }
+  };
+
   const handlePublishClick = async () => {
     console.log('🔵 تم الضغط على زر نشر الحملة');
     try {
@@ -806,6 +900,103 @@ export default function CampaignPreviewPage() {
       const selectedLanguage = campaignData.selectedLanguage || '1019';
       const selectedLanguageCode = campaignData.selectedLanguageCode || 'ar';
 
+      // Get user info for billing mode
+      let billingModeForPublish = 'self_managed';
+      let userIdForPublish: string | null = null;
+      try {
+        billingModeForPublish = localStorage.getItem('billing_mode') || 'self_managed';
+
+        // Method 1: Try 'user' key
+        const userDataStr = localStorage.getItem('user');
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            userIdForPublish = userData?.id || userData?.user?.id || null;
+            console.log('🔍 Found user from "user" key:', userIdForPublish);
+          } catch { /* skip */ }
+        }
+
+        // Method 2: Try Supabase auth token keys
+        if (!userIdForPublish) {
+          const supabaseKeys = Object.keys(localStorage).filter(
+            key => key.startsWith('sb-') && key.includes('auth-token')
+          );
+          console.log('🔍 Found Supabase auth keys:', supabaseKeys);
+
+          for (const key of supabaseKeys) {
+            try {
+              const data = JSON.parse(localStorage.getItem(key) || '{}');
+              if (data?.user?.id) {
+                userIdForPublish = data.user.id;
+                console.log('✅ Found user_id from Supabase token:', userIdForPublish);
+                break;
+              }
+            } catch { /* skip */ }
+          }
+        }
+
+        // Method 3: Try any key containing 'auth' or 'supabase'
+        if (!userIdForPublish) {
+          for (const key of Object.keys(localStorage)) {
+            if (key.includes('auth') || key.includes('supabase') || key.includes('session')) {
+              try {
+                const data = JSON.parse(localStorage.getItem(key) || '{}');
+                if (data?.user?.id) {
+                  userIdForPublish = data.user.id;
+                  console.log('✅ Found user_id from key:', key, userIdForPublish);
+                  break;
+                }
+              } catch { /* skip non-JSON */ }
+            }
+          }
+        }
+
+        // Final fallback warning
+        if (!userIdForPublish) {
+          // Method 4: Try to get from oauth_user_info (this contains the real Google ID)
+          try {
+            const oauthInfo = localStorage.getItem('oauth_user_info');
+            if (oauthInfo) {
+              const parsed = JSON.parse(oauthInfo);
+              userIdForPublish = parsed?.id || parsed?.sub || null;
+              if (userIdForPublish) {
+                console.log('✅ Found user_id from oauth_user_info:', userIdForPublish);
+              }
+            }
+          } catch { /* skip */ }
+        }
+
+        // Method 5: Try to parse cookies for oauth_user_info
+        if (!userIdForPublish && typeof document !== 'undefined') {
+          try {
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {
+              const [name, value] = cookie.trim().split('=');
+              if (name === 'oauth_user_info' && value) {
+                const decoded = decodeURIComponent(value);
+                const parsed = JSON.parse(decoded);
+                userIdForPublish = parsed?.id || parsed?.sub || null;
+                if (userIdForPublish) {
+                  console.log('✅ Found user_id from cookie oauth_user_info:', userIdForPublish);
+                  break;
+                }
+              }
+            }
+          } catch { /* skip */ }
+        }
+
+        if (!userIdForPublish) {
+          console.warn('⚠️ Could not find user_id. Available localStorage keys:',
+            Object.keys(localStorage).filter(k => k.includes('user') || k.includes('auth') || k.includes('oauth'))
+          );
+        }
+      } catch (e) {
+        console.warn('Could not get billing mode or user ID:', e);
+      }
+
+      console.log('💳 Billing Mode for publish:', billingModeForPublish);
+      console.log('👤 User ID for publish:', userIdForPublish);
+
       // Prepare complete campaign data
       const completeCampaignData = {
         customer_id: selectedAccount,  // Selected Google Ads account
@@ -830,6 +1021,11 @@ export default function CampaignPreviewPage() {
         realCPC: campaignData.realCPC || null, // Real CPC from Google Ads Historical Metrics (USD)
         maxCpcBid: campaignData.maxCpcBid || campaignData.realCPC || null, // Max CPC Bid (USD)
         // ═══════════════════════════════════════════════════════════════════
+        // BILLING MODE & USER ID
+        // ═══════════════════════════════════════════════════════════════════
+        billing_mode: billingModeForPublish,
+        user_id: userIdForPublish,
+        // ═══════════════════════════════════════════════════════════════════
         // VIDEO CAMPAIGN SPECIFIC DATA
         // ═══════════════════════════════════════════════════════════════════
         video_ad_type: campaignData.videoSubType || campaignData.videoAdType || campaignData.videoSubtype || 'VIDEO_RESPONSIVE_AD',
@@ -846,7 +1042,6 @@ export default function CampaignPreviewPage() {
           action_button_label: generatedContent?.action_button_label || 'تعرف أكثر',
           action_headline: generatedContent?.action_headline || '',
         },
-        user_id: 'test_user',
         // Customer email for notifications (from OAuth user info)
         customer_email: (() => {
           try {
@@ -919,6 +1114,33 @@ export default function CampaignPreviewPage() {
 
       const result = await launchResponse.json();
       console.log('✅ Campaign launch result:', result);
+
+      // ✅ Register campaign in platform_created_campaigns for tracking
+      // Use google_campaign_id (real Google Ads ID) not campaign_id (internal UUID)
+      const realGoogleCampaignId = result.google_campaign_id || result.campaign_id;
+      if (result.success && realGoogleCampaignId) {
+        try {
+          await fetch('/api/campaigns/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              google_campaign_id: realGoogleCampaignId,
+              google_campaign_name: result.campaign_name || completeCampaignData.campaign_name,
+              customer_id: selectedAccount,
+              source: billingModeForPublish === 'furriyadh_managed' ? 'furriyadh_managed' : 'self_managed',
+              user_id: userIdForPublish,
+              user_email: completeCampaignData.customer_email,
+              campaign_type: completeCampaignData.campaign_type,
+              daily_budget: completeCampaignData.daily_budget,
+              currency: completeCampaignData.currency,
+              website_url: completeCampaignData.website_url,
+            })
+          });
+          console.log('✅ Campaign registered in platform tracking with Google ID:', realGoogleCampaignId);
+        } catch (regError) {
+          console.warn('⚠️ Could not register campaign for tracking:', regError);
+        }
+      }
 
       // Smoothly complete progress to 100%
       setPublishProgress(95);
@@ -1425,7 +1647,7 @@ export default function CampaignPreviewPage() {
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {/* My Account Option */}
                 <button
-                  onClick={() => setPublishMode('my_account')}
+                  onClick={() => handleBillingModeChange('my_account')}
                   className={`relative p-4 rounded-xl border-2 transition-all text-left ${publishMode === 'my_account'
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -1455,7 +1677,7 @@ export default function CampaignPreviewPage() {
 
                 {/* Managed Account Option */}
                 <button
-                  onClick={() => setPublishMode('managed')}
+                  onClick={() => handleBillingModeChange('managed')}
                   className={`relative p-4 rounded-xl border-2 transition-all text-left ${publishMode === 'managed'
                     ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -1480,7 +1702,7 @@ export default function CampaignPreviewPage() {
                       <Crown className="w-4 h-4 text-purple-600" />
                     </div>
                     <span className="h6 !mb-0">
-                      {language === 'ar' ? 'حساب Furriyadh المُدار' : 'Managed Furriyadh Account'}
+                      {language === 'ar' ? 'حساب Furriyadh' : 'Furriyadh Account'}
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 !mb-0">
@@ -1590,7 +1812,7 @@ export default function CampaignPreviewPage() {
                                   </div>
                                   <div className="text-left">
                                     <p className="text-gray-900 dark:text-white font-medium text-base">
-                                      {language === 'ar' ? 'حساب Furriyadh المُدار' : 'Managed Furriyadh Account'}
+                                      {language === 'ar' ? 'حساب Furriyadh' : 'Furriyadh Account'}
                                       <span dir="ltr" className="text-gray-500 dark:text-gray-400 font-normal text-sm ml-2">
                                         {formatCustomerId(account.customerId)}
                                       </span>
@@ -1678,6 +1900,23 @@ export default function CampaignPreviewPage() {
                       </span>
                     ))}
                   </div>
+
+                  {/* Start Now Button - Navigate to managed account setup */}
+                  <button
+                    onClick={() => {
+                      // Save campaign data for later
+                      localStorage.setItem('pending_managed_campaign', 'true');
+                      // Redirect to managed account setup/billing page
+                      router.push('/google-ads/billing?setup=managed');
+                    }}
+                    className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      {language === 'ar' ? 'ابدأ الآن' : 'Start Now'}
+                      <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                    </span>
+                  </button>
                 </div>
               )}
 

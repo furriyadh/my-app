@@ -128,6 +128,14 @@ try:
 except Exception as e:
     logger.error(f"❌ فشل تسجيل User Accounts Blueprint: {e}")
 
+# 🏢 Furriyadh Commission System Blueprint
+try:
+    from routes.furriyadh_routes import furriyadh_bp
+    app.register_blueprint(furriyadh_bp)  # url_prefix is already set in the blueprint
+    logger.info("✅ تم تسجيل Furriyadh Commission System Blueprint")
+except Exception as e:
+    logger.error(f"❌ فشل تسجيل Furriyadh Commission System Blueprint: {e}")
+
 try:
     # إعداد Supabase مع إصدار محدث (باستخدام متغيرات البيئة فقط بدون قيم افتراضية حساسة)
     SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
@@ -2427,6 +2435,126 @@ def get_budget_impact():
     except Exception as e:
         logger.error(f"❌ خطأ في جلب تأثير الميزانية: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/google-ads/update-campaign-budget', methods=['POST'])
+def update_campaign_budget():
+    """تحديث ميزانية حملة معينة عبر Google Ads API"""
+    try:
+        data = request.get_json()
+        
+        customer_id = data.get('customer_id')
+        campaign_id = data.get('campaign_id')
+        new_daily_budget = data.get('new_daily_budget')
+        
+        if not customer_id or not campaign_id or not new_daily_budget:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: customer_id, campaign_id, new_daily_budget',
+                'message': 'الحقول المطلوبة غير مكتملة'
+            }), 400
+        
+        # تنظيف معرف العميل
+        clean_customer_id = str(customer_id).replace('-', '').strip()
+        
+        if not clean_customer_id.isdigit() or len(clean_customer_id) != 10:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid customer ID format',
+                'message': 'معرف العميل يجب أن يكون 10 أرقام'
+            }), 400
+        
+        # تحويل الميزانية إلى micros
+        budget_amount_micros = int(float(new_daily_budget) * 1_000_000)
+        
+        logger.info(f"💰 تحديث ميزانية الحملة {campaign_id} للحساب {clean_customer_id}")
+        logger.info(f"   الميزانية الجديدة: {new_daily_budget} ({budget_amount_micros} micros)")
+        
+        client = get_google_ads_client()
+        ga_service = client.get_service("GoogleAdsService")
+        campaign_budget_service = client.get_service("CampaignBudgetService")
+        
+        # 1. جلب resource_name للميزانية المرتبطة بالحملة
+        query = f"""
+            SELECT
+                campaign.id,
+                campaign.name,
+                campaign_budget.resource_name,
+                campaign_budget.amount_micros
+            FROM campaign
+            WHERE campaign.id = {campaign_id}
+        """
+        
+        search_request = client.get_type("SearchGoogleAdsRequest")
+        search_request.customer_id = clean_customer_id
+        search_request.query = query
+        
+        response = ga_service.search(request=search_request)
+        
+        budget_resource_name = None
+        campaign_name = None
+        old_budget_micros = 0
+        
+        for row in response:
+            budget_resource_name = row.campaign_budget.resource_name
+            old_budget_micros = row.campaign_budget.amount_micros
+            campaign_name = row.campaign.name
+            break
+        
+        if not budget_resource_name:
+            return jsonify({
+                'success': False,
+                'error': 'Campaign budget not found',
+                'message': 'لم يتم العثور على ميزانية لهذه الحملة'
+            }), 404
+        
+        logger.info(f"   الميزانية الحالية: {old_budget_micros / 1_000_000}")
+        
+        # 2. تحديث الميزانية
+        campaign_budget_operation = client.get_type("CampaignBudgetOperation")
+        campaign_budget = campaign_budget_operation.update
+        
+        campaign_budget.resource_name = budget_resource_name
+        campaign_budget.amount_micros = budget_amount_micros
+        
+        # تعيين field mask
+        from google.api_core import protobuf_helpers
+        client.copy_from(
+            campaign_budget_operation.update_mask,
+            protobuf_helpers.field_mask(None, campaign_budget._pb)
+        )
+        
+        # تنفيذ التحديث
+        mutate_response = campaign_budget_service.mutate_campaign_budgets(
+            customer_id=clean_customer_id,
+            operations=[campaign_budget_operation]
+        )
+        
+        logger.info(f"✅ تم تحديث ميزانية الحملة {campaign_id} بنجاح")
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث الميزانية بنجاح',
+            'campaign_id': campaign_id,
+            'campaign_name': campaign_name,
+            'old_budget': old_budget_micros / 1_000_000,
+            'new_budget': new_daily_budget,
+            'customer_id': clean_customer_id
+        })
+        
+    except GoogleAdsException as e:
+        logger.error(f"❌ خطأ Google Ads API في تحديث الميزانية: {e}")
+        return jsonify(handle_google_ads_exception(e)), 400
+        
+    except Exception as e:
+        logger.error(f"❌ خطأ عام في update_campaign_budget: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'خطأ في تحديث الميزانية'
+        }), 500
 
 
 if __name__ == '__main__':

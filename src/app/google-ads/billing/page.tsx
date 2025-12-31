@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     CreditCard,
     Zap,
@@ -15,10 +15,14 @@ import {
     Sparkles,
     TrendingUp,
     Calendar,
-    Receipt
+    Receipt,
+    Gift
 } from 'lucide-react';
 import { getCurrentPlanLimits, setCurrentPlan, PLAN_LIMITS, type PlanLimits } from '@/lib/services/PlanService';
 import { supabase } from '@/lib/supabase';
+import { FurriyadhPaymentGateway } from '@/components/furriyadh/FurriyadhPaymentGateway';
+import { CampaignBudgetProgressCard } from '@/components/furriyadh/CampaignBudgetProgressCard';
+import { FurriyadhPromotionalCard } from '@/components/furriyadh/FurriyadhPromotionalCard';
 
 const BillingPage: React.FC = () => {
     const router = useRouter();
@@ -48,6 +52,16 @@ const BillingPage: React.FC = () => {
     // 🔄 Billing Mode: 'self_managed' (subscription) or 'managed' (20% commission)
     const [billingMode, setBillingMode] = useState<'self_managed' | 'managed'>('self_managed');
 
+    // 🚀 Managed Account Setup Modal
+    const [showManagedSetup, setShowManagedSetup] = useState(false);
+    const searchParams = useSearchParams();
+
+    // 👤 User email for Furriyadh Balance Card
+    const [userEmail, setUserEmail] = useState<string>('');
+
+    // 📊 Managed account ID for progress cards
+    const [managedAccountId, setManagedAccountId] = useState<string>('');
+
     useEffect(() => {
         const updateLanguage = () => {
             const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
@@ -65,8 +79,54 @@ const BillingPage: React.FC = () => {
         // Fetch real accounts count from Supabase
         fetchAccountsCount();
 
+        // Fetch user email from Supabase auth
+        fetchUserEmail();
+
         return () => window.removeEventListener('languageChange', updateLanguage);
     }, []);
+
+    // Fetch user email from Supabase
+    const fetchUserEmail = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user?.email) {
+                setUserEmail(user.email);
+                // Also fetch managed account ID for this user
+                fetchManagedAccountId(user.email);
+            }
+        } catch (err) {
+            console.error('Error fetching user:', err);
+        }
+    };
+
+    // Fetch Furriyadh managed account ID
+    const fetchManagedAccountId = async (email: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('furriyadh_customer_accounts')
+                .select('id')
+                .eq('user_email', email)
+                .single();
+
+            if (data?.id) {
+                setManagedAccountId(data.id);
+                console.log('📊 Furriyadh Account ID:', data.id);
+            } else if (error) {
+                console.log('ℹ️ No Furriyadh account found for user:', email);
+            }
+        } catch (err) {
+            console.error('Error fetching managed account:', err);
+        }
+    };
+
+    // Handle ?setup=managed query parameter
+    useEffect(() => {
+        const setup = searchParams.get('setup');
+        if (setup === 'managed') {
+            setBillingMode('managed');
+            setShowManagedSetup(true);
+        }
+    }, [searchParams]);
 
     const fetchAccountsCount = async () => {
         try {
@@ -156,7 +216,7 @@ const BillingPage: React.FC = () => {
             features: [
                 { text: isRTL ? '3 حملات' : '3 Campaigns', included: true },
                 { text: isRTL ? '1 حساب Google Ads' : '1 Google Ads Account', included: true },
-                { text: isRTL ? 'ميزانية شهرية $1,000' : '$1,000 Monthly Budget', included: true },
+                { text: isRTL ? 'ميزانية غير محدودة' : 'Unlimited Budget', included: true },
                 { text: isRTL ? 'تقارير متقدمة' : 'Advanced Reports', included: true },
                 { text: isRTL ? 'دعم البريد الإلكتروني' : 'Email Support', included: true },
                 { text: isRTL ? 'تحسين AI' : 'AI Optimization', included: false },
@@ -174,7 +234,7 @@ const BillingPage: React.FC = () => {
             features: [
                 { text: isRTL ? '10 حملات' : '10 Campaigns', included: true },
                 { text: isRTL ? '3 حسابات Google Ads' : '3 Google Ads Accounts', included: true },
-                { text: isRTL ? 'ميزانية شهرية $5,000' : '$5,000 Monthly Budget', included: true },
+                { text: isRTL ? 'ميزانية غير محدودة' : 'Unlimited Budget', included: true },
                 { text: isRTL ? 'تحسين AI متقدم' : 'Advanced AI Optimization', included: true },
                 { text: isRTL ? 'دعم أولوية' : 'Priority Support', included: true },
                 { text: isRTL ? 'تقارير مخصصة' : 'Custom Reports', included: true },
@@ -365,6 +425,57 @@ const BillingPage: React.FC = () => {
                     </div>
                 </div>
 
+                {/* 🏢 Furriyadh Managed Account Section */}
+                {billingMode === 'managed' && userEmail && (
+                    <div className="mb-[25px]">
+                        <div id="account-balance-section">
+                            <FurriyadhPaymentGateway
+                                userEmail={userEmail}
+                                isRTL={isRTL}
+                                currentBalance={0}
+                                onPaymentSuccess={(amount, method) => {
+                                    console.log(`Payment success: $${amount} via ${method}`);
+                                }}
+                            />
+                        </div>
+
+                        {/* Campaign Budget & Promotional Cards - Side by Side */}
+                        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Campaign Budget Card */}
+                            <div>
+                                <h5 className="!mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <TrendingUp className="w-6 h-6 text-purple-500" />
+                                    {isRTL ? 'ميزانيات الحملات' : 'Campaign Budgets'}
+                                </h5>
+                                <CampaignBudgetProgressCard
+                                    accountId={managedAccountId}
+                                    userEmail={userEmail}
+                                    isRTL={isRTL}
+                                    onManageBudgets={() => {
+                                        const balanceSection = document.getElementById('account-balance-section');
+                                        if (balanceSection) {
+                                            balanceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                    }}
+                                />
+                            </div>
+
+                            {/* Promotional Credits Card */}
+                            <div>
+                                <h5 className="!mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Gift className="w-6 h-6 text-purple-500" />
+                                    {isRTL ? 'احصل على رصيد مجاني' : 'Get Free Credit'}
+                                </h5>
+                                <FurriyadhPromotionalCard
+                                    userEmail={userEmail}
+                                    isRTL={isRTL}
+                                    currentSpend={0}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Self-Managed Plans Section */}
                 {billingMode === 'self_managed' && (
                     <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md mb-[25px]">
@@ -513,64 +624,7 @@ const BillingPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Managed Mode Section - 20% Commission */}
-                {billingMode === 'managed' && (
-                    <div className="trezo-card bg-gradient-to-br from-purple-900/20 to-pink-900/20 dark:from-purple-900/30 dark:to-pink-900/30 border border-purple-500/30 p-[20px] md:p-[25px] rounded-md mb-[25px]">
-                        <div className="text-center max-w-2xl mx-auto">
-                            <div className="inline-flex items-center gap-2 bg-purple-500/20 text-purple-400 px-4 py-2 rounded-full text-sm mb-4">
-                                <Sparkles className="w-4 h-4" />
-                                {isRTL ? 'حساباتنا الموثقة' : 'Our Verified Accounts'}
-                            </div>
 
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                                {isRTL ? 'اعمل على حساباتنا الموثقة' : 'Work on Our Verified Accounts'}
-                            </h3>
-                            <p className="text-gray-500 dark:text-gray-400 mb-6">
-                                {isRTL ? 'حسابات موثقة عالية الثقة مع إنشاء حملات AI كامل' : 'Premium verified accounts with full AI campaign creation'}
-                            </p>
-
-                            {/* Commission Card */}
-                            <div className="bg-gray-900/50 dark:bg-black/30 border border-purple-500/30 rounded-xl p-8 mb-6">
-                                <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                                    20%
-                                    <span className="text-lg font-normal text-gray-400 ml-2">
-                                        {isRTL ? 'عمولة' : 'commission'}
-                                    </span>
-                                </div>
-                                <p className="text-gray-400 mb-2">{isRTL ? 'من إنفاقك الإعلاني فقط' : 'of your ad spend only'}</p>
-                                <p className="text-green-400 text-sm font-medium">
-                                    {isRTL ? 'بدون رسوم شهرية • ادفع حسب الاستخدام' : 'No monthly fees • Pay as you go'}
-                                </p>
-                            </div>
-
-                            {/* Features */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mb-6">
-                                {[
-                                    { en: 'Verified High-Trust Ad Accounts', ar: 'حسابات إعلانية موثقة عالية الثقة' },
-                                    { en: 'No Suspension Risk - Guaranteed', ar: 'بدون خطر إيقاف - مضمون' },
-                                    { en: 'AI-Generated Ad Images & Banners', ar: 'صور وبانرات إعلانية بالذكاء الاصطناعي' },
-                                    { en: 'AI-Written Ad Copy & Headlines', ar: 'نصوص وعناوين إعلانية بالذكاء الاصطناعي' },
-                                    { en: 'Complete Campaign Setup by AI', ar: 'إعداد حملة كامل بالذكاء الاصطناعي' },
-                                    { en: 'Keyword Research & Bid Strategy', ar: 'بحث الكلمات المفتاحية واستراتيجية المزايدة' },
-                                    { en: 'Real-time 24/7 Optimization', ar: 'تحسين مستمر على مدار الساعة' },
-                                    { en: 'Dedicated Account Manager', ar: 'مدير حساب مخصص' },
-                                    { en: 'Priority Support & Reporting', ar: 'دعم أولوية وتقارير' },
-                                    { en: 'Unlimited Campaigns & Ad Groups', ar: 'حملات ومجموعات إعلانية غير محدودة' },
-                                ].map((feature, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                                        <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                                        {isRTL ? feature.ar : feature.en}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* CTA Button */}
-                            <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all shadow-lg shadow-purple-500/25">
-                                {isRTL ? 'ابدأ الآن - ادفع فقط عند الإنفاق' : 'Get Started - Pay Only When You Spend'}
-                            </button>
-                        </div>
-                    </div>
-                )}
 
                 {/* Payment Method & Billing Address */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] mb-[25px]">
@@ -767,6 +821,111 @@ const BillingPage: React.FC = () => {
                         >
                             {isRTL ? 'حسناً' : 'Got it'}
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* 🚀 Managed Account Setup Modal */}
+            {showManagedSetup && (
+                <div
+                    className={`fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-[60] p-4 ${isRTL ? 'lg:pr-[250px]' : 'lg:pl-[250px]'}`}
+                    onClick={() => setShowManagedSetup(false)}
+                >
+                    <div
+                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-lg relative shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Crown Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                                <Crown className="w-8 h-8 text-white" />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-3">
+                            {isRTL ? 'مرحباً بك في الحسابات المُدارة!' : 'Welcome to Managed Accounts!'}
+                        </h3>
+
+                        {/* Message */}
+                        <p className="text-gray-600 dark:text-gray-400 text-center mb-6 text-sm">
+                            {isRTL
+                                ? 'أنت على وشك تفعيل نشر الحملات عبر حساباتنا الموثقة. ستستفيد من حماية ضد الإيقاف ودرجة ثقة عالية.'
+                                : 'You are about to activate campaign publishing through our verified accounts. You will benefit from suspension protection and high trust score.'
+                            }
+                        </p>
+
+                        {/* Commission Info */}
+                        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4 mb-6">
+                            <div className="flex items-center justify-center gap-2 text-purple-700 dark:text-purple-300">
+                                <span className="text-2xl font-bold">20%</span>
+                                <span className="text-sm">{isRTL ? 'رسوم إدارة الحملة' : 'campaign management fee'}</span>
+                            </div>
+                            <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 text-center">
+                                {isRTL ? 'تُحتسب من الميزانية الإعلانية فقط • بدون رسوم شهرية' : 'Calculated from ad budget only • No monthly fees'}
+                            </p>
+                        </div>
+
+                        {/* Features */}
+                        <div className="space-y-2 mb-6">
+                            {[
+                                { en: 'Premium verified ad accounts', ar: 'حسابات إعلانية موثقة' },
+                                { en: 'No suspension risk - guaranteed', ar: 'بدون خطر إيقاف - مضمون' },
+                                { en: '24/7 AI optimization', ar: 'تحسين مستمر بالذكاء الاصطناعي' },
+                            ].map((feature, i) => (
+                                <div key={i} className="flex items-center gap-2 text-sm">
+                                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                    <span className="text-gray-700 dark:text-gray-300">{isRTL ? feature.ar : feature.en}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowManagedSetup(false);
+                                    // Clear the query param
+                                    router.push('/google-ads/billing');
+                                }}
+                                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                            >
+                                {isRTL ? 'إلغاء' : 'Cancel'}
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    // Save billing mode to database
+                                    const userDataStr = localStorage.getItem('user');
+                                    const userData = userDataStr ? JSON.parse(userDataStr) : null;
+                                    const userId = userData?.id || userData?.user?.id;
+                                    const userEmail = userData?.email || userData?.user?.email;
+
+                                    if (userId) {
+                                        await fetch('/api/billing-mode', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ userId, userEmail, billingMode: 'furriyadh_managed' })
+                                        });
+                                        localStorage.setItem('billing_mode', 'furriyadh_managed');
+                                    }
+
+                                    setShowManagedSetup(false);
+
+                                    // Check if there's a pending campaign
+                                    const pendingCampaign = localStorage.getItem('pending_managed_campaign');
+                                    if (pendingCampaign) {
+                                        localStorage.removeItem('pending_managed_campaign');
+                                        // Return to preview to publish
+                                        router.push('/google-ads/campaigns/preview');
+                                    } else {
+                                        router.push('/google-ads/billing');
+                                    }
+                                }}
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-colors font-medium"
+                            >
+                                {isRTL ? 'تفعيل الآن' : 'Activate Now'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

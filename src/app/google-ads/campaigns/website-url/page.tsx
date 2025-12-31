@@ -14,7 +14,7 @@ import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
 import PlasmaGlobe from '@/components/ui/plasma-globe';
-import { canCreateCampaign, getCurrentPlanLimits, canCreateCampaignAsync, getUserUsage } from '@/lib/services/PlanService';
+import { canCreateCampaign, getCurrentPlanLimits, canCreateCampaignAsync, canUseBudgetAsync, getUserUsage } from '@/lib/services/PlanService';
 import { supabase } from '@/lib/supabase';
 
 // Types for URL detection

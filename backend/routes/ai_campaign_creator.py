@@ -2929,7 +2929,119 @@ def launch_campaign():
         
         # Extract campaign data
         customer_id = data.get('customer_id')  # Get customer_id from frontend
+        user_id = data.get('user_id')  # Get user_id for billing mode check
+        billing_mode = data.get('billing_mode', 'self_managed')  # Get billing mode from frontend
         logger.info(f"🎯 Customer ID from frontend: {customer_id}")
+        logger.info(f"👤 User ID: {user_id}")
+        logger.info(f"💳 Billing Mode: {billing_mode}")
+        
+        # =====================================================
+        # 🔄 CHECK BILLING MODE AND USE MANAGED ACCOUNT IF NEEDED
+        # =====================================================
+        original_customer_id = customer_id
+        is_managed_publish = False
+        managed_account_info = None
+        
+        if billing_mode == 'furriyadh_managed':
+            logger.info("🏢 User selected FURRIYADH MANAGED mode (20% commission)")
+            
+            try:
+                # Import the new Furriyadh Account Service
+                from services.furriyadh_customer_account_service import get_furriyadh_account_service
+                
+                furriyadh_service = get_furriyadh_account_service()
+                
+                # Get user email from request data
+                user_email = data.get('customer_email')
+                website_url = data.get('website_url', '')
+                daily_budget = float(data.get('daily_budget', 15))
+                
+                if not user_email:
+                    logger.error("❌ No customer_email provided for Furriyadh Managed mode")
+                    return jsonify({
+                        'success': False,
+                        'error': 'Customer email is required for Furriyadh Managed mode',
+                        'message': 'يجب توفير البريد الإلكتروني للعميل'
+                    }), 400
+                
+                if not website_url:
+                    logger.error("❌ No website_url provided for Furriyadh Managed mode")
+                    return jsonify({
+                        'success': False,
+                        'error': 'Website URL is required',
+                        'message': 'يجب توفير رابط الموقع الإلكتروني'
+                    }), 400
+                
+                # Get or create customer account (this will create Google Ads sub-account if needed)
+                account, error = furriyadh_service.get_or_create_customer_account(
+                    user_email=user_email,
+                    user_id=user_id,
+                    asset_url=website_url,
+                    asset_type='website'
+                )
+                
+                if error:
+                    logger.error(f"❌ Furriyadh account error: {error}")
+                    return jsonify({
+                        'success': False,
+                        'error': error,
+                        'message': error
+                    }), 400
+                
+                if not account:
+                    logger.error("❌ Failed to get/create Furriyadh account")
+                    return jsonify({
+                        'success': False,
+                        'error': 'Failed to create Furriyadh account',
+                        'message': 'فشل في إنشاء حساب Furriyadh'
+                    }), 500
+                
+                # Check sufficient balance
+                is_sufficient, balance_message = furriyadh_service.check_sufficient_balance(
+                    user_email=user_email,
+                    daily_budget=daily_budget,
+                    days=1  # Check for at least 1 day
+                )
+                
+                if not is_sufficient:
+                    logger.error(f"❌ Insufficient balance: {balance_message}")
+                    return jsonify({
+                        'success': False,
+                        'error': 'INSUFFICIENT_BALANCE',
+                        'message': balance_message,
+                        'balance_info': furriyadh_service.get_balance(user_email)
+                    }), 402  # Payment Required
+                
+                # Use the Furriyadh account's Google Ads customer ID
+                customer_id = account.get('google_ads_customer_id')
+                is_managed_publish = True
+                managed_account_info = account
+                
+                logger.info(f"✅ Using FURRIYADH account: {customer_id}")
+                logger.info(f"   📧 Customer Email: {user_email}")
+                logger.info(f"   🌐 Locked Asset: {account.get('locked_asset_url')}")
+                logger.info(f"   💰 Current Balance: ${account.get('current_balance', 0):.2f}")
+                
+                if balance_message != "OK":
+                    logger.warning(f"   ⚠️ Balance Warning: {balance_message}")
+                    
+            except ImportError as e:
+                logger.error(f"❌ Failed to import FurriyadhCustomerAccountService: {e}")
+                return jsonify({
+                    'success': False,
+                    'error': 'Service not available',
+                    'message': 'خدمة Furriyadh Account غير متاحة حالياً'
+                }), 503
+            except Exception as e:
+                logger.error(f"❌ Error in Furriyadh Managed mode: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+                return jsonify({
+                    'success': False,
+                    'error': str(e),
+                    'message': 'حدث خطأ في نظام Furriyadh Account'
+                }), 500
+
         
         if not customer_id:
             logger.error("❌ No customer_id provided")
@@ -2940,7 +3052,7 @@ def launch_campaign():
         
         # Remove dashes from customer_id if present (format: 558-232-7249 -> 5582327249)
         customer_id = customer_id.replace('-', '').strip()
-        logger.info(f"📦 Publishing campaign to customer account: {customer_id}")
+        logger.info(f"📦 Publishing campaign to {'MANAGED' if is_managed_publish else 'USER'} account: {customer_id}")
         
         campaign_name = data.get('campaign_name', f"Campaign {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         campaign_type = data.get('campaign_type', 'SEARCH')
@@ -3721,84 +3833,96 @@ def launch_campaign():
                 'error': error_msg,
                 'message': f'خطأ في إنشاء الحملة: {error_msg}'
             }
-            
+        
             logger.info(f"✅ Campaign creation result: {result.get('success')}")
+        
+        if result.get('success'):
+            logger.info(f"✅ Campaign created on Google Ads successfully!")
+            logger.info(f"   Google Campaign ID: {result.get('google_campaign_id')}")
             
-            if result.get('success'):
-                logger.info(f"✅ Campaign created on Google Ads successfully!")
-                logger.info(f"   Google Campaign ID: {result.get('google_campaign_id')}")
-                
-                # Prepare response
-                response_data = {
-                    'success': True,
-                    'campaign_id': campaign_id,
-                    'campaign_name': campaign_name,
-                    'campaign_type': campaign_type,
-                    'status': 'ACTIVE',
-                    'google_campaign_created': True,
-                    'google_campaign_id': result.get('google_campaign_id'),
-                    'google_ad_group_id': result.get('google_ad_group_id'),
-                    'daily_budget': daily_budget,
-                    'currency': currency,
-                    'target_locations': target_locations,
-                    'website_url': website_url,
-                    'phone_number': phone_number,
-                    'estimated_performance': {
-                        'impressions': cpc_data.get('estimated_impressions', 0) if cpc_data else 0,
-                        'clicks': cpc_data.get('estimated_clicks', 0) if cpc_data else 0,
-                        'average_cpc': cpc_data.get('average_cpc', 0) if cpc_data else 0
-                    },
-                    'generated_content': generated_content,
-                    'adCreative': {
-                        'headlines': generated_content.get('headlines', []) if generated_content else [],
-                        'descriptions': generated_content.get('descriptions', []) if generated_content else [],
-                        'keywords': generated_content.get('keywords', []) if generated_content else (cpc_data.get('keywords', []) if cpc_data else []),
-                        'phoneNumber': phone_number
-                    },
-                    'created_at': datetime.now().isoformat(),
-                    'message': '🎉 Campaign created successfully on Google Ads!'
-                }
-                
-                logger.info(f"✅ Campaign launch completed: {campaign_id}")
-                logger.info(f"📤 Response includes:")
-                logger.info(f"   - Google Campaign ID: {response_data['google_campaign_id']}")
-                logger.info(f"   - Ad Creative: {len(response_data['adCreative']['headlines'])} headlines, {len(response_data['adCreative']['descriptions'])} descriptions, {len(response_data['adCreative']['keywords'])} keywords")
-                
-                return jsonify(response_data), 201
-            else:
-                error_msg = result.get('error', 'Unknown error')
-                logger.error(f"❌ Failed to create campaign on Google Ads: {error_msg}")
-                
-                # Check if it's an account access error
-                user_friendly_msg = 'Failed to create campaign on Google Ads'
-                if 'not yet enabled' in error_msg or 'has been deactivated' in error_msg or 'not accessible' in error_msg:
-                    user_friendly_msg = f'Account {customer_id} is not enabled or deactivated. Please activate it in Google Ads or choose a different account.'
-                
-                # Return error but with the generated content
-                return jsonify({
-                    'success': False,
-                    'error': error_msg,
-                    'message': user_friendly_msg,
-                    'customer_id': customer_id,
-                    'generated_content': generated_content,
-                    'adCreative': {
-                        'headlines': generated_content.get('headlines', []) if generated_content else [],
-                        'descriptions': generated_content.get('descriptions', []) if generated_content else [],
-                        'keywords': generated_content.get('keywords', []) if generated_content else (cpc_data.get('keywords', []) if cpc_data else []),
-                        'phoneNumber': phone_number
-                    }
-                }), 400
-                
-        except Exception as e:
-            logger.error(f"❌ Error creating campaign on Google Ads: {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
+            # =====================================================
+            # 🏢 REGISTER CAMPAIGN IN FURRIYADH SYSTEM (if managed mode)
+            # =====================================================
+            if is_managed_publish and billing_mode == 'furriyadh_managed':
+                try:
+                    from services.furriyadh_customer_account_service import get_furriyadh_account_service
+                    furriyadh_service = get_furriyadh_account_service()
+                    
+                    user_email = data.get('customer_email')
+                    google_campaign_id = result.get('google_campaign_id')
+                    
+                    if user_email and google_campaign_id:
+                        success, msg = furriyadh_service.register_campaign(
+                            user_email=user_email,
+                            google_campaign_id=str(google_campaign_id),
+                            campaign_name=campaign_name,
+                            campaign_type=campaign_type,
+                            daily_budget=daily_budget,
+                            target_url=website_url
+                        )
+                        
+                        if success:
+                            logger.info(f"✅ Campaign registered in Furriyadh system")
+                        else:
+                            logger.warning(f"⚠️ Failed to register campaign in Furriyadh: {msg}")
+                except Exception as furriyadh_error:
+                    logger.error(f"⚠️ Error registering campaign in Furriyadh: {furriyadh_error}")
+                    # Don't fail the request - campaign was created successfully
+            
+            # Prepare response
+            response_data = {
+                'success': True,
+                'campaign_id': campaign_id,
+                'campaign_name': campaign_name,
+                'campaign_type': campaign_type,
+                'status': 'ACTIVE',
+                'google_campaign_created': True,
+                'google_campaign_id': result.get('google_campaign_id'),
+                'google_ad_group_id': result.get('google_ad_group_id'),
+                'daily_budget': daily_budget,
+                'currency': currency,
+                'target_locations': target_locations,
+                'website_url': website_url,
+                'phone_number': phone_number,
+                'billing_mode': billing_mode,  # Include billing mode in response
+                'is_furriyadh_managed': is_managed_publish,  # Flag for Furriyadh-managed campaigns
+                'estimated_performance': {
+                    'impressions': cpc_data.get('estimated_impressions', 0) if cpc_data else 0,
+                    'clicks': cpc_data.get('estimated_clicks', 0) if cpc_data else 0,
+                    'average_cpc': cpc_data.get('average_cpc', 0) if cpc_data else 0
+                },
+                'generated_content': generated_content,
+                'adCreative': {
+                    'headlines': generated_content.get('headlines', []) if generated_content else [],
+                    'descriptions': generated_content.get('descriptions', []) if generated_content else [],
+                    'keywords': generated_content.get('keywords', []) if generated_content else (cpc_data.get('keywords', []) if cpc_data else []),
+                    'phoneNumber': phone_number
+                },
+                'created_at': datetime.now().isoformat(),
+                'message': '🎉 Campaign created successfully on Google Ads!'
+            }
+            
+            logger.info(f"✅ Campaign launch completed: {campaign_id}")
+            logger.info(f"📤 Response includes:")
+            logger.info(f"   - Google Campaign ID: {response_data['google_campaign_id']}")
+            logger.info(f"   - Ad Creative: {len(response_data['adCreative']['headlines'])} headlines, {len(response_data['adCreative']['descriptions'])} descriptions, {len(response_data['adCreative']['keywords'])} keywords")
+            
+            return jsonify(response_data), 201
+        else:
+            error_msg = result.get('error', 'Unknown error')
+            logger.error(f"❌ Failed to create campaign on Google Ads: {error_msg}")
+            
+            # Check if it's an account access error
+            user_friendly_msg = 'Failed to create campaign on Google Ads'
+            if 'not yet enabled' in error_msg or 'has been deactivated' in error_msg or 'not accessible' in error_msg:
+                user_friendly_msg = f'Account {customer_id} is not enabled or deactivated. Please activate it in Google Ads or choose a different account.'
             
             # Return error but with the generated content
             return jsonify({
                 'success': False,
-                'error': str(e),
-                'message': 'Error occurred while creating campaign on Google Ads',
+                'error': error_msg,
+                'message': user_friendly_msg,
+                'customer_id': customer_id,
                 'generated_content': generated_content,
                 'adCreative': {
                     'headlines': generated_content.get('headlines', []) if generated_content else [],
@@ -3806,7 +3930,7 @@ def launch_campaign():
                     'keywords': generated_content.get('keywords', []) if generated_content else (cpc_data.get('keywords', []) if cpc_data else []),
                     'phoneNumber': phone_number
                 }
-            }), 500
+            }), 400
         
     except Exception as e:
         logger.error(f"Error launching campaign: {str(e)}")

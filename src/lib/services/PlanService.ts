@@ -62,7 +62,7 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         planNameAr: 'أساسي',
         maxAccounts: 1,
         maxCampaigns: 3,
-        monthlyBudget: 1000,
+        monthlyBudget: null, // Unlimited
         features: {
             aiOptimization: false,
             prioritySupport: false,
@@ -78,7 +78,7 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         planNameAr: 'احترافي',
         maxAccounts: 3,
         maxCampaigns: 10,
-        monthlyBudget: 5000,
+        monthlyBudget: null, // Unlimited
         features: {
             aiOptimization: true,
             prioritySupport: true,
@@ -399,6 +399,160 @@ export const getVisibleAccounts = <T extends { customerId: string }>(
     }
 
     return allAccounts.slice(0, limits.maxAccounts);
+};
+
+// التحقق من إمكانية استخدام ميزانية إضافية (مع Supabase)
+export const canUseBudgetAsync = async (userId: string, additionalBudget: number): Promise<{
+    allowed: boolean;
+    message: string;
+    messageAr: string;
+    remaining: number;
+    limit: number | null;
+}> => {
+    const [subscription, usage] = await Promise.all([
+        getUserSubscription(userId),
+        getUserUsage(userId),
+    ]);
+
+    const planId = subscription?.planId || 'free';
+    const limits = PLAN_LIMITS[planId] || PLAN_LIMITS['free'];
+
+    // Unlimited budget
+    if (limits.monthlyBudget === null) {
+        return { allowed: true, message: '', messageAr: '', remaining: Infinity, limit: null };
+    }
+
+    const currentMonth = new Date().toISOString().slice(0, 7); // '2025-01'
+    let currentUsed = usage.monthlyBudgetUsed || 0;
+
+    // Reset if new month
+    if ((usage as any).currentMonth !== currentMonth) {
+        currentUsed = 0;
+    }
+
+    const remaining = limits.monthlyBudget - currentUsed;
+    const monthlyBudgetNeeded = additionalBudget * 30; // Convert daily to monthly estimate
+
+    if (monthlyBudgetNeeded > remaining) {
+        return {
+            allowed: false,
+            message: `Monthly budget limit exceeded. Your ${limits.planName} plan allows $${limits.monthlyBudget}/month. Remaining: $${remaining.toFixed(2)}. Upgrade to increase your budget.`,
+            messageAr: `تم تجاوز حد الميزانية الشهرية. خطة ${limits.planNameAr || limits.planName} تسمح بـ $${limits.monthlyBudget}/شهر. المتبقي: $${remaining.toFixed(2)}. قم بالترقية لزيادة ميزانيتك.`,
+            remaining,
+            limit: limits.monthlyBudget
+        };
+    }
+
+    return { allowed: true, message: '', messageAr: '', remaining: remaining - monthlyBudgetNeeded, limit: limits.monthlyBudget };
+};
+
+// تحديث الميزانية الشهرية المستخدمة
+export const updateMonthlyBudgetUsed = async (userId: string, amount: number): Promise<boolean> => {
+    try {
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const usage = await getUserUsage(userId);
+
+        // Reset if new month
+        let newUsed = amount;
+        if ((usage as any).currentMonth === currentMonth) {
+            newUsed = (usage.monthlyBudgetUsed || 0) + amount;
+        }
+
+        const { error } = await supabase
+            .from('user_billing_usage')
+            .upsert({
+                user_id: userId,
+                monthly_budget_used: newUsed,
+                current_month: currentMonth,
+                last_updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' });
+
+        return !error;
+    } catch {
+        return false;
+    }
+};
+
+// تسجيل حملة جديدة في النظام
+export const registerPlatformCampaign = async (data: {
+    googleCampaignId: string;
+    googleCampaignName?: string;
+    customerId: string;
+    source: 'furriyadh_managed' | 'self_managed';
+    userId: string;
+    userEmail?: string;
+    campaignType?: string;
+    dailyBudget?: number;
+    currency?: string;
+    websiteUrl?: string;
+}): Promise<boolean> => {
+    try {
+        const { error } = await supabase
+            .from('platform_created_campaigns')
+            .upsert({
+                google_campaign_id: data.googleCampaignId,
+                google_campaign_name: data.googleCampaignName,
+                customer_id: data.customerId,
+                source: data.source,
+                user_id: data.userId,
+                user_email: data.userEmail,
+                campaign_type: data.campaignType || 'SEARCH',
+                daily_budget: data.dailyBudget || 0,
+                currency: data.currency || 'USD',
+                website_url: data.websiteUrl,
+                status: 'active',
+            }, { onConflict: 'google_campaign_id,customer_id' });
+
+        if (error) {
+            console.error('Error registering platform campaign:', error);
+            return false;
+        }
+
+        // Update campaigns count
+        await incrementCampaignsCount(data.userId);
+
+        return true;
+    } catch (e) {
+        console.error('Error in registerPlatformCampaign:', e);
+        return false;
+    }
+};
+
+// زيادة عدد الحملات
+export const incrementCampaignsCount = async (userId: string): Promise<boolean> => {
+    try {
+        const usage = await getUserUsage(userId);
+        const newCount = (usage.campaignsCount || 0) + 1;
+
+        const { error } = await supabase
+            .from('user_billing_usage')
+            .upsert({
+                user_id: userId,
+                campaigns_count: newCount,
+                last_updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' });
+
+        return !error;
+    } catch {
+        return false;
+    }
+};
+
+// جلب الحملات المنشأة من النظام فقط
+export const getPlatformCampaignIds = async (userId: string): Promise<string[]> => {
+    try {
+        const { data, error } = await supabase
+            .from('platform_created_campaigns')
+            .select('google_campaign_id')
+            .eq('user_id', userId)
+            .eq('status', 'active');
+
+        if (error || !data) return [];
+
+        return data.map(c => c.google_campaign_id);
+    } catch {
+        return [];
+    }
 };
 
 // جلب كل الخطط من Supabase
