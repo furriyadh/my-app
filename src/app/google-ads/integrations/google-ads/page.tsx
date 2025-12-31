@@ -7,6 +7,7 @@ import AnimatedList from '@/components/AnimatedList';
 import Announcement from '@/components/seraui/Announcement';
 import { supabase, subscribeToClientRequests, type ClientRequest } from '@/lib/supabase';
 import { useLanguage } from '@/lib/hooks/useLanguage';
+import { canAddAccount, getCurrentPlanLimits, canAddAccountAsync, getUserUsage, updateAccountsCount } from '@/lib/services/PlanService';
 
 // CSS styles للتأثيرات البصرية
 const styles = `
@@ -318,6 +319,27 @@ const GoogleAdsContent: React.FC = () => {
     const [pollingAccounts, setPollingAccounts] = useState<Record<string, boolean>>({}); // ✅ تتبع عمليات الفحص النشطة
     const pollingIntervalsRef = useRef<Record<string, NodeJS.Timeout>>({}); // ✅ تخزين الـ intervals لمنع التكرار
     const syncingRef = useRef(false); // ✅ guard لمنع تكرار المزامنة المتوازية
+
+    // 💳 Plan limit notification state
+    const [planLimitNotification, setPlanLimitNotification] = useState<{
+        show: boolean;
+        message: string;
+        messageAr: string;
+    }>({ show: false, message: '', messageAr: '' });
+
+    // 🔐 User ID from Supabase Auth
+    const [userId, setUserId] = useState<string | null>(null);
+
+    // Get user ID on mount
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                setUserId(user.id);
+            }
+        };
+        getUser();
+    }, []);
 
     // دالة لاستطلاع حالة الحساب المحدد فقط (Single Account Polling)
     const startPollingForAcceptance = (customerId: string, isManualCheck: boolean = false) => {
@@ -2206,6 +2228,32 @@ const GoogleAdsContent: React.FC = () => {
 
     const handleLinkToMCC = async (customerId: string, accountName: string) => {
         try {
+            // تحقق من حدود الخطة قبل الربط
+            const linkedAccountsCount = accounts.filter(acc =>
+                acc.isLinkedToMCC || acc.displayStatus === 'Connected' || acc.displayStatus === 'Pending'
+            ).length;
+
+            // استخدام Supabase إذا كان userId متوفر
+            let planCheck;
+            if (userId) {
+                planCheck = await canAddAccountAsync(userId);
+            } else {
+                // fallback للـ localStorage
+                planCheck = canAddAccount(linkedAccountsCount);
+            }
+
+            if (!planCheck.allowed) {
+                const planLimits = getCurrentPlanLimits();
+                // إظهار إشعار حد الخطة
+                setPlanLimitNotification({
+                    show: true,
+                    message: planCheck.message,
+                    messageAr: planCheck.messageAr,
+                });
+                console.warn('⚠️ Plan limit reached:', { linkedAccountsCount, maxAccounts: planLimits.maxAccounts, plan: planLimits.planName });
+                return;
+            }
+
             // التحقق من صحة customerId
             if (!customerId || customerId === 'undefined') {
                 console.error('❌ Invalid customerId in handleLinkToMCC:', customerId);
@@ -3004,97 +3052,102 @@ const GoogleAdsContent: React.FC = () => {
                                             return (
                                                 <div
                                                     key={account.id}
-                                                    className={`account-item w-full relative transition-all duration-300 rounded-xl p-3 sm:p-4 ${(isPending || linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)])
-                                                        ? 'bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-cyan-500/10 border border-blue-500/30 shadow-lg shadow-blue-500/5'
-                                                        : 'bg-[#001a0d] border border-emerald-500/20 hover:bg-[#002a15] hover:border-emerald-500/40'
+                                                    className={`account-item w-full relative transition-all duration-300 rounded-xl p-4 ${(isPending || linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)])
+                                                        ? 'bg-white dark:bg-gray-800 border-2 border-blue-500 shadow-md'
+                                                        : isConnected
+                                                            ? 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700'
+                                                            : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-400'
                                                         }`}
                                                 >
                                                     {/* Account Display - Responsive Row */}
                                                     <div className="flex items-center justify-between relative z-10 gap-2">
-                                                        {/* Left: Icon + Account ID */}
-                                                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                                                            <div className={`w-9 h-9 sm:w-12 sm:h-12 flex-shrink-0 rounded-full flex items-center justify-center ${isConnected
-                                                                ? 'bg-emerald-500/20 border-2 border-emerald-400/50 shadow-inner shadow-emerald-500/20'
-                                                                : (isPending || linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)])
-                                                                    ? 'bg-blue-500/20 border-2 border-blue-400/50 shadow-inner shadow-blue-500/20'
-                                                                    : 'bg-[#0a1f15] border border-emerald-500/20'
+                                                        {/* Left: Radio Button + Account Name + Managed Badge */}
+                                                        <div className="flex items-center gap-4 min-w-0">
+                                                            {/* Radio Button Style */}
+                                                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isConnected
+                                                                ? 'border-emerald-500 bg-emerald-500'
+                                                                : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700'
                                                                 }`}>
-                                                                <img
-                                                                    src="/images/integrations/google-ads-logo.svg"
-                                                                    alt="Google Ads"
-                                                                    className="w-5 h-5 sm:w-8 sm:h-8"
-                                                                />
+                                                                {isConnected && (
+                                                                    <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                                                                )}
                                                             </div>
-                                                            <span className="text-white font-medium text-sm sm:text-base whitespace-nowrap">
-                                                                <span className="hidden sm:inline">Google Ads </span>
-                                                                <span className="font-mono">{formatCustomerId(account.customerId)}</span>
-                                                            </span>
+                                                            <div className="text-left">
+                                                                <p className="text-gray-900 dark:text-white font-medium text-base">
+                                                                    Managed Furriyadh Account
+                                                                    <span dir="ltr" className="text-gray-500 dark:text-gray-400 font-normal text-sm ml-2">
+                                                                        {formatCustomerId(account.customerId)}
+                                                                    </span>
+                                                                </p>
+                                                            </div>
                                                         </div>
 
                                                         {/* Right: Status Button */}
-                                                        <button
-                                                            onClick={() => {
-                                                                const customerId = normalizeCustomerId(account.customerId);
-                                                                if (isConnected) {
-                                                                    // Disconnect the account
-                                                                    handleUnlinkFromMCC(customerId, account.name);
-                                                                } else if (isPending && !pollingAccounts[customerId] && !pollingUnlinkAccounts[customerId]) {
-                                                                    // Timeout case - Manual check
-                                                                    console.log('🔄 Manual status check triggered');
-                                                                    // التحقق مما إذا كان الطلب الأصلي ربط أم إلغاء ربط
-                                                                    // إذا كان الحساب غير مرتبط (isLinkedToMCC === false)، فهو طلب ربط
-                                                                    if (!account.isLinkedToMCC) {
-                                                                        startPollingForAcceptance(customerId, true);
+                                                        <div className="flex items-center gap-3">
+                                                            <button
+                                                                onClick={() => {
+                                                                    const customerId = normalizeCustomerId(account.customerId);
+                                                                    if (isConnected) {
+                                                                        // Disconnect the account
+                                                                        handleUnlinkFromMCC(customerId, account.name);
+                                                                    } else if (isPending && !pollingAccounts[customerId] && !pollingUnlinkAccounts[customerId]) {
+                                                                        // Timeout case - Manual check
+                                                                        console.log('🔄 Manual status check triggered');
+                                                                        // التحقق مما إذا كان الطلب الأصلي ربط أم إلغاء ربط
+                                                                        // إذا كان الحساب غير مرتبط (isLinkedToMCC === false)، فهو طلب ربط
+                                                                        if (!account.isLinkedToMCC) {
+                                                                            startPollingForAcceptance(customerId, true);
+                                                                        } else {
+                                                                            startPollingForUnlink(customerId, true);
+                                                                        }
                                                                     } else {
-                                                                        startPollingForUnlink(customerId, true);
+                                                                        handleLinkToMCC(customerId, account.name);
                                                                     }
-                                                                } else {
-                                                                    handleLinkToMCC(customerId, account.name);
+                                                                }}
+                                                                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold border-2 flex-shrink-0 transition-all whitespace-nowrap ${
+                                                                    // 🔴 Disconnect (أولوية قصوى للحالة المتصلة)
+                                                                    isConnected
+                                                                        ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-400 hover:from-red-700 hover:to-red-800 cursor-pointer'
+                                                                        // 🔴 Disconnecting... (أحمر متحرك)
+                                                                        : pollingUnlinkAccounts[normalizeCustomerId(account.customerId)]
+                                                                            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400 animate-pulse cursor-wait'
+                                                                            // 🔵 Linking... (أزرق متحرك) - أثناء إرسال الطلب أو أثناء الفحص
+                                                                            : linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)]
+                                                                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 animate-pulse cursor-wait'
+                                                                                // ⚪ Check Status (أبيض) - بعد انتهاء الوقت
+                                                                                : isPending
+                                                                                    ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100 cursor-pointer'
+                                                                                    // 🟢 Link (أخضر غامق)
+                                                                                    : 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-400 hover:from-emerald-700 hover:to-emerald-800 cursor-pointer'
+                                                                    }`}
+                                                                disabled={linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)] || pollingUnlinkAccounts[normalizeCustomerId(account.customerId)]}
+                                                            >
+                                                                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                                                                    // Disconnecting → أسود
+                                                                    pollingUnlinkAccounts[normalizeCustomerId(account.customerId)] ? 'bg-black'
+                                                                        // Linking (أثناء الطلب أو الفحص) → أبيض
+                                                                        : linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)] ? 'bg-white'
+                                                                            // Disconnect → أبيض
+                                                                            : isConnected ? 'bg-white'
+                                                                                // Check Status → رمادي
+                                                                                : isPending ? 'bg-gray-500'
+                                                                                    // Link → أبيض
+                                                                                    : 'bg-white'
+                                                                    }`}></span>
+                                                                {
+                                                                    // 🔴 Disconnect (أولوية قصوى)
+                                                                    isConnected ? 'Disconnect'
+                                                                        // 🔴 Disconnecting...
+                                                                        : pollingUnlinkAccounts[normalizeCustomerId(account.customerId)] ? 'Disconnecting...'
+                                                                            // 🔵 Linking... (أثناء إرسال الطلب أو أثناء الفحص)
+                                                                            : linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)] ? 'Linking...'
+                                                                                // ⚪ Check Status (بعد انتهاء الوقت - isPending و !pollingAccounts)
+                                                                                : isPending ? 'Check Status'
+                                                                                    // 🟢 Link
+                                                                                    : 'Link'
                                                                 }
-                                                            }}
-                                                            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold border-2 flex-shrink-0 transition-all whitespace-nowrap ${
-                                                                // 🔴 Disconnect (أولوية قصوى للحالة المتصلة)
-                                                                isConnected
-                                                                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-400 hover:from-red-700 hover:to-red-800 cursor-pointer'
-                                                                    // 🔴 Disconnecting... (أحمر متحرك)
-                                                                    : pollingUnlinkAccounts[normalizeCustomerId(account.customerId)]
-                                                                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400 animate-pulse cursor-wait'
-                                                                        // 🔵 Linking... (أزرق متحرك) - أثناء إرسال الطلب أو أثناء الفحص
-                                                                        : linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)]
-                                                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 animate-pulse cursor-wait'
-                                                                            // ⚪ Check Status (أبيض) - بعد انتهاء الوقت
-                                                                            : isPending
-                                                                                ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100 cursor-pointer'
-                                                                                // 🟢 Link (أخضر غامق)
-                                                                                : 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-400 hover:from-emerald-700 hover:to-emerald-800 cursor-pointer'
-                                                                }`}
-                                                            disabled={linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)] || pollingUnlinkAccounts[normalizeCustomerId(account.customerId)]}
-                                                        >
-                                                            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                                                                // Disconnecting → أسود
-                                                                pollingUnlinkAccounts[normalizeCustomerId(account.customerId)] ? 'bg-black'
-                                                                    // Linking (أثناء الطلب أو الفحص) → أبيض
-                                                                    : linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)] ? 'bg-white'
-                                                                        // Disconnect → أبيض
-                                                                        : isConnected ? 'bg-white'
-                                                                            // Check Status → رمادي
-                                                                            : isPending ? 'bg-gray-500'
-                                                                                // Link → أبيض
-                                                                                : 'bg-white'
-                                                                }`}></span>
-                                                            {
-                                                                // 🔴 Disconnect (أولوية قصوى)
-                                                                isConnected ? 'Disconnect'
-                                                                    // 🔴 Disconnecting...
-                                                                    : pollingUnlinkAccounts[normalizeCustomerId(account.customerId)] ? 'Disconnecting...'
-                                                                        // 🔵 Linking... (أثناء إرسال الطلب أو أثناء الفحص)
-                                                                        : linkingAccounts[normalizeCustomerId(account.customerId)] || pollingAccounts[normalizeCustomerId(account.customerId)] ? 'Linking...'
-                                                                            // ⚪ Check Status (بعد انتهاء الوقت - isPending و !pollingAccounts)
-                                                                            : isPending ? 'Check Status'
-                                                                                // 🟢 Link
-                                                                                : 'Link'
-                                                            }
-                                                        </button>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
@@ -3146,6 +3199,48 @@ const GoogleAdsContent: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* 💳 Plan Limit Notification Modal */}
+            {planLimitNotification.show && (
+                <div className={`fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-[60] p-4 ${isRTL ? 'lg:pr-[250px]' : 'lg:pl-[250px]'}`}>
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-md relative shadow-2xl">
+                        {/* Warning Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-3">
+                            {isRTL ? '⚠️ تم الوصول للحد الأقصى' : '⚠️ Plan Limit Reached'}
+                        </h3>
+
+                        {/* Message */}
+                        <p className="text-gray-600 dark:text-gray-400 text-center mb-6 text-sm">
+                            {isRTL ? planLimitNotification.messageAr : planLimitNotification.message}
+                        </p>
+
+                        {/* Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={() => setPlanLimitNotification({ show: false, message: '', messageAr: '' })}
+                                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                            >
+                                {isRTL ? 'إغلاق' : 'Close'}
+                            </button>
+                            <button
+                                onClick={() => router.push('/google-ads/billing')}
+                                className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"
+                            >
+                                {isRTL ? 'ترقية الخطة' : 'Upgrade Plan'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

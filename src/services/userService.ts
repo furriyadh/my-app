@@ -19,7 +19,7 @@ export class UserService {
     try {
       // تحميل supabase client بشكل ديناميكي
       const supabase = await getSupabaseClient();
-      
+
       // الحصول على الجلسة الحالية أولاً
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
@@ -46,11 +46,28 @@ export class UserService {
         // إذا لم يوجد ملف شخصي، إنشاء واحد جديد بالبيانات الأساسية
         if (error.code === 'PGRST116') { // PGRST116 means no rows found
           console.log("UserService: No profile found, creating new one...");
+
+          // استخراج بيانات Google من user_metadata
+          const metadata = user.user_metadata || {};
+          const fullName = metadata.full_name || metadata.name || '';
+          const nameParts = fullName.split(" ");
+          const firstName = nameParts[0] || metadata.given_name || '';
+          const lastName = nameParts.slice(1).join(" ") || metadata.family_name || '';
+
+          console.log("UserService: Extracting Google data:", {
+            fullName,
+            firstName,
+            lastName,
+            picture: metadata.picture || metadata.avatar_url,
+            email: user.email
+          });
+
           const newProfile: Partial<UserProfile> = {
             user_id: user.id,
             email: user.email || '',
-            first_name: user.user_metadata?.full_name?.split(" ")[0] || "",
-            last_name: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
+            first_name: firstName,
+            last_name: lastName,
+            profile_image_url: metadata.picture || metadata.avatar_url || '',
             phone: '',
             address: '',
             country: '',
@@ -113,7 +130,7 @@ export class UserService {
     try {
       // تحميل supabase client بشكل ديناميكي
       const supabase = await getSupabaseClient();
-      
+
       // الحصول على الجلسة الحالية أولاً
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
@@ -167,9 +184,9 @@ export class UserService {
     try {
       // تحميل supabase client بشكل ديناميكي
       const supabase = await getSupabaseClient();
-      
+
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
+
       if (authError || !user) {
         console.error("UserService: Auth error or no user found for image upload:", authError);
         return {
@@ -223,9 +240,9 @@ export class UserService {
     try {
       // تحميل supabase client بشكل ديناميكي
       const supabase = await getSupabaseClient();
-      
+
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
+
       if (authError || !user) {
         console.error("UserService: Auth error or no user found for profile deletion:", authError);
         return {

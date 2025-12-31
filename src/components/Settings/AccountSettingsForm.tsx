@@ -1,4 +1,4 @@
-// AccountSettingsForm محدث مع Supabase - معدل لـ Dynamic Import
+// AccountSettingsForm محدث مع Supabase و دعم الترجمة
 // مسار: src/components/Settings/AccountSettingsForm.tsx
 
 "use client";
@@ -9,27 +9,27 @@ import dynamic from "next/dynamic";
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { UserService } from "@/services/userService";
 import { UserProfile } from "@/types/user";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 // Dynamic import للـ supabase client لتجنب مشاكل prerendering
 const useSupabaseClient = () => {
   const [supabase, setSupabase] = useState<any>(null);
-  
+
   useEffect(() => {
-    // تحميل supabase client فقط في المتصفح
     if (typeof window !== 'undefined') {
       import('@/utils/supabase/client').then((module) => {
         setSupabase(module.supabase);
       });
     }
   }, []);
-  
+
   return supabase;
 };
 
 const AccountSettingsForm: React.FC = () => {
-  const supabase = useSupabaseClient(); // استخدام hook للـ dynamic import
-  
-  // حالة لتخزين بيانات المستخدم
+  const supabase = useSupabaseClient();
+  const { t } = useTranslation();
+
   const [userData, setUserData] = useState<UserProfile>({
     first_name: "",
     last_name: "",
@@ -50,137 +50,99 @@ const AccountSettingsForm: React.FC = () => {
     youtube_url: "",
   });
 
-  // حالات التحكم
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // Upload image
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // جلب بيانات المستخدم عند تحميل المكون أو تغيير حالة المصادقة
   useEffect(() => {
-    // التأكد من تحميل supabase قبل المتابعة
     if (!supabase) return;
-    
+
     const fetchUserData = async () => {
       try {
         setLoading(true);
         setError(null);
-
         const result = await UserService.getCurrentUserProfile();
-        console.log("Fetch User Data Result:", result); // سجل تصحيح
-
         if (result.error) {
           setError(result.error);
         } else if (result.data) {
           setUserData(result.data);
-          console.log("User Data after setting state:", result.data); // سجل تصحيح
         }
       } catch (err) {
-        setError("حدث خطأ غير متوقع أثناء جلب البيانات");
-        console.error("Error fetching user data:", err); // سجل تصحيح
+        console.error("Error fetching user data:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    // جلب البيانات عند تحميل المكون لأول مرة
     fetchUserData();
 
-    // الاستماع لتغييرات حالة المصادقة مع تحديد أنواع البيانات
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-          console.log("Auth state changed:", event, session); // سجل تصحيح
-          fetchUserData(); // إعادة جلب البيانات عند تسجيل الدخول أو الخروج
+          fetchUserData();
         }
       }
     );
 
-    // تنظيف المستمع عند إلغاء تحميل المكون
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase]); // إضافة supabase كتبعية
+  }, [supabase]);
 
-  // دالة لتحديث البيانات
   const handleInputChange = (field: keyof UserProfile, value: string) => {
-    setUserData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    // إخفاء رسائل النجاح والخطأ عند التعديل
+    setUserData((prev) => ({ ...prev, [field]: value }));
     if (successMessage) setSuccessMessage(null);
     if (error) setError(null);
   };
 
-  // دالة لحفظ التغييرات
   const handleSaveChanges = async () => {
     try {
       setSaving(true);
       setError(null);
       setSuccessMessage(null);
 
-      // معالجة حقل تاريخ الميلاد: إذا كان فارغًا، أرسل null بدلاً من سلسلة فارغة
       const dataToSave = {
         ...userData,
         date_of_birth: userData.date_of_birth === "" ? null : userData.date_of_birth,
       };
-      console.log("Data to Save:", dataToSave); // سجل تصحيح
 
       const result = await UserService.updateUserProfile(dataToSave);
-      console.log("Update User Profile Result:", result); // سجل تصحيح
 
       if (result.error) {
         setError(result.error);
       } else {
-        setSuccessMessage("تم حفظ التغييرات بنجاح!");
+        setSuccessMessage(t.settings?.saveSuccess || "Changes saved successfully!");
         if (result.data) {
           setUserData(result.data);
-          console.log("User Data after update and setting state:", result.data);
         }
       }
     } catch (err) {
-      setError("حدث خطأ غير متوقع أثناء حفظ التغييرات");
-      console.error("Error saving user data:", err); // سجل تصحيح
+      setError(t.settings?.saveError || "An unexpected error occurred while saving");
     } finally {
       setSaving(false);
     }
   };
 
-  // دالة لرفع الصورة
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-
       try {
         setUploadingImage(true);
         setError(null);
-
         const result = await UserService.uploadProfileImage(file);
-        console.log("Upload Image Result:", result); // سجل تصحيح
-
         if (result.error) {
           setError(result.error);
         } else if (result.url) {
-          // تحديث رابط الصورة في البيانات
           const updatedData = { ...userData, profile_image_url: result.url };
           setUserData(updatedData);
-
-          // حفظ رابط الصورة في قاعدة البيانات
           await UserService.updateUserProfile({ profile_image_url: result.url });
-
           setSuccessMessage("تم رفع الصورة بنجاح!");
         }
       } catch (err) {
         setError("حدث خطأ أثناء رفع الصورة");
-        console.error("Error uploading image:", err); // سجل تصحيح
       } finally {
         setUploadingImage(false);
       }
@@ -191,27 +153,17 @@ const AccountSettingsForm: React.FC = () => {
     setSelectedImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
-  // دالة لإعادة تعيين النموذج
   const handleCancel = () => {
     window.location.reload();
   };
 
-  // عرض حالة التحميل
-  if (loading || !supabase) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">جاري تحميل البيانات...</p>
-        </div>
-      </div>
-    );
+  if (!supabase) {
+    return null;
   }
 
   return (
     <>
       <form onSubmit={(e) => e.preventDefault()}>
-        {/* رسائل النجاح والخطأ */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4 mb-4">
             <p className="text-red-600 dark:text-red-400">{error}</p>
@@ -224,86 +176,87 @@ const AccountSettingsForm: React.FC = () => {
           </div>
         )}
 
-        <h5 className="!text-lg !mb-[6px]">Profile</h5>
+        <h5 className="!text-lg !mb-[6px]">{t.settings?.profile || "Profile"}</h5>
         <p className="mb-[20px] md:mb-[25px]">
-          Update your photo and personal details here.
+          {t.settings?.profileDesc || "Update your photo and personal details here."}
         </p>
+
         <div className="sm:grid sm:grid-cols-2 sm:gap-[25px]">
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              First Name
+              {t.settings?.firstName || "First Name"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.first_name}
               onChange={(e) => handleInputChange("first_name", e.target.value)}
-              placeholder="أدخل الاسم الأول"
+              placeholder={t.settings?.placeholders?.firstName || "Enter first name"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Last Name
+              {t.settings?.lastName || "Last Name"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.last_name}
               onChange={(e) => handleInputChange("last_name", e.target.value)}
-              placeholder="أدخل اسم العائلة"
+              placeholder={t.settings?.placeholders?.lastName || "Enter last name"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Email Address
+              {t.settings?.emailAddress || "Email Address"}
             </label>
             <input
               type="email"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
-              placeholder="أدخل البريد الإلكتروني"
+              placeholder={t.settings?.placeholders?.email || "Enter email address"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Phone Number
+              {t.settings?.phoneNumber || "Phone Number"}
             </label>
             <input
               type="tel"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.phone}
               onChange={(e) => handleInputChange("phone", e.target.value)}
-              placeholder="أدخل رقم الهاتف"
+              placeholder={t.settings?.placeholders?.phone || "Enter phone number"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Address
+              {t.settings?.address || "Address"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
-              placeholder="أدخل العنوان"
+              placeholder={t.settings?.placeholders?.address || "Enter address"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Country
+              {t.settings?.country || "Country"}
             </label>
             <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.country}
               onChange={(e) => handleInputChange("country", e.target.value)}
             >
-              <option value="">Select</option>
+              <option value="">{t.settings?.select || "Select"}</option>
               <option value="saudi-arabia">Saudi Arabia</option>
               <option value="uae">United Arab Emirates</option>
               <option value="kuwait">Kuwait</option>
@@ -331,7 +284,7 @@ const AccountSettingsForm: React.FC = () => {
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Date Of Birth
+              {t.settings?.dateOfBirth || "Date Of Birth"}
             </label>
             <input
               type="date"
@@ -343,30 +296,30 @@ const AccountSettingsForm: React.FC = () => {
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Gender
+              {t.settings?.gender || "Gender"}
             </label>
             <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.gender}
               onChange={(e) => handleInputChange("gender", e.target.value)}
             >
-              <option value="">Select</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="prefer-not-to-say">Prefer not to say</option>
+              <option value="">{t.settings?.select || "Select"}</option>
+              <option value="male">{t.settings?.male || "Male"}</option>
+              <option value="female">{t.settings?.female || "Female"}</option>
+              <option value="prefer-not-to-say">{t.settings?.preferNotToSay || "Prefer not to say"}</option>
             </select>
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Your Skills
+              {t.settings?.yourSkills || "Your Skills"}
             </label>
             <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.skills}
               onChange={(e) => handleInputChange("skills", e.target.value)}
             >
-              <option value="">Select</option>
+              <option value="">{t.settings?.select || "Select"}</option>
               <option value="leadership">Leadership</option>
               <option value="project-management">Project Management</option>
               <option value="data-analysis">Data Analysis</option>
@@ -386,14 +339,14 @@ const AccountSettingsForm: React.FC = () => {
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Your Profession
+              {t.settings?.yourProfession || "Your Profession"}
             </label>
             <select
               className="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white"
               value={userData.profession}
               onChange={(e) => handleInputChange("profession", e.target.value)}
             >
-              <option value="">Select</option>
+              <option value="">{t.settings?.select || "Select"}</option>
               <option value="software-engineer">Software Engineer</option>
               <option value="web-developer">Web Developer</option>
               <option value="mobile-developer">Mobile Developer</option>
@@ -420,91 +373,91 @@ const AccountSettingsForm: React.FC = () => {
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Company Name
+              {t.settings?.companyName || "Company Name"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.company_name}
               onChange={(e) => handleInputChange("company_name", e.target.value)}
-              placeholder="أدخل اسم الشركة"
+              placeholder={t.settings?.placeholders?.companyName || "Enter company name"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Company Website
+              {t.settings?.companyWebsite || "Company Website"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.company_website}
               onChange={(e) => handleInputChange("company_website", e.target.value)}
-              placeholder="أدخل موقع الشركة"
+              placeholder={t.settings?.placeholders?.companyWebsite || "Enter company website"}
             />
           </div>
 
           <div className="sm:col-span-2 mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Bio
+              {t.settings?.bio || "Bio"}
             </label>
             <textarea
               className="min-h-[100px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] py-[15px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.bio}
               onChange={(e) => handleInputChange("bio", e.target.value)}
-              placeholder="أدخل نبذة عنك"
+              placeholder={t.settings?.placeholders?.bio || "Enter your bio"}
             ></textarea>
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Facebook URL
+              {t.settings?.facebookUrl || "Facebook URL"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.facebook_url}
               onChange={(e) => handleInputChange("facebook_url", e.target.value)}
-              placeholder="أدخل رابط فيسبوك"
+              placeholder={t.settings?.placeholders?.facebook || "Enter Facebook URL"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              Twitter URL
+              {t.settings?.twitterUrl || "Twitter URL"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.twitter_url}
               onChange={(e) => handleInputChange("twitter_url", e.target.value)}
-              placeholder="أدخل رابط تويتر"
+              placeholder={t.settings?.placeholders?.twitter || "Enter Twitter URL"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              LinkedIn URL
+              {t.settings?.linkedinUrl || "LinkedIn URL"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.linkedin_url}
               onChange={(e) => handleInputChange("linkedin_url", e.target.value)}
-              placeholder="أدخل رابط لينكد إن"
+              placeholder={t.settings?.placeholders?.linkedin || "Enter LinkedIn URL"}
             />
           </div>
 
           <div className="mb-[20px] sm:mb-0">
             <label className="mb-[10px] font-medium block text-black dark:text-white">
-              YouTube URL
+              {t.settings?.youtubeUrl || "YouTube URL"}
             </label>
             <input
               type="text"
               className="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500"
               value={userData.youtube_url}
               onChange={(e) => handleInputChange("youtube_url", e.target.value)}
-              placeholder="أدخل رابط يوتيوب"
+              placeholder={t.settings?.placeholders?.youtube || "Enter YouTube URL"}
             />
           </div>
         </div>
@@ -515,7 +468,7 @@ const AccountSettingsForm: React.FC = () => {
             className="py-[15px] px-[25px] rounded-md text-black dark:text-white font-semibold text-md transition-all bg-gray-100 dark:bg-[#172036] hover:bg-gray-200 dark:hover:bg-[#1c2742]"
             onClick={handleCancel}
           >
-            الغاء
+            {t.settings?.cancel || "Cancel"}
           </button>
           <button
             type="submit"
@@ -523,7 +476,7 @@ const AccountSettingsForm: React.FC = () => {
             onClick={handleSaveChanges}
             disabled={saving}
           >
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
+            {saving ? (t.settings?.saving || "Saving...") : (t.settings?.saveChanges || "Save Changes")}
           </button>
         </div>
       </form>
@@ -532,4 +485,3 @@ const AccountSettingsForm: React.FC = () => {
 };
 
 export default AccountSettingsForm;
-

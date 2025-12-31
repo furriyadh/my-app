@@ -14,6 +14,8 @@ import { useTranslation } from '@/lib/hooks/useTranslation';
 import CampaignProgress from '@/components/ui/campaign-progress';
 import { getApiUrl } from '@/lib/config';
 import PlasmaGlobe from '@/components/ui/plasma-globe';
+import { canCreateCampaign, getCurrentPlanLimits, canCreateCampaignAsync, getUserUsage } from '@/lib/services/PlanService';
+import { supabase } from '@/lib/supabase';
 
 // Types for URL detection
 interface UrlDetectionResult {
@@ -118,6 +120,27 @@ const WebsiteUrlPage: React.FC = () => {
   const [isVideoSearching, setIsVideoSearching] = useState(false);
   // Linked YouTube channels for validation
   const [linkedChannelIds, setLinkedChannelIds] = useState<string[]>([]);
+
+  // 💳 Campaign limit notification state
+  const [campaignLimitNotification, setCampaignLimitNotification] = useState<{
+    show: boolean;
+    message: string;
+    messageAr: string;
+  }>({ show: false, message: '', messageAr: '' });
+
+  // 🔐 User ID from Supabase Auth
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get user ID on mount
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    getUser();
+  }, []);
 
   // Dynamic colors based on campaign type
   const campaignTypeColors: Record<string, string> = {
@@ -1127,6 +1150,27 @@ const WebsiteUrlPage: React.FC = () => {
       return; // Button is disabled, but double-check
     }
 
+    // 💳 Check campaign limit before proceeding
+    let planCheck;
+    if (userId) {
+      // استخدام Supabase إذا كان userId متوفر
+      planCheck = await canCreateCampaignAsync(userId);
+    } else {
+      // fallback للـ localStorage
+      const currentCampaignsCount = parseInt(localStorage.getItem('user_campaigns_count') || '0');
+      planCheck = canCreateCampaign(currentCampaignsCount);
+    }
+
+    if (!planCheck.allowed) {
+      setCampaignLimitNotification({
+        show: true,
+        message: planCheck.message,
+        messageAr: planCheck.messageAr,
+      });
+      console.warn('⚠️ Campaign limit reached:', { plan: getCurrentPlanLimits().planName });
+      return;
+    }
+
     // Check phone number for Call Ads campaigns
     if (campaignType === 'Call Ads' && !phoneNumber) {
       alert('Phone number is required for Call Ads campaigns');
@@ -2025,6 +2069,48 @@ const WebsiteUrlPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 💳 Campaign Limit Notification Modal */}
+      {campaignLimitNotification.show && (
+        <div className={`fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-[60] p-4 ${isRTL ? 'lg:pr-[250px]' : 'lg:pl-[250px]'}`}>
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-md relative shadow-2xl">
+            {/* Warning Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-3">
+              {isRTL ? '⚠️ تم الوصول للحد الأقصى' : '⚠️ Campaign Limit Reached'}
+            </h3>
+
+            {/* Message */}
+            <p className="text-gray-600 dark:text-gray-400 text-center mb-6 text-sm">
+              {isRTL ? campaignLimitNotification.messageAr : campaignLimitNotification.message}
+            </p>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setCampaignLimitNotification({ show: false, message: '', messageAr: '' })}
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+              >
+                {isRTL ? 'إغلاق' : 'Close'}
+              </button>
+              <button
+                onClick={() => router.push('/google-ads/billing')}
+                className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"
+              >
+                {isRTL ? 'ترقية الخطة' : 'Upgrade Plan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
