@@ -82,6 +82,11 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     pathname === "/cookies" ||
     pathname === "/terms" ||
     pathname === "/privacy" ||
+    pathname === "/pricing" ||
+    pathname === "/team" ||
+    pathname === "/faq" ||
+    pathname === "/contact" ||
+    pathname === "/features" ||
     pathname?.startsWith("/authentication/") ||
     pathname?.startsWith("/front-pages/") ||
     pathname?.startsWith("/pdf/") ||

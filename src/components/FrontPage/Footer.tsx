@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
                 />
               </Link>
 
-              <p className="leading-[1.6] text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className="leading-[1.7] text-gray-300 text-base md:text-lg" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar'
                   ? 'منصة متقدمة لإدارة حملات إعلانات جوجل بالذكاء الاصطناعي، نقدم لوحة تحكم ذكية لمتابعة الأداء والميزانيات.'
                   : 'AI-powered Google Ads management platform with smart dashboards for real-time performance and budget monitoring.'}
@@ -100,7 +100,7 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Services */}
-            <div className="ltr:xl:pl-[142px] rtl:xl:pr-[142px]">
+            <div className="ltr:xl:pl-[80px] rtl:xl:pr-[80px]">
               <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold !text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'خدماتنا' : 'Our Services'}
               </h3>
@@ -108,7 +108,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/google-ads"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'إدارة إعلانات جوجل' : 'Google Ads Management'}
@@ -117,7 +117,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/google-ads/campaigns"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'إنشاء الحملات بالذكاء الاصطناعي' : 'AI Campaign Creation'}
@@ -125,8 +125,8 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/google-ads/billing"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    href="/pricing"
+                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'الخطط والأسعار' : 'Pricing Plans'}
@@ -134,8 +134,8 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/front-pages/features"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    href="/features"
+                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'الميزات' : 'Features'}
@@ -145,7 +145,7 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Quick Links */}
-            <div className="ltr:xl:pl-[130px] rtl:xl:pr-[130px]">
+            <div className="ltr:xl:pl-[60px] rtl:xl:pr-[60px]">
               <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold !text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'روابط سريعة' : 'Quick Links'}
               </h3>
@@ -161,7 +161,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/front-pages/team"
+                    href="/team"
                     className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
@@ -170,7 +170,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/front-pages/faq"
+                    href="/faq"
                     className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
@@ -179,7 +179,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/front-pages/contact"
+                    href="/contact"
                     className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
@@ -190,7 +190,7 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Legal */}
-            <div className="ltr:xl:pl-[80px] rtl:xl:pr-[80px]">
+            <div className="ltr:xl:pl-[40px] rtl:xl:pr-[40px]">
               <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold !text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'القانونية' : 'Legal'}
               </h3>

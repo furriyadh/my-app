@@ -9,19 +9,55 @@ import { useTranslation, SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/ho
 const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { t, language, setLanguage } = useTranslation();
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to dark
+  const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [isMobileLanguageOpen, setMobileLanguageOpen] = useState(false);
   const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const handleToggle = () => setMenuOpen(!isMenuOpen);
 
+  // Initialize theme from localStorage
+  useEffect(() => {
+    setMounted(true);
+    const storedPreference = localStorage.getItem("theme");
+    if (storedPreference === "dark") {
+      setIsDarkMode(true);
+    } else if (storedPreference === "light") {
+      setIsDarkMode(false);
+    } else {
+      // Default to dark if no preference
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  // Handle theme toggle
+  const handleThemeToggle = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  // Apply theme changes to DOM and localStorage
+  useEffect(() => {
+    if (!mounted) return;
+
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    const htmlElement = document.querySelector("html");
+    if (htmlElement) {
+      if (isDarkMode) {
+        htmlElement.classList.add("dark");
+      } else {
+        htmlElement.classList.remove("dark");
+      }
+    }
+  }, [isDarkMode, mounted]);
+
   const NAV_ITEMS = [
     { name: t.navbar.home, path: "/" },
-    { name: t.navbar.features, path: "/front-pages/features" },
-    { name: "Pricing", path: "/pricing" },
-    { name: t.navbar.team, path: "/front-pages/team" },
-    { name: t.navbar.faq, path: "/front-pages/faq" },
-    { name: t.navbar.contact, path: "/front-pages/contact" },
+    { name: t.navbar.features, path: "/features" },
+    { name: language === 'ar' ? 'الأسعار' : 'Pricing', path: "/pricing" },
+    { name: t.navbar.team, path: "/team" },
+    { name: t.navbar.faq, path: "/faq" },
+    { name: t.navbar.contact, path: "/contact" },
   ];
 
   // Switch language function
@@ -99,14 +135,15 @@ const Navbar: React.FC = () => {
         }
       `}</style>
       <div
-        className={`fixed top-0 right-0 left-0 transition-all h-auto z-[5] ${isSticky
-          ? "bg-[#0a0e19]/90 backdrop-blur-md border-b border-white/10 py-[15px] shadow-sm"
-          : "py-[20px]"
+        className={`fixed top-0 right-0 left-0 transition-all h-auto z-[999] ${isSticky
+          ? "bg-[#0a0e19]/95 backdrop-blur-xl border-b border-white/10 py-[12px] shadow-lg shadow-black/20"
+          : "bg-[#0a0e19]/80 backdrop-blur-md py-[16px]"
           }`}
         id="navbar"
       >
         <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
           <div className="flex items-center relative flex-wrap lg:flex-nowrap justify-between lg:justify-start">
+            {/* Logo */}
             <Link
               href="/"
               className="inline-block max-w-[130px] ltr:mr-[15px] rtl:ml-[15px]"
@@ -127,58 +164,77 @@ const Navbar: React.FC = () => {
               />
             </Link>
 
+            {/* Mobile Menu Button */}
             <button
               type="button"
-              className="relative w-[36px] h-[36px] flex flex-col items-center justify-center gap-[6px] p-1 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 lg:hidden group"
+              className="relative w-[40px] h-[40px] flex flex-col items-center justify-center gap-[5px] p-1 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/40 transition-all duration-300 hover:bg-white/10 lg:hidden group"
               onClick={handleToggle}
               aria-label="Toggle menu"
             >
-              <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? 'rotate-45 translate-y-[9px]' : ''}`}></span>
-              <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
-              <span className={`h-[3px] w-[24px] rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 pointer-events-none ${isMenuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`}></span>
-
-              {/* AI Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300 pointer-events-none"></div>
+              <span className={`h-[2px] w-[20px] rounded-full bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
+              <span className={`h-[2px] w-[20px] rounded-full bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
+              <span className={`h-[2px] w-[20px] rounded-full bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
             </button>
 
-            {/* For Big Devices */}
+            {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center grow basis-full">
-              <ul className="flex ltr:ml-[30px] rtl:mr-[30px] ltr:xl:ml-[55px] rtl:xl:mr-[55px] flex-row gap-[30px] xl:gap-[50px]">
+              {/* Nav Links */}
+              <ul className="flex ltr:ml-[40px] rtl:mr-[40px] ltr:xl:ml-[60px] rtl:xl:mr-[60px] flex-row gap-[8px]">
                 {NAV_ITEMS.map((item) => (
                   <li key={item.path}>
                     <Link
                       href={item.path}
-                      className="font-medium transition-all hover:text-primary-600 text-[15px] xl:text-md dark:text-white"
+                      className={`font-medium transition-all text-[14px] xl:text-[15px] px-4 py-2 rounded-full ${pathname === item.path
+                        ? 'bg-purple-600 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                        }`}
                     >
                       {item.name}
                     </Link>
                   </li>
                 ))}
+              </ul>
 
-                {/* Languages Dropdown */}
-                <li
+              {/* Right Side Controls */}
+              <div className="flex items-center ltr:ml-auto rtl:mr-auto gap-[15px]">
+                {/* Theme Toggle Button - Dashboard Style */}
+                {mounted && (
+                  <button
+                    onClick={handleThemeToggle}
+                    className="leading-none inline-block transition-all hover:opacity-80"
+                    aria-label="Toggle theme"
+                  >
+                    <i className="material-symbols-outlined !text-[22px] text-[#fe7a36]">
+                      {isDarkMode ? 'light_mode' : 'dark_mode'}
+                    </i>
+                  </button>
+                )}
+
+                {/* Language Dropdown - Dashboard Style */}
+                <div
                   className="relative"
                   onMouseEnter={handleLanguageMouseEnter}
                   onMouseLeave={handleLanguageMouseLeave}
                 >
                   <button
-                    className="font-medium transition-all hover:text-primary-600 text-[15px] xl:text-md dark:text-white flex items-center gap-1"
+                    className="leading-none pr-[12px] inline-block transition-all relative hover:text-primary-500 font-semibold text-[15px] text-white"
                   >
-                    <span className="font-semibold text-[16px]">{language.toUpperCase()}</span>
-                    <i className="material-symbols-outlined !text-[18px]">
-                      expand_more
-                    </i>
+                    <span className="uppercase">{language}</span>
+                    <i className="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2"></i>
                   </button>
 
                   {/* Dropdown Menu */}
                   {isLanguageDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-[280px] bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
-                      <div className="py-2 max-h-[600px] overflow-y-auto custom-scrollbar">
+                    <div className="absolute top-full ltr:right-0 rtl:left-0 mt-4 w-[280px] bg-white dark:bg-[#0c1427] rounded-lg shadow-2xl border border-gray-100 dark:border-[#172036] overflow-hidden z-50">
+                      <span className="block text-black dark:text-white font-semibold px-[20px] py-[14px] text-sm border-b border-gray-100 dark:border-[#172036]">
+                        {language === 'ar' ? 'اختر اللغة' : 'Choose Language'}
+                      </span>
+                      <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                         {SUPPORTED_LANGUAGES.map((lang) => (
                           <button
                             key={lang.code}
                             onClick={() => switchLanguage(lang.code)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                            className={`w-full flex items-center gap-3 px-[20px] py-[12px] transition-all hover:bg-gray-50 dark:hover:bg-[#172036] cursor-pointer ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                               }`}
                           >
                             <Image
@@ -188,59 +244,61 @@ const Navbar: React.FC = () => {
                               height={28}
                               className="rounded-sm"
                             />
-                            <span className="text-base font-medium text-gray-900 dark:text-white">
+                            <span className={`flex-1 ltr:text-left rtl:text-right text-black dark:text-white ${language === lang.code ? 'font-semibold text-primary-600 dark:text-primary-400' : ''}`}>
                               {lang.name}
                             </span>
+                            {language === lang.code && (
+                              <i className="material-symbols-outlined !text-[16px] text-primary-600 dark:text-primary-400">
+                                check
+                              </i>
+                            )}
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
-                </li>
-              </ul>
+                </div>
 
-              <div className="flex items-center ltr:ml-auto rtl:mr-auto gap-[15px]">
+                {/* Login Button */}
                 <Link
                   href="/authentication/sign-in"
-                  className="inline-block text-purple-600 lg:text-[15px] xl:text-[16px] py-[11px] px-[17px] rounded-md transition-all font-medium border border-purple-600 hover:text-white hover:bg-purple-500 hover:border-purple-500"
+                  className="inline-flex items-center gap-2 text-[14px] py-[10px] px-[18px] rounded-full transition-all font-medium text-white border border-white/20 hover:border-purple-500 hover:bg-purple-500/10"
                 >
-                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                      login
-                    </i>
-                    {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-                  </span>
+                  <i className="material-symbols-outlined !text-[18px]">
+                    login
+                  </i>
+                  {language === 'ar' ? 'دخول' : 'Login'}
                 </Link>
 
+                {/* Register Button */}
                 <Link
                   href="/authentication/sign-up"
-                  className="inline-block lg:text-[15px] xl:text-[16px] py-[11px] px-[17px] bg-purple-600 text-white rounded-md transition-all font-medium border border-purple-600 hover:bg-purple-500 hover:border-purple-500"
+                  className="inline-flex items-center gap-2 text-[14px] py-[10px] px-[20px] bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full transition-all font-semibold hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-500/25"
                 >
-                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                      person
-                    </i>
-                    {language === 'ar' ? 'تسجيل حساب' : 'Register'}
-                  </span>
+                  <i className="material-symbols-outlined !text-[18px]">
+                    person_add
+                  </i>
+                  {language === 'ar' ? 'سجل الآن' : 'Get Started'}
                 </Link>
               </div>
             </div>
 
-            {/* For Resposive */}
+            {/* Mobile Menu */}
             <div
-              className={`fixed left-0 right-0 top-[76px] bg-black/95 dark:bg-black/95 backdrop-blur-xl border-t border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl shadow-purple-500/10 max-h-[calc(100vh-76px)] overflow-y-auto z-[999] ${isMenuOpen ? "block" : "hidden"
+              className={`fixed left-0 right-0 top-[68px] bg-[#0a0e19]/98 backdrop-blur-xl border-t border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl max-h-[calc(100vh-68px)] overflow-y-auto z-[999] transform transition-all duration-300 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
                 }`}
               id="navbar-collapse"
             >
-              <ul>
+              <ul className="space-y-2">
                 {NAV_ITEMS.map((item) => (
-                  <li
-                    key={item.path}
-                    className="my-[14px] md:my-[16px] first:mt-0 last:mb-0"
-                  >
+                  <li key={item.path}>
                     <Link
                       href={item.path}
-                      className="font-medium dark:text-white transition-all hover:text-primary-600"
+                      onClick={() => setMenuOpen(false)}
+                      className={`block font-medium transition-all px-4 py-3 rounded-xl ${pathname === item.path
+                        ? 'bg-purple-600 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-white/5'
+                        }`}
                     >
                       {item.name}
                     </Link>
@@ -248,13 +306,13 @@ const Navbar: React.FC = () => {
                 ))}
 
                 {/* Languages for Mobile - Collapsible */}
-                <li className="my-[14px] md:my-[16px]">
+                <li>
                   <button
                     onClick={() => setMobileLanguageOpen(!isMobileLanguageOpen)}
-                    className="w-full flex items-center justify-between font-semibold text-gray-900 dark:text-white text-base py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                    className="w-full flex items-center justify-between font-medium text-gray-300 py-3 px-4 rounded-xl hover:bg-white/5 transition-all"
                   >
-                    <div className="flex items-center gap-2">
-                      <i className="material-symbols-outlined !text-[20px] text-purple-600">
+                    <div className="flex items-center gap-3">
+                      <i className="material-symbols-outlined !text-[20px] text-purple-400">
                         language
                       </i>
                       <span>{t.common.languages}</span>
@@ -265,8 +323,8 @@ const Navbar: React.FC = () => {
                   </button>
 
                   {/* Dropdown Content */}
-                  <div className={`overflow-hidden transition-all duration-300 ${isMobileLanguageOpen ? 'max-h-[600px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
-                    <div className="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar pl-2">
+                  <div className={`overflow-hidden transition-all duration-300 ${isMobileLanguageOpen ? 'max-h-[400px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+                    <div className="space-y-1 max-h-[350px] overflow-y-auto custom-scrollbar pl-4">
                       {SUPPORTED_LANGUAGES.map((lang) => (
                         <button
                           key={lang.code}
@@ -274,7 +332,7 @@ const Navbar: React.FC = () => {
                             switchLanguage(lang.code);
                             setMobileLanguageOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${language === lang.code ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-600' : ''
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all hover:bg-white/5 cursor-pointer ${language === lang.code ? 'bg-purple-600/20 border-l-2 border-purple-500' : ''
                             }`}
                         >
                           <Image
@@ -284,7 +342,7 @@ const Navbar: React.FC = () => {
                             height={24}
                             className="rounded-sm"
                           />
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          <span className="text-sm font-medium text-white">
                             {lang.name}
                           </span>
                         </button>
@@ -294,31 +352,29 @@ const Navbar: React.FC = () => {
                 </li>
               </ul>
 
-              <div className="flex items-center gap-[15px] mt-[14px] md:mt-[16px]">
+              {/* Mobile Auth Buttons */}
+              <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-white/10">
                 <Link
                   href="/authentication/sign-in"
-                  className="inline-block text-purple-600 lg:text-[15px] xl:text-[16px] py-[11px] px-[17px] rounded-md transition-all font-medium border border-purple-600 hover:text-white hover:bg-purple-500 hover:border-purple-500"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 text-[15px] py-3 px-4 rounded-xl transition-all font-medium text-white border border-white/20 hover:border-purple-500 hover:bg-purple-500/10"
                 >
-                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                      login
-                    </i>
-                    {t.common.login}
-                  </span>
+                  <i className="material-symbols-outlined !text-[20px]">
+                    login
+                  </i>
+                  {t.common.login}
                 </Link>
 
                 <Link
                   href="/authentication/sign-up"
-                  className="inline-block lg:text-[15px] xl:text-[16px] py-[11px] px-[17px] bg-purple-600 text-white rounded-md transition-all font-medium border border-purple-600 hover:bg-purple-500 hover:border-purple-500"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 text-[15px] py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl transition-all font-semibold hover:from-purple-500 hover:to-indigo-500"
                 >
-                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                      person
-                    </i>
-                    {t.common.register}
-                  </span>
+                  <i className="material-symbols-outlined !text-[20px]">
+                    person_add
+                  </i>
+                  {t.common.register}
                 </Link>
-
               </div>
             </div>
           </div>

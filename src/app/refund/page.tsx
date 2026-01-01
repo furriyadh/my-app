@@ -106,7 +106,7 @@ export default function RefundPolicyPage() {
 
     return (
         <>
-            <div className="front-page-body overflow-hidden bg-black min-h-screen" dir="ltr">
+            <div className="front-page-body overflow-hidden bg-white dark:bg-black min-h-screen" dir="ltr">
                 <Navbar />
 
                 {/* Hero Section */}
@@ -115,10 +115,10 @@ export default function RefundPolicyPage() {
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 mb-6 shadow-lg shadow-green-500/30">
                             <RefreshCw className="w-10 h-10 text-white" />
                         </div>
-                        <h1 className="!mb-4 !leading-[1.2] !text-[32px] md:!text-[40px] lg:!text-[50px] xl:!text-[60px] -tracking-[.5px] md:-tracking-[1px] xl:-tracking-[1.5px] text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <h1 className="!mb-4 !leading-[1.2] !text-[32px] md:!text-[40px] lg:!text-[50px] xl:!text-[60px] -tracking-[.5px] md:-tracking-[1px] xl:-tracking-[1.5px] text-black dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                             {language === 'ar' ? 'سياسة الاسترداد والإلغاء' : 'Refund & Cancellation Policy'}
                         </h1>
-                        <p className="text-gray-400 text-lg max-w-2xl mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
                             {language === 'ar'
                                 ? 'نحن نقدر ثقتك ونسعى لتوفير تجربة شفافة. تعرف على سياساتنا للاسترداد والإلغاء.'
                                 : 'We value your trust and strive to provide a transparent experience. Learn about our refund and cancellation policies.'}
@@ -152,7 +152,7 @@ export default function RefundPolicyPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-xl p-6 text-center">
                             <div className="text-3xl font-bold text-green-400 mb-2">100%</div>
-                            <div className="text-gray-300 text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="text-gray-700 dark:text-gray-300 text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
                                 {language === 'ar' ? 'استرداد كامل للاشتراك' : 'Full Subscription Refund'}
                             </div>
                             <div className="text-gray-500 text-xs mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -186,19 +186,19 @@ export default function RefundPolicyPage() {
                         {sections.map((section, index) => (
                             <div
                                 key={index}
-                                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8 hover:border-green-500/30 transition-all duration-300"
+                                className="bg-gray-100 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-2xl p-6 md:p-8 hover:border-green-500/30 transition-all duration-300"
                             >
                                 <div className="flex items-center gap-4 mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 flex items-center justify-center text-green-400">
                                         {section.icon}
                                     </div>
-                                    <h2 className="text-xl md:text-2xl font-bold text-white">
+                                    <h2 className="text-xl md:text-2xl font-bold text-black dark:text-white">
                                         {language === 'ar' ? section.titleAr : section.titleEn}
                                     </h2>
                                 </div>
                                 <ul className="space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                     {(language === 'ar' ? section.contentAr : section.contentEn).map((item, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-gray-300">
+                                        <li key={i} className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
                                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2.5 flex-shrink-0"></span>
                                             <span>{item}</span>
                                         </li>
@@ -211,10 +211,10 @@ export default function RefundPolicyPage() {
                     {/* Contact Section */}
                     <div className="mt-12 bg-gradient-to-br from-green-600/10 to-emerald-600/10 border border-green-500/20 rounded-2xl p-6 md:p-8 text-center">
                         <Mail className="w-10 h-10 text-green-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-white mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <h3 className="text-xl font-bold text-black dark:text-white mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
                             {language === 'ar' ? 'تحتاج مساعدة؟' : 'Need Help?'}
                         </h3>
-                        <p className="text-gray-400 mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
                             {language === 'ar'
                                 ? 'فريق الدعم متاح لمساعدتك في أي استفسار حول الاسترداد أو الإلغاء.'
                                 : 'Our support team is available to help you with any refund or cancellation inquiries.'}

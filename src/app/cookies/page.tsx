@@ -31,18 +31,18 @@ export default function CookiePolicyPage() {
             titleEn: "2. Types of Cookies We Use",
             titleAr: "2. أنواع ملفات تعريف الارتباط التي نستخدمها",
             contentEn: [
-                "**Necessary Cookies:** Essential for the proper functioning of our website. They enable core features such as page navigation, secure access, and user authentication.",
-                "**Functional Cookies:** Enhance website usability by remembering your preferences and enabling features like language settings or customized content.",
-                "**Analytical Cookies:** Help us understand how users interact with our website by collecting anonymized data on site traffic, behavior, and performance. We use Google Analytics to track user activity.",
-                "**Advertising Cookies:** Used to deliver ads that are relevant to you and your interests. They also limit the number of times you see an ad and help measure the effectiveness of campaigns.",
-                "**Third-Party Cookies:** Set by third-party services integrated into our website, such as social media platforms or embedded content providers."
+                "Necessary Cookies: Essential for the proper functioning of our website. They enable core features such as page navigation, secure access, and user authentication.",
+                "Functional Cookies: Enhance website usability by remembering your preferences and enabling features like language settings or customized content.",
+                "Analytical Cookies: Help us understand how users interact with our website by collecting anonymized data on site traffic, behavior, and performance. We use Google Analytics to track user activity.",
+                "Advertising Cookies: Used to deliver ads that are relevant to you and your interests. They also limit the number of times you see an ad and help measure the effectiveness of campaigns.",
+                "Third-Party Cookies: Set by third-party services integrated into our website, such as social media platforms or embedded content providers."
             ],
             contentAr: [
-                "**ملفات تعريف الارتباط الضرورية:** ضرورية للعمل السليم لموقعنا. تمكّن الميزات الأساسية مثل التنقل بين الصفحات والوصول الآمن ومصادقة المستخدم.",
-                "**ملفات تعريف الارتباط الوظيفية:** تعزز قابلية استخدام الموقع من خلال تذكر تفضيلاتك وتمكين ميزات مثل إعدادات اللغة أو المحتوى المخصص.",
-                "**ملفات تعريف الارتباط التحليلية:** تساعدنا على فهم كيفية تفاعل المستخدمين مع موقعنا من خلال جمع بيانات مجهولة الهوية حول حركة الموقع والسلوك والأداء. نستخدم Google Analytics لتتبع نشاط المستخدم.",
-                "**ملفات تعريف الارتباط الإعلانية:** تُستخدم لتقديم إعلانات ذات صلة بك وباهتماماتك. كما أنها تحد من عدد مرات مشاهدة الإعلان وتساعد في قياس فعالية الحملات.",
-                "**ملفات تعريف الارتباط من الطرف الثالث:** يتم تعيينها بواسطة خدمات الطرف الثالث المدمجة في موقعنا، مثل منصات التواصل الاجتماعي أو مزودي المحتوى المضمن."
+                "ملفات تعريف الارتباط الضرورية: ضرورية للعمل السليم لموقعنا. تمكّن الميزات الأساسية مثل التنقل بين الصفحات والوصول الآمن ومصادقة المستخدم.",
+                "ملفات تعريف الارتباط الوظيفية: تعزز قابلية استخدام الموقع من خلال تذكر تفضيلاتك وتمكين ميزات مثل إعدادات اللغة أو المحتوى المخصص.",
+                "ملفات تعريف الارتباط التحليلية: تساعدنا على فهم كيفية تفاعل المستخدمين مع موقعنا من خلال جمع بيانات مجهولة الهوية حول حركة الموقع والسلوك والأداء. نستخدم Google Analytics لتتبع نشاط المستخدم.",
+                "ملفات تعريف الارتباط الإعلانية: تُستخدم لتقديم إعلانات ذات صلة بك وباهتماماتك. كما أنها تحد من عدد مرات مشاهدة الإعلان وتساعد في قياس فعالية الحملات.",
+                "ملفات تعريف الارتباط من الطرف الثالث: يتم تعيينها بواسطة خدمات الطرف الثالث المدمجة في موقعنا، مثل منصات التواصل الاجتماعي أو مزودي المحتوى المضمن."
             ]
         },
         {
