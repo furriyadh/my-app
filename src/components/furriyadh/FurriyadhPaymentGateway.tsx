@@ -213,13 +213,13 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
     const [copiedText, setCopiedText] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentStep, setPaymentStep] = useState<'select' | 'details' | 'confirm'>('select');
-    const [shakePrompt, setShakePrompt] = useState(false); // For shake animation
     const [cardDetails, setCardDetails] = useState({
         number: '',
         expiry: '',
         cvv: '',
         name: ''
     });
+    const [shakeWarning, setShakeWarning] = useState(false);
 
     // Quick amounts
     const quickAmounts = [50, 100, 250, 500, 1000, 2500];
@@ -758,8 +758,20 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                             );
                         })()}
                         {!selectedMethod && (
-                            <div className={`p-3 mb-5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl text-center transition-all ${shakePrompt ? 'animate-[shake_0.5s_ease-in-out] border-red-400 bg-red-50 dark:bg-red-900/20' : ''}`}>
-                                <p className={`text-xs ${shakePrompt ? 'text-red-600 dark:text-red-400 font-bold' : 'text-yellow-700 dark:text-yellow-400'}`}>
+                            <div
+                                className={`p-3 mb-5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl text-center transition-all ${shakeWarning ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : ''}`}
+                                style={shakeWarning ? {
+                                    animation: 'shake 0.5s ease-in-out'
+                                } : {}}
+                            >
+                                <style>{`
+                                    @keyframes shake {
+                                        0%, 100% { transform: translateX(0); }
+                                        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                                        20%, 40%, 60%, 80% { transform: translateX(5px); }
+                                    }
+                                `}</style>
+                                <p className={`text-xs ${shakeWarning ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-yellow-700 dark:text-yellow-400'}`}>
                                     {isRTL ? 'اختر طريقة الدفع من اليسار' : 'Select a payment method from the left'}
                                 </p>
                             </div>
@@ -782,8 +794,8 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                                     if (selectedMethod) {
                                         setShowPaymentModal(true);
                                     } else {
-                                        setShakePrompt(true);
-                                        setTimeout(() => setShakePrompt(false), 600);
+                                        setShakeWarning(true);
+                                        setTimeout(() => setShakeWarning(false), 600);
                                     }
                                 }}
                                 className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 hover:-translate-y-0.5 active:translate-y-0"
