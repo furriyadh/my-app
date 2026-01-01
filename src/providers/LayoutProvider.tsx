@@ -78,6 +78,10 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const isPublicModule =
     pathname === "/" ||
     pathname === "/coming-soon" ||
+    pathname === "/refund" ||
+    pathname === "/cookies" ||
+    pathname === "/terms" ||
+    pathname === "/privacy" ||
     pathname?.startsWith("/authentication/") ||
     pathname?.startsWith("/front-pages/") ||
     pathname?.startsWith("/pdf/") ||
