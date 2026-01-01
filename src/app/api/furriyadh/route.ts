@@ -47,11 +47,24 @@ export async function GET(request: NextRequest) {
             },
         });
 
+        // Handle non-JSON responses (like HTML error pages)
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            return NextResponse.json({
+                success: false,
+                error: 'Backend returned non-JSON response',
+                status: response.status
+            }, { status: 502 });
+        }
+
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
 
-    } catch (error) {
-        console.error('❌ Furriyadh API GET error:', error);
+    } catch (error: any) {
+        // Suppress noisy polling errors
+        if (!error.message?.includes('JSON')) {
+            console.error('❌ Furriyadh API GET error:', error.message || error);
+        }
         return NextResponse.json({
             success: false,
             error: 'Internal server error',

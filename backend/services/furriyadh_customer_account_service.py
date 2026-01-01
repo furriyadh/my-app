@@ -13,7 +13,7 @@ This service handles:
 
 import os
 import logging
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Tuple, List
 from datetime import datetime
 
 # Setup logging
@@ -447,9 +447,126 @@ class FurriyadhCustomerAccountService:
             logger.error(f"❌ Error adding deposit: {e}")
             return False, f"حدث خطأ: {str(e)}", None
     
-    # =========================================================================
-    # CAMPAIGN MANAGEMENT
-    # =========================================================================
+    def process_refund(
+        self,
+        user_email: str,
+        refund_amount: float,
+        reason: str = '',
+        original_deposit_id: Optional[str] = None,
+        admin_email: Optional[str] = None
+    ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
+        """
+        Process a refund for a customer.
+        
+        Deducts amount from balance and records refund transaction.
+        
+        Args:
+            user_email: User's email
+            refund_amount: Amount to refund (positive number)
+            reason: Reason for refund
+            original_deposit_id: ID of original deposit (optional)
+            admin_email: Email of admin processing refund
+            
+        Returns:
+            Tuple of (success, message, refund_data)
+        """
+        try:
+            account = self.get_customer_account(user_email)
+            
+            if not account:
+                return False, "لم يتم العثور على الحساب", None
+            
+            current_balance = float(account.get('current_balance', 0))
+            
+            # Validate refund amount
+            if refund_amount <= 0:
+                return False, "مبلغ الاسترداد يجب أن يكون أكبر من صفر", None
+            
+            if refund_amount > current_balance:
+                return False, f"مبلغ الاسترداد (${refund_amount:.2f}) أكبر من الرصيد الحالي (${current_balance:.2f})", None
+            
+            # Create refund record (negative amounts in deposits table)
+            refund_data = {
+                'customer_account_id': account['id'],
+                'gross_amount': -refund_amount,  # Negative for refund
+                'commission_amount': 0,  # No commission on refunds
+                'net_amount': -refund_amount,  # Negative for refund
+                'payment_method': 'refund',
+                'payment_reference': f"REFUND-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+                'payment_email': admin_email,
+                'status': 'completed',
+                'currency': 'USD',
+                'notes': reason,
+                'completed_at': datetime.utcnow().isoformat()
+            }
+            
+            result = self.supabase.table('furriyadh_deposits') \
+                .insert(refund_data) \
+                .execute()
+            
+            if not result.data:
+                return False, "فشل في حفظ الاسترداد", None
+            
+            # Update account balance
+            new_balance = current_balance - refund_amount
+            
+            self.supabase.table('furriyadh_customer_accounts') \
+                .update({
+                    'current_balance': new_balance,
+                    'status': 'active' if new_balance > 0 else 'out_of_balance'
+                }) \
+                .eq('id', account['id']) \
+                .execute()
+            
+            # Create notification
+            self._create_notification(
+                account_id=account['id'],
+                notification_type='refund_processed',
+                title='تم معالجة الاسترداد',
+                message=f'تم استرداد ${refund_amount:.2f} من رصيدك. السبب: {reason or "غير محدد"}'
+            )
+            
+            # Check if campaigns should be paused
+            if new_balance <= 0:
+                self.check_and_pause_campaigns_if_needed(user_email)
+            
+            logger.info(f"💸 Refund processed for {user_email}: ${refund_amount} (reason: {reason})")
+            
+            return True, f"تم استرداد ${refund_amount:.2f} بنجاح", result.data[0]
+            
+        except Exception as e:
+            logger.error(f"❌ Error processing refund: {e}")
+            return False, f"حدث خطأ: {str(e)}", None
+    
+    def get_refunds(self, user_email: str) -> List[Dict[str, Any]]:
+        """
+        Get all refunds for a customer.
+        
+        Args:
+            user_email: User's email
+            
+        Returns:
+            List of refund records
+        """
+        try:
+            account = self.get_customer_account(user_email)
+            
+            if not account:
+                return []
+            
+            result = self.supabase.table('furriyadh_deposits') \
+                .select('*') \
+                .eq('customer_account_id', account['id']) \
+                .eq('payment_method', 'refund') \
+                .order('created_at', desc=True) \
+                .execute()
+            
+            return result.data if result.data else []
+            
+        except Exception as e:
+            logger.error(f"❌ Error getting refunds: {e}")
+            return []
+    
     
     def register_campaign(
         self,
@@ -750,10 +867,6 @@ class FurriyadhCustomerAccountService:
                 .execute()
         except Exception as e:
             logger.error(f"❌ Error creating notification: {e}")
-
-
-# Type hint for List
-from typing import List
 
 # Singleton instance
 _service_instance = None

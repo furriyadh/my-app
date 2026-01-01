@@ -397,6 +397,108 @@ def mark_notification_read():
 
 
 # =====================================================
+# REFUND ENDPOINTS
+# =====================================================
+
+@furriyadh_bp.route('/refund', methods=['POST'])
+def process_refund():
+    """
+    Process a refund for a customer.
+    
+    Request body:
+    - email: Customer email address
+    - amount: Refund amount (positive number)
+    - reason: Reason for refund (optional)
+    - admin_email: Admin processing the refund (optional)
+    """
+    try:
+        data = request.get_json()
+        
+        email = data.get('email')
+        amount = data.get('amount')
+        reason = data.get('reason', '')
+        admin_email = data.get('admin_email')
+        
+        if not email:
+            return jsonify({
+                'success': False,
+                'error': 'Email is required'
+            }), 400
+        
+        if not amount or float(amount) <= 0:
+            return jsonify({
+                'success': False,
+                'error': 'Valid positive amount is required'
+            }), 400
+        
+        service = get_furriyadh_account_service()
+        success, message, refund_data = service.process_refund(
+            user_email=email,
+            refund_amount=float(amount),
+            reason=reason,
+            admin_email=admin_email
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': message,
+                'refund': refund_data,
+                'balance': service.get_balance(email)
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': message
+            }), 400
+        
+    except Exception as e:
+        logger.error(f"❌ Error processing refund: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@furriyadh_bp.route('/refunds', methods=['GET'])
+def get_refunds():
+    """
+    Get refund history for a customer.
+    
+    Query params:
+    - email: Customer email address
+    """
+    try:
+        email = request.args.get('email')
+        
+        if not email:
+            return jsonify({
+                'success': False,
+                'error': 'Email is required'
+            }), 400
+        
+        service = get_furriyadh_account_service()
+        refunds = service.get_refunds(email)
+        
+        # Calculate totals
+        total_refunded = sum(abs(float(r.get('net_amount', 0))) for r in refunds)
+        
+        return jsonify({
+            'success': True,
+            'refunds': refunds,
+            'count': len(refunds),
+            'total_refunded': total_refunded
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting refunds: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+# =====================================================
 # PAYPAL WEBHOOK ENDPOINTS
 # =====================================================
 

@@ -9,6 +9,8 @@ import {
     Check,
     AlertCircle,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     ExternalLink,
     QrCode,
     RefreshCcw,
@@ -22,8 +24,15 @@ import {
     Shield,
     Sparkles,
     Zap,
-    ArrowRight
+    ArrowRight,
+    ArrowDownLeft,
+    Download,
+    Filter
 } from 'lucide-react';
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+
+// PayPal configuration
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test';
 
 // Payment method types
 type PaymentMethod = 'visa_mastercard' | 'binance_pay' | 'usdt_crypto' | 'redotpay' | 'paypal';
@@ -220,6 +229,244 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
         name: ''
     });
     const [shakeWarning, setShakeWarning] = useState(false);
+    const [activeTab, setActiveTab] = useState<'payment' | 'history'>('payment');
+
+    // Balance History state
+    interface Transaction {
+        id: string;
+        type: 'deposit' | 'campaign' | 'refund';
+        method?: string;
+        description?: string;
+        amount: number;
+        date: string;
+        status: string;
+    }
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+
+    // Pagination & Filtering state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
+    const [typeFilter, setTypeFilter] = useState<'all' | 'deposit' | 'campaign'>('all');
+    const [dateFilter, setDateFilter] = useState<'all' | '7days' | '30days' | '90days'>('all');
+    const [isExporting, setIsExporting] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const ITEMS_PER_PAGE = 10;
+
+    // Real-time balance polling
+    const [lastBalanceUpdate, setLastBalanceUpdate] = useState<Date>(new Date());
+    const BALANCE_POLL_INTERVAL = 30000; // 30 seconds
+
+    // Low Balance Alert state
+    const [showLowBalanceAlert, setShowLowBalanceAlert] = useState(false);
+    const [lowBalanceAlertSent, setLowBalanceAlertSent] = useState(false);
+    const LOW_BALANCE_THRESHOLD = 10; // $10
+
+    // Check for low balance on mount and when balance changes
+    useEffect(() => {
+        if (currentBalance !== undefined && currentBalance < LOW_BALANCE_THRESHOLD) {
+            setShowLowBalanceAlert(true);
+
+            // Send email alert once per session
+            if (!lowBalanceAlertSent && userEmail) {
+                setLowBalanceAlertSent(true);
+                fetch('/api/email/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: userEmail,
+                        type: 'low_balance_alert',
+                        data: {
+                            currentBalance: currentBalance.toFixed(2),
+                            threshold: LOW_BALANCE_THRESHOLD,
+                            activeCampaigns: 0, // TODO: Get actual count
+                            addFundsUrl: `${window.location.origin}/google-ads/billing`
+                        }
+                    })
+                }).catch(err => console.error('Low balance email error:', err));
+            }
+        } else {
+            setShowLowBalanceAlert(false);
+        }
+    }, [currentBalance, userEmail, lowBalanceAlertSent]);
+
+    // Fetch transactions when history tab is active or filters change
+    useEffect(() => {
+        if (activeTab === 'history' && userEmail) {
+            fetchTransactions();
+        }
+    }, [activeTab, userEmail, currentPage, typeFilter, dateFilter]);
+
+    // Real-time balance polling
+    useEffect(() => {
+        if (!userEmail) return;
+
+        const pollBalance = async () => {
+            try {
+                const response = await fetch(`/api/furriyadh?email=${encodeURIComponent(userEmail)}&action=balance`);
+                if (!response.ok) return; // Silently skip if backend unavailable
+                const data = await response.json();
+                if (data.success && data.balance !== undefined) {
+                    setLastBalanceUpdate(new Date());
+                    // If balance changed significantly, refresh transactions
+                    if (activeTab === 'history') {
+                        fetchTransactions();
+                    }
+                }
+            } catch {
+                // Silently ignore - backend may be unavailable
+            }
+        };
+
+        const intervalId = setInterval(pollBalance, BALANCE_POLL_INTERVAL);
+
+        return () => clearInterval(intervalId);
+    }, [userEmail, activeTab]);
+
+    const fetchTransactions = async () => {
+        if (!userEmail) return;
+        setIsLoadingTransactions(true);
+        try {
+            // Build query params
+            const params = new URLSearchParams({
+                email: userEmail,
+                page: currentPage.toString(),
+                limit: ITEMS_PER_PAGE.toString()
+            });
+
+            if (typeFilter !== 'all') params.append('type', typeFilter);
+
+            // Calculate date range
+            if (dateFilter !== 'all') {
+                const endDate = new Date().toISOString().split('T')[0];
+                const startDate = new Date();
+                if (dateFilter === '7days') startDate.setDate(startDate.getDate() - 7);
+                else if (dateFilter === '30days') startDate.setDate(startDate.getDate() - 30);
+                else if (dateFilter === '90days') startDate.setDate(startDate.getDate() - 90);
+                params.append('startDate', startDate.toISOString().split('T')[0]);
+                params.append('endDate', endDate);
+            }
+
+            const response = await fetch(`/api/furriyadh/transactions?${params.toString()}`);
+            const data = await response.json();
+            if (data.success) {
+                setTransactions(data.transactions || []);
+                setTotalPages(data.totalPages || 0);
+                setTotalCount(data.totalCount || 0);
+            }
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+        } finally {
+            setIsLoadingTransactions(false);
+        }
+    };
+
+    const exportToCSV = async () => {
+        if (!userEmail) return;
+        setIsExporting(true);
+        try {
+            const params = new URLSearchParams({ email: userEmail, export: 'csv' });
+            if (typeFilter !== 'all') params.append('type', typeFilter);
+
+            if (dateFilter !== 'all') {
+                const endDate = new Date().toISOString().split('T')[0];
+                const startDate = new Date();
+                if (dateFilter === '7days') startDate.setDate(startDate.getDate() - 7);
+                else if (dateFilter === '30days') startDate.setDate(startDate.getDate() - 30);
+                else if (dateFilter === '90days') startDate.setDate(startDate.getDate() - 90);
+                params.append('startDate', startDate.toISOString().split('T')[0]);
+                params.append('endDate', endDate);
+            }
+
+            const response = await fetch(`/api/furriyadh/transactions?${params.toString()}`);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error exporting CSV:', error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    // Handle PayPal payment success
+    const handlePayPalSuccess = async (details: any) => {
+        setIsProcessing(true);
+        try {
+            const response = await fetch('/api/furriyadh', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'deposit',
+                    email: userEmail,
+                    amount: totalPayment,
+                    payment_method: 'paypal',
+                    payment_reference: details.id,
+                    payment_email: details.payer?.email_address
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Close modal and show success
+                setShowPaymentModal(false);
+                setSelectedMethod(null);
+
+                // Send email confirmation (non-blocking)
+                const commissionRate = 20;
+                const commission = totalPayment * 0.20;
+                const netAmount = totalPayment - commission;
+                const newBalance = (currentBalance || 0) + netAmount;
+
+                fetch('/api/email/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: userEmail,
+                        type: 'deposit_confirmation',
+                        data: {
+                            amount: totalPayment.toFixed(2),
+                            netAmount: netAmount.toFixed(2),
+                            commission: commission.toFixed(2),
+                            commissionRate: commissionRate,
+                            newBalance: newBalance.toFixed(2),
+                            transactionId: details.id || 'N/A',
+                            paymentMethod: 'PayPal',
+                            date: new Date().toLocaleString('en-US', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short'
+                            }),
+                            dashboardUrl: `${window.location.origin}/google-ads/billing`
+                        }
+                    })
+                }).catch(err => console.error('Email send error:', err));
+
+                // Refresh transactions if on history tab
+                if (activeTab === 'history') {
+                    fetchTransactions();
+                }
+                // Call parent callback if provided
+                onPaymentSuccess?.(totalPayment, 'paypal');
+                // Show success message
+                alert(isRTL ? '✅ تم إضافة الرصيد بنجاح! سيصلك إيميل تأكيد.' : '✅ Credit added successfully! Confirmation email sent.');
+            } else {
+                alert(data.error || (isRTL ? 'فشل الدفع' : 'Payment failed'));
+            }
+        } catch (err) {
+            console.error('Payment processing error:', err);
+            alert(isRTL ? 'فشل معالجة الدفع' : 'Failed to process payment');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     // Quick amounts
     const quickAmounts = [50, 100, 250, 500, 1000, 2500];
@@ -640,6 +887,43 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
 
     return (
         <>
+            {/* Low Balance Alert Banner */}
+            {showLowBalanceAlert && (
+                <div className="mb-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-4 shadow-lg animate-pulse">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <AlertCircle className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold text-sm">
+                                    {isRTL ? '⚠️ تحذير: رصيد منخفض!' : '⚠️ Warning: Low Balance!'}
+                                </h4>
+                                <p className="text-white/90 text-xs">
+                                    {isRTL
+                                        ? `رصيدك الحالي $${currentBalance?.toFixed(2)} - قد تتوقف حملاتك قريباً`
+                                        : `Your balance is $${currentBalance?.toFixed(2)} - campaigns may pause soon`}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setActiveTab('payment')}
+                                className="px-4 py-2 bg-white text-orange-600 rounded-lg text-sm font-semibold hover:bg-white/90 transition-all shadow-md"
+                            >
+                                {isRTL ? 'أضف رصيد' : 'Add Funds'}
+                            </button>
+                            <button
+                                onClick={() => setShowLowBalanceAlert(false)}
+                                className="p-2 hover:bg-white/20 rounded-lg transition-all"
+                            >
+                                <X className="w-5 h-5 text-white" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Premium Furriyadh Payment Card */}
             <div className="bg-white dark:bg-[#0c1427] rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
                 {/* Header */}
@@ -649,207 +933,432 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                     </h4>
                     {/* Tabs */}
                     <div className="flex gap-3 mt-4">
-                        <button className="px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-semibold shadow-lg transition-transform active:scale-95 border border-white/30">
+                        <button
+                            onClick={() => setActiveTab('payment')}
+                            className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${activeTab === 'payment'
+                                ? 'bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/30'
+                                : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'}`}
+                        >
                             {isRTL ? 'طرق الدفع' : 'Payment methods'}
                         </button>
-                        <button className="px-5 py-2 bg-white/10 text-white/70 rounded-full text-sm font-semibold hover:bg-white/20 hover:text-white transition-colors">
+                        <button
+                            onClick={() => setActiveTab('history')}
+                            className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${activeTab === 'history'
+                                ? 'bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/30'
+                                : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'}`}
+                        >
                             {isRTL ? 'سجل الرصيد' : 'Balance history'}
                         </button>
                     </div>
                 </div>
 
-                {/* Two Column Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
-                    {/* Left: Payment Methods */}
-                    <div className="space-y-6">
-                        {/* Credit/Debit Cards Section */}
-                        <div className="animate-fade-in-up">
-                            <h5 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 px-1">
-                                {isRTL ? 'البطاقات والمحافظ' : 'Cards & Wallets'}
-                            </h5>
-                            <div className="flex flex-wrap gap-3">
-                                {PAYMENT_METHODS.filter(m => ['visa_mastercard', 'paypal', 'redotpay'].includes(m.id)).map((method) => (
-                                    <button
-                                        key={method.id}
-                                        onClick={() => {
-                                            setSelectedMethod(method.id);
-                                            setPreviewMethod(method.id);
-                                        }}
-                                        className={`group flex flex-row items-center gap-3 p-3 bg-white dark:bg-[#15203c] border rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${selectedMethod === method.id
-                                            ? 'border-purple-500 shadow-purple-500/20 ring-1 ring-purple-500/20'
-                                            : 'border-gray-100 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
-                                            }`}
-                                    >
-                                        <div className={`w-14 h-14 rounded-lg ${method.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
-                                            {method.iconSvg}
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-500 transition-colors whitespace-nowrap">
-                                                {isRTL ? method.nameAr : method.name}
-                                            </p>
-                                            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{method.feeDisplay}</p>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Crypto Section */}
-                        <div className="animate-fade-in-up md:delay-100">
-                            <h5 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 px-1">
-                                {isRTL ? 'العملات الرقمية' : 'Cryptocurrencies'}
-                            </h5>
-                            <div className="flex flex-wrap gap-3">
-                                {PAYMENT_METHODS.filter(m => ['usdt_crypto', 'binance_pay'].includes(m.id)).map((method) => (
-                                    <button
-                                        key={method.id}
-                                        onClick={() => {
-                                            setSelectedMethod(method.id);
-                                            setPreviewMethod(method.id);
-                                        }}
-                                        className={`group flex flex-row items-center gap-3 p-3 bg-white dark:bg-[#15203c] border rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${selectedMethod === method.id
-                                            ? 'border-purple-500 shadow-purple-500/20 ring-1 ring-purple-500/20'
-                                            : 'border-gray-100 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
-                                            }`}
-                                    >
-                                        <div className={`w-14 h-14 rounded-lg ${method.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
-                                            {method.iconSvg}
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-500 transition-colors whitespace-nowrap">
-                                                {isRTL ? method.nameAr : method.name}
-                                            </p>
-                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-medium">
-                                                {method.feeDisplay}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right: Amount Input */}
-                    <div className="bg-gray-50 dark:bg-[#15203c] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 h-fit">
-                        <h5 className="text-sm font-bold text-gray-900 dark:text-white mb-5 uppercase tracking-wide flex items-center justify-between">
-                            {isRTL ? 'المبلغ المراد إضافته ($):' : 'Amount to add, $:'}
-                            <span className="text-xs font-normal normal-case bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 px-2 py-1 rounded">
-                                {isRTL ? 'الحد الأدنى $10' : 'Min $10'}
-                            </span>
-                        </h5>
-
-                        {/* Selected Payment Method Display */}
-                        {selectedMethod && (() => {
-                            const method = PAYMENT_METHODS.find(m => m.id === selectedMethod);
-                            if (!method) return null;
-                            return (
-                                <div className="flex items-center gap-3 p-3 mb-5 bg-white dark:bg-[#0c1427] border border-purple-200 dark:border-purple-800 rounded-xl">
-                                    <div className={`w-10 h-10 rounded-lg ${method.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
-                                        {method.iconSvg}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                            {isRTL ? method.nameAr : method.name}
-                                        </p>
-                                        <p className="text-[10px] text-gray-500 dark:text-gray-400">{method.feeDisplay}</p>
-                                    </div>
-                                    <Check className="w-5 h-5 text-purple-600" />
+                {/* Two Column Layout - Payment Methods Tab */}
+                {activeTab === 'payment' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
+                        {/* Left: Payment Methods */}
+                        <div className="space-y-6">
+                            {/* Credit/Debit Cards Section */}
+                            <div className="animate-fade-in-up">
+                                <h5 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 px-1">
+                                    {isRTL ? 'البطاقات والمحافظ' : 'Cards & Wallets'}
+                                </h5>
+                                <div className="flex flex-wrap gap-3">
+                                    {PAYMENT_METHODS.filter(m => ['visa_mastercard', 'paypal', 'redotpay'].includes(m.id)).map((method) => (
+                                        <button
+                                            key={method.id}
+                                            onClick={() => {
+                                                setSelectedMethod(method.id);
+                                                setPreviewMethod(method.id);
+                                            }}
+                                            className={`group flex flex-row items-center gap-3 p-3 bg-white dark:bg-[#15203c] border rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${selectedMethod === method.id
+                                                ? 'border-purple-500 shadow-purple-500/20 ring-1 ring-purple-500/20'
+                                                : 'border-gray-100 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
+                                                }`}
+                                        >
+                                            <div className={`w-14 h-14 rounded-lg ${method.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
+                                                {method.iconSvg}
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-500 transition-colors whitespace-nowrap">
+                                                    {isRTL ? method.nameAr : method.name}
+                                                </p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{method.feeDisplay}</p>
+                                            </div>
+                                        </button>
+                                    ))}
                                 </div>
-                            );
-                        })()}
-                        {!selectedMethod && (
-                            <div
-                                className={`p-3 mb-5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl text-center transition-all ${shakeWarning ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : ''}`}
-                                style={shakeWarning ? {
-                                    animation: 'shake 0.5s ease-in-out'
-                                } : {}}
-                            >
-                                <style>{`
+                            </div>
+
+                            {/* Crypto Section */}
+                            <div className="animate-fade-in-up md:delay-100">
+                                <h5 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 px-1">
+                                    {isRTL ? 'العملات الرقمية' : 'Cryptocurrencies'}
+                                </h5>
+                                <div className="flex flex-wrap gap-3">
+                                    {PAYMENT_METHODS.filter(m => ['usdt_crypto', 'binance_pay'].includes(m.id)).map((method) => (
+                                        <button
+                                            key={method.id}
+                                            onClick={() => {
+                                                setSelectedMethod(method.id);
+                                                setPreviewMethod(method.id);
+                                            }}
+                                            className={`group flex flex-row items-center gap-3 p-3 bg-white dark:bg-[#15203c] border rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${selectedMethod === method.id
+                                                ? 'border-purple-500 shadow-purple-500/20 ring-1 ring-purple-500/20'
+                                                : 'border-gray-100 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
+                                                }`}
+                                        >
+                                            <div className={`w-14 h-14 rounded-lg ${method.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
+                                                {method.iconSvg}
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-500 transition-colors whitespace-nowrap">
+                                                    {isRTL ? method.nameAr : method.name}
+                                                </p>
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-medium">
+                                                    {method.feeDisplay}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: Amount Input */}
+                        <div className="bg-gray-50 dark:bg-[#15203c] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 h-fit">
+                            <h5 className="text-sm font-bold text-gray-900 dark:text-white mb-5 uppercase tracking-wide flex items-center justify-between">
+                                {isRTL ? 'المبلغ المراد إضافته ($):' : 'Amount to add, $:'}
+                                <span className="text-xs font-normal normal-case bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 px-2 py-1 rounded">
+                                    {isRTL ? 'الحد الأدنى $10' : 'Min $10'}
+                                </span>
+                            </h5>
+
+                            {/* Selected Payment Method Display */}
+                            {selectedMethod && (() => {
+                                const method = PAYMENT_METHODS.find(m => m.id === selectedMethod);
+                                if (!method) return null;
+                                return (
+                                    <div className="flex items-center gap-3 p-3 mb-5 bg-white dark:bg-[#0c1427] border border-purple-200 dark:border-purple-800 rounded-xl">
+                                        <div className={`w-10 h-10 rounded-lg ${method.iconBg} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
+                                            {method.iconSvg}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                                {isRTL ? method.nameAr : method.name}
+                                            </p>
+                                            <p className="text-[10px] text-gray-500 dark:text-gray-400">{method.feeDisplay}</p>
+                                        </div>
+                                        <Check className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                );
+                            })()}
+                            {!selectedMethod && (
+                                <div
+                                    className={`p-3 mb-5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl text-center transition-all ${shakeWarning ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : ''}`}
+                                    style={shakeWarning ? {
+                                        animation: 'shake 0.5s ease-in-out'
+                                    } : {}}
+                                >
+                                    <style>{`
                                     @keyframes shake {
                                         0%, 100% { transform: translateX(0); }
                                         10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
                                         20%, 40%, 60%, 80% { transform: translateX(5px); }
                                     }
                                 `}</style>
-                                <p className={`text-xs ${shakeWarning ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-yellow-700 dark:text-yellow-400'}`}>
-                                    {isRTL ? 'اختر طريقة الدفع من اليسار' : 'Select a payment method from the left'}
-                                </p>
-                            </div>
-                        )}
+                                    <p className={`text-xs ${shakeWarning ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-yellow-700 dark:text-yellow-400'}`}>
+                                        {isRTL ? 'اختر طريقة الدفع من اليسار' : 'Select a payment method from the left'}
+                                    </p>
+                                </div>
+                            )}
 
-                        {/* Amount Input Row */}
-                        <div className="flex gap-4 mb-6">
-                            <div className="relative flex-1 group">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-bold group-focus-within:text-purple-500 transition-colors">$</span>
-                                <input
-                                    type="number"
-                                    min="10"
-                                    value={campaignBudget}
-                                    onChange={(e) => setCampaignBudget(Math.max(10, Number(e.target.value)))}
-                                    className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-2xl font-bold text-gray-900 dark:text-white bg-white dark:bg-[#0c1427] focus:border-purple-500 focus:ring-0 focus:outline-none transition-all placeholder-gray-300"
-                                />
+                            {/* Amount Input Row */}
+                            <div className="flex gap-4 mb-6">
+                                <div className="relative flex-1 group">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-bold group-focus-within:text-purple-500 transition-colors">$</span>
+                                    <input
+                                        type="number"
+                                        min="10"
+                                        value={campaignBudget}
+                                        onChange={(e) => setCampaignBudget(Math.max(10, Number(e.target.value)))}
+                                        className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-2xl font-bold text-gray-900 dark:text-white bg-white dark:bg-[#0c1427] focus:border-purple-500 focus:ring-0 focus:outline-none transition-all placeholder-gray-300"
+                                    />
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        if (selectedMethod) {
+                                            setShowPaymentModal(true);
+                                        } else {
+                                            setShakeWarning(true);
+                                            setTimeout(() => setShakeWarning(false), 600);
+                                        }
+                                    }}
+                                    className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 hover:-translate-y-0.5 active:translate-y-0"
+                                >
+                                    {isRTL ? 'إضافة' : 'Add'}
+                                </button>
                             </div>
+
+                            {/* Quick Amounts */}
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                {quickAmounts.map((amount) => (
+                                    <button
+                                        key={amount}
+                                        onClick={() => setCampaignBudget(amount)}
+                                        className={`px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${campaignBudget === amount
+                                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                                            : 'bg-white dark:bg-[#0c1427] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400'
+                                            }`}
+                                    >
+                                        ${amount}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Summary */}
+                            <div className="bg-white dark:bg-[#0c1427] rounded-xl p-4 space-y-3 border border-gray-100 dark:border-gray-800 shadow-sm">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-gray-500 dark:text-gray-400">{isRTL ? 'الميزانية' : 'Budget'}</span>
+                                    <span className="font-bold text-gray-900 dark:text-white">${campaignBudget.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-amber-600 dark:text-amber-500 flex items-center gap-1">
+                                        <Sparkles className="w-3 h-3" />
+                                        {isRTL ? 'العمولة (20%)' : 'Commission (20%)'}
+                                    </span>
+                                    <span className="font-bold text-amber-600 dark:text-amber-500">${commission.toFixed(2)}</span>
+                                </div>
+                                {processingFee > 0 && (
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-purple-600 dark:text-purple-400">{isRTL ? 'رسوم البوابة' : 'Gateway Fee'}</span>
+                                        <span className="font-bold text-purple-600 dark:text-purple-400">${processingFee.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center border-t border-dashed border-gray-200 dark:border-gray-700 pt-3 mt-2">
+                                    <span className="font-bold text-gray-900 dark:text-white text-base">{isRTL ? 'الإجمالي' : 'Total'}</span>
+                                    <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 text-xl">
+                                        ${totalPayment.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                )}
+
+                {/* Balance History Tab */}
+                {activeTab === 'history' && (
+                    <div className="p-6">
+                        {/* Filters & Export Toolbar */}
+                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                {/* Search Input */}
+                                <div className="relative flex-1 sm:flex-none sm:w-48">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder={isRTL ? 'بحث...' : 'Search...'}
+                                        className="w-full bg-gray-100 dark:bg-[#15203c] text-gray-700 dark:text-gray-300 text-sm pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-400"
+                                    />
+                                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+
+                                {/* Type Filter */}
+                                <div className="relative">
+                                    <select
+                                        value={typeFilter}
+                                        onChange={(e) => { setTypeFilter(e.target.value as any); setCurrentPage(1); }}
+                                        className="appearance-none bg-gray-100 dark:bg-[#15203c] text-gray-700 dark:text-gray-300 text-sm px-3 py-2 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="all">{isRTL ? 'جميع المعاملات' : 'All Types'}</option>
+                                        <option value="deposit">{isRTL ? 'الإيداعات' : 'Deposits'}</option>
+                                        <option value="refund">{isRTL ? 'الاستردادات' : 'Refunds'}</option>
+                                        <option value="campaign">{isRTL ? 'مصروفات الحملات' : 'Campaign Spending'}</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                </div>
+
+                                {/* Date Filter */}
+                                <div className="relative">
+                                    <select
+                                        value={dateFilter}
+                                        onChange={(e) => { setDateFilter(e.target.value as any); setCurrentPage(1); }}
+                                        className="appearance-none bg-gray-100 dark:bg-[#15203c] text-gray-700 dark:text-gray-300 text-sm px-3 py-2 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    >
+                                        <option value="all">{isRTL ? 'كل الوقت' : 'All Time'}</option>
+                                        <option value="7days">{isRTL ? 'آخر 7 أيام' : 'Last 7 Days'}</option>
+                                        <option value="30days">{isRTL ? 'آخر 30 يوم' : 'Last 30 Days'}</option>
+                                        <option value="90days">{isRTL ? 'آخر 90 يوم' : 'Last 90 Days'}</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                </div>
+
+                                {/* Transaction Count */}
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    {totalCount} {isRTL ? 'معاملة' : 'transactions'}
+                                </span>
+
+                                {/* Real-time Indicator */}
+                                <div className="hidden sm:flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                    </span>
+                                    <span>{isRTL ? 'تحديث تلقائي' : 'Auto-refresh'}</span>
+                                </div>
+                            </div>
+
+                            {/* Export Button */}
                             <button
-                                onClick={() => {
-                                    if (selectedMethod) {
-                                        setShowPaymentModal(true);
-                                    } else {
-                                        setShakeWarning(true);
-                                        setTimeout(() => setShakeWarning(false), 600);
-                                    }
-                                }}
-                                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 hover:-translate-y-0.5 active:translate-y-0"
+                                onClick={exportToCSV}
+                                disabled={isExporting || transactions.length === 0}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all disabled:opacity-50"
                             >
-                                {isRTL ? 'إضافة' : 'Add'}
+                                <Download className="w-4 h-4" />
+                                {isExporting ? (isRTL ? 'جاري التصدير...' : 'Exporting...') : (isRTL ? 'تصدير CSV' : 'Export CSV')}
                             </button>
                         </div>
 
-                        {/* Quick Amounts */}
-                        <div className="flex flex-wrap gap-2 mb-6">
-                            {quickAmounts.map((amount) => (
-                                <button
-                                    key={amount}
-                                    onClick={() => setCampaignBudget(amount)}
-                                    className={`px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${campaignBudget === amount
-                                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                                        : 'bg-white dark:bg-[#0c1427] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400'
-                                        }`}
-                                >
-                                    ${amount}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Summary */}
-                        <div className="bg-white dark:bg-[#0c1427] rounded-xl p-4 space-y-3 border border-gray-100 dark:border-gray-800 shadow-sm">
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">{isRTL ? 'الميزانية' : 'Budget'}</span>
-                                <span className="font-bold text-gray-900 dark:text-white">${campaignBudget.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-amber-600 dark:text-amber-500 flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3" />
-                                    {isRTL ? 'العمولة (20%)' : 'Commission (20%)'}
-                                </span>
-                                <span className="font-bold text-amber-600 dark:text-amber-500">${commission.toFixed(2)}</span>
-                            </div>
-                            {processingFee > 0 && (
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-purple-600 dark:text-purple-400">{isRTL ? 'رسوم البوابة' : 'Gateway Fee'}</span>
-                                    <span className="font-bold text-purple-600 dark:text-purple-400">${processingFee.toFixed(2)}</span>
+                        <div className="space-y-4">
+                            {/* Loading State */}
+                            {isLoadingTransactions && (
+                                <div className="space-y-3">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#15203c] rounded-xl animate-pulse">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                                <div className="space-y-2">
+                                                    <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                                    <div className="w-20 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                                </div>
+                                            </div>
+                                            <div className="w-16 h-5 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-                            <div className="flex justify-between items-center border-t border-dashed border-gray-200 dark:border-gray-700 pt-3 mt-2">
-                                <span className="font-bold text-gray-900 dark:text-white text-base">{isRTL ? 'الإجمالي' : 'Total'}</span>
-                                <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 text-xl">
-                                    ${totalPayment.toFixed(2)}
-                                </span>
-                            </div>
+
+                            {/* Real Transaction History */}
+                            {!isLoadingTransactions && transactions.length > 0 && transactions
+                                .filter(tx => {
+                                    if (!searchQuery.trim()) return true;
+                                    const query = searchQuery.toLowerCase();
+                                    return (
+                                        tx.method?.toLowerCase().includes(query) ||
+                                        tx.description?.toLowerCase().includes(query) ||
+                                        tx.id.toLowerCase().includes(query) ||
+                                        tx.type.toLowerCase().includes(query)
+                                    );
+                                })
+                                .map((tx) => (
+                                    <div key={tx.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-[#15203c] rounded-xl border border-gray-100 dark:border-gray-800 gap-3 sm:gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'deposit' ? 'bg-green-100 dark:bg-green-900/30' :
+                                                tx.type === 'refund' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                                                    'bg-orange-100 dark:bg-orange-900/30'
+                                                }`}>
+                                                {tx.type === 'deposit' ? (
+                                                    <Plus className={`w-5 h-5 text-green-600 dark:text-green-400`} />
+                                                ) : tx.type === 'refund' ? (
+                                                    <ArrowDownLeft className={`w-5 h-5 text-blue-600 dark:text-blue-400`} />
+                                                ) : (
+                                                    <Zap className={`w-5 h-5 text-orange-600 dark:text-orange-400`} />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                                    {tx.type === 'deposit' ? (isRTL ? 'إيداع عبر ' : 'Deposit via ') + (tx.method || 'Unknown') :
+                                                        tx.type === 'refund' ? (isRTL ? 'استرداد: ' : 'Refund: ') + (tx.description || '') :
+                                                            tx.description || (isRTL ? 'إنفاق حملة' : 'Campaign spending')}
+                                                </p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {new Date(tx.date).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', {
+                                                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            {/* Invoice Download for Deposits */}
+                                            {tx.type === 'deposit' && (
+                                                <button
+                                                    onClick={() => {
+                                                        const invoiceUrl = `/api/invoice?transactionId=${tx.id}&email=${userEmail}&method=${tx.method || 'Unknown'}&gross=${Math.abs(tx.amount / 0.8).toFixed(2)}&commission=${(Math.abs(tx.amount / 0.8) * 0.2).toFixed(2)}&rate=20&net=${Math.abs(tx.amount).toFixed(2)}&status=${tx.status}&date=${encodeURIComponent(new Date(tx.date).toLocaleDateString('en-US', { dateStyle: 'long' }))}`;
+                                                        window.open(invoiceUrl, '_blank');
+                                                    }}
+                                                    className="p-2 text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-all"
+                                                    title={isRTL ? 'تحميل الفاتورة' : 'Download Invoice'}
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            <div className="text-right">
+                                                <p className={`font-bold text-sm ${tx.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                    {tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} $
+                                                </p>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full ${tx.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
+                                                    tx.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
+                                                        'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                                    }`}>
+                                                    {tx.status === 'completed' ? (isRTL ? 'مكتمل' : 'Completed') :
+                                                        tx.status === 'pending' ? (isRTL ? 'قيد الانتظار' : 'Pending') :
+                                                            (isRTL ? 'فشل' : 'Failed')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                            {/* Empty State */}
+                            {!isLoadingTransactions && transactions.length === 0 && (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                                        <CreditCard className="w-8 h-8 text-gray-400" />
+                                    </div>
+                                    <p className="text-gray-500 dark:text-gray-400 font-medium">
+                                        {isRTL ? 'لا توجد معاملات بعد' : 'No transactions yet'}
+                                    </p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                        {isRTL ? 'ستظهر هنا سجلات الإيداع والإنفاق' : 'Deposit and spending records will appear here'}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Pagination Controls */}
+                            {!isLoadingTransactions && totalPages > 1 && (
+                                <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#15203c] rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        {isRTL ? 'السابق' : 'Previous'}
+                                    </button>
+
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        {isRTL
+                                            ? `${currentPage} من ${totalPages}`
+                                            : `Page ${currentPage} of ${totalPages}`}
+                                    </span>
+
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#15203c] rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isRTL ? 'التالي' : 'Next'}
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
-
-
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Payment Modal - Centered in content area (accounting for sidebar) */}
@@ -921,17 +1430,53 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                             {selectedMethod === 'redotpay' && renderRedotPayInstructions()}
                             {selectedMethod === 'visa_mastercard' && renderCardPaymentForm()}
                             {selectedMethod === 'paypal' && (
-                                <div className="text-center py-8">
-                                    <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                        <svg className="w-14 h-14 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.641.641 0 0 1 .633-.544h6.033c2.834 0 4.835 1.89 4.4 4.72-.483 3.142-3.116 5.39-6.419 5.39H7.562l-1.277 8.051a.641.641 0 0 1-.633.544h-.576z" />
-                                        </svg>
+                                <div className="py-6">
+                                    <div className="text-center mb-6">
+                                        <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                            <svg className="w-12 h-12 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.641.641 0 0 1 .633-.544h6.033c2.834 0 4.835 1.89 4.4 4.72-.483 3.142-3.116 5.39-6.419 5.39H7.562l-1.277 8.051a.641.641 0 0 1-.633.544h-.576z" />
+                                            </svg>
+                                        </div>
+                                        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                                            {isRTL ? 'الدفع الآمن عبر PayPal' : 'Secure Payment via PayPal'}
+                                        </h4>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            {isRTL ? `المبلغ: $${totalPayment.toFixed(2)}` : `Amount: $${totalPayment.toFixed(2)}`}
+                                        </p>
                                     </div>
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                                        {isRTL ? 'الدفع عبر PayPal' : 'Pay with PayPal'}
-                                    </h4>
-                                    <p className="text-gray-500">
-                                        {isRTL ? 'سيتم توجيهك إلى PayPal لإتمام الدفع' : 'You will be redirected to PayPal'}
+
+                                    {/* Real PayPal Buttons */}
+                                    <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: 'USD' }}>
+                                        <PayPalButtons
+                                            style={{ layout: 'vertical', shape: 'pill', color: 'blue' }}
+                                            createOrder={(data, actions) => {
+                                                return actions.order.create({
+                                                    purchase_units: [{
+                                                        amount: {
+                                                            currency_code: 'USD',
+                                                            value: totalPayment.toFixed(2)
+                                                        },
+                                                        description: `Furriyadh Credit - $${campaignBudget.toFixed(2)} after commission`,
+                                                        custom_id: userEmail
+                                                    }],
+                                                    intent: 'CAPTURE'
+                                                });
+                                            }}
+                                            onApprove={async (data, actions) => {
+                                                const details = await actions.order?.capture();
+                                                if (details) {
+                                                    handlePayPalSuccess(details);
+                                                }
+                                            }}
+                                            onError={(err) => {
+                                                console.error('PayPal error:', err);
+                                                alert(isRTL ? 'فشل الدفع. يرجى المحاولة مرة أخرى.' : 'Payment failed. Please try again.');
+                                            }}
+                                        />
+                                    </PayPalScriptProvider>
+
+                                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+                                        {isRTL ? 'معاملة آمنة ومشفرة' : 'Secure and encrypted transaction'}
                                     </p>
                                 </div>
                             )}
@@ -939,7 +1484,7 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
 
                         {/* Modal Footer */}
                         <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
-                            {selectedMethod === 'visa_mastercard' || selectedMethod === 'paypal' ? (
+                            {selectedMethod === 'visa_mastercard' ? (
                                 <button
                                     onClick={handleSubmitPayment}
                                     disabled={isProcessing}
@@ -980,8 +1525,7 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                         </div>
                     </div>
                 </div>
-            )
-            }
+            )}
         </>
     );
 };

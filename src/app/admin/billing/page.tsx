@@ -15,7 +15,9 @@ import {
     Filter,
     Download,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    RotateCcw,
+    Send
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -53,7 +55,47 @@ const AdminBillingDashboard: React.FC = () => {
     const [language, setLanguage] = useState<'en' | 'ar'>('en');
     const [isRTL, setIsRTL] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'commissions' | 'users'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'commissions' | 'users' | 'refunds'>('overview');
+
+    // Refund states
+    const [refundEmail, setRefundEmail] = useState('');
+    const [refundAmount, setRefundAmount] = useState('');
+    const [refundReason, setRefundReason] = useState('');
+    const [refundLoading, setRefundLoading] = useState(false);
+    const [refundMessage, setRefundMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+    const handleProcessRefund = async () => {
+        if (!refundEmail || !refundAmount) {
+            setRefundMessage({ type: 'error', text: 'Email and amount are required' });
+            return;
+        }
+        setRefundLoading(true);
+        setRefundMessage(null);
+        try {
+            const res = await fetch('/admin/billing/refund', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: refundEmail,
+                    amount: parseFloat(refundAmount),
+                    reason: refundReason
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setRefundMessage({ type: 'success', text: `Refunded $${refundAmount} to ${refundEmail}` });
+                setRefundEmail('');
+                setRefundAmount('');
+                setRefundReason('');
+            } else {
+                setRefundMessage({ type: 'error', text: data.error || 'Refund failed' });
+            }
+        } catch (err: any) {
+            setRefundMessage({ type: 'error', text: err.message });
+        } finally {
+            setRefundLoading(false);
+        }
+    };
 
     // Data states
     const [stats, setStats] = useState<DashboardStats>({
@@ -256,14 +298,15 @@ const AdminBillingDashboard: React.FC = () => {
                     { id: 'overview', label: isRTL ? 'نظرة عامة' : 'Overview' },
                     { id: 'accounts', label: isRTL ? 'الحسابات المُدارة' : 'Managed Accounts' },
                     { id: 'commissions', label: isRTL ? 'العمولات' : 'Commissions' },
+                    { id: 'refunds', label: isRTL ? 'الاستردادات' : 'Refunds' },
                     { id: 'users', label: isRTL ? 'المستخدمين' : 'Users' },
                 ].map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                     >
                         {tab.label}
@@ -343,10 +386,10 @@ const AdminBillingDashboard: React.FC = () => {
                                             </td>
                                             <td className="py-3 px-4">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${account.status === 'available'
-                                                        ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400'
-                                                        : account.status === 'assigned'
-                                                            ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                                    ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                                                    : account.status === 'assigned'
+                                                        ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                                                     }`}>
                                                     {account.status === 'available' ? (isRTL ? 'متاح' : 'Available') :
                                                         account.status === 'assigned' ? (isRTL ? 'مُعين' : 'Assigned') :
@@ -358,7 +401,7 @@ const AdminBillingDashboard: React.FC = () => {
                                                     <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                                         <div
                                                             className={`h-full rounded-full ${account.trust_score >= 80 ? 'bg-green-500' :
-                                                                    account.trust_score >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                account.trust_score >= 50 ? 'bg-yellow-500' : 'bg-red-500'
                                                                 }`}
                                                             style={{ width: `${account.trust_score}%` }}
                                                         />
@@ -424,10 +467,10 @@ const AdminBillingDashboard: React.FC = () => {
                                             </td>
                                             <td className="py-3 px-4">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${commission.status === 'paid'
-                                                        ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400'
-                                                        : commission.status === 'pending'
-                                                            ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
-                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                                    ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                                                    : commission.status === 'pending'
+                                                        ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
+                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                                                     }`}>
                                                     {commission.status === 'paid' ? (isRTL ? 'مدفوع' : 'Paid') :
                                                         commission.status === 'pending' ? (isRTL ? 'معلق' : 'Pending') :
@@ -511,6 +554,86 @@ const AdminBillingDashboard: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Refunds Tab */}
+                {activeTab === 'refunds' && (
+                    <div className="p-6">
+                        <div className="max-w-2xl mx-auto">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                                    <RotateCcw className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h6 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        {isRTL ? 'معالجة استرداد' : 'Process Refund'}
+                                    </h6>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {isRTL ? 'أدخل بيانات العميل لمعالجة الاسترداد' : 'Enter customer details to process refund'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {refundMessage && (
+                                <div className={`p-4 rounded-lg mb-4 ${refundMessage.type === 'success' ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'}`}>
+                                    {refundMessage.text}
+                                </div>
+                            )}
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        {isRTL ? 'البريد الإلكتروني للعميل' : 'Customer Email'}
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={refundEmail}
+                                        onChange={(e) => setRefundEmail(e.target.value)}
+                                        placeholder="customer@example.com"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        {isRTL ? 'مبلغ الاسترداد ($)' : 'Refund Amount ($)'}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={refundAmount}
+                                        onChange={(e) => setRefundAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        {isRTL ? 'سبب الاسترداد' : 'Refund Reason'}
+                                    </label>
+                                    <textarea
+                                        value={refundReason}
+                                        onChange={(e) => setRefundReason(e.target.value)}
+                                        placeholder={isRTL ? 'سبب الاسترداد (اختياري)' : 'Reason for refund (optional)'}
+                                        rows={3}
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleProcessRefund}
+                                    disabled={refundLoading || !refundEmail || !refundAmount}
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors"
+                                >
+                                    {refundLoading ? (
+                                        <RefreshCw className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <Send className="w-5 h-5" />
+                                    )}
+                                    {isRTL ? 'معالجة الاسترداد' : 'Process Refund'}
+                                </button>
                             </div>
                         </div>
                     </div>
