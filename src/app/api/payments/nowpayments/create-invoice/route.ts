@@ -67,12 +67,15 @@ export async function POST(request: NextRequest) {
         // Get base URL for callbacks
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-        // Create invoice via NowPayments API
+        // Create invoice via NowPayments API  
+        // Using 'usdttrc20' as price_currency ensures exact USDT amount without USD conversion
         const invoiceData = {
             price_amount: amount,
-            price_currency: 'usd',
+            price_currency: 'usdttrc20',  // USDT on TRON - exact amount, no conversion
+            pay_currency: 'usdttrc20',     // Lock to TRC20 for fastest/cheapest
             order_id: order_id || `ORDER_${Date.now()}`,
             order_description: description || `Payment for ${email}`,
+            customer_email: email,         // IMPORTANT: Needed for webhook to identify user
             ipn_callback_url: `${baseUrl}/api/payments/nowpayments/webhook`,
             success_url: success_url || `${baseUrl}/google-ads/billing?payment=success`,
             cancel_url: cancel_url || `${baseUrl}/google-ads/billing?payment=cancelled`,

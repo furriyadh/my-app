@@ -326,25 +326,16 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
             {/* Two-Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* LEFT: Payment Methods */}
-                <div className="bg-white dark:bg-gray-800/50 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
-                                <CreditCard className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                                    {isRTL ? 'طرق الدفع' : 'Payment Methods'}
-                                </h3>
-                                <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                                    {isRTL ? 'إدارة بطاقاتك' : 'Manage your cards'}
-                                </p>
-                            </div>
+                <div className="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+                    <div className="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
+                        <div className="trezo-card-title">
+                            <h5 className="!mb-0">
+                                {isRTL ? 'طرق الدفع' : 'Payment Methods'}
+                            </h5>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
+                        <div className="flex items-center gap-1 text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md">
                             <Shield className="w-3 h-3" />
-                            <span className="font-medium">{isRTL ? 'آمن' : 'Secure'}</span>
+                            <span>{isRTL ? 'آمن' : 'Secure'}</span>
                         </div>
                     </div>
 
@@ -359,7 +350,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                 {paymentMethods.map((method, index) => (
                                     <div
                                         key={method.id}
-                                        className={`relative flex items-center gap-4 p-3 rounded-xl border-2 transition-all cursor-pointer hover:shadow-md ${method.isDefault
+                                        className={`relative flex items-center gap-4 p-3 rounded-md border transition-all cursor-pointer hover:shadow-sm ${method.isDefault
                                             ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-900/20'
                                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                             }`}
@@ -408,7 +399,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                                 <MoreVertical className="w-4 h-4 text-gray-400" />
                                             </button>
                                             {activeMenu === method.id && (
-                                                <div className="absolute right-0 top-8 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-1.5 min-w-[140px] z-20 border border-gray-100 dark:border-gray-700">
+                                                <div className="absolute right-0 top-8 bg-white dark:bg-gray-800 rounded-md shadow-xl py-1.5 min-w-[140px] z-20 border border-gray-100 dark:border-gray-700">
                                                     {!method.isDefault && (
                                                         <button
                                                             onClick={() => setDefaultMethod(method.id)}
@@ -432,7 +423,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                 ))}
 
                                 {paymentMethods.length === 0 && (
-                                    <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                    <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-md border-2 border-dashed border-gray-200 dark:border-gray-700">
                                         <CreditCard className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                                         <p className="text-gray-500 dark:text-gray-400 text-sm">
                                             {isRTL ? 'لا توجد بطاقات محفوظة' : 'No cards saved'}
@@ -444,7 +435,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                             {/* Add Card Button */}
                             <button
                                 onClick={() => setShowAddCard(true)}
-                                className="mt-4 w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all text-gray-500 dark:text-gray-400 hover:text-primary-600 group"
+                                className="mt-4 w-full flex items-center justify-center gap-2 p-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-md hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all text-gray-500 dark:text-gray-400 hover:text-primary-600 group"
                             >
                                 <Plus className="w-4 h-4" />
                                 <span className="text-sm font-medium">{isRTL ? 'إضافة بطاقة' : 'Add Card'}</span>
@@ -454,26 +445,17 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                 </div>
 
                 {/* RIGHT: Billing Address */}
-                <div className="bg-white dark:bg-gray-800/50 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-                                <MapPin className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                                    {isRTL ? 'عنوان الفوترة' : 'Billing Address'}
-                                </h3>
-                                <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                                    {isRTL ? 'عنوان الفواتير' : 'Invoice address'}
-                                </p>
-                            </div>
+                <div className="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+                    <div className="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
+                        <div className="trezo-card-title">
+                            <h5 className="!mb-0">
+                                {isRTL ? 'عنوان الفوترة' : 'Billing Address'}
+                            </h5>
                         </div>
                     </div>
 
                     {/* Address Card */}
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-4 border border-gray-100 dark:border-gray-700">
                         {billingAddress.company || billingAddress.street || billingAddress.country ? (
                             <div className="space-y-2">
                                 {billingAddress.company && (
@@ -537,7 +519,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                             </div>
                             <button
                                 onClick={() => setShowAddCard(false)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
                             >
                                 <X className="w-5 h-5 text-gray-500" />
                             </button>
@@ -556,7 +538,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                         onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                                         maxLength={19}
                                         placeholder="4242 4242 4242 4242"
-                                        className={`w-full px-4 py-3 border-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12 ${cardValidationStatus.status === 'valid' ? 'border-green-500' :
+                                        className={`w-full px-4 py-3 border-2 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12 ${cardValidationStatus.status === 'valid' ? 'border-green-500' :
                                             cardValidationStatus.status === 'invalid' ? 'border-red-500' :
                                                 'border-gray-200 dark:border-gray-700'
                                             }`}
@@ -586,7 +568,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                         onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
                                         maxLength={5}
                                         placeholder="MM/YY"
-                                        className={`w-full px-4 py-3 border-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center ${cardExpiry.length === 5 ? (expiryValid ? 'border-green-500' : 'border-red-500') : 'border-gray-200 dark:border-gray-700'
+                                        className={`w-full px-4 py-3 border-2 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center ${cardExpiry.length === 5 ? (expiryValid ? 'border-green-500' : 'border-red-500') : 'border-gray-200 dark:border-gray-700'
                                             }`}
                                     />
                                 </div>
@@ -600,7 +582,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                         onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
                                         maxLength={4}
                                         placeholder="•••"
-                                        className={`w-full px-4 py-3 border-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center ${cvvValid ? 'border-green-500' : 'border-gray-200 dark:border-gray-700'
+                                        className={`w-full px-4 py-3 border-2 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center ${cvvValid ? 'border-green-500' : 'border-gray-200 dark:border-gray-700'
                                             }`}
                                     />
                                 </div>
@@ -616,13 +598,13 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                                     value={cardName}
                                     onChange={(e) => setCardName(e.target.value.toUpperCase())}
                                     placeholder="JOHN DOE"
-                                    className={`w-full px-4 py-3 border-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white uppercase tracking-wide ${cardName.length >= 3 ? 'border-green-500' : 'border-gray-200 dark:border-gray-700'
+                                    className={`w-full px-4 py-3 border-2 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white uppercase tracking-wide ${cardName.length >= 3 ? 'border-green-500' : 'border-gray-200 dark:border-gray-700'
                                         }`}
                                 />
                             </div>
 
                             {/* Security Note */}
-                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
                                 <Lock className="w-4 h-4 text-green-500 flex-shrink-0" />
                                 <span>{isRTL ? 'بياناتك مشفرة ومحمية' : 'Your data is encrypted and secure'}</span>
                             </div>
@@ -631,7 +613,7 @@ export const SavedPaymentMethods: React.FC<SavedPaymentMethodsProps> = ({
                             <button
                                 onClick={handleAddCard}
                                 disabled={isAddingCard || cardValidationStatus.status !== 'valid' || !expiryValid || !cvvValid || cardName.length < 3}
-                                className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white rounded-md font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                             >
                                 {isAddingCard ? (
                                     <div className="flex items-center justify-center gap-2">

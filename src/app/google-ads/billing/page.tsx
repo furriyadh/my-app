@@ -325,22 +325,17 @@ const BillingPage: React.FC = () => {
         <>
             <div className="mb-[25px]">
                 {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-[25px]">
-                    <div>
-                        <h5 className="!mb-0 text-lg font-bold text-gray-900 dark:text-white">
-                            {isRTL ? 'الفوترة والاشتراكات' : 'Billing & Subscriptions'}
-                        </h5>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                            {isRTL ? 'إدارة خطتك وطرق الدفع والفواتير' : 'Manage your plan, payment methods, and invoices'}
-                        </p>
-                    </div>
+                <div className="mb-[25px]">
+                    <h5 className="!mb-0">
+                        {isRTL ? 'الفوترة والاشتراكات' : 'Billing & Subscriptions'}
+                    </h5>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px] mb-[25px]">
                     <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg bg-primary-50 dark:bg-primary-900/10">
+                            <div className="p-3 rounded-md bg-primary-50 dark:bg-primary-900/10">
                                 <Crown className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                             </div>
                             <div>
@@ -352,7 +347,7 @@ const BillingPage: React.FC = () => {
 
                     <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/10">
+                            <div className="p-3 rounded-md bg-orange-50 dark:bg-orange-900/10">
                                 <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                             </div>
                             <div>
@@ -364,7 +359,7 @@ const BillingPage: React.FC = () => {
 
                     <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/10">
+                            <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/10">
                                 <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
@@ -378,7 +373,7 @@ const BillingPage: React.FC = () => {
 
                     <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/10">
+                            <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/10">
                                 <Receipt className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
@@ -391,14 +386,18 @@ const BillingPage: React.FC = () => {
 
                 {/* 🔄 Billing Mode Toggle */}
                 <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md mb-[25px]">
-                    <h6 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        {isRTL ? 'اختر طريقة العمل' : 'Choose Your Billing Mode'}
-                    </h6>
+                    <div className="trezo-card-header mb-[20px] md:mb-[25px]">
+                        <div className="trezo-card-title">
+                            <h5 className="!mb-0">
+                                {isRTL ? 'اختر طريقة العمل' : 'Choose Your Billing Mode'}
+                            </h5>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Self-Managed Mode */}
                         <button
                             onClick={() => setBillingMode('self_managed')}
-                            className={`relative p-6 rounded-xl border-2 transition-all text-left ${billingMode === 'self_managed'
+                            className={`relative p-5 rounded-md border transition-all text-left ${billingMode === 'self_managed'
                                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                 }`}
@@ -427,7 +426,7 @@ const BillingPage: React.FC = () => {
                         {/* Managed Mode */}
                         <button
                             onClick={() => setBillingMode('managed')}
-                            className={`relative p-6 rounded-xl border-2 transition-all text-left ${billingMode === 'managed'
+                            className={`relative p-5 rounded-md border transition-all text-left ${billingMode === 'managed'
                                 ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                 }`}
@@ -518,14 +517,11 @@ const BillingPage: React.FC = () => {
                 {/* Self-Managed Plans Section */}
                 {billingMode === 'self_managed' && (
                     <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md mb-[25px]">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                            <div>
-                                <h6 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        <div className="trezo-card-header mb-[20px] md:mb-[25px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="trezo-card-title">
+                                <h5 className="!mb-0">
                                     {isRTL ? 'اختر خطتك' : 'Choose Your Plan'}
-                                </h6>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                                    {isRTL ? 'وفّر 17% مع الاشتراك السنوي' : 'Save 17% with annual billing'}
-                                </p>
+                                </h5>
                             </div>
                             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                                 <button
@@ -557,7 +553,7 @@ const BillingPage: React.FC = () => {
                             {plans.map((plan) => (
                                 <div
                                     key={plan.id}
-                                    className={`relative border-2 rounded-xl p-5 transition-all duration-300 hover:shadow-lg ${plan.popular
+                                    className={`relative border rounded-md p-4 transition-all hover:shadow-md ${plan.popular
                                         ? 'border-primary-500 dark:border-primary-400'
                                         : plan.current
                                             ? 'border-green-500 dark:border-green-400'
@@ -640,7 +636,7 @@ const BillingPage: React.FC = () => {
                                     <button
                                         onClick={() => handleUpgrade(plan.id)}
                                         disabled={plan.current}
-                                        className={`w-full py-2 rounded-lg font-medium text-sm transition-all ${plan.current
+                                        className={`w-full py-2 rounded-md font-medium text-sm transition-all ${plan.current
                                             ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
                                             : plan.popular
                                                 ? 'bg-primary-600 text-white hover:bg-primary-700'
@@ -700,7 +696,7 @@ const BillingPage: React.FC = () => {
                     onClick={() => setConfirmModal({ show: false, planId: '', planName: '', planNameAr: '' })}
                 >
                     <div
-                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-md relative shadow-2xl"
+                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 rounded-md w-full max-w-md relative shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Question Icon */}
@@ -727,13 +723,13 @@ const BillingPage: React.FC = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setConfirmModal({ show: false, planId: '', planName: '', planNameAr: '' })}
-                                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                                className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
                             >
                                 {isRTL ? 'إلغاء' : 'Cancel'}
                             </button>
                             <button
                                 onClick={confirmPlanChange}
-                                className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+                                className="flex-1 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors text-sm font-medium"
                             >
                                 {isRTL ? 'تأكيد' : 'Confirm'}
                             </button>
@@ -749,7 +745,7 @@ const BillingPage: React.FC = () => {
                     onClick={() => setSuccessModal({ show: false, planName: '', planNameAr: '' })}
                 >
                     <div
-                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-md relative shadow-2xl"
+                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 rounded-md w-full max-w-md relative shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Success Icon */}
@@ -778,7 +774,7 @@ const BillingPage: React.FC = () => {
                         {/* Button */}
                         <button
                             onClick={() => setSuccessModal({ show: false, planName: '', planNameAr: '' })}
-                            className="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium"
+                            className="w-full px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors text-sm font-medium"
                         >
                             {isRTL ? 'حسناً' : 'Got it'}
                         </button>
@@ -793,7 +789,7 @@ const BillingPage: React.FC = () => {
                     onClick={() => setShowManagedSetup(false)}
                 >
                     <div
-                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 rounded-2xl w-full max-w-lg relative shadow-2xl"
+                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 rounded-md w-full max-w-lg relative shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Crown Icon */}
@@ -849,7 +845,7 @@ const BillingPage: React.FC = () => {
                                     // Clear the query param
                                     router.push('/google-ads/billing');
                                 }}
-                                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                                className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
                             >
                                 {isRTL ? 'إلغاء' : 'Cancel'}
                             </button>
@@ -882,7 +878,7 @@ const BillingPage: React.FC = () => {
                                         router.push('/google-ads/billing');
                                     }
                                 }}
-                                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-colors font-medium"
+                                className="flex-1 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors text-sm font-medium"
                             >
                                 {isRTL ? 'تفعيل الآن' : 'Activate Now'}
                             </button>

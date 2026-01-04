@@ -27,7 +27,7 @@ import { supabase } from '@/lib/supabase';
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test';
 
 // Types
-type PaymentMethod = 'visa_mastercard' | 'usdt_crypto' | 'redotpay' | 'paypal';
+type PaymentMethod = 'visa_mastercard' | 'usdt_crypto' | 'paypal';
 type CryptoNetwork = 'TRC20' | 'BEP20';
 
 // Plan data matching billing page
@@ -61,16 +61,6 @@ const PAYMENT_METHODS = [
         feeDisplay: '+$1',
         calculateFee: () => 1,
         popular: true
-    },
-    {
-        id: 'redotpay' as PaymentMethod,
-        name: 'RedotPay',
-        nameAr: 'ريدوت باي',
-        iconPath: '/images/payment-method/redotpay.png',
-        processingTime: 'Instant',
-        processingTimeAr: 'فوري',
-        feeDisplay: '+$1',
-        calculateFee: () => 1,
     },
     {
         id: 'paypal' as PaymentMethod,
@@ -108,10 +98,7 @@ const CRYPTO_NETWORKS = [
     }
 ];
 
-// Payment info from env
-const PAYMENT_INFO = {
-    redotpay_uid: process.env.NEXT_PUBLIC_REDOTPAY_UID || 'REDOTPAY_UID_NOT_CONFIGURED',
-};
+// Payment info is no longer needed since RedotPay was removed
 
 function CheckoutContent() {
     const router = useRouter();
@@ -132,6 +119,15 @@ function CheckoutContent() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [paymentStep, setPaymentStep] = useState<'select' | 'details' | 'success'>('select');
+
+    // NowPayments state
+    const [nowPaymentsInvoice, setNowPaymentsInvoice] = useState<{
+        id: string;
+        invoice_url: string;
+        order_id: string;
+        amount: number;
+    } | null>(null);
+    const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
 
     // 💳 Saved Cards State
     interface SavedCard {
@@ -410,6 +406,45 @@ function CheckoutContent() {
         }
     };
 
+    // Create NowPayments invoice for USDT subscriptions
+    const createNowPaymentsInvoice = async () => {
+        if (!userEmail || planPrice <= 0) return;
+
+        setIsCreatingInvoice(true);
+
+        try {
+            const response = await fetch('/api/payments/nowpayments/create-invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: totalPayment,
+                    email: userEmail,
+                    order_id: `SUB-${planId.toUpperCase()}-${cycle.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+                    description: `${selectedPlan.name} Plan - ${cycle} subscription`,
+                    success_url: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`,
+                    cancel_url: `${window.location.origin}/google-ads/billing/checkout?plan=${planId}&cycle=${cycle}&payment=cancelled`,
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.invoice) {
+                console.log('✅ NowPayments invoice created:', data.invoice.id);
+                // Auto-redirect to NowPayments - no second button needed
+                window.open(data.invoice.invoice_url, '_blank');
+                setNowPaymentsInvoice(data.invoice);
+            } else {
+                console.error('❌ Failed to create invoice:', data.error);
+                alert(isRTL ? 'فشل إنشاء الفاتورة. حاول مرة أخرى.' : 'Failed to create invoice. Please try again.');
+            }
+        } catch (error) {
+            console.error('❌ Invoice creation error:', error);
+            alert(isRTL ? 'خطأ في الاتصال. حاول مرة أخرى.' : 'Connection error. Please try again.');
+        } finally {
+            setIsCreatingInvoice(false);
+        }
+    };
+
     // Render payment method selection
     const renderPaymentMethods = () => (
         <div className="grid grid-cols-1 gap-3">
@@ -420,7 +455,7 @@ function CheckoutContent() {
                         setSelectedMethod(method.id);
                         setPaymentStep('details');
                     }}
-                    className={`relative p-4 rounded-xl border-2 transition-all duration-300 flex items-center gap-4 ${selectedMethod === method.id
+                    className={`relative p-4 rounded-md border-2 transition-all duration-300 flex items-center gap-4 ${selectedMethod === method.id
                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-lg'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900'
                         }`}
@@ -431,7 +466,7 @@ function CheckoutContent() {
                         </span>
                     )}
 
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-md overflow-hidden bg-white flex items-center justify-center">
                         <Image
                             src={method.iconPath}
                             alt={method.name}
@@ -466,124 +501,87 @@ function CheckoutContent() {
     const renderPaymentDetails = () => {
         if (!selectedMethod) return null;
 
-        // USDT Crypto
+        // USDT Crypto with NowPayments
         if (selectedMethod === 'usdt_crypto') {
-            const network = CRYPTO_NETWORKS.find(n => n.id === selectedNetwork);
+            // We no longer show "Invoice Created" screen - NowPayments opens automatically
+            // Just show the payment button that creates invoice and opens payment page
+
+            // Initial state - show create invoice button
             return (
-                <div className="space-y-5">
-                    {/* Network Selection */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {CRYPTO_NETWORKS.map((net) => (
-                            <button
-                                key={net.id}
-                                onClick={() => setSelectedNetwork(net.id)}
-                                className={`relative p-4 rounded-xl border-2 transition-all ${selectedNetwork === net.id
-                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
-                                    : 'border-gray-200 dark:border-gray-700'
-                                    }`}
-                            >
-                                {net.recommended && (
-                                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                                        {isRTL ? 'مُوصى' : 'BEST'}
-                                    </span>
-                                )}
-                                <p className={`text-lg font-bold ${selectedNetwork === net.id ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>
-                                    {net.id}
-                                </p>
-                                <p className={`text-xs ${net.chainColor}`}>{net.chain}</p>
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Wallet Address */}
-                    {network && (
-                        <div className="bg-gray-900 rounded-xl p-5">
-                            <div className="bg-black/40 rounded-xl p-4 mb-3">
-                                <code className="text-sm font-mono text-green-400 break-all">
-                                    {network.walletAddress}
-                                </code>
-                            </div>
-                            <button
-                                onClick={() => copyToClipboard(network.walletAddress, 'wallet')}
-                                className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 ${copiedText === 'wallet'
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                                    }`}
-                            >
-                                {copiedText === 'wallet' ? (
-                                    <><Check className="w-5 h-5" />{isRTL ? 'تم النسخ!' : 'Copied!'}</>
-                                ) : (
-                                    <><Copy className="w-5 h-5" />{isRTL ? 'نسخ العنوان' : 'Copy Address'}</>
-                                )}
-                            </button>
+                <div className="space-y-6">
+                    {/* USDT Info Card */}
+                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white text-center">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-2xl">₮</span>
                         </div>
-                    )}
-
-                    {/* Amount Warning */}
-                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
-                        <div className="flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-                            <div className="text-sm text-amber-700 dark:text-amber-300">
-                                <p className="font-bold mb-1">{isRTL ? '⚠️ مهم!' : '⚠️ Important!'}</p>
-                                <p>{isRTL ? `أرسل بالضبط: $${totalPayment.toFixed(2)} USDT` : `Send exactly: $${totalPayment.toFixed(2)} USDT`}</p>
-                            </div>
+                        <h3 className="text-xl font-bold mb-2">
+                            {isRTL ? 'ادفع بـ USDT' : 'Pay with USDT'}
+                        </h3>
+                        <p className="text-white/80 text-sm mb-4">
+                            {isRTL
+                                ? 'دفع آمن وسريع عبر العملات الرقمية'
+                                : 'Fast and secure payment via cryptocurrency'}
+                        </p>
+                        <div className="bg-white/10 backdrop-blur rounded-md p-4">
+                            <p className="text-sm text-white/70">{isRTL ? 'المبلغ المطلوب' : 'Amount to Pay'}</p>
+                            <p className="text-3xl font-bold">${totalPayment.toFixed(2)}</p>
+                            <p className="text-xs text-white/60 mt-1">
+                                {isRTL ? `اشتراك ${selectedPlan.nameAr} - ${cycle === 'monthly' ? 'شهري' : 'سنوي'}` : `${selectedPlan.name} Plan - ${cycle}`}
+                            </p>
                         </div>
                     </div>
 
+                    {/* Features */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 text-center">
+                            <div className="text-green-500 text-lg mb-1">⚡</div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {isRTL ? 'سريع' : 'Fast'}
+                            </p>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 text-center">
+                            <div className="text-green-500 text-lg mb-1">🔒</div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {isRTL ? 'آمن' : 'Secure'}
+                            </p>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3 text-center">
+                            <div className="text-green-500 text-lg mb-1">✓</div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {isRTL ? 'تلقائي' : 'Auto'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Create Invoice Button */}
                     <button
-                        onClick={handleManualPaymentConfirm}
-                        disabled={isProcessing}
-                        className="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-lg transition-colors disabled:opacity-50"
+                        onClick={createNowPaymentsInvoice}
+                        disabled={isCreatingInvoice}
+                        className={`w-full py-4 rounded-md font-bold text-white transition-all duration-300 flex items-center justify-center gap-3 text-lg ${isCreatingInvoice
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                            }`}
                     >
-                        {isProcessing ? (isRTL ? 'جاري المعالجة...' : 'Processing...') : (isRTL ? 'تأكيد الدفع' : 'Confirm Payment')}
+                        {isCreatingInvoice ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                {isRTL ? 'جاري إنشاء الفاتورة...' : 'Creating Invoice...'}
+                            </>
+                        ) : (
+                            <>
+                                <span>₮</span>
+                                {isRTL ? 'ادفع الآن بـ USDT' : 'Pay Now with USDT'}
+                            </>
+                        )}
                     </button>
-                </div>
-            );
-        }
 
-        // RedotPay
-        if (selectedMethod === 'redotpay') {
-            return (
-                <div className="space-y-5">
-                    <div className="bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 rounded-xl p-6 text-center">
-                        <h5 className="text-lg font-bold text-white mb-2">RedotPay UID</h5>
-                        <div className="bg-black/20 rounded-xl p-4 mb-4">
-                            <code className="text-xl font-mono font-bold text-white">
-                                {PAYMENT_INFO.redotpay_uid}
-                            </code>
-                        </div>
-                        <button
-                            onClick={() => copyToClipboard(PAYMENT_INFO.redotpay_uid, 'redotpay')}
-                            className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 ${copiedText === 'redotpay'
-                                ? 'bg-green-500 text-white'
-                                : 'bg-white text-red-600'
-                                }`}
-                        >
-                            {copiedText === 'redotpay' ? (
-                                <><Check className="w-5 h-5" />{isRTL ? 'تم النسخ!' : 'Copied!'}</>
-                            ) : (
-                                <><Copy className="w-5 h-5" />{isRTL ? 'نسخ UID' : 'Copy UID'}</>
-                            )}
-                        </button>
+                    {/* NowPayments Badge */}
+                    <div className="text-center">
+                        <p className="text-xs text-gray-400">
+                            {isRTL ? 'مدعوم بواسطة' : 'Powered by'}{' '}
+                            <span className="font-semibold text-gray-600 dark:text-gray-300">NowPayments</span>
+                        </p>
                     </div>
-
-                    <a
-                        href="https://helpcenter.redotpay.com/en/articles/10521793-where-can-i-find-my-redotpay-uid"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 text-red-500 hover:text-red-600 font-medium"
-                    >
-                        <ExternalLink className="w-4 h-4" />
-                        {isRTL ? 'كيف تجد UID الخاص بك؟' : 'How to find your UID?'}
-                    </a>
-
-                    <button
-                        onClick={handleManualPaymentConfirm}
-                        disabled={isProcessing}
-                        className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-lg transition-colors disabled:opacity-50"
-                    >
-                        {isProcessing ? (isRTL ? 'جاري المعالجة...' : 'Processing...') : (isRTL ? 'تأكيد الدفع' : 'Confirm Payment')}
-                    </button>
                 </div>
             );
         }
@@ -649,7 +647,7 @@ function CheckoutContent() {
                                 <button
                                     key={card.id}
                                     onClick={() => setSelectedSavedCard(card.id)}
-                                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${selectedSavedCard === card.id
+                                    className={`w-full flex items-center gap-4 p-4 rounded-md border-2 transition-all ${selectedSavedCard === card.id
                                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
@@ -691,7 +689,7 @@ function CheckoutContent() {
                                     setShowNewCardForm(true);
                                     setSelectedSavedCard(null);
                                 }}
-                                className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary-500 hover:text-primary-500 transition-all"
+                                className="w-full flex items-center justify-center gap-2 p-4 rounded-md border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary-500 hover:text-primary-500 transition-all"
                             >
                                 <CreditCard className="w-5 h-5" />
                                 {isRTL ? 'إضافة بطاقة جديدة' : 'Add New Card'}
@@ -728,7 +726,7 @@ function CheckoutContent() {
                                         value={cardNumber}
                                         placeholder="4242 4242 4242 4242"
                                         maxLength={19}
-                                        className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono tracking-wider pr-24 ${cardNumber.length > 0
+                                        className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono tracking-wider pr-24 ${cardNumber.length > 0
                                             ? cardValidation.isValid
                                                 ? 'border-green-500'
                                                 : cardValidation.error
@@ -789,7 +787,7 @@ function CheckoutContent() {
                                             value={cardExpiry}
                                             placeholder="MM/YY"
                                             maxLength={5}
-                                            className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono text-center pr-10 ${cardExpiry.length === 5
+                                            className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono text-center pr-10 ${cardExpiry.length === 5
                                                 ? expiryValid
                                                     ? 'border-green-500'
                                                     : 'border-red-500'
@@ -834,7 +832,7 @@ function CheckoutContent() {
                                             value={cardCVV}
                                             placeholder="•••"
                                             maxLength={cardValidation.cardType === 'amex' ? 4 : 3}
-                                            className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono text-center pr-10 ${cardCVV.length >= 3
+                                            className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono text-center pr-10 ${cardCVV.length >= 3
                                                 ? cvvValid
                                                     ? 'border-green-500'
                                                     : 'border-red-500'
@@ -873,7 +871,7 @@ function CheckoutContent() {
                                         type="text"
                                         value={cardholderName}
                                         placeholder={isRTL ? 'الاسم كما يظهر على البطاقة' : 'Name as it appears on card'}
-                                        className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-10 ${cardholderName.length >= 3
+                                        className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-10 ${cardholderName.length >= 3
                                             ? 'border-green-500'
                                             : 'border-gray-200 dark:border-gray-700'
                                             }`}
@@ -919,7 +917,7 @@ function CheckoutContent() {
                                 cardholderName.length < 3
                             )
                         )}
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
                     >
                         {isProcessing ? (
                             <>
@@ -955,7 +953,7 @@ function CheckoutContent() {
                     : `Your ${selectedPlan.name} plan subscription is now active!`
                 }
             </p>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 mb-6">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-4 mb-6">
                 <p className="text-green-700 dark:text-green-400 text-sm">
                     {isRTL
                         ? 'تم إرسال تفاصيل الاشتراك إلى بريدك الإلكتروني'
@@ -965,7 +963,7 @@ function CheckoutContent() {
             </div>
             <button
                 onClick={() => router.push('/google-ads/billing')}
-                className="w-full py-4 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-bold text-lg transition-colors"
+                className="w-full py-4 bg-primary-500 hover:bg-primary-600 text-white rounded-md font-bold text-lg transition-colors"
             >
                 {isRTL ? 'الذهاب للوحة التحكم' : 'Go to Dashboard'}
             </button>
@@ -984,9 +982,9 @@ function CheckoutContent() {
                         <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <h5 className="!mb-0">
                             {isRTL ? 'إتمام الاشتراك' : 'Complete Subscription'}
-                        </h1>
+                        </h5>
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
                             {isRTL ? 'آمن ومشفر 100%' : 'Secure and encrypted'}
                         </p>
@@ -996,7 +994,7 @@ function CheckoutContent() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Content */}
                     <div className="lg:col-span-2">
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6">
+                        <div className="trezo-card bg-white dark:bg-[#0c1427] rounded-md p-[20px] md:p-[25px]">
                             {paymentStep === 'success' ? renderSuccessScreen() : (
                                 <>
                                     {/* Step Indicator */}
@@ -1012,12 +1010,12 @@ function CheckoutContent() {
                                         </div>
                                     </div>
 
-                                    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                    <h5 className="!mb-[15px]">
                                         {paymentStep === 'select'
                                             ? (isRTL ? 'اختر طريقة الدفع' : 'Choose Payment Method')
                                             : (isRTL ? 'أكمل الدفع' : 'Complete Payment')
                                         }
-                                    </h2>
+                                    </h5>
 
                                     {paymentStep === 'select' ? renderPaymentMethods() : renderPaymentDetails()}
                                 </>
@@ -1027,13 +1025,13 @@ function CheckoutContent() {
 
                     {/* Order Summary */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sticky top-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                        <div className="trezo-card bg-white dark:bg-[#0c1427] rounded-md p-[20px] md:p-[25px] sticky top-6">
+                            <h5 className="!mb-[15px]">
                                 {isRTL ? 'ملخص الطلب' : 'Order Summary'}
-                            </h3>
+                            </h5>
 
                             {/* Plan Info */}
-                            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl mb-4">
+                            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-md mb-4">
                                 <div className={`p-2 rounded-lg bg-${selectedPlan.color}-100 dark:bg-${selectedPlan.color}-900/20`}>
                                     <selectedPlan.icon className={`w-6 h-6 text-${selectedPlan.color}-500`} />
                                 </div>

@@ -110,7 +110,7 @@ export const FurriyadhPromotionalCard: React.FC<Props> = ({
                             <button
                                 key={offer.id}
                                 onClick={() => setSelectedOffer(offer.id as 'A' | 'B' | 'C')}
-                                className={`relative p-4 rounded-xl border-2 transition-all ${selectedOffer === offer.id
+                                className={`relative p-4 rounded-md border-2 transition-all ${selectedOffer === offer.id
                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}

@@ -36,18 +36,27 @@ interface NowPaymentsIPN {
     actually_paid_at_fiat: number;
 }
 
-// Verify IPN signature
+// Verify IPN signature - CRITICAL for security
 function verifySignature(payload: string, signature: string): boolean {
     if (!NOWPAYMENTS_IPN_SECRET) {
-        console.warn('⚠️ IPN Secret not configured, skipping signature verification');
-        return true; // Allow in development without secret
+        console.error('❌ CRITICAL: IPN Secret not configured! Rejecting webhook.');
+        return false; // NEVER allow without secret - security critical
+    }
+
+    if (!signature) {
+        console.error('❌ No signature provided in webhook request');
+        return false;
     }
 
     const hmac = crypto.createHmac('sha512', NOWPAYMENTS_IPN_SECRET);
     hmac.update(payload);
     const expectedSignature = hmac.digest('hex');
 
-    return signature === expectedSignature;
+    const isValid = signature === expectedSignature;
+    if (!isValid) {
+        console.error('❌ Signature mismatch - possible attack attempt');
+    }
+    return isValid;
 }
 
 export async function POST(request: NextRequest) {
@@ -122,22 +131,56 @@ async function handleSuccessfulPayment(ipnData: NowPaymentsIPN) {
     const orderId = ipnData.order_id;
     const amount = ipnData.price_amount;
 
-    // Parse order_id to get email and type
-    // Format: DEPOSIT_{email}_{timestamp} or SUB_{email}_{plan}_{cycle}_{timestamp}
-    const orderParts = orderId.split('_');
+    // NEW format: SUB-PRO-MONTHLY-XXXXX or DEP-100-XXXXX
+    // OLD format: DEPOSIT_{email}_{timestamp} or SUB_{email}_{plan}_{cycle}_{timestamp}
 
-    if (orderParts[0] === 'DEPOSIT') {
+    // Get email from invoice data (NowPayments stores customer_email)
+    let email = '';
+
+    // Try to get payment details to fetch email
+    try {
+        const paymentResponse = await fetch(`https://api.nowpayments.io/v1/payment/${ipnData.payment_id}`, {
+            headers: {
+                'x-api-key': process.env.NOWPAYMENTS_API_KEY || ''
+            }
+        });
+        const paymentData = await paymentResponse.json();
+        email = paymentData.customer_email || '';
+        console.log('📧 Customer email from payment:', email);
+    } catch (err) {
+        console.warn('⚠️ Could not fetch payment details for email');
+    }
+
+    // Parse order type from order_id
+    if (orderId.startsWith('DEP-') || orderId.startsWith('DEPOSIT_')) {
         // Handle deposit to balance
-        const email = orderParts.slice(1, -1).join('_'); // Everything except first and last
+        if (orderId.startsWith('DEPOSIT_')) {
+            // Legacy format: DEPOSIT_{email}_{timestamp}
+            const orderParts = orderId.split('_');
+            email = email || orderParts.slice(1, -1).join('_');
+        }
         await processDeposit(email, amount, ipnData);
-    } else if (orderParts[0] === 'SUB') {
+    } else if (orderId.startsWith('SUB-') || orderId.startsWith('SUB_')) {
         // Handle subscription payment
-        const email = orderParts[1];
-        const plan = orderParts[2];
-        const cycle = orderParts[3];
+        let plan = 'pro';
+        let cycle = 'monthly';
+
+        if (orderId.startsWith('SUB-')) {
+            // New format: SUB-PRO-MONTHLY-XXXXX
+            const parts = orderId.split('-');
+            plan = parts[1]?.toLowerCase() || 'pro';
+            cycle = parts[2]?.toLowerCase() || 'monthly';
+        } else {
+            // Legacy format: SUB_{email}_{plan}_{cycle}_{timestamp}
+            const orderParts = orderId.split('_');
+            email = email || orderParts[1];
+            plan = orderParts[2] || 'pro';
+            cycle = orderParts[3] || 'monthly';
+        }
         await processSubscription(email, plan, cycle, amount, ipnData);
     }
 }
+
 
 async function processDeposit(email: string, amount: number, ipnData: NowPaymentsIPN) {
     console.log(`💰 Processing deposit for ${email}: $${amount}`);

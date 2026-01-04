@@ -177,15 +177,14 @@ export const SubscriptionPaymentHistory: React.FC<SubscriptionPaymentHistoryProp
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
+        <div className="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
             {/* Header */}
-            <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 p-6">
-                <h2 className="text-xl font-bold text-white mb-1">
-                    {isRTL ? 'سجل المدفوعات' : 'Payment History'}
-                </h2>
-                <p className="text-white/70 text-sm">
-                    {isRTL ? 'تتبع مدفوعات الاشتراك الخاصة بك' : 'Track your subscription payments'}
-                </p>
+            <div className="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
+                <div className="trezo-card-title">
+                    <h5 className="!mb-0">
+                        {isRTL ? 'سجل المدفوعات' : 'Payment History'}
+                    </h5>
+                </div>
             </div>
 
             {/* Filters */}
@@ -199,7 +198,7 @@ export const SubscriptionPaymentHistory: React.FC<SubscriptionPaymentHistoryProp
                             placeholder={isRTL ? 'بحث...' : 'Search...'}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-md text-sm focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
 
@@ -207,7 +206,7 @@ export const SubscriptionPaymentHistory: React.FC<SubscriptionPaymentHistoryProp
                     <select
                         value={typeFilter}
                         onChange={(e) => setTypeFilter(e.target.value as any)}
-                        className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                        className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-md text-sm focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="all">{isRTL ? 'كل الأنواع' : 'All Types'}</option>
                         <option value="subscription_fee">{isRTL ? 'اشتراكات' : 'Subscriptions'}</option>
@@ -218,7 +217,7 @@ export const SubscriptionPaymentHistory: React.FC<SubscriptionPaymentHistoryProp
                     <select
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value as any)}
-                        className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                        className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-md text-sm focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="all">{isRTL ? 'كل الوقت' : 'All Time'}</option>
                         <option value="7days">{isRTL ? 'آخر 7 أيام' : 'Last 7 days'}</option>
@@ -275,10 +274,10 @@ export const SubscriptionPaymentHistory: React.FC<SubscriptionPaymentHistoryProp
                             return (
                                 <div
                                     key={transaction.id}
-                                    className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                 >
                                     {/* Type Icon */}
-                                    <div className={`p-2 rounded-xl ${typeDisplay.color === 'text-primary-500' ? 'bg-primary-100 dark:bg-primary-900/30' : typeDisplay.color === 'text-green-500' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                                    <div className={`p-2 rounded-md ${typeDisplay.color === 'text-primary-500' ? 'bg-primary-100 dark:bg-primary-900/30' : typeDisplay.color === 'text-green-500' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                                         <TypeIcon className={`w-5 h-5 ${typeDisplay.color}`} />
                                     </div>
 

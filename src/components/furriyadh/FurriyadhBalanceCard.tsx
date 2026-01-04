@@ -200,7 +200,7 @@ export const FurriyadhBalanceCard: React.FC<FurriyadhBalanceCardProps> = ({
 
     if (isLoading) {
         return (
-            <div className="trezo-card bg-white dark:bg-[#0c1427] p-6 rounded-xl animate-pulse">
+            <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md animate-pulse">
                 <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2"></div>
                 <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
@@ -210,11 +210,11 @@ export const FurriyadhBalanceCard: React.FC<FurriyadhBalanceCardProps> = ({
 
     if (error) {
         return (
-            <div className="trezo-card bg-white dark:bg-[#0c1427] p-6 rounded-xl border-2 border-red-200 dark:border-red-800">
+            <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md border border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
                     <XCircle className="w-6 h-6" />
                     <div>
-                        <h4 className="font-semibold">{isRTL ? 'خطأ' : 'Error'}</h4>
+                        <h5 className="!mb-0">{isRTL ? 'خطأ' : 'Error'}</h5>
                         <p className="text-sm">{error}</p>
                     </div>
                 </div>
@@ -232,62 +232,57 @@ export const FurriyadhBalanceCard: React.FC<FurriyadhBalanceCardProps> = ({
     return (
         <>
             {/* Main Balance Card */}
-            <div className="trezo-card bg-white dark:bg-[#0c1427] p-6 rounded-xl">
+            <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
-                            <Wallet className="w-6 h-6 text-white" />
+                <div className="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
+                    <div className="trezo-card-title flex items-center gap-3">
+                        <div className="p-2 rounded-md bg-purple-100 dark:bg-purple-900/20">
+                            <Wallet className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
-                        <div>
-                            <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-                                {isRTL ? 'رصيد Furriyadh Account' : 'Furriyadh Account Balance'}
-                            </h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {isRTL ? 'نظام العمولة 20%' : '20% Commission System'}
-                            </p>
-                        </div>
+                        <h5 className="!mb-0">
+                            {isRTL ? 'رصيد Furriyadh Account' : 'Furriyadh Account Balance'}
+                        </h5>
                     </div>
                     <div className="flex items-center gap-2">
                         {getStatusBadge()}
                         {/* Notifications Bell */}
                         <button
                             onClick={() => setShowNotifications(!showNotifications)}
-                            className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            className="relative p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                         >
-                            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            <Bell className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                             {notifications.length > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                                     {notifications.length}
                                 </span>
                             )}
                         </button>
                         <button
                             onClick={fetchBalance}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             title={isRTL ? 'تحديث' : 'Refresh'}
                         >
-                            <RefreshCcw className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            <RefreshCcw className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </button>
                     </div>
                 </div>
 
                 {/* Balance Display */}
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 mb-6">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 mb-[20px]">
                     <div className="flex items-end justify-between mb-4">
                         <div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                                 {isRTL ? 'الرصيد الحالي' : 'Current Balance'}
                             </p>
-                            <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
+                            <h5 className="!mb-0 !text-[28px]">
                                 ${balance?.current_balance?.toFixed(2) || '0.00'}
-                            </h2>
+                            </h5>
                         </div>
                         <button
                             onClick={() => setShowAddCredit(true)}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                            className="flex items-center gap-2 px-4 py-2 rounded-md bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition-all"
                         >
-                            <Plus className="w-5 h-5" />
+                            <Plus className="w-4 h-4" />
                             {isRTL ? 'إضافة رصيد' : 'Add Credit'}
                         </button>
                     </div>
@@ -328,50 +323,50 @@ export const FurriyadhBalanceCard: React.FC<FurriyadhBalanceCardProps> = ({
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-4">
                         <div className="flex items-center gap-2 mb-2">
                             <TrendingUp className="w-4 h-4 text-green-500" />
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {isRTL ? 'إجمالي الإيداعات' : 'Total Deposits'}
                             </span>
                         </div>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        <p className="text-lg font-bold text-black dark:text-white">
                             ${balance?.total_deposited?.toFixed(2) || '0.00'}
                         </p>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-4">
                         <div className="flex items-center gap-2 mb-2">
                             <TrendingDown className="w-4 h-4 text-red-500" />
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {isRTL ? 'إجمالي الإنفاق' : 'Total Spent'}
                             </span>
                         </div>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        <p className="text-lg font-bold text-black dark:text-white">
                             ${balance?.total_spent?.toFixed(2) || '0.00'}
                         </p>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-4">
                         <div className="flex items-center gap-2 mb-2">
                             <DollarSign className="w-4 h-4 text-purple-500" />
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {isRTL ? 'العمولة (20%)' : 'Commission (20%)'}
                             </span>
                         </div>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        <p className="text-lg font-bold text-black dark:text-white">
                             ${balance?.total_commission?.toFixed(2) || '0.00'}
                         </p>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-4">
                         <div className="flex items-center gap-2 mb-2">
                             <ExternalLink className="w-4 h-4 text-blue-500" />
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {isRTL ? 'الموقع المقفل' : 'Locked Asset'}
                             </span>
                         </div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={balance?.locked_asset_url}>
+                        <p className="text-sm font-medium text-black dark:text-white truncate" title={balance?.locked_asset_url}>
                             {balance?.locked_asset_url ? new URL(`https://${balance.locked_asset_url.replace(/^https?:\/\//, '')}`).hostname : '-'}
                         </p>
                     </div>
@@ -431,7 +426,7 @@ export const FurriyadhBalanceCard: React.FC<FurriyadhBalanceCardProps> = ({
                         </div>
 
                         {/* Commission Breakdown */}
-                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 mb-6">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-4 mb-6">
                             <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                                 {isRTL ? 'تفاصيل المبلغ' : 'Amount Breakdown'}
                             </h4>
@@ -491,7 +486,7 @@ export const FurriyadhBalanceCard: React.FC<FurriyadhBalanceCardProps> = ({
             {/* Notifications Panel */}
             {showNotifications && notifications.length > 0 && (
                 <div className="fixed inset-0 z-50 flex items-start justify-end pt-20 pr-4 bg-black/30" onClick={() => setShowNotifications(false)}>
-                    <div className="bg-white dark:bg-[#0c1427] rounded-xl shadow-2xl w-80 max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-[#0c1427] rounded-md shadow-2xl w-80 max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                             <h4 className="font-semibold text-gray-900 dark:text-white">
                                 {isRTL ? 'الإشعارات' : 'Notifications'}
