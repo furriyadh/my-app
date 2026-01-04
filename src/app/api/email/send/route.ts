@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 // Email Types
-type EmailType = 'deposit_confirmation' | 'low_balance_alert' | 'payment_failed' | 'refund_processed';
+type EmailType = 'deposit_confirmation' | 'low_balance_alert' | 'payment_failed' | 'refund_processed' | 'subscription_confirmation' | 'subscription_cancelled' | 'subscription_renewal_reminder';
 
 // Email configuration from environment
 const EMAIL_CONFIG = {
@@ -315,6 +315,202 @@ const getEmailTemplate = (type: EmailType, data: any): { subject: string; html: 
                                 <p style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">
                                     If you did not request this refund, please contact support immediately.
                                 </p>
+                                <p style="color: #6b7280; font-size: 12px;">
+                                    © 2025 Furriyadh. All rights reserved.
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </body>
+                    </html>
+                `
+            };
+
+        case 'subscription_confirmation':
+            return {
+                subject: `🎉 Subscription Activated - ${data.planName} Plan`,
+                html: `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        ${baseStyles}
+                    </head>
+                    <body style="background-color: #f3f4f6; padding: 40px 20px;">
+                        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                            
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); padding: 32px; text-align: center;">
+                                <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 32px;">🎉</span>
+                                </div>
+                                <h1 style="color: white; font-size: 24px; font-weight: 700; margin-bottom: 8px;">Subscription Activated!</h1>
+                                <p style="color: rgba(255,255,255,0.9); font-size: 14px;">Welcome to ${data.planName} Plan</p>
+                            </div>
+                            
+                            <!-- Plan Card -->
+                            <div style="padding: 32px;">
+                                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                                    <p style="color: #166534; font-size: 14px; margin-bottom: 8px;">Your Plan</p>
+                                    <p style="color: #15803d; font-size: 28px; font-weight: 700;">${data.planName}</p>
+                                    <p style="color: #166534; font-size: 16px; margin-top: 8px;">$${data.amount}/${data.billingCycle === 'monthly' ? 'month' : 'year'}</p>
+                                </div>
+                                
+                                <!-- Subscription Details -->
+                                <h3 style="color: #1f2937; font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">Subscription Details</h3>
+                                
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Transaction ID</td>
+                                        <td style="padding: 12px 0; color: #1f2937; font-size: 14px; text-align: right; font-family: monospace;">${data.transactionId}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #f3f4f6;">Billing Cycle</td>
+                                        <td style="padding: 12px 0; color: #1f2937; font-size: 14px; text-align: right; border-top: 1px solid #f3f4f6;">${data.billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #f3f4f6;">Next Billing Date</td>
+                                        <td style="padding: 12px 0; color: #1f2937; font-size: 14px; text-align: right; border-top: 1px solid #f3f4f6;">${data.nextBillingDate || 'Auto-renewal'}</td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- CTA Button -->
+                                <a href="${data.dashboardUrl}" style="display: block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; text-decoration: none; text-align: center; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; margin-top: 24px;">
+                                    Go to Dashboard →
+                                </a>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">
+                                    Thank you for subscribing to Furriyadh!
+                                </p>
+                                <p style="color: #6b7280; font-size: 12px;">
+                                    © 2025 Furriyadh. All rights reserved.
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </body>
+                    </html>
+                `
+            };
+
+        case 'subscription_cancelled':
+            return {
+                subject: `😢 Subscription Cancelled - We're Sorry to See You Go`,
+                html: `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        ${baseStyles}
+                    </head>
+                    <body style="background-color: #f3f4f6; padding: 40px 20px;">
+                        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                            
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #6b7280 0%, #374151 100%); padding: 32px; text-align: center;">
+                                <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 32px;">😢</span>
+                                </div>
+                                <h1 style="color: white; font-size: 24px; font-weight: 700; margin-bottom: 8px;">Subscription Cancelled</h1>
+                                <p style="color: rgba(255,255,255,0.9); font-size: 14px;">We're sorry to see you go</p>
+                            </div>
+                            
+                            <!-- Content -->
+                            <div style="padding: 32px;">
+                                <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                                    <p style="color: #92400e; font-size: 14px; line-height: 1.6;">
+                                        <strong>📅 Access Until:</strong> ${data.endDate}<br>
+                                        You'll continue to have access until your current billing period ends.
+                                    </p>
+                                </div>
+                                
+                                <h3 style="color: #1f2937; font-size: 16px; font-weight: 600; margin-bottom: 16px;">What happens next?</h3>
+                                <ul style="color: #4b5563; font-size: 14px; line-height: 1.8; padding-left: 20px; margin-bottom: 24px;">
+                                    <li>Your account will revert to the Free plan</li>
+                                    <li>Premium features will be disabled</li>
+                                    <li>Your data will be preserved</li>
+                                    <li>You can resubscribe anytime</li>
+                                </ul>
+                                
+                                <a href="${data.resubscribeUrl || data.dashboardUrl}" style="display: block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; text-decoration: none; text-align: center; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px;">
+                                    Resubscribe →
+                                </a>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">
+                                    We'd love to hear your feedback. Reply to this email to let us know how we can improve.
+                                </p>
+                                <p style="color: #6b7280; font-size: 12px;">
+                                    © 2025 Furriyadh. All rights reserved.
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </body>
+                    </html>
+                `
+            };
+
+        case 'subscription_renewal_reminder':
+            return {
+                subject: `⏰ Subscription Renewal Reminder - ${data.daysUntilRenewal} Days Left`,
+                html: `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        ${baseStyles}
+                    </head>
+                    <body style="background-color: #f3f4f6; padding: 40px 20px;">
+                        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                            
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px; text-align: center;">
+                                <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 32px;">⏰</span>
+                                </div>
+                                <h1 style="color: white; font-size: 24px; font-weight: 700; margin-bottom: 8px;">Renewal Reminder</h1>
+                                <p style="color: rgba(255,255,255,0.9); font-size: 14px;">Your subscription renews soon</p>
+                            </div>
+                            
+                            <!-- Content -->
+                            <div style="padding: 32px;">
+                                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fbbf24; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                                    <p style="color: #92400e; font-size: 14px; margin-bottom: 8px;">Renews In</p>
+                                    <p style="color: #b45309; font-size: 36px; font-weight: 700;">${data.daysUntilRenewal} Days</p>
+                                    <p style="color: #92400e; font-size: 14px; margin-top: 8px;">on ${data.renewalDate}</p>
+                                </div>
+                                
+                                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                                    <tr>
+                                        <td style="padding: 12px 0; color: #6b7280; font-size: 14px;">Plan</td>
+                                        <td style="padding: 12px 0; color: #1f2937; font-size: 14px; text-align: right; font-weight: 600;">${data.planName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #f3f4f6;">Amount</td>
+                                        <td style="padding: 12px 0; color: #1f2937; font-size: 14px; text-align: right; border-top: 1px solid #f3f4f6;">$${data.amount}</td>
+                                    </tr>
+                                </table>
+                                
+                                <a href="${data.dashboardUrl}" style="display: block; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; text-decoration: none; text-align: center; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px;">
+                                    Manage Subscription →
+                                </a>
+                                
+                                <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 16px;">
+                                    To cancel, visit your billing settings before ${data.renewalDate}
+                                </p>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
                                 <p style="color: #6b7280; font-size: 12px;">
                                     © 2025 Furriyadh. All rights reserved.
                                 </p>

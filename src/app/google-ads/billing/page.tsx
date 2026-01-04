@@ -23,6 +23,9 @@ import { supabase } from '@/lib/supabase';
 import { FurriyadhPaymentGateway } from '@/components/furriyadh/FurriyadhPaymentGateway';
 import { CampaignBudgetProgressCard } from '@/components/furriyadh/CampaignBudgetProgressCard';
 import { FurriyadhPromotionalCard } from '@/components/furriyadh/FurriyadhPromotionalCard';
+import { SubscriptionPaymentHistory } from '@/components/furriyadh/SubscriptionPaymentHistory';
+import { SavedPaymentMethods } from '@/components/furriyadh/SavedPaymentMethods';
+
 
 const BillingPage: React.FC = () => {
     const router = useRouter();
@@ -89,13 +92,41 @@ const BillingPage: React.FC = () => {
     const fetchUserEmail = async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (user?.email) {
-                setUserEmail(user.email);
+            if (user) {
+                setUserEmail(user.email || '');
                 // Also fetch managed account ID for this user
-                fetchManagedAccountId(user.email);
+                fetchManagedAccountId(user.email || '');
+
+                // Fetch subscription from database using user_id
+                fetchSubscription(user.id);
             }
         } catch (err) {
             console.error('Error fetching user:', err);
+        }
+    };
+
+    // Fetch subscription from database
+    const fetchSubscription = async (userId: string) => {
+        try {
+            const { data: subscription, error } = await supabase
+                .from('user_billing_subscriptions')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
+
+            if (subscription && !error) {
+                console.log('📦 Subscription found:', subscription);
+                // Update plan limits based on subscription
+                const planId = subscription.plan_id as keyof typeof PLAN_LIMITS;
+                if (PLAN_LIMITS[planId]) {
+                    setCurrentPlanLimits(PLAN_LIMITS[planId]);
+                    setCurrentPlan(planId);
+                }
+            } else {
+                console.log('ℹ️ No subscription found for user, using free plan');
+            }
+        } catch (err) {
+            console.error('Error fetching subscription:', err);
         }
     };
 
@@ -157,17 +188,25 @@ const BillingPage: React.FC = () => {
             return;
         }
 
-        // Show confirmation modal
-        const plan = PLAN_LIMITS[planId];
-        setConfirmModal({
-            show: true,
-            planId: planId,
-            planName: plan.planName,
-            planNameAr: plan.planNameAr || plan.planName,
-        });
+        // Free plan - just save locally
+        if (planId === 'free') {
+            setCurrentPlan(planId);
+            setCurrentPlanLimits(PLAN_LIMITS[planId]);
+            setSelectedPlan(planId);
+            setSuccessModal({
+                show: true,
+                planName: 'Free',
+                planNameAr: 'مجاني',
+            });
+            return;
+        }
+
+        // Paid plans - redirect to checkout page
+        router.push(`/google-ads/billing/checkout?plan=${planId}&cycle=${billingCycle}`);
     };
 
-    // Step 2: Confirm and apply plan change
+    // Step 2: Confirm and apply plan change (kept for free plan or future use)
+
     const confirmPlanChange = () => {
         const planId = confirmModal.planId;
 
@@ -624,112 +663,34 @@ const BillingPage: React.FC = () => {
                     </div>
                 )}
 
+                {/* 📊 Subscription Payment History - Self-Managed Mode */}
+                {billingMode === 'self_managed' && userEmail && (
+                    <div className="mb-[25px]">
+                        <SubscriptionPaymentHistory
+                            userEmail={userEmail}
+                            isRTL={isRTL}
+                        />
+                    </div>
+                )}
+
 
 
                 {/* Payment Method & Billing Address */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] mb-[25px]">
-                    <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
-                        <h6 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {isRTL ? 'طريقة الدفع' : 'Payment Method'}
-                        </h6>
 
-                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-10 bg-gradient-to-r from-blue-600 to-blue-800 rounded-md flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">VISA</span>
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">•••• •••• •••• 4242</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{isRTL ? 'تنتهي' : 'Expires'} 12/2025</p>
-                                    </div>
-                                </div>
-                                <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-2 py-1 rounded">
-                                    {isRTL ? 'الافتراضية' : 'Default'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <button className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium text-sm">
-                            <Plus className="w-4 h-4" />
-                            {isRTL ? 'إضافة طريقة دفع' : 'Add payment method'}
-                        </button>
+                {/* 💳 Enhanced Payment Methods Section */}
+                {userEmail && (
+                    <div className="mb-[25px]">
+                        <SavedPaymentMethods
+                            userEmail={userEmail}
+                            isRTL={isRTL}
+                            onPaymentMethodChange={() => {
+                                console.log('Payment method updated');
+                            }}
+                        />
                     </div>
+                )}
 
-                    <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
-                        <h6 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {isRTL ? 'عنوان الفوترة' : 'Billing Address'}
-                        </h6>
 
-                        <div className="text-gray-600 dark:text-gray-400 text-sm space-y-1 mb-4">
-                            <p className="font-medium text-gray-900 dark:text-white">Furriyadh Company</p>
-                            <p>123 Business Street</p>
-                            <p>Riyadh, Saudi Arabia</p>
-                            <p>12345</p>
-                        </div>
-
-                        <button className="text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium text-sm">
-                            {isRTL ? 'تعديل العنوان' : 'Edit Address'}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Billing History */}
-                <div className="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
-                    <div className="flex items-center justify-between mb-4">
-                        <h6 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {isRTL ? 'سجل الفواتير' : 'Billing History'}
-                        </h6>
-                        <button className="text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium text-sm">
-                            {isRTL ? 'تحميل الكل' : 'Download All'}
-                        </button>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-200 dark:border-gray-700">
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                        {isRTL ? 'الفاتورة' : 'Invoice'}
-                                    </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                        {isRTL ? 'التاريخ' : 'Date'}
-                                    </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                        {isRTL ? 'الخطة' : 'Plan'}
-                                    </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                        {isRTL ? 'المبلغ' : 'Amount'}
-                                    </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                        {isRTL ? 'الحالة' : 'Status'}
-                                    </th>
-                                    <th className="text-right py-3 px-4"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {invoices.map((invoice) => (
-                                    <tr key={invoice.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{invoice.id}</td>
-                                        <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{invoice.date}</td>
-                                        <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{invoice.plan}</td>
-                                        <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">${invoice.amount}.00</td>
-                                        <td className="py-3 px-4">
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400">
-                                                {isRTL ? 'مدفوع' : 'Paid'}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-right">
-                                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-500 dark:text-gray-400">
-                                                <Download className="w-4 h-4" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
 
             {/* ❓ Plan Change Confirmation Modal */}

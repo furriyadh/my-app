@@ -35,7 +35,7 @@ import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test';
 
 // Payment method types
-type PaymentMethod = 'visa_mastercard' | 'binance_pay' | 'usdt_crypto' | 'redotpay' | 'paypal';
+type PaymentMethod = 'visa_mastercard' | 'usdt_crypto' | 'redotpay' | 'paypal';
 type CryptoNetwork = 'TRC20' | 'BEP20';
 
 interface PaymentGatewayProps {
@@ -71,31 +71,6 @@ const PAYMENT_METHODS = [
         calculateFee: (amount: number) => (amount * 0.0294) + 0.30,
         feeDescription: '2.94% + $0.30',
         popular: false
-    },
-    {
-        id: 'binance_pay' as PaymentMethod,
-        name: 'Binance Pay',
-        nameAr: 'باينانس باي',
-        iconBg: 'bg-transparent', // Image carries its own background
-        iconSvg: (
-            <Image
-                src="/images/payment-method/binance-v2.png"
-                alt="Binance"
-                width={32}
-                height={32}
-                className="w-full h-full object-contain rounded-lg" // Added rounded-lg to match icon shape
-            />
-        ),
-        description: 'Pay with Binance wallet',
-        descriptionAr: 'الدفع من محفظة باينانس',
-        processingTime: '1-5 min',
-        processingTimeAr: '1-5 دقائق',
-        feeDisplay: '+$1',
-        feeDisplayAr: '+$1',
-        // Flat $1 fee
-        calculateFee: (amount: number) => 1,
-        feeDescription: '$1 flat',
-        popular: true
     },
     {
         id: 'usdt_crypto' as PaymentMethod,
@@ -201,9 +176,7 @@ const CRYPTO_NETWORKS = [
     }
 ];
 
-// Furriyadh Payment Details - Loaded from Environment Variables
 const FURRIYADH_PAYMENT_INFO = {
-    binance_pay_id: process.env.NEXT_PUBLIC_BINANCE_PAY_ID || 'BINANCE_PAY_ID_NOT_CONFIGURED',
     redotpay_uid: process.env.NEXT_PUBLIC_REDOTPAY_UID || 'REDOTPAY_UID_NOT_CONFIGURED',
     commission_rate: parseFloat(process.env.NEXT_PUBLIC_FURRIYADH_COMMISSION_RATE || '0.20')
 };
@@ -230,6 +203,16 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
     });
     const [shakeWarning, setShakeWarning] = useState(false);
     const [activeTab, setActiveTab] = useState<'payment' | 'history'>('payment');
+
+    // NowPayments state
+    const [nowPaymentsInvoice, setNowPaymentsInvoice] = useState<{
+        id: string;
+        invoice_url: string;
+        order_id: string;
+        amount: number;
+    } | null>(null);
+    const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'confirming' | 'completed' | 'failed'>('idle');
 
     // Balance History state
     interface Transaction {
@@ -535,194 +518,184 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
         setShowPaymentModal(false);
         setPaymentStep('select');
         setSelectedMethod(null);
+        // Reset NowPayments state
+        setNowPaymentsInvoice(null);
+        setPaymentStatus('idle');
     };
+
+    // Create NowPayments invoice for USDT
+    const createNowPaymentsInvoice = async () => {
+        if (!userEmail || campaignBudget <= 0) return;
+
+        setIsCreatingInvoice(true);
+        setPaymentStatus('pending');
+
+        try {
+            const response = await fetch('/api/payments/nowpayments/create-invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: totalPayment,
+                    email: userEmail,
+                    order_id: `DEPOSIT_${userEmail}_${Date.now()}`,
+                    description: `Add $${campaignBudget} credit to Furriyadh Ads account`,
+                    success_url: `${window.location.origin}/google-ads/billing?payment=success`,
+                    cancel_url: `${window.location.origin}/google-ads/billing?payment=cancelled`,
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.invoice) {
+                setNowPaymentsInvoice(data.invoice);
+                console.log('✅ NowPayments invoice created:', data.invoice.id);
+            } else {
+                console.error('❌ Failed to create invoice:', data.error);
+                alert(isRTL ? 'فشل إنشاء الفاتورة. حاول مرة أخرى.' : 'Failed to create invoice. Please try again.');
+                setPaymentStatus('failed');
+            }
+        } catch (error) {
+            console.error('❌ Invoice creation error:', error);
+            alert(isRTL ? 'خطأ في الاتصال. حاول مرة أخرى.' : 'Connection error. Please try again.');
+            setPaymentStatus('failed');
+        } finally {
+            setIsCreatingInvoice(false);
+        }
+    };
+
 
     // Render crypto payment instructions
     const renderCryptoInstructions = () => {
-        const network = CRYPTO_NETWORKS.find(n => n.id === selectedNetwork);
-        if (!network) return null;
+        // If invoice created, show payment link
+        if (nowPaymentsInvoice) {
+            return (
+                <div className="space-y-6 text-center">
+                    {/* Success State */}
+                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white">
+                        <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Check className="w-10 h-10" />
+                        </div>
+                        <h3 className="text-2xl font-bold mb-2">
+                            {isRTL ? 'تم إنشاء الفاتورة!' : 'Invoice Created!'}
+                        </h3>
+                        <p className="text-white/80 mb-4">
+                            {isRTL ? 'اضغط الزر أدناه لإكمال الدفع' : 'Click the button below to complete payment'}
+                        </p>
+                        <div className="bg-white/10 backdrop-blur rounded-xl p-4 mb-4">
+                            <p className="text-sm text-white/70">{isRTL ? 'المبلغ المطلوب' : 'Amount to Pay'}</p>
+                            <p className="text-3xl font-bold">${totalPayment.toFixed(2)}</p>
+                        </div>
+                    </div>
 
+                    {/* Pay Button */}
+                    <a
+                        href={nowPaymentsInvoice.invoice_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                        {isRTL ? '💳 ادفع الآن بـ USDT' : '💳 Pay Now with USDT'}
+                    </a>
+
+                    {/* Info */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5" />
+                            <div className="text-sm text-blue-700 dark:text-blue-300">
+                                <p className="font-semibold mb-1">
+                                    {isRTL ? 'تأكيد تلقائي!' : 'Automatic Confirmation!'}
+                                </p>
+                                <p>
+                                    {isRTL
+                                        ? 'بعد إتمام الدفع، سيتم تأكيد المبلغ وإضافته لرصيدك تلقائياً.'
+                                        : 'After payment, your balance will be automatically credited.'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Initial state - show create invoice button
         return (
             <div className="space-y-6">
-                {/* Network Selector - Premium Design */}
-                <div>
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                        {isRTL ? 'اختر الشبكة' : 'Select Network'}
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                        {CRYPTO_NETWORKS.map((net) => (
-                            <button
-                                key={net.id}
-                                onClick={() => setSelectedNetwork(net.id)}
-                                className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${selectedNetwork === net.id
-                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30 shadow-md'
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900'
-                                    }`}
-                            >
-                                {net.recommended && (
-                                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-lg">
-                                        {isRTL ? 'مُوصى' : 'BEST'}
-                                    </span>
-                                )}
-                                <div className="text-center">
-                                    <p className={`text-lg font-bold ${selectedNetwork === net.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                                        {net.id}
-                                    </p>
-                                    <p className={`text-xs mt-1 ${net.chainColor}`}>{net.chain}</p>
-                                    <div className="flex items-center justify-center gap-2 mt-2">
-                                        <Clock className="w-3 h-3 text-gray-400" />
-                                        <span className="text-xs text-gray-500">{net.estimatedTime}</span>
-                                    </div>
-                                    <p className="text-xs text-gray-400 mt-1">{isRTL ? 'الرسوم:' : 'Fee:'} {net.fee}</p>
-                                </div>
-                            </button>
-                        ))}
+                {/* USDT Info Card */}
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white text-center">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl">₮</span>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">
+                        {isRTL ? 'ادفع بـ USDT' : 'Pay with USDT'}
+                    </h3>
+                    <p className="text-white/80 text-sm mb-4">
+                        {isRTL
+                            ? 'دفع آمن وسريع عبر العملات الرقمية'
+                            : 'Fast and secure payment via cryptocurrency'}
+                    </p>
+                    <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+                        <p className="text-sm text-white/70">{isRTL ? 'المبلغ المطلوب' : 'Amount to Pay'}</p>
+                        <p className="text-3xl font-bold">${totalPayment.toFixed(2)}</p>
+                        <p className="text-xs text-white/60 mt-1">
+                            {isRTL ? 'يشمل عمولة 0.5%' : 'Includes 0.5% fee'}
+                        </p>
                     </div>
                 </div>
 
-                {/* Wallet Address Card */}
-                <div className="bg-gray-900 dark:bg-[#0c1427] border border-gray-700 rounded-xl p-5">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full animate-pulse ${network.id === 'TRC20' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
-                            <span className="text-sm font-medium text-gray-300">
-                                {network.chain}
-                            </span>
-                        </div>
-                        <span className="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-medium">
-                            USDT {network.id}
-                        </span>
+                {/* Features */}
+                <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
+                        <div className="text-green-500 text-lg mb-1">⚡</div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                            {isRTL ? 'سريع' : 'Fast'}
+                        </p>
                     </div>
-
-                    <div className="bg-black/40 backdrop-blur rounded-xl p-4 mb-3">
-                        <code className="text-sm font-mono text-green-400 break-all leading-relaxed">
-                            {network.walletAddress}
-                        </code>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
+                        <div className="text-green-500 text-lg mb-1">🔒</div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                            {isRTL ? 'آمن' : 'Secure'}
+                        </p>
                     </div>
-
-                    <button
-                        onClick={() => copyToClipboard(network.walletAddress, 'wallet')}
-                        className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${copiedText === 'wallet'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white'
-                            }`}
-                    >
-                        {copiedText === 'wallet' ? (
-                            <>
-                                <Check className="w-5 h-5" />
-                                {isRTL ? 'تم النسخ!' : 'Copied!'}
-                            </>
-                        ) : (
-                            <>
-                                <Copy className="w-5 h-5" />
-                                {isRTL ? 'نسخ العنوان' : 'Copy Address'}
-                            </>
-                        )}
-                    </button>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
+                        <div className="text-green-500 text-lg mb-1">✓</div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                            {isRTL ? 'تلقائي' : 'Auto'}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Warning Box */}
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                        <div className="p-2 bg-amber-500/20 rounded-xl">
-                            <AlertCircle className="w-5 h-5 text-amber-500" />
-                        </div>
-                        <div className="text-sm">
-                            <p className="font-bold text-amber-600 dark:text-amber-400 mb-2">
-                                {isRTL ? '⚠️ مهم جداً!' : '⚠️ Important!'}
-                            </p>
-                            <ul className="text-amber-700 dark:text-amber-300 space-y-1.5">
-                                <li className="flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-amber-500 rounded-full"></span>
-                                    {isRTL ? `أرسل فقط USDT عبر شبكة ${network.id}` : `Only send USDT via ${network.id} network`}
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-amber-500 rounded-full"></span>
-                                    {isRTL ? `أرسل بالضبط: $${totalPayment.toFixed(2)}` : `Send exactly: $${totalPayment.toFixed(2)}`}
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-amber-500 rounded-full"></span>
-                                    {isRTL ? 'إرسال عملات أخرى سيؤدي لخسارتها' : 'Sending other tokens will result in loss'}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                {/* Create Invoice Button */}
+                <button
+                    onClick={createNowPaymentsInvoice}
+                    disabled={isCreatingInvoice}
+                    className={`w-full py-4 rounded-xl font-bold text-white transition-all duration-300 flex items-center justify-center gap-3 text-lg ${isCreatingInvoice
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                        }`}
+                >
+                    {isCreatingInvoice ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            {isRTL ? 'جاري إنشاء الفاتورة...' : 'Creating Invoice...'}
+                        </>
+                    ) : (
+                        <>
+                            <span>💳</span>
+                            {isRTL ? 'متابعة للدفع' : 'Continue to Payment'}
+                        </>
+                    )}
+                </button>
+
+                {/* NowPayments Badge */}
+                <div className="text-center">
+                    <p className="text-xs text-gray-400">
+                        {isRTL ? 'مدعوم بواسطة' : 'Powered by'}{' '}
+                        <span className="font-semibold text-gray-600 dark:text-gray-300">NowPayments</span>
+                    </p>
                 </div>
             </div>
         );
     };
-
-    // Render Binance Pay instructions
-    const renderBinancePayInstructions = () => (
-        <div className="space-y-6">
-            {/* Binance Pay ID Card */}
-            <div className="bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-500 rounded-xl p-6 text-center shadow-xl">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <svg className="w-12 h-12 text-white" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L6.5 7.5L8.4 9.4L12 5.8L15.6 9.4L17.5 7.5L12 2Z" />
-                        <path d="M2 12L3.9 10.1L5.8 12L3.9 13.9L2 12Z" />
-                        <path d="M6.5 16.5L12 22L17.5 16.5L15.6 14.6L12 18.2L8.4 14.6L6.5 16.5Z" />
-                        <path d="M18.2 12L20.1 10.1L22 12L20.1 13.9L18.2 12Z" />
-                        <path d="M12 9.2L9.2 12L12 14.8L14.8 12L12 9.2Z" />
-                    </svg>
-                </div>
-
-                <h5 className="!mb-0 text-lg font-bold text-white">Binance Pay ID</h5>
-                <p className="text-white/80 text-sm mb-4">{isRTL ? 'انسخ الـ ID وأرسل المبلغ' : 'Copy ID and send amount'}</p>
-
-                <div className="bg-black/20 backdrop-blur rounded-xl p-4 mb-4">
-                    <code className="text-2xl font-mono font-bold text-white tracking-wider">
-                        {FURRIYADH_PAYMENT_INFO.binance_pay_id}
-                    </code>
-                </div>
-
-                <button
-                    onClick={() => copyToClipboard(FURRIYADH_PAYMENT_INFO.binance_pay_id, 'binance')}
-                    className={`w-full py-3 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ${copiedText === 'binance'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-white text-yellow-600 hover:bg-gray-100'
-                        }`}
-                >
-                    {copiedText === 'binance' ? (
-                        <>
-                            <Check className="w-5 h-5" />
-                            {isRTL ? 'تم النسخ!' : 'Copied!'}
-                        </>
-                    ) : (
-                        <>
-                            <Copy className="w-5 h-5" />
-                            {isRTL ? 'نسخ Pay ID' : 'Copy Pay ID'}
-                        </>
-                    )}
-                </button>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                <h6 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-500" />
-                    {isRTL ? 'خطوات الدفع السريع' : 'Quick Payment Steps'}
-                </h6>
-                <div className="space-y-3">
-                    {[
-                        { en: 'Open Binance App', ar: 'افتح تطبيق Binance' },
-                        { en: 'Tap Pay → Send', ar: 'اضغط Pay → Send' },
-                        { en: 'Paste Pay ID above', ar: 'الصق Pay ID أعلاه' },
-                        { en: `Enter $${totalPayment.toFixed(2)}`, ar: `أدخل $${totalPayment.toFixed(2)}` },
-                        { en: 'Confirm & Done!', ar: 'أكد وخلاص!' },
-                    ].map((step, i) => (
-                        <div key={i} className="flex items-center gap-3 group">
-                            <span className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl flex items-center justify-center text-sm font-bold shadow-lg shadow-yellow-500/30 group-hover:scale-110 transition-transform">
-                                {i + 1}
-                            </span>
-                            <span className="text-gray-700 dark:text-gray-300 font-medium">
-                                {isRTL ? step.ar : step.en}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
 
     // Render RedotPay instructions
     const renderRedotPayInstructions = () => (
@@ -1426,7 +1399,6 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                         {/* Modal Content */}
                         <div className="p-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                             {selectedMethod === 'usdt_crypto' && renderCryptoInstructions()}
-                            {selectedMethod === 'binance_pay' && renderBinancePayInstructions()}
                             {selectedMethod === 'redotpay' && renderRedotPayInstructions()}
                             {selectedMethod === 'visa_mastercard' && renderCardPaymentForm()}
                             {selectedMethod === 'paypal' && (

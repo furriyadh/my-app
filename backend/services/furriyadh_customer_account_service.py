@@ -486,17 +486,18 @@ class FurriyadhCustomerAccountService:
                 return False, f"مبلغ الاسترداد (${refund_amount:.2f}) أكبر من الرصيد الحالي (${current_balance:.2f})", None
             
             # Create refund record (negative amounts in deposits table)
+            # Using 'manual' payment_method to work with database constraint
             refund_data = {
                 'customer_account_id': account['id'],
                 'gross_amount': -refund_amount,  # Negative for refund
                 'commission_amount': 0,  # No commission on refunds
                 'net_amount': -refund_amount,  # Negative for refund
-                'payment_method': 'refund',
+                'payment_method': 'manual',  # Use 'manual' - constraint doesn't allow 'refund'
                 'payment_reference': f"REFUND-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
                 'payment_email': admin_email,
                 'status': 'completed',
                 'currency': 'USD',
-                'notes': reason,
+                'notes': f"[REFUND] {reason}" if reason else "[REFUND]",
                 'completed_at': datetime.utcnow().isoformat()
             }
             
@@ -521,7 +522,7 @@ class FurriyadhCustomerAccountService:
             # Create notification
             self._create_notification(
                 account_id=account['id'],
-                notification_type='refund_processed',
+                notification_type='system',  # Use 'system' - constraint doesn't allow 'refund_processed'
                 title='تم معالجة الاسترداد',
                 message=f'تم استرداد ${refund_amount:.2f} من رصيدك. السبب: {reason or "غير محدد"}'
             )
