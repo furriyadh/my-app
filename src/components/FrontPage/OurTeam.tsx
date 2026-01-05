@@ -28,7 +28,7 @@ const teamMembers: TeamMember[] = [
     socials: {
       linkedin: "https://www.linkedin.com/",
       twitter: "https://x.com/",
-      email: "ahmed@furriyadh.com"
+      email: "ads@furriyadh.com"
     },
   },
   {
@@ -40,7 +40,7 @@ const teamMembers: TeamMember[] = [
     socials: {
       linkedin: "https://www.linkedin.com/",
       twitter: "https://x.com/",
-      email: "sarah@furriyadh.com"
+      email: "ads@furriyadh.com"
     },
   },
   {
@@ -52,7 +52,7 @@ const teamMembers: TeamMember[] = [
     socials: {
       linkedin: "https://www.linkedin.com/",
       twitter: "https://x.com/",
-      email: "mohammed@furriyadh.com"
+      email: "ads@furriyadh.com"
     },
   },
   {
@@ -64,7 +64,7 @@ const teamMembers: TeamMember[] = [
     socials: {
       linkedin: "https://www.linkedin.com/",
       twitter: "https://x.com/",
-      email: "emily@furriyadh.com"
+      email: "ads@furriyadh.com"
     },
   },
 ];

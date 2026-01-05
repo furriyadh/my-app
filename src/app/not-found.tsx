@@ -106,7 +106,7 @@ export default function NotFound() {
           <p>
             Need help? Contact our{" "}
             <a
-              href="mailto:support@furriyadh.com"
+              href="mailto:ads@furriyadh.com"
               className="text-blue-600 hover:text-blue-800 underline"
             >
               support team

@@ -338,7 +338,7 @@ function generateInvoiceHTML(data: {
                     © 2025 Furriyadh. All rights reserved.
                 </div>
                 <div class="footer-contact">
-                    <a href="mailto:support@furriyadh.com">support@furriyadh.com</a>
+                    <a href="mailto:ads@furriyadh.com">ads@furriyadh.com</a>
                 </div>
             </div>
         </div>

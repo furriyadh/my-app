@@ -242,7 +242,7 @@ const getEmailTemplate = (type: EmailType, data: any): { subject: string; html: 
                             <!-- Footer -->
                             <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
                                 <p style="color: #6b7280; font-size: 12px;">
-                                    Need help? Contact support at support@furriyadh.com
+                                    Need help? Contact support at ads@furriyadh.com
                                 </p>
                             </div>
                             
