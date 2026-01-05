@@ -216,14 +216,14 @@ export default function AdCreationPrompt() {
                         </Link>
                         <Link
                             href="#video-demo"
-                            className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-2xl font-semibold transition-all duration-200 flex items-center gap-2"
+                            className="px-8 py-4 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 dark:bg-white/10 dark:hover:bg-white/20 dark:border-white/20 text-zinc-900 dark:text-white rounded-2xl font-semibold transition-all duration-200 flex items-center gap-2"
                         >
                             <Play className="w-5 h-5" />
                             Watch Demo
                         </Link>
                     </div>
 
-                    <p className="text-center text-gray-500 text-sm">
+                    <p className="text-center text-zinc-600 dark:text-gray-500 text-sm">
                         ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial &nbsp;•&nbsp; ✓ Cancel anytime
                     </p>
                 </div>
