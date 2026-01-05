@@ -175,17 +175,7 @@ function CheckoutContent() {
         }
     };
 
-    // Trigger Paddle when switching to details view for Visa/MasterCard
-    useEffect(() => {
-        if (selectedMethod === 'visa_mastercard' && paymentStep === 'details' && paddle) {
-            // Small timeout to ensure DOM is ready
-            setTimeout(() => {
-                handlePaddleCheckout();
-            }, 100);
-        }
-    }, [selectedMethod, paymentStep, paddle]);
-
-    const handlePaddleCheckout = () => {
+    const handlePaddleCheckout = (retries = 3) => {
         if (!paddle) {
             console.log('Paddle initializing...');
             return;
@@ -197,6 +187,20 @@ function CheckoutContent() {
         if (!priceId) {
             console.error('Invalid plan selected for Paddle checkout');
             addDebugLog(`Error: Invalid Price ID. planKey=${planId}`);
+            return;
+        }
+
+        const container = document.getElementById('paddle-container');
+        if (!container) {
+            if (retries > 0) {
+                console.log(`Paddle container not found, retrying... (${retries} left)`);
+                addDebugLog(`Container missing. Retrying in 200ms... (${retries})`);
+                setTimeout(() => handlePaddleCheckout(retries - 1), 200);
+                return;
+            }
+            const err = 'Error: #paddle-container not found in DOM after retries';
+            console.error(err);
+            addDebugLog(err);
             return;
         }
 
@@ -222,6 +226,16 @@ function CheckoutContent() {
             addDebugLog(`Error opening checkout: ${error.message || error}`);
         }
     };
+
+    // Trigger Paddle when switching to details view for Visa/MasterCard
+    useEffect(() => {
+        if (selectedMethod === 'visa_mastercard' && paymentStep === 'details' && paddle) {
+            // Small timeout to ensure DOM is ready
+            setTimeout(() => {
+                handlePaddleCheckout();
+            }, 100);
+        }
+    }, [selectedMethod, paymentStep, paddle]);
 
     // NowPayments state
     const [nowPaymentsInvoice, setNowPaymentsInvoice] = useState<{
