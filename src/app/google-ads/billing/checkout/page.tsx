@@ -104,13 +104,13 @@ const CRYPTO_NETWORKS = [
 const PADDLE_PRICE_IDS = {
     MONTHLY: {
         BASIC: 'pri_01ke7gzh9508w5j81azc699748',
-        PREMIUM: 'pri_01ke7h6e9d05pt54j0mxs539q2',
-        ENTERPRISE: 'pri_01ke7h8765hth3c99hgbvaaj6r'
+        PRO: 'pri_01ke7h6e9d05pt54j0mxs539q2',
+        AGENCY: 'pri_01ke7h8765hth3c99hgbvaaj6r'
     },
     YEARLY: {
         BASIC: 'pri_01ke7hr62ce5rgdndnpwhjz3sh',
-        PREMIUM: 'pri_01ke7hseye96pemfdssn9r5m5t',
-        ENTERPRISE: 'pri_01ke7htrekf52ar328f1esrmp3'
+        PRO: 'pri_01ke7hseye96pemfdssn9r5m5t',
+        AGENCY: 'pri_01ke7htrekf52ar328f1esrmp3'
     }
 };
 
@@ -153,16 +153,11 @@ function CheckoutContent() {
     const getPaddlePriceId = () => {
         // Map plan IDs from URL to Paddle keys
         // URL plans: free, basic, pro, agency, enterprise
-        // Paddle keys: BASIC, PREMIUM (Pro), ENTERPRISE (Agency)
-
-        // Note: 'free' and 'enterprise' (custom) might not have direct Paddle IDs here
-        // Assuming we default to Basic or handle error if invalid
-
-        let planKey: 'BASIC' | 'PREMIUM' | 'ENTERPRISE' | null = null;
+        let planKey: 'BASIC' | 'PRO' | 'AGENCY' | null = null;
 
         if (planId === 'basic') planKey = 'BASIC';
-        else if (planId === 'pro') planKey = 'PREMIUM';
-        else if (planId === 'agency') planKey = 'ENTERPRISE';
+        else if (planId === 'pro') planKey = 'PRO';
+        else if (planId === 'agency') planKey = 'AGENCY';
 
         if (!planKey) return null;
 
@@ -190,6 +185,8 @@ function CheckoutContent() {
         }
 
         const priceId = getPaddlePriceId();
+        console.log('Paddle Checkout Debug:', { priceId, planId, cycle, env: process.env.NEXT_PUBLIC_PADDLE_ENV });
+
         if (!priceId) {
             console.error('Invalid plan selected for Paddle checkout');
             return;
@@ -200,10 +197,11 @@ function CheckoutContent() {
             settings: {
                 displayMode: 'inline',
                 frameTarget: 'paddle-container',
+                frameInitialHeight: 450,
                 frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
                 theme: 'dark',
                 locale: language === 'ar' ? 'ar' : 'en',
-                successUrl: `${getBackendUrl()}/google-ads/billing?payment=success&plan=${planId}`
+                successUrl: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`
             },
             customer: {
                 email: userEmail
@@ -462,7 +460,7 @@ function CheckoutContent() {
                             amount: totalPayment.toFixed(2),
                             billingCycle: cycle,
                             transactionId: transactionId,
-                            dashboardUrl: `${getBackendUrl()}/google-ads/billing`
+                            dashboardUrl: `${window.location.origin}/google-ads/billing`
                         }
                     })
                 }).catch(err => console.error('Email error:', err));
@@ -512,8 +510,8 @@ function CheckoutContent() {
                     email: userEmail,
                     order_id: `SUB-${planId.toUpperCase()}-${cycle.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
                     description: `${selectedPlan.name} Plan - ${cycle} subscription`,
-                    success_url: `${getBackendUrl()}/google-ads/billing?payment=success&plan=${planId}`,
-                    cancel_url: `${getBackendUrl()}/google-ads/billing/checkout?plan=${planId}&cycle=${cycle}&payment=cancelled`,
+                    success_url: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`,
+                    cancel_url: `${window.location.origin}/google-ads/billing/checkout?plan=${planId}&cycle=${cycle}&payment=cancelled`,
                 })
             });
 
