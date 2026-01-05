@@ -916,6 +916,38 @@ export default function RootLayout({
             html.dark .border-gray-100 {
               border-color: #172036 !important;
             }
+            
+            /* Navbar specific dark mode overrides */
+            html.dark #navbar {
+              background-color: rgba(10, 14, 25, 0.95) !important;
+            }
+            html.dark .bg-white\\/95 {
+              background-color: rgba(10, 14, 25, 0.95) !important;
+            }
+            html.dark .bg-white\\/80 {
+              background-color: rgba(10, 14, 25, 0.8) !important;
+            }
+            html.dark .bg-gray-100 {
+              background-color: rgba(255, 255, 255, 0.05) !important;
+            }
+            html.dark .text-gray-300 {
+              color: #d1d5db !important;
+            }
+            html.dark .text-gray-400 {
+              color: #9ca3af !important;
+            }
+            html.dark .text-gray-500 {
+              color: #6b7280 !important;
+            }
+            html.dark .bg-white\\/5 {
+              background-color: rgba(255, 255, 255, 0.05) !important;
+            }
+            html.dark .border-white\\/10 {
+              border-color: rgba(255, 255, 255, 0.1) !important;
+            }
+            html.dark .hover\\:bg-white\\/10:hover {
+              background-color: rgba(255, 255, 255, 0.1) !important;
+            }
           `
         }} />
 
