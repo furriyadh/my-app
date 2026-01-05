@@ -138,13 +138,20 @@ function CheckoutContent() {
     const [paddle, setPaddle] = useState<Paddle>();
 
     // Initialize Paddle
+    const [debugLogs, setDebugLogs] = useState<string[]>([]);
+    const addDebugLog = (msg: string) => setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
+
     useEffect(() => {
+        addDebugLog(`Initializing Paddle... Env: ${process.env.NEXT_PUBLIC_PADDLE_ENV}`);
         initializePaddle({
             environment: process.env.NEXT_PUBLIC_PADDLE_ENV as 'production' | 'sandbox' || 'production',
             token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
         }).then((paddleInstance: Paddle | undefined) => {
             if (paddleInstance) {
                 setPaddle(paddleInstance);
+                addDebugLog('Paddle instance created successfully.');
+            } else {
+                addDebugLog('Failed to create Paddle instance.');
             }
         });
     }, []);
@@ -189,24 +196,31 @@ function CheckoutContent() {
 
         if (!priceId) {
             console.error('Invalid plan selected for Paddle checkout');
+            addDebugLog(`Error: Invalid Price ID. planKey=${planId}`);
             return;
         }
 
-        paddle.Checkout.open({
-            items: [{ priceId, quantity: 1 }],
-            settings: {
-                displayMode: 'inline',
-                frameTarget: 'paddle-container',
-                frameInitialHeight: 450,
-                frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
-                theme: 'dark',
-                locale: language === 'ar' ? 'ar' : 'en',
-                successUrl: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`
-            },
-            customer: {
-                email: userEmail
-            }
-        });
+        try {
+            addDebugLog(`Opening Checkout... Price: ${priceId}`);
+            paddle.Checkout.open({
+                items: [{ priceId, quantity: 1 }],
+                settings: {
+                    displayMode: 'inline',
+                    frameTarget: 'paddle-container',
+                    frameInitialHeight: 450,
+                    frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
+                    theme: 'dark',
+                    locale: language === 'ar' ? 'ar' : 'en',
+                    successUrl: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`
+                },
+                customer: {
+                    email: userEmail
+                }
+            });
+        } catch (error: any) {
+            console.error('Paddle open error:', error);
+            addDebugLog(`Error opening checkout: ${error.message || error}`);
+        }
     };
 
     // NowPayments state
@@ -724,6 +738,12 @@ function CheckoutContent() {
                         )}
                         {/* Paddle Frame Container */}
                         <div id="paddle-container" className="w-full h-full min-h-[600px]" />
+                    </div>
+
+                    {/* DEBUG PANEL - TEMPORARY */}
+                    <div className="bg-black text-green-400 p-4 rounded text-xs font-mono border border-green-900 overflow-auto max-h-40" dir="ltr">
+                        <h4 className="font-bold border-b border-green-900 pb-1 mb-2">DEBUG INFO (Share this screenshot if it fails):</h4>
+                        {debugLogs.map((log, i) => <div key={i}>{log}</div>)}
                     </div>
 
                     {/* COMPLIANCE FOOTER - "Giant Site" Standard */}
