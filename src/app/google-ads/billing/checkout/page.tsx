@@ -190,15 +190,16 @@ function CheckoutContent() {
             return;
         }
 
-        const container = document.getElementById('paddle-container');
+        // Paddle expects a class name for frameTarget, so we check for class
+        const container = document.querySelector('.paddle-container');
         if (!container) {
             if (retries > 0) {
-                console.log(`Paddle container not found, retrying... (${retries} left)`);
+                console.log(`Paddle container (class) not found, retrying... (${retries} left)`);
                 addDebugLog(`Container missing. Retrying in 200ms... (${retries})`);
                 setTimeout(() => handlePaddleCheckout(retries - 1), 200);
                 return;
             }
-            const err = 'Error: #paddle-container not found in DOM after retries';
+            const err = 'Error: .paddle-container not found in DOM after retries';
             console.error(err);
             addDebugLog(err);
             return;
@@ -210,7 +211,7 @@ function CheckoutContent() {
                 items: [{ priceId, quantity: 1 }],
                 settings: {
                     displayMode: 'inline',
-                    frameTarget: 'paddle-container',
+                    frameTarget: 'paddle-container', // Matches class name below
                     frameInitialHeight: 450,
                     frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
                     theme: 'dark',
@@ -751,7 +752,7 @@ function CheckoutContent() {
                             </div>
                         )}
                         {/* Paddle Frame Container */}
-                        <div id="paddle-container" className="w-full h-full min-h-[600px]" />
+                        <div id="paddle-container" className="paddle-container w-full h-full min-h-[600px]" />
                     </div>
 
                     {/* DEBUG PANEL - TEMPORARY */}
