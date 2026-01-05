@@ -46,8 +46,8 @@ const ContactUs: React.FC = () => {
                     <h3 className="text-black dark:text-white font-semibold mb-1">
                       {language === 'ar' ? 'اتصل بنا' : 'Call Us'}
                     </h3>
-                    <a href="tel:+15303504377" className="text-gray-600 dark:text-gray-400 hover:text-purple-400 transition-colors">
-                      +1 530 350 4377
+                    <a href="tel:+201080219382" className="text-gray-600 dark:text-gray-400 hover:text-purple-400 transition-colors">
+                      +20 1080219382
                     </a>
                   </div>
                 </div>
@@ -61,8 +61,8 @@ const ContactUs: React.FC = () => {
                     <h3 className="text-black dark:text-white font-semibold mb-1">
                       {language === 'ar' ? 'البريد الإلكتروني' : 'Email Us'}
                     </h3>
-                    <a href="mailto:support@furriyadh.com" className="text-gray-600 dark:text-gray-400 hover:text-purple-400 transition-colors">
-                      support@furriyadh.com
+                    <a href="mailto:ads@furriyadh.com" className="text-gray-600 dark:text-gray-400 hover:text-purple-400 transition-colors">
+                      ads@furriyadh.com
                     </a>
                   </div>
                 </div>
@@ -77,8 +77,8 @@ const ContactUs: React.FC = () => {
                       {language === 'ar' ? 'العنوان' : 'Our Address'}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      350 5th Avenue, Empire State Building<br />
-                      New York, NY 10118, USA
+                      Al Ain Truck Road, Abu Dhabi<br />
+                      United Arab Emirates
                     </p>
                   </div>
                 </div>
