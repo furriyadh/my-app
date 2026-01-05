@@ -777,7 +777,7 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Script Ù„ØªØ·Ø¨ÙŠÙ‚ RTL Ù‚Ø¨Ù„ Ø±Ø³Ù… Ø§Ù„ØµÙØ­Ø© Ù„ØªØ¬Ù†Ø¨ Ø§Ù„ØªØ¶Ø§Ø±Ø¨ */}
+        {/* Script لتطبيق RTL قبل رسم الصفحة لتجنب التضارب */}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
@@ -795,8 +795,28 @@ export default function RootLayout({
                     document.documentElement.setAttribute('dir', 'ltr');
                   }
                 } catch (e) {
-                  // ÙÙŠ Ø­Ø§Ù„Ø© Ø¹Ø¯Ù… ÙˆØ¬ÙˆØ¯ localStorageØŒ Ø§Ø³ØªØ®Ø¯Ù… LTR ÙƒØ§ÙØªØ±Ø§Ø¶ÙŠ
+                  // في حالة عدم وجود localStorage، استخدم LTR كافتراضي
                   document.documentElement.setAttribute('dir', 'ltr');
+                }
+              })();
+            `,
+          }}
+        />
+        {/* Script لتطبيق الثيم قبل رسم الصفحة لتجنب الوميض */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme');
+                  if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // في حالة عدم وجود localStorage، استخدم الوضع الفاتح كافتراضي
                 }
               })();
             `,
@@ -867,6 +887,51 @@ export default function RootLayout({
 
       </head>
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
+        {/* CRITICAL: Apply theme IMMEDIATELY and ENFORCE it to prevent any flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  var applyTheme = function() {
+                    if (theme === 'dark') {
+                      document.documentElement.classList.add('dark');
+                    }
+                  };
+                  
+                  // Apply immediately
+                  applyTheme();
+                  
+                  // Apply again after short delays to override any React hydration
+                  setTimeout(applyTheme, 0);
+                  setTimeout(applyTheme, 10);
+                  setTimeout(applyTheme, 50);
+                  setTimeout(applyTheme, 100);
+                  setTimeout(applyTheme, 200);
+                  setTimeout(applyTheme, 500);
+                  
+                  // Watch for any attempts to remove dark class and re-add it
+                  if (theme === 'dark') {
+                    var observer = new MutationObserver(function(mutations) {
+                      mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                          if (!document.documentElement.classList.contains('dark')) {
+                            document.documentElement.classList.add('dark');
+                          }
+                        }
+                      });
+                    });
+                    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                    
+                    // Stop observing after 3 seconds (after React fully hydrates)
+                    setTimeout(function() { observer.disconnect(); }, 3000);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <GoogleTagManager gtmId="GTM-M3P8KJ2R" />
         <SessionSyncProvider>
           <CampaignProvider>

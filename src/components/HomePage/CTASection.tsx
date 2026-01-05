@@ -7,12 +7,12 @@ export default function CTASection() {
   return (
     <section className="py-16 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-3xl text-center">
-        <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 sm:p-10">
-          <Sparkles className="w-12 h-12 mx-auto mb-5 text-purple-400" />
-          <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold !text-white">
+        <div className="bg-white/80 dark:bg-gradient-to-r dark:from-purple-600/10 dark:to-blue-600/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-2xl p-8 sm:p-10 shadow-lg dark:shadow-none">
+          <Sparkles className="w-12 h-12 mx-auto mb-5 text-purple-600 dark:text-purple-400" />
+          <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
             Ready to Transform Your Google Ads Campaigns?
           </h2>
-          <p className="text-base md:text-lg text-gray-400 mb-6">
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 mb-6">
             Join thousands of businesses that trust our platform to manage and optimize their Google Ads campaigns. Start your free trial today and see the difference AI makes.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -25,7 +25,7 @@ export default function CTASection() {
             </Link>
             <Link
               href="/front-pages/contact"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-semibold text-sm transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 border border-gray-200 dark:border-white/20 text-gray-900 dark:text-white rounded-xl font-semibold text-sm transition-all duration-200"
             >
               <Phone className="w-4 h-4" />
               Contact Sales

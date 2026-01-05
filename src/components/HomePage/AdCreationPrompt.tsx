@@ -316,9 +316,9 @@ export default function AdCreationPrompt() {
                     className="relative max-w-6xl mx-auto h-[40rem] md:h-[45rem] w-full bg-transparent transition-all duration-300 hover:shadow-3xl overflow-visible"
                 >
                     {/* Content Container */}
-                    <div className="h-full w-full overflow-hidden rounded-2xl bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl relative flex flex-col transition-all duration-300 hover:shadow-purple-500/10 hover:border-white/20">
+                    <div className="h-full w-full overflow-hidden rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-3xl border border-gray-200 dark:border-white/10 shadow-2xl relative flex flex-col transition-all duration-300 hover:shadow-purple-500/10 hover:border-purple-500/20 dark:hover:border-white/20">
                         {/* Mac Window Header */}
-                        <div className="h-10 w-full bg-white/5 border-b border-white/10 flex items-center px-4 gap-2 flex-shrink-0 backdrop-blur-md">
+                        <div className="h-10 w-full bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/10 flex items-center px-4 gap-2 flex-shrink-0 backdrop-blur-md">
                             <div className="h-3 w-3 rounded-full bg-[#FF5F56]"></div>
                             <div className="h-3 w-3 rounded-full bg-[#FFBD2E]"></div>
                             <div className="h-3 w-3 rounded-full bg-[#27C93F]"></div>
@@ -342,13 +342,13 @@ export default function AdCreationPrompt() {
                                                     { src: "https://i.pravatar.cc/150?u=a04258114e29026302d", alt: "Analyst" },
                                                 ]}
                                             />
-                                            <span className="text-gray-400 text-sm font-medium">+10k Campaigns Managed</span>
+                                            <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">+10k Campaigns Managed</span>
                                         </div>
                                     </div>
 
                                     {/* 2. Main Title */}
-                                    <h2 className={`text-center !mb-8 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold !text-white`}>
-                                        <span className="!text-white">
+                                    <h2 className={`text-center !mb-8 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white`}>
+                                        <span className="text-black dark:text-white">
                                             Build your Google Ads in seconds with AI magic
                                         </span>
                                     </h2>
@@ -364,7 +364,7 @@ export default function AdCreationPrompt() {
                                                 key={i}
                                                 type="button"
                                                 onClick={() => setPrompt(item.prompt)} // Use item.prompt which has the full context
-                                                className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#1e1e2d] border border-white/5 text-gray-300 hover:bg-[#252536] hover:border-purple-500/30 transition-all text-sm md:text-base font-medium group active:scale-95 animate-in fade-in zoom-in duration-300"
+                                                className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-50 dark:bg-[#1e1e2d] border border-gray-200 dark:border-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#252536] hover:border-purple-500/30 transition-all text-sm md:text-base font-medium group active:scale-95 animate-in fade-in zoom-in duration-300"
                                             >
                                                 <item.icon className="w-4 h-4 text-blue-400 group-hover:text-purple-400 transition-colors" />
                                                 <span>{item.text}</span>
@@ -405,7 +405,7 @@ export default function AdCreationPrompt() {
                                                 max-w-[85%] rounded-2xl p-3 shadow-md relative overflow-hidden
                                                 ${message.role === 'user'
                                                         ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-purple-500/10 rounded-tr-sm'
-                                                        : 'bg-[#1a1a2e]/95 backdrop-blur-md border border-purple-500/20 text-gray-100 shadow-purple-500/5 rounded-tl-sm'
+                                                        : 'bg-white dark:bg-[#1a1a2e]/95 backdrop-blur-md border border-gray-200 dark:border-purple-500/20 text-gray-800 dark:text-gray-100 shadow-sm dark:shadow-purple-500/5 rounded-tl-sm'
                                                     }
                                                 group transition-all duration-300 hover:shadow-lg
                                             `}>
@@ -463,12 +463,12 @@ export default function AdCreationPrompt() {
                             {/* Input Form - Sticky Footer Integrated */}
                             <form onSubmit={handleSendMessage} className={`w-full mt-auto relative z-20 sticky ${isMobile ? 'bottom-0' : 'bottom-0'}`}>
 
-                                <div className={`bg-black/30 backdrop-blur-xl border border-white/10 ${isMobile ? 'p-2 rounded-xl' : 'px-4 py-3 rounded-2xl'} shadow-lg transition-all duration-300 hover:border-purple-500/30 hover:shadow-purple-500/10`}>
+                                <div className={`bg-white/80 dark:bg-black/30 backdrop-blur-xl border border-gray-200 dark:border-white/10 ${isMobile ? 'p-2 rounded-xl' : 'px-4 py-3 rounded-2xl'} shadow-lg transition-all duration-300 hover:border-purple-500/30 hover:shadow-purple-500/10`}>
 
                                     {/* Image Preview Area - Refined */}
                                     {selectedImages.length > 0 && (
                                         <div className="mb-3 px-2">
-                                            <h3 className="text-gray-500 text-[10px] font-normal mb-2 flex items-center gap-1.5 opacity-70">
+                                            <h3 className="text-gray-500 dark:text-gray-500 text-[10px] font-normal mb-2 flex items-center gap-1.5 opacity-70">
                                                 <Paperclip size={10} />
                                                 Extract only text from images and files.
                                             </h3>
@@ -516,7 +516,7 @@ export default function AdCreationPrompt() {
                                             // Empty placeholder when messages exist (so no typewriter), standard text otherwise
                                             placeholder={messages.length === 0 ? "" : "Type your question here..."}
                                             rows={1}
-                                            className="w-full p-2 bg-transparent text-gray-100 placeholder-transparent focus:outline-none resize-none text-base font-medium leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed mb-0 relative z-10"
+                                            className="w-full p-2 bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-transparent focus:outline-none resize-none text-base font-medium leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed mb-0 relative z-10"
                                         />
 
                                         {/* Custom Typewriter Overlay (Only visible when empty & initial state) */}
@@ -538,7 +538,7 @@ export default function AdCreationPrompt() {
                                             <button
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                                className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
                                             >
                                                 <Paperclip size={20} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
                                                 <span className="font-medium text-sm">Tools</span>
@@ -555,7 +555,7 @@ export default function AdCreationPrompt() {
                                             {/* Search Button */}
                                             <button
                                                 type="button"
-                                                className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-400 hover:text-gray-100 hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
+                                                className="flex items-center gap-2 px-2 md:px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all duration-200 group active:scale-95"
                                             >
                                                 <Globe size={20} className="group-hover:text-blue-400 transition-colors" />
                                                 <span className="font-medium text-sm">Search</span>
@@ -574,7 +574,7 @@ export default function AdCreationPrompt() {
                                             <button
                                                 type="button"
                                                 onClick={toggleRecording}
-                                                className={`p-2 rounded-lg transition-all active:scale-95 ${isRecording ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                                                className={`p-2 rounded-lg transition-all active:scale-95 ${isRecording ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                             >
                                                 <Mic size={20} />
                                             </button>

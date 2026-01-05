@@ -3,35 +3,28 @@
 import React, { useState, useEffect } from "react";
 
 const LightDarkModeButton: React.FC = () => {
-  // Light/Dark Mode
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  // Light/Dark Mode - Initialize to null, read from DOM
+  const [isDarkMode, setIsDarkMode] = useState<boolean | null>(null);
 
+  // Read theme from DOM on mount (the layout script already set it)
   useEffect(() => {
-    // Retrieve the user's preference from local storage
-    const storedPreference = localStorage.getItem("theme");
-    if (storedPreference === "dark") {
-      setIsDarkMode(true);
-    }
+    const isDark = document.documentElement.classList.contains('dark');
+    setIsDarkMode(isDark);
   }, []);
 
   const handleToggle = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
 
-  useEffect(() => {
-    // Update the user's preference in local storage
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-
-    // Update the class on the <html> element to apply the selected mode
-    const htmlElement = document.querySelector("html");
-    if (htmlElement) {
-      if (isDarkMode) {
-        htmlElement.classList.add("dark");
-      } else {
-        htmlElement.classList.remove("dark");
-      }
+    // Update localStorage and DOM only on toggle
+    localStorage.setItem("theme", newMode ? "dark" : "light");
+    const htmlElement = document.documentElement;
+    if (newMode) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
     }
-  }, [isDarkMode]);
+  };
 
   return (
     <>

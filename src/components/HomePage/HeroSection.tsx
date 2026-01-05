@@ -98,22 +98,22 @@ export default function HeroSection() {
       <div className="container mx-auto max-w-5xl relative z-10">
         {/* Hero Text */}
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm shadow-lg shadow-purple-500/10">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-sm text-purple-300">Powered by Advanced AI</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-600/10 border border-purple-200 dark:border-purple-500/20 rounded-full mb-6 backdrop-blur-sm shadow-lg shadow-purple-500/10">
+            <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <span className="text-sm text-purple-600 dark:text-purple-300">Powered by Advanced AI</span>
           </div>
 
-          <h1 className="!mb-6 !text-[32px] md:!text-[42px] lg:!text-[56px] xl:!text-[64px] -tracking-[.5px] md:-tracking-[1px] !leading-[1.1] !font-bold !text-white">
-            <span className="!text-white">
+          <h1 className="!mb-6 !text-[32px] md:!text-[42px] lg:!text-[56px] xl:!text-[64px] -tracking-[.5px] md:-tracking-[1px] !leading-[1.1] !font-bold text-black dark:text-white">
+            <span className="text-black dark:text-white">
               AI‑Powered Google Ads Management
             </span>
             <br />
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent">
               Launch High‑Converting Campaigns
             </span>
           </h1>
 
-          <p className="text-base md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
             AI‑powered platform to create, manage, and optimize profitable Google Ads campaigns worldwide. Reduce CPC, increase conversions, and maximize your ROAS with smart automation.
           </p>
         </div>

@@ -9,7 +9,7 @@ import { useTranslation, SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/ho
 const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { t, language, setLanguage } = useTranslation();
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to dark
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
@@ -17,39 +17,32 @@ const Navbar: React.FC = () => {
   const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const handleToggle = () => setMenuOpen(!isMenuOpen);
 
-  // Initialize theme from localStorage
+  // Initialize theme state from DOM (the head script already applied the class)
   useEffect(() => {
+    // Read the current state from DOM - don't modify it
+    const htmlElement = document.documentElement;
+    const isDark = htmlElement.classList.contains('dark');
+    setIsDarkMode(isDark);
     setMounted(true);
-    const storedPreference = localStorage.getItem("theme");
-    if (storedPreference === "dark") {
-      setIsDarkMode(true);
-    } else if (storedPreference === "light") {
-      setIsDarkMode(false);
-    } else {
-      // Default to dark if no preference
-      setIsDarkMode(true);
-    }
   }, []);
 
   // Handle theme toggle
   const handleThemeToggle = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
 
-  // Apply theme changes to DOM and localStorage
-  useEffect(() => {
-    if (!mounted) return;
-
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    // Update localStorage and DOM immediately
+    localStorage.setItem("theme", newMode ? "dark" : "light");
     const htmlElement = document.querySelector("html");
     if (htmlElement) {
-      if (isDarkMode) {
+      if (newMode) {
         htmlElement.classList.add("dark");
       } else {
         htmlElement.classList.remove("dark");
       }
     }
-  }, [isDarkMode, mounted]);
+  };
+
 
   const NAV_ITEMS = [
     { name: t.navbar.home, path: "/" },
@@ -136,8 +129,8 @@ const Navbar: React.FC = () => {
       `}</style>
       <div
         className={`fixed top-0 right-0 left-0 transition-all h-auto z-[999] ${isSticky
-          ? "bg-[#0a0e19]/95 backdrop-blur-xl border-b border-white/10 py-[12px] shadow-lg shadow-black/20"
-          : "bg-[#0a0e19]/80 backdrop-blur-md py-[16px]"
+          ? "bg-white/95 dark:bg-[#0a0e19]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 py-[12px] shadow-lg shadow-black/10 dark:shadow-black/20"
+          : "bg-white/80 dark:bg-[#0a0e19]/80 backdrop-blur-md py-[16px]"
           }`}
         id="navbar"
       >
@@ -150,14 +143,14 @@ const Navbar: React.FC = () => {
             >
               <Image
                 src="/images/logo-big.svg"
-                alt="logo"
+                alt="Furriyadh"
                 className="inline-block dark:hidden"
                 width={126}
                 height={36}
               />
               <Image
                 src="/images/white-logo-big.svg"
-                alt="logo"
+                alt="Furriyadh"
                 className="hidden dark:inline-block"
                 width={126}
                 height={36}
@@ -167,13 +160,13 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="relative w-[40px] h-[40px] flex flex-col items-center justify-center gap-[5px] p-1 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/40 transition-all duration-300 hover:bg-white/10 lg:hidden group"
+              className="relative w-[40px] h-[40px] flex flex-col items-center justify-center gap-[5px] p-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-purple-500/40 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-white/10 lg:hidden group"
               onClick={handleToggle}
               aria-label="Toggle menu"
             >
-              <span className={`h-[2px] w-[20px] rounded-full bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
-              <span className={`h-[2px] w-[20px] rounded-full bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
-              <span className={`h-[2px] w-[20px] rounded-full bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
+              <span className={`h-[2px] w-[20px] rounded-full bg-gray-800 dark:bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
+              <span className={`h-[2px] w-[20px] rounded-full bg-gray-800 dark:bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
+              <span className={`h-[2px] w-[20px] rounded-full bg-gray-800 dark:bg-white transition-all duration-300 pointer-events-none ${isMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
             </button>
 
             {/* Desktop Navigation */}
@@ -186,7 +179,7 @@ const Navbar: React.FC = () => {
                       href={item.path}
                       className={`font-medium transition-all text-[14px] xl:text-[15px] px-4 py-2 rounded-full ${pathname === item.path
                         ? 'bg-purple-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
                         }`}
                     >
                       {item.name}
@@ -197,18 +190,17 @@ const Navbar: React.FC = () => {
 
               {/* Right Side Controls */}
               <div className="flex items-center ltr:ml-auto rtl:mr-auto gap-[15px]">
-                {/* Theme Toggle Button - Dashboard Style */}
-                {mounted && (
-                  <button
-                    onClick={handleThemeToggle}
-                    className="leading-none inline-block transition-all hover:opacity-80"
-                    aria-label="Toggle theme"
-                  >
-                    <i className="material-symbols-outlined !text-[22px] text-[#fe7a36]">
-                      {isDarkMode ? 'light_mode' : 'dark_mode'}
-                    </i>
-                  </button>
-                )}
+                {/* Theme Toggle Button - Same as other pages */}
+                <button
+                  type="button"
+                  className="leading-none inline-block transition-all hover:opacity-80"
+                  onClick={handleThemeToggle}
+                  aria-label="Toggle theme"
+                >
+                  <i className="material-symbols-outlined !text-[22px] text-[#fe7a36]">
+                    light_mode
+                  </i>
+                </button>
 
                 {/* Language Dropdown - Dashboard Style */}
                 <div
@@ -217,7 +209,7 @@ const Navbar: React.FC = () => {
                   onMouseLeave={handleLanguageMouseLeave}
                 >
                   <button
-                    className="leading-none pr-[12px] inline-block transition-all relative hover:text-primary-500 font-semibold text-[15px] text-white"
+                    className="leading-none pr-[12px] inline-block transition-all relative hover:text-primary-500 font-semibold text-[15px] text-gray-800 dark:text-white"
                   >
                     <span className="uppercase">{language}</span>
                     <i className="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2"></i>
@@ -262,7 +254,7 @@ const Navbar: React.FC = () => {
                 {/* Login Button */}
                 <Link
                   href="/authentication/sign-in"
-                  className="inline-flex items-center gap-2 text-[14px] py-[10px] px-[18px] rounded-full transition-all font-medium text-white border border-white/20 hover:border-purple-500 hover:bg-purple-500/10"
+                  className="inline-flex items-center gap-2 text-[14px] py-[10px] px-[18px] rounded-full transition-all font-medium text-gray-800 dark:text-white border border-gray-300 dark:border-white/20 hover:border-purple-500 hover:bg-purple-500/10"
                 >
                   <i className="material-symbols-outlined !text-[18px]">
                     login
@@ -285,7 +277,7 @@ const Navbar: React.FC = () => {
 
             {/* Mobile Menu */}
             <div
-              className={`fixed left-0 right-0 top-[68px] bg-[#0a0e19]/98 backdrop-blur-xl border-t border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl max-h-[calc(100vh-68px)] overflow-y-auto z-[999] transform transition-all duration-300 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+              className={`fixed left-0 right-0 top-[68px] bg-white/98 dark:bg-[#0a0e19]/98 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 p-[20px] md:p-[30px] w-full lg:hidden shadow-2xl max-h-[calc(100vh-68px)] overflow-y-auto z-[999] transform transition-all duration-300 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
                 }`}
               id="navbar-collapse"
             >
@@ -297,7 +289,7 @@ const Navbar: React.FC = () => {
                       onClick={() => setMenuOpen(false)}
                       className={`block font-medium transition-all px-4 py-3 rounded-xl ${pathname === item.path
                         ? 'bg-purple-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-white/5'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                         }`}
                     >
                       {item.name}
@@ -309,7 +301,7 @@ const Navbar: React.FC = () => {
                 <li>
                   <button
                     onClick={() => setMobileLanguageOpen(!isMobileLanguageOpen)}
-                    className="w-full flex items-center justify-between font-medium text-gray-300 py-3 px-4 rounded-xl hover:bg-white/5 transition-all"
+                    className="w-full flex items-center justify-between font-medium text-gray-700 dark:text-gray-300 py-3 px-4 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <i className="material-symbols-outlined !text-[20px] text-purple-400">
@@ -332,7 +324,7 @@ const Navbar: React.FC = () => {
                             switchLanguage(lang.code);
                             setMobileLanguageOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all hover:bg-white/5 cursor-pointer ${language === lang.code ? 'bg-purple-600/20 border-l-2 border-purple-500' : ''
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer ${language === lang.code ? 'bg-purple-600/20 border-l-2 border-purple-500' : ''
                             }`}
                         >
                           <Image
@@ -342,7 +334,7 @@ const Navbar: React.FC = () => {
                             height={24}
                             className="rounded-sm"
                           />
-                          <span className="text-sm font-medium text-white">
+                          <span className="text-sm font-medium text-gray-800 dark:text-white">
                             {lang.name}
                           </span>
                         </button>
@@ -353,11 +345,11 @@ const Navbar: React.FC = () => {
               </ul>
 
               {/* Mobile Auth Buttons */}
-              <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-white/10">
+              <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-white/10">
                 <Link
                   href="/authentication/sign-in"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 text-[15px] py-3 px-4 rounded-xl transition-all font-medium text-white border border-white/20 hover:border-purple-500 hover:bg-purple-500/10"
+                  className="flex items-center justify-center gap-2 text-[15px] py-3 px-4 rounded-xl transition-all font-medium text-gray-800 dark:text-white border border-gray-300 dark:border-white/20 hover:border-purple-500 hover:bg-purple-500/10"
                 >
                   <i className="material-symbols-outlined !text-[20px]">
                     login

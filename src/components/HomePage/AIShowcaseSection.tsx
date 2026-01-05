@@ -32,14 +32,14 @@ export default function AIShowcaseSection() {
             </div>
           </div>
 
-          <h2 className="!mb-6 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold !text-white">
-            <span className="text-white">Watch AI Create </span>
+          <h2 className="!mb-6 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
+            <span className="text-black dark:text-white">Watch AI Create </span>
             <br className="hidden md:block" />
-            <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 dark:from-green-400 dark:via-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent">
               Winning Campaigns
             </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-10">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-10">
             See our AI analyze, create, and optimize ads in real-time. From competitor analysis to launch in seconds.
           </p>
 
@@ -54,7 +54,7 @@ export default function AIShowcaseSection() {
             ].map((item, i) => (
               <div
                 key={i}
-                className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${item.color} border rounded-full text-sm text-white/90 backdrop-blur-sm cursor-default hover:scale-105 transition-transform`}
+                className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${item.color} border rounded-full text-sm text-gray-800 dark:text-white/90 backdrop-blur-sm cursor-default hover:scale-105 transition-transform`}
               >
                 {item.icon}
                 {item.text}
@@ -68,7 +68,7 @@ export default function AIShowcaseSection() {
           <div className="w-full max-w-2xl mx-auto px-4">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 rounded-3xl blur-xl"></div>
-              <div className="relative bg-gray-950/90 backdrop-blur-xl rounded-3xl border border-green-500/30 overflow-hidden shadow-2xl shadow-green-500/20">
+              <div className="relative bg-white dark:bg-gray-950/90 backdrop-blur-xl rounded-3xl border border-gray-200 dark:border-green-500/30 overflow-hidden shadow-2xl shadow-green-500/20">
                 <ModernLoader
                   words={[
                     "Analyzing competitor ads...",
@@ -96,10 +96,10 @@ export default function AIShowcaseSection() {
               <span className="text-purple-300 text-sm md:text-base font-medium">AI-Generated Ad Gallery</span>
               <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
             </div>
-            <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold !text-white">
+            <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
               Explore All Ad Types
             </h2>
-            <p className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto px-4">
+            <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base max-w-2xl mx-auto px-4">
               Drag to explore our AI-generated campaigns across Search, Display, Shopping, Video, and more
             </p>
           </div>
@@ -117,7 +117,7 @@ export default function AIShowcaseSection() {
                 { image: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=800&h=600", text: "Discovery Ads" },
               ]}
               bend={3}
-              textColor="#ffffff"
+              textColor="#888888"
               borderRadius={0.05}
               scrollSpeed={2}
               scrollEase={0.02}

@@ -1,3 +1,5 @@
+"use client";
+
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
 import Image from "next/image";
@@ -18,7 +20,7 @@ import CTASection from "@/components/HomePage/CTASection";
 
 export default function Home() {
   return (
-    <div className="front-page-body overflow-hidden bg-[#0a0e19] text-white" dir="ltr">
+    <div className="front-page-body overflow-hidden bg-white dark:bg-[#0a0e19] min-h-screen" dir="ltr">
       <Navbar />
 
       <div className="relative z-[1]">

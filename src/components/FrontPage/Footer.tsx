@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/40 bg-black/80 backdrop-blur-sm">
+      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/40 bg-white dark:bg-[#0a0e19] relative z-50">
         <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px]">
             {/* Logo & Description */}
@@ -21,21 +21,21 @@ const Footer: React.FC = () => {
               >
                 <Image
                   src="/images/logo-big.svg"
-                  alt="logo"
+                  alt="Furriyadh"
                   className="inline-block dark:hidden"
                   width={132}
                   height={53}
                 />
                 <Image
                   src="/images/white-logo-big.svg"
-                  alt="logo"
+                  alt="Furriyadh"
                   className="hidden dark:inline-block"
                   width={132}
                   height={53}
                 />
               </Link>
 
-              <p className="leading-[1.7] text-gray-300 text-base md:text-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className="leading-[1.7] text-gray-600 dark:text-gray-300 text-base md:text-lg" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar'
                   ? 'منصة متقدمة لإدارة حملات إعلانات جوجل بالذكاء الاصطناعي، نقدم لوحة تحكم ذكية لمتابعة الأداء والميزانيات.'
                   : 'AI-powered Google Ads management platform with smart dashboards for real-time performance and budget monitoring.'}
@@ -44,24 +44,26 @@ const Footer: React.FC = () => {
               {/* Contact Info */}
               <div className="mt-[15px] space-y-2">
                 <a
-                  href="tel:+15303504377"
-                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-all text-sm"
+                  href="tel:+201080219382"
+                  className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all text-sm"
                 >
                   <i className="ri-phone-fill text-primary-500"></i>
-                  +1 530 350 4377
+                  +20 1080219382
                 </a>
                 <a
-                  href="mailto:support@furriyadh.com"
-                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-all text-sm"
+                  href="mailto:ads@furriyadh.com"
+                  className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all text-sm"
                 >
                   <i className="ri-mail-fill text-primary-500"></i>
-                  support@furriyadh.com
+                  ads@furriyadh.com
                 </a>
-                <div className="flex items-start gap-2 text-gray-300 text-sm">
+                <div className="flex items-start gap-2 text-gray-600 dark:text-gray-300 text-sm">
                   <i className="ri-map-pin-fill text-primary-500 mt-1"></i>
                   <span>
-                    350 5th Avenue, Empire State Building<br />
-                    New York, NY 10118
+                    <span>
+                      Al Ain Truck Road, Abu Dhabi<br />
+                      United Arab Emirates
+                    </span>
                   </span>
                 </div>
               </div>
@@ -101,14 +103,14 @@ const Footer: React.FC = () => {
 
             {/* Services */}
             <div className="ltr:xl:pl-[80px] rtl:xl:pr-[80px]">
-              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold !text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold text-black dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'خدماتنا' : 'Our Services'}
               </h3>
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/google-ads"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'إدارة إعلانات جوجل' : 'Google Ads Management'}
@@ -117,7 +119,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/google-ads/campaigns"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'إنشاء الحملات بالذكاء الاصطناعي' : 'AI Campaign Creation'}
@@ -126,7 +128,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/pricing"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'الخطط والأسعار' : 'Pricing Plans'}
@@ -135,7 +137,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/features"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all whitespace-nowrap"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'الميزات' : 'Features'}
@@ -146,14 +148,14 @@ const Footer: React.FC = () => {
 
             {/* Quick Links */}
             <div className="ltr:xl:pl-[60px] rtl:xl:pr-[60px]">
-              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold !text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold text-black dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'روابط سريعة' : 'Quick Links'}
               </h3>
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'الرئيسية' : 'Home'}
@@ -162,7 +164,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/team"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'فريقنا' : 'Our Team'}
@@ -171,7 +173,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/faq"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}
@@ -180,7 +182,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/contact"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'تواصل معنا' : 'Contact Us'}
@@ -191,14 +193,14 @@ const Footer: React.FC = () => {
 
             {/* Legal */}
             <div className="ltr:xl:pl-[40px] rtl:xl:pr-[40px]">
-              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold !text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h3 className="!leading-[1.2] !text-[16px] md:!text-lg !mb-[18px] !font-semibold text-black dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                 {language === 'ar' ? 'القانونية' : 'Legal'}
               </h3>
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/terms"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
@@ -207,7 +209,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/privacy"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
@@ -216,7 +218,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/cookies"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'سياسة ملفات تعريف الارتباط' : 'Cookie Policy'}
@@ -225,7 +227,7 @@ const Footer: React.FC = () => {
                 <li className="mb-[10px] last:mb-0">
                   <Link
                     href="/refund"
-                    className="lg:text-[16px] inline-block text-gray-300 hover:text-white transition-all"
+                    className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {language === 'ar' ? 'سياسة الاسترجاع' : 'Refund Policy'}
@@ -237,14 +239,14 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] bg-[#0a0e19]/90 backdrop-blur-md text-center border-t border-white/10">
+        <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] bg-gray-50 dark:bg-[#0a0e19]/90 backdrop-blur-md text-center border-t border-gray-200 dark:border-white/10">
           <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
-            <p className="leading-[1.6] text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
+            <p className="leading-[1.6] text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
               © <span className="text-purple-500">2025, Furriyadh</span> {language === 'ar' ? '. جميع الحقوق محفوظة.' : '. All rights reserved.'}
             </p>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 };
