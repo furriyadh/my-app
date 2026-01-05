@@ -23,6 +23,7 @@ import {
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { initializePaddle, Paddle } from '@paddle/paddle-js';
 import { supabase } from '@/lib/supabase';
+import { getBackendUrl } from '@/lib/config';
 
 // PayPal configuration
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test';
@@ -172,25 +173,37 @@ function CheckoutContent() {
         }
     };
 
+    // Trigger Paddle when switching to details view for Visa/MasterCard
+    useEffect(() => {
+        if (selectedMethod === 'visa_mastercard' && paymentStep === 'details' && paddle) {
+            // Small timeout to ensure DOM is ready
+            setTimeout(() => {
+                handlePaddleCheckout();
+            }, 100);
+        }
+    }, [selectedMethod, paymentStep, paddle]);
+
     const handlePaddleCheckout = () => {
         if (!paddle) {
-            alert('Paddle is initializing... please wait');
+            console.log('Paddle initializing...');
             return;
         }
 
         const priceId = getPaddlePriceId();
         if (!priceId) {
-            alert('Invalid plan selected for Paddle checkout');
+            console.error('Invalid plan selected for Paddle checkout');
             return;
         }
 
         paddle.Checkout.open({
             items: [{ priceId, quantity: 1 }],
             settings: {
-                displayMode: 'overlay',
+                displayMode: 'inline',
+                frameTarget: 'paddle-container',
+                frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
                 theme: 'dark',
                 locale: language === 'ar' ? 'ar' : 'en',
-                successUrl: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`
+                successUrl: `${getBackendUrl()}/google-ads/billing?payment=success&plan=${planId}`
             },
             customer: {
                 email: userEmail
@@ -449,7 +462,7 @@ function CheckoutContent() {
                             amount: totalPayment.toFixed(2),
                             billingCycle: cycle,
                             transactionId: transactionId,
-                            dashboardUrl: `${window.location.origin}/google-ads/billing`
+                            dashboardUrl: `${getBackendUrl()}/google-ads/billing`
                         }
                     })
                 }).catch(err => console.error('Email error:', err));
@@ -499,8 +512,8 @@ function CheckoutContent() {
                     email: userEmail,
                     order_id: `SUB-${planId.toUpperCase()}-${cycle.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
                     description: `${selectedPlan.name} Plan - ${cycle} subscription`,
-                    success_url: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`,
-                    cancel_url: `${window.location.origin}/google-ads/billing/checkout?plan=${planId}&cycle=${cycle}&payment=cancelled`,
+                    success_url: `${getBackendUrl()}/google-ads/billing?payment=success&plan=${planId}`,
+                    cancel_url: `${getBackendUrl()}/google-ads/billing/checkout?plan=${planId}&cycle=${cycle}&payment=cancelled`,
                 })
             });
 
@@ -699,59 +712,35 @@ function CheckoutContent() {
             );
         }
 
-        // Visa/MasterCard (Paddle Integrated)
+        // Visa/MasterCard (Paddle Integrated - Inline)
         if (selectedMethod === 'visa_mastercard') {
             return (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden">
-                        {/* Background Decoration */}
-                        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('/images/noise.png')] pointer-events-none" />
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
-                        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-700" />
-
-                        <div className="relative z-10">
-                            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-inner">
-                                <CreditCard className="w-8 h-8 text-white drop-shadow-md" />
+                    <div className="relative min-h-[600px] w-full bg-white dark:bg-[#0c1427] rounded-lg border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                        {/* Loading State - Overlay until Paddle loads */}
+                        {!paddle && (
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white dark:bg-[#0c1427]">
+                                <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                <p className="text-gray-500 font-medium animate-pulse">{isRTL ? 'جاري تحميل بوابة الدفع الآمنة...' : 'Loading Secure Payment Gateway...'}</p>
                             </div>
-                            <h3 className="text-xl font-bold mb-2 tracking-tight">
-                                {isRTL ? 'الدفع الآمن عبر Paddle' : 'Secure Payment via Paddle'}
-                            </h3>
-                            <p className="text-white/90 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
-                                {isRTL
-                                    ? 'بوابة دفع عالمية مشفرة بالكامل تضمن حماية بياناتك المالية 100%'
-                                    : 'Global, fully encrypted payment gateway ensuring 100% protection of your financial data'}
-                            </p>
-
-                            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-sm">
-                                <p className="text-xs text-white/70 uppercase tracking-wider mb-2 font-medium">{isRTL ? 'البطاقات المدعومة' : 'Supported Cards'}</p>
-                                <div className="flex justify-center items-center gap-4 opacity-90 grayscale-[0.2] hover:grayscale-0 transition-all duration-300">
-                                    <img src="/images/payment-method/visa-icon.svg" alt="Visa" className="h-8 drop-shadow-sm hover:scale-110 transition-transform" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                    <div className="w-px h-6 bg-white/20" />
-                                    <img src="/images/payment-method/mastercard-icon.svg" alt="Mastercard" className="h-8 drop-shadow-sm hover:scale-110 transition-transform" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                    <div className="w-px h-6 bg-white/20" />
-                                    <img src="/images/payment-method/apple-pay.svg" alt="Apple Pay" className="h-8 drop-shadow-sm hover:scale-110 transition-transform" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                </div>
-                            </div>
-                        </div>
+                        )}
+                        {/* Paddle Frame Container */}
+                        <div id="paddle-container" className="w-full h-full min-h-[600px]" />
                     </div>
 
-                    <div className="space-y-4">
-                        <button
-                            onClick={handlePaddleCheckout}
-                            className="group w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] ring-offset-2 focus:ring-2 ring-purple-500"
-                        >
-                            <div className="bg-white/20 p-1.5 rounded-full group-hover:rotate-12 transition-transform">
-                                <Lock className="w-5 h-5" />
-                            </div>
-                            <span>{isRTL ? 'إتمام الدفع الآمن' : 'Proceed to Secure Checkout'}</span>
-                            <div className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
-                                {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5 rotate-180" />}
-                            </div>
-                        </button>
-
-                        <div className="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 animate-pulse">
-                            <Shield className="w-3 h-3 text-green-500" />
-                            <span>{isRTL ? 'تشفير عالي المستوى 256-bit SSL' : 'High-grade 256-bit SSL Encryption'}</span>
+                    {/* COMPLIANCE FOOTER - "Giant Site" Standard */}
+                    <div className="flex flex-col items-center justify-center gap-3 text-center border-t border-gray-100 dark:border-gray-800 pt-6">
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Lock className="w-3 h-3" />
+                            <span>{isRTL ? 'معالجة آمنة ومشفرة 100%' : '256-bit SSL Secure Payment'}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 max-w-md leading-relaxed">
+                            {isRTL
+                                ? 'يتم معالجة المدفوعات بواسطة Paddle، شريكنا المعتمد للمعاملات المالية. تظهر المعاملة باسم PADDLE.NET* FURRIYADH على كشف حسابك.'
+                                : 'Payments are processed by Paddle, our authorized Merchant of Record. Charges will appear as PADDLE.NET* FURRIYADH on your statement.'}
+                        </p>
+                        <div className="flex gap-3 opacity-50 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+                            <Image src="/images/payment-method/visa-mastercard-v3.png" alt="Card Networks" width={100} height={20} className="h-5 w-auto object-contain" />
                         </div>
                     </div>
                 </div>
