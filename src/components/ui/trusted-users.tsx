@@ -34,9 +34,8 @@ export const TrustedUsers: React.FC<TrustedUsersProps> = ({
         {avatars.map((src, i) => (
           <div
             key={i}
-            className={`w-10 h-10 rounded-full overflow-hidden ring-1 ring-offset-2 ring-offset-black ${
-              ringColors[i] || "ring-blue-900"
-            }`}
+            className={`w-10 h-10 rounded-full overflow-hidden ring-1 ring-offset-2 ring-offset-white dark:ring-offset-black ${ringColors[i] || "ring-blue-900"
+              }`}
           >
             <img
               src={src}
@@ -55,7 +54,7 @@ export const TrustedUsers: React.FC<TrustedUsersProps> = ({
             <Star key={i} fill="currentColor" className="w-4 h-4" style={{ color: '#facc15' }} />
           ))}
         </div>
-        <span className="text-white dark:text-white text-xs md:text-md font-medium">
+        <span className="text-zinc-900 dark:text-white text-xs md:text-md font-medium">
           {caption}{" "}
           <CountUp
             value={totalUsersText}
