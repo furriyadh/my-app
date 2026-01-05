@@ -169,7 +169,7 @@ const Navbar: React.FC = () => {
                   <li key={item.path}>
                     <Link
                       href={item.path}
-                      className={`font-medium transition-all text-[14px] xl:text-[15px] px-4 py-2 rounded-full hover:bg-gray-100 ${pathname === item.path
+                      className={`font-medium transition-all text-[14px] xl:text-[15px] px-4 py-2 rounded-full hover:bg-purple-500/10 ${pathname === item.path
                         ? 'bg-purple-600 !text-white'
                         : ''
                         }`}

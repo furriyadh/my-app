@@ -16,9 +16,9 @@ export default function LiveDemoSection() {
         titleComponent={
           <>
             <div className="flex flex-col items-center justify-center mb-20 -mt-16 md:-mt-24">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600/10 border border-cyan-500/20 rounded-full mb-6">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
-                <span className="text-sm text-cyan-300">See It In Action</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-50 dark:bg-cyan-600/10 border border-cyan-200 dark:border-cyan-500/20 rounded-full mb-6">
+                <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                <span className="text-sm text-cyan-600 dark:text-cyan-300">See It In Action</span>
               </div>
               <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
                 The Ultimate Google Ads AI Dashboard

@@ -13,9 +13,7 @@ import ComparisonSection from "@/components/HomePage/ComparisonSection";
 import AIShowcaseSection from "@/components/HomePage/AIShowcaseSection";
 import LiveDemoSection from "@/components/HomePage/LiveDemoSection";
 import TestimonialsSection from "@/components/HomePage/TestimonialsSection";
-import PricingSection from "@/components/HomePage/PricingSection";
 import FAQSection from "@/components/HomePage/FAQSection";
-import CTASection from "@/components/HomePage/CTASection";
 
 
 export default function Home() {
@@ -55,9 +53,7 @@ export default function Home() {
             <AIShowcaseSection />
             <LiveDemoSection />
             <TestimonialsSection />
-            <PricingSection />
             <FAQSection />
-            <CTASection />
           </div>
         </main>
       </div>

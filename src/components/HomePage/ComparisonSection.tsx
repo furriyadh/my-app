@@ -4,8 +4,8 @@ import { Brain, Globe, MessageCircle, Sparkles, CheckCircle } from "lucide-react
 import Link from "next/link";
 
 const PRICING = {
-  single: 30,
-  multiple: 100,
+  single: 49,
+  multiple: 249,
 };
 
 export default function ComparisonSection() {
@@ -13,9 +13,9 @@ export default function ComparisonSection() {
     <section className="py-16 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-4xl relative z-10">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
-            <Brain className="w-4 h-4 text-blue-400" />
-            <span className="text-blue-300 text-sm font-medium">Compare Your Options</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-full mb-6">
+            <Brain className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-blue-600 dark:text-blue-300 text-sm font-medium">Compare Your Options</span>
           </div>
           <h2 className="!mb-3 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
             Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-cyan-600 dark:from-green-400 dark:to-cyan-400">Furriyadh AI for Google Ads</span>?
@@ -26,7 +26,7 @@ export default function ComparisonSection() {
         </div>
 
         {/* Comparison Table */}
-        <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-900/80 dark:to-gray-900/40 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/20 overflow-hidden shadow-lg dark:shadow-none">
+        <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-900/80 dark:to-gray-900/40 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/20 overflow-hidden shadow-lg dark:shadow-none selection:bg-purple-500/30 selection:text-white">
           {/* Header */}
           <div className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-gray-200 dark:border-white/20 bg-gray-50 dark:bg-white/5">
             <div className="text-gray-500 dark:text-gray-400 text-[10px] md:text-xs font-medium">Metric</div>
@@ -69,7 +69,7 @@ export default function ComparisonSection() {
           ].map((row, i) => (
             <div
               key={i}
-              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-gray-100 dark:border-white/10 hover:bg-purple-500/10 transition-colors"
             >
               <div className="text-gray-900 dark:text-white font-medium text-[10px] md:text-xs">{row.metric}</div>
               <div className={`text-center text-[10px] md:text-xs ${row.freelancerColor}`}>{row.freelancer}</div>
@@ -85,12 +85,10 @@ export default function ComparisonSection() {
         <div className="mt-8 flex justify-center relative z-20">
           <Link
             href="/campaign/website-url"
-            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-purple-600 rounded-full font-bold text-lg shadow-2xl shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden"
+            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-bold text-lg shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-purple-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <Sparkles className="w-5 h-5 relative z-10 animate-pulse" />
             <span className="relative z-10">Start Your Campaign Now</span>
-            <div className="absolute inset-0 rounded-full ring-2 ring-white/50 group-hover:ring-purple-200 transition-all duration-300" />
           </Link>
         </div>
       </div>

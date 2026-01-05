@@ -945,8 +945,22 @@ export default function RootLayout({
             html.dark .border-white\\/10 {
               border-color: rgba(255, 255, 255, 0.1) !important;
             }
-            html.dark .hover\\:bg-white\\/10:hover {
+            html.dark .hover\:bg-white\\/10:hover {
               background-color: rgba(255, 255, 255, 0.1) !important;
+            }
+            /* Fix table hover in dark mode */
+            html.dark .hover\:bg-purple-50:hover {
+              background-color: rgba(168, 85, 247, 0.15) !important;
+            }
+            /* Fix badge backgrounds in dark mode */
+            html.dark .bg-purple-50 {
+              background-color: rgba(147, 51, 234, 0.15) !important;
+            }
+            html.dark .bg-blue-50 {
+              background-color: rgba(59, 130, 246, 0.15) !important;
+            }
+            html.dark .bg-cyan-50 {
+              background-color: rgba(6, 182, 212, 0.15) !important;
             }
           `
         }} />

@@ -46,15 +46,15 @@ export default function AIShowcaseSection() {
           {/* AI Capabilities Pills */}
           <div className="flex flex-wrap justify-center gap-4">
             {[
-              { icon: <Wand2 className="w-4 h-4" />, text: "Auto Copy Generation", color: "from-purple-500/20 to-pink-500/20 border-purple-500/30" },
-              { icon: <Target className="w-4 h-4" />, text: "Smart Audience AI", color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30" },
-              { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding", color: "from-yellow-500/20 to-orange-500/20 border-yellow-500/30" },
-              { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics", color: "from-green-500/20 to-emerald-500/20 border-green-500/30" },
-              { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization", color: "from-pink-500/20 to-red-500/20 border-pink-500/30" },
+              { icon: <Wand2 className="w-4 h-4" />, text: "Auto Copy Generation", bgLight: "bg-purple-100", bgDark: "dark:bg-purple-500/20", textLight: "text-purple-700", textDark: "dark:text-purple-300", borderLight: "border-purple-300", borderDark: "dark:border-purple-500/50" },
+              { icon: <Target className="w-4 h-4" />, text: "Smart Audience AI", bgLight: "bg-blue-100", bgDark: "dark:bg-blue-500/20", textLight: "text-blue-700", textDark: "dark:text-blue-300", borderLight: "border-blue-300", borderDark: "dark:border-blue-500/50" },
+              { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding", bgLight: "bg-orange-100", bgDark: "dark:bg-orange-500/20", textLight: "text-orange-700", textDark: "dark:text-orange-300", borderLight: "border-orange-300", borderDark: "dark:border-orange-500/50" },
+              { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics", bgLight: "bg-green-100", bgDark: "dark:bg-green-500/20", textLight: "text-green-700", textDark: "dark:text-green-300", borderLight: "border-green-300", borderDark: "dark:border-green-500/50" },
+              { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization", bgLight: "bg-pink-100", bgDark: "dark:bg-pink-500/20", textLight: "text-pink-700", textDark: "dark:text-pink-300", borderLight: "border-pink-300", borderDark: "dark:border-pink-500/50" },
             ].map((item, i) => (
               <div
                 key={i}
-                className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${item.color} border rounded-full text-sm text-gray-800 dark:text-white/90 backdrop-blur-sm cursor-default hover:scale-105 transition-transform`}
+                className={`flex items-center gap-2 px-5 py-2.5 ${item.bgLight} ${item.bgDark} border ${item.borderLight} ${item.borderDark} rounded-full text-sm ${item.textLight} ${item.textDark} backdrop-blur-sm cursor-default hover:scale-105 transition-transform font-medium`}
               >
                 {item.icon}
                 {item.text}

@@ -234,7 +234,7 @@ const Footer: React.FC = () => {
         <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] bg-gray-50 dark:bg-[#0a0e19]/90 backdrop-blur-md text-center border-t border-gray-200 dark:border-white/10">
           <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
             <p className="leading-[1.6] text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-              © <span className="text-purple-500">2025, Furriyadh</span> {language === 'ar' ? '. جميع الحقوق محفوظة.' : '. All rights reserved.'}
+              © <span className="text-purple-500">2026, Furriyadh</span> {language === 'ar' ? '. جميع الحقوق محفوظة.' : '. All rights reserved.'}
             </p>
           </div>
         </div>
