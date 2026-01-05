@@ -138,20 +138,13 @@ function CheckoutContent() {
     const [paddle, setPaddle] = useState<Paddle>();
 
     // Initialize Paddle
-    const [debugLogs, setDebugLogs] = useState<string[]>([]);
-    const addDebugLog = (msg: string) => setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
-
     useEffect(() => {
-        addDebugLog(`Initializing Paddle... Env: ${process.env.NEXT_PUBLIC_PADDLE_ENV}`);
         initializePaddle({
             environment: process.env.NEXT_PUBLIC_PADDLE_ENV as 'production' | 'sandbox' || 'production',
             token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
         }).then((paddleInstance: Paddle | undefined) => {
             if (paddleInstance) {
                 setPaddle(paddleInstance);
-                addDebugLog('Paddle instance created successfully.');
-            } else {
-                addDebugLog('Failed to create Paddle instance.');
             }
         });
     }, []);
@@ -176,17 +169,13 @@ function CheckoutContent() {
     };
 
     const handlePaddleCheckout = (retries = 3) => {
-        if (!paddle) {
-            console.log('Paddle initializing...');
-            return;
-        }
+        if (!paddle) return;
 
         const priceId = getPaddlePriceId();
-        console.log('Paddle Checkout Debug:', { priceId, planId, cycle, env: process.env.NEXT_PUBLIC_PADDLE_ENV });
+        const successUrl = `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`;
 
         if (!priceId) {
             console.error('Invalid plan selected for Paddle checkout');
-            addDebugLog(`Error: Invalid Price ID. planKey=${planId}`);
             return;
         }
 
@@ -194,19 +183,14 @@ function CheckoutContent() {
         const container = document.querySelector('.paddle-container');
         if (!container) {
             if (retries > 0) {
-                console.log(`Paddle container (class) not found, retrying... (${retries} left)`);
-                addDebugLog(`Container missing. Retrying in 200ms... (${retries})`);
                 setTimeout(() => handlePaddleCheckout(retries - 1), 200);
                 return;
             }
-            const err = 'Error: .paddle-container not found in DOM after retries';
-            console.error(err);
-            addDebugLog(err);
+            console.error('Error: .paddle-container not found in DOM after retries');
             return;
         }
 
         try {
-            addDebugLog(`Opening Checkout... Price: ${priceId}`);
             paddle.Checkout.open({
                 items: [{ priceId, quantity: 1 }],
                 settings: {
@@ -216,7 +200,7 @@ function CheckoutContent() {
                     frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
                     theme: 'dark',
                     locale: language === 'ar' ? 'ar' : 'en',
-                    successUrl: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`
+                    successUrl: successUrl
                 },
                 customer: {
                     email: userEmail
@@ -224,7 +208,6 @@ function CheckoutContent() {
             });
         } catch (error: any) {
             console.error('Paddle open error:', error);
-            addDebugLog(`Error opening checkout: ${error.message || error}`);
         }
     };
 
@@ -755,11 +738,7 @@ function CheckoutContent() {
                         <div id="paddle-container" className="paddle-container w-full h-full min-h-[600px]" />
                     </div>
 
-                    {/* DEBUG PANEL - TEMPORARY */}
-                    <div className="bg-black text-green-400 p-4 rounded text-xs font-mono border border-green-900 overflow-auto max-h-40" dir="ltr">
-                        <h4 className="font-bold border-b border-green-900 pb-1 mb-2">DEBUG INFO (Share this screenshot if it fails):</h4>
-                        {debugLogs.map((log, i) => <div key={i}>{log}</div>)}
-                    </div>
+
 
                     {/* COMPLIANCE FOOTER - "Giant Site" Standard */}
                     <div className="flex flex-col items-center justify-center gap-3 text-center border-t border-gray-100 dark:border-gray-800 pt-6">
