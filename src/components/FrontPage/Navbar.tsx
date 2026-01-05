@@ -144,14 +144,6 @@ const Navbar: React.FC = () => {
               <Image
                 src="/images/logo-big.svg"
                 alt="Furriyadh"
-                className="inline-block dark:hidden"
-                width={126}
-                height={36}
-              />
-              <Image
-                src="/images/white-logo-big.svg"
-                alt="Furriyadh"
-                className="hidden dark:inline-block"
                 width={126}
                 height={36}
               />
@@ -177,10 +169,11 @@ const Navbar: React.FC = () => {
                   <li key={item.path}>
                     <Link
                       href={item.path}
-                      className={`font-medium transition-all text-[14px] xl:text-[15px] px-4 py-2 rounded-full ${pathname === item.path
-                        ? 'bg-purple-600 text-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
+                      className={`font-medium transition-all text-[14px] xl:text-[15px] px-4 py-2 rounded-full hover:bg-gray-100 ${pathname === item.path
+                        ? 'bg-purple-600 !text-white'
+                        : ''
                         }`}
+                      style={{ color: pathname === item.path ? '#ffffff' : (isDarkMode ? '#d1d5db' : '#374151') }}
                     >
                       {item.name}
                     </Link>

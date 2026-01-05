@@ -22,14 +22,6 @@ const Footer: React.FC = () => {
                 <Image
                   src="/images/logo-big.svg"
                   alt="Furriyadh"
-                  className="inline-block dark:hidden"
-                  width={132}
-                  height={53}
-                />
-                <Image
-                  src="/images/white-logo-big.svg"
-                  alt="Furriyadh"
-                  className="hidden dark:inline-block"
                   width={132}
                   height={53}
                 />

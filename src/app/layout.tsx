@@ -882,6 +882,40 @@ export default function RootLayout({
                 bottom: auto !important;
               }
             }
+            
+            /* DARK MODE FIX: Override for .dark class (globals.css uses [class=dark] which doesn't work with multiple classes) */
+            html.dark,
+            html.dark body {
+              background-color: #0a0e19 !important;
+              color: #9ca3af !important;
+            }
+            html.dark .front-page-body {
+              background-color: #0a0e19 !important;
+            }
+            html.dark .bg-white {
+              background-color: #0a0e19 !important;
+            }
+            html.dark .bg-gray-50 {
+              background-color: #0c1427 !important;
+            }
+            html.dark .text-black {
+              color: #ffffff !important;
+            }
+            html.dark .text-gray-900 {
+              color: #f3f4f6 !important;
+            }
+            html.dark .text-gray-700 {
+              color: #d1d5db !important;
+            }
+            html.dark .text-gray-600 {
+              color: #9ca3af !important;
+            }
+            html.dark .border-gray-200 {
+              border-color: #172036 !important;
+            }
+            html.dark .border-gray-100 {
+              border-color: #172036 !important;
+            }
           `
         }} />
 
