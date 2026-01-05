@@ -21,6 +21,7 @@ import {
     Lock
 } from 'lucide-react';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { initializePaddle, Paddle } from '@paddle/paddle-js';
 import { supabase } from '@/lib/supabase';
 
 // PayPal configuration
@@ -98,6 +99,20 @@ const CRYPTO_NETWORKS = [
     }
 ];
 
+// Paddle Price IDs (Matched with Billing Page)
+const PADDLE_PRICE_IDS = {
+    MONTHLY: {
+        BASIC: 'pri_01ke7gzh9508w5j81azc699748',
+        PREMIUM: 'pri_01ke7h6e9d05pt54j0mxs539q2',
+        ENTERPRISE: 'pri_01ke7h8765hth3c99hgbvaaj6r'
+    },
+    YEARLY: {
+        BASIC: 'pri_01ke7hr62ce5rgdndnpwhjz3sh',
+        PREMIUM: 'pri_01ke7hseye96pemfdssn9r5m5t',
+        ENTERPRISE: 'pri_01ke7htrekf52ar328f1esrmp3'
+    }
+};
+
 // Payment info is no longer needed since RedotPay was removed
 
 function CheckoutContent() {
@@ -119,6 +134,69 @@ function CheckoutContent() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [paymentStep, setPaymentStep] = useState<'select' | 'details' | 'success'>('select');
+    const [paddle, setPaddle] = useState<Paddle>();
+
+    // Initialize Paddle
+    useEffect(() => {
+        initializePaddle({
+            environment: process.env.NEXT_PUBLIC_PADDLE_ENV as 'production' | 'sandbox' || 'production',
+            token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
+        }).then((paddleInstance: Paddle | undefined) => {
+            if (paddleInstance) {
+                setPaddle(paddleInstance);
+            }
+        });
+    }, []);
+
+    // Helper to get Price ID based on selection
+    const getPaddlePriceId = () => {
+        // Map plan IDs from URL to Paddle keys
+        // URL plans: free, basic, pro, agency, enterprise
+        // Paddle keys: BASIC, PREMIUM (Pro), ENTERPRISE (Agency)
+
+        // Note: 'free' and 'enterprise' (custom) might not have direct Paddle IDs here
+        // Assuming we default to Basic or handle error if invalid
+
+        let planKey: 'BASIC' | 'PREMIUM' | 'ENTERPRISE' | null = null;
+
+        if (planId === 'basic') planKey = 'BASIC';
+        else if (planId === 'pro') planKey = 'PREMIUM';
+        else if (planId === 'agency') planKey = 'ENTERPRISE';
+
+        if (!planKey) return null;
+
+        if (cycle === 'yearly') {
+            return PADDLE_PRICE_IDS.YEARLY[planKey];
+        } else {
+            return PADDLE_PRICE_IDS.MONTHLY[planKey];
+        }
+    };
+
+    const handlePaddleCheckout = () => {
+        if (!paddle) {
+            alert('Paddle is initializing... please wait');
+            return;
+        }
+
+        const priceId = getPaddlePriceId();
+        if (!priceId) {
+            alert('Invalid plan selected for Paddle checkout');
+            return;
+        }
+
+        paddle.Checkout.open({
+            items: [{ priceId, quantity: 1 }],
+            settings: {
+                displayMode: 'overlay',
+                theme: 'dark',
+                locale: language === 'ar' ? 'ar' : 'en',
+                successUrl: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`
+            },
+            customer: {
+                email: userEmail
+            }
+        });
+    };
 
     // NowPayments state
     const [nowPaymentsInvoice, setNowPaymentsInvoice] = useState<{
@@ -621,316 +699,61 @@ function CheckoutContent() {
             );
         }
 
-        // Visa/MasterCard
+        // Visa/MasterCard (Paddle Integrated)
         if (selectedMethod === 'visa_mastercard') {
-            const handleCardPayment = async () => {
-                setIsProcessing(true);
-
-                // If new card and save for future is checked
-                if ((showNewCardForm || savedCards.length === 0) && saveCardForFuture && cardNumber && cardExpiry) {
-                    await saveCardToDatabase();
-                }
-
-                // Process payment
-                await handleManualPaymentConfirm();
-            };
-
             return (
-                <div className="space-y-5">
-                    {/* Saved Cards Section */}
-                    {savedCards.length > 0 && !showNewCardForm && (
-                        <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                {isRTL ? 'البطاقات المحفوظة' : 'Saved Cards'}
-                            </h4>
-                            {savedCards.map((card) => (
-                                <button
-                                    key={card.id}
-                                    onClick={() => setSelectedSavedCard(card.id)}
-                                    className={`w-full flex items-center gap-4 p-4 rounded-md border-2 transition-all ${selectedSavedCard === card.id
-                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                                        }`}
-                                >
-                                    {/* Card Icon */}
-                                    <div className={`p-2 rounded-lg ${card.brand === 'visa' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-orange-100 dark:bg-orange-900/30'}`}>
-                                        <CreditCard className={`w-5 h-5 ${card.brand === 'visa' ? 'text-blue-600' : 'text-orange-600'}`} />
-                                    </div>
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden">
+                        {/* Background Decoration */}
+                        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('/images/noise.png')] pointer-events-none" />
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
+                        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-700" />
 
-                                    {/* Card Details */}
-                                    <div className="flex-1 text-left">
-                                        <p className="font-medium text-gray-900 dark:text-white">
-                                            •••• •••• •••• {card.last4}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {card.cardholder_name} • {card.exp_month.toString().padStart(2, '0')}/{card.exp_year.toString().slice(-2)}
-                                        </p>
-                                    </div>
+                        <div className="relative z-10">
+                            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-inner">
+                                <CreditCard className="w-8 h-8 text-white drop-shadow-md" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2 tracking-tight">
+                                {isRTL ? 'الدفع الآمن عبر Paddle' : 'Secure Payment via Paddle'}
+                            </h3>
+                            <p className="text-white/90 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+                                {isRTL
+                                    ? 'بوابة دفع عالمية مشفرة بالكامل تضمن حماية بياناتك المالية 100%'
+                                    : 'Global, fully encrypted payment gateway ensuring 100% protection of your financial data'}
+                            </p>
 
-                                    {/* Selection Indicator */}
-                                    {selectedSavedCard === card.id && (
-                                        <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
-                                            <Check className="w-3 h-3 text-white" />
-                                        </div>
-                                    )}
-
-                                    {/* Default Badge */}
-                                    {card.is_default && (
-                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 px-2 py-1 rounded-full">
-                                            {isRTL ? 'الافتراضية' : 'Default'}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-
-                            {/* Add New Card Button */}
-                            <button
-                                onClick={() => {
-                                    setShowNewCardForm(true);
-                                    setSelectedSavedCard(null);
-                                }}
-                                className="w-full flex items-center justify-center gap-2 p-4 rounded-md border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary-500 hover:text-primary-500 transition-all"
-                            >
-                                <CreditCard className="w-5 h-5" />
-                                {isRTL ? 'إضافة بطاقة جديدة' : 'Add New Card'}
-                            </button>
+                            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 shadow-sm">
+                                <p className="text-xs text-white/70 uppercase tracking-wider mb-2 font-medium">{isRTL ? 'البطاقات المدعومة' : 'Supported Cards'}</p>
+                                <div className="flex justify-center items-center gap-4 opacity-90 grayscale-[0.2] hover:grayscale-0 transition-all duration-300">
+                                    <img src="/images/payment-method/visa-icon.svg" alt="Visa" className="h-8 drop-shadow-sm hover:scale-110 transition-transform" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                    <div className="w-px h-6 bg-white/20" />
+                                    <img src="/images/payment-method/mastercard-icon.svg" alt="Mastercard" className="h-8 drop-shadow-sm hover:scale-110 transition-transform" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                    <div className="w-px h-6 bg-white/20" />
+                                    <img src="/images/payment-method/apple-pay.svg" alt="Apple Pay" className="h-8 drop-shadow-sm hover:scale-110 transition-transform" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                </div>
+                            </div>
                         </div>
-                    )}
-
-                    {/* New Card Form - Show if no saved cards or user chose to add new */}
-                    {(savedCards.length === 0 || showNewCardForm) && (
-                        <div className="space-y-4">
-                            {showNewCardForm && savedCards.length > 0 && (
-                                <button
-                                    onClick={() => {
-                                        setShowNewCardForm(false);
-                                        if (savedCards.length > 0) {
-                                            setSelectedSavedCard(savedCards[0].id);
-                                        }
-                                    }}
-                                    className="text-primary-500 hover:text-primary-600 text-sm flex items-center gap-1"
-                                >
-                                    <ArrowLeft className="w-4 h-4" />
-                                    {isRTL ? 'العودة للبطاقات المحفوظة' : 'Back to saved cards'}
-                                </button>
-                            )}
-
-                            {/* Card Number */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {isRTL ? 'رقم البطاقة' : 'Card Number'}
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        value={cardNumber}
-                                        placeholder="4242 4242 4242 4242"
-                                        maxLength={19}
-                                        className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono tracking-wider pr-24 ${cardNumber.length > 0
-                                            ? cardValidation.isValid
-                                                ? 'border-green-500'
-                                                : cardValidation.error
-                                                    ? 'border-red-500'
-                                                    : 'border-gray-200 dark:border-gray-700'
-                                            : 'border-gray-200 dark:border-gray-700'
-                                            }`}
-                                        onChange={(e) => {
-                                            let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
-                                            value = value.replace(/(.{4})/g, '$1 ').trim();
-                                            setCardNumber(value);
-                                            // Validate on change
-                                            const validation = validateCardNumber(value);
-                                            setCardValidation(validation);
-                                        }}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                                        {/* Validation indicator */}
-                                        {cardNumber.length > 0 && cardValidation.isValid && (
-                                            <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                        )}
-                                        {cardNumber.length > 0 && cardValidation.error && (
-                                            <AlertCircle className="w-5 h-5 text-red-500" />
-                                        )}
-                                        {/* Card type icon */}
-                                        {cardValidation.cardType === 'visa' && (
-                                            <img src="/images/payment-method/visa-icon.svg" alt="Visa" className="h-6 w-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                        )}
-                                        {cardValidation.cardType === 'mastercard' && (
-                                            <img src="/images/payment-method/mastercard-icon.svg" alt="Mastercard" className="h-6 w-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                        )}
-                                        {cardValidation.cardType === 'unknown' && cardNumber.length === 0 && (
-                                            <>
-                                                <img src="/images/payment-method/visa-icon.svg" alt="Visa" className="h-6 w-auto opacity-50" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                <img src="/images/payment-method/mastercard-icon.svg" alt="Mastercard" className="h-6 w-auto opacity-50" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                                {/* Error message */}
-                                {cardValidation.error && (
-                                    <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                                        <AlertCircle className="w-4 h-4" />
-                                        {cardValidation.error}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Expiry and CVV */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {isRTL ? 'تاريخ الانتهاء' : 'Expiry Date'}
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={cardExpiry}
-                                            placeholder="MM/YY"
-                                            maxLength={5}
-                                            className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono text-center pr-10 ${cardExpiry.length === 5
-                                                ? expiryValid
-                                                    ? 'border-green-500'
-                                                    : 'border-red-500'
-                                                : 'border-gray-200 dark:border-gray-700'
-                                                }`}
-                                            onChange={(e) => {
-                                                let value = e.target.value.replace(/\D/g, '');
-                                                if (value.length >= 2) {
-                                                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                                                }
-                                                setCardExpiry(value);
-                                                if (value.length === 5) {
-                                                    setExpiryValid(validateExpiry(value));
-                                                } else {
-                                                    setExpiryValid(null);
-                                                }
-                                            }}
-                                        />
-                                        {cardExpiry.length === 5 && (
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                {expiryValid ? (
-                                                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                                ) : (
-                                                    <AlertCircle className="w-5 h-5 text-red-500" />
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                    {cardExpiry.length === 5 && !expiryValid && (
-                                        <p className="mt-1 text-xs text-red-500">
-                                            {isRTL ? 'البطاقة منتهية الصلاحية' : 'Card expired'}
-                                        </p>
-                                    )}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        CVV
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type="password"
-                                            value={cardCVV}
-                                            placeholder="•••"
-                                            maxLength={cardValidation.cardType === 'amex' ? 4 : 3}
-                                            className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg font-mono text-center pr-10 ${cardCVV.length >= 3
-                                                ? cvvValid
-                                                    ? 'border-green-500'
-                                                    : 'border-red-500'
-                                                : 'border-gray-200 dark:border-gray-700'
-                                                }`}
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/\D/g, '');
-                                                setCardCVV(value);
-                                                if (value.length >= 3) {
-                                                    setCvvValid(validateCVV(value, cardValidation.cardType));
-                                                } else {
-                                                    setCvvValid(null);
-                                                }
-                                            }}
-                                        />
-                                        {cardCVV.length >= 3 && (
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                {cvvValid ? (
-                                                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                                ) : (
-                                                    <AlertCircle className="w-5 h-5 text-red-500" />
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Cardholder Name */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {isRTL ? 'اسم حامل البطاقة' : 'Cardholder Name'}
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        value={cardholderName}
-                                        placeholder={isRTL ? 'الاسم كما يظهر على البطاقة' : 'Name as it appears on card'}
-                                        className={`w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border-2 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-10 ${cardholderName.length >= 3
-                                            ? 'border-green-500'
-                                            : 'border-gray-200 dark:border-gray-700'
-                                            }`}
-                                        onChange={(e) => setCardholderName(e.target.value)}
-                                    />
-                                    {cardholderName.length >= 3 && (
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                            <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Save Card Checkbox */}
-                            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                <input
-                                    type="checkbox"
-                                    checked={saveCardForFuture}
-                                    onChange={(e) => setSaveCardForFuture(e.target.checked)}
-                                    className="w-5 h-5 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-                                />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
-                                    {isRTL ? 'حفظ البطاقة للمدفوعات المستقبلية' : 'Save card for future payments'}
-                                </span>
-                            </label>
-                        </div>
-                    )}
-
-                    {/* Security Note */}
-                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Lock className="w-4 h-4" />
-                        <span>{isRTL ? 'بياناتك محمية بتشفير SSL 256-bit' : 'Your data is protected with 256-bit SSL encryption'}</span>
                     </div>
 
-                    {/* Pay Button */}
-                    <button
-                        onClick={handleCardPayment}
-                        disabled={isProcessing || (
-                            !selectedSavedCard && (
-                                !cardValidation.isValid ||
-                                !expiryValid ||
-                                !cvvValid ||
-                                cardholderName.length < 3
-                            )
-                        )}
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-                    >
-                        {isProcessing ? (
-                            <>
-                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                                {isRTL ? 'جاري المعالجة...' : 'Processing...'}
-                            </>
-                        ) : (
-                            <>
-                                <CreditCard className="w-5 h-5" />
-                                {isRTL ? `ادفع $${totalPayment.toFixed(2)}` : `Pay $${totalPayment.toFixed(2)}`}
-                            </>
-                        )}
-                    </button>
+                    <div className="space-y-4">
+                        <button
+                            onClick={handlePaddleCheckout}
+                            className="group w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] ring-offset-2 focus:ring-2 ring-purple-500"
+                        >
+                            <div className="bg-white/20 p-1.5 rounded-full group-hover:rotate-12 transition-transform">
+                                <Lock className="w-5 h-5" />
+                            </div>
+                            <span>{isRTL ? 'إتمام الدفع الآمن' : 'Proceed to Secure Checkout'}</span>
+                            <div className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
+                                {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5 rotate-180" />}
+                            </div>
+                        </button>
+
+                        <div className="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 animate-pulse">
+                            <Shield className="w-3 h-3 text-green-500" />
+                            <span>{isRTL ? 'تشفير عالي المستوى 256-bit SSL' : 'High-grade 256-bit SSL Encryption'}</span>
+                        </div>
+                    </div>
                 </div>
             );
         }
@@ -1087,11 +910,11 @@ function CheckoutContent() {
     );
 }
 
-export default function SubscriptionCheckoutPage() {
+export default function CheckoutPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent" />
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
             </div>
         }>
             <CheckoutContent />

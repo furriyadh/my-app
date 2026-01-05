@@ -25,21 +25,6 @@ import { CampaignBudgetProgressCard } from '@/components/furriyadh/CampaignBudge
 import { FurriyadhPromotionalCard } from '@/components/furriyadh/FurriyadhPromotionalCard';
 import { SubscriptionPaymentHistory } from '@/components/furriyadh/SubscriptionPaymentHistory';
 import { SavedPaymentMethods } from '@/components/furriyadh/SavedPaymentMethods';
-import { initializePaddle, Paddle } from '@paddle/paddle-js';
-
-// Paddle Price IDs
-const PADDLE_PRICE_IDS = {
-    MONTHLY: {
-        BASIC: 'pri_01ke7gzh9508w5j81azc699748',
-        PREMIUM: 'pri_01ke7h6e9d05pt54j0mxs539q2', // Pro Plan
-        ENTERPRISE: 'pri_01ke7h8765hth3c99hgbvaaj6r' // Agency Plan
-    },
-    YEARLY: {
-        BASIC: 'pri_01ke7hr62ce5rgdndnpwhjz3sh',
-        PREMIUM: 'pri_01ke7hseye96pemfdssn9r5m5t', // Pro Plan
-        ENTERPRISE: 'pri_01ke7htrekf52ar328f1esrmp3' // Agency Plan
-    }
-};
 
 
 const BillingPage: React.FC = () => {
@@ -59,37 +44,6 @@ const BillingPage: React.FC = () => {
         planName: string;
         planNameAr: string;
     }>({ show: false, planId: '', planName: '', planNameAr: '' });
-
-    // Paddle State
-    const [paddle, setPaddle] = useState<Paddle>();
-
-    // Initialize Paddle
-    useEffect(() => {
-        initializePaddle({
-            environment: process.env.NEXT_PUBLIC_PADDLE_ENV as 'production' | 'sandbox' || 'production',
-            token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
-        }).then((paddleInstance: Paddle | undefined) => {
-            if (paddleInstance) {
-                setPaddle(paddleInstance);
-            }
-        });
-    }, []);
-
-    // Handle Paddle Checkout
-    const openCheckout = (priceId: string) => {
-        if (!paddle) {
-            alert('Paddle not initialized yet. Please wait...');
-            return;
-        }
-        paddle.Checkout.open({
-            items: [{ priceId, quantity: 1 }],
-            settings: {
-                displayMode: 'overlay',
-                theme: 'dark',
-                locale: 'en'
-            }
-        });
-    };
 
     // ✅ Success modal (after confirming plan change)
     const [successModal, setSuccessModal] = useState<{
@@ -247,19 +201,8 @@ const BillingPage: React.FC = () => {
             return;
         }
 
-        // Paid plans - Open Paddle Checkout
-        let priceId = '';
-        if (planId === 'basic') {
-            priceId = billingCycle === 'monthly' ? PADDLE_PRICE_IDS.MONTHLY.BASIC : PADDLE_PRICE_IDS.YEARLY.BASIC;
-        } else if (planId === 'pro') {
-            priceId = billingCycle === 'monthly' ? PADDLE_PRICE_IDS.MONTHLY.PREMIUM : PADDLE_PRICE_IDS.YEARLY.PREMIUM;
-        } else if (planId === 'agency') {
-            priceId = billingCycle === 'monthly' ? PADDLE_PRICE_IDS.MONTHLY.ENTERPRISE : PADDLE_PRICE_IDS.YEARLY.ENTERPRISE;
-        }
-
-        if (priceId) {
-            openCheckout(priceId);
-        }
+        // Paid plans - redirect to checkout page
+        router.push(`/google-ads/billing/checkout?plan=${planId}&cycle=${billingCycle}`);
     };
 
     // Step 2: Confirm and apply plan change (kept for free plan or future use)
