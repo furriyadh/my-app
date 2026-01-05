@@ -25,8 +25,7 @@ export const TrustedUsers: React.FC<TrustedUsersProps> = ({
   return (
     <div
       className={cn(
-        `flex items-center justify-center gap-6 bg-transparent
-          text-foreground py-4 px-4`,
+        `flex items-center justify-center gap-6 bg-transparent py-4 px-4`,
         className
       )}
     >
@@ -54,7 +53,7 @@ export const TrustedUsers: React.FC<TrustedUsersProps> = ({
             <Star key={i} fill="currentColor" className="w-4 h-4" style={{ color: '#facc15' }} />
           ))}
         </div>
-        <span className="text-zinc-900 dark:text-white text-xs md:text-md font-medium">
+        <span className="text-gray-900 dark:text-white text-xs md:text-md font-medium">
           {caption}{" "}
           <CountUp
             value={totalUsersText}
