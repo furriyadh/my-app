@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
 import Image from "next/image";
+import { useMediaQuery } from "react-responsive";
 
 import HeroSection from "@/components/HomePage/HeroSection";
 import SmoothScrollManager from "@/components/ui/SmoothScrollManager";
@@ -18,6 +20,28 @@ import FAQSection from "@/components/HomePage/FAQSection";
 
 
 export default function Home() {
+  // Responsive breakpoints using react-responsive
+  const isMobileQuery = useMediaQuery({ maxWidth: 640 });
+  const isTabletQuery = useMediaQuery({ minWidth: 641, maxWidth: 1024 });
+  const isDesktopQuery = useMediaQuery({ minWidth: 1025 });
+
+  const [orbSize, setOrbSize] = useState(1200);
+  const [orbTop, setOrbTop] = useState(-64); // -top-16 = -64px
+
+  // Handle hydration mismatch safely
+  useEffect(() => {
+    if (isMobileQuery) {
+      setOrbSize(500);
+      setOrbTop(-20); // Closer to top on mobile
+    } else if (isTabletQuery) {
+      setOrbSize(800);
+      setOrbTop(-40); // Medium position on tablet
+    } else {
+      setOrbSize(1200);
+      setOrbTop(-64); // Original position on desktop
+    }
+  }, [isMobileQuery, isTabletQuery, isDesktopQuery]);
+
   return (
     <div className="front-page-body bg-white dark:bg-[#0a0e19] min-h-screen" dir="ltr">
       <Navbar />
@@ -75,9 +99,12 @@ export default function Home() {
         <main className="min-h-screen relative selection:bg-purple-500/30 selection:text-white">
           <SmoothScrollManager />
 
-          {/* Orb Background - Covers HeroSection and AdCreationPrompt */}
-          <div className="orb-container absolute -top-16 left-0 right-0 h-[1200px] flex items-start justify-center z-20">
-            <div style={{ width: '1200px', height: '1200px', position: 'relative' }}>
+          {/* Orb Background - Covers HeroSection and AdCreationPrompt - Fully Responsive */}
+          <div
+            className="orb-container absolute left-0 right-0 flex items-start justify-center z-20"
+            style={{ height: `${orbSize}px`, top: `${orbTop}px` }}
+          >
+            <div style={{ width: `${orbSize}px`, height: `${orbSize}px`, position: 'relative' }}>
               <Orb
                 hue={0}
                 hoverIntensity={2}
