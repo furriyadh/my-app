@@ -168,7 +168,7 @@ const Navbar: React.FC = () => {
               as={Link}
               href="/authentication/sign-in"
               variant="primary"
-              className="hidden md:inline-flex bg-gradient-to-r from-purple-600 to-indigo-600 border-0 px-8 py-2.5 text-base"
+              className="hidden md:inline-flex bg-gradient-to-r from-purple-600 to-indigo-600 border-0 px-8 py-2.5 text-base text-white"
             >
               {language === 'ar' ? 'دخول' : 'Login'}
             </NavbarButton>
