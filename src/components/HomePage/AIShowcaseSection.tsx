@@ -9,7 +9,7 @@ const CircularGallery = dynamic(() => import("@/components/ui/CircularGallery"),
 
 export default function AIShowcaseSection() {
   return (
-    <section className="py-24 px-4 relative overflow-hidden">
+    <section className="py-16 md:py-20 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-7xl relative z-10">
         {/* Header with AI Animation */}
         <div className="text-center mb-16">

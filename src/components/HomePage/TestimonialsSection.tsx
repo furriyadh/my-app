@@ -55,7 +55,7 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-20 px-4 relative overflow-hidden">
+    <section className="py-16 md:py-20 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">

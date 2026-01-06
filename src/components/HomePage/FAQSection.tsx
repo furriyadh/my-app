@@ -49,7 +49,7 @@ export default function FAQSection() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
   return (
-    <section className="py-16 px-4 relative overflow-hidden">
+    <section className="py-16 md:py-20 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-3xl">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 rounded-full mb-6">

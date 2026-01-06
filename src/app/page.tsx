@@ -120,9 +120,9 @@ export default function Home() {
           <GoogleOneTap />
 
           <div className="relative space-y-0 pb-10 mt-32">
+            <LiveDemoSection />
             <ComparisonSection />
             <AIShowcaseSection />
-            <LiveDemoSection />
             <TestimonialsSection />
             <FAQSection />
           </div>
