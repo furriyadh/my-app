@@ -76,12 +76,12 @@ export default function AdCreationPrompt() {
     };
 
     return (
-        <section className="relative z-30 px-4 mb-16">
+        <section className="relative z-40 px-4 mb-16">
             <div className="mx-auto max-w-4xl">
                 {/* Lovable-style Input Box - Exact Match */}
                 <form
                     onSubmit={handleSubmit}
-                    className="group flex flex-col gap-2 p-3 w-full rounded-[32px] border border-white/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-base shadow-xl ring-1 ring-black/[0.05] dark:ring-white/[0.05] transition-all duration-150 ease-in-out focus-within:ring-black/[0.1] dark:focus-within:ring-white/[0.1] hover:ring-black/[0.08] dark:hover:ring-white/[0.08]"
+                    className="group flex flex-col gap-2 p-3 w-full rounded-[32px] border border-white/20 dark:border-zinc-700/50 bg-white/10 dark:bg-zinc-900/50 backdrop-blur-xl text-base shadow-xl ring-1 ring-black/[0.05] dark:ring-white/[0.05] transition-all duration-150 ease-in-out focus-within:ring-black/[0.1] dark:focus-within:ring-white/[0.1] hover:ring-black/[0.08] dark:hover:ring-white/[0.08] pointer-events-auto"
                 >
                     {/* Textarea Container */}
                     <div className="relative flex flex-1 items-center">

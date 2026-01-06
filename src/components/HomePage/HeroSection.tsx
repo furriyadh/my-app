@@ -8,13 +8,14 @@ import Link from "next/link";
 export default function HeroSection() {
   return (
     <section className="relative pt-64 pb-8 px-4 overflow-hidden min-h-[45vh] flex items-center">
-      <div className="container mx-auto max-w-4xl relative z-10">
+      {/* Content - z-30 above Orb, pointer-events-none to pass events to Orb */}
+      <div className="container mx-auto max-w-4xl relative z-30 pointer-events-none">
         {/* Hero Text */}
         <div className="text-center">
-          {/* Small promotional badge */}
+          {/* Small promotional badge - pointer-events-auto for clickability */}
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-full mb-8 hover:bg-purple-600/20 transition-all group"
+            className="pointer-events-auto inline-flex items-center gap-2 px-4 py-1.5 bg-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-full mb-8 hover:bg-purple-600/20 transition-all group"
           >
             <span className="text-lg">🚀</span>
             <span className="text-sm text-zinc-600 dark:text-gray-300">Start free trial - No credit card required</span>

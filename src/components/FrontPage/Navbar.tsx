@@ -126,7 +126,7 @@ const Navbar: React.FC = () => {
           </Link>
 
           {/* Centered Links - SparkleNavbar */}
-          <SparkleNavbar items={NAV_ITEMS.map(item => item.name)} color="#605dff" />
+          <SparkleNavbar items={NAV_ITEMS} color="#605dff" />
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 md:gap-4 z-20">

@@ -1,15 +1,22 @@
 "use client";
 import React, { useState, useRef, useLayoutEffect } from "react";
 import { gsap } from "gsap";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Define the props for the reusable component.
+interface NavItem {
+  name: string;
+  link: string;
+}
+
 interface SparkleNavbarProps {
   /**
-   * An array of strings representing the navigation menu items.
-   * Each string will be the text for a button.
-   * @example ['Home', 'About', 'Contact']
+   * An array of objects representing the navigation menu items.
+   * Each object should have a name and link.
+   * @example [{name: 'Home', link: '/'}, {name: 'About', link: '/about'}]
    */
-  items: string[];
+  items: NavItem[];
   /**
    * The color for the active state text shadow, box shadow, and other effects.
    * @example '#1E90FF' (a shade of blue)
@@ -28,7 +35,10 @@ const SparkleNavbar: React.FC<SparkleNavbarProps> = ({
   items,
   color = "#00fffc",
 }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const pathname = usePathname();
+  // Find initial active index based on current path
+  const initialIndex = items.findIndex(item => item.link === pathname) || 0;
+  const [activeIndex, setActiveIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
 
   // Refs to get direct access to DOM elements for animations.
   const navRef = useRef<HTMLDivElement>(null);
@@ -280,16 +290,18 @@ const SparkleNavbar: React.FC<SparkleNavbarProps> = ({
       <nav className="navigation-menu" ref={navRef}>
         <ul>
           {items.map((item, index) => (
-            <li key={item} className={index === activeIndex ? "active" : ""}>
-              <button
-                ref={(el) => {
-                  buttonRefs.current[index] = el;
-                }}
-                onClick={() => handleClick(index)}
-                className="text-foreground"
-              >
-                {item}
-              </button>
+            <li key={item.name} className={index === activeIndex ? "active" : ""}>
+              <Link href={item.link}>
+                <button
+                  ref={(el) => {
+                    buttonRefs.current[index] = el;
+                  }}
+                  onClick={() => handleClick(index)}
+                  className="text-foreground"
+                >
+                  {item.name}
+                </button>
+              </Link>
             </li>
           ))}
         </ul>
