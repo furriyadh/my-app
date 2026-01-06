@@ -17,19 +17,19 @@ export default function ComparisonSection() {
             <Brain className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span className="text-blue-600 dark:text-blue-300 text-sm font-medium">Compare Your Options</span>
           </div>
-          <h2 className="!mb-3 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
+          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
             Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-cyan-600 dark:from-green-400 dark:to-cyan-400">Furriyadh AI for Google Ads</span>?
           </h2>
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+          <p className="mt-4 text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
             See how our AI‑powered Google Ads management platform compares to agencies and freelancers
           </p>
         </div>
 
         {/* Comparison Table */}
-        <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-900/80 dark:to-gray-900/40 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/20 overflow-hidden shadow-lg dark:shadow-none selection:bg-purple-500/30 selection:text-white">
+        <div className="bg-white/80 dark:bg-gradient-to-br dark:from-zinc-900/80 dark:to-zinc-900/40 backdrop-blur-xl rounded-xl border border-zinc-200 dark:border-white/20 overflow-hidden shadow-lg dark:shadow-none selection:bg-purple-500/30 selection:text-white">
           {/* Header */}
-          <div className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-gray-200 dark:border-white/20 bg-gray-50 dark:bg-white/5">
-            <div className="text-gray-500 dark:text-gray-400 text-[10px] md:text-xs font-medium">Metric</div>
+          <div className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-zinc-200 dark:border-white/20 bg-zinc-50 dark:bg-white/5">
+            <div className="text-zinc-500 dark:text-zinc-400 text-[10px] md:text-xs font-medium">Metric</div>
             <div className="text-center">
               <div className="flex flex-col items-center gap-0.5">
                 <div className="w-6 h-6 md:w-7 md:h-7 bg-orange-500/20 rounded-full flex items-center justify-center">
@@ -69,9 +69,9 @@ export default function ComparisonSection() {
           ].map((row, i) => (
             <div
               key={i}
-              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-gray-100 dark:border-white/10 hover:bg-purple-500/10 transition-colors"
+              className="grid grid-cols-4 gap-3 p-3 md:p-4 border-b border-zinc-100 dark:border-white/10 hover:bg-purple-500/10 transition-colors"
             >
-              <div className="text-gray-900 dark:text-white font-medium text-[10px] md:text-xs">{row.metric}</div>
+              <div className="text-zinc-900 dark:text-white font-medium text-[10px] md:text-xs">{row.metric}</div>
               <div className={`text-center text-[10px] md:text-xs ${row.freelancerColor}`}>{row.freelancer}</div>
               <div className={`text-center text-[10px] md:text-xs ${row.agencyColor}`}>{row.agency}</div>
               <div className={`text-center text-[10px] md:text-xs font-semibold ${row.aiColor}`}>{row.ai}</div>

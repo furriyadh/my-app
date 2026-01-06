@@ -20,10 +20,10 @@ export default function LiveDemoSection() {
                 <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                 <span className="text-sm text-cyan-600 dark:text-cyan-300">See It In Action</span>
               </div>
-              <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
+              <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
                 The Ultimate Google Ads AI Dashboard
               </h2>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-4xl mx-auto mt-4">
+              <p className="mt-4 text-zinc-600 dark:text-zinc-400 max-w-4xl mx-auto">
                 Launch professional campaigns in 30 seconds. Experience a unified platform where artificial intelligence drives your growth and maximizes ROI.
               </p>
             </div>

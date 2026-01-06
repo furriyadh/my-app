@@ -195,7 +195,24 @@ export default function Orb({
     const container = ctnDom.current;
     if (!container) return;
 
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
+    // Check if WebGL is available
+    const testCanvas = document.createElement('canvas');
+    const testContext = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
+    if (!testContext) {
+      console.warn('WebGL is not supported in this browser');
+      return;
+    }
+
+    let renderer: Renderer | null = null;
+    try {
+      renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
+    } catch (e) {
+      console.warn('Failed to create WebGL renderer:', e);
+      return;
+    }
+
+    if (!renderer) return;
+
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
     container.appendChild(gl.canvas);

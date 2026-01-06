@@ -288,7 +288,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="en" dir="ltr" className="dark" suppressHydrationWarning>
       <head>
         <meta
           name="google-site-verification"
@@ -904,6 +904,9 @@ export default function RootLayout({
             html.dark .text-gray-900 {
               color: #f3f4f6 !important;
             }
+            html.dark .text-zinc-900 {
+              color: #ffffff !important;
+            }
             html.dark .text-gray-700 {
               color: #d1d5db !important;
             }
@@ -961,6 +964,31 @@ export default function RootLayout({
             }
             html.dark .bg-cyan-50 {
               background-color: rgba(6, 182, 212, 0.15) !important;
+            }
+            /* Zinc palette dark mode overrides */
+            html.dark .text-zinc-600 {
+              color: #a1a1aa !important;
+            }
+            html.dark .text-zinc-500 {
+              color: #71717a !important;
+            }
+            html.dark .text-zinc-400 {
+              color: #a1a1aa !important;
+            }
+            html.dark .text-zinc-300 {
+              color: #d4d4d8 !important;
+            }
+            html.dark .bg-zinc-100 {
+              background-color: rgba(255, 255, 255, 0.05) !important;
+            }
+            html.dark .bg-zinc-50 {
+              background-color: rgba(255, 255, 255, 0.03) !important;
+            }
+            html.dark .border-zinc-200 {
+              border-color: #27272a !important;
+            }
+            html.dark .border-zinc-100 {
+              border-color: #27272a !important;
             }
           `
         }} />

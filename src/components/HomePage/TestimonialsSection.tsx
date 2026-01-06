@@ -58,10 +58,10 @@ export default function TestimonialsSection() {
     <section className="py-20 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
-          <h2 className="!mb-4 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold text-black dark:text-white">
+          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
             What Our Clients Say About Google Ads Management
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-zinc-600 dark:text-zinc-400">
             Thousands of companies trust our platform to manage their Google Ads campaigns and increase conversions
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function TestimonialsSection() {
         <AnimatedTestimonials
           data={testimonials}
           className="w-full"
-          cardClassName="bg-white dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-lg dark:shadow-none"
+          cardClassName="bg-white dark:bg-zinc-800/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-700 shadow-lg dark:shadow-none"
         />
       </div>
     </section>

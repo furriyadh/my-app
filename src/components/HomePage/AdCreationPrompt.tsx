@@ -101,7 +101,7 @@ export default function AdCreationPrompt() {
                         />
                         {/* Typewriter placeholder */}
                         {!prompt && (
-                            <div className="absolute top-2 left-2 pointer-events-none text-gray-400 dark:text-gray-500 text-base">
+                            <div className="absolute top-2 left-2 pointer-events-none text-zinc-400 dark:text-zinc-500 text-base">
                                 {typewriterText}
                                 <span className="animate-pulse text-purple-500 ml-0.5">|</span>
                             </div>
@@ -113,7 +113,7 @@ export default function AdCreationPrompt() {
                         {/* Plus Button */}
                         <button
                             type="button"
-                            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 h-10 w-10 rounded-full p-0 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white md:h-8 md:w-8"
+                            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 h-10 w-10 rounded-full p-0 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white md:h-8 md:w-8"
                         >
                             <Plus className="h-5 w-5" />
                         </button>
@@ -130,7 +130,7 @@ export default function AdCreationPrompt() {
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 py-2 h-10 w-10 gap-1.5 rounded-full px-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white md:h-8 md:w-fit"
+                            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 py-2 h-10 w-10 gap-1.5 rounded-full px-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white md:h-8 md:w-fit"
                         >
                             <Paperclip className="h-4 w-4" />
                             <span className="hidden md:flex">Attach</span>
@@ -139,7 +139,7 @@ export default function AdCreationPrompt() {
                         {/* Theme Button */}
                         <button
                             type="button"
-                            className="items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 px-3 py-2 gap-1.5 hidden h-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white md:flex"
+                            className="items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 px-3 py-2 gap-1.5 hidden h-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white md:flex"
                             disabled
                         >
                             <div className="flex min-w-0 flex-1 items-center gap-1">
@@ -156,7 +156,7 @@ export default function AdCreationPrompt() {
                             {/* Chat Button */}
                             <button
                                 type="button"
-                                className="items-center justify-center whitespace-nowrap text-sm transition-colors duration-100 ease-in-out border border-gray-200 dark:border-white/10 bg-transparent flex h-10 gap-1.5 rounded-full px-3 py-0 font-normal text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 md:h-8 md:font-medium"
+                                className="items-center justify-center whitespace-nowrap text-sm transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent flex h-10 gap-1.5 rounded-full px-3 py-0 font-normal text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 md:h-8 md:font-medium"
                             >
                                 <MessageSquare className="h-4 w-4" />
                                 Chat
@@ -165,7 +165,7 @@ export default function AdCreationPrompt() {
                             {/* Voice/Wave Button */}
                             <button
                                 type="button"
-                                className="gap-2 whitespace-nowrap text-sm font-medium ease-in-out border border-gray-200 dark:border-white/10 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 relative z-10 flex shrink-0 rounded-full p-0 text-gray-500 dark:text-gray-400 transition-opacity duration-150 hover:text-gray-900 dark:hover:text-white items-center justify-center h-10 w-10 md:h-8 md:w-8"
+                                className="gap-2 whitespace-nowrap text-sm font-medium ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 relative z-10 flex shrink-0 rounded-full p-0 text-zinc-500 dark:text-zinc-400 transition-opacity duration-150 hover:text-zinc-900 dark:hover:text-white items-center justify-center h-10 w-10 md:h-8 md:w-8"
                             >
                                 <BarChart3 className="relative z-10 h-5 w-5" />
                             </button>
@@ -223,7 +223,7 @@ export default function AdCreationPrompt() {
                         </Link>
                     </div>
 
-                    <p className="text-center text-zinc-600 dark:text-gray-500 text-sm">
+                    <p className="text-center text-zinc-600 dark:text-zinc-500 text-sm">
                         ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial &nbsp;•&nbsp; ✓ Cancel anytime
                     </p>
                 </div>

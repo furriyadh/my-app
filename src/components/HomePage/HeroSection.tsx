@@ -18,8 +18,8 @@ export default function HeroSection() {
             className="pointer-events-auto inline-flex items-center gap-2 px-4 py-1.5 bg-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-full mb-8 hover:bg-purple-600/20 transition-all group"
           >
             <span className="text-lg">🚀</span>
-            <span className="text-sm text-zinc-600 dark:text-gray-300">Start free trial - No credit card required</span>
-            <span className="text-zinc-400 dark:text-gray-400 group-hover:translate-x-0.5 transition-transform">→</span>
+            <span className="text-sm text-zinc-600 dark:text-zinc-300">Start free trial - No credit card required</span>
+            <span className="text-zinc-400 dark:text-zinc-400 group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
 
           {/* Main Headline - Clean sizing like Lovable */}
@@ -32,7 +32,7 @@ export default function HeroSection() {
           </h1>
 
           {/* Subtitle - Clean like Lovable */}
-          <p className="text-base md:text-lg text-zinc-600 dark:text-gray-400 mb-32 max-w-xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400 mb-32 max-w-xl mx-auto leading-relaxed">
             Create high-converting campaigns by chatting with AI
           </p>
         </div>
