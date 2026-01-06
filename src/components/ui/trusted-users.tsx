@@ -57,7 +57,7 @@ export const TrustedUsers: React.FC<TrustedUsersProps> = ({
           {caption}{" "}
           <CountUp
             value={totalUsersText}
-            duration={2}
+            duration={3}
             separator=","
             className="ml-1 text-lg"
             suffix="+"

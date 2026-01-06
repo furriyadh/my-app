@@ -61,18 +61,14 @@ export default function AdCreationPrompt() {
         }
     };
 
+    const handleRedirectToSignIn = () => {
+        router.push('/authentication/sign-in');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!prompt.trim() || isLoading) return;
-
-        setIsLoading(true);
-
-        // Save prompt to localStorage to persist across navigation
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('campaign_prompt', prompt);
-        }
-
-        router.push('/google-ads/campaigns/new');
+        // Redirect to sign-in page
+        router.push('/authentication/sign-in');
     };
 
     return (
@@ -91,7 +87,7 @@ export default function AdCreationPrompt() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
-                                    handleSubmit(e);
+                                    handleRedirectToSignIn();
                                 }
                             }}
                             className="flex w-full rounded-md px-2 py-2 transition-colors duration-150 ease-in-out placeholder:text-gray-400 focus-visible:outline-none resize-none border-none text-base leading-snug max-h-[max(35svh,5rem)] bg-transparent text-zinc-900 dark:text-white flex-1"
@@ -113,6 +109,7 @@ export default function AdCreationPrompt() {
                         {/* Plus Button */}
                         <button
                             type="button"
+                            onClick={handleRedirectToSignIn}
                             className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                         >
                             <Plus className="h-5 w-5" />
@@ -129,7 +126,7 @@ export default function AdCreationPrompt() {
                         {/* Attach Button */}
                         <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={handleRedirectToSignIn}
                             className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white text-sm font-medium transition-colors"
                         >
                             <Paperclip className="h-4 w-4" />
@@ -142,15 +139,17 @@ export default function AdCreationPrompt() {
                             {/* Chat Button */}
                             <button
                                 type="button"
+                                onClick={handleRedirectToSignIn}
                                 className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white text-sm font-medium transition-colors"
                             >
                                 <MessageSquare className="h-4 w-4" />
                                 <span>Chat</span>
                             </button>
 
-                            {/* Analytics Button */}
+                            {/* Audio Button */}
                             <button
                                 type="button"
+                                onClick={handleRedirectToSignIn}
                                 className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                             >
                                 <AudioLines className="h-5 w-5" />
@@ -158,15 +157,11 @@ export default function AdCreationPrompt() {
 
                             {/* Send Button - Accent Color */}
                             <button
-                                type="submit"
-                                disabled={isLoading || !prompt.trim()}
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                                type="button"
+                                onClick={handleRedirectToSignIn}
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white transition-all shadow-lg"
                             >
-                                {isLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <ArrowUp className="h-5 w-5" />
-                                )}
+                                <ArrowUp className="h-5 w-5" />
                             </button>
                         </div>
                     </div>
@@ -181,20 +176,23 @@ export default function AdCreationPrompt() {
                             "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
                             "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
                             "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+                            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
+                            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
+                            "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
                         ]}
                         rating={5}
-                        totalUsersText={5000}
+                        totalUsersText={412856}
                         caption="Trusted by"
                         starColorClass="text-yellow-400"
                         ringColors={[
-                            "ring-purple-500", "ring-blue-500", "ring-pink-500", "ring-green-500", "ring-orange-500",
+                            "ring-purple-500", "ring-blue-500", "ring-pink-500", "ring-green-500", "ring-orange-500", "ring-cyan-500", "ring-red-500", "ring-indigo-500",
                         ]}
                     />
 
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <Link
-                            href="/authentication/sign-up"
+                            href="/authentication/sign-in"
                             className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
                         >
                             Start Free Trial
@@ -210,7 +208,7 @@ export default function AdCreationPrompt() {
                     </div>
 
                     <p className="text-center text-zinc-600 dark:text-zinc-500 text-sm">
-                        ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial &nbsp;•&nbsp; ✓ Cancel anytime
+                        ✓ Free plan available &nbsp;•&nbsp; ✓ No hidden fees &nbsp;•&nbsp; ✓ Cancel anytime
                     </p>
                 </div>
             </div>
