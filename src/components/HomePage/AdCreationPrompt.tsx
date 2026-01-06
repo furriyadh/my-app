@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Paperclip, Mic, ArrowUp, Loader2, Plus, MessageSquare, Palette, BarChart3 } from 'lucide-react';
+import { Paperclip, Mic, ArrowUp, Loader2, Plus, MessageSquare, Palette, AudioLines } from 'lucide-react';
 import { TrustedUsers } from "@/components/ui/trusted-users";
 import Link from "next/link";
 import { Play, ArrowRight } from "lucide-react";
@@ -78,10 +78,10 @@ export default function AdCreationPrompt() {
     return (
         <section className="relative z-40 px-4 mb-16">
             <div className="mx-auto max-w-4xl">
-                {/* Lovable-style Input Box - Exact Match */}
+                {/* Lovable-style Input Box - Bimodal UI */}
                 <form
                     onSubmit={handleSubmit}
-                    className="group flex flex-col gap-2 p-3 w-full rounded-[32px] border border-white/20 dark:border-zinc-700/50 bg-white/10 dark:bg-zinc-900/50 backdrop-blur-xl text-base shadow-xl ring-1 ring-black/[0.05] dark:ring-white/[0.05] transition-all duration-150 ease-in-out focus-within:ring-black/[0.1] dark:focus-within:ring-white/[0.1] hover:ring-black/[0.08] dark:hover:ring-white/[0.08] pointer-events-auto"
+                    className="group flex flex-col gap-2 p-3 w-full rounded-[32px] border border-zinc-200 dark:border-zinc-700/50 bg-white dark:bg-zinc-900/50 backdrop-blur-xl text-base shadow-lg dark:shadow-xl ring-1 ring-zinc-200 dark:ring-white/[0.05] transition-all duration-150 ease-in-out focus-within:ring-zinc-300 dark:focus-within:ring-white/[0.1] hover:ring-zinc-300 dark:hover:ring-white/[0.08] pointer-events-auto"
                 >
                     {/* Textarea Container */}
                     <div className="relative flex flex-1 items-center">
@@ -101,19 +101,19 @@ export default function AdCreationPrompt() {
                         />
                         {/* Typewriter placeholder */}
                         {!prompt && (
-                            <div className="absolute top-2 left-2 pointer-events-none text-zinc-400 dark:text-zinc-500 text-base">
+                            <div className="absolute top-2 left-2 pointer-events-none text-zinc-500 dark:text-zinc-400 text-base">
                                 {typewriterText}
                                 <span className="animate-pulse text-purple-500 ml-0.5">|</span>
                             </div>
                         )}
                     </div>
 
-                    {/* Tools Bar */}
-                    <div className="flex gap-1 flex-wrap items-center">
+                    {/* Tools Bar - Lovable Style */}
+                    <div className="flex gap-1.5 flex-wrap items-center">
                         {/* Plus Button */}
                         <button
                             type="button"
-                            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 h-10 w-10 rounded-full p-0 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white md:h-8 md:w-8"
+                            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                         >
                             <Plus className="h-5 w-5" />
                         </button>
@@ -130,56 +130,42 @@ export default function AdCreationPrompt() {
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 py-2 h-10 w-10 gap-1.5 rounded-full px-3 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white md:h-8 md:w-fit"
+                            className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white text-sm font-medium transition-colors"
                         >
                             <Paperclip className="h-4 w-4" />
-                            <span className="hidden md:flex">Attach</span>
+                            <span className="hidden md:inline">Attach</span>
                         </button>
 
-                        {/* Theme Button */}
-                        <button
-                            type="button"
-                            className="items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 px-3 py-2 gap-1.5 hidden h-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white md:flex"
-                            disabled
-                        >
-                            <div className="flex min-w-0 flex-1 items-center gap-1">
-                                <Palette className="h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">Theme</span>
-                            </div>
-                            <svg className="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M11.526 15.582a.75.75 0 0 0 1.004-.052l5-5a.75.75 0 1 0-1.06-1.06L12 13.94 7.53 9.47a.75.75 0 1 0-1.06 1.06l5 5z" />
-                            </svg>
-                        </button>
 
                         {/* Right Side Tools */}
-                        <div className="ml-auto flex items-center gap-1">
+                        <div className="ml-auto flex items-center gap-1.5">
                             {/* Chat Button */}
                             <button
                                 type="button"
-                                className="items-center justify-center whitespace-nowrap text-sm transition-colors duration-100 ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent flex h-10 gap-1.5 rounded-full px-3 py-0 font-normal text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 md:h-8 md:font-medium"
+                                className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white text-sm font-medium transition-colors"
                             >
                                 <MessageSquare className="h-4 w-4" />
-                                Chat
+                                <span>Chat</span>
                             </button>
 
-                            {/* Voice/Wave Button */}
+                            {/* Analytics Button */}
                             <button
                                 type="button"
-                                className="gap-2 whitespace-nowrap text-sm font-medium ease-in-out border border-zinc-200 dark:border-white/10 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/10 relative z-10 flex shrink-0 rounded-full p-0 text-zinc-500 dark:text-zinc-400 transition-opacity duration-150 hover:text-zinc-900 dark:hover:text-white items-center justify-center h-10 w-10 md:h-8 md:w-8"
+                                className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
                             >
-                                <BarChart3 className="relative z-10 h-5 w-5" />
+                                <AudioLines className="h-5 w-5" />
                             </button>
 
-                            {/* Send Button */}
+                            {/* Send Button - Accent Color */}
                             <button
                                 type="submit"
                                 disabled={isLoading || !prompt.trim()}
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 dark:bg-blue-600 transition-opacity duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 md:h-8 md:w-8"
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                             >
                                 {isLoading ? (
-                                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                                    <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
-                                    <ArrowUp className="h-6 w-6 text-white" />
+                                    <ArrowUp className="h-5 w-5" />
                                 )}
                             </button>
                         </div>

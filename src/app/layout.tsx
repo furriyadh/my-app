@@ -978,9 +978,7 @@ export default function RootLayout({
             html.dark .text-zinc-300 {
               color: #d4d4d8 !important;
             }
-            html.dark .bg-zinc-100 {
-              background-color: rgba(255, 255, 255, 0.05) !important;
-            }
+            /* bg-zinc-100 override removed to allow Tailwind dark: variants to work */
             html.dark .bg-zinc-50 {
               background-color: rgba(255, 255, 255, 0.03) !important;
             }
