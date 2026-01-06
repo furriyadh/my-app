@@ -150,7 +150,7 @@ const Navbar: React.FC = () => {
                       <button
                         key={lang.code}
                         onClick={() => switchLanguage(lang.code)}
-                        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-50 dark:hover:bg-[#172036] ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-primary-600' : 'text-gray-700 dark:text-gray-200'}`}
+                        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:!hover:bg-neutral-800 ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-primary-600' : 'text-gray-700 dark:text-gray-200'}`}
                       >
                         <Image src={lang.flag} alt={lang.name} width={20} height={20} className="rounded-sm flex-shrink-0" />
                         <span className="text-sm font-medium text-start truncate">{lang.name}</span>

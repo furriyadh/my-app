@@ -79,7 +79,7 @@
   /* Typography */
   --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-  
+
   /* Font Sizes */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -202,8 +202,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error States */
@@ -320,15 +325,15 @@
   .App header .flex {
     flex-wrap: wrap;
   }
-  
+
   .App header nav {
     display: none;
   }
-  
+
   .App main {
     padding: var(--spacing-md);
   }
-  
+
   .App footer .flex {
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -340,7 +345,7 @@
   .App header h1 {
     font-size: var(--text-xl);
   }
-  
+
   .processing-content {
     margin: var(--spacing-sm);
     padding: var(--spacing-lg);
@@ -379,7 +384,7 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .loading-spinner {
     animation: none;
     border: 2px solid var(--primary-600);
@@ -388,16 +393,17 @@
 
 /* Print Styles */
 @media print {
+
   .App header,
   .App footer,
   .processing-overlay {
     display: none !important;
   }
-  
+
   .App main {
     padding: 0;
   }
-  
+
   * {
     background: white !important;
     color: black !important;
@@ -444,4 +450,3 @@ textarea:focus-visible {
   background: var(--primary-200);
   color: var(--primary-900);
 }
-
