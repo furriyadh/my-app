@@ -1,5 +1,5 @@
-@import "tailwindcss";
-
+@import 'tailwindcss';
+@plugin 'lightswind/plugin';
 @custom-variant dark (&:where([class=dark], [class=dark] *));
 
 @theme {

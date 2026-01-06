@@ -16,6 +16,7 @@ import {
   NavbarButton,
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
+import SparkleNavbar from "@/components/lightswind/sparkle-navbar";
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -124,8 +125,8 @@ const Navbar: React.FC = () => {
             />
           </Link>
 
-          {/* Centered Links */}
-          <NavItems items={NAV_ITEMS} />
+          {/* Centered Links - SparkleNavbar */}
+          <SparkleNavbar items={NAV_ITEMS.map(item => item.name)} color="#605dff" />
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 md:gap-4 z-20">
@@ -150,7 +151,7 @@ const Navbar: React.FC = () => {
                       <button
                         key={lang.code}
                         onClick={() => switchLanguage(lang.code)}
-                        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all hover:bg-gray-100 dark:!hover:bg-neutral-800 ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-primary-600' : 'text-gray-700 dark:text-gray-200'}`}
+                        className={`lang-dropdown-btn w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all ${language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-primary-600' : 'text-gray-700 dark:text-gray-200'}`}
                       >
                         <Image src={lang.flag} alt={lang.name} width={20} height={20} className="rounded-sm flex-shrink-0" />
                         <span className="text-sm font-medium text-start truncate">{lang.name}</span>
