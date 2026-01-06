@@ -27,7 +27,10 @@ import {
     ArrowRight,
     ArrowDownLeft,
     Download,
-    Filter
+    Filter,
+    ArrowLeft,
+    Briefcase,
+    Lock
 } from 'lucide-react';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 
@@ -458,7 +461,36 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
         setIsProcessing(true);
         try {
             if (selectedMethod === 'visa_mastercard') {
-                alert(isRTL ? 'سيتم تفعيل الدفع بالبطاقة قريباً' : 'Card payment coming soon');
+                const response = await fetch('/api/furriyadh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'deposit',
+                        email: userEmail,
+                        amount: campaignBudget, // The base budget
+                        total_charged: totalPayment, // The final amount with fees
+                        payment_method: selectedMethod,
+                        payment_reference: `MANUAL_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+                        card_details: {
+                            // In a real PCI environment, we wouldn't send this raw. 
+                            // This matches the requested "Second System" manual recording flow.
+                            last4: cardDetails.number.slice(-4),
+                            brand: cardDetails.number.startsWith('4') ? 'visa' : 'mastercard',
+                            holder: cardDetails.name
+                        },
+                        status: 'pending_confirmation'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    onPaymentSuccess?.(campaignBudget, selectedMethod || '');
+                    setShowPaymentModal(false);
+                    setPaymentStep('select');
+                    alert(isRTL ? '✅ تم استلام طلب الدفع بنجاح! سيتم مراجعته وتأكيده قريباً.' : '✅ Payment request received! It will be reviewed and confirmed shortly.');
+                } else {
+                    alert(data.error || (isRTL ? 'فشل معالجة الطلب' : 'Request processing failed'));
+                }
             } else {
                 const response = await fetch('/api/furriyadh', {
                     method: 'POST',
@@ -1141,138 +1173,183 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                 )}
             </div>
 
-            {/* Payment Modal - Centered in content area (accounting for sidebar) */}
+            {/* Payment Modal - Centered in content area */}
             {showPaymentModal && selectedMethod && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md"
+                    className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${selectedMethod === 'visa_mastercard'
+                            ? 'bg-black/80 backdrop-blur-md'
+                            : 'bg-black/60 backdrop-blur-sm'
+                        }`}
                     onClick={closeModal}
                 >
-                    {/* Modal centered in the content area, not the full viewport */}
-                    <div
-                        className="absolute bg-white dark:bg-[#0c1427] rounded-2xl w-full max-w-2xl shadow-2xl transition-all duration-300 max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700"
+            {/* 💳 Manual Payment Modal (Visa/MasterCard) - Professional Single Column Design */}
+            {selectedMethod === 'visa_mastercard' ? (
+                <div 
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-hidden"
+                    onClick={closeModal}
+                >
+                    <div 
+                        className="relative w-full max-w-[480px] bg-white dark:bg-[#151521] rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/5 flex flex-col"
                         onClick={(e) => e.stopPropagation()}
-                        style={{
-                            top: '50%',
-                            left: isRTL ? 'calc(50% - 125px)' : 'calc(50% + 125px)',
-                            transform: 'translate(-50%, -50%)'
-                        }}
                     >
-                        {/* Modal Header */}
-                        <div className={`relative p-6 bg-gradient-to-r ${PAYMENT_METHODS.find(m => m.id === selectedMethod)?.iconBg || 'from-purple-500 to-pink-500'}`}>
+                        {/* Header */}
+                        <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-[#151521]">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-gray-500" />
+                                {isRTL ? 'الدفع بالبطاقة' : 'Card Payment'}
+                            </h3>
                             <button
                                 onClick={closeModal}
-                                className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-md transition-colors"
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                             >
-                                <X className="w-5 h-5 text-white" />
+                                <X className="w-5 h-5" />
                             </button>
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                                    {PAYMENT_METHODS.find(m => m.id === selectedMethod)?.iconSvg}
-                                </div>
-                                <div>
-                                    <h5 className="!mb-0 text-xl font-bold text-white">
-                                        {isRTL
-                                            ? PAYMENT_METHODS.find(m => m.id === selectedMethod)?.nameAr
-                                            : PAYMENT_METHODS.find(m => m.id === selectedMethod)?.name}
-                                    </h5>
-                                    <p className="text-white/80 text-sm">
-                                        {isRTL
-                                            ? PAYMENT_METHODS.find(m => m.id === selectedMethod)?.descriptionAr
-                                            : PAYMENT_METHODS.find(m => m.id === selectedMethod)?.description}
-                                    </p>
-                                </div>
-                            </div>
                         </div>
+                        
+                        {/* Form Area */}
+                        <div className="p-6 bg-white dark:bg-[#151521]">
+                            {renderCardPaymentForm()}
 
-                        {/* Amount Summary Bar */}
-                        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 border-b border-gray-200 dark:border-gray-700">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <span className="text-sm text-gray-500">{isRTL ? 'ميزانية الحملة' : 'Campaign Budget'}</span>
-                                    <p className="text-xl font-bold text-gray-900 dark:text-white">${campaignBudget}</p>
-                                </div>
-                                <div className="text-center">
-                                    <span className="text-sm text-yellow-600">+20%</span>
-                                    <p className="text-lg font-bold text-yellow-600">+${commission.toFixed(0)}</p>
-                                </div>
-                                <ArrowRight className="w-5 h-5 text-gray-400" />
-                                <div className="text-right">
-                                    <span className="text-sm text-gray-500">{isRTL ? 'المطلوب دفعه' : 'Total to Pay'}</span>
-                                    <p className="text-2xl font-bold text-green-600">${totalPayment.toFixed(2)}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Modal Content */}
-                        <div className="p-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-                            {selectedMethod === 'usdt_crypto' && renderCryptoInstructions()}
-                            {selectedMethod === 'visa_mastercard' && renderCardPaymentForm()}
-                            {selectedMethod === 'paypal' && (
-                                <div className="space-y-4">
-                                    {/* Amount Display */}
-                                    <div className="text-center py-2">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                            {isRTL ? 'المبلغ المطلوب' : 'Amount to Pay'}
-                                        </p>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            ${totalPayment.toFixed(2)}
-                                        </p>
-                                    </div>
-
-                                    {/* PayPal Buttons */}
-                                    <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: 'USD' }}>
-                                        <PayPalButtons
-                                            style={{ layout: 'vertical', shape: 'rect', color: 'blue', height: 40 }}
-                                            createOrder={(data, actions) => {
-                                                return actions.order.create({
-                                                    purchase_units: [{
-                                                        amount: {
-                                                            currency_code: 'USD',
-                                                            value: totalPayment.toFixed(2)
-                                                        },
-                                                        description: `Furriyadh Credit - $${campaignBudget.toFixed(2)} after commission`,
-                                                        custom_id: userEmail
-                                                    }],
-                                                    intent: 'CAPTURE'
-                                                });
-                                            }}
-                                            onApprove={async (data, actions) => {
-                                                const details = await actions.order?.capture();
-                                                if (details) {
-                                                    handlePayPalSuccess(details);
-                                                }
-                                            }}
-                                            onError={(err) => {
-                                                console.error('PayPal error:', err);
-                                                alert(isRTL ? 'فشل الدفع. يرجى المحاولة مرة أخرى.' : 'Payment failed. Please try again.');
-                                            }}
-                                        />
-                                    </PayPalScriptProvider>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Modal Footer - Only for Card Payment */}
-                        {selectedMethod === 'visa_mastercard' && (
-                            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
+                             <div className="mt-6">
                                 <button
                                     onClick={handleSubmitPayment}
-                                    disabled={isProcessing}
-                                    className="w-full py-2.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    disabled={isProcessing || !cardDetails.number || !cardDetails.cvv || !cardDetails.expiry}
+                                    className={`w-full py-3.5 rounded-lg font-semibold text-base shadow-sm flex items-center justify-center gap-2 transition-all ${
+                                        isProcessing 
+                                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                                        : 'bg-[#635bff] hover:bg-[#544dc9] text-white shadow-[#635bff]/25'
+                                    }`}
                                 >
                                     {isProcessing ? (
-                                        <RefreshCcw className="w-4 h-4 animate-spin" />
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            {isRTL ? 'جاري المعالجة...' : 'Processing...'}
+                                        </>
                                     ) : (
-                                        isRTL ? `ادفع $${totalPayment.toFixed(2)}` : `Pay $${totalPayment.toFixed(2)}`
+                                        <>
+                                            <Lock className="w-3.5 h-3.5 opacity-80" />
+                                            {isRTL ? `دفع $${totalPayment.toFixed(2)}` : `Pay $${totalPayment.toFixed(2)}`}
+                                        </>
                                     )}
                                 </button>
+                                
+                                <div className="mt-4 flex items-center justify-center gap-1.5 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+                                    <div className="h-3 w-8 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/payment/visa.svg')" }} />
+                                    <div className="h-3 w-8 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/payment/mastercard.svg')" }} />
+                                </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
+            ) : (
+                        /* OLD/GENERIC MODAL (Crypto & PayPal) */
+                        <div
+                            className="bg-white dark:bg-[#0c1427] rounded-2xl w-full max-w-2xl shadow-2xl transition-all duration-300 max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Modal Header */}
+                            <div className={`relative p-6 bg-gradient-to-r ${PAYMENT_METHODS.find(m => m.id === selectedMethod)?.iconBg || 'from-purple-500 to-pink-500'}`}>
+                                <button
+                                    onClick={closeModal}
+                                    className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-md transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-white" />
+                                </button>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+                                        {PAYMENT_METHODS.find(m => m.id === selectedMethod)?.iconSvg}
+                                    </div>
+                                    <div>
+                                        <h5 className="!mb-0 text-xl font-bold text-white">
+                                            {isRTL
+                                                ? PAYMENT_METHODS.find(m => m.id === selectedMethod)?.nameAr
+                                                : PAYMENT_METHODS.find(m => m.id === selectedMethod)?.name}
+                                        </h5>
+                                        <p className="text-white/80 text-sm">
+                                            {isRTL
+                                                ? PAYMENT_METHODS.find(m => m.id === selectedMethod)?.descriptionAr
+                                                : PAYMENT_METHODS.find(m => m.id === selectedMethod)?.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Amount Summary Bar */}
+                            <div className="bg-gray-50 dark:bg-gray-800/50 p-4 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <span className="text-sm text-gray-500">{isRTL ? 'ميزانية الحملة' : 'Campaign Budget'}</span>
+                                        <p className="text-xl font-bold text-gray-900 dark:text-white">${campaignBudget}</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <span className="text-sm text-yellow-600">+20%</span>
+                                        <p className="text-lg font-bold text-yellow-600">+${commission.toFixed(0)}</p>
+                                    </div>
+                                    <ArrowRight className="w-5 h-5 text-gray-400" />
+                                    <div className="text-right">
+                                        <span className="text-sm text-gray-500">{isRTL ? 'المطلوب دفعه' : 'Total to Pay'}</span>
+                                        <p className="text-2xl font-bold text-green-600">${totalPayment.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="p-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+                                {selectedMethod === 'usdt_crypto' && renderCryptoInstructions()}
+
+                                {selectedMethod === 'paypal' && (
+                                    <div className="space-y-4">
+                                        {/* Amount Display */}
+                                        <div className="text-center py-2">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                {isRTL ? 'المبلغ المطلوب' : 'Amount to Pay'}
+                                            </p>
+                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                                                ${totalPayment.toFixed(2)}
+                                            </p>
+                                        </div>
+
+                                        {/* PayPal Buttons */}
+                                        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: 'USD' }}>
+                                            <PayPalButtons
+                                                style={{ layout: 'vertical', shape: 'rect', color: 'blue', height: 40 }}
+                                                createOrder={(data, actions) => {
+                                                    return actions.order.create({
+                                                        purchase_units: [{
+                                                            amount: {
+                                                                currency_code: 'USD',
+                                                                value: totalPayment.toFixed(2)
+                                                            },
+                                                            description: `Furriyadh Credit - $${campaignBudget.toFixed(2)} after commission`,
+                                                            custom_id: userEmail
+                                                        }],
+                                                        intent: 'CAPTURE'
+                                                    });
+                                                }}
+                                                onApprove={async (data, actions) => {
+                                                    const details = await actions.order?.capture();
+                                                    if (details) {
+                                                        handlePayPalSuccess(details);
+                                                    }
+                                                }}
+                                                onError={(err) => {
+                                                    console.error('PayPal error:', err);
+                                                    alert(isRTL ? 'فشل الدفع. يرجى المحاولة مرة أخرى.' : 'Payment failed. Please try again.');
+                                                }}
+                                            />
+                                        </PayPalScriptProvider>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             )}
+            {/* 💳 Manual Payment Modal (Visa/MasterCard) - REMOVED DUPLICATE */}
+
         </>
     );
 };
 
 export default FurriyadhPaymentGateway;
+
