@@ -101,10 +101,10 @@ export default function Home() {
 
           {/* Orb Background - Covers HeroSection and AdCreationPrompt - Fully Responsive */}
           <div
-            className="orb-container absolute left-0 right-0 flex items-start justify-center z-20"
-            style={{ height: `${orbSize}px`, top: `${orbTop}px` }}
+            className="orb-container absolute left-0 right-0 flex items-start justify-center z-20 overflow-hidden"
+            style={{ height: `${orbSize}px`, top: `${orbTop}px`, width: '100vw' }}
           >
-            <div style={{ width: `${orbSize}px`, height: `${orbSize}px`, position: 'relative' }}>
+            <div style={{ width: '100vw', height: `${orbSize}px`, position: 'relative' }}>
               <Orb
                 hue={0}
                 hoverIntensity={2}
