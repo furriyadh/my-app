@@ -17,6 +17,7 @@ import AIShowcaseSection from "@/components/HomePage/AIShowcaseSection";
 import LiveDemoSection from "@/components/HomePage/LiveDemoSection";
 import TestimonialsSection from "@/components/HomePage/TestimonialsSection";
 import FAQSection from "@/components/HomePage/FAQSection";
+import GlobeSection from "@/components/HomePage/GlobeSection";
 
 
 export default function Home() {
@@ -121,8 +122,8 @@ export default function Home() {
 
           <div className="relative space-y-0 pb-10 mt-32">
             <LiveDemoSection />
+            <GlobeSection />
             <ComparisonSection />
-            <AIShowcaseSection />
             <TestimonialsSection />
             <FAQSection />
           </div>

@@ -1,78 +1,135 @@
 "use client";
 
-import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
+import {
+    ThreeDScrollTriggerContainer,
+    ThreeDScrollTriggerRow,
+} from "@/components/lightswind/3d-scroll-trigger";
 
 const testimonials = [
-  {
-    name: "John Smith",
-    handle: "@johnsmith",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-    description: "Amazing platform! Saved us tons of time and effort in managing our ad campaigns. Results exceeded all expectations."
-  },
-  {
-    name: "Sarah Johnson",
-    handle: "@sarahjohnson",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-    description: "The AI helped me target customers precisely. My sales increased by 150% in just one month!"
-  },
-  {
-    name: "Michael Chen",
-    handle: "@michaelchen",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-    description: "Best investment I made for my company. Excellent support and amazing results. Highly recommended!"
-  },
-  {
-    name: "Emily Davis",
-    handle: "@emilydavis",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
-    description: "Easy to use and very effective. Even without prior experience, I was able to create professional campaigns."
-  },
-  {
-    name: "David Wilson",
-    handle: "@davidwilson",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
-    description: "The analytics and reports are very detailed. I can make decisions based on accurate data."
-  },
-  {
-    name: "Lisa Anderson",
-    handle: "@lisaanderson",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
-    description: "The platform combines everything I need in one place. Saved me hours of daily work."
-  },
-  {
-    name: "Robert Taylor",
-    handle: "@roberttaylor",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop",
-    description: "Our revenue increased significantly after using the platform. Smart automation saves a lot of effort."
-  },
-  {
-    name: "Jennifer Martinez",
-    handle: "@jennifermartinez",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
-    description: "Advanced analytics tools helped me understand my audience better. A complete and wonderful platform!"
-  },
+    {
+        name: "Emily Chen",
+        role: "Product Manager",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+        content: "This platform has completely transformed how we manage our ad campaigns. The AI insights are incredibly accurate.",
+    },
+    {
+        name: "Michael Roberts",
+        role: "Marketing Director",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+        content: "We've seen a 150% increase in ROI since switching to this platform. The automation saves us hours every week.",
+    },
+    {
+        name: "Sarah Johnson",
+        role: "Startup Founder",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+        content: "Best investment I made for my company. Excellent support and amazing results. Highly recommended!",
+    },
+    {
+        name: "David Kim",
+        role: "E-commerce Owner",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+        content: "The AI helped me target customers precisely. My sales increased by 150% in just one month!",
+    },
+    {
+        name: "Lisa Anderson",
+        role: "Agency Director",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
+        content: "The platform combines everything I need in one place. Saved me hours of daily work.",
+    },
+    {
+        name: "James Wilson",
+        role: "Digital Marketer",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+        content: "The analytics and reports are very detailed. I can make decisions based on accurate data.",
+    },
+    {
+        name: "Amanda Lee",
+        role: "Growth Lead",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
+        content: "Advanced analytics tools helped me understand my audience better. A complete and wonderful platform!",
+    },
+    {
+        name: "Robert Taylor",
+        role: "Retail Manager",
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
+        content: "Our revenue increased significantly after using the platform. Smart automation saves a lot of effort.",
+    },
+    {
+        name: "Jennifer Martinez",
+        role: "Business Owner",
+        avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
+        content: "Simple and effective. Even without prior experience, I was able to create professional campaigns.",
+    },
 ];
 
-export default function TestimonialsSection() {
-  return (
-    <section className="py-16 md:py-20 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12">
-          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
-            What Our Clients Say About Google Ads Management
-          </h2>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400">
-            Thousands of companies trust our platform to manage their Google Ads campaigns and increase conversions
-          </p>
+function TestimonialCard({
+    name,
+    role,
+    avatar,
+    content,
+}: {
+    name: string;
+    role: string;
+    avatar: string;
+    content: string;
+}) {
+    return (
+        <div className="w-[300px] shrink-0 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 mx-2 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+                <img
+                    src={avatar}
+                    alt={name}
+                    className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                    <p className="font-medium text-zinc-900 dark:text-white text-sm">{name}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{role}</p>
+                </div>
+            </div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-normal">
+                {content}
+            </p>
         </div>
-
-        <AnimatedTestimonials
-          data={testimonials}
-          className="w-full"
-          cardClassName="bg-white dark:bg-zinc-800/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-700 shadow-lg dark:shadow-none"
-        />
-      </div>
-    </section>
-  );
+    );
 }
 
+export default function TestimonialsSection() {
+    const row1 = testimonials.slice(0, 3);
+    const row2 = testimonials.slice(3, 6);
+    const row3 = testimonials.slice(6, 9);
+
+    return (
+        <section className="py-16 md:py-24 overflow-hidden">
+            {/* Header */}
+            <div className="text-center mb-12 px-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
+                    What Our Clients Say
+                </h2>
+                <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+                    Thousands of companies trust our platform to manage their Google Ads campaigns
+                </p>
+            </div>
+
+            {/* 3D Scroll Trigger - 3 Rows */}
+            <ThreeDScrollTriggerContainer className="space-y-4">
+                <ThreeDScrollTriggerRow baseVelocity={3} direction={1}>
+                    {row1.map((testimonial, i) => (
+                        <TestimonialCard key={i} {...testimonial} />
+                    ))}
+                </ThreeDScrollTriggerRow>
+
+                <ThreeDScrollTriggerRow baseVelocity={3} direction={-1}>
+                    {row2.map((testimonial, i) => (
+                        <TestimonialCard key={i} {...testimonial} />
+                    ))}
+                </ThreeDScrollTriggerRow>
+
+                <ThreeDScrollTriggerRow baseVelocity={3} direction={1}>
+                    {row3.map((testimonial, i) => (
+                        <TestimonialCard key={i} {...testimonial} />
+                    ))}
+                </ThreeDScrollTriggerRow>
+            </ThreeDScrollTriggerContainer>
+        </section>
+    );
+}

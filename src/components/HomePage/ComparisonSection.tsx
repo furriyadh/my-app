@@ -11,7 +11,7 @@ const PRICING = {
 export default function ComparisonSection() {
   return (
     <section className="py-16 md:py-20 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-4xl relative z-10">
+      <div className="container mx-auto max-w-6xl relative z-10">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-full mb-6">
             <Brain className="w-4 h-4 text-blue-600 dark:text-blue-400" />
