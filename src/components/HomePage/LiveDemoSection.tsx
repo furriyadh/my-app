@@ -26,7 +26,7 @@ export default function LiveDemoSection() {
         <div className="relative w-full">
           {/* Dashboard Card - ExamAI exact styling */}
           <div
-            className="relative bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden transform-gpu min-h-[600px] md:min-h-[750px]"
+            className="relative bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden transform-gpu"
             style={{
               boxShadow: '0px 0px 100px 0px rgba(168, 85, 247, 0.5), 0px 0px 60px 0px rgba(99, 102, 241, 0.4), 0px 0px 30px 0px rgba(168, 85, 247, 0.3)'
             }}
@@ -36,7 +36,7 @@ export default function LiveDemoSection() {
               alt="Furriyadh AI Dashboard"
               height={800}
               width={1400}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-auto"
               draggable={false}
             />
           </div>
