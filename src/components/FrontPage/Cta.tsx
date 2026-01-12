@@ -33,22 +33,7 @@ const Cta: React.FC = () => {
             </a>
           </div>
 
-          <div className="absolute ltr:left-[10px] rtl:right-[10px] -top-[200px] -z-[1] blur-[150px]">
-            <Image
-              src="/images/front-pages/shape1.png"
-              alt="shape1"
-              width={530}
-              height={530}
-            />
-          </div>
-          <div className="absolute ltr:right-[25px] rtl:left-[25px] top-[150px] -z-[1] blur-[125px] hidden md:block">
-            <Image
-              src="/images/front-pages/shape2.png"
-              alt="shape1"
-              width={530}
-              height={530}
-            />
-          </div>
+
         </div>
       </div>
     </>

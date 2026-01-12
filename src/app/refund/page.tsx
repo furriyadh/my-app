@@ -11,19 +11,21 @@ export default function RefundPolicyPage() {
 
     return (
         <>
-            <div className="front-page-body overflow-hidden bg-white dark:bg-[#0a0e19] min-h-screen" dir="ltr">
+            <div className="front-page-body overflow-hidden bg-transparent min-h-screen" dir="ltr">
                 <Navbar />
 
                 <div className="relative z-[1]">
-                    {/* Background Shapes */}
-                    <div className="absolute top-0 w-full h-full -z-[1] overflow-hidden pointer-events-none">
-                        <div className="absolute bottom-0 -z-[1] ltr:-right-[30px] rtl:-left-[30px] blur-[250px]">
-                            <Image src="/images/front-pages/shape3.png" alt="shape" width={685} height={685} />
-                        </div>
-                        <div className="absolute -top-[220px] -z-[1] ltr:-left-[50px] rtl:-right-[50px] blur-[150px]">
-                            <Image src="/images/front-pages/shape5.png" alt="shape" width={658} height={656} />
-                        </div>
-                    </div>
+                    {/* Multi-Shape Nebula Background - Fixed position for scroll stability */}
+                    <div
+                        className="fixed inset-0 z-0 bg-[#030014] pointer-events-none"
+                        style={{
+                            backgroundImage: `
+                                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.35) 0%, transparent 50%),
+                                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                                radial-gradient(circle at 80% 60%, rgba(124, 58, 237, 0.1) 0%, transparent 35%)
+                            `,
+                        }}
+                    />
 
                     {/* Hero Section */}
                     <div className="pt-[140px] pb-12 text-center">

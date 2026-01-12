@@ -44,38 +44,7 @@ const HeroBanner: React.FC = () => {
             />
           </div>
 
-          <div className="absolute -z-[1] ltr:-right-[30px] rtl:-left-[30px] bottom-[50px] blur-[150px]">
-            <Image
-              src="/images/front-pages/shape3.png"
-              alt="shape3"
-              width={685}
-              height={685}
-            />
-          </div>
-          <div className="absolute -z-[1] ltr:left-[25px] rtl:right-[25px] -top-[210px] blur-[125px]">
-            <Image
-              src="/images/front-pages/shape2.png"
-              alt="shape3"
-              width={437}
-              height={453}
-            />
-          </div>
-          <div className="absolute -z-[1] ltr:right-[260px] rtl:left-[260px] -top-[125px] blur-[75px]">
-            <Image
-              src="/images/front-pages/shape4.png"
-              alt="shape3"
-              width={170}
-              height={170}
-            />
-          </div>
-          <div className="absolute -z-[1] ltr:-left-[50px] rtl:-right-[50px] bottom-0 blur-[75px]">
-            <Image
-              src="/images/front-pages/shape5.png"
-              alt="shape3"
-              width={658}
-              height={656}
-            />
-          </div>
+
         </div>
       </div>
     </>

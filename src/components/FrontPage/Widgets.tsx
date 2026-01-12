@@ -64,22 +64,7 @@ const Widgets: React.FC = () => {
             </div>
           </div>
 
-          <div className="absolute -top-[60px] ltr:left-[65px] rtl:right-[65px] -z-[1] blur-[150px]">
-            <Image
-              src="/images/front-pages/shape1.png"
-              alt="shape1"
-              width={530}
-              height={530}
-            />
-          </div>
-          <div className="absolute -bottom-[30px] ltr:right-[20px] rtl:left-[20px] -z-[1] blur-[125px]">
-            <Image
-              src="/images/front-pages/shape2.png"
-              alt="shape1"
-              width={447}
-              height={453}
-            />
-          </div>
+
         </div>
       </div>
     </>
