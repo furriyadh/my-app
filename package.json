@@ -9,6 +9,18 @@
 		"start": "next start",
 		"lint": "next lint"
 	},
+	"overrides": {
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"react-native": "npm:react-native-web@^0.19.13",
+		"react-konva": {
+			"react": "^19.1.0",
+			"react-dom": "^19.1.0"
+		},
+		"@react-spring/native": {
+			"react-native": "npm:react-native-web@^0.19.13"
+		}
+	},
 	"dependencies": {
 		"@fullcalendar/core": "^6.1.20",
 		"@fullcalendar/daygrid": "^6.1.17",
@@ -27,7 +39,6 @@
 		"@radix-ui/react-tabs": "^1.1.12",
 		"@radix-ui/react-toast": "^1.2.14",
 		"@react-google-maps/api": "^2.20.7",
-		"@react-spring/web": "^10.0.1",
 		"@react-three/drei": "^10.7.7",
 		"@react-three/fiber": "^9.5.0",
 		"@remixicon/react": "^4.6.0",
@@ -82,7 +93,6 @@
 		"react-markdown": "^10.1.0",
 		"react-responsive": "^10.0.1",
 		"react-simple-wysiwyg": "^3.2.2",
-		"react-spring": "^10.0.1",
 		"react-svg-worldmap": "^2.0.0-alpha.16",
 		"react-type-animation": "^3.2.0",
 		"recharts": "^2.15.4",
