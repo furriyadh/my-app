@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
 import CosmicBackground from "@/components/ui/CosmicBackground";
+import SplashCursor from "@/components/ui/SplashCursor";
 import { useTranslation } from "@/lib/hooks/useTranslation";
 
 export default function RefundPolicyPage() {
@@ -20,6 +21,7 @@ export default function RefundPolicyPage() {
                 <CosmicBackground />
 
                 <Navbar />
+                <SplashCursor />
 
                 <div className="relative z-[1]">
                     {/* Hero Section */}

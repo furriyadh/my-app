@@ -87,20 +87,15 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mr-4 rtl:ml-4 rtl:mr-0 z-20">
             <Image
-              src="/images/logo-circle.svg"
-              alt="Furriyadh Icon"
-              width={34}
-              height={36}
-              priority
-              className={cn("w-auto h-9", !isScrolled && "hidden")}
-            />
-            <Image
               src="/images/logo-icon.svg"
               alt="Furriyadh"
               width={110}
               height={32}
               priority
-              className={cn("w-auto h-8", isScrolled && "hidden")}
+              className={cn(
+                "w-auto transition-all duration-300",
+                isScrolled ? "h-7" : "h-8"
+              )}
             />
           </Link>
 

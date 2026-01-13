@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/40 bg-white dark:bg-[#0a0e19] relative z-50">
+      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/40 bg-white dark:bg-[#0a0e19] relative z-10">
         <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px]">
             {/* Logo & Description */}
@@ -36,11 +36,11 @@ const Footer: React.FC = () => {
               {/* Contact Info */}
               <div className="mt-[15px] space-y-2">
                 <a
-                  href="tel:+201080219382"
+                  href="tel:+15303504377"
                   className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all text-sm"
                 >
                   <i className="ri-phone-fill text-primary-500"></i>
-                  +20 1080219382
+                  +1 530 350 4377
                 </a>
                 <a
                   href="mailto:ads@furriyadh.com"
@@ -235,6 +235,9 @@ const Footer: React.FC = () => {
           <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
             <p className="leading-[1.6] text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
               © <span className="text-purple-500">2026, Furriyadh</span> {language === 'ar' ? '. جميع الحقوق محفوظة.' : '. All rights reserved.'}
+            </p>
+            <p className="leading-[1.6] text-gray-500 dark:text-gray-400 mt-0.5">
+              Designed with <span className="text-red-500">♥</span> by <a href="https://furriyadh.com" className="text-purple-500 hover:text-purple-400 transition-colors">Furriyadh.com</a>
             </p>
           </div>
         </div>

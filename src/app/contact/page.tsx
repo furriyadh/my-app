@@ -6,6 +6,7 @@ import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
 import ContactUs from "@/components/FrontPage/ContactUs";
 import CosmicBackground from "@/components/ui/CosmicBackground";
+import SplashCursor from "@/components/ui/SplashCursor";
 import { useTranslation } from "@/lib/hooks/useTranslation";
 
 export default function Page() {
@@ -21,6 +22,7 @@ export default function Page() {
             <div className="front-page-body overflow-hidden" dir="ltr">
                 <CosmicBackground />
                 <Navbar />
+                <SplashCursor />
 
                 <div className="relative z-[1]">
                     <div className="pt-[125px] md:pt-[145px] lg:pt-[185px] xl:pt-[195px] text-center">

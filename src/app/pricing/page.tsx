@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Navbar from "@/components/FrontPage/Navbar";
 import Footer from "@/components/FrontPage/Footer";
 import CosmicBackground from "@/components/ui/CosmicBackground";
+import SplashCursor from "@/components/ui/SplashCursor";
 import {
     PricingHero,
     PricingCards,
@@ -22,6 +23,7 @@ export default function PricingPage() {
             <CosmicBackground />
 
             <Navbar />
+            <SplashCursor />
 
             <div className="relative z-[1]">
                 <main>

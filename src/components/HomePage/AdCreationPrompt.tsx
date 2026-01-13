@@ -180,13 +180,15 @@ export default function AdCreationPrompt() {
                             Start Free Plan
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
-                        <Link
-                            href="#video-demo"
+                        <button
+                            onClick={() => {
+                                document.getElementById('video-demo')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
                             className="px-8 py-4 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 dark:bg-white/10 dark:hover:bg-white/20 dark:border-white/20 text-zinc-900 dark:text-white rounded-2xl font-semibold transition-all duration-200 flex items-center gap-2"
                         >
                             <Play className="w-5 h-5" />
                             Watch Demo
-                        </Link>
+                        </button>
                     </div>
 
                     <p className="text-center text-zinc-600 dark:text-zinc-500 text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { HeroVideoDialog } from "@/components/ui/hero-video-dialog";
 
 export default function LiveDemoSection() {
   return (
@@ -22,29 +22,28 @@ export default function LiveDemoSection() {
           </span>
         </div>
 
-        {/* Dashboard Preview with Purple Glow - ExamAI Style */}
+        {/* Dashboard Preview with Video Dialog */}
         <div className="relative w-full">
-          {/* Dashboard Card - Theme-aware styling */}
           <div
-            className="relative bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden transform-gpu shadow-xl dark:shadow-none"
+            className="relative overflow-hidden transform-gpu"
             style={{
               boxShadow: '0px 0px 100px 0px rgba(168, 85, 247, 0.3), 0px 0px 60px 0px rgba(99, 102, 241, 0.2), 0px 0px 30px 0px rgba(168, 85, 247, 0.15)'
             }}
           >
-            <Image
-              src="/dashboard-preview.png"
-              alt="Furriyadh AI Dashboard"
-              height={800}
-              width={1400}
-              className="w-full h-auto"
-              draggable={false}
+            <HeroVideoDialog
+              animationStyle="from-center"
+              videoSrc="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+              thumbnailSrc="/dashboard-preview.png"
+              thumbnailAlt="Furriyadh AI Dashboard - Click to watch demo"
+              className="w-full rounded-xl"
             />
           </div>
 
           {/* Bottom Fade */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white dark:from-zinc-950 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white dark:from-[#0a0a0f] to-transparent pointer-events-none" />
         </div>
       </div>
     </section>
   );
 }
+

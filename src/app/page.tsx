@@ -7,9 +7,11 @@ import Navbar from "@/components/FrontPage/Navbar";
 import { useMediaQuery } from "react-responsive";
 
 import HeroSection from "@/components/HomePage/HeroSection";
+import AnimatedBeamSection from "@/components/HomePage/BentoGridSection";
 import SmoothScrollManager from "@/components/ui/SmoothScrollManager";
 import Orb from "@/components/ui/Orb";
 import Particles from "@/components/ui/Particles";
+import SplashCursor from "@/components/ui/SplashCursor";
 
 import AdCreationPrompt from "@/components/HomePage/AdCreationPrompt";
 import GoogleOneTap from "@/components/Authentication/GoogleOneTap";
@@ -52,6 +54,7 @@ export default function Home() {
   return (
     <div className="front-page-body min-h-screen transition-colors duration-300 bg-[#0a0a0f]" dir="ltr">
       <Navbar />
+      <SplashCursor />
 
       {/* Particles Background - Fixed */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -97,6 +100,7 @@ export default function Home() {
           <div className="relative space-y-0 pb-10 mt-32">
             <LiveDemoSection />
             <GlobeSection />
+            <AnimatedBeamSection />
             <ComparisonSection />
             <TestimonialsSection />
             <FAQSection />
