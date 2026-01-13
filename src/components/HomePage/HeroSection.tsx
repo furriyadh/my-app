@@ -27,7 +27,7 @@ export default function HeroSection() {
             className="pointer-events-auto inline-flex items-center gap-2 px-4 py-1.5 bg-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-full mb-8 hover:bg-purple-600/20 transition-all group"
           >
             <span className="text-lg">🚀</span>
-            <span className="text-sm text-zinc-300">Start free trial - No credit card required</span>
+            <span className="text-sm text-zinc-300">Start Free plan - No credit card required</span>
             <span className="text-zinc-400 dark:text-zinc-400 group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
 

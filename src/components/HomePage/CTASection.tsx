@@ -20,7 +20,7 @@ export default function CTASection() {
               href="/authentication/sign-up"
               className="group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-purple-500/50 hover:scale-105"
             >
-              Start Free Trial
+              Start Free Plan
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link

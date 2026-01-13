@@ -169,25 +169,7 @@ export default function AdCreationPrompt() {
 
                 {/* Trust Badge & CTAs */}
                 <div className="flex flex-col items-center mt-12 space-y-8">
-                    <TrustedUsers
-                        avatars={[
-                            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-                            "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
-                        ]}
-                        rating={5}
-                        totalUsersText={412856}
-                        caption="Trusted by"
-                        starColorClass="text-yellow-400"
-                        ringColors={[
-                            "ring-purple-500", "ring-blue-500", "ring-pink-500", "ring-green-500", "ring-orange-500", "ring-cyan-500", "ring-red-500", "ring-indigo-500",
-                        ]}
-                    />
+                    <TrustedUsers targetCount={412856} />
 
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -195,7 +177,7 @@ export default function AdCreationPrompt() {
                             href="/authentication/sign-in"
                             className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-purple-500/50 flex items-center gap-2 hover:scale-105"
                         >
-                            Start Free Trial
+                            Start Free Plan
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
                         <Link
