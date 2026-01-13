@@ -30,6 +30,11 @@ export default function Home() {
   const [orbSize, setOrbSize] = useState(1200);
   const [orbTop, setOrbTop] = useState(-64); // -top-16 = -64px
 
+  // Force dark mode on external pages
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   // Handle hydration mismatch safely
   useEffect(() => {
     if (isMobileQuery) {
@@ -45,7 +50,7 @@ export default function Home() {
   }, [isMobileQuery, isTabletQuery, isDesktopQuery]);
 
   return (
-    <div className="front-page-body bg-[#0a0a0f] min-h-screen" dir="ltr">
+    <div className="front-page-body min-h-screen transition-colors duration-300 bg-[#0a0a0f]" dir="ltr">
       <Navbar />
 
       {/* Particles Background - Fixed */}
@@ -57,7 +62,7 @@ export default function Home() {
           particleColors={["#ffffff"]}
           moveParticlesOnHover={true}
           particleHoverFactor={1}
-          alphaParticles={false}
+          alphaParticles={true}
           particleBaseSize={100}
           sizeRandomness={1}
           disableRotation={false}
@@ -66,7 +71,7 @@ export default function Home() {
 
       {/* Orb Background - FIXED to stay behind all components while scrolling */}
       <div
-        className="fixed inset-0 z-[1] flex items-start justify-center pointer-events-none opacity-60"
+        className="fixed inset-0 z-[1] flex items-start justify-center pointer-events-none transition-opacity duration-300 opacity-30"
         style={{ top: `${orbTop}px` }}
       >
         <div style={{ width: '100vw', height: `${orbSize}px`, position: 'relative' }}>
@@ -103,3 +108,4 @@ export default function Home() {
     </div>
   );
 }
+

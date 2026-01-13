@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
+import CosmicBackground from "@/components/ui/CosmicBackground";
 
 export default function Page() {
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
@@ -17,6 +18,11 @@ export default function Page() {
     minutes: "00",
     seconds: "00",
   });
+
+  // Force dark mode on external pages
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   // Listen for language changes
   useEffect(() => {
@@ -59,7 +65,8 @@ export default function Page() {
 
   return (
     <>
-      <div className="coming-soon-content bg-white dark:bg-[#0a0e19] py-[30px] h-screen overflow-x-hidden" dir="ltr">
+      <CosmicBackground />
+      <div className="coming-soon-content relative z-[1] py-[30px] h-screen overflow-x-hidden" dir="ltr">
         <div className="w-full h-full table">
           <div className="table-cell align-middle">
             <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">

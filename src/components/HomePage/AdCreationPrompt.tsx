@@ -77,7 +77,7 @@ export default function AdCreationPrompt() {
                 {/* Lovable-style Input Box - Bimodal UI */}
                 <form
                     onSubmit={handleSubmit}
-                    className="group flex flex-col gap-2 p-3 w-full rounded-[32px] border border-zinc-200 dark:border-zinc-700/50 bg-white dark:bg-zinc-900/50 backdrop-blur-xl text-base shadow-lg dark:shadow-xl ring-1 ring-zinc-200 dark:ring-white/[0.05] transition-all duration-150 ease-in-out focus-within:ring-zinc-300 dark:focus-within:ring-white/[0.1] hover:ring-zinc-300 dark:hover:ring-white/[0.08] pointer-events-auto"
+                    className="group flex flex-col gap-2 p-3 w-full rounded-[32px] border border-zinc-700/50 bg-zinc-900/80 backdrop-blur-xl text-base shadow-lg shadow-xl ring-1 ring-white/[0.05] transition-all duration-150 ease-in-out focus-within:ring-white/[0.1] hover:ring-white/[0.08] pointer-events-auto"
                 >
                     {/* Textarea Container */}
                     <div className="relative flex flex-1 items-center">

@@ -1,32 +1,27 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
-import Image from "next/image";
+import CosmicBackground from "@/components/ui/CosmicBackground";
 import { useTranslation } from "@/lib/hooks/useTranslation";
 
 export default function CookiePolicyPage() {
     const { language, isRTL } = useTranslation();
 
+    // Force dark mode on external pages
+    useEffect(() => {
+        document.documentElement.classList.add('dark');
+    }, []);
+
     return (
         <>
-            <div className="front-page-body overflow-hidden bg-transparent min-h-screen" dir="ltr">
+            <div className="front-page-body overflow-hidden min-h-screen" dir="ltr">
+                <CosmicBackground />
+
                 <Navbar />
 
                 <div className="relative z-[1]">
-                    {/* Multi-Shape Nebula Background - Fixed position for scroll stability */}
-                    <div
-                        className="fixed inset-0 z-0 bg-[#030014] pointer-events-none"
-                        style={{
-                            backgroundImage: `
-                                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.35) 0%, transparent 50%),
-                                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                                radial-gradient(circle at 80% 60%, rgba(124, 58, 237, 0.1) 0%, transparent 35%)
-                            `,
-                        }}
-                    />
-
                     {/* Hero Section */}
                     <div className="pt-[140px] pb-12 text-center">
                         <div className="container 2xl:max-w-[1000px] mx-auto px-4">

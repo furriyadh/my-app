@@ -21,7 +21,7 @@ import SparkleNavbar from "@/components/lightswind/sparkle-navbar";
 const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { t, language, setLanguage } = useTranslation();
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
@@ -30,11 +30,8 @@ const Navbar: React.FC = () => {
 
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Initialize theme state and scroll listener
+  // Initialize scroll listener
   useEffect(() => {
-    const htmlElement = document.documentElement;
-    const isDark = htmlElement.classList.contains('dark');
-    setIsDarkMode(isDark);
     setMounted(true);
 
     const handleScroll = () => {
@@ -45,17 +42,7 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handle theme toggle
-  const handleThemeToggle = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem("theme", newMode ? "dark" : "light");
-    const htmlElement = document.querySelector("html");
-    if (htmlElement) {
-      if (newMode) htmlElement.classList.add("dark");
-      else htmlElement.classList.remove("dark");
-    }
-  };
+
 
   const NAV_ITEMS = [
     { name: t.navbar.home, link: "/" },
@@ -92,15 +79,7 @@ const Navbar: React.FC = () => {
       `}</style>
 
 
-      {/* Fixed Theme Toggle (Top Left) */}
-      <button
-        type="button"
-        onClick={handleThemeToggle}
-        className="fixed top-1/2 -translate-y-1/2 left-6 z-[110] p-2 hover:scale-110 transition-all duration-300 text-[#fe7a36]"
-        aria-label="Toggle theme"
-      >
-        <i className="material-symbols-outlined !text-[20px]">light_mode</i>
-      </button>
+
 
       <AceternityNavbar className="fixed top-4 md:top-6">
         {/* Desktop Navigation */}
@@ -211,13 +190,8 @@ const Navbar: React.FC = () => {
 
             <hr className="w-full border-gray-100 dark:border-white/10 my-2" />
 
-            {/* Mobile Language & Theme */}
-            <div className="flex w-full items-center justify-between py-2">
-              <button onClick={handleThemeToggle} className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                <i className="material-symbols-outlined">light_mode</i>
-                <span className="text-sm">Theme</span>
-              </button>
-
+            {/* Mobile Language */}
+            <div className="flex w-full items-center justify-end py-2">
               <button
                 onClick={() => setMobileLanguageOpen(!isMobileLanguageOpen)}
                 className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300 uppercase font-bold"

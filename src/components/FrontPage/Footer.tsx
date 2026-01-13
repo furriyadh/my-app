@@ -65,28 +65,28 @@ const Footer: React.FC = () => {
                 <a
                   href="https://www.facebook.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-primary-600 transition-all hover:text-primary-500 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-facebook-fill"></i>
                 </a>
                 <a
                   href="https://x.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-primary-600 transition-all hover:text-primary-500 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-twitter-x-fill"></i>
                 </a>
                 <a
                   href="https://www.linkedin.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-primary-600 transition-all hover:text-primary-500 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-linkedin-fill"></i>
                 </a>
                 <a
                   href="https://www.instagram.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-primary-600 transition-all hover:text-primary-500 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-instagram-fill"></i>
                 </a>

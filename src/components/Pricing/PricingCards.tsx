@@ -179,7 +179,7 @@ export default function PricingCards() {
 
     return (
         <section className="py-8 px-4" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="container mx-auto max-w-7xl">
+            <div className="container mx-auto max-w-[1440px]">
 
                 {/* Section 1: Two Ways to Manage Your Ads */}
                 <div className="mb-12 text-center">
@@ -191,9 +191,9 @@ export default function PricingCards() {
                         {/* Self-Managed */}
                         <button
                             onClick={() => setBillingMode('self-managed')}
-                            className={`relative p-6 rounded-xl border-2 text-left transition-all ${billingMode === 'self-managed'
-                                ? 'border-primary-500 bg-white dark:bg-gray-800/50'
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800/50'
+                            className={`relative p-6 rounded-xl border-2 text-left transition-all backdrop-blur-xl ${billingMode === 'self-managed'
+                                ? 'border-primary-500 bg-[#0a0f1a]/75'
+                                : 'border-white/10 hover:border-white/20 bg-[#0a0f1a]/75'
                                 }`}
                         >
                             {billingMode === 'self-managed' && (
@@ -205,11 +205,11 @@ export default function PricingCards() {
                                 <div className="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                                     <Users className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                                 </div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">
+                                <h3 className="font-semibold text-white">
                                     {language === 'ar' ? 'الإدارة الذاتية' : 'Self-Managed'}
                                 </h3>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            <p className="text-sm text-gray-400 mb-3">
                                 {language === 'ar'
                                     ? 'استخدم حساباتك الخاصة مع اشتراك شهري'
                                     : 'Use your own accounts with monthly subscription'}
@@ -222,9 +222,9 @@ export default function PricingCards() {
                         {/* Verified Accounts */}
                         <button
                             onClick={() => setBillingMode('verified')}
-                            className={`relative p-6 rounded-xl border-2 text-left transition-all ${billingMode === 'verified'
-                                ? 'border-purple-500 bg-white dark:bg-gray-800/50'
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800/50'
+                            className={`relative p-6 rounded-xl border-2 text-left transition-all backdrop-blur-xl ${billingMode === 'verified'
+                                ? 'border-purple-500 bg-[#0a0f1a]/75'
+                                : 'border-white/10 hover:border-white/20 bg-[#0a0f1a]/75'
                                 }`}
                         >
                             {/* Most Popular Badge */}
@@ -243,11 +243,11 @@ export default function PricingCards() {
                                 <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                                     <Crown className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                 </div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">
+                                <h3 className="font-semibold text-white">
                                     {language === 'ar' ? 'حساباتنا الموثوقة' : 'Our Verified Accounts'}
                                 </h3>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            <p className="text-sm text-gray-400 mb-3">
                                 {language === 'ar'
                                     ? 'حسابات موثوقة متميزة - لا خطر تعليق'
                                     : 'Premium verified accounts - No suspension risk'}
@@ -299,9 +299,9 @@ export default function PricingCards() {
                             {plans.map((plan) => (
                                 <div
                                     key={plan.id}
-                                    className={`relative bg-white dark:bg-gray-800/50 rounded-xl border ${plan.isBest
+                                    className={`relative bg-[#0a0f1a]/75 backdrop-blur-xl rounded-xl border ${plan.isBest
                                         ? 'border-purple-500 ring-2 ring-purple-500/20'
-                                        : 'border-gray-200 dark:border-gray-700'
+                                        : 'border-white/10'
                                         } p-5 hover:shadow-lg transition-all`}
                                 >
                                     {/* Best Badge */}
@@ -328,7 +328,7 @@ export default function PricingCards() {
                                         <div className={`w-8 h-8 rounded-lg ${plan.bgColor} flex items-center justify-center ${plan.iconColor}`}>
                                             {getIcon(plan.id)}
                                         </div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white">
+                                        <h3 className="font-bold text-white">
                                             {language === 'ar' ? plan.nameAr : plan.nameEn}
                                         </h3>
                                     </div>
@@ -336,12 +336,12 @@ export default function PricingCards() {
                                     {/* Price */}
                                     <div className="mb-4">
                                         {plan.isEnterprise ? (
-                                            <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            <span className="text-2xl font-bold text-white">
                                                 {language === 'ar' ? 'مخصص' : 'Custom'}
                                             </span>
                                         ) : (
                                             <>
-                                                <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                                                <span className="text-3xl font-bold text-white">
                                                     ${billingCycle === 'monthly' ? plan.price : plan.yearlyPrice}
                                                 </span>
                                                 <span className="text-gray-500 text-sm">/{billingCycle === 'monthly' ? (language === 'ar' ? 'شهر' : 'mo') : (language === 'ar' ? 'سنة' : 'yr')}</span>
@@ -358,7 +358,7 @@ export default function PricingCards() {
                                                 ) : (
                                                     <X className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                                 )}
-                                                <span className={feature.included ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}>
+                                                <span className={feature.included ? 'text-gray-300' : 'text-gray-500'}>
                                                     {feature.text}
                                                 </span>
                                             </li>
@@ -391,7 +391,7 @@ export default function PricingCards() {
 
                 {/* Verified Accounts Info (When selected) */}
                 {billingMode === 'verified' && (
-                    <div className="bg-gradient-to-b from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 md:p-8 max-w-md mx-auto border border-gray-700 shadow-2xl">
+                    <div className="bg-[#0a0f1a]/75 backdrop-blur-xl rounded-2xl p-6 md:p-8 max-w-md mx-auto border border-white/10 shadow-2xl">
                         {/* Most Popular Badge */}
                         <div className="flex justify-center mb-4">
                             <span className="px-3 py-1 bg-purple-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">

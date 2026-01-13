@@ -86,19 +86,18 @@ const Testimonials: React.FC = () => {
             {testimonialsData.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-[#0c1427] p-[20px] md:p-[30px] xl:p-[40px] rounded-[7px]"
+                className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-6 md:p-8 hover:border-purple-500/30 transition-all duration-300"
               >
                 <div className="leading-none mb-[12px] md:mb-[20px] text-[16px] md:text-[19px] text-[#fe7a36] flex items-center gap-[4px]">
                   {Array.from({ length: 5 }, (_, i) => (
                     <i
                       key={i}
-                      className={`ri-star${
-                        i < Math.floor(testimonial.rating)
+                      className={`ri-star${i < Math.floor(testimonial.rating)
                           ? "-fill"
                           : i < testimonial.rating
-                          ? "-half-fill"
-                          : "-line"
-                      }`}
+                            ? "-half-fill"
+                            : "-line"
+                        }`}
                     ></i>
                   ))}
                 </div>

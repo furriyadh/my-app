@@ -24,11 +24,11 @@ export default function LiveDemoSection() {
 
         {/* Dashboard Preview with Purple Glow - ExamAI Style */}
         <div className="relative w-full">
-          {/* Dashboard Card - ExamAI exact styling */}
+          {/* Dashboard Card - Theme-aware styling */}
           <div
-            className="relative bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden transform-gpu"
+            className="relative bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden transform-gpu shadow-xl dark:shadow-none"
             style={{
-              boxShadow: '0px 0px 100px 0px rgba(168, 85, 247, 0.5), 0px 0px 60px 0px rgba(99, 102, 241, 0.4), 0px 0px 30px 0px rgba(168, 85, 247, 0.3)'
+              boxShadow: '0px 0px 100px 0px rgba(168, 85, 247, 0.3), 0px 0px 60px 0px rgba(99, 102, 241, 0.2), 0px 0px 30px 0px rgba(168, 85, 247, 0.15)'
             }}
           >
             <Image

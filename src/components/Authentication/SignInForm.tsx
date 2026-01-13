@@ -30,6 +30,11 @@ const SignInForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
+  // Force dark mode on external pages
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
 

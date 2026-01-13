@@ -99,37 +99,40 @@ export default function TestimonialsSection() {
     const row3 = testimonials.slice(6, 9);
 
     return (
-        <section className="py-16 md:py-24 overflow-hidden">
-            {/* Header */}
-            <div className="text-center mb-12 px-4">
-                <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
-                    What Our Clients Say
-                </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-                    Thousands of companies trust our platform to manage their Google Ads campaigns
-                </p>
+        <section className="py-16 md:py-24">
+            {/* Container */}
+            <div className="max-w-7xl mx-auto px-4">
+                {/* Header */}
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
+                        What Our Clients Say
+                    </h2>
+                    <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+                        Thousands of companies trust our platform to manage their Google Ads campaigns
+                    </p>
+                </div>
+
+                {/* 3D Scroll Trigger - 3 Rows */}
+                <ThreeDScrollTriggerContainer className="space-y-4 overflow-hidden rounded-xl">
+                    <ThreeDScrollTriggerRow baseVelocity={3} direction={1}>
+                        {row1.map((testimonial, i) => (
+                            <TestimonialCard key={i} {...testimonial} />
+                        ))}
+                    </ThreeDScrollTriggerRow>
+
+                    <ThreeDScrollTriggerRow baseVelocity={3} direction={-1}>
+                        {row2.map((testimonial, i) => (
+                            <TestimonialCard key={i} {...testimonial} />
+                        ))}
+                    </ThreeDScrollTriggerRow>
+
+                    <ThreeDScrollTriggerRow baseVelocity={3} direction={1}>
+                        {row3.map((testimonial, i) => (
+                            <TestimonialCard key={i} {...testimonial} />
+                        ))}
+                    </ThreeDScrollTriggerRow>
+                </ThreeDScrollTriggerContainer>
             </div>
-
-            {/* 3D Scroll Trigger - 3 Rows */}
-            <ThreeDScrollTriggerContainer className="space-y-4">
-                <ThreeDScrollTriggerRow baseVelocity={3} direction={1}>
-                    {row1.map((testimonial, i) => (
-                        <TestimonialCard key={i} {...testimonial} />
-                    ))}
-                </ThreeDScrollTriggerRow>
-
-                <ThreeDScrollTriggerRow baseVelocity={3} direction={-1}>
-                    {row2.map((testimonial, i) => (
-                        <TestimonialCard key={i} {...testimonial} />
-                    ))}
-                </ThreeDScrollTriggerRow>
-
-                <ThreeDScrollTriggerRow baseVelocity={3} direction={1}>
-                    {row3.map((testimonial, i) => (
-                        <TestimonialCard key={i} {...testimonial} />
-                    ))}
-                </ThreeDScrollTriggerRow>
-            </ThreeDScrollTriggerContainer>
         </section>
     );
 }

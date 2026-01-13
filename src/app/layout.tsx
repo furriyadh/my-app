@@ -15,6 +15,7 @@ import SessionSyncProvider from "../components/Providers/SessionSyncProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { GoogleTagManager } from '@next/third-parties/google';
+import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 const inter = Inter({
   variable: "--font-body",
@@ -1039,6 +1040,7 @@ export default function RootLayout({
           }}
         />
         <GoogleTagManager gtmId="GTM-M3P8KJ2R" />
+        <ScrollProgress className="h-1" />
         <SessionSyncProvider>
           <CampaignProvider>
             <LayoutProvider>

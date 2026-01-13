@@ -11,7 +11,7 @@ interface Feature {
 
 const Features: React.FC = () => {
   const { t, isRTL } = useTranslation();
-  
+
   const featuresData: Feature[] = [
     {
       icon: "/images/front-pages/stacks.svg",
@@ -52,10 +52,10 @@ const Features: React.FC = () => {
             {featuresData.map((feature, index) => (
               <div
                 key={index}
-                className="text-center ltr:lg:text-left rtl:lg:text-right"
+                className="text-center ltr:lg:text-left rtl:lg:text-right bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-6 md:p-8 hover:border-purple-500/30 transition-all duration-300"
               >
                 <div
-                  className={`flex items-center justify-center w-[80px] h-[80px] md:w-[85px] md:h-[85px] rounded-[10px] md:rounded-[17px] mb-[20px] lg:mb-[22px] mx-auto lg:mx-0 ${feature.bgColor}`}
+                  className={`flex items-center justify-center w-[80px] h-[80px] md:w-[85px] md:h-[85px] rounded-[10px] md:rounded-[17px] mb-[20px] lg:mb-[22px] mx-auto lg:mx-0 ${feature.bgColor.replace('100', '500/10')}`}
                 >
                   <Image
                     src={feature.icon}
