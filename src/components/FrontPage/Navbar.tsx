@@ -88,7 +88,7 @@ const Navbar: React.FC = () => {
           <Link href="/" className="flex items-center gap-2 mr-4 rtl:ml-4 rtl:mr-0 z-20">
             {/* Full logo when at top */}
             <Image
-              src="/images/logo-icon.svg"
+              src="/images/logo-big.svg"
               alt="Furriyadh"
               width={110}
               height={32}
@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
             />
             {/* Icon only when scrolled */}
             <Image
-              src="/images/logo-circle.svg"
+              src="/images/logo-icon.svg"
               alt="Furriyadh"
               width={32}
               height={32}
