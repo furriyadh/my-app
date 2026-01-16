@@ -84,8 +84,9 @@ const Navbar: React.FC = () => {
       <AceternityNavbar className="fixed top-4 md:top-6">
         {/* Desktop Navigation */}
         <NavBody>
-          {/* Logo */}
+          {/* Logo - switches between full logo and icon on scroll */}
           <Link href="/" className="flex items-center gap-2 mr-4 rtl:ml-4 rtl:mr-0 z-20">
+            {/* Full logo when at top */}
             <Image
               src="/images/logo-icon.svg"
               alt="Furriyadh"
@@ -93,8 +94,20 @@ const Navbar: React.FC = () => {
               height={32}
               priority
               className={cn(
-                "w-auto transition-all duration-300",
-                isScrolled ? "h-7" : "h-8"
+                "w-auto h-8 transition-all duration-300",
+                isScrolled ? "opacity-0 absolute scale-90" : "opacity-100 scale-100"
+              )}
+            />
+            {/* Icon only when scrolled */}
+            <Image
+              src="/images/logo-circle.svg"
+              alt="Furriyadh"
+              width={32}
+              height={32}
+              priority
+              className={cn(
+                "w-auto h-7 transition-all duration-300",
+                isScrolled ? "opacity-100 scale-100" : "opacity-0 absolute scale-90"
               )}
             />
           </Link>
