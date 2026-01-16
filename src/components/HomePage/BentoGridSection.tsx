@@ -55,7 +55,7 @@ const Icons = {
         </svg>
     ),
     furriyadh: () => (
-        <img src="/images/logo-circle.svg" alt="Furriyadh" className="w-12 h-12 object-contain" />
+        <img src="/images/logo-icon.svg" alt="Furriyadh" className="w-12 h-12 object-contain" />
     ),
     user: () => (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" xmlns="http://www.w3.org/2000/svg">
@@ -142,187 +142,144 @@ export default function AnimatedBeamSection() {
 
     return (
         <section className="py-16 md:py-24 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-[150px]" />
-            </div>
-
             <div className="container mx-auto px-4 max-w-7xl relative z-10">
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 text-sm text-purple-400">
-                        <Zap className="w-4 h-4" />
-                        AI-Powered Platform
-                    </span>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-                        Create Ads in{" "}
-                        <span className="bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
-                            60 Seconds
-                        </span>
-                    </h2>
-                    <p className="text-zinc-400 max-w-2xl mx-auto">
-                        From idea to live campaign in under a minute. Our AI handles the heavy lifting while you focus on results.
-                    </p>
-                </div>
+                {/* Two Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-                {/* Dual Card Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                    {/* Left Card - Ad Creation Flow */}
-                    <div className="relative rounded-2xl border border-zinc-800 bg-zinc-950/50 backdrop-blur-sm p-8 overflow-hidden">
-                        {/* Card Header */}
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500">
-                                <Sparkles className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <h3 className="text-white font-semibold">Campaign Creation</h3>
-                                <p className="text-zinc-500 text-sm">AI-powered workflow</p>
-                            </div>
-                        </div>
-
-                        {/* Animated Steps List */}
-                        <div className="relative h-[380px] overflow-hidden">
-                            <AnimatedList delay={1500} className="gap-4">
-                                {notifications.map((step, idx) => (
-                                    <AdStepItem key={idx} step={step} />
-                                ))}
-                            </AnimatedList>
-
-                            {/* Fade overlay at bottom */}
-                            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
-                        </div>
-
-                        {/* Decorative glow */}
-                        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-[80px]" />
+                    {/* Left Side - Text Content */}
+                    <div className="space-y-6">
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                            Simple, smart &<br />affordable advertising
+                        </h2>
+                        <p className="text-lg md:text-xl text-zinc-400 max-w-lg">
+                            Whether you're just starting out or scaling up, Furriyadh makes it easy to launch powerful ad campaigns. Our AI does the heavy lifting so you can focus on growing your business.
+                        </p>
                     </div>
 
                     {/* Right Card - Integrations */}
-                    <div className="relative rounded-2xl border border-zinc-800 bg-zinc-950/50 backdrop-blur-sm p-8 overflow-hidden">
-                        {/* Card Header */}
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                </svg>
+                    <div className="relative w-full">
+                        {/* Static Glow Effect */}
+                        <div className="absolute inset-0 rounded-3xl shadow-[0_0_40px_10px_rgba(168,85,247,0.35)]" />
+
+                        <div className="relative rounded-3xl border border-purple-500/20 bg-gradient-to-br from-zinc-900/90 via-zinc-950/95 to-purple-950/30 backdrop-blur-xl p-8 overflow-hidden">
+                            {/* Top gradient line */}
+                            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+
+                            {/* Card Header */}
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/30">
+                                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Seamless Integrations</h3>
+                                    <p className="text-zinc-400 text-sm mt-0.5">Connect all your marketing platforms in one place</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-white font-semibold">Integrations Hub</h3>
-                                <p className="text-zinc-500 text-sm">Connect your platforms</p>
+
+                            {/* Animated Beam Demo */}
+                            <div
+                                className="relative flex h-[380px] w-full items-center justify-center overflow-hidden"
+                                ref={containerRef}
+                            >
+                                <div className="flex size-full max-w-md flex-row items-stretch justify-between gap-10">
+                                    {/* Left - User */}
+                                    <div className="flex flex-col justify-center">
+                                        <Circle ref={div7Ref} className="size-16 border-purple-500/50">
+                                            <Icons.user />
+                                        </Circle>
+                                    </div>
+
+                                    {/* Center - Furriyadh AI Hub */}
+                                    <div className="flex flex-col justify-center">
+                                        <Circle ref={div6Ref} className="size-16 border-purple-500 bg-gradient-to-br from-purple-900/50 to-blue-900/50">
+                                            <Icons.furriyadh />
+                                        </Circle>
+                                    </div>
+
+                                    {/* Right - Integrations */}
+                                    <div className="flex flex-col justify-center gap-3">
+                                        <Circle ref={div1Ref} className="size-14 border-yellow-500/50">
+                                            <Icons.googleAds />
+                                        </Circle>
+                                        <Circle ref={div2Ref} className="size-14 border-orange-500/50">
+                                            <Icons.analytics />
+                                        </Circle>
+                                        <Circle ref={div3Ref} className="size-14 border-cyan-500/50">
+                                            <Icons.tagManager />
+                                        </Circle>
+                                        <Circle ref={div4Ref} className="size-14 border-blue-400/50">
+                                            <Icons.merchantCenter />
+                                        </Circle>
+                                        <Circle ref={div5Ref} className="size-14 border-red-500/50">
+                                            <Icons.youtube />
+                                        </Circle>
+                                    </div>
+                                </div>
+
+                                {/* AnimatedBeams */}
+                                <AnimatedBeam
+                                    containerRef={containerRef}
+                                    fromRef={div1Ref}
+                                    toRef={div6Ref}
+                                    duration={5}
+                                    gradientStartColor="#a855f7"
+                                    gradientStopColor="#3b82f6"
+                                />
+                                <AnimatedBeam
+                                    containerRef={containerRef}
+                                    fromRef={div2Ref}
+                                    toRef={div6Ref}
+                                    duration={5}
+                                    gradientStartColor="#a855f7"
+                                    gradientStopColor="#3b82f6"
+                                />
+                                <AnimatedBeam
+                                    containerRef={containerRef}
+                                    fromRef={div3Ref}
+                                    toRef={div6Ref}
+                                    duration={5}
+                                    gradientStartColor="#a855f7"
+                                    gradientStopColor="#3b82f6"
+                                />
+                                <AnimatedBeam
+                                    containerRef={containerRef}
+                                    fromRef={div4Ref}
+                                    toRef={div6Ref}
+                                    duration={5}
+                                    gradientStartColor="#a855f7"
+                                    gradientStopColor="#3b82f6"
+                                />
+                                <AnimatedBeam
+                                    containerRef={containerRef}
+                                    fromRef={div5Ref}
+                                    toRef={div6Ref}
+                                    duration={5}
+                                    gradientStartColor="#a855f7"
+                                    gradientStopColor="#3b82f6"
+                                />
+                                <AnimatedBeam
+                                    containerRef={containerRef}
+                                    fromRef={div6Ref}
+                                    toRef={div7Ref}
+                                    duration={5}
+                                    gradientStartColor="#a855f7"
+                                    gradientStopColor="#3b82f6"
+                                />
                             </div>
+
+                            {/* Decorative glows */}
+                            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-purple-600/20 rounded-full blur-[100px]" />
+                            <div className="absolute -top-20 -left-20 w-40 h-40 bg-blue-500/15 rounded-full blur-[80px]" />
+
+                            {/* Bottom gradient line */}
+                            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
                         </div>
-
-                        {/* Animated Beam Demo */}
-                        <div
-                            className="relative flex h-[380px] w-full items-center justify-center overflow-hidden"
-                            ref={containerRef}
-                        >
-                            <div className="flex size-full max-w-md flex-row items-stretch justify-between gap-10">
-                                {/* Left - User */}
-                                <div className="flex flex-col justify-center">
-                                    <Circle ref={div7Ref} className="size-16 border-purple-500/50">
-                                        <Icons.user />
-                                    </Circle>
-                                </div>
-
-                                {/* Center - Furriyadh AI Hub */}
-                                <div className="flex flex-col justify-center">
-                                    <Circle ref={div6Ref} className="size-16 border-purple-500 bg-gradient-to-br from-purple-900/50 to-blue-900/50">
-                                        <Icons.furriyadh />
-                                    </Circle>
-                                </div>
-
-                                {/* Right - Integrations */}
-                                <div className="flex flex-col justify-center gap-3">
-                                    <Circle ref={div1Ref} className="size-14 border-yellow-500/50">
-                                        <Icons.googleAds />
-                                    </Circle>
-                                    <Circle ref={div2Ref} className="size-14 border-orange-500/50">
-                                        <Icons.analytics />
-                                    </Circle>
-                                    <Circle ref={div3Ref} className="size-14 border-cyan-500/50">
-                                        <Icons.tagManager />
-                                    </Circle>
-                                    <Circle ref={div4Ref} className="size-14 border-blue-400/50">
-                                        <Icons.merchantCenter />
-                                    </Circle>
-                                    <Circle ref={div5Ref} className="size-14 border-red-500/50">
-                                        <Icons.youtube />
-                                    </Circle>
-                                </div>
-                            </div>
-
-                            {/* AnimatedBeams */}
-                            <AnimatedBeam
-                                containerRef={containerRef}
-                                fromRef={div1Ref}
-                                toRef={div6Ref}
-                                duration={5}
-                                gradientStartColor="#a855f7"
-                                gradientStopColor="#3b82f6"
-                            />
-                            <AnimatedBeam
-                                containerRef={containerRef}
-                                fromRef={div2Ref}
-                                toRef={div6Ref}
-                                duration={5}
-                                gradientStartColor="#a855f7"
-                                gradientStopColor="#3b82f6"
-                            />
-                            <AnimatedBeam
-                                containerRef={containerRef}
-                                fromRef={div3Ref}
-                                toRef={div6Ref}
-                                duration={5}
-                                gradientStartColor="#a855f7"
-                                gradientStopColor="#3b82f6"
-                            />
-                            <AnimatedBeam
-                                containerRef={containerRef}
-                                fromRef={div4Ref}
-                                toRef={div6Ref}
-                                duration={5}
-                                gradientStartColor="#a855f7"
-                                gradientStopColor="#3b82f6"
-                            />
-                            <AnimatedBeam
-                                containerRef={containerRef}
-                                fromRef={div5Ref}
-                                toRef={div6Ref}
-                                duration={5}
-                                gradientStartColor="#a855f7"
-                                gradientStopColor="#3b82f6"
-                            />
-                            <AnimatedBeam
-                                containerRef={containerRef}
-                                fromRef={div6Ref}
-                                toRef={div7Ref}
-                                duration={5}
-                                gradientStartColor="#a855f7"
-                                gradientStopColor="#3b82f6"
-                            />
-                        </div>
-
-                        {/* Decorative glow */}
-                        <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-[80px]" />
                     </div>
                 </div>
 
-                {/* Bottom Stats */}
-                <div className="flex flex-wrap justify-center gap-8 mt-12 pt-8 border-t border-zinc-800">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">10+</div>
-                        <div className="text-zinc-500 text-sm">Integrations</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">60s</div>
-                        <div className="text-zinc-500 text-sm">Avg. Campaign Time</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">3x</div>
-                        <div className="text-zinc-500 text-sm">Faster Than Manual</div>
-                    </div>
-                </div>
+
             </div>
         </section>
     );
