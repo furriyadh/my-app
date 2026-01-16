@@ -32,7 +32,7 @@ export default function HeroSection() {
           </Link>
 
           {/* Main Headline - TextType with 4 rotating headlines */}
-          <h1 className="!mb-6 !text-[32px] md:!text-[44px] lg:!text-[56px] xl:!text-[64px] -tracking-[1px] md:-tracking-[1.5px] !leading-[1.1] !font-semibold text-white">
+          <h1 className="!mb-6 !text-[32px] md:!text-[44px] lg:!text-[56px] xl:!text-[64px] -tracking-[1px] md:-tracking-[1.5px] !leading-[1.1] !font-semibold text-white min-h-[70px] md:min-h-[100px] lg:min-h-[130px] xl:min-h-[150px]">
             <TextType
               text={headlines}
               typingSpeed={80}
