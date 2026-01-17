@@ -16,12 +16,28 @@ const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { user_id, email, plan_id, billing_cycle, payment_method, transaction_id, amount } = body;
+        const { plan_id, billing_cycle, payment_method, transaction_id, amount } = body;
 
-        // Validate required fields - now user_id is required
-        if (!user_id || !email || !plan_id || !billing_cycle) {
+        // ✅ Verify user identity server-side via JWT
+        const { createClient: createServerClient } = await import('@/utils/supabase/server');
+        const supabaseAuth = await createServerClient();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+
+        if (authError || !user) {
+            console.error('❌ Unauthorized subscription attempt:', authError);
             return NextResponse.json(
-                { success: false, error: 'Missing required fields (user_id, email, plan_id, billing_cycle)' },
+                { success: false, error: 'Unauthorized: Valid session required' },
+                { status: 401 }
+            );
+        }
+
+        const userId = user.id;
+        const email = user.email;
+
+        // Validate required fields
+        if (!plan_id || !billing_cycle) {
+            return NextResponse.json(
+                { success: false, error: 'Missing required fields (plan_id, billing_cycle)' },
                 { status: 400 }
             );
         }
@@ -34,8 +50,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Use the passed user_id directly (already validated from frontend auth)
-        const userId = user_id;
+        // Use the validated userId from JWT
+        // (Previously user_id was taken from body but now secured)
 
         // Calculate subscription period
         const now = new Date();
@@ -176,24 +192,20 @@ export async function POST(request: NextRequest) {
 // Get subscription status
 export async function GET(request: NextRequest) {
     try {
-        const searchParams = request.nextUrl.searchParams;
-        const email = searchParams.get('email');
+        // ✅ Verify user identity server-side via JWT
+        const { createClient: createServerClient } = await import('@/utils/supabase/server');
+        const supabaseAuth = await createServerClient();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
 
-        if (!email) {
+        if (authError || !user) {
             return NextResponse.json(
-                { success: false, error: 'Email is required' },
-                { status: 400 }
+                { success: false, error: 'Unauthorized' },
+                { status: 401 }
             );
         }
 
-        // Get user by email
-        const { data: userData } = await supabase
-            .from('user_profiles')
-            .select('user_id')
-            .eq('email', email)
-            .single();
-
-        let userId = userData?.user_id;
+        const userId = user.id;
+        const email = user.email;
 
         // If no user found in profiles, return free plan (no subscription)
         if (!userId) {

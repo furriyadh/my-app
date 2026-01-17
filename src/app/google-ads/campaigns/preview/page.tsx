@@ -781,7 +781,7 @@ export default function CampaignPreviewPage() {
       const response = await fetch('/api/billing-mode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, userEmail, billingMode })
+        body: JSON.stringify({ billingMode })
       });
 
       const result = await response.json();
@@ -1024,7 +1024,7 @@ export default function CampaignPreviewPage() {
         // BILLING MODE & USER ID
         // ═══════════════════════════════════════════════════════════════════
         billing_mode: billingModeForPublish,
-        user_id: userIdForPublish,
+        // user_id removed for security (verified via JWT)
         // ═══════════════════════════════════════════════════════════════════
         // VIDEO CAMPAIGN SPECIFIC DATA
         // ═══════════════════════════════════════════════════════════════════
@@ -1042,13 +1042,7 @@ export default function CampaignPreviewPage() {
           action_button_label: generatedContent?.action_button_label || 'تعرف أكثر',
           action_headline: generatedContent?.action_headline || '',
         },
-        // Customer email for notifications (from OAuth user info)
-        customer_email: (() => {
-          try {
-            const userInfo = JSON.parse(localStorage.getItem('oauth_user_info') || '{}');
-            return userInfo.email || '';
-          } catch { return ''; }
-        })()
+        // customer_email removed for security (verified via JWT)
       };
 
       console.log('📦 Publishing campaign:', completeCampaignData);
@@ -1128,11 +1122,9 @@ export default function CampaignPreviewPage() {
               google_campaign_name: result.campaign_name || completeCampaignData.campaign_name,
               customer_id: selectedAccount,
               source: billingModeForPublish === 'furriyadh_managed' ? 'furriyadh_managed' : 'self_managed',
-              user_id: userIdForPublish,
-              user_email: completeCampaignData.customer_email,
-              campaign_type: completeCampaignData.campaign_type,
-              daily_budget: completeCampaignData.daily_budget,
-              currency: completeCampaignData.currency,
+              campaign_type: completeCampaignData.campaign_type || 'SEARCH',
+              daily_budget: completeCampaignData.daily_budget || 0,
+              currency: completeCampaignData.currency || 'USD',
               website_url: completeCampaignData.website_url,
             })
           });

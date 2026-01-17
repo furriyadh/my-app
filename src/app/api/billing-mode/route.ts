@@ -9,9 +9,25 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { userId, userEmail, billingMode } = body;
+        const { billingMode } = body;
 
-        if (!userId || !billingMode) {
+        // ✅ Verify user identity server-side via JWT
+        const { createClient: createServerClient } = await import('@/utils/supabase/server');
+        const supabaseAuth = await createServerClient();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+
+        if (authError || !user) {
+            console.error('❌ Unauthorized billing mode update attempt:', authError);
+            return NextResponse.json(
+                { error: 'Unauthorized: Valid session required' },
+                { status: 401 }
+            );
+        }
+
+        const userId = user.id;
+        const userEmail = user.email;
+
+        if (!billingMode) {
             return NextResponse.json(
                 { error: 'Missing required fields: userId, billingMode' },
                 { status: 400 }
@@ -146,15 +162,19 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        // ✅ Verify user identity server-side via JWT
+        const { createClient: createServerClient } = await import('@/utils/supabase/server');
+        const supabaseAuth = await createServerClient();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
 
-        if (!userId) {
+        if (authError || !user) {
             return NextResponse.json(
-                { error: 'Missing userId parameter' },
-                { status: 400 }
+                { error: 'Unauthorized: Valid session required' },
+                { status: 401 }
             );
         }
+
+        const userId = user.id;
 
         // Get user's current billing mode
         const { data: subscription, error } = await supabase

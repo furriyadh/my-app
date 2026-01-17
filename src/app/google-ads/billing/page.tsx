@@ -861,7 +861,7 @@ const BillingPage: React.FC = () => {
                                         await fetch('/api/billing-mode', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ userId, userEmail, billingMode: 'furriyadh_managed' })
+                                            body: JSON.stringify({ billingMode: 'furriyadh_managed' })
                                         });
                                         localStorage.setItem('billing_mode', 'furriyadh_managed');
                                     }

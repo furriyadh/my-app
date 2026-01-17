@@ -25,18 +25,36 @@ const getCookieOptions = (maxAge: number, httpOnly: boolean = true) => {
 
 export async function POST(request: NextRequest) {
     try {
-        const userInfo = await request.json();
+        // ✅ التحقق من الجلسة من خلال Supabase server-side للسماح فقط للمستخدمين المصادقين
+        const { createClient } = await import('@/utils/supabase/server');
+        const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        // التحقق من وجود البيانات المطلوبة
-        if (!userInfo.id || !userInfo.email) {
+        if (authError || !user) {
+            console.error('❌ Unauthorized sync attempt:', authError);
             return NextResponse.json(
-                { success: false, error: 'Missing required user info (id, email)' },
-                { status: 400 }
+                { success: false, error: 'Unauthorized: Valid Supabase session required' },
+                { status: 401 }
             );
         }
 
-        console.log('🔄 Syncing Supabase session to OAuth cookies...');
-        console.log('👤 User:', { id: userInfo.id, email: userInfo.email, name: userInfo.name });
+        // استخراج البيانات من الـ user object الموثوق به من السيرفر
+        const googleIdentity = user.identities?.find((i: any) => i.provider === 'google');
+        const googleId = googleIdentity?.id ||
+            user.user_metadata?.provider_id ||
+            user.user_metadata?.sub ||
+            user.id;
+
+        const userInfo = {
+            id: googleId,
+            supabaseId: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+            picture: user.user_metadata?.avatar_url || ''
+        };
+
+        console.log('🔄 Syncing authenticated Supabase session to OAuth cookies...');
+        console.log('👤 Authenticated User:', { id: userInfo.id, email: userInfo.email });
 
         const response = NextResponse.json({
             success: true,
@@ -47,8 +65,8 @@ export async function POST(request: NextRequest) {
         const userInfoForCookie = {
             id: userInfo.id,
             email: userInfo.email,
-            name: userInfo.name || userInfo.full_name || '',
-            picture: userInfo.picture || userInfo.avatar_url || ''
+            name: userInfo.name,
+            picture: userInfo.picture
         };
 
         response.cookies.set(
@@ -61,8 +79,8 @@ export async function POST(request: NextRequest) {
 
         // ✅ استعادة OAuth tokens المحفوظة من قاعدة البيانات
         try {
-            const { createClient } = await import('@supabase/supabase-js');
-            const supabaseAdmin = createClient(
+            const { createClient: createAdminClient } = await import('@supabase/supabase-js');
+            const supabaseAdmin = createAdminClient(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!
             );

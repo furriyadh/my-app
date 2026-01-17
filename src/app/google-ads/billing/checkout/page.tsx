@@ -444,8 +444,6 @@ function CheckoutContent() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_id: userId,
-                    email: userEmail,
                     plan_id: planId,
                     billing_cycle: cycle,
                     payment_method: paymentMethod,
@@ -519,7 +517,6 @@ function CheckoutContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     amount: totalPayment,
-                    email: userEmail,
                     order_id: `SUB-${planId.toUpperCase()}-${cycle.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
                     description: `${selectedPlan.name} Plan - ${cycle} subscription`,
                     success_url: `${window.location.origin}/google-ads/billing?payment=success&plan=${planId}`,

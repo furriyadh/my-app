@@ -47,19 +47,26 @@ export async function POST(request: NextRequest) {
         }
 
         const body: CreateInvoiceRequest = await request.json();
-        const { amount, email, order_id, description, success_url, cancel_url } = body;
+        const { amount, order_id, description, success_url, cancel_url } = body;
+
+        // ✅ Verify user identity server-side via JWT
+        const { createClient: createServerClient } = await import('@/utils/supabase/server');
+        const supabaseAuth = await createServerClient();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+
+        if (authError || !user || !user.email) {
+            return NextResponse.json(
+                { success: false, error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        const email = user.email;
 
         // Validate required fields
         if (!amount || amount <= 0) {
             return NextResponse.json(
                 { success: false, error: 'Invalid amount' },
-                { status: 400 }
-            );
-        }
-
-        if (!email) {
-            return NextResponse.json(
-                { success: false, error: 'Email is required' },
                 { status: 400 }
             );
         }

@@ -20,13 +20,27 @@ export async function POST(request: NextRequest) {
             google_campaign_name,
             customer_id,
             source, // 'furriyadh_managed' | 'self_managed'
-            user_id,
-            user_email,
             campaign_type,
             daily_budget,
             currency,
             website_url,
         } = body;
+
+        // ✅ Verify user identity server-side via JWT
+        const { createClient: createServerClient } = await import('@/utils/supabase/server');
+        const supabase = await createServerClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            console.error('❌ Unauthorized registration attempt:', authError);
+            return NextResponse.json(
+                { success: false, error: 'Unauthorized: Valid session required' },
+                { status: 401 }
+            );
+        }
+
+        const user_id = user.id;
+        const user_email = user.email;
 
         if (!google_campaign_id || !customer_id || !source) {
             return NextResponse.json(

@@ -137,6 +137,45 @@ def detect_currency_from_locations(target_locations):
     # Default to USD
     return COUNTRY_TO_CURRENCY['US']
 
+def is_safe_url(url):
+    """
+    Check if a URL is safe for server-side fetching (SSRF prevention)
+    Blocks private and loopback IP addresses.
+    """
+    from urllib.parse import urlparse
+    import socket
+    import ipaddress
+    
+    try:
+        parsed_url = urlparse(url)
+        if not parsed_url.scheme or parsed_url.scheme not in ['http', 'https']:
+            return False
+            
+        hostname = parsed_url.hostname
+        if not hostname:
+            return False
+            
+        # 1. Check for literal IP addresses
+        try:
+            ip = ipaddress.ip_address(hostname)
+            if ip.is_private or ip.is_loopback:
+                return False
+        except ValueError:
+            # 2. Resolve hostname to IP
+            try:
+                # This could be potentially slow, but necessary for DNS pinning/rebinding protection
+                # In a high-traffic env, consider using a safe DNS resolver
+                remote_ip = socket.gethostbyname(hostname)
+                ip = ipaddress.ip_address(remote_ip)
+                if ip.is_private or ip.is_loopback:
+                    return False
+            except (socket.gaierror, ValueError):
+                pass # If it doesn't resolve, it's either invalid or we let requests handle it
+        
+        return True
+    except Exception:
+        return False
+
 # إنشاء Blueprint
 ai_campaign_creator_bp = Blueprint('ai_campaign_creator', __name__)
 
@@ -1073,10 +1112,14 @@ def get_keyword_cpc_data():
                     for url_attempt in urls_to_try:
                         try:
                             logger.info(f"🔗 Trying to fetch: {url_attempt}")
-                            response = requests.get(url_attempt, timeout=15, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
-                            if response.status_code == 200:
-                                logger.info(f"✅ Successfully fetched: {url_attempt}")
-                                break
+                            if is_safe_url(url_attempt):
+                                response = requests.get(url_attempt, timeout=15, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+                                if response.status_code == 200:
+                                    logger.info(f"✅ Successfully fetched: {url_attempt}")
+                                    break
+                            else:
+                                logger.error(f"❌ Blocked unsafe URL for favicon: {url_attempt}")
+                                continue
                         except Exception as e:
                             logger.warning(f"⚠️ Failed {url_attempt}: {e}")
                             continue
@@ -1367,8 +1410,12 @@ def get_historical_metrics():
                     website_url = 'https://' + website_url
                 
                 try:
-                    response = requests.get(website_url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
-                    soup = BeautifulSoup(response.content, 'html.parser')
+                    if is_safe_url(website_url):
+                        response = requests.get(website_url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+                        soup = BeautifulSoup(response.content, 'html.parser')
+                    else:
+                        logger.error(f"❌ Blocked unsafe URL for color analysis: {website_url}")
+                        return jsonify({"success": False, "error": "Unsafe URL"}), 400
                     
                     title = soup.find('title')
                     title_text = title.get_text() if title else ''
@@ -1688,8 +1735,12 @@ def generate_forecast_metrics():
                     website_url = 'https://' + website_url
                 
                 try:
-                    response = requests.get(website_url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
-                    soup = BeautifulSoup(response.content, 'html.parser')
+                    if is_safe_url(website_url):
+                        response = requests.get(website_url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+                        soup = BeautifulSoup(response.content, 'html.parser')
+                    else:
+                        logger.error(f"❌ Blocked unsafe URL for SEO analysis: {website_url}")
+                        return jsonify({"success": False, "error": "Unsafe URL"}), 400
                     
                     title = soup.find('title')
                     title_text = title.get_text() if title else ''
@@ -2492,7 +2543,17 @@ def detect_website_language():
                 # Use oEmbed API to get video title (language-neutral)
                 try:
                     oembed_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
-                    oembed_response = http_requests.get(oembed_url, timeout=10)
+                    
+                    # SSRF Check for oEmbed URL
+                    if not is_safe_url(oembed_url):
+                        logger.error(f"❌ Security violation: Attempted to fetch unsafe oEmbed URL: {oembed_url}")
+                        return jsonify({'success': False, 'error': 'Security violation: Unsafe URL'}), 403
+
+                    if is_safe_url(oembed_url):
+                        oembed_response = http_requests.get(oembed_url, timeout=10)
+                    else:
+                        logger.error(f"❌ Blocked unsafe oEmbed URL: {oembed_url}")
+                        oembed_response = None
                     
                     if oembed_response.status_code == 200:
                         oembed_data = oembed_response.json()
@@ -2534,10 +2595,16 @@ def detect_website_language():
             for url_attempt in urls_to_try:
                 try:
                     logger.info(f"🔗 Fetching: {url_attempt}")
-                    response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
-                    if response.status_code == 200:
-                        logger.info(f"✅ Website fetched successfully: {response.status_code}")
-                        break
+                    
+                    if is_safe_url(url_attempt):
+                        response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True)
+                        if response.status_code == 200:
+                            logger.info(f"✅ Website fetched successfully: {response.status_code}")
+                            break
+                    else:
+                        logger.error(f"❌ Security violation: Attempted to fetch unsafe URL: {url_attempt}")
+                        fetch_error_msg = f"Security violation: Unsafe URL {url_attempt}"
+                        continue
                 except Exception as fetch_error:
                     fetch_error_msg = str(fetch_error)
                     logger.warning(f"⚠️ Failed to fetch {url_attempt}: {fetch_error}")
@@ -4110,7 +4177,11 @@ def video_reach_forecast():
             try:
                 # Try oEmbed for basic info
                 oembed_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={youtube_video_id}&format=json"
-                oembed_response = requests.get(oembed_url, timeout=5)
+                if is_safe_url(oembed_url):
+                    oembed_response = requests.get(oembed_url, timeout=5)
+                else:
+                    logger.error(f"❌ Blocked unsafe oEmbed URL: {oembed_url}")
+                    oembed_response = None
                 if oembed_response.status_code == 200:
                     oembed_data = oembed_response.json()
                     video_title = oembed_data.get('title', '')

@@ -58,6 +58,44 @@ class AIContentGenerator:
     def __init__(self):
         """تهيئة خدمة توليد المحتوى"""
         self.api_key = os.getenv("COMETAPI_API_KEY")
+        self.logger = logging.getLogger(__name__)
+
+    def is_safe_url(self, url: str) -> bool:
+        """
+        Check if a URL is safe for server-side fetching (SSRF prevention)
+        Blocks private and loopback IP addresses.
+        """
+        from urllib.parse import urlparse
+        import socket
+        import ipaddress
+        
+        try:
+            parsed_url = urlparse(url)
+            if not parsed_url.scheme or parsed_url.scheme not in ['http', 'https']:
+                return False
+                
+            hostname = parsed_url.hostname
+            if not hostname:
+                return False
+                
+            # 1. Check for literal IP addresses
+            try:
+                ip = ipaddress.ip_address(hostname)
+                if ip.is_private or ip.is_loopback:
+                    return False
+            except ValueError:
+                # 2. Resolve hostname to IP
+                try:
+                    remote_ip = socket.gethostbyname(hostname)
+                    ip = ipaddress.ip_address(remote_ip)
+                    if ip.is_private or ip.is_loopback:
+                        return False
+                except (socket.gaierror, ValueError):
+                    pass
+            
+            return True
+        except Exception:
+            return False
         self.base_url = os.getenv("COMETAPI_BASE_URL", "https://api.cometapi.com")
         self.text_model = os.getenv("TEXT_MODEL", "gpt-4o-mini")
         self.image_model = os.getenv("IMAGE_MODEL", "black-forest-labs/flux-1.1-pro-ultra")  # الأفضل للواقعية المطلقة
@@ -592,6 +630,11 @@ Return results in JSON format:
             if not website_url.startswith(('http://', 'https://')):
                 website_url = f'https://{website_url}'
             
+            # SSRF Check
+            if not self.is_safe_url(website_url):
+                self.logger.error(f"❌ Security violation: Attempted to fetch unsafe URL: {website_url}")
+                return ""
+
             self.logger.info(f"Fetching website content: {website_url}")
             
             headers = {
@@ -617,6 +660,12 @@ Return results in JSON format:
             for url_attempt in urls_to_try:
                 try:
                     self.logger.info(f"🔗 Fetching: {url_attempt}")
+                    
+                    # SSRF Check
+                    if not self.is_safe_url(url_attempt):
+                        self.logger.warning(f"⚠️ Skipping unsafe URL attempt: {url_attempt}")
+                        continue
+
                     response = http_requests.get(url_attempt, headers=headers, timeout=20, allow_redirects=True, verify=False)
                     if response.status_code == 200:
                         self.logger.info(f"✅ Website fetched successfully: {response.status_code}")
