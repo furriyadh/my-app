@@ -2537,9 +2537,17 @@ const GoogleAdsContent: React.FC = () => {
                 // Handle specific error types
                 if (errorResult.error_type === 'OAUTH_ERROR') {
                     console.error(`🔐 مشكلة في المصادقة: ${errorResult.message}`);
-                    // Redirect to OAuth
+                    // Redirect to OAuth via popup
                     if (typeof window !== 'undefined') {
-                        window.location.href = '/api/oauth/google';
+                        const width = 500;
+                        const height = 600;
+                        const left = window.screen.width / 2 - width / 2;
+                        const top = window.screen.height / 2 - height / 2;
+                        window.open(
+                            '/api/oauth/google',
+                            'OAuthPopup',
+                            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+                        );
                     }
                 } else if (errorResult.error_type === 'NETWORK_ERROR') {
                     console.error(`🌐 مشكلة في الاتصال: ${errorResult.message}`);

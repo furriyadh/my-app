@@ -17,7 +17,7 @@ const avatars = [
 
 export const TrustedUsers: React.FC<TrustedUsersProps> = ({
   className = "",
-  targetCount = 41000,
+  targetCount = 2847,
 }) => {
   const [count, setCount] = useState(0);
 

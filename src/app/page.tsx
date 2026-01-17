@@ -73,7 +73,7 @@ export default function Home() {
       </div>
 
       {/* Orb Background - FIXED to stay behind all components while scrolling */}
-      <div
+      {/* <div
         className="fixed inset-0 z-[1] flex items-start justify-center pointer-events-none transition-opacity duration-300 opacity-30"
         style={{ top: `${orbTop}px` }}
       >
@@ -86,7 +86,7 @@ export default function Home() {
             backgroundColor="transparent"
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="relative z-[2]">
 

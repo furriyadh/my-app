@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
 import SparkleNavbar from "@/components/lightswind/sparkle-navbar";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -150,15 +152,20 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Auth Buttons */}
-            {/* Auth Buttons - Consolidated */}
-            <NavbarButton
-              as={Link}
-              href="/authentication/sign-in"
-              variant="primary"
-              className="hidden md:inline-flex bg-gradient-to-r from-purple-600 to-indigo-600 border-0 px-8 py-2.5 text-base text-white"
-            >
-              {language === 'ar' ? 'دخول' : 'Login'}
-            </NavbarButton>
+            <Dialog>
+              <DialogTrigger asChild>
+                <NavbarButton
+                  as="button"
+                  variant="primary"
+                  className="hidden md:inline-flex bg-gradient-to-r from-purple-600 to-indigo-600 border-0 px-8 py-2.5 text-base text-white"
+                >
+                  {language === 'ar' ? 'دخول' : 'Login'}
+                </NavbarButton>
+              </DialogTrigger>
+              <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                <Login />
+              </DialogContent>
+            </Dialog>
           </div>
         </NavBody>
 
@@ -227,15 +234,21 @@ const Navbar: React.FC = () => {
 
             {/* Mobile Auth Buttons */}
             <div className="flex w-full flex-col gap-3 mt-4">
-              <NavbarButton
-                as={Link}
-                href="/authentication/sign-in"
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 border-0 justify-center"
-              >
-                {language === 'ar' ? 'دخول' : 'Login'}
-              </NavbarButton>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <NavbarButton
+                    as="button"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="primary"
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 border-0 justify-center"
+                  >
+                    {language === 'ar' ? 'دخول' : 'Login'}
+                  </NavbarButton>
+                </DialogTrigger>
+                <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                  <Login />
+                </DialogContent>
+              </Dialog>
             </div>
           </MobileNavMenu>
         </MobileNav>

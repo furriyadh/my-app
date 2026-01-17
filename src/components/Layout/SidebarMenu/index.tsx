@@ -11,6 +11,44 @@ interface SidebarMenuProps {
 
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
   const pathname = usePathname();
+  const [supabase, setSupabase] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("cached_google_ads_accounts");
+      localStorage.removeItem("oauth_user_info");
+      localStorage.removeItem("userEmail");
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("account_stats_")) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+    }
+
+    try {
+      await fetch("/api/oauth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) { }
+
+    window.location.href = "/";
+  };
 
   // Initialize openIndex to 0 to open the first item by default
   const [openIndex, setOpenIndex] = React.useState<number | null>(0);
@@ -2949,16 +2987,16 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/" ? "active" : ""
-                  }`}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c]`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   logout
                 </i>
                 <span className="title leading-none">Logout</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

@@ -11,7 +11,7 @@ const avatars = [
 
 export default function LiveUsersBadge() {
     const [count, setCount] = useState(0);
-    const targetCount = 41000;
+    const targetCount = 2847;
 
     useEffect(() => {
         const duration = 2000;

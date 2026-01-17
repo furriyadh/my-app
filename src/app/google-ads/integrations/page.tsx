@@ -460,18 +460,47 @@ const IntegrationsPage: React.FC = () => {
   const handleConnect = async (integrationId: string) => {
     console.log(`Connecting to ${integrationId}`);
 
+    // Helper to open OAuth in popup
+    const openOAuthPopup = (url: string) => {
+      const width = 500;
+      const height = 600;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+
+      const popup = window.open(
+        url,
+        'OAuthPopup',
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+      );
+
+      if (!popup) {
+        alert('Popup blocked! Please allow popups for this site.');
+        return;
+      }
+
+      // Poll for popup close, then refresh
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          // Refresh to check if OAuth succeeded
+          router.refresh();
+          window.location.reload();
+        }
+      }, 1000);
+    };
+
     if (integrationId === 'google-ads') {
-      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-ads') + '&scope=ads';
+      openOAuthPopup('/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-ads') + '&scope=ads');
     } else if (integrationId === 'google-analytics') {
-      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-analytics') + '&scope=analytics';
+      openOAuthPopup('/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-analytics') + '&scope=analytics');
     } else if (integrationId === 'google-tag-manager') {
-      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-tag-manager') + '&scope=gtm';
+      openOAuthPopup('/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-tag-manager') + '&scope=gtm');
     } else if (integrationId === 'google-merchant') {
-      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-merchant') + '&scope=merchant';
+      openOAuthPopup('/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/google-merchant') + '&scope=merchant');
     } else if (integrationId === 'youtube-channel') {
-      window.location.href = '/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/youtube-channel') + '&scope=youtube';
+      openOAuthPopup('/api/oauth/google?redirect_after=' + encodeURIComponent('/google-ads/integrations/youtube-channel') + '&scope=youtube');
     } else if (integrationId === 'meta-ads') {
-      window.location.href = '/api/oauth/meta?redirect_after=' + encodeURIComponent('/google-ads/integrations/meta-ads');
+      openOAuthPopup('/api/oauth/meta?redirect_after=' + encodeURIComponent('/google-ads/integrations/meta-ads'));
     } else {
       alert('This integration will be available soon!');
     }
