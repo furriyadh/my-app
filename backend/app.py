@@ -228,6 +228,39 @@ if not all([MCC_CUSTOMER_ID, DEVELOPER_TOKEN, CLIENT_ID, CLIENT_SECRET, REFRESH_
 else:
     logger.info("✅ جميع الإعدادات المطلوبة متوفرة")
 
+# 🔒 Security: دالة للتحقق من المصادقة
+def require_auth():
+    """
+    التحقق من وجود Authorization header صالح.
+    يُرجع tuple: (success, token_or_error_response)
+    
+    الاستخدام:
+        is_auth, result = require_auth()
+        if not is_auth:
+            return result  # يرجع error response
+        access_token = result  # يستخدم الـ token
+    """
+    auth_header = request.headers.get('Authorization')
+    
+    if not auth_header or not auth_header.startswith('Bearer '):
+        logger.warning("⚠️ طلب بدون Authorization header - مرفوض")
+        return False, (jsonify({
+            'success': False,
+            'error': 'UNAUTHORIZED',
+            'message': 'Authorization header مطلوب - يجب تسجيل الدخول'
+        }), 401)
+    
+    token = auth_header.split(' ')[1]
+    if not token or len(token) < 10:
+        logger.warning("⚠️ طلب بـ token فارغ أو غير صالح - مرفوض")
+        return False, (jsonify({
+            'success': False,
+            'error': 'UNAUTHORIZED', 
+            'message': 'Token غير صالح'
+        }), 401)
+    
+    return True, token
+
 def get_google_ads_client(access_token=None):
     """
     إنشاء عميل Google Ads باستخدام المكتبة الرسمية.
@@ -354,10 +387,17 @@ def convert_status_to_db_safe(api_status: str) -> str:
 def get_user_accounts():
     """الحصول على حسابات المستخدم المرتبطة بـ MCC باستخدام المكتبة الرسمية"""
     try:
-        logger.info("📋 طلب الحصول على حسابات المستخدم")
+        # 🔒 Security: التحقق من المصادقة - مطلوب Authorization header
+        is_auth, result = require_auth()
+        if not is_auth:
+            return result
+        access_token = result
         
-        client = get_google_ads_client()
-        logger.info("🔍 استخدام المكتبة الرسمية لجلب الحسابات")
+        logger.info("📋 طلب الحصول على حسابات المستخدم (مصادق)")
+        
+        # 🔒 استخدام token المستخدم بدلاً من MCC token
+        client = get_google_ads_client(access_token)
+        logger.info("🔍 استخدام المكتبة الرسمية لجلب الحسابات (User Context)")
         
         # الحصول على خدمة Google Ads
         ga_service = client.get_service("GoogleAdsService")
@@ -784,6 +824,12 @@ def get_mcc_invitations():
 def get_account_stats(customer_id):
     """الحصول على إحصائيات حساب معين باستخدام المكتبة الرسمية"""
     try:
+        # 🔒 Security: التحقق من المصادقة - مطلوب Authorization header
+        is_auth, result = require_auth()
+        if not is_auth:
+            return result
+        access_token = result
+        
         # تنظيف معرف العميل
         clean_customer_id = str(customer_id).replace('-', '').strip()
         
@@ -794,9 +840,10 @@ def get_account_stats(customer_id):
                 'message': 'معرف العميل يجب أن يكون 10 أرقام'
             }), 400
         
-        logger.info(f"📊 طلب إحصائيات الحساب {customer_id}")
+        logger.info(f"📊 طلب إحصائيات الحساب {customer_id} (مصادق)")
         
-        client = get_google_ads_client()
+        # 🔒 استخدام token المستخدم بدلاً من MCC token
+        client = get_google_ads_client(access_token)
         ga_service = client.get_service("GoogleAdsService")
         
         # استعلام للحصول على إحصائيات الحساب

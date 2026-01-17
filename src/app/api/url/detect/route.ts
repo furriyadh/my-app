@@ -36,6 +36,56 @@ function extractDomain(urlStr: string): string {
     }
 }
 
+// 🔒 SSRF Protection: التحقق من أن URL آمن قبل عمل الطلب
+function isUrlSafe(urlStr: string): { safe: boolean; reason?: string } {
+    try {
+        const url = new URL(urlStr);
+        const hostname = url.hostname.toLowerCase();
+
+        // ❌ منع localhost و 127.x.x.x
+        if (hostname === 'localhost' || hostname.startsWith('127.')) {
+            return { safe: false, reason: 'localhost not allowed' };
+        }
+
+        // ❌ منع IPs الداخلية (Private Networks)
+        const ipPatterns = [
+            /^10\./,                    // 10.0.0.0/8
+            /^172\.(1[6-9]|2\d|3[01])\./, // 172.16.0.0/12
+            /^192\.168\./,              // 192.168.0.0/16
+            /^169\.254\./,              // Link-local
+            /^0\./,                     // 0.0.0.0/8
+            /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./, // Carrier-grade NAT
+        ];
+
+        for (const pattern of ipPatterns) {
+            if (pattern.test(hostname)) {
+                return { safe: false, reason: 'private IP not allowed' };
+            }
+        }
+
+        // ❌ منع AWS/GCP/Azure Metadata endpoints
+        const metadataHosts = [
+            '169.254.169.254',      // AWS/GCP metadata
+            'metadata.google.internal',
+            'metadata.google',
+            '100.100.100.200',      // Alibaba Cloud
+        ];
+
+        if (metadataHosts.includes(hostname)) {
+            return { safe: false, reason: 'cloud metadata endpoint not allowed' };
+        }
+
+        // ❌ منع file:// و ftp:// protocols
+        if (!['http:', 'https:'].includes(url.protocol)) {
+            return { safe: false, reason: 'only http/https allowed' };
+        }
+
+        return { safe: true };
+    } catch {
+        return { safe: false, reason: 'invalid URL' };
+    }
+}
+
 // Check if URL domain matches any Merchant Center account
 async function checkMerchantCenterMatch(url: string): Promise<{ isMatch: boolean; accountName?: string }> {
     try {
@@ -100,6 +150,13 @@ async function checkMerchantCenterMatch(url: string): Promise<{ isMatch: boolean
 // Wappalyzer-style e-commerce detection (enhanced)
 async function detectStoreFromHTML(url: string): Promise<{ isStore: boolean; platform?: string }> {
     try {
+        // 🔒 SSRF Protection - التحقق من أن URL آمن قبل عمل الطلب
+        const urlCheck = isUrlSafe(url);
+        if (!urlCheck.safe) {
+            console.warn(`⚠️ SSRF protection: blocked ${url} - ${urlCheck.reason}`);
+            return { isStore: false };
+        }
+
         // === Explicit Exclusions (Classifieds/Services) ===
         // Check BEFORE fetching HTML to save time and prevent false positives
         const nonStorePatterns = [
@@ -343,6 +400,16 @@ export async function POST(request: NextRequest) {
         const hostname = urlObj.hostname;
         const pathname = urlObj.pathname;
         const searchParams = urlObj.searchParams;
+
+        // 🔒 SSRF Protection - رفض URLs الداخلية والخطيرة
+        const urlCheck = isUrlSafe(normalizedUrl);
+        if (!urlCheck.safe) {
+            console.warn(`⚠️ SSRF blocked in POST: ${normalizedUrl} - ${urlCheck.reason}`);
+            return NextResponse.json(
+                { error: 'Invalid URL', reason: urlCheck.reason },
+                { status: 400 }
+            );
+        }
 
         let result: UrlDetectionResult;
 
