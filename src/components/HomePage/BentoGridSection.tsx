@@ -148,10 +148,10 @@ export default function AnimatedBeamSection() {
 
                     {/* Left Side - Text Content */}
                     <div className="space-y-6">
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
                             Simple, smart &<br />affordable advertising
                         </h2>
-                        <p className="text-lg md:text-xl text-zinc-400 max-w-lg">
+                        <p className="text-base md:text-lg text-zinc-400 max-w-lg">
                             Whether you're just starting out or scaling up, Furriyadh makes it easy to launch powerful ad campaigns. Our AI does the heavy lifting so you can focus on growing your business.
                         </p>
                     </div>
@@ -223,7 +223,7 @@ export default function AnimatedBeamSection() {
                                     containerRef={containerRef}
                                     fromRef={div1Ref}
                                     toRef={div6Ref}
-                                    duration={5}
+                                    duration={2}
                                     gradientStartColor="#a855f7"
                                     gradientStopColor="#3b82f6"
                                 />
@@ -231,7 +231,7 @@ export default function AnimatedBeamSection() {
                                     containerRef={containerRef}
                                     fromRef={div2Ref}
                                     toRef={div6Ref}
-                                    duration={5}
+                                    duration={2}
                                     gradientStartColor="#a855f7"
                                     gradientStopColor="#3b82f6"
                                 />
@@ -239,7 +239,7 @@ export default function AnimatedBeamSection() {
                                     containerRef={containerRef}
                                     fromRef={div3Ref}
                                     toRef={div6Ref}
-                                    duration={5}
+                                    duration={2}
                                     gradientStartColor="#a855f7"
                                     gradientStopColor="#3b82f6"
                                 />
@@ -247,7 +247,7 @@ export default function AnimatedBeamSection() {
                                     containerRef={containerRef}
                                     fromRef={div4Ref}
                                     toRef={div6Ref}
-                                    duration={5}
+                                    duration={2}
                                     gradientStartColor="#a855f7"
                                     gradientStopColor="#3b82f6"
                                 />
@@ -255,7 +255,7 @@ export default function AnimatedBeamSection() {
                                     containerRef={containerRef}
                                     fromRef={div5Ref}
                                     toRef={div6Ref}
-                                    duration={5}
+                                    duration={2}
                                     gradientStartColor="#a855f7"
                                     gradientStopColor="#3b82f6"
                                 />
@@ -263,7 +263,7 @@ export default function AnimatedBeamSection() {
                                     containerRef={containerRef}
                                     fromRef={div6Ref}
                                     toRef={div7Ref}
-                                    duration={5}
+                                    duration={2}
                                     gradientStartColor="#a855f7"
                                     gradientStopColor="#3b82f6"
                                 />

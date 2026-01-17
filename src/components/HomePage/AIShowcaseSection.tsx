@@ -1,10 +1,38 @@
 "use client";
 
-import { Brain, Sparkles, Target, Zap, BarChart3, Wand2, ArrowRight, CheckCircle, Play } from "lucide-react";
+import { useState } from "react";
+import { Brain, ArrowRight, CheckCircle, Play, LayoutDashboard, Users, BarChart3, Settings } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { BrowserWindow } from "@/components/ui/mock-browser-window";
 
 export default function AIShowcaseSection() {
+  const [config, setConfig] = useState({
+    variant: "chrome" as "chrome" | "safari",
+    headerStyle: "full" as "minimal" | "full",
+    size: "lg" as "sm" | "md" | "lg" | "xl",
+    showSidebar: true,
+    sidebarPosition: "left" as "left" | "right" | "top" | "bottom",
+    url: "https://app.adspro.ai/dashboard",
+  });
+
+  const [sidebarItems] = useState([
+    { label: "Overview", active: true, icon: <LayoutDashboard className="w-4 h-4" /> },
+    { label: "Users", badge: "12", icon: <Users className="w-4 h-4" /> },
+    { label: "Analytics", badge: "new", icon: <BarChart3 className="w-4 h-4" /> },
+    { label: "Settings", icon: <Settings className="w-4 h-4" /> },
+  ]);
+
   return (
     <section className="py-16 md:py-24 px-4 relative overflow-hidden">
       {/* Background Effects */}
@@ -31,56 +59,189 @@ export default function AIShowcaseSection() {
           </h2>
         </div>
 
-        {/* Browser Window with Dashboard */}
-        <div className="relative max-w-6xl mx-auto">
-          {/* Glow Effect Behind Browser */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20 rounded-2xl blur-2xl opacity-60" />
+        {/* Browser Preview */}
+        <div className="space-y-8">
+          <div className="relative max-w-6xl mx-auto">
+            {/* Glow Effect Behind Browser */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20 rounded-2xl blur-2xl opacity-60" />
 
-          {/* Browser Mockup */}
-          <div className="relative">
-            <BrowserWindow
-              url="https://app.adspro.ai/dashboard"
-              imageSrc="/images/dashboard-preview.png"
-              className="w-full shadow-[0_0_60px_-15px_rgba(168,85,247,0.4)]"
-            />
+            <div className="relative flex justify-center p-8 bg-zinc-900/30 rounded-xl border border-zinc-800/50">
+              <BrowserWindow
+                variant={config.variant}
+                headerStyle={config.headerStyle}
+                size={config.size}
+                showSidebar={config.showSidebar}
+                sidebarPosition={config.sidebarPosition}
+                url={config.url}
+                sidebarItems={config.showSidebar ? sidebarItems : undefined}
+                className="w-full max-w-5xl shadow-[0_0_60px_-15px_rgba(168,85,247,0.4)]"
+              />
+            </div>
+          </div>
 
-            {/* Floating Play Button */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="relative">
-                {/* Pulse Ring */}
-                <div className="absolute inset-0 -m-4 bg-purple-500/20 rounded-full animate-ping" />
-                <div className="absolute inset-0 -m-2 bg-purple-500/30 rounded-full animate-pulse" />
+          {/* Window Settings */}
+          <div className="space-y-6 max-w-4xl mx-auto">
+            <h3 className="text-lg font-semibold text-white">Window Settings</h3>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Browser Variant */}
+              <div className="space-y-2">
+                <Label className="text-sm">Browser</Label>
+                <Select
+                  value={config.variant}
+                  onValueChange={(value: "chrome" | "safari") =>
+                    setConfig((prev) => ({ ...prev, variant: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-zinc-900/50 border-zinc-700/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="chrome">Chrome</SelectItem>
+                    <SelectItem value="safari">Safari</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                {/* Play Button */}
-                <button className="relative w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/50 pointer-events-auto hover:scale-110 transition-transform cursor-pointer">
-                  <Play className="w-6 h-6 md:w-8 md:h-8 text-white fill-white ml-1" />
-                </button>
+              {/* Header Style */}
+              <div className="space-y-2">
+                <Label className="text-sm">Header Style</Label>
+                <Select
+                  value={config.headerStyle}
+                  onValueChange={(value: "minimal" | "full") =>
+                    setConfig((prev) => ({ ...prev, headerStyle: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-zinc-900/50 border-zinc-700/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="minimal">Minimal</SelectItem>
+                    <SelectItem value="full">Address Bar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Size */}
+              <div className="space-y-2">
+                <Label className="text-sm">Size</Label>
+                <Select
+                  value={config.size}
+                  onValueChange={(value: "sm" | "md" | "lg" | "xl") =>
+                    setConfig((prev) => ({ ...prev, size: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-zinc-900/50 border-zinc-700/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sm">Small</SelectItem>
+                    <SelectItem value="md">Medium</SelectItem>
+                    <SelectItem value="lg">Large</SelectItem>
+                    <SelectItem value="xl">Extra Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* URL */}
+              <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                <Label className="text-sm">URL</Label>
+                <Input
+                  value={config.url}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      url: e.target.value,
+                    }))
+                  }
+                  placeholder="https://example.com"
+                  className="bg-zinc-900/50 border-zinc-700/50"
+                />
+              </div>
+
+              {/* Show Sidebar Toggle */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Show Sidebar</Label>
+                  <Switch
+                    checked={config.showSidebar}
+                    onCheckedChange={(checked) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        showSidebar: checked,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Sidebar Position */}
+              {config.showSidebar && (
+                <div className="space-y-2">
+                  <Label className="text-sm">Sidebar Position</Label>
+                  <Select
+                    value={config.sidebarPosition}
+                    onValueChange={(value: "left" | "right" | "top" | "bottom") =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sidebarPosition: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="bg-zinc-900/50 border-zinc-700/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="right">Right</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Quick Presets */}
+              <div className="space-y-2 md:col-span-2 lg:col-span-1">
+                <Label className="text-sm">Quick Presets</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 bg-transparent border-zinc-700/50 hover:bg-purple-500/10 hover:border-purple-500/50"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        variant: "chrome",
+                        headerStyle: "full",
+                        showSidebar: true,
+                        size: "lg",
+                      }))
+                    }
+                  >
+                    Chrome Dashboard
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 bg-transparent border-zinc-700/50 hover:bg-purple-500/10 hover:border-purple-500/50"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        variant: "safari",
+                        headerStyle: "minimal",
+                        showSidebar: false,
+                        size: "md",
+                      }))
+                    }
+                  >
+                    Safari Minimal
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* AI Capabilities Pills */}
-        <div className="flex flex-wrap justify-center gap-3 mt-12">
-          {[
-            { icon: <Wand2 className="w-4 h-4" />, text: "Auto Copy Generation" },
-            { icon: <Target className="w-4 h-4" />, text: "Smart Audience AI" },
-            { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding" },
-            { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics" },
-            { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization" },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-sm text-zinc-300 backdrop-blur-sm cursor-default hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
-            >
-              <span className="text-purple-400">{item.icon}</span>
-              {item.text}
-            </div>
-          ))}
-        </div>
-
         {/* Bottom CTA */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-16">
           <Link
             href="/authentication/sign-up"
             className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-base transition-all duration-300 shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105"
