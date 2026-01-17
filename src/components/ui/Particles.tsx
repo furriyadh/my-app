@@ -10,28 +10,6 @@ interface ParticlesProps {
   className?: string;
 }
 
-// Create a disc texture programmatically
-function createDiscTexture(): THREE.Texture {
-  const canvas = document.createElement("canvas");
-  canvas.width = 32;
-  canvas.height = 32;
-  const ctx = canvas.getContext("2d");
-
-  if (ctx) {
-    const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-    gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
-    gradient.addColorStop(0.4, "rgba(255, 255, 255, 0.8)");
-    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 32, 32);
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
-}
-
 export function Particles({
   color = "#ff3366",
   particleCount = 10000,
@@ -47,7 +25,6 @@ export function Particles({
 
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let renderer: THREE.WebGLRenderer;
     let material: THREE.PointsMaterial;
     let animationFrameId: number;
     let mouseX = 0;
@@ -63,7 +40,7 @@ export function Particles({
       camera.position.z = 1000;
 
       scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x0a0e19, 0.001);
+      scene.fog = new THREE.FogExp2(0x000000, 0.001);
 
       const geometry = new THREE.BufferGeometry();
       const vertices: number[] = [];
@@ -81,23 +58,20 @@ export function Particles({
         new THREE.Float32BufferAttribute(vertices, 3)
       );
 
-      // Use programmatically created texture
-      const sprite = createDiscTexture();
+      const sprite = new THREE.TextureLoader().load("/assets/disc.png");
       material = new THREE.PointsMaterial({
         size: particleSize,
         sizeAttenuation: true,
         map: sprite,
-        alphaTest: 0.001,
+        alphaTest: 0.5,
         transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
       });
       material.color.setStyle(color);
 
       const particles = new THREE.Points(geometry, material);
       scene.add(particles);
 
-      renderer = new THREE.WebGLRenderer({
+      const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
       });
@@ -139,7 +113,7 @@ export function Particles({
       animationFrameId = requestAnimationFrame(animateScene);
     };
 
-    init();
+    const renderer = init();
     window.addEventListener("resize", handleResize);
     window.addEventListener("pointermove", handlePointerMove);
     animateScene();

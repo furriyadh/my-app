@@ -3,6 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 export default function PricingHero() {
     const { language, isRTL } = useTranslation();
@@ -25,12 +27,19 @@ export default function PricingHero() {
                 </p>
 
                 {/* CTA Button */}
-                <Link
-                    href="/authentication/sign-up"
-                    className="inline-block px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-full transition-colors"
-                >
-                    {language === 'ar' ? 'إنشاء حساب مجاني' : 'Create a Free Account'}
-                </Link>
+                {/* CTA Button */}
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <button
+                            className="inline-block px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-full transition-colors"
+                        >
+                            {language === 'ar' ? 'إنشاء حساب مجاني' : 'Create a Free Account'}
+                        </button>
+                    </DialogTrigger>
+                    <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                        <Login />
+                    </DialogContent>
+                </Dialog>
             </div>
         </section>
     );

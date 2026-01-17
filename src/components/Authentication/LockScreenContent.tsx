@@ -2,12 +2,12 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  User, 
-  Shield, 
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  User,
+  Shield,
   Clock,
   AlertTriangle,
   CheckCircle,
@@ -18,6 +18,8 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 // Types
 interface LockScreenState {
@@ -73,11 +75,11 @@ const LockScreenContent: React.FC = () => {
           lastLogin: new Date()
         };
       }
-      
+
       const userInfoCookie = document.cookie
         .split('; ')
         .find(row => row.startsWith('oauth2_user_info='));
-      
+
       if (userInfoCookie) {
         const userData = JSON.parse(decodeURIComponent(userInfoCookie.split('=')[1]));
         return {
@@ -91,7 +93,7 @@ const LockScreenContent: React.FC = () => {
     } catch (error) {
       console.warn('Could not parse user info from cookies:', error);
     }
-    
+
     // البيانات الافتراضية إذا لم يتم العثور على بيانات المستخدم
     return {
       name: "مستخدم النظام",
@@ -105,7 +107,7 @@ const LockScreenContent: React.FC = () => {
   // Lock timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (state.isLocked && state.lockTimeRemaining > 0) {
       interval = setInterval(() => {
         setState(prev => {
@@ -165,7 +167,7 @@ const LockScreenContent: React.FC = () => {
   // Handle unlock
   const handleUnlock = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (state.isLocked) return;
     if (!state.password.trim()) {
       setState(prev => ({ ...prev, error: "يرجى إدخال كلمة المرور" }));
@@ -176,9 +178,9 @@ const LockScreenContent: React.FC = () => {
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       const isValidPassword = state.password === "123456";
-      
+
       if (isValidPassword) {
         localStorage.setItem("lastActivity", Date.now().toString());
         localStorage.setItem("isAuthenticated", "true");
@@ -186,7 +188,7 @@ const LockScreenContent: React.FC = () => {
         window.location.href = "/dashboard";
       } else {
         const newAttempts = state.attempts + 1;
-        
+
         if (newAttempts >= MAX_ATTEMPTS) {
           setState(prev => ({
             ...prev,
@@ -222,18 +224,20 @@ const LockScreenContent: React.FC = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  // State for controlling Dialogs
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showForgotDialog, setShowForgotDialog] = useState(false);
+
   // Handle forgot password
   const handleForgotPassword = useCallback(() => {
-    // مسار نسبي يعمل في التطوير والإنتاج
-    window.location.href = "/authentication/forgot-password";
+    setShowForgotDialog(true);
   }, []);
 
   // Handle switch user
   const handleSwitchUser = useCallback(() => {
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("lastActivity");
-    // مسار نسبي يعمل في التطوير والإنتاج
-    window.location.href = "/authentication/sign-in";
+    setShowLoginDialog(true);
   }, []);
 
   // Furriyadh Logo Component
@@ -316,7 +320,7 @@ const LockScreenContent: React.FC = () => {
       <div className="auth-main-content bg-white dark:bg-[#0a0e19] py-[60px] md:py-[80px] lg:py-[135px] min-h-screen">
         <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] items-center">
-            
+
             {/* Left Side - Image */}
             <div className="xl:ltr:-mr-[25px] xl:rtl:-ml-[25px] 2xl:ltr:-mr-[45px] 2xl:rtl:-ml-[45px] rounded-[25px] order-2 lg:order-1 relative">
               <Image
@@ -331,23 +335,23 @@ const LockScreenContent: React.FC = () => {
                   target.src = "data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'646\' height=\'804\' viewBox=\'0 0 646 804\'%3E%3Crect width=\'646\' height=\'804\' fill=\'%23f3f4f6\'%3E%3C/rect%3E%3Ctext x=\'323\' y=\'402\' text-anchor=\'middle\' fill=\'%236b7280\' font-family=\'Arial\' font-size=\'24\'%3ELock Screen%3C/text%3E%3C/svg%3E";
                 }}
               />
-              
+
               {/* Floating Security Badge */}
               <div className="absolute -top-4 -right-4 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg">
                 <Shield className="w-6 h-6 text-green-500" />
               </div>
-              
+
               {/* Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-[25px]"></div>
             </div>
 
             {/* Right Side - Lock Form */}
             <div className="xl:ltr:pl-[90px] xl:rtl:pr-[90px] 2xl:ltr:pl-[120px] 2xl:rtl:pr-[120px] order-1 lg:order-2">
-              
+
               {/* Logo Section */}
               <div className="mb-6">
                 <FurriyadhLogo />
-                
+
                 {/* Fallback to original logos if needed */}
                 <div className="hidden">
                   <Image
@@ -373,7 +377,7 @@ const LockScreenContent: React.FC = () => {
               {/* Lock Screen Content */}
               {state.isLocked ? (
                 <LockAnimation />
-               ) : (
+              ) : (
                 <>
                   {/* Header */}
                   <div className="my-[17px] md:my-[25px]">
@@ -453,7 +457,7 @@ const LockScreenContent: React.FC = () => {
                         <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                         <span className="text-sm">{state.error}</span>
                       </div>
-                     )}
+                    )}
 
                     {/* Attempts Warning */}
                     {state.attempts > 0 && state.attempts < MAX_ATTEMPTS && (
@@ -494,7 +498,7 @@ const LockScreenContent: React.FC = () => {
                         <HelpCircle className="w-4 h-4" />
                         نسيت كلمة المرور؟
                       </button>
-                      
+
                       <button
                         type="button"
                         onClick={() => {
@@ -534,6 +538,17 @@ const LockScreenContent: React.FC = () => {
           </div>
         </div>
       </div>
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+          <Login initialView="signin" />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showForgotDialog} onOpenChange={setShowForgotDialog}>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+          <Login initialView="forgot" />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

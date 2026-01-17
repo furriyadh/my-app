@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Brain, ArrowRight, CheckCircle, Play, LayoutDashboard, Users, BarChart3, Settings } from "lucide-react";
 import Link from "next/link";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
@@ -240,14 +242,20 @@ export default function AIShowcaseSection() {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <Link
-            href="/authentication/sign-up"
-            className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-base transition-all duration-300 shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105"
-          >
-            <Brain className="w-5 h-5" />
-            <span>Start Creating AI-Powered Ads</span>
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-base transition-all duration-300 shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105"
+              >
+                <Brain className="w-5 h-5" />
+                <span>Start Creating AI-Powered Ads</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+              <Login />
+            </DialogContent>
+          </Dialog>
 
           <p className="text-zinc-500 mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
             <span className="flex items-center gap-2">

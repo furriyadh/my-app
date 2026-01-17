@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 export default function PricingCTA() {
     const { language, isRTL } = useTranslation();
@@ -27,12 +29,18 @@ export default function PricingCTA() {
 
                 {/* CTA Button */}
                 <div className="mb-6">
-                    <a
-                        href="/authentication/sign-up"
-                        className="inline-block px-10 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-full transition-colors shadow-lg shadow-primary-500/30 text-lg"
-                    >
-                        {language === 'ar' ? 'إنشاء حساب مجاني' : 'Create Free Account'}
-                    </a>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button
+                                className="inline-block px-10 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-full transition-colors shadow-lg shadow-primary-500/30 text-lg"
+                            >
+                                {language === 'ar' ? 'إنشاء حساب مجاني' : 'Create Free Account'}
+                            </button>
+                        </DialogTrigger>
+                        <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                            <Login />
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 {/* Social Proof */}

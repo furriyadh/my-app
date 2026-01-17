@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Key, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 // --- Icons ---
 // Reusing Lucide icons imported above for this standalone page version
@@ -83,9 +85,16 @@ const ForgotPasswordForm: React.FC = () => {
                         </div>
                         <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Check Your Inbox</h2>
                         <p className="text-zinc-500 dark:text-zinc-400">{message}</p>
-                        <Link href="/authentication/sign-in" className="inline-block mt-4 text-purple-600 dark:text-purple-400 font-medium hover:underline">
-                            Back to Sign In
-                        </Link>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <button className="inline-block mt-4 text-purple-600 dark:text-purple-400 font-medium hover:underline">
+                                    Back to Sign In
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                                <Login />
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
             </div>
@@ -148,9 +157,16 @@ const ForgotPasswordForm: React.FC = () => {
                 </form>
 
                 <div className="text-center pt-2">
-                    <Link href="/authentication/sign-in" className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Back to Sign In
-                    </Link>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                                <ArrowLeft className="w-4 h-4" /> Back to Sign In
+                            </button>
+                        </DialogTrigger>
+                        <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                            <Login />
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
             </div>

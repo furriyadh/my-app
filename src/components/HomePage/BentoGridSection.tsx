@@ -27,21 +27,21 @@ Circle.displayName = "Circle";
 
 // Icons - Using official icons from integrations page
 const Icons = {
-    googleAds: () => (
-        <img src="/images/integrations/google-ads-logo.svg" alt="Google Ads" className="w-10 h-10 object-contain" />
+    googleAds: ({ className = "w-10 h-10" }: { className?: string }) => (
+        <img src="/images/integrations/google-ads-logo.svg" alt="Google Ads" className={cn("object-contain", className)} />
     ),
-    analytics: () => (
-        <img src="/images/integrations/google-analytics-logo.svg" alt="Google Analytics" className="w-10 h-10 object-contain" />
+    analytics: ({ className = "w-10 h-10" }: { className?: string }) => (
+        <img src="/images/integrations/google-analytics-logo.svg" alt="Google Analytics" className={cn("object-contain", className)} />
     ),
-    tagManager: () => (
-        <svg viewBox="0 0 48 48" className="w-10 h-10">
+    tagManager: ({ className = "w-10 h-10" }: { className?: string }) => (
+        <svg viewBox="0 0 48 48" className={className}>
             <path fill="#4fc3f7" d="M44.945,21.453L26.547,3.055c-1.404-1.404-3.689-1.404-5.094,0L3.055,21.453c-1.404,1.404-1.404,3.689,0,5.094l18.398,18.398c0.702,0.702,1.625,1.053,2.547,1.053s1.845-0.351,2.547-1.053l18.398-18.398C46.349,25.143,46.349,22.857,44.945,21.453z M24,29l-5-5l5-5l5,5L24,29z" />
             <path fill="#2979ff" d="M33.246,9.754L24,19l5,5l-5,5l9.246,9.246l11.699-11.699c1.404-1.404,1.404-3.689,0-5.094L33.246,9.754z" />
             <path fill="#2962ff" d="M14.754,38.246l6.699,6.699c0.702,0.702,1.625,1.053,2.547,1.053s1.845-0.351,2.547-1.053l6.699-6.699L24,29L14.754,38.246z" />
         </svg>
     ),
-    merchantCenter: () => (
-        <svg viewBox="0 0 24 24" className="w-10 h-10">
+    merchantCenter: ({ className = "w-10 h-10" }: { className?: string }) => (
+        <svg viewBox="0 0 24 24" className={className}>
             <path fill="#4285F4" d="M20.01 7.56L12 2 3.99 7.56v8.88L12 22l8.01-5.56V7.56z" />
             <path fill="#34A853" d="M12 22l8.01-5.56V7.56L12 13.12V22z" />
             <path fill="#FBBC05" d="M3.99 16.44L12 22v-8.88L3.99 7.56v8.88z" />
@@ -49,16 +49,16 @@ const Icons = {
             <path fill="#fff" d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm0 5.5a2 2 0 110-4 2 2 0 010 4z" />
         </svg>
     ),
-    youtube: () => (
-        <svg viewBox="0 0 24 24" className="w-10 h-10" fill="#FF0000">
+    youtube: ({ className = "w-10 h-10" }: { className?: string }) => (
+        <svg viewBox="0 0 24 24" className={className} fill="#FF0000">
             <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
         </svg>
     ),
-    furriyadh: () => (
-        <img src="/images/logo-icon.svg" alt="Furriyadh" className="w-12 h-12 object-contain" />
+    furriyadh: ({ className = "w-12 h-12" }: { className?: string }) => (
+        <img src="/images/logo-icon.svg" alt="Furriyadh" className={cn("object-contain", className)} />
     ),
-    user: () => (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" xmlns="http://www.w3.org/2000/svg">
+    user: ({ className = "w-8 h-8" }: { className?: string }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
         </svg>
@@ -179,40 +179,40 @@ export default function AnimatedBeamSection() {
 
                             {/* Animated Beam Demo */}
                             <div
-                                className="relative flex h-[380px] w-full items-center justify-center overflow-hidden"
+                                className="relative flex h-[500px] w-full items-center justify-center overflow-hidden"
                                 ref={containerRef}
                             >
-                                <div className="flex size-full max-w-lg flex-row items-stretch justify-between gap-10">
+                                <div className="flex size-full max-w-3xl flex-row items-stretch justify-between gap-16 px-4">
                                     {/* Left - User */}
                                     <div className="flex flex-col justify-center">
-                                        <Circle ref={div7Ref} className="size-16 border-purple-500/50">
-                                            <Icons.user />
+                                        <Circle ref={div7Ref} className="size-24 border-purple-500/50 bg-zinc-900/80">
+                                            <Icons.user className="w-10 h-10" />
                                         </Circle>
                                     </div>
 
                                     {/* Center - Furriyadh AI Hub */}
                                     <div className="flex flex-col justify-center">
-                                        <Circle ref={div6Ref} className="size-20 border-purple-500 bg-gradient-to-br from-purple-900/50 to-blue-900/50 shadow-purple-500/20 shadow-xl">
-                                            <Icons.furriyadh />
+                                        <Circle ref={div6Ref} className="size-32 border-purple-500 bg-gradient-to-br from-purple-900/50 to-blue-900/50 shadow-purple-500/40 shadow-2xl p-6">
+                                            <Icons.furriyadh className="w-20 h-20" />
                                         </Circle>
                                     </div>
 
                                     {/* Right - Integrations */}
-                                    <div className="flex flex-col justify-center gap-4">
-                                        <Circle ref={div1Ref} className="size-12 border-yellow-500/50 bg-yellow-500/10">
-                                            <Icons.googleAds />
+                                    <div className="flex flex-col justify-center gap-6">
+                                        <Circle ref={div1Ref} className="size-16 border-yellow-500/50 bg-yellow-500/10">
+                                            <Icons.googleAds className="w-8 h-8" />
                                         </Circle>
-                                        <Circle ref={div2Ref} className="size-12 border-orange-500/50 bg-orange-500/10">
-                                            <Icons.analytics />
+                                        <Circle ref={div2Ref} className="size-16 border-orange-500/50 bg-orange-500/10">
+                                            <Icons.analytics className="w-8 h-8" />
                                         </Circle>
-                                        <Circle ref={div3Ref} className="size-12 border-cyan-500/50 bg-cyan-500/10">
-                                            <Icons.tagManager />
+                                        <Circle ref={div3Ref} className="size-16 border-cyan-500/50 bg-cyan-500/10">
+                                            <Icons.tagManager className="w-8 h-8" />
                                         </Circle>
-                                        <Circle ref={div4Ref} className="size-12 border-blue-400/50 bg-blue-400/10">
-                                            <Icons.merchantCenter />
+                                        <Circle ref={div4Ref} className="size-16 border-blue-400/50 bg-blue-400/10">
+                                            <Icons.merchantCenter className="w-8 h-8" />
                                         </Circle>
-                                        <Circle ref={div5Ref} className="size-12 border-red-500/50 bg-red-500/10">
-                                            <Icons.youtube />
+                                        <Circle ref={div5Ref} className="size-16 border-red-500/50 bg-red-500/10">
+                                            <Icons.youtube className="w-8 h-8" />
                                         </Circle>
                                     </div>
                                 </div>

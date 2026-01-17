@@ -147,7 +147,7 @@ const useSupabaseClient = () => {
 };
 
 interface LoginProps {
-    initialView?: "signin" | "signup";
+    initialView?: "signin" | "signup" | "forgot";
 }
 
 export default function Login({ initialView = "signin" }: LoginProps) {
