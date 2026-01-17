@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ import SparkleNavbar from "@/components/lightswind/sparkle-navbar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Login from "@/components/ui/login";
 
-const Navbar: React.FC = () => {
+const NavbarContent: React.FC = () => {
   const pathname = usePathname();
   const { t, language, setLanguage } = useTranslation();
 
@@ -266,6 +266,14 @@ const Navbar: React.FC = () => {
         </MobileNav>
       </AceternityNavbar>
     </div>
+  );
+};
+
+const Navbar: React.FC = () => {
+  return (
+    <Suspense fallback={null}>
+      <NavbarContent />
+    </Suspense>
   );
 };
 
