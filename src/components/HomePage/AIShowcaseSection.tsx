@@ -1,141 +1,95 @@
 "use client";
 
-import { Brain, Sparkles, Target, Zap, BarChart3, Wand2, ArrowRight, CheckCircle } from "lucide-react";
+import { Brain, Sparkles, Target, Zap, BarChart3, Wand2, ArrowRight, CheckCircle, Play } from "lucide-react";
 import Link from "next/link";
-import ModernLoader from "@/components/ui/modern-loader";
-import dynamic from "next/dynamic";
-
-const CircularGallery = dynamic(() => import("@/components/ui/CircularGallery"), { ssr: false });
+import { BrowserWindow } from "@/components/ui/mock-browser-window";
 
 export default function AIShowcaseSection() {
   return (
-    <section className="py-16 md:py-20 px-4 relative overflow-hidden">
+    <section className="py-16 md:py-24 px-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl" />
+      </div>
+
       <div className="container mx-auto max-w-7xl relative z-10">
-        {/* Header with AI Animation */}
-        <div className="text-center mb-16">
-          {/* AI Status Badge */}
-          <div className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 border border-green-500/30 rounded-full mb-8 backdrop-blur-xl shadow-lg shadow-green-500/20">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-            </div>
-            <div className="text-left">
-              <p className="text-green-300 font-bold text-sm">AI Engine Active</p>
-              <p className="text-green-400/60 text-xs">Processing 2,847 campaigns</p>
-            </div>
-            <div className="h-8 w-px bg-green-500/30"></div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-400 text-xs font-mono">LIVE</span>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            </div>
+        {/* Header */}
+        <div className="text-center mb-12 md:mb-16">
+          {/* Small Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6">
+            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
+            <span className="text-purple-300 text-xs font-medium uppercase tracking-wider">
+              Unleash the power of
+            </span>
           </div>
 
-          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
-            <span className="text-zinc-900 dark:text-white">Watch AI Create </span>
-            <span className="bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 dark:from-green-400 dark:via-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              Winning Campaigns
+          <h2 className="!mb-0 !text-[32px] md:!text-[42px] lg:!text-[52px] xl:!text-[60px] -tracking-[1px] md:-tracking-[1.5px] lg:-tracking-[2px] !leading-[1.1] text-zinc-900 dark:text-white font-bold">
+            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              AI-Powered Ads
             </span>
           </h2>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400 max-w-3xl mx-auto mb-10">
-            See our AI analyze, create, and optimize ads in real-time. From competitor analysis to launch in seconds.
-          </p>
-
-          {/* AI Capabilities Pills */}
-          <div className="flex flex-wrap justify-center gap-4">
-            {[
-              { icon: <Wand2 className="w-4 h-4" />, text: "Auto Copy Generation", bgLight: "bg-purple-100", bgDark: "dark:bg-purple-500/20", textLight: "text-purple-700", textDark: "dark:text-purple-300", borderLight: "border-purple-300", borderDark: "dark:border-purple-500/50" },
-              { icon: <Target className="w-4 h-4" />, text: "Smart Audience AI", bgLight: "bg-blue-100", bgDark: "dark:bg-blue-500/20", textLight: "text-blue-700", textDark: "dark:text-blue-300", borderLight: "border-blue-300", borderDark: "dark:border-blue-500/50" },
-              { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding", bgLight: "bg-orange-100", bgDark: "dark:bg-orange-500/20", textLight: "text-orange-700", textDark: "dark:text-orange-300", borderLight: "border-orange-300", borderDark: "dark:border-orange-500/50" },
-              { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics", bgLight: "bg-green-100", bgDark: "dark:bg-green-500/20", textLight: "text-green-700", textDark: "dark:text-green-300", borderLight: "border-green-300", borderDark: "dark:border-green-500/50" },
-              { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization", bgLight: "bg-pink-100", bgDark: "dark:bg-pink-500/20", textLight: "text-pink-700", textDark: "dark:text-pink-300", borderLight: "border-pink-300", borderDark: "dark:border-pink-500/50" },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className={`flex items-center gap-2 px-5 py-2.5 ${item.bgLight} ${item.bgDark} border ${item.borderLight} ${item.borderDark} rounded-full text-sm ${item.textLight} ${item.textDark} backdrop-blur-sm cursor-default hover:scale-105 transition-transform font-medium`}
-              >
-                {item.icon}
-                {item.text}
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Main Content - AI Campaign Generator */}
-        <div className="flex justify-center items-center w-full">
-          <div className="w-full max-w-2xl mx-auto px-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-cyan-600/20 rounded-3xl blur-xl"></div>
-              <div className="relative bg-white dark:bg-zinc-950/90 backdrop-blur-xl rounded-3xl border border-zinc-200 dark:border-green-500/30 overflow-hidden shadow-2xl shadow-green-500/20">
-                <ModernLoader
-                  words={[
-                    "Analyzing competitor ads...",
-                    "Generating AI headlines...",
-                    "Optimizing bid strategy...",
-                    "Predicting CTR scores...",
-                    "Creating ad variations...",
-                    "Targeting ideal audience...",
-                    "Calculating optimal budget...",
-                    "Refining ad copy...",
-                    "Building campaign structure...",
-                    "Maximizing ROAS potential...",
-                  ]}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Browser Window with Dashboard */}
+        <div className="relative max-w-6xl mx-auto">
+          {/* Glow Effect Behind Browser */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20 rounded-2xl blur-2xl opacity-60" />
 
-        {/* Circular Gallery */}
-        <div className="mt-12 md:mt-20 relative">
-          <div className="text-center mb-6 md:mb-12">
-            <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full mb-4 md:mb-6">
-              <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
-              <span className="text-purple-300 text-sm md:text-base font-medium">AI-Generated Ad Gallery</span>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-            </div>
-            <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
-              Explore All Ad Types
-            </h2>
-            <p className="mt-4 text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto px-4">
-              Drag to explore our AI-generated campaigns across Search, Display, Shopping, Video, and more
-            </p>
-          </div >
-
-          <div className="h-[280px] sm:h-[350px] md:h-[450px] lg:h-[500px] xl:h-[600px] relative">
-            <CircularGallery
-              items={[
-                { image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&h=600", text: "Search Ads" },
-                { image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600", text: "Display Ads" },
-                { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600", text: "Shopping Ads" },
-                { image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=600", text: "Video Ads" },
-                { image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=600", text: "App Campaigns" },
-                { image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600", text: "Performance Max" },
-                { image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600", text: "Smart Campaigns" },
-                { image: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=800&h=600", text: "Discovery Ads" },
-              ]}
-              bend={3}
-              textColor="#888888"
-              borderRadius={0.05}
-              scrollSpeed={2}
-              scrollEase={0.02}
+          {/* Browser Mockup */}
+          <div className="relative">
+            <BrowserWindow
+              url="https://app.adspro.ai/dashboard"
+              imageSrc="/images/dashboard-preview.png"
+              className="w-full shadow-[0_0_60px_-15px_rgba(168,85,247,0.4)]"
             />
+
+            {/* Floating Play Button */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="relative">
+                {/* Pulse Ring */}
+                <div className="absolute inset-0 -m-4 bg-purple-500/20 rounded-full animate-ping" />
+                <div className="absolute inset-0 -m-2 bg-purple-500/30 rounded-full animate-pulse" />
+
+                {/* Play Button */}
+                <button className="relative w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/50 pointer-events-auto hover:scale-110 transition-transform cursor-pointer">
+                  <Play className="w-6 h-6 md:w-8 md:h-8 text-white fill-white ml-1" />
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* AI Capabilities Pills */}
+        <div className="flex flex-wrap justify-center gap-3 mt-12">
+          {[
+            { icon: <Wand2 className="w-4 h-4" />, text: "Auto Copy Generation" },
+            { icon: <Target className="w-4 h-4" />, text: "Smart Audience AI" },
+            { icon: <Zap className="w-4 h-4" />, text: "Real-time Bidding" },
+            { icon: <BarChart3 className="w-4 h-4" />, text: "Predictive Analytics" },
+            { icon: <Brain className="w-4 h-4" />, text: "Neural Optimization" },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-sm text-zinc-300 backdrop-blur-sm cursor-default hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+            >
+              <span className="text-purple-400">{item.icon}</span>
+              {item.text}
+            </div>
+          ))}
         </div>
 
         {/* Bottom CTA */}
         <div className="text-center mt-12">
-          <div className="inline-block">
-            <Link
-              href="/authentication/sign-up"
-              className="group relative inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-green-600 via-emerald-600 to-cyan-600 text-white rounded-2xl font-bold text-lg transition-all duration-300 shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 overflow-hidden"
-            >
-              <Brain className="w-6 h-6 relative z-10" />
-              <span className="relative z-10">Start Creating AI-Powered Ads</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform relative z-10" />
-            </Link>
-          </div>
+          <Link
+            href="/authentication/sign-up"
+            className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-base transition-all duration-300 shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105"
+          >
+            <Brain className="w-5 h-5" />
+            <span>Start Creating AI-Powered Ads</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
           <p className="text-zinc-500 mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
             <span className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-green-400" />
@@ -155,4 +109,3 @@ export default function AIShowcaseSection() {
     </section>
   );
 }
-
