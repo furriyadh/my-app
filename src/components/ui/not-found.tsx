@@ -3,8 +3,9 @@
 import { useRef, useEffect, useState, MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Particles } from "@/components/ui/particles";
-import { Button } from "@/components/ui/button";
+import { Particles } from "@/components/ui/Particles";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface NotFoundProps {
   particleCount?: number;
@@ -76,7 +77,11 @@ export default function NotFound({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`relative h-[24rem] md:h-screen w-full flex items-center justify-center overflow-hidden bg-white dark:bg-black ${className}`}
+      className={cn(
+        "relative h-[24rem] md:h-screen w-full flex items-center justify-center overflow-hidden",
+        "bg-white dark:bg-[#0a0e19]",
+        className
+      )}
       style={{ perspective: "1000px" }}
     >
       <Particles

@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/40 bg-white dark:bg-[#0a0e19] relative z-10">
+      <div className="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[150px] border-t border-purple-500/20 backdrop-blur-md dark:bg-black/10 relative z-10">
         <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px]">
             {/* Logo & Description */}
@@ -65,28 +65,28 @@ const Footer: React.FC = () => {
                 <a
                   href="https://www.facebook.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-flex items-center justify-center w-[35px] h-[35px] rounded-full leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-facebook-fill"></i>
                 </a>
                 <a
                   href="https://x.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-flex items-center justify-center w-[35px] h-[35px] rounded-full leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-twitter-x-fill"></i>
                 </a>
                 <a
                   href="https://www.linkedin.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-flex items-center justify-center w-[35px] h-[35px] rounded-full leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-linkedin-fill"></i>
                 </a>
                 <a
                   href="https://www.instagram.com/"
                   target="_blank"
-                  className="inline-block leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
+                  className="inline-flex items-center justify-center w-[35px] h-[35px] rounded-full leading-none text-[20px] text-purple-500 transition-all hover:text-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] ltr:mr-[8px] rtl:ml-[8px] ltr:last:mr-0 rtl:last:ml-0"
                 >
                   <i className="ri-instagram-fill"></i>
                 </a>
@@ -231,7 +231,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] bg-gray-50 dark:bg-[#0a0e19]/90 backdrop-blur-md text-center border-t border-gray-200 dark:border-white/10">
+        <div className="py-[15px] md:py-[20px] mt-[60px] md:mt-[80px] lg:mt-[100px] text-center border-t border-purple-500/10">
           <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
             <p className="leading-[1.6] text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
               © <span className="text-purple-500">2026, Furriyadh</span> {language === 'ar' ? '. جميع الحقوق محفوظة.' : '. All rights reserved.'}

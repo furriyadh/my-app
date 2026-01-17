@@ -74,23 +74,22 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     setActive(!active);
   };
 
-  // Define public/auth pages (No Sidebar/Header/Footer)
-  const isPublicModule =
-    pathname === "/" ||
-    pathname === "/coming-soon" ||
-    pathname === "/refund" ||
-    pathname === "/cookies" ||
-    pathname === "/terms" ||
-    pathname === "/privacy" ||
-    pathname === "/pricing" ||
-    pathname === "/team" ||
-    pathname === "/faq" ||
-    pathname === "/contact" ||
-    pathname === "/features" ||
-    pathname?.startsWith("/authentication/") ||
-    pathname?.startsWith("/front-pages/") ||
-    pathname?.startsWith("/pdf/") ||
-    pathname?.startsWith("/extra-pages/"); // Add any other public path prefixes here
+  // Define Protected/Dashboard Routes (Show Sidebar/Header/Footer)
+  const protectedRoutes = [
+    '/admin', '/apps', '/billing', '/charts', '/crm', '/crypto-trader', '/dashboard',
+    '/demo-navbar', '/doctor', '/ecommerce', '/events', '/finance', '/forms', '/gallery',
+    '/google-ads', '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
+    '/my-profile', '/nft', '/notifications', '/onboarding', '/profile', '/project-management',
+    '/quick-test', '/real-estate', '/real-estate-agent', '/restaurant', '/search', '/settings',
+    '/social', '/starter', '/tables', '/timeline', '/ui-elements', '/users', '/widgets'
+  ];
+
+  // Logic: If path starts with any protected route, it's NOT public.
+  // Exception: Authentication and Front Pages are explicitly Public (already covered by not being in protected list? 
+  // No, authentication is not in protected list. So it defaults to Public. Correct.)
+
+  const isProtected = protectedRoutes.some(route => pathname === route || pathname?.startsWith(route + '/'));
+  const isPublicModule = !isProtected;
 
   useEffect(() => {
     // Auth Check for Protected Pages
@@ -98,7 +97,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
       const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          router.push('/authentication/sign-in');
+          router.push('/?login=true');
         }
       };
 
@@ -106,7 +105,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
         if (event === 'SIGNED_OUT') {
-          router.push('/');
+          router.push('/?login=true');
         }
       });
 
@@ -124,9 +123,13 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     );
   }
 
+  if (isPublicModule) {
+    return <>{children}</>;
+  }
+
   return (
     <>
-      <div className={`main-content-wrap transition-all ${active ? "active" : ""}`}>
+      <div className={`main-content-wrap transition-all ${active ? "active" : ""} ${isPublicModule ? "!ml-0 !p-0 !w-full" : ""}`}>
         {!isPublicModule && (
           <>
             <SidebarMenu toggleActive={toggleActive} />

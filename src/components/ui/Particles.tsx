@@ -29,6 +29,26 @@ export function Particles({
     let animationFrameId: number;
     let mouseX = 0;
     let mouseY = 0;
+    let renderer: THREE.WebGLRenderer;
+
+    const createDiscTexture = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 32;
+      canvas.height = 32;
+      const context = canvas.getContext("2d");
+      if (!context) return new THREE.Texture();
+
+      const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
+      gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 32, 32);
+
+      const texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    };
 
     const init = () => {
       camera = new THREE.PerspectiveCamera(
@@ -40,7 +60,8 @@ export function Particles({
       camera.position.z = 1000;
 
       scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x000000, 0.001);
+      // Match the background color #0a0e19
+      scene.fog = new THREE.FogExp2(0x0a0e19, 0.001);
 
       const geometry = new THREE.BufferGeometry();
       const vertices: number[] = [];
@@ -58,20 +79,22 @@ export function Particles({
         new THREE.Float32BufferAttribute(vertices, 3)
       );
 
-      const sprite = new THREE.TextureLoader().load("/assets/disc.png");
+      const sprite = createDiscTexture();
       material = new THREE.PointsMaterial({
         size: particleSize,
         sizeAttenuation: true,
         map: sprite,
-        alphaTest: 0.5,
+        alphaTest: 0.001, // Reduced to prevent clipping
         transparent: true,
+        depthWrite: false, // Fix transparency issues
+        blending: THREE.AdditiveBlending,
       });
       material.color.setStyle(color);
 
       const particles = new THREE.Points(geometry, material);
       scene.add(particles);
 
-      const renderer = new THREE.WebGLRenderer({
+      renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
       });
@@ -113,7 +136,7 @@ export function Particles({
       animationFrameId = requestAnimationFrame(animateScene);
     };
 
-    const renderer = init();
+    init();
     window.addEventListener("resize", handleResize);
     window.addEventListener("pointermove", handlePointerMove);
     animateScene();

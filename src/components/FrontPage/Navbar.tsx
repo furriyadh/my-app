@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useTranslation, SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/hooks/useTranslation";
 import {
   Navbar as AceternityNavbar,
@@ -31,6 +31,19 @@ const Navbar: React.FC = () => {
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Check for login query param
+  useEffect(() => {
+    if (searchParams?.get("login") === "true") {
+      setShowLoginDialog(true);
+      // Clean up URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
 
   // Initialize scroll listener
   useEffect(() => {
@@ -151,8 +164,7 @@ const Navbar: React.FC = () => {
               )}
             </div>
 
-            {/* Auth Buttons */}
-            <Dialog>
+            <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
               <DialogTrigger asChild>
                 <NavbarButton
                   as="button"
@@ -234,7 +246,7 @@ const Navbar: React.FC = () => {
 
             {/* Mobile Auth Buttons */}
             <div className="flex w-full flex-col gap-3 mt-4">
-              <Dialog>
+              <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
                 <DialogTrigger asChild>
                   <NavbarButton
                     as="button"

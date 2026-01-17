@@ -45,12 +45,12 @@ export default function SessionSyncProvider({
 
                 console.log('✅ Session cleared, redirecting to login...');
 
-                // التوجيه لصفحة تسجيل الدخول
-                router.push('/login');
+                // التوجيه لصفحة الـ Home
+                router.push('/');
             } catch (error) {
                 console.error('❌ Error during logout:', error);
-                // في حالة الخطأ، نوجه للـ login على أي حال
-                router.push('/login');
+                // في حالة الخطأ، نوجه للـ Home على أي حال
+                router.push('/');
             }
         };
 

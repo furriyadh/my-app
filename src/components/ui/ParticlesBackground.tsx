@@ -14,8 +14,19 @@ export default function ParticlesBackground() {
 
     if (!mounted) return null;
 
-    // Exclude dashboard pages
-    if (pathname?.startsWith("/dashboard")) {
+    // Define Protected/Dashboard Routes to exclude particles from
+    const protectedRoutes = [
+        '/admin', '/apps', '/billing', '/charts', '/crm', '/crypto-trader', '/dashboard',
+        '/demo-navbar', '/doctor', '/ecommerce', '/events', '/finance', '/forms', '/gallery',
+        '/google-ads', '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
+        '/my-profile', '/nft', '/notifications', '/onboarding', '/profile', '/project-management',
+        '/quick-test', '/real-estate', '/real-estate-agent', '/restaurant', '/search', '/settings',
+        '/social', '/starter', '/tables', '/timeline', '/ui-elements', '/users', '/widgets'
+    ];
+
+    const isProtected = protectedRoutes.some(route => pathname === route || pathname?.startsWith(route + '/'));
+
+    if (isProtected) {
         return null;
     }
 

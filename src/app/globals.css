@@ -114,7 +114,7 @@
 /** Body */
 html,
 body {
-  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 bg-[#0a0e19] leading-normal dark:bg-[#0a0e19] dark:text-gray-400;
+  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 bg-white leading-normal dark:bg-[#0a0e19] dark:text-gray-400;
 }
 
 /** Paragraph */
