@@ -1,13 +1,14 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Eye, 
-  MousePointer, 
-  DollarSign, 
-  Users, 
+import { authFetch } from '@/lib/authFetch';
+import {
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  MousePointer,
+  DollarSign,
+  Users,
   Calendar,
   Filter,
   Download,
@@ -216,7 +217,7 @@ const AILoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
                 r="2"
                 fill="#60A5FA"
                 initial={{ opacity: 0 }}
-                animate={{ 
+                animate={{
                   opacity: [0, 1, 0],
                   scale: [1, 1.5, 1]
                 }}
@@ -390,9 +391,9 @@ const AdvancedCharts: React.FC<{ campaigns: Campaign[]; summary: Summary | null 
   );
 };
 
-const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({ 
-  selectedPeriod: propSelectedPeriod, 
-  selectedCurrency: propSelectedCurrency 
+const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
+  selectedPeriod: propSelectedPeriod,
+  selectedCurrency: propSelectedCurrency
 }) => {
   // State management
   const [selectedPeriod, setSelectedPeriod] = useState(propSelectedPeriod || 'Last 30 days');
@@ -403,14 +404,14 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showAILoading, setShowAILoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
-  
+
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [sortBy, setSortBy] = useState('spend');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  
+
   // UI states
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
@@ -439,7 +440,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
   // Time periods
   const timePeriods = [
     'Today',
-    'Yesterday', 
+    'Yesterday',
     'Last 7 days',
     'Last 14 days',
     'Last 30 days',
@@ -455,57 +456,57 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
   // Helper function to get campaign type icon and styling
   const getCampaignTypeIcon = (type: string) => {
     const iconMap: Record<string, { icon: React.ReactNode; color: string; bgGradient: string }> = {
-      'Performance Max': { 
-        icon: <Target className="w-5 h-5" />, 
-        color: 'text-purple-600', 
-        bgGradient: 'bg-purple-600' 
+      'Performance Max': {
+        icon: <Target className="w-5 h-5" />,
+        color: 'text-purple-600',
+        bgGradient: 'bg-purple-600'
       },
-      'Search': { 
-        icon: <Search className="w-5 h-5" />, 
-        color: 'text-blue-600', 
-        bgGradient: 'bg-blue-600' 
+      'Search': {
+        icon: <Search className="w-5 h-5" />,
+        color: 'text-blue-600',
+        bgGradient: 'bg-blue-600'
       },
-      'Shopping': { 
-        icon: <ShoppingCart className="w-5 h-5" />, 
-        color: 'text-green-600', 
-        bgGradient: 'bg-green-600' 
+      'Shopping': {
+        icon: <ShoppingCart className="w-5 h-5" />,
+        color: 'text-green-600',
+        bgGradient: 'bg-green-600'
       },
-      'Display': { 
-        icon: <Monitor className="w-5 h-5" />, 
-        color: 'text-red-600', 
-        bgGradient: 'bg-red-600' 
+      'Display': {
+        icon: <Monitor className="w-5 h-5" />,
+        color: 'text-red-600',
+        bgGradient: 'bg-red-600'
       },
-      'Video': { 
-        icon: <Video className="w-5 h-5" />, 
-        color: 'text-yellow-600', 
-        bgGradient: 'bg-yellow-600' 
+      'Video': {
+        icon: <Video className="w-5 h-5" />,
+        color: 'text-yellow-600',
+        bgGradient: 'bg-yellow-600'
       },
-      'Call': { 
-        icon: <Phone className="w-5 h-5" />, 
-        color: 'text-indigo-600', 
-        bgGradient: 'bg-indigo-600' 
+      'Call': {
+        icon: <Phone className="w-5 h-5" />,
+        color: 'text-indigo-600',
+        bgGradient: 'bg-indigo-600'
       },
-      'Local': { 
-        icon: <MapPin className="w-5 h-5" />, 
-        color: 'text-teal-600', 
-        bgGradient: 'bg-teal-600' 
+      'Local': {
+        icon: <MapPin className="w-5 h-5" />,
+        color: 'text-teal-600',
+        bgGradient: 'bg-teal-600'
       },
-      'App': { 
-        icon: <Smartphone className="w-5 h-5" />, 
-        color: 'text-pink-600', 
-        bgGradient: 'bg-pink-600' 
+      'App': {
+        icon: <Smartphone className="w-5 h-5" />,
+        color: 'text-pink-600',
+        bgGradient: 'bg-pink-600'
       },
-      'Discovery': { 
-        icon: <Zap className="w-5 h-5" />, 
-        color: 'text-orange-600', 
-        bgGradient: 'bg-orange-600' 
+      'Discovery': {
+        icon: <Zap className="w-5 h-5" />,
+        color: 'text-orange-600',
+        bgGradient: 'bg-orange-600'
       }
     };
-    
-    return iconMap[type] || { 
-      icon: <BarChart3 className="w-5 h-5" />, 
-      color: 'text-gray-600', 
-      bgGradient: 'bg-gray-600' 
+
+    return iconMap[type] || {
+      icon: <BarChart3 className="w-5 h-5" />,
+      color: 'text-gray-600',
+      bgGradient: 'bg-gray-600'
     };
   };
 
@@ -808,9 +809,9 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log('🔄 Fetching campaigns data...');
-      
+
       const params = new URLSearchParams({
         dataType: 'campaigns',
         ...(selectedType !== 'all' && { campaignType: selectedType }),
@@ -819,18 +820,18 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
       });
 
       const response = await fetch(`/api/google-ads?${params}`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const text = await response.text();
       console.log('Raw response received');
-      
+
       if (!text) {
         throw new Error('Empty response from server');
       }
-      
+
       let result: ApiResponse;
       try {
         result = JSON.parse(text);
@@ -853,7 +854,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
     } catch (err: any) {
       console.error('Error fetching campaigns:', err);
       setError(err.message);
-      
+
       // Use local demo data as final fallback
       console.log('🔄 Using local demo data as final fallback...');
       const demoData = generateDemoData();
@@ -869,8 +870,8 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
   const handleCampaignAction = async (campaignId: string, action: 'pause' | 'enable' | 'delete') => {
     try {
       console.log(`🔧 Performing ${action} on campaign ${campaignId}`);
-      
-      const response = await fetch('/api/google-ads', {
+
+      const response = await authFetch('/api/google-ads', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ campaignId, action })
@@ -892,19 +893,19 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
         console.error('JSON parse error:', parseError);
         throw new Error('Invalid JSON response from server');
       }
-      
+
       if (result.success) {
         // Update local state
-        setCampaigns(prev => prev.map(campaign => 
-          campaign.id === campaignId 
-            ? { 
-                ...campaign, 
-                status: action === 'pause' ? 'PAUSED' : 
-                       action === 'enable' ? 'ENABLED' : 'REMOVED' 
-              }
+        setCampaigns(prev => prev.map(campaign =>
+          campaign.id === campaignId
+            ? {
+              ...campaign,
+              status: action === 'pause' ? 'PAUSED' :
+                action === 'enable' ? 'ENABLED' : 'REMOVED'
+            }
             : campaign
         ));
-        
+
         console.log(`✅ Campaign ${campaignId} ${action}d successfully`);
         if (result.isDemo) {
           console.log('ℹ️ Demo mode action');
@@ -915,13 +916,13 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
     } catch (error: any) {
       console.error('Error performing campaign action:', error);
       // Still update local state as fallback
-      setCampaigns(prev => prev.map(campaign => 
-        campaign.id === campaignId 
-          ? { 
-              ...campaign, 
-              status: action === 'pause' ? 'PAUSED' : 
-                     action === 'enable' ? 'ENABLED' : 'REMOVED' 
-            }
+      setCampaigns(prev => prev.map(campaign =>
+        campaign.id === campaignId
+          ? {
+            ...campaign,
+            status: action === 'pause' ? 'PAUSED' :
+              action === 'enable' ? 'ENABLED' : 'REMOVED'
+          }
           : campaign
       ));
       console.log(`⚠️ Local state updated for campaign ${campaignId} (fallback)`);
@@ -934,17 +935,17 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
       const matchesType = selectedType === 'all' || campaign.type.toLowerCase() === selectedType.toLowerCase();
       const matchesStatus = selectedStatus === 'all' || campaign.status.toLowerCase() === selectedStatus.toLowerCase();
       const matchesSearch = !searchTerm || campaign.name.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       return matchesType && matchesStatus && matchesSearch;
     });
 
     // Sort campaigns
     filtered.sort((a, b) => {
       let aValue: number, bValue: number;
-      
+
       switch (sortBy) {
         case 'name':
-          return sortOrder === 'asc' 
+          return sortOrder === 'asc'
             ? a.name.localeCompare(b.name)
             : b.name.localeCompare(a.name);
         case 'spend':
@@ -971,7 +972,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
           aValue = a.spend;
           bValue = b.spend;
       }
-      
+
       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
     });
 
@@ -1105,11 +1106,10 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
               {/* Auto Refresh Toggle */}
               <button
                 onClick={() => setAutoRefresh(!autoRefresh)}
-                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg ${
-                  autoRefresh 
-                    ? 'bg-green-600 text-gray-800' 
+                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg ${autoRefresh
+                    ? 'bg-green-600 text-gray-800'
                     : 'bg-white/15 backdrop-blur-md border border-gray-200 text-gray-700 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
               </button>
@@ -1335,21 +1335,19 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   <div className="flex items-center bg-gray-100 rounded-xl p-1">
                     <button
                       onClick={() => setViewMode('table')}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        viewMode === 'table'
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === 'table'
                           ? 'bg-white text-blue-600 shadow-sm'
                           : 'text-gray-600 hover:text-gray-900'
-                      }`}
+                        }`}
                     >
                       Table
                     </button>
                     <button
                       onClick={() => setViewMode('cards')}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        viewMode === 'cards'
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === 'cards'
                           ? 'bg-white text-blue-600 shadow-sm'
                           : 'text-gray-600 hover:text-gray-900'
-                      }`}
+                        }`}
                     >
                       Cards
                     </button>
@@ -1380,7 +1378,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                         {filteredAndSortedCampaigns.map((campaign, index) => {
                           const typeIcon = getCampaignTypeIcon(campaign.type);
                           return (
-                            <tr 
+                            <tr
                               key={campaign.id}
                               className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors duration-200"
                             >
@@ -1399,13 +1397,12 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                               </td>
                               <td className="py-4 px-4 text-gray-700">{campaign.type}</td>
                               <td className="py-4 px-4">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                                  campaign.status === 'ENABLED' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : campaign.status === 'PAUSED' 
-                                    ? 'bg-yellow-100 text-yellow-800' 
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${campaign.status === 'ENABLED'
+                                    ? 'bg-green-100 text-green-800'
+                                    : campaign.status === 'PAUSED'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
                                   {campaign.status}
                                 </span>
                               </td>
@@ -1433,7 +1430,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                                       <Play className="w-4 h-4" />
                                     </button>
                                   ) : null}
-                                  
+
                                   <button
                                     onClick={() => handleCampaignAction(campaign.id, 'delete')}
                                     className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-all duration-200"
@@ -1454,9 +1451,9 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredAndSortedCampaigns.map((campaign, index) => {
                       const typeIcon = getCampaignTypeIcon(campaign.type);
-                      
+
                       return (
-                        <div 
+                        <div
                           key={campaign.id}
                           className="group bg-white/15 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/50 p-6 hover:shadow-xl transition-all duration-300 hover:scale-105"
                           style={{ animationDelay: `${index * 100}ms` }}
@@ -1476,13 +1473,12 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                                 <p className="text-sm text-gray-500">{campaign.type}</p>
                               </div>
                             </div>
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                              campaign.status === 'ENABLED' 
-                                ? 'bg-green-100 text-green-800' 
-                                : campaign.status === 'PAUSED' 
-                                ? 'bg-yellow-100 text-yellow-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${campaign.status === 'ENABLED'
+                                ? 'bg-green-100 text-green-800'
+                                : campaign.status === 'PAUSED'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
                               {campaign.status}
                             </span>
                           </div>
@@ -1527,7 +1523,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                                   <Play className="w-4 h-4" />
                                 </button>
                               ) : null}
-                              
+
                               <button
                                 onClick={() => handleCampaignAction(campaign.id, 'delete')}
                                 className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-all duration-200"
@@ -1536,7 +1532,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                            
+
                             <div className="text-xs text-gray-500">
                               Quality Score: {campaign.qualityScore}/10
                             </div>
@@ -1583,29 +1579,27 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {summary.recommendations.map((rec, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="group bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-blue-200/50 hover:shadow-lg transition-all duration-300"
                     >
                       <div className="flex items-start gap-4">
-                        <div className={`p-2 rounded-xl ${
-                          rec.impact === 'high' ? 'bg-red-100 text-red-600' :
-                          rec.impact === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                          'bg-green-100 text-green-600'
-                        }`}>
+                        <div className={`p-2 rounded-xl ${rec.impact === 'high' ? 'bg-red-100 text-red-600' :
+                            rec.impact === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                              'bg-green-100 text-green-600'
+                          }`}>
                           {rec.type === 'budget' ? <DollarSign className="w-5 h-5" /> :
-                           rec.type === 'keyword' ? <Search className="w-5 h-5" /> :
-                           rec.type === 'audience' ? <Users className="w-5 h-5" /> :
-                           <Settings className="w-5 h-5" />}
+                            rec.type === 'keyword' ? <Search className="w-5 h-5" /> :
+                              rec.type === 'audience' ? <Users className="w-5 h-5" /> :
+                                <Settings className="w-5 h-5" />}
                         </div>
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-gray-900">{rec.title}</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              rec.impact === 'high' ? 'bg-red-100 text-red-700' :
-                              rec.impact === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-green-100 text-green-700'
-                            }`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${rec.impact === 'high' ? 'bg-red-100 text-red-700' :
+                                rec.impact === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-green-100 text-green-700'
+                              }`}>
                               {rec.impact} impact
                             </span>
                           </div>
@@ -1641,7 +1635,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                     {summary?.campaignTypes ? Object.entries(summary.campaignTypes).map(([type, count]) => {
                       const typeIcon = getCampaignTypeIcon(type);
                       const percentage = (count / campaigns.length) * 100;
-                      
+
                       return (
                         <div key={type} className="flex items-center gap-4">
                           <div className={`p-2 rounded-xl ${typeIcon.bgGradient}`}>
@@ -1655,7 +1649,7 @@ const GoogleAdsDashboard: React.FC<GoogleAdsDashboardProps> = ({
                               <span className="text-sm text-gray-600">{count} campaigns</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
+                              <div
                                 className={`h-2 rounded-full ${typeIcon.bgGradient}`}
                                 style={{ width: `${percentage}%` }}
                               ></div>

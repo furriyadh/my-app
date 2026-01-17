@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
+import { authFetch } from '@/lib/authFetch';
 
 // CSS styles for visual effects
 const styles = `
@@ -197,7 +198,7 @@ const GoogleTagManagerContent: React.FC = () => {
     // Fetch linked containers from database
     const fetchLinkedContainers = async () => {
         try {
-            const response = await fetch('/api/gtm/connected');
+            const response = await authFetch('/api/gtm/connected');
             const data = await response.json();
 
             if (data.success && data.containers) {
@@ -212,7 +213,7 @@ const GoogleTagManagerContent: React.FC = () => {
     const fetchContainers = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/gtm/containers');
+            const response = await authFetch('/api/gtm/containers');
             const data = await response.json();
 
             if (data.success) {
@@ -260,7 +261,7 @@ const GoogleTagManagerContent: React.FC = () => {
             const selectedCont = containers.find(c => c.path === selectedContainer);
 
             // 1. Save container to Supabase
-            const response = await fetch('/api/gtm/connected', {
+            const response = await authFetch('/api/gtm/connected', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -290,7 +291,7 @@ const GoogleTagManagerContent: React.FC = () => {
 
                 // 2. Add admin
                 console.log('📧 Adding admin to GTM account...');
-                const adminResponse = await fetch('/api/gtm/add-admin', {
+                const adminResponse = await authFetch('/api/gtm/add-admin', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

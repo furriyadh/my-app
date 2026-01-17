@@ -3,6 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 const Cta: React.FC = () => {
   const { t, isRTL } = useTranslation();
@@ -20,17 +22,23 @@ const Cta: React.FC = () => {
               {t.cta.description}
             </p>
 
-            <a
-              href="#"
-              className="inline-block lg:text-[15px] xl:text-[16px] mt-[5px] md:mt-[10px] lg:mt-[20px] xl:mt-[30px] py-[12px] px-[17px] bg-purple-600 text-white rounded-md transition-all font-medium hover:bg-purple-500"
-            >
-              <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={isRTL ? 'rtl' : 'ltr'}>
-                <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                  person
-                </i>
-                {t.cta.button}
-              </span>
-            </a>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  className="inline-block lg:text-[15px] xl:text-[16px] mt-[5px] md:mt-[10px] lg:mt-[20px] xl:mt-[30px] py-[12px] px-[17px] bg-purple-600 text-white rounded-md transition-all font-medium hover:bg-purple-500"
+                >
+                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
+                      person
+                    </i>
+                    {t.cta.button}
+                  </span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                <Login />
+              </DialogContent>
+            </Dialog>
           </div>
 
 

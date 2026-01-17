@@ -17,10 +17,11 @@ export default function ComparisonSection() {
             <Brain className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span className="text-blue-600 dark:text-blue-300 text-sm font-medium">Compare Your Options</span>
           </div>
-          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
-            Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-cyan-600 dark:from-green-400 dark:to-cyan-400">Furriyadh AI for Google Ads</span>?
+          <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+            Why Choose <span className="bg-gradient-to-r from-green-600 to-cyan-600 dark:from-green-400 dark:to-cyan-400 bg-clip-text text-transparent">Furriyadh AI?</span>
           </h2>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
+
+          <p className="mt-6 text-base md:text-lg text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
             See how our AI‑powered Google Ads management platform compares to agencies and freelancers
           </p>
         </div>

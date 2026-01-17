@@ -146,12 +146,11 @@ export default function AnimatedBeamSection() {
                 {/* Centered Layout */}
                 <div className="flex flex-col items-center gap-16">
 
-                    {/* Header - Text Content */}
-                    <div className="text-center max-w-3xl mx-auto space-y-6">
-                        <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight">
-                            Simple, smart & affordable advertising
+                    <div className="text-center max-w-5xl mx-auto mb-16">
+                        <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+                            Simple, smart & <span className="bg-gradient-to-r from-purple-600 to-cyan-500 bg-clip-text text-transparent">affordable advertising</span>
                         </h2>
-                        <p className="text-base md:text-xl text-zinc-400">
+                        <p className="text-zinc-600 dark:text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mt-6">
                             Whether you're just starting out or scaling up, Furriyadh makes it easy to launch powerful ad campaigns. Our AI does the heavy lifting so you can focus on growing your business.
                         </p>
                     </div>
@@ -166,7 +165,7 @@ export default function AnimatedBeamSection() {
                             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
 
                             {/* Card Header */}
-                            <div className="flex flex-col md:flex-row items-center gap-4 mb-12 text-center md:text-left">
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12 text-center md:text-left">
                                 <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/30">
                                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />

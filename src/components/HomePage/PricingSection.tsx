@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Crown, Users, Sparkles, CheckCircle, Star, Shield } from "lucide-react";
 import Link from "next/link";
 import ElectroBorder from "@/components/ui/electro-border";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 const PRICING = {
   single: 30,
@@ -125,12 +127,18 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link
-                href="/authentication/sign-up"
-                className="block w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-green-500/30"
-              >
-                Start Managing
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className="block w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-green-500/30"
+                  >
+                    Start Managing
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                  <Login />
+                </DialogContent>
+              </Dialog>
             </div>
           </ElectroBorder>
 
@@ -194,12 +202,18 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link
-                href="/authentication/sign-up"
-                className="block w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-purple-500/50"
-              >
-                Get Started - Pay Only When You Spend
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className="block w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-purple-500/50"
+                  >
+                    Get Started - Pay Only When You Spend
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                  <Login />
+                </DialogContent>
+              </Dialog>
 
               {/* Money-back Guarantee */}
               <p className="text-center text-gray-400 text-sm mt-4 flex items-center justify-center gap-2">

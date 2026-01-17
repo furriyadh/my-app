@@ -51,15 +51,15 @@ export default function FAQSection() {
   return (
     <section className="py-16 md:py-20 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-3xl">
-        <div className="text-center mb-10">
+        <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 rounded-full mb-6">
             <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span className="text-sm text-blue-600 dark:text-blue-300">FAQ</span>
           </div>
-          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
-            Frequently Asked Questions
+          <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+            Frequently Asked <span className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Questions</span>
           </h2>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+          <p className="mt-6 text-base md:text-lg text-zinc-600 dark:text-zinc-400">
             Got questions? We've got answers
           </p>
         </div>

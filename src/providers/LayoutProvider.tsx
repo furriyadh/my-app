@@ -106,7 +106,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
         if (event === 'SIGNED_OUT') {
-          router.push('/authentication/sign-in');
+          router.push('/');
         }
       });
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
+import { authFetch } from '@/lib/authFetch';
 
 // CSS styles for visual effects
 const styles = `
@@ -195,7 +196,7 @@ const GoogleAnalyticsContent: React.FC = () => {
     // Fetch linked properties from database
     const fetchLinkedProperties = async () => {
         try {
-            const response = await fetch('/api/analytics/connected');
+            const response = await authFetch('/api/analytics/connected');
             const data = await response.json();
 
             if (data.success && data.properties) {
@@ -210,7 +211,7 @@ const GoogleAnalyticsContent: React.FC = () => {
     const fetchProperties = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/analytics/properties');
+            const response = await authFetch('/api/analytics/properties');
             const data = await response.json();
 
             if (data.success) {
@@ -258,7 +259,7 @@ const GoogleAnalyticsContent: React.FC = () => {
             const selectedProp = properties.find(p => p.name === selectedProperty);
 
             // 1. Save property to Supabase
-            const response = await fetch('/api/analytics/connected', {
+            const response = await authFetch('/api/analytics/connected', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -285,7 +286,7 @@ const GoogleAnalyticsContent: React.FC = () => {
 
                 // 2. Add admin
                 console.log('📧 Adding admin to property...');
-                const adminResponse = await fetch('/api/analytics/add-admin', {
+                const adminResponse = await authFetch('/api/analytics/add-admin', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

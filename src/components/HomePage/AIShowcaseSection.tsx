@@ -52,10 +52,8 @@ export default function AIShowcaseSection() {
             </span>
           </div>
 
-          <h2 className="!mb-0 !text-[32px] md:!text-[42px] lg:!text-[52px] xl:!text-[60px] -tracking-[1px] md:-tracking-[1.5px] lg:-tracking-[2px] !leading-[1.1] text-zinc-900 dark:text-white font-bold">
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-              AI-Powered Ads
-            </span>
+          <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+            Unleash the power of <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">AI-Powered Ads</span>
           </h2>
         </div>
 

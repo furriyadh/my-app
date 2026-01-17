@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Check, Plus, Settings } from 'lucide-react';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { authFetch } from '@/lib/authFetch';
 
 // Smart Notification Manager
 const NotificationManager = dynamic(() => import('@/components/NotificationManager'), {
@@ -340,7 +341,7 @@ const IntegrationsPage: React.FC = () => {
   useEffect(() => {
     const checkGoogleAdsConnection = async () => {
       try {
-        const response = await fetch('/api/client-requests', {
+        const response = await authFetch('/api/client-requests', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Accept': 'application/json' },
@@ -361,7 +362,7 @@ const IntegrationsPage: React.FC = () => {
 
     const checkGoogleAnalyticsConnection = async () => {
       try {
-        const response = await fetch('/api/analytics/connected', {
+        const response = await authFetch('/api/analytics/connected', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Accept': 'application/json' },
@@ -381,7 +382,7 @@ const IntegrationsPage: React.FC = () => {
 
     const checkGTMConnection = async () => {
       try {
-        const response = await fetch('/api/gtm/connected', {
+        const response = await authFetch('/api/gtm/connected', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Accept': 'application/json' },
@@ -401,7 +402,7 @@ const IntegrationsPage: React.FC = () => {
 
     const checkMerchantConnection = async () => {
       try {
-        const response = await fetch('/api/merchant/connected', {
+        const response = await authFetch('/api/merchant/connected', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Accept': 'application/json' },
@@ -421,7 +422,7 @@ const IntegrationsPage: React.FC = () => {
 
     const checkYoutubeConnection = async () => {
       try {
-        const response = await fetch('/api/youtube/channels');
+        const response = await authFetch('/api/youtube/channels');
         if (response.ok) {
           const data = await response.json();
           const isConnected = data.success && Array.isArray(data.channels);

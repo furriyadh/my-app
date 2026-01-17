@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, ShoppingBag } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
+import { authFetch } from '@/lib/authFetch';
 
 // CSS styles for visual effects
 const styles = `
@@ -194,7 +195,7 @@ const GoogleMerchantContent: React.FC = () => {
     // Fetch linked accounts from database
     const fetchLinkedAccounts = async () => {
         try {
-            const response = await fetch('/api/merchant/connected');
+            const response = await authFetch('/api/merchant/connected');
             const data = await response.json();
 
             if (data.success && data.accounts) {
@@ -209,7 +210,7 @@ const GoogleMerchantContent: React.FC = () => {
     const fetchAccounts = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/merchant/accounts');
+            const response = await authFetch('/api/merchant/accounts');
             const data = await response.json();
 
             if (data.success) {
@@ -257,7 +258,7 @@ const GoogleMerchantContent: React.FC = () => {
             const selectedAcc = accounts.find(a => a.merchantId === selectedAccount);
 
             // 1. Save account to Supabase
-            const response = await fetch('/api/merchant/connected', {
+            const response = await authFetch('/api/merchant/connected', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -275,7 +276,7 @@ const GoogleMerchantContent: React.FC = () => {
             if (result.success) {
                 // 2. إضافة المدير (ads@furriyadh.com) على الحساب
                 console.log('📧 Adding admin to Merchant Center account...');
-                const adminResponse = await fetch('/api/merchant/add-admin', {
+                const adminResponse = await authFetch('/api/merchant/add-admin', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

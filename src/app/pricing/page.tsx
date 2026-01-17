@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import Navbar from "@/components/FrontPage/Navbar";
 import Footer from "@/components/FrontPage/Footer";
-import CosmicBackground from "@/components/ui/CosmicBackground";
 import SplashCursor from "@/components/ui/SplashCursor";
 import {
     PricingHero,
@@ -20,8 +19,6 @@ export default function PricingPage() {
 
     return (
         <div className="front-page-body overflow-hidden min-h-screen" dir="ltr">
-            <CosmicBackground />
-
             <Navbar />
             <SplashCursor />
 

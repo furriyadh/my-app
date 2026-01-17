@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Facebook, ExternalLink, Copy } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
+import { authFetch } from '@/lib/authFetch';
 
 // CSS styles for visual effects
 const styles = `
@@ -176,7 +177,7 @@ const MetaAdsContent: React.FC = () => {
 
     const fetchLinkedAccounts = async () => {
         try {
-            const response = await fetch('/api/meta/connected');
+            const response = await authFetch('/api/meta/connected');
             const data = await response.json();
 
             if (data.success && data.accounts) {
@@ -191,7 +192,7 @@ const MetaAdsContent: React.FC = () => {
     const fetchAccounts = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/meta/accounts');
+            const response = await authFetch('/api/meta/accounts');
             const data = await response.json();
 
             if (data.success) {
@@ -212,7 +213,7 @@ const MetaAdsContent: React.FC = () => {
 
     const fetchPartnerInfo = async () => {
         try {
-            const response = await fetch('/api/meta/add-partner');
+            const response = await authFetch('/api/meta/add-partner');
             const data = await response.json();
             if (data.success) {
                 setPartnerInfo({
@@ -251,7 +252,7 @@ const MetaAdsContent: React.FC = () => {
             const selectedAcc = accounts.find(a => a.id === selectedAccount);
 
             // Save account to Supabase
-            const response = await fetch('/api/meta/connected', {
+            const response = await authFetch('/api/meta/connected', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -270,7 +271,7 @@ const MetaAdsContent: React.FC = () => {
             if (result.success) {
                 // Request partner access
                 console.log('🤝 Requesting partner access...');
-                const partnerResponse = await fetch('/api/meta/add-partner', {
+                const partnerResponse = await authFetch('/api/meta/add-partner', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ adAccountId: selectedAccount }),

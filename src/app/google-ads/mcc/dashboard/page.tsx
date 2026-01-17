@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { authFetch } from '@/lib/authFetch';
 
 interface MCCAccount {
   customer_id: string;
@@ -102,7 +103,7 @@ export default function MCCDashboard() {
       setLoading(true);
 
       // استخدام النظام الموجود في الباك اند
-      const response = await fetch('/api/mcc/accounts', {
+      const response = await authFetch('/api/mcc/accounts', {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -158,7 +159,7 @@ export default function MCCDashboard() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/mcc/accounts/${operation}`, {
+      const response = await authFetch(`/api/mcc/accounts/${operation}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -188,7 +189,7 @@ export default function MCCDashboard() {
   const handleSyncAccounts = async () => {
     setProcessing(true);
     try {
-      const response = await fetch('/api/mcc/accounts/sync', {
+      const response = await authFetch('/api/mcc/accounts/sync', {
         method: 'POST'
       });
 

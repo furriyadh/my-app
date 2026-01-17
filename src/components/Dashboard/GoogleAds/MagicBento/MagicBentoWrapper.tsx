@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import MagicBento, { BentoCardProps } from './MagicBento';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { Target, Eye, MousePointer, Zap, DollarSign, TrendingUp, Star, Activity } from 'lucide-react';
+import { authFetch } from '@/lib/authFetch';
 
 const MagicBentoWrapper: React.FC = () => {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ const MagicBentoWrapper: React.FC = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await fetch('/api/campaigns?timeRange=30');
+        const response = await authFetch('/api/campaigns?timeRange=30');
         const data = await response.json();
         if (data.success) {
           setMetrics(data.metrics);
@@ -32,7 +33,7 @@ const MagicBentoWrapper: React.FC = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchMetrics();
   }, []);
 

@@ -103,11 +103,11 @@ export default function TestimonialsSection() {
             {/* Container */}
             <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
-                        What Our Clients Say
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+                        What our <span className="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Clients Say</span>
                     </h2>
-                    <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mt-6">
                         Thousands of companies trust our platform to manage their Google Ads campaigns
                     </p>
                 </div>

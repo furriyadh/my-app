@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Check, Youtube, Link as LinkIcon, X, ExternalLink } from 'lucide-react';
 import GlowButton from '@/components/ui/glow-button';
 import { toast } from '@/hooks/use-toast';
+import { authFetch } from '@/lib/authFetch';
 
 // CSS styles for visual effects (Adapted to Red/YouTube Theme)
 const styles = `
@@ -176,7 +177,7 @@ const YouTubeChannelContent: React.FC = () => {
     // Fetch ads accounts on page load
     const fetchAdsAccountsOnMount = async () => {
         try {
-            const response = await fetch('/api/user/accounts');
+            const response = await authFetch('/api/user/accounts');
             const data = await response.json();
             if (data.google_ads && Array.isArray(data.google_ads)) {
                 const mappedAccounts = data.google_ads.map((acc: any) => ({
@@ -207,7 +208,7 @@ const YouTubeChannelContent: React.FC = () => {
     // Confirm link to database and update state
     const confirmLinkToDatabase = async (channelId: string, channelTitle: string, adAccountId: string) => {
         try {
-            const response = await fetch('/api/youtube/confirm-link', {
+            const response = await authFetch('/api/youtube/confirm-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -234,7 +235,7 @@ const YouTubeChannelContent: React.FC = () => {
     const fetchLinkedChannelsFromAPI = async () => {
         try {
             // Fetch linked channels from each connected Google Ads account
-            const accountsResponse = await fetch('/api/user/accounts');
+            const accountsResponse = await authFetch('/api/user/accounts');
             const accountsData = await accountsResponse.json();
 
             if (accountsData.google_ads && accountsData.google_ads.length > 0) {
@@ -298,7 +299,7 @@ const YouTubeChannelContent: React.FC = () => {
 
             // Only show loading if no cache
             setLoading(true);
-            const response = await fetch('/api/youtube/channels');
+            const response = await authFetch('/api/youtube/channels');
             const data = await response.json();
 
             if (data.success) {
@@ -362,7 +363,7 @@ const YouTubeChannelContent: React.FC = () => {
 
             // Only show loading if no cache
             setIsLoadingAccounts(true);
-            const response = await fetch('/api/user/accounts');
+            const response = await authFetch('/api/user/accounts');
             const data = await response.json();
 
             // API returns { google_ads: [...], ... } structure
@@ -396,7 +397,7 @@ const YouTubeChannelContent: React.FC = () => {
         try {
             setLinking(true);
             // Call backend to get linking URL
-            const response = await fetch('/api/youtube/link', {
+            const response = await authFetch('/api/youtube/link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -470,7 +471,7 @@ const YouTubeChannelContent: React.FC = () => {
         setPendingUnlinkChannel(null);
 
         try {
-            const response = await fetch('/api/youtube/unlink', {
+            const response = await authFetch('/api/youtube/unlink', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

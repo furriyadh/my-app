@@ -8,14 +8,11 @@ export default function GlobeSection() {
         <section className="py-20 relative overflow-hidden w-full font-sans z-10">
             <div className="max-w-7xl mx-auto px-4 w-full">
                 {/* Header - Centered Above */}
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-semibold text-zinc-900 dark:text-white">
-                        Reaching Customers
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+                        Reaching Customers <span className="bg-gradient-to-r from-purple-600 to-cyan-500 bg-clip-text text-transparent">Worldwide</span>
                     </h2>
-                    <span className="block text-4xl md:text-[6rem] font-bold mt-1 leading-none bg-gradient-to-r from-purple-600 to-cyan-500 bg-clip-text text-transparent">
-                        Worldwide
-                    </span>
-                    <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mt-6">
+                    <p className="text-zinc-600 dark:text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mt-6">
                         Our AI-powered platform helps businesses in over <span className="text-zinc-900 dark:text-white font-semibold">190 countries</span> create and optimize Google Ads campaigns that drive real results.
                     </p>
                 </div>

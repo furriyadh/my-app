@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import CosmicBackground from "@/components/ui/CosmicBackground";
 
 export default function Page() {
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
@@ -65,7 +64,6 @@ export default function Page() {
 
   return (
     <>
-      <CosmicBackground />
       <div className="coming-soon-content relative z-[1] py-[30px] h-screen overflow-x-hidden" dir="ltr">
         <div className="w-full h-full table">
           <div className="table-cell align-middle">

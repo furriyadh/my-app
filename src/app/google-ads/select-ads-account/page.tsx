@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { authFetch } from '@/lib/authFetch';
 
 interface GoogleAdsAccount {
   customerId: string;
@@ -55,7 +56,7 @@ const SelectAdsAccountContent: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await fetch('/api/google-ads/accounts', {
+      const response = await authFetch('/api/google-ads/accounts', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ const SelectAdsAccountContent: React.FC = () => {
       setSelectedAccount(customerId);
 
       // ربط الحساب المختار بالـ MCC
-      const response = await fetch('/api/google-ads/connect-account', {
+      const response = await authFetch('/api/google-ads/connect-account', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

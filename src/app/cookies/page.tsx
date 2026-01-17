@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import Footer from "@/components/FrontPage/Footer";
 import Navbar from "@/components/FrontPage/Navbar";
-import CosmicBackground from "@/components/ui/CosmicBackground";
 import SplashCursor from "@/components/ui/SplashCursor";
 import { useTranslation } from "@/lib/hooks/useTranslation";
 
@@ -18,8 +17,6 @@ export default function CookiePolicyPage() {
     return (
         <>
             <div className="front-page-body overflow-hidden min-h-screen" dir="ltr">
-                <CosmicBackground />
-
                 <Navbar />
                 <SplashCursor />
 

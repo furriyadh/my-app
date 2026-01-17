@@ -3,7 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 const HeroBanner: React.FC = () => {
   const { t, isRTL } = useTranslation();
@@ -21,17 +24,23 @@ const HeroBanner: React.FC = () => {
               {t.hero.subtitle}
             </p>
 
-            <Link
-              href="/"
-              className="inline-block lg:text-[15px] xl:text-[16px] mt-[5px] md:mt-[12px] lg:mt-[20px] xl:mt-[25px] py-[12px] px-[17px] bg-primary-600 text-white rounded-md transition-all font-medium hover:bg-primary-500"
-            >
-              <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={isRTL ? 'rtl' : 'ltr'}>
-                <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                  person
-                </i>
-                {t.hero.cta}
-              </span>
-            </Link>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  className="inline-block lg:text-[15px] xl:text-[16px] mt-[5px] md:mt-[12px] lg:mt-[20px] xl:mt-[25px] py-[12px] px-[17px] bg-primary-600 text-white rounded-md transition-all font-medium hover:bg-primary-500"
+                >
+                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
+                      person
+                    </i>
+                    {t.hero.cta}
+                  </span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                <Login />
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="text-center">

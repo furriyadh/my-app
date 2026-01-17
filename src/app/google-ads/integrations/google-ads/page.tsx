@@ -8,6 +8,7 @@ import Announcement from '@/components/seraui/Announcement';
 import { supabase, subscribeToClientRequests, type ClientRequest } from '@/lib/supabase';
 import { useLanguage } from '@/lib/hooks/useLanguage';
 import { canAddAccount, getCurrentPlanLimits, canAddAccountAsync, getUserUsage, updateAccountsCount } from '@/lib/services/PlanService';
+import { authFetch } from '@/lib/authFetch';
 
 // CSS styles للتأثيرات البصرية
 const styles = `
@@ -1163,7 +1164,7 @@ const GoogleAdsContent: React.FC = () => {
             console.log('📥 جلب الحسابات من Google Ads API وحفظها في قاعدة البيانات...');
 
             // جلب الحسابات من Google Ads API باستخدام الـ Endpoint المحسن (Direct Proxy)
-            const response = await fetch('/api/google-ads/accounts', {
+            const response = await authFetch('/api/google-ads/accounts', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1191,7 +1192,7 @@ const GoogleAdsContent: React.FC = () => {
                     }
 
                     try {
-                        const saveResponse = await fetch('/api/client-requests', {
+                        const saveResponse = await authFetch('/api/client-requests', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
@@ -1226,7 +1227,7 @@ const GoogleAdsContent: React.FC = () => {
             console.log('📥 جلب الحسابات مباشرة من Supabase...');
 
             // استخدام API داخلي مفلتر بالمستخدم الحالي بدلاً من جلب كل العملاء من الباك‑إند
-            const response = await fetch('/api/client-requests', {
+            const response = await authFetch('/api/client-requests', {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -1261,7 +1262,7 @@ const GoogleAdsContent: React.FC = () => {
                 // إذا لم توجد طلبات في قاعدة البيانات، اجلب الحسابات من Google Ads API وحفظها
                 await fetchAndSaveAccountsToDatabase();
                 // إعادة جلب البيانات لنفس المستخدم الحالي فقط عبر API Next.js
-                const updatedResponse = await fetch('/api/client-requests', {
+                const updatedResponse = await authFetch('/api/client-requests', {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
@@ -1522,7 +1523,7 @@ const GoogleAdsContent: React.FC = () => {
             console.log('🔄 بدء مزامنة الحالات (Smart Batch)...');
 
             // استدعاء واحد فقط لجلب كل الحسابات من Supabase + Live Status from Flask
-            const batchResponse = await fetch('/api/google-ads/batch-refresh-statuses?forceRefresh=true', {
+            const batchResponse = await authFetch('/api/google-ads/batch-refresh-statuses?forceRefresh=true', {
                 method: 'GET',
                 credentials: 'include',
                 signal: AbortSignal.timeout(30000) // 30 seconds timeout (Flask may take time)
@@ -1706,7 +1707,7 @@ const GoogleAdsContent: React.FC = () => {
 
             // First, get accounts from the customer's OAuth session (not all MCC accounts)
             // استخدام Endpoint المحسن (Direct Proxy)
-            const response = await fetch('/api/google-ads/accounts', {
+            const response = await authFetch('/api/google-ads/accounts', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1953,7 +1954,7 @@ const GoogleAdsContent: React.FC = () => {
         // التحقق من المستخدم في الخلفية بدون حظر العرض
         const verifyAndLoadData = async () => {
             try {
-                const response = await fetch('/api/oauth/user-info');
+                const response = await authFetch('/api/oauth/user-info');
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && data.user) {
