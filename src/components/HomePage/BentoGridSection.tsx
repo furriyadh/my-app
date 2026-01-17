@@ -143,21 +143,21 @@ export default function AnimatedBeamSection() {
     return (
         <section className="py-16 md:py-24 relative overflow-hidden">
             <div className="container mx-auto px-4 max-w-7xl relative z-10">
-                {/* Two Column Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {/* Centered Layout */}
+                <div className="flex flex-col items-center gap-16">
 
-                    {/* Left Side - Text Content */}
-                    <div className="space-y-6">
-                        <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-                            Simple, smart &<br />affordable advertising
+                    {/* Header - Text Content */}
+                    <div className="text-center max-w-3xl mx-auto space-y-6">
+                        <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+                            Simple, smart & affordable advertising
                         </h2>
-                        <p className="text-base md:text-lg text-zinc-400 max-w-lg">
+                        <p className="text-base md:text-xl text-zinc-400">
                             Whether you're just starting out or scaling up, Furriyadh makes it easy to launch powerful ad campaigns. Our AI does the heavy lifting so you can focus on growing your business.
                         </p>
                     </div>
 
-                    {/* Right Card - Integrations */}
-                    <div className="relative w-full">
+                    {/* Content - Integrations */}
+                    <div className="relative w-full max-w-5xl mx-auto">
                         {/* Static Glow Effect */}
                         <div className="absolute inset-0 rounded-3xl shadow-[0_0_40px_10px_rgba(168,85,247,0.35)]" />
 
@@ -166,7 +166,7 @@ export default function AnimatedBeamSection() {
                             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
 
                             {/* Card Header */}
-                            <div className="flex items-center gap-4 mb-8">
+                            <div className="flex flex-col md:flex-row items-center gap-4 mb-12 text-center md:text-left">
                                 <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/30">
                                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -183,7 +183,7 @@ export default function AnimatedBeamSection() {
                                 className="relative flex h-[380px] w-full items-center justify-center overflow-hidden"
                                 ref={containerRef}
                             >
-                                <div className="flex size-full max-w-md flex-row items-stretch justify-between gap-10">
+                                <div className="flex size-full max-w-lg flex-row items-stretch justify-between gap-10">
                                     {/* Left - User */}
                                     <div className="flex flex-col justify-center">
                                         <Circle ref={div7Ref} className="size-16 border-purple-500/50">
@@ -193,26 +193,26 @@ export default function AnimatedBeamSection() {
 
                                     {/* Center - Furriyadh AI Hub */}
                                     <div className="flex flex-col justify-center">
-                                        <Circle ref={div6Ref} className="size-16 border-purple-500 bg-gradient-to-br from-purple-900/50 to-blue-900/50">
+                                        <Circle ref={div6Ref} className="size-20 border-purple-500 bg-gradient-to-br from-purple-900/50 to-blue-900/50 shadow-purple-500/20 shadow-xl">
                                             <Icons.furriyadh />
                                         </Circle>
                                     </div>
 
                                     {/* Right - Integrations */}
-                                    <div className="flex flex-col justify-center gap-3">
-                                        <Circle ref={div1Ref} className="size-14 border-yellow-500/50">
+                                    <div className="flex flex-col justify-center gap-4">
+                                        <Circle ref={div1Ref} className="size-12 border-yellow-500/50 bg-yellow-500/10">
                                             <Icons.googleAds />
                                         </Circle>
-                                        <Circle ref={div2Ref} className="size-14 border-orange-500/50">
+                                        <Circle ref={div2Ref} className="size-12 border-orange-500/50 bg-orange-500/10">
                                             <Icons.analytics />
                                         </Circle>
-                                        <Circle ref={div3Ref} className="size-14 border-cyan-500/50">
+                                        <Circle ref={div3Ref} className="size-12 border-cyan-500/50 bg-cyan-500/10">
                                             <Icons.tagManager />
                                         </Circle>
-                                        <Circle ref={div4Ref} className="size-14 border-blue-400/50">
+                                        <Circle ref={div4Ref} className="size-12 border-blue-400/50 bg-blue-400/10">
                                             <Icons.merchantCenter />
                                         </Circle>
-                                        <Circle ref={div5Ref} className="size-14 border-red-500/50">
+                                        <Circle ref={div5Ref} className="size-12 border-red-500/50 bg-red-500/10">
                                             <Icons.youtube />
                                         </Circle>
                                     </div>

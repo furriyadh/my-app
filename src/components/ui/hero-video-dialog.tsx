@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useMediaQuery } from "react-responsive"
 import { Play, XIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
@@ -78,6 +79,38 @@ export function HeroVideoDialog({
   const [isVideoOpen, setIsVideoOpen] = useState(false)
   const selectedAnimation = animationVariants[animationStyle]
 
+  // Responsive Ripple settings - following pattern from page.tsx to avoid hydration mismatch
+  const isMobileQuery = useMediaQuery({ maxWidth: 640 })
+  const isTabletQuery = useMediaQuery({ minWidth: 641, maxWidth: 1024 })
+
+  const [rippleProps, setRippleProps] = useState({
+    mainCircleSize: 120,
+    numCircles: 4, // Default (Desktop) - reduced from 8/5
+    circleGap: 70
+  })
+
+  useEffect(() => {
+    if (isMobileQuery) {
+      setRippleProps({
+        mainCircleSize: 60, // Much smaller for mobile
+        numCircles: 3, // Fewer circles
+        circleGap: 35 // Tighter gap
+      })
+    } else if (isTabletQuery) {
+      setRippleProps({
+        mainCircleSize: 100,
+        numCircles: 3,
+        circleGap: 50
+      })
+    } else {
+      setRippleProps({
+        mainCircleSize: 120, // Original-ish size
+        numCircles: 3, // Reduced count further
+        circleGap: 70 // Original gap
+      })
+    }
+  }, [isMobileQuery, isTabletQuery])
+
   return (
     <div className={cn("relative", className)}>
       <button
@@ -95,7 +128,12 @@ export function HeroVideoDialog({
         />
         <div className="absolute inset-0 flex scale-[0.9] items-center justify-center rounded-2xl transition-all duration-200 ease-out group-hover:scale-100">
           {/* Professional Ripple Effect */}
-          <Ripple mainCircleSize={120} mainCircleOpacity={0.4} numCircles={5} />
+          <Ripple
+            mainCircleSize={rippleProps.mainCircleSize}
+            mainCircleOpacity={0.4}
+            numCircles={rippleProps.numCircles}
+            circleGap={rippleProps.circleGap}
+          />
 
           {/* Play Button */}
           <div className="relative z-10 bg-purple-500/20 flex size-28 items-center justify-center rounded-full backdrop-blur-md border border-purple-500/30">

@@ -25,7 +25,7 @@ export default function GlobeSection() {
                     <div className="max-w-7xl mx-auto w-full">
                         <WorldMap
                             lineColor="#0ea5e9"
-                            dotsColor="#ffffff20"
+                            dotsColor="#ffffff51"
                             dots={[
                                 {
                                     start: { lat: 64.2008, lng: -149.4937 }, // Alaska (Fairbanks)
