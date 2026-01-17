@@ -58,7 +58,7 @@ export default function NotFoundPage() {
 
             {!isProtected && <Navbar />}
 
-            <div className={`flex-grow relative z-10 ${isProtected ? 'pt-0 flex items-center justify-center' : 'pt-32 md:pt-40'}`}>
+            <div className={`flex-grow relative ${isProtected ? 'pt-0 flex items-center justify-center' : 'pt-32 md:pt-40'}`}>
                 <NotFound
                     imageLight="/images/dashboard-404-light.png"
                     imageDark="/images/dashboard-404-dark.png"
