@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 /**
@@ -10,6 +11,7 @@ import { createClient } from "@/utils/supabase/client";
  * هذا يضمن أن الـ API routes تعمل بشكل صحيح حتى بعد OAuth callback
  * 
  * ✅ يقوم أيضاً بتجديد access_token تلقائياً كل 50 دقيقة
+ * ✅ يستمع لـ auth:logout events من authFetch ويتعامل معها
  */
 export default function SessionSyncProvider({
     children,
@@ -18,6 +20,46 @@ export default function SessionSyncProvider({
 }) {
     const syncedRef = useRef(false);
     const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const router = useRouter();
+
+    // 🔒 استماع لـ logout events من authFetch
+    useEffect(() => {
+        const handleLogout = async () => {
+            console.log('🚪 Auth logout event received - clearing session...');
+
+            try {
+                // مسح الـ session من Supabase
+                const supabase = createClient();
+                await supabase.auth.signOut();
+
+                // مسح OAuth cookies
+                await fetch('/api/oauth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                // مسح localStorage
+                localStorage.removeItem('cached_google_ads_accounts');
+                localStorage.removeItem('oauth_user_info');
+                localStorage.removeItem('userEmail');
+
+                console.log('✅ Session cleared, redirecting to login...');
+
+                // التوجيه لصفحة تسجيل الدخول
+                router.push('/login');
+            } catch (error) {
+                console.error('❌ Error during logout:', error);
+                // في حالة الخطأ، نوجه للـ login على أي حال
+                router.push('/login');
+            }
+        };
+
+        window.addEventListener('auth:logout', handleLogout);
+
+        return () => {
+            window.removeEventListener('auth:logout', handleLogout);
+        };
+    }, [router]);
 
     useEffect(() => {
         // تجنب المزامنة المتكررة

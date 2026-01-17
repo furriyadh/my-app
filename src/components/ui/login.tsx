@@ -124,9 +124,22 @@ const useSupabaseClient = () => {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            import('@/utils/supabase/client').then((module) => {
-                setSupabase(module.supabase);
-            });
+            console.log('🔄 Loading Supabase client...');
+            import('@/utils/supabase/client')
+                .then((module) => {
+                    console.log('✅ Supabase module loaded:', module);
+                    // Try both exports
+                    const client = module.supabase || module.default;
+                    if (client) {
+                        console.log('✅ Supabase client ready');
+                        setSupabase(client);
+                    } else {
+                        console.error('❌ No supabase client found in module');
+                    }
+                })
+                .catch((error) => {
+                    console.error('❌ Failed to load Supabase client:', error);
+                });
         }
     }, []);
 
@@ -151,6 +164,11 @@ export default function Login({ initialView = "signin" }: LoginProps) {
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState(""); // For Sign Up
 
+    // Log when supabase client loads
+    useEffect(() => {
+        console.log('🔐 Supabase client state changed:', supabase ? '✅ Loaded' : '⏳ Loading...');
+    }, [supabase]);
+
     // Initialize view from props, but only once
     useEffect(() => {
         if (initialView) {
@@ -165,7 +183,14 @@ export default function Login({ initialView = "signin" }: LoginProps) {
     // --- Handlers ---
 
     const handleOAuthSignIn = async (provider: "google" | "facebook" | "apple" | "twitter") => {
-        if (!supabase) return;
+        console.log('🔐 OAuth button clicked, provider:', provider);
+        console.log('🔐 Supabase client status:', supabase ? 'Ready' : 'Not loaded yet');
+
+        if (!supabase) {
+            setMessage("System is loading, please wait...");
+            console.error('❌ Supabase client not ready');
+            return;
+        }
         setIsLoading(true);
         setMessage("");
 
@@ -213,12 +238,15 @@ export default function Login({ initialView = "signin" }: LoginProps) {
 
                 // Listen for the message from the popup
                 const handleMessage = (event: MessageEvent) => {
-                    if (event.origin !== window.location.origin) return;
+                    console.log('📩 Received message:', event.data);
 
-                    if (event.data.type === "SUPABASE_AUTH_SUCCESS") {
+                    // Accept messages from any origin since OAuth might redirect cross-origin
+                    if (event.data?.type === "SUPABASE_AUTH_SUCCESS") {
+                        console.log('✅ Auth success message received!');
                         // Auth successful! The popup has closed itself or will close.
                         // We can now redirect or refresh.
                         window.removeEventListener("message", handleMessage);
+                        clearInterval(timer);
 
                         // Briefly wait to ensure local storage sync, then redirect
                         setTimeout(() => {
@@ -230,23 +258,24 @@ export default function Login({ initialView = "signin" }: LoginProps) {
 
                 window.addEventListener("message", handleMessage);
 
-                // Optional: Polling to detect if popup was closed manually without success
+                // Polling to detect if popup was closed
                 const timer = setInterval(() => {
                     if (popup.closed) {
+                        console.log('🔐 Popup closed, checking session...');
                         clearInterval(timer);
                         window.removeEventListener("message", handleMessage);
-                        // If we are here and not redirected, maybe check session?
-                        // But usually we just stop loading state if user closed it.
-                        // We can verify if session exists just in case.
+                        // Check if session exists
                         supabase.auth.getSession().then(({ data: { session } }: any) => {
                             if (session) {
+                                console.log('✅ Session found after popup closed');
                                 router.push("/dashboard");
                             } else {
+                                console.log('❌ No session after popup closed');
                                 setIsLoading(false);
                             }
                         });
                     }
-                }, 1000);
+                }, 500); // Check more frequently
             }
 
         } catch (err: any) {
