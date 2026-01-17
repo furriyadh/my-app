@@ -86,6 +86,11 @@ function TestimonialCard({
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">{role}</p>
                 </div>
             </div>
+            <div className="flex gap-1 mb-2">
+                {[...Array(5)].map((_, i) => (
+                    <i key={i} className="ri-star-fill text-yellow-400 text-sm"></i>
+                ))}
+            </div>
             <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-normal">
                 {content}
             </p>
