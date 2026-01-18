@@ -139,15 +139,19 @@ export async function POST(request: NextRequest) {
 
                 let accessToken = savedTokens.access_token;
                 const refreshToken = savedTokens.refresh_token;
+                const expiresAt = savedTokens.expires_at ? new Date(savedTokens.expires_at) : null;
+                const now = new Date();
 
-                // ✅ تجديد access_token تلقائياً لأنه غالباً منتهي الصلاحية
-                if (refreshToken) {
+                // Add 5 minutes buffer
+                const needsRefresh = !accessToken || !expiresAt || (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000);
+
+                if (needsRefresh && refreshToken) {
                     try {
                         const clientId = process.env.GOOGLE_ADS_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
                         const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
 
                         if (clientId && clientSecret) {
-                            console.log('🔄 Refreshing access token...');
+                            console.log('🔄 Access token expired or missing, refreshing...');
 
                             const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
                                 method: 'POST',
@@ -166,12 +170,12 @@ export async function POST(request: NextRequest) {
                                 console.log('✅ Access token refreshed successfully');
 
                                 // حفظ الـ access_token الجديد في قاعدة البيانات
-                                const expiresAt = new Date(Date.now() + (tokenData.expires_in || 3600) * 1000);
+                                const newExpiresAt = new Date(Date.now() + (tokenData.expires_in || 3600) * 1000);
                                 await supabaseAdmin
                                     .from('user_oauth_tokens')
                                     .update({
                                         access_token: accessToken,
-                                        expires_at: expiresAt.toISOString(),
+                                        expires_at: newExpiresAt.toISOString(),
                                         updated_at: new Date().toISOString()
                                     })
                                     .eq('id', savedTokens.id);
@@ -184,6 +188,8 @@ export async function POST(request: NextRequest) {
                     } catch (refreshError) {
                         console.error('⚠️ Error refreshing token:', refreshError);
                     }
+                } else {
+                    console.log('✅ Access token is still valid, skipping refresh');
                 }
 
                 // استعادة access_token (الجديد أو القديم)

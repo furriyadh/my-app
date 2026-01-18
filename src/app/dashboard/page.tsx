@@ -314,7 +314,7 @@ export default function DashboardAIPage() {
                                                 const parsed = parseMessageWithButtons(message.content);
                                                 return (
                                                     <>
-                                                        <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                                        <div className="whitespace-pre-wrap text-sm leading-relaxed break-words">
                                                             {parsed.text}
                                                         </div>
                                                         {parsed.buttons.length > 0 && (
@@ -335,7 +335,7 @@ export default function DashboardAIPage() {
                                             })()}
                                         </>
                                     ) : (
-                                        <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                        <div className="whitespace-pre-wrap text-sm leading-relaxed break-words">
                                             {message.content}
                                         </div>
                                     )}

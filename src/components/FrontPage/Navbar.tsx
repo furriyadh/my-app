@@ -175,7 +175,7 @@ const NavbarContent: React.FC = () => {
                 </NavbarButton>
               </DialogTrigger>
               <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
-                <Login />
+                <Login onClose={() => setShowLoginDialog(false)} />
               </DialogContent>
             </Dialog>
           </div>
@@ -258,7 +258,7 @@ const NavbarContent: React.FC = () => {
                   </NavbarButton>
                 </DialogTrigger>
                 <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
-                  <Login />
+                  <Login onClose={() => setShowLoginDialog(false)} />
                 </DialogContent>
               </Dialog>
             </div>

@@ -18,6 +18,7 @@ import { GoogleTagManager } from '@next/third-parties/google';
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 import ParticlesBackground from "@/components/ui/ParticlesBackground";
+import GoogleOneTap from "@/components/Authentication/GoogleOneTap";
 
 const inter = Inter({
   variable: "--font-body",
@@ -740,7 +741,6 @@ export default function RootLayout({
         />
         {/* Script ?????? ????? ??? ??? ?????? ????? ?????? */}
         <script
-          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -756,6 +756,47 @@ export default function RootLayout({
                 }
               })();
             `,
+          }}
+        />
+
+        {/* CRITICAL: OAuth Popup Fallback Handler
+            This script detects if the main site is loaded inside an OAuth popup with a token.
+            If so, it notifies the opener and closes itself to prevent the "Black Screen" issue.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+                (function() {
+                    try {
+                        // Check if we are in a popup and have authentication data
+                        if (window.opener && (window.location.hash.includes('access_token') || window.location.search.includes('code='))) {
+                            console.log('🔄 OAuth Popup detected on main layout (Fallback)');
+                            
+                            // 1. Notify the opener
+                            try {
+                                window.opener.postMessage({ type: "SUPABASE_AUTH_SUCCESS" }, "*");
+                            } catch (e) {
+                                console.error('Failed to post message to opener', e);
+                            }
+
+                            // 2. Close the window immediately
+                            window.close();
+                            
+                            // 3. If window.close() is blocked or slow, show a friendly message and stop rendering the heavy app
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.body.innerHTML = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;background:#111;color:#fff;font-family:sans-serif;">' + 
+                                    '<div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:#a855f7;animation:spin 1s ease-in-out infinite;margin-bottom:20px;"></div>' +
+                                    '<h2>Authentication Successful</h2>' + 
+                                    '<p>You can close this window now.</p>' +
+                                    '<style>@keyframes spin { to { transform: rotate(360deg); } }</style>' +
+                                    '</div>';
+                            });
+                        }
+                    } catch (err) {
+                        console.error('OAuth Fallback Script Error:', err);
+                    }
+                })();
+             `
           }}
         />
         {/* Preload critical resources */}
@@ -984,6 +1025,8 @@ export default function RootLayout({
             </LayoutProvider>
           </CampaignProvider>
         </SessionSyncProvider>
+        {/* Google One Tap - For Visitors */}
+        <GoogleOneTap />
         <SpeedInsights />
       </body>
     </html>

@@ -117,6 +117,13 @@ const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+const CloseIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+    </svg>
+);
+
 // --- Component ---
 
 const useSupabaseClient = () => {
@@ -148,9 +155,10 @@ const useSupabaseClient = () => {
 
 interface LoginProps {
     initialView?: "signin" | "signup" | "forgot";
+    onClose?: () => void;
 }
 
-export default function Login({ initialView = "signin" }: LoginProps) {
+export default function Login({ initialView = "signin", onClose }: LoginProps) {
     const supabase = useSupabaseClient();
     const router = useRouter();
 
@@ -182,7 +190,10 @@ export default function Login({ initialView = "signin" }: LoginProps) {
 
     // --- Handlers ---
 
+    // ... rest of handlers ...
+
     const handleOAuthSignIn = async (provider: "google" | "facebook" | "apple" | "twitter") => {
+        // ... (existing helper logic)
         console.log('🔐 OAuth button clicked, provider:', provider);
         console.log('🔐 Supabase client status:', supabase ? 'Ready' : 'Not loaded yet');
 
@@ -425,6 +436,17 @@ export default function Login({ initialView = "signin" }: LoginProps) {
             >
                 {/* Decorative gradient blur behind the card */}
                 <div className="absolute -z-10 inset-0 bg-gradient-to-tr from-purple-500/10 via-transparent to-indigo-500/10 rounded-2xl opacity-50" />
+
+                {/* Close Button */}
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        type="button"
+                    >
+                        <CloseIcon />
+                    </button>
+                )}
 
                 {view === "forgot" && (
                     <button
