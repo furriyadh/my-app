@@ -19,23 +19,24 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "API key missing" }, { status: 500 });
         }
 
-        // Prepare FormData for standard OpenAI Audio API (supported by CometAPI as per docs/screenshot)
+        // Prepare FormData for standard OpenAI Audio API (supported by CometAPI)
         // Endpoint: /v1/audio/transcriptions
-        // Model: whisper-1 (This is the standard model name for this endpoint)
+        // Model: whisper-1
 
         const apiFormData = new FormData();
         apiFormData.append("file", audioFile);
         apiFormData.append("model", "whisper-1");
         apiFormData.append("response_format", "json");
 
-        // The previous error was because we sent audio to /chat/completions with a model that didn't support it or wrong format.
-        // Standard STT should go to /audio/transcriptions.
+        // 🎯 ENHANCEMET: Force Arabic language & add prompt context for better accuracy
+        apiFormData.append("language", "ar");
+        apiFormData.append("prompt", "النص باللغة العربية. يرجى كتابة النص بدقة إملائية عالية وتصحيح الكلمات.");
+
 
         const response = await fetch(`${COMETAPI_BASE_URL}/audio/transcriptions`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${COMETAPI_API_KEY}`,
-                // Content-Type header is NOT set manually when using FormData, fetch sets boundary automatically
             },
             body: apiFormData,
         });

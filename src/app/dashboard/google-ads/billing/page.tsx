@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
 import {
     CreditCard,
     Zap,
@@ -27,7 +29,7 @@ import { SubscriptionPaymentHistory } from '@/components/furriyadh/SubscriptionP
 import { SavedPaymentMethods } from '@/components/furriyadh/SavedPaymentMethods';
 
 
-const BillingPage: React.FC = () => {
+const BillingContent: React.FC = () => {
     const router = useRouter();
     const [language, setLanguage] = useState<'en' | 'ar'>('en');
     const [isRTL, setIsRTL] = useState(false);
@@ -887,6 +889,16 @@ const BillingPage: React.FC = () => {
                 </div>
             )}
         </>
+    );
+};
+
+const BillingPage: React.FC = () => {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>}>
+            <BillingContent />
+        </Suspense>
     );
 };
 
