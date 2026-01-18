@@ -352,15 +352,15 @@ export default function DashboardAIPage() {
 
                         {/* AI Thinking Indicator */}
                         {isAIThinking && (
-                            <div className="flex gap-3 justify-start">
+                            <div className="flex gap-1 justify-start items-center">
                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
                                     <Bot className="h-5 w-5 text-white" />
                                 </div>
-                                <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl px-4 py-3">
+                                <div className="">
                                     <AITextLoading
                                         texts={AI_LOADING_TEXTS}
                                         interval={1500}
-                                        className="!text-lg !p-0"
+                                        className="!text-sm text-gray-500 dark:text-zinc-400 !p-0"
                                     />
                                 </div>
                             </div>
@@ -400,8 +400,8 @@ export default function DashboardAIPage() {
                             {/* Typewriter/Listening/Processing placeholder */}
                             {!prompt && !isAIThinking && (
                                 <div className={`absolute top-2 left-2 pointer-events-none text-base flex items-center gap-2 ${isTranscribing ? "text-amber-500" :
-                                        isListening ? "text-red-500" :
-                                            "text-gray-500 dark:text-zinc-400"
+                                    isListening ? "text-red-500" :
+                                        "text-gray-500 dark:text-zinc-400"
                                     }`}>
                                     {isTranscribing ? (
                                         <>
