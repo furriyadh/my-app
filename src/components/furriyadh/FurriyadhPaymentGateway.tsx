@@ -241,7 +241,7 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                             currentBalance: currentBalance.toFixed(2),
                             threshold: LOW_BALANCE_THRESHOLD,
                             activeCampaigns: 0, // TODO: Get actual count
-                            addFundsUrl: `${window.location.origin}/google-ads/billing`
+                            addFundsUrl: `${window.location.origin}/dashboard/google-ads/billing`
                         }
                     })
                 }).catch(err => console.error('Low balance email error:', err));
@@ -404,7 +404,7 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                                 dateStyle: 'medium',
                                 timeStyle: 'short'
                             }),
-                            dashboardUrl: `${window.location.origin}/google-ads/billing`
+                            dashboardUrl: `${window.location.origin}/dashboard/google-ads/billing`
                         }
                     })
                 }).catch(err => console.error('Email send error:', err));
@@ -545,8 +545,8 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
                     email: userEmail,
                     order_id: `DEP-${campaignBudget}-${Date.now().toString(36).toUpperCase()}`,
                     description: `Add $${campaignBudget} credit to Furriyadh Ads account`,
-                    success_url: `${window.location.origin}/google-ads/billing?payment=success`,
-                    cancel_url: `${window.location.origin}/google-ads/billing?payment=cancelled`,
+                    success_url: `${window.location.origin}/dashboard/google-ads/billing?payment=success`,
+                    cancel_url: `${window.location.origin}/dashboard/google-ads/billing?payment=cancelled`,
                 })
             });
 
@@ -1177,71 +1177,70 @@ export const FurriyadhPaymentGateway: React.FC<PaymentGatewayProps> = ({
             {showPaymentModal && selectedMethod && (
                 <div
                     className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${selectedMethod === 'visa_mastercard'
-                            ? 'bg-black/80 backdrop-blur-md'
-                            : 'bg-black/60 backdrop-blur-sm'
+                        ? 'bg-black/80 backdrop-blur-md'
+                        : 'bg-black/60 backdrop-blur-sm'
                         }`}
                     onClick={closeModal}
                 >
-            {/* 💳 Manual Payment Modal (Visa/MasterCard) - Professional Single Column Design */}
-            {selectedMethod === 'visa_mastercard' ? (
-                <div 
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-hidden"
-                    onClick={closeModal}
-                >
-                    <div 
-                        className="relative w-full max-w-[480px] bg-white dark:bg-[#151521] rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/5 flex flex-col"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Header */}
-                        <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-[#151521]">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-gray-500" />
-                                {isRTL ? 'الدفع بالبطاقة' : 'Card Payment'}
-                            </h3>
-                            <button
-                                onClick={closeModal}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                    {/* 💳 Manual Payment Modal (Visa/MasterCard) - Professional Single Column Design */}
+                    {selectedMethod === 'visa_mastercard' ? (
+                        <div
+                            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-hidden"
+                            onClick={closeModal}
+                        >
+                            <div
+                                className="relative w-full max-w-[480px] bg-white dark:bg-[#151521] rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/5 flex flex-col"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        
-                        {/* Form Area */}
-                        <div className="p-6 bg-white dark:bg-[#151521]">
-                            {renderCardPaymentForm()}
+                                {/* Header */}
+                                <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-[#151521]">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                        <CreditCard className="w-5 h-5 text-gray-500" />
+                                        {isRTL ? 'الدفع بالبطاقة' : 'Card Payment'}
+                                    </h3>
+                                    <button
+                                        onClick={closeModal}
+                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
 
-                             <div className="mt-6">
-                                <button
-                                    onClick={handleSubmitPayment}
-                                    disabled={isProcessing || !cardDetails.number || !cardDetails.cvv || !cardDetails.expiry}
-                                    className={`w-full py-3.5 rounded-lg font-semibold text-base shadow-sm flex items-center justify-center gap-2 transition-all ${
-                                        isProcessing 
-                                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
-                                        : 'bg-[#635bff] hover:bg-[#544dc9] text-white shadow-[#635bff]/25'
-                                    }`}
-                                >
-                                    {isProcessing ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            {isRTL ? 'جاري المعالجة...' : 'Processing...'}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Lock className="w-3.5 h-3.5 opacity-80" />
-                                            {isRTL ? `دفع $${totalPayment.toFixed(2)}` : `Pay $${totalPayment.toFixed(2)}`}
-                                        </>
-                                    )}
-                                </button>
-                                
-                                <div className="mt-4 flex items-center justify-center gap-1.5 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-                                    <div className="h-3 w-8 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/payment/visa.svg')" }} />
-                                    <div className="h-3 w-8 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/payment/mastercard.svg')" }} />
+                                {/* Form Area */}
+                                <div className="p-6 bg-white dark:bg-[#151521]">
+                                    {renderCardPaymentForm()}
+
+                                    <div className="mt-6">
+                                        <button
+                                            onClick={handleSubmitPayment}
+                                            disabled={isProcessing || !cardDetails.number || !cardDetails.cvv || !cardDetails.expiry}
+                                            className={`w-full py-3.5 rounded-lg font-semibold text-base shadow-sm flex items-center justify-center gap-2 transition-all ${isProcessing
+                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                                                : 'bg-[#635bff] hover:bg-[#544dc9] text-white shadow-[#635bff]/25'
+                                                }`}
+                                        >
+                                            {isProcessing ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    {isRTL ? 'جاري المعالجة...' : 'Processing...'}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Lock className="w-3.5 h-3.5 opacity-80" />
+                                                    {isRTL ? `دفع $${totalPayment.toFixed(2)}` : `Pay $${totalPayment.toFixed(2)}`}
+                                                </>
+                                            )}
+                                        </button>
+
+                                        <div className="mt-4 flex items-center justify-center gap-1.5 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+                                            <div className="h-3 w-8 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/payment/visa.svg')" }} />
+                                            <div className="h-3 w-8 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/payment/mastercard.svg')" }} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            ) : (
+                    ) : (
                         /* OLD/GENERIC MODAL (Crypto & PayPal) */
                         <div
                             className="bg-white dark:bg-[#0c1427] rounded-2xl w-full max-w-2xl shadow-2xl transition-all duration-300 max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700"

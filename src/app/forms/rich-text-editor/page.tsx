@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import RichTextEditor from "@/components/Forms/RichTextEditor";
 import Link from "next/link";
@@ -24,7 +24,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-[25px] md:flex items-center justify-between" dir="ltr">
-        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'Ù…Ø­Ø±Ø± Ø§Ù„Ù†ØµÙˆØµ Ø§Ù„Ù…ØªÙ‚Ø¯Ù…' : 'Rich Text Editor'}</h5>
+        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'محرر النصوص المتقدم' : 'Rich Text Editor'}</h5>
 
         <ol className="breadcrumb mt-[12px] md:mt-0">
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">

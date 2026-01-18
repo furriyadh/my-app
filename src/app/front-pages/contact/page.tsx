@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Cta from "@/components/FrontPage/Cta";
 import Footer from "@/components/FrontPage/Footer";

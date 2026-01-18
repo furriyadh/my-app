@@ -1,4 +1,4 @@
-﻿import BasicBoxplotChart from "@/components/Charts/More/BasicBoxplotChart";
+import BasicBoxplotChart from "@/components/Charts/More/BasicBoxplotChart";
 import BasicBubbleChart from "@/components/Charts/More/BasicBubbleChart";
 import BasicCandlestickChart from "@/components/Charts/More/BasicCandlestickChart";
 import BasicHeatmapChart from "@/components/Charts/More/BasicHeatmapChart";

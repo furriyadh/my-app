@@ -1,4 +1,4 @@
-﻿import DownloadMobileApp from "@/components/Dashboard/NFT/DownloadMobileApp";
+import DownloadMobileApp from "@/components/Dashboard/NFT/DownloadMobileApp";
 import ActiveAuctions from "@/components/Dashboard/NFT/ActiveAuctions";
 import AllNft from "@/components/Dashboard/NFT/AllNft";
 import EthereumRate from "@/components/Dashboard/NFT/EthereumRate";

@@ -1,4 +1,4 @@
-﻿import ImportantContent from "@/components/Apps/FileManager/ImportantContent";
+import ImportantContent from "@/components/Apps/FileManager/ImportantContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

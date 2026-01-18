@@ -1,4 +1,4 @@
-﻿import CardsWithAmount from "@/components/Dashboard/CreditCard/CardsWithAmount";
+import CardsWithAmount from "@/components/Dashboard/CreditCard/CardsWithAmount";
 import CreditUtilizationRatio from "@/components/Dashboard/CreditCard/CreditUtilizationRatio";
 import DailyLimit from "@/components/Dashboard/CreditCard/DailyLimit";
 import InterestChargeFees from "@/components/Dashboard/CreditCard/InterestChargeFees";

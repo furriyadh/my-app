@@ -1,4 +1,4 @@
-﻿import ProjectsContent from "@/components/Apps/FileManager/ProjectsContent";
+import ProjectsContent from "@/components/Apps/FileManager/ProjectsContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

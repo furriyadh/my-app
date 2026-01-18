@@ -78,7 +78,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   const protectedRoutes = [
     '/admin', '/apps', '/billing', '/charts', '/crm', '/crypto-trader', '/dashboard',
     '/demo-navbar', '/doctor', '/ecommerce', '/events', '/finance', '/forms', '/gallery',
-    '/google-ads', '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
+    '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
     '/my-profile', '/nft', '/notifications', '/onboarding', '/profile', '/project-management',
     '/quick-test', '/real-estate', '/real-estate-agent', '/restaurant', '/search', '/settings',
     '/social', '/starter', '/tables', '/timeline', '/ui-elements', '/users', '/widgets'
@@ -112,16 +112,6 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
       return () => subscription.unsubscribe();
     }
   }, [isPublicModule, router, supabase]);
-
-  // Loading State
-  if (!isPublicModule && !supabase) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
-        <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(96, 93, 255, 0.3) 0%, rgba(59, 130, 246, 0.15) 40%, transparent 70%)' }} />
-        <div className="relative z-10"><PrimaryLoader /></div>
-      </div>
-    );
-  }
 
   if (isPublicModule) {
     return <>{children}</>;

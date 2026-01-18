@@ -1,4 +1,4 @@
-﻿ 
+ 
 import Promotions from "@/components/Apps/Email/Promotions";
 import Sidebar from "@/components/Apps/Email/Sidebar";
 import Link from "next/link";

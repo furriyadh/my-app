@@ -1,4 +1,4 @@
-﻿import BasicLineChart from "@/components/Charts/Line/BasicLineChart";
+import BasicLineChart from "@/components/Charts/Line/BasicLineChart";
 import DashedLineChart from "@/components/Charts/Line/DashedLineChart";
 import GradientLineChart from "@/components/Charts/Line/GradientLineChart";
 import SteplineLineChart from "@/components/Charts/Line/SteplineLineChart";

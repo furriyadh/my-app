@@ -1,4 +1,4 @@
-﻿import RefundsTable from "@/components/eCommerce/Refunds/RefundsTable";
+import RefundsTable from "@/components/eCommerce/Refunds/RefundsTable";
 import Link from "next/link";
 
 export default function Page() {

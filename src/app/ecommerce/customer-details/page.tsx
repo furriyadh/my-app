@@ -1,4 +1,4 @@
-﻿import Profile from "@/components/eCommerce/CustomerDetails/Profile";
+import Profile from "@/components/eCommerce/CustomerDetails/Profile";
 import TransactionHistory from "@/components/eCommerce/CustomerDetails/TransactionHistory";
 import Link from "next/link";
 

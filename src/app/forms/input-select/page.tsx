@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Datalists from "@/components/Forms/Input/Datalists";
 import DefaultSelect from "@/components/Forms/Input/DefaultSelect";
@@ -31,7 +31,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-[25px] md:flex items-center justify-between" dir="ltr">
-        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'Ø§Ù„Ø¥Ø¯Ø®Ø§Ù„ ÙˆØ§Ù„Ø§Ø®ØªÙŠØ§Ø±' : 'Input & Select'}</h5>
+        <h5 className="!mb-0" dir={language === 'ar' ? 'rtl' : 'ltr'}>{language === 'ar' ? 'الإدخال والاختيار' : 'Input & Select'}</h5>
 
         <ol className="breadcrumb mt-[12px] md:mt-0">
           <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">

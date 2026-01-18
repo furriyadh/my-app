@@ -1,4 +1,4 @@
-﻿import TransactionsTable from "@/components/CryptoTrader/TransactionsTable";
+import TransactionsTable from "@/components/CryptoTrader/TransactionsTable";
 import Link from "next/link";
 
 export default function Page() {

@@ -1,4 +1,4 @@
-﻿// Fix for remaining TypeScript issues
+// Fix for remaining TypeScript issues
 declare module 'long' {
   interface Long {
     high: number;

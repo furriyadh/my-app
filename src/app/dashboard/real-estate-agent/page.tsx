@@ -1,4 +1,4 @@
-﻿import ClientRatings from "@/components/Dashboard/RealEstateAgent/ClientRatings";
+import ClientRatings from "@/components/Dashboard/RealEstateAgent/ClientRatings";
 import DownloadApp from "@/components/Dashboard/RealEstateAgent/DownloadApp";
 import LatestTransactions from "@/components/Dashboard/RealEstateAgent/LatestTransactions";
 import MyFeaturedListings from "@/components/Dashboard/RealEstateAgent/MyFeaturedListings";

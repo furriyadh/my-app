@@ -62,7 +62,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
       <div className="sidebar-area bg-white dark:bg-[#0c1427] fixed z-[7] top-0 h-screen transition-all rounded-r-md">
         <div className="logo bg-white dark:bg-[#0c1427] border-b border-gray-100 dark:border-[#172036] px-[25px] pt-[19px] pb-[15px] absolute z-[2] right-0 top-0 left-0">
           <Link
-            href="/google-ads/"
+            href="/dashboard/google-ads/"
             className="transition-none relative flex items-center outline-none"
           >
             <Image
@@ -88,6 +88,30 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
         <div className="pt-[89px] px-[22px] pb-[20px] h-screen overflow-y-scroll sidebar-custom-scrollbar">
           <div className="accordion">
 
+            {/* AI Assistant Section - Premium Design */}
+            <div className="mb-6">
+              <Link
+                href="/dashboard/"
+                className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 hover:scale-[1.02] ${pathname === "/dashboard/" ? "ring-2 ring-white/30" : ""}`}
+              >
+                {/* Animated background glow */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+
+                {/* Icon with sparkle animation */}
+                <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm">
+                  <i className="material-symbols-outlined !text-[22px] text-white">auto_awesome</i>
+                </div>
+
+                {/* Text content */}
+                <div className="relative flex-1">
+                  <span className="block font-semibold text-sm">AI Assistant</span>
+                  <span className="block text-[10px] text-white/70">Create campaigns with AI</span>
+                </div>
+
+                {/* Arrow icon */}
+                <i className="material-symbols-outlined relative !text-[18px] text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all">arrow_forward</i>
+              </Link>
+            </div>
 
             <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs">
               Main
@@ -117,8 +141,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/" ? "active" : ""
+                        href="/dashboard/google-ads/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/" ? "active" : ""
                           }`}
                       >
                         Google Ads
@@ -729,8 +753,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/campaigns/website-url/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname?.includes("/google-ads/campaigns/") ? "active" : ""
+                        href="/dashboard/google-ads/campaigns/website-url/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname?.includes("/dashboard/google-ads/campaigns/") ? "active" : ""
                           }`}
                       >
                         Create Campaign
@@ -739,8 +763,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/integrations/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/integrations/" ? "active" : ""
+                        href="/dashboard/google-ads/integrations/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/integrations/" ? "active" : ""
                           }`}
                       >
                         Integrations
@@ -751,8 +775,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/assets/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/assets/" ? "active" : ""
+                        href="/dashboard/google-ads/assets/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/assets/" ? "active" : ""
                           }`}
                       >
                         Assets
@@ -761,8 +785,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/billing/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/billing/" ? "active" : ""
+                        href="/dashboard/google-ads/billing/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/billing/" ? "active" : ""
                           }`}
                       >
                         Billing

@@ -1,4 +1,4 @@
-﻿// Ø§Ù„Ù…Ø³Ø§Ø±: src/app/layout.tsx
+// المسار: src/app/layout.tsx
 
 import "material-symbols";
 import "remixicon/fonts/remixicon.css";
@@ -27,10 +27,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://furriyadh.com'),
   title: {
-    default: "Furriyadh | Google Ads Management & AI Campaigns | إدارة إعلانات جوجل بالذكاء الاصطناعي",
+    default: "Furriyadh | Google Ads Management & AI Campaigns | ????? ??????? ???? ??????? ?????????",
     template: "%s | Furriyadh - Google Ads Management",
   },
-  description: "Furriyadh is a specialized AI-powered Google Ads management platform for Search, Display, Shopping, and Performance Max campaigns. Automate keyword research, ad copywriting, and bid optimization to maximize ROAS and minimize CPC. منصة احترافية لإدارة حملات إعلانات جوجل لزيادة المبيعات وتقليل التكلفة، وتحسين عائد الإنفاق الإعلاني.",
+  description: "Furriyadh is a specialized AI-powered Google Ads management platform for Search, Display, Shopping, and Performance Max campaigns. Automate keyword research, ad copywriting, and bid optimization to maximize ROAS and minimize CPC. ???? ???????? ?????? ????? ??????? ???? ?????? ???????? ?????? ???????? ?????? ???? ??????? ????????.",
   keywords: [
     // === ENGLISH KEYWORDS ===
     // Core Google Ads
@@ -90,56 +90,56 @@ export const metadata: Metadata = {
     "how to increase quality score Google Ads",
     // === ARABIC KEYWORDS ===
     // Core Terms & Roles
-    "خبير إعلانات جوجل",
-    "مدير إعلانات جوجل",
-    "شركة إعلانات جوجل",
-    "وكالة إعلانات جوجل",
-    "مستشار إعلانات جوجل",
-    "أخصائي إعلانات جوجل",
-    "محترف إعلانات جوجل",
+    "???? ??????? ????",
+    "???? ??????? ????",
+    "???? ??????? ????",
+    "????? ??????? ????",
+    "?????? ??????? ????",
+    "?????? ??????? ????",
+    "????? ??????? ????",
     // Ads Variations
-    "إعلانات جوجل",
-    "إعلانات قوقل",
-    "إعلانات البحث",
-    "إعلانات يوتيوب",
-    "إعلانات الشبكة الإعلانية",
+    "??????? ????",
+    "??????? ????",
+    "??????? ?????",
+    "??????? ??????",
+    "??????? ?????? ?????????",
     // Google Ads / AdWords
-    "جوجل أدز",
-    "جوجل أدووردز",
-    "قوقل أدز",
-    "حساب إعلانات جوجل",
-    "فتح حساب إعلانات جوجل",
+    "???? ???",
+    "???? ???????",
+    "???? ???",
+    "???? ??????? ????",
+    "??? ???? ??????? ????",
     // Services
-    "إدارة حملات إعلانات جوجل",
-    "إنشاء حملات إعلانية",
-    "تصميم إعلانات جوجل",
-    "تسويق إلكتروني جوجل",
-    "تحسين محركات البحث",
-    "زيادة المبيعات",
-    "تقليل سعر النقرة",
-    "تحسين العائد على الإعلان",
+    "????? ????? ??????? ????",
+    "????? ????? ???????",
+    "????? ??????? ????",
+    "????? ???????? ????",
+    "????? ?????? ?????",
+    "????? ????????",
+    "????? ??? ??????",
+    "????? ?????? ??? ???????",
     // AI & Features
-    "إعلانات جوجل بالذكاء الاصطناعي",
-    "ذكاء اصطناعي إعلانات جوجل",
-    "تحليل بيانات إعلانات جوجل",
-    "لوحة تحكم إعلانات جوجل",
-    "أتمتة إعلانات جوجل",
-    "إعلانات جوجل للمتاجر",
-    "إعلانات جوجل للعقارات",
+    "??????? ???? ??????? ?????????",
+    "???? ??????? ??????? ????",
+    "????? ?????? ??????? ????",
+    "???? ???? ??????? ????",
+    "????? ??????? ????",
+    "??????? ???? ???????",
+    "??????? ???? ????????",
     // Cost & Pricing
-    "تكلفة إعلانات جوجل",
-    "أسعار إعلانات جوجل",
-    "سعر النقرة في جوجل",
-    "ميزانية إعلانات جوجل",
+    "????? ??????? ????",
+    "????? ??????? ????",
+    "??? ?????? ?? ????",
+    "??????? ??????? ????",
     // Support
-    "دعم إعلانات جوجل",
-    "مشاكل إعلانات جوجل",
-    "حل مشكلة تعليق الحساب",
+    "??? ??????? ????",
+    "????? ??????? ????",
+    "?? ????? ????? ??????",
     // General
-    "الإعلان على جوجل",
-    "طريقة عمل إعلان ممول",
-    "شرح إعلانات جوجل",
-    "كوبون إعلانات جوجل",
+    "??????? ??? ????",
+    "????? ??? ????? ????",
+    "??? ??????? ????",
+    "????? ??????? ????",
     // Regional targeting - Asia & Africa
     "Google Ads Saudi Arabia",
     "Google Ads UAE",
@@ -153,17 +153,17 @@ export const metadata: Metadata = {
     "Google Ads South Africa",
     "Google Ads Morocco",
     "Google Ads Kenya",
-    "إعلانات جوجل السعودية",
-    "إعلانات جوجل الإمارات",
-    "إعلانات جوجل مصر",
-    "إعلانات جوجل الكويت",
-    "إعلانات جوجل قطر",
-    "إعلانات جوجل البحرين",
-    "إعلانات جوجل عمان",
-    "إعلانات جوجل الأردن",
-    "إعلانات جوجل المغرب",
-    "إعلانات جوجل الجزائر",
-    "إعلانات جوجل تونس",
+    "??????? ???? ????????",
+    "??????? ???? ????????",
+    "??????? ???? ???",
+    "??????? ???? ??????",
+    "??????? ???? ???",
+    "??????? ???? ???????",
+    "??????? ???? ????",
+    "??????? ???? ??????",
+    "??????? ???? ??????",
+    "??????? ???? ???????",
+    "??????? ???? ????",
     "Google Ads Middle East",
     "Google Ads Africa",
     "Google Ads Asia",
@@ -174,8 +174,8 @@ export const metadata: Metadata = {
     canonical: "https://furriyadh.com",
   },
   openGraph: {
-    title: "Furriyadh â€“ AIâ€‘Powered Google Ads Management Platform | Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ",
-    description: "Launch and scale profitable Google Ads campaigns worldwide with Furriyadh's AIâ€‘powered management platform. Ø¥Ø¯Ø§Ø±Ø© Ø§Ø­ØªØ±Ø§ÙÙŠØ© Ù„Ø­Ù…Ù„Ø§Øª Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù„Ø²ÙŠØ§Ø¯Ø© Ø§Ù„ØªØ­ÙˆÙŠÙ„Ø§Øª ÙˆØªÙ‚Ù„ÙŠÙ„ ØªÙƒÙ„ÙØ© Ø§Ù„Ù†Ù‚Ø±Ø©.",
+    title: "Furriyadh – AI‑Powered Google Ads Management Platform | إدارة إعلانات جوجل بالذكاء الاصطناعي",
+    description: "Launch and scale profitable Google Ads campaigns worldwide with Furriyadh's AI‑powered management platform. إدارة احترافية لحملات إعلانات جوجل لزيادة التحويلات وتقليل تكلفة النقرة.",
     url: "https://furriyadh.com",
     siteName: "Furriyadh",
     type: "website",
@@ -191,7 +191,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Furriyadh â€“ AIâ€‘Powered Google Ads Management Platform",
+    title: "Furriyadh – AI‑Powered Google Ads Management Platform",
     description: "Increase conversions and lower CPC with smart Google Ads management for businesses around the world.",
     images: ["/images/front-pages/dashboard.png"],
     creator: "@furaborsa",
@@ -330,7 +330,7 @@ export default function RootLayout({
                   "name": "Google Ads Campaign Management",
                   "description": "Professional AI-powered Google Ads management services including campaign creation, optimization, keyword research, bid management, and performance analytics.",
                   "areaServed": [
-                    // Asia - Ø§Ù„Ø´Ø±Ù‚ Ø§Ù„Ø£ÙˆØ³Ø·
+                    // Asia - الشرق الأوسط
                     { "@type": "Country", "name": "Saudi Arabia" },
                     { "@type": "Country", "name": "United Arab Emirates" },
                     { "@type": "Country", "name": "Kuwait" },
@@ -343,14 +343,14 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Syria" },
                     { "@type": "Country", "name": "Palestine" },
                     { "@type": "Country", "name": "Yemen" },
-                    // Asia - Ø¬Ù†ÙˆØ¨ Ø¢Ø³ÙŠØ§
+                    // Asia - جنوب آسيا
                     { "@type": "Country", "name": "India" },
                     { "@type": "Country", "name": "Pakistan" },
                     { "@type": "Country", "name": "Bangladesh" },
                     { "@type": "Country", "name": "Sri Lanka" },
                     { "@type": "Country", "name": "Nepal" },
                     { "@type": "Country", "name": "Afghanistan" },
-                    // Asia - Ø¬Ù†ÙˆØ¨ Ø´Ø±Ù‚ Ø¢Ø³ÙŠØ§
+                    // Asia - جنوب شرق آسيا
                     { "@type": "Country", "name": "Indonesia" },
                     { "@type": "Country", "name": "Malaysia" },
                     { "@type": "Country", "name": "Thailand" },
@@ -359,26 +359,26 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Singapore" },
                     { "@type": "Country", "name": "Myanmar" },
                     { "@type": "Country", "name": "Cambodia" },
-                    // Asia - Ø´Ø±Ù‚ Ø¢Ø³ÙŠØ§
+                    // Asia - شرق آسيا
                     { "@type": "Country", "name": "China" },
                     { "@type": "Country", "name": "Japan" },
                     { "@type": "Country", "name": "South Korea" },
                     { "@type": "Country", "name": "Taiwan" },
                     { "@type": "Country", "name": "Hong Kong" },
-                    // Asia - Ø¢Ø³ÙŠØ§ Ø§Ù„ÙˆØ³Ø·Ù‰
+                    // Asia - آسيا الوسطى
                     { "@type": "Country", "name": "Turkey" },
                     { "@type": "Country", "name": "Iran" },
                     { "@type": "Country", "name": "Kazakhstan" },
                     { "@type": "Country", "name": "Uzbekistan" },
                     { "@type": "Country", "name": "Azerbaijan" },
-                    // Africa - Ø´Ù…Ø§Ù„ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - شمال أفريقيا
                     { "@type": "Country", "name": "Egypt" },
                     { "@type": "Country", "name": "Morocco" },
                     { "@type": "Country", "name": "Algeria" },
                     { "@type": "Country", "name": "Tunisia" },
                     { "@type": "Country", "name": "Libya" },
                     { "@type": "Country", "name": "Sudan" },
-                    // Africa - Ø´Ø±Ù‚ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - شرق أفريقيا
                     { "@type": "Country", "name": "Kenya" },
                     { "@type": "Country", "name": "Ethiopia" },
                     { "@type": "Country", "name": "Tanzania" },
@@ -386,7 +386,7 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Rwanda" },
                     { "@type": "Country", "name": "Somalia" },
                     { "@type": "Country", "name": "Djibouti" },
-                    // Africa - ØºØ±Ø¨ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - غرب أفريقيا
                     { "@type": "Country", "name": "Nigeria" },
                     { "@type": "Country", "name": "Ghana" },
                     { "@type": "Country", "name": "Senegal" },
@@ -394,7 +394,7 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Cameroon" },
                     { "@type": "Country", "name": "Mali" },
                     { "@type": "Country", "name": "Mauritania" },
-                    // Africa - Ø¬Ù†ÙˆØ¨ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - جنوب أفريقيا
                     { "@type": "Country", "name": "South Africa" },
                     { "@type": "Country", "name": "Zimbabwe" },
                     { "@type": "Country", "name": "Zambia" },
@@ -527,7 +527,7 @@ export default function RootLayout({
                         "name": "Mohammed Hassan"
                       },
                       "datePublished": "2024-12-01",
-                      "reviewBody": "Ù…Ù†ØµØ© Ø±Ø§Ø¦Ø¹Ø© Ù„Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„. Ø³Ù‡Ù„Ø© Ø§Ù„Ø§Ø³ØªØ®Ø¯Ø§Ù… ÙˆÙ†ØªØ§Ø¦Ø¬ Ù…Ø°Ù‡Ù„Ø©. Ø£Ù†ØµØ­ Ø¨Ù‡Ø§ Ø¨Ø´Ø¯Ø©!",
+                      "reviewBody": "منصة رائعة لإدارة إعلانات جوجل. سهلة الاستخدام ونتائج مذهلة. أنصح بها بشدة!",
                       "reviewRating": {
                         "@type": "Rating",
                         "ratingValue": "5",
@@ -713,7 +713,7 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Script لتطبيق RTL قبل رسم الصفحة لتجنب التضارب */}
+        {/* Script ?????? RTL ??? ??? ?????? ????? ??????? */}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
@@ -731,14 +731,14 @@ export default function RootLayout({
                     document.documentElement.setAttribute('dir', 'ltr');
                   }
                 } catch (e) {
-                  // في حالة عدم وجود localStorage، استخدم LTR كافتراضي
+                  // ?? ???? ??? ???? localStorage? ?????? LTR ????????
                   document.documentElement.setAttribute('dir', 'ltr');
                 }
               })();
             `,
           }}
         />
-        {/* Script لتطبيق الثيم قبل رسم الصفحة لتجنب الوميض */}
+        {/* Script ?????? ????? ??? ??? ?????? ????? ?????? */}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
@@ -752,7 +752,7 @@ export default function RootLayout({
                     document.documentElement.classList.remove('dark');
                   }
                 } catch (e) {
-                  // في حالة عدم وجود localStorage، استخدم الوضع الفاتح كافتراضي
+                  // ?? ???? ??? ???? localStorage? ?????? ????? ?????? ????????
                 }
               })();
             `,
@@ -762,7 +762,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
-        {/* Google Maps API - Load globally (Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù…ØªØºÙŠØ± Ø§Ù„Ø¨ÙŠØ¦Ø© ÙÙ‚Ø· Ø¨Ø¯ÙˆÙ† Ù…ÙØªØ§Ø­ Ø§ÙØªØ±Ø§Ø¶ÙŠ ÙÙŠ Ø§Ù„ÙƒÙˆØ¯) */}
+        {/* Google Maps API - Load globally (باستخدام متغير البيئة فقط بدون مفتاح افتراضي في الكود) */}
         <script
           async
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`}

@@ -1,4 +1,4 @@
-﻿import Stats from "@/components/Dashboard/School/Stats";
+import Stats from "@/components/Dashboard/School/Stats";
 import Overview from "@/components/Dashboard/School/Overview";
 import UpcomingEvents from "@/components/Dashboard/School/UpcomingEvents";
 import AttendanceAnalytics from "@/components/Dashboard/School/AttendanceAnalytics";

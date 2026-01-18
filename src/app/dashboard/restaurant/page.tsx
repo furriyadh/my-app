@@ -1,4 +1,4 @@
-﻿import CustomerRatings from "@/components/Dashboard/Restaurant/CustomerRatings";
+import CustomerRatings from "@/components/Dashboard/Restaurant/CustomerRatings";
 import Expense from "@/components/Dashboard/Restaurant/Expense";
 import LowStockAlerts from "@/components/Dashboard/Restaurant/LowStockAlerts";
 import OrderSummary from "@/components/Dashboard/Restaurant/OrderSummary";

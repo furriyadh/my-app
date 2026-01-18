@@ -1,4 +1,4 @@
-﻿import Contacts from "@/components/Apps/Contacts";
+import Contacts from "@/components/Apps/Contacts";
 import Link from "next/link";
 
 export default function Page() {

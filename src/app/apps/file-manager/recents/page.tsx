@@ -1,4 +1,4 @@
-﻿import RecentContent from "@/components/Apps/FileManager/RecentContent";
+import RecentContent from "@/components/Apps/FileManager/RecentContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

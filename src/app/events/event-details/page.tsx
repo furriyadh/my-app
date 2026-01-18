@@ -1,4 +1,4 @@
-﻿ 
+ 
 import EventDetailsContent from "@/components/Events/EventDetailsContent";
 import Link from "next/link";
 

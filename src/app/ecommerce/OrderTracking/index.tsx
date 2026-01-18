@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 
@@ -106,7 +106,7 @@ const OrderTracking: React.FC = () => {
               <span className="block mb-[10px] last:mb-0">
                 22 Mar 2024 - 11:35AM:{" "}
                 <span className="text-black dark:text-white">
-                  Your order is now on warehouse. Itâ€™s being ready for shipped.
+                  Your order is now on warehouse. It’s being ready for shipped.
                 </span>
               </span>
             </div>

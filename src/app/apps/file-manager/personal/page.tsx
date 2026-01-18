@@ -1,4 +1,4 @@
-﻿import PersonalContent from "@/components/Apps/FileManager/PersonalContent";
+import PersonalContent from "@/components/Apps/FileManager/PersonalContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

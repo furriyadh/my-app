@@ -1,4 +1,4 @@
-﻿import Cards from "@/components/Finance/Wallet/Cards";
+import Cards from "@/components/Finance/Wallet/Cards";
 import Statistics from "@/components/Finance/Wallet/Statistics";
 import TotalBalance from "@/components/Finance/Wallet/TotalBalance";
 import TotalExpenses from "@/components/Finance/Wallet/TotalExpenses";

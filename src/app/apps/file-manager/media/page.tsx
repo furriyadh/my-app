@@ -1,4 +1,4 @@
-﻿import MediaContent from "@/components/Apps/FileManager/MediaContent";
+import MediaContent from "@/components/Apps/FileManager/MediaContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

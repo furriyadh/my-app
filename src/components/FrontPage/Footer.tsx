@@ -101,7 +101,7 @@ const Footer: React.FC = () => {
               <ul>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/google-ads"
+                    href="/dashboard/google-ads"
                     className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >
@@ -110,7 +110,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="mb-[10px] last:mb-0">
                   <Link
-                    href="/google-ads/campaigns"
+                    href="/dashboard/google-ads/campaigns"
                     className="lg:text-[16px] inline-block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-white transition-all whitespace-nowrap"
                     dir={isRTL ? 'rtl' : 'ltr'}
                   >

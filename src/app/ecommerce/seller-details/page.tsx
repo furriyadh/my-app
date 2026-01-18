@@ -1,4 +1,4 @@
-﻿import ProductsList from "@/components/eCommerce/ProductsList";
+import ProductsList from "@/components/eCommerce/ProductsList";
 import Profile from "@/components/eCommerce/SellerDetails/Profile";
 import Revenue from "@/components/eCommerce/SellerDetails/Revenue";
 import SellerOverview from "@/components/eCommerce/SellerDetails/SellerOverview";

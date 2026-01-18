@@ -1,4 +1,4 @@
-﻿import BedOccupancyRate from "@/components/Dashboard/Hospital/BedOccupancyRate";
+import BedOccupancyRate from "@/components/Dashboard/Hospital/BedOccupancyRate";
 import CriticalPatients from "@/components/Dashboard/Hospital/CriticalPatients";
 import EmergencyRoomVisits from "@/components/Dashboard/Hospital/EmergencyRoomVisits";
 import HospitalEarnings from "@/components/Dashboard/Hospital/HospitalEarnings";

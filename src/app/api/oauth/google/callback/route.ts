@@ -165,11 +165,11 @@ export async function GET(request: NextRequest) {
       console.log('✅ تم المصادقة بنجاح (حسب Google Ads API Documentation)');
 
       // تحديد صفحة التحويل بعد OAuth من state
-      let redirectAfter = '/google-ads/integrations/google-ads'; // تغيير الافتراضي
+      let redirectAfter = '/dashboard/google-ads/integrations/google-ads'; // تغيير الافتراضي
       try {
         if (state) {
           const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
-          redirectAfter = stateData.redirect_after || '/google-ads/integrations/google-ads';
+          redirectAfter = stateData.redirect_after || '/dashboard/google-ads/integrations/google-ads';
           console.log('🔍 redirect_after من state:', redirectAfter);
         }
       } catch (error) {
@@ -214,7 +214,7 @@ export async function GET(request: NextRequest) {
             if (tokenData.refresh_token) {
               successResponse.cookies.set('gtm_refresh_token', tokenData.refresh_token, getCookieOptions(180 * 24 * 3600));
             }
-          } else if (redirectAfter.includes('/google-ads')) {
+          } else if (redirectAfter.includes('/dashboard/google-ads')) {
             console.log('🎯 Detected Google Ads Auth -> Saving ads_oauth_token');
             successResponse.cookies.set('ads_oauth_token', tokenData.access_token, getCookieOptions(7 * 24 * 3600));
             if (tokenData.refresh_token) {
@@ -292,7 +292,7 @@ export async function GET(request: NextRequest) {
           }
 
           // ✅ Auto-discover and save Google Ads accounts after OAuth
-          if (redirectAfter?.includes('/google-ads')) {
+          if (redirectAfter?.includes('/dashboard/google-ads')) {
             console.log('🔄 اكتشاف حسابات Google Ads تلقائياً بعد OAuth...');
             try {
               const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;

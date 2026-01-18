@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
     // إضافة redirect_after إلى state إذا كان موجوداً
     const stateData = {
       state: baseState,
-      redirect_after: redirect_after || '/google-ads/integrations/google-ads'
+      redirect_after: redirect_after || '/dashboard/google-ads/integrations/google-ads'
     };
     const state = Buffer.from(JSON.stringify(stateData)).toString('base64');
 

@@ -1,4 +1,4 @@
-﻿import OrderSummary from "@/components/Dashboard/eCommerce/OrderSummary";
+import OrderSummary from "@/components/Dashboard/eCommerce/OrderSummary";
 import RecentOrders from "@/components/Dashboard/eCommerce/RecentOrders";
 import RecentTransaction from "@/components/Dashboard/eCommerce/RecentTransaction";
 import ReturningCustomerRate from "@/components/Dashboard/eCommerce/ReturningCustomerRate";

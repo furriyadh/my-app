@@ -36,7 +36,7 @@ const CONFIG = {
         '/authentication',
         '/dashboard',
         '/campaign',
-        '/google-ads',
+        '/dashboard/google-ads',
         '/settings',
         '/onboarding',
         '/admin',
@@ -227,7 +227,8 @@ export default function GoogleOneTap() {
                                             supabaseId: user.id,
                                             email: user.email,
                                             name: user.user_metadata?.full_name || user.user_metadata?.name || '',
-                                            picture: user.user_metadata?.avatar_url || ''
+                                            picture: user.user_metadata?.avatar_url || '',
+                                            access_token: data.session.access_token
                                         })
                                     });
                                     console.log("✅ Session synced to OAuth cookies");

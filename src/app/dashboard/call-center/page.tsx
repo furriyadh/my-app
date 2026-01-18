@@ -1,4 +1,4 @@
-﻿import AgentAvgEarnings from "@/components/Dashboard/CallCenter/AgentAvgEarnings";
+import AgentAvgEarnings from "@/components/Dashboard/CallCenter/AgentAvgEarnings";
 import AgentsPerformanceOverview from "@/components/Dashboard/CallCenter/AgentsPerformanceOverview";
 import CallCenterGeography from "@/components/Dashboard/CallCenter/CallCenterGeography";
 import InboundCalls from "@/components/Dashboard/CallCenter/InboundCalls";

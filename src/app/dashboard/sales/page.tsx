@@ -1,4 +1,4 @@
-﻿import GrossEarnings from "@/components/Dashboard/Sales/GrossEarnings";
+import GrossEarnings from "@/components/Dashboard/Sales/GrossEarnings";
 import RealTimeSales from "@/components/Dashboard/Sales/RealTimeSales";
 import RecentEarnings from "@/components/Dashboard/Sales/RecentEarnings";
 import RecentOrders from "@/components/Dashboard/Sales/RecentOrders";

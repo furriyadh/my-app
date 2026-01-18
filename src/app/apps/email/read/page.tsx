@@ -1,4 +1,4 @@
-﻿import ReadEmail from "@/components/Apps/Email/ReadEmail";
+import ReadEmail from "@/components/Apps/Email/ReadEmail";
 import Sidebar from "@/components/Apps/Email/Sidebar";
 import Link from "next/link";
 

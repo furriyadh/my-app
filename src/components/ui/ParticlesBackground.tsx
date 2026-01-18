@@ -18,7 +18,7 @@ export default function ParticlesBackground() {
     const protectedRoutes = [
         '/admin', '/apps', '/billing', '/charts', '/crm', '/crypto-trader', '/dashboard',
         '/demo-navbar', '/doctor', '/ecommerce', '/events', '/finance', '/forms', '/gallery',
-        '/google-ads', '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
+        '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
         '/my-profile', '/nft', '/notifications', '/onboarding', '/profile', '/project-management',
         '/quick-test', '/real-estate', '/real-estate-agent', '/restaurant', '/search', '/settings',
         '/social', '/starter', '/tables', '/timeline', '/ui-elements', '/users', '/widgets'

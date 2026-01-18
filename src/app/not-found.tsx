@@ -10,67 +10,63 @@ export default function NotFoundPage() {
     const pathname = usePathname();
     const [language, setLanguage] = useState<'en' | 'ar'>('en');
 
-    // Define Protected/Dashboard Routes matches LayoutProvider.tsx
+    // Define Protected/Dashboard Routes matches LayoutProvider.tsx exactly
     const protectedRoutes = [
         '/admin', '/apps', '/billing', '/charts', '/crm', '/crypto-trader', '/dashboard',
         '/demo-navbar', '/doctor', '/ecommerce', '/events', '/finance', '/forms', '/gallery',
-        '/google-ads', '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
+        '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
         '/my-profile', '/nft', '/notifications', '/onboarding', '/profile', '/project-management',
         '/quick-test', '/real-estate', '/real-estate-agent', '/restaurant', '/search', '/settings',
         '/social', '/starter', '/tables', '/timeline', '/ui-elements', '/users', '/widgets'
     ];
 
+    // Logic: If path starts with any protected route, it's NOT public.
     const isProtected = protectedRoutes.some(route => pathname === route || pathname?.startsWith(route + '/'));
 
     useEffect(() => {
-        // Basic language detection from localStorage or default to 'en'
         const storedLang = localStorage.getItem('preferredLanguage') as 'en' | 'ar';
         if (storedLang) {
             setLanguage(storedLang);
         }
+    }, []);
 
-        // Apply background class to body while on 404 dashboard page to cover layout padding
-        if (isProtected) {
-            document.body.classList.add('dashboard-404-body');
-        }
-        return () => {
-            document.body.classList.remove('dashboard-404-body');
-        };
-    }, [isProtected]);
-
-    return (
-        <div className="flex flex-col min-h-screen">
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .dashboard-404-body {
-                    background-color: #FFFFFF !important;
-                    background-image: none !important;
-                }
-                .dark .dashboard-404-body {
-                    background-color: #0a0e19 !important;
-                }
-                /* Ensure any wrapper divs from standard layout are also transparent to show the body background */
-                .dashboard-404-body .main-content-wrap,
-                .dashboard-404-body .main-content {
-                    background-color: transparent !important;
-                }
-            ` }} />
-
-            {!isProtected && <Navbar />}
-
-            <div className={`flex-grow relative ${isProtected ? 'pt-0 flex items-center justify-center' : 'pt-32 md:pt-40'}`}>
+    // Protected Route 404 (Dashboard/Admin/Apps etc) - Minimal content
+    // LayoutProvider handles Sidebar/Header for these routes
+    if (isProtected) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
                 <NotFound
                     imageLight="/images/dashboard-404-light.png"
                     imageDark="/images/dashboard-404-dark.png"
-                    onButtonClick={() => window.location.href = isProtected ? '/dashboard' : '/'}
-                    buttonText={language === 'ar' ? (isProtected ? "العودة للوحة التحكم" : "العودة للرئيسية") : (isProtected ? "Back to Dashboard" : "Back to Home")}
+                    onButtonClick={() => window.location.href = '/dashboard'}
+                    buttonText={language === 'ar' ? "العودة للوحة التحكم" : "Back to Dashboard"}
                     animate={false}
                     particleCount={0}
-                    className={`!bg-transparent dark:!bg-transparent ${isProtected ? 'h-[60vh]' : 'h-[75vh]'}`}
+                    className="!bg-transparent dark:!bg-transparent h-[60vh]"
+                />
+            </div>
+        );
+    }
+
+    // Public 404 - Full Layout
+    // Includes Navbar and Footer manually since LayoutProvider doesn't wrap public pages with them
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Navbar />
+
+            <div className="flex-grow relative pt-32 md:pt-40">
+                <NotFound
+                    imageLight="/images/404-lightc.png"
+                    imageDark="/images/404-darkc.png"
+                    onButtonClick={() => window.location.href = '/'}
+                    buttonText={language === 'ar' ? "العودة للرئيسية" : "Back to Home"}
+                    animate={false}
+                    particleCount={0}
+                    className="!bg-transparent dark:!bg-transparent h-[75vh]"
                 />
             </div>
 
-            {!isProtected && <Footer />}
+            <Footer />
         </div>
     );
 }

@@ -25,13 +25,43 @@ const getCookieOptions = (maxAge: number, httpOnly: boolean = true) => {
 
 export async function POST(request: NextRequest) {
     try {
-        // ✅ التحقق من الجلسة من خلال Supabase server-side للسماح فقط للمستخدمين المصادقين
-        const { createClient } = await import('@/utils/supabase/server');
-        const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        // ✅ 1. محاولة الحصول على access_token من الـ body (للموثوقية)
+        let body;
+        try {
+            body = await request.json();
+        } catch (e) {
+            body = {};
+        }
 
-        if (authError || !user) {
-            console.error('❌ Unauthorized sync attempt:', authError);
+        const token = body.access_token;
+
+        let user;
+
+        if (token) {
+            // التحقق باستخدام الـ token المرسل
+            const { createClient } = await import('@supabase/supabase-js');
+            const supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            );
+            const { data, error } = await supabase.auth.getUser(token);
+            if (!error && data.user) {
+                user = data.user;
+            }
+        }
+
+        // ✅ 2. إذا فشل التحقق من الـ token، نجرب الـ cookies (الطريقة القديمة)
+        if (!user) {
+            const { createClient } = await import('@/utils/supabase/server');
+            const supabase = await createClient();
+            const { data, error } = await supabase.auth.getUser();
+            if (!error && data.user) {
+                user = data.user;
+            }
+        }
+
+        if (!user) {
+            console.error('❌ Unauthorized sync attempt: No valid session or token');
             return NextResponse.json(
                 { success: false, error: 'Unauthorized: Valid Supabase session required' },
                 { status: 401 }

@@ -1,4 +1,4 @@
-﻿import AnnualProfit from "@/components/Dashboard/CRM/AnnualProfit";
+import AnnualProfit from "@/components/Dashboard/CRM/AnnualProfit";
 import BalanceOverview from "@/components/Dashboard/CRM/BalanceOverview";
 import LeadConversion from "@/components/Dashboard/CRM/LeadConversion";
 import LeadsBySource from "@/components/Dashboard/CRM/LeadsBySource";
