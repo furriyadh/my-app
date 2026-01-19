@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { cn } from "@/lib/utils";
 import SparkleNavbar from "@/components/lightswind/sparkle-navbar";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import Login from "@/components/ui/login";
 
 const NavbarContent: React.FC = () => {
@@ -175,6 +175,7 @@ const NavbarContent: React.FC = () => {
                 </NavbarButton>
               </DialogTrigger>
               <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                <DialogTitle className="hidden">Login</DialogTitle>
                 <Login onClose={() => setShowLoginDialog(false)} />
               </DialogContent>
             </Dialog>
@@ -258,6 +259,7 @@ const NavbarContent: React.FC = () => {
                   </NavbarButton>
                 </DialogTrigger>
                 <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                  <DialogTitle className="hidden">Login</DialogTitle>
                   <Login onClose={() => setShowLoginDialog(false)} />
                 </DialogContent>
               </Dialog>

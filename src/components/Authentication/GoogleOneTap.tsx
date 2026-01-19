@@ -275,7 +275,9 @@ export default function GoogleOneTap() {
                             // Don't count as dismissal - this is a technical issue
                         }
                     } else if (notification.isSkippedMoment()) {
-                        const reason = notification.getSkippedMomentReason();
+                        const reason = typeof notification.getSkippedMomentReason === 'function'
+                            ? notification.getSkippedMomentReason()
+                            : 'unknown';
                         console.log("One Tap skipped:", reason);
                     } else if (notification.isDismissedMoment()) {
                         const reason = notification.getDismissedReason();

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Paperclip, ArrowUp, Loader2, Plus, MessageSquare, Mic, MicOff, Bot, User, RotateCcw, Rocket } from 'lucide-react';
 import AITextLoading from "@/components/kokonutui/ai-text-loading";
+import { createClient } from "@/utils/supabase/client";
 import { useAISpeechToText } from "@/lib/hooks/useAISpeechToText";
 import { useLanguage } from "@/lib/hooks/useLanguage";
 
@@ -64,15 +65,53 @@ export default function DashboardAIPage() {
     const [isAIThinking, setIsAIThinking] = useState(false);
     const [typewriterText, setTypewriterText] = useState("");
     const [scenarioIndex, setScenarioIndex] = useState(0);
+    const [userName, setUserName] = useState("");
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Get user's preferred language
+    // Get user's preferred language for speech recognition
     const { language: appLanguage } = useLanguage();
 
-    // AI Speech-to-Text Hook - Supports ALL languages including Arabic
+    // Map app language codes to Web Speech API language codes
+    const getSpeechLanguage = (lang: string): string => {
+        const languageMap: Record<string, string> = {
+            'en': 'en-US',
+            'ar': 'ar-SA',
+            'de': 'de-DE',
+            'es': 'es-ES',
+            'fr': 'fr-FR',
+            'it': 'it-IT',
+            'pt': 'pt-BR',
+            'ru': 'ru-RU',
+            'zh': 'zh-CN',
+            'ja': 'ja-JP',
+            'ko': 'ko-KR',
+        };
+        return languageMap[lang] || 'en-US';
+    };
+
+    // Fetch User Name
+    useEffect(() => {
+        const fetchUser = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                // Get name from metadata or fall back to email
+                const name = user.user_metadata?.full_name ||
+                    user.user_metadata?.name ||
+                    user.email?.split('@')[0] ||
+                    "Client";
+                setUserName(name);
+            }
+        };
+        fetchUser();
+    }, []);
+
+
+
+    // AI Speech-to-Text Hook - Uses user's preferred language
     const {
         isRecording: isListening,
         isProcessing: isTranscribing,
@@ -88,6 +127,7 @@ export default function DashboardAIPage() {
             console.error("Speech error:", error);
         },
         silenceDelay: 2000, // 2 seconds of silence = auto send
+        language: getSpeechLanguage(appLanguage), // Use user's preferred language
     });
 
     // Scroll to bottom when messages change
@@ -261,6 +301,13 @@ export default function DashboardAIPage() {
                         <div className="flex flex-col items-center mb-8">
                             <div className="w-1 h-6 bg-gradient-to-b from-transparent via-purple-500 to-purple-500 rounded-full animate-pulse" />
                             <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                        </div>
+
+                        {/* Welcome Header */}
+                        <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                            <h2 className="text-2xl md:text-3xl font-medium text-gray-500 dark:text-zinc-400 mb-2">
+                                Welcome, <span className="text-gray-900 dark:text-white font-semibold">{userName}</span> 👋
+                            </h2>
                         </div>
 
                         {/* Main Title */}

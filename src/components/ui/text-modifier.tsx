@@ -126,7 +126,7 @@ const TextModifier: React.FC<TextModifierProps> = ({
     </span>
   );
 
-  return <div {...props}>{content}</div>;
+  return <span {...props}>{content}</span>;
 };
 
 export default TextModifier;
