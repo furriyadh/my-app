@@ -758,6 +758,47 @@ export default function RootLayout({
             `,
           }}
         />
+
+        {/* OAuth Popup Auto-Close: Detects if this is a popup with auth token and closes it */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Only run if we're in a popup AND have an access_token in the URL hash
+                  if (window.opener && window.location.hash && window.location.hash.includes('access_token=')) {
+                    console.log('🔐 OAuth popup detected with token, waiting for Supabase...');
+                    
+                    // Wait for Supabase to process the token (it removes the hash after processing)
+                    var attempts = 0;
+                    var maxAttempts = 30; // 3 seconds max
+                    
+                    var checkInterval = setInterval(function() {
+                      attempts++;
+                      
+                      // Check if hash is gone (Supabase processed it) or max attempts reached
+                      if (!window.location.hash.includes('access_token=') || attempts >= maxAttempts) {
+                        clearInterval(checkInterval);
+                        
+                        // Notify opener
+                        try {
+                          window.opener.postMessage({ type: "SUPABASE_AUTH_SUCCESS" }, "*");
+                        } catch(e) {}
+                        
+                        // Close popup
+                        setTimeout(function() {
+                          window.close();
+                        }, 200);
+                      }
+                    }, 100);
+                  }
+                } catch(e) {
+                  console.error('Popup detection error:', e);
+                }
+              })();
+            `,
+          }}
+        />
         {/* Preload critical resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

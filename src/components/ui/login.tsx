@@ -193,13 +193,10 @@ export default function Login({ initialView = "signin", onClose }: LoginProps) {
     // ... rest of handlers ...
 
     const handleOAuthSignIn = async (provider: "google" | "facebook" | "apple" | "twitter") => {
-        // ... (existing helper logic)
         console.log('🔐 OAuth button clicked, provider:', provider);
-        console.log('🔐 Supabase client status:', supabase ? 'Ready' : 'Not loaded yet');
 
         if (!supabase) {
             setMessage("System is loading, please wait...");
-            console.error('❌ Supabase client not ready');
             return;
         }
         setIsLoading(true);
@@ -208,11 +205,11 @@ export default function Login({ initialView = "signin", onClose }: LoginProps) {
         try {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "");
 
-            // Generate the OAuth URL without redirecting immediately
+            // Use popup flow - skipBrowserRedirect: true to get URL for popup
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${appUrl}/authentication/popup-callback`,
+                    redirectTo: `${appUrl}/dashboard`,
                     skipBrowserRedirect: true,
                     queryParams: {
                         access_type: 'offline',
@@ -228,65 +225,39 @@ export default function Login({ initialView = "signin", onClose }: LoginProps) {
             }
 
             if (data?.url) {
-                // Determine popup dimensions and position
+                // Open popup for OAuth
                 const width = 500;
                 const height = 600;
                 const left = window.screen.width / 2 - width / 2;
                 const top = window.screen.height / 2 - height / 2;
 
-                // Open the popup
                 const popup = window.open(
                     data.url,
-                    "SupabaseAuthPopup",
-                    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+                    "GoogleAuth",
+                    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
                 );
 
                 if (!popup) {
-                    setMessage("Popup blocked! Please allow popups for this site.");
+                    setMessage("Popup blocked! Please allow popups.");
                     setIsLoading(false);
                     return;
                 }
 
-                // Listen for the message from the popup
-                const handleMessage = (event: MessageEvent) => {
-                    console.log('📩 Received message:', event.data);
+                // Poll for popup close and check session
+                const checkInterval = setInterval(async () => {
+                    if (popup.closed) {
+                        clearInterval(checkInterval);
 
-                    // Accept messages from any origin since OAuth might redirect cross-origin
-                    if (event.data?.type === "SUPABASE_AUTH_SUCCESS") {
-                        console.log('✅ Auth success message received!');
-                        // Auth successful! The popup has closed itself or will close.
-                        // We can now redirect or refresh.
-                        window.removeEventListener("message", handleMessage);
-                        clearInterval(timer);
-
-                        // Briefly wait to ensure local storage sync, then redirect
-                        setTimeout(() => {
+                        // Check if session was created
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session) {
                             router.push("/dashboard");
                             router.refresh();
-                        }, 500);
+                        } else {
+                            setIsLoading(false);
+                        }
                     }
-                };
-
-                window.addEventListener("message", handleMessage);
-
-                // Polling to detect if popup was closed
-                const timer = setInterval(() => {
-                    if (popup.closed) {
-                        console.log('🔐 Popup closed, checking session...');
-                        clearInterval(timer);
-                        window.removeEventListener("message", handleMessage);
-                        // Check if session exists
-                        supabase.auth.getSession().then(({ data: { session } }: any) => {
-                            if (session) {
-                                console.log('✅ Session found after popup closed');
-                                router.push("/dashboard");
-                            } else {
-                                console.log('❌ No session after popup closed');
-                                setIsLoading(false);
-                            }
-                        });
-                    }
-                }, 500); // Check more frequently
+                }, 300);
             }
 
         } catch (err: any) {
