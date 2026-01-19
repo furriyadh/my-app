@@ -47,8 +47,27 @@ export async function GET(request: NextRequest) {
     if (campaignId) queryParams.set('campaignId', campaignId); // ✅ جديد
 
     // الحصول على cookies للطلبات الداخلية
+    // ⚠️ نحتاج فقط الـ cookies المتعلقة بالمصادقة وتكون ASCII-safe
     const cookieStore = await cookies();
+    const authCookieNames = ['oauth_access_token', 'oauth_refresh_token', 'sb-access-token', 'sb-refresh-token'];
     const cookieHeader = cookieStore.getAll()
+      .filter(cookie => {
+        // فقط الـ cookies المهمة للمصادقة
+        if (!authCookieNames.some(name => cookie.name.includes(name))) {
+          return false;
+        }
+        // تأكد أن القيمة ASCII فقط (لتجنب خطأ ByteString)
+        try {
+          for (let i = 0; i < cookie.value.length; i++) {
+            if (cookie.value.charCodeAt(i) > 255) {
+              return false;
+            }
+          }
+          return true;
+        } catch {
+          return false;
+        }
+      })
       .map(cookie => `${cookie.name}=${cookie.value}`)
       .join('; ');
 

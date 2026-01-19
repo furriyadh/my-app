@@ -94,9 +94,21 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   useEffect(() => {
     // Auth Check for Protected Pages
     if (!isPublicModule && supabase) {
-      const checkAuth = async () => {
+      const checkAuth = async (retries = 3) => {
+        // إعطاء Supabase وقت لاستعادة الجلسة من localStorage
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session && retries > 0) {
+          // إعادة المحاولة بعد تأخير إضافي
+          console.log(`🔄 Session not found, retrying... (${retries} attempts left)`);
+          setTimeout(() => checkAuth(retries - 1), 200);
+          return;
+        }
+
         if (!session) {
+          console.log('❌ No session after retries, redirecting to home');
           router.push('/');
         }
       };
