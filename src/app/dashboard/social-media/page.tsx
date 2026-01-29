@@ -1,4 +1,4 @@
-﻿import FacebookCampaignOverview from "@/components/Dashboard/SocialMedia/FacebookCampaignOverview";
+import FacebookCampaignOverview from "@/components/Dashboard/SocialMedia/FacebookCampaignOverview";
 import FacebookFollowers from "@/components/Dashboard/SocialMedia/FacebookFollowers";
 import FollowersByGender from "@/components/Dashboard/SocialMedia/FollowersByGender";
 import InstagramFollowers from "@/components/Dashboard/SocialMedia/InstagramFollowers";

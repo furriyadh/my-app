@@ -22,7 +22,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "types": [
-      "node"
+      "node",
+      "dom-speech-recognition"
     ],
     "plugins": [
       {

@@ -12,7 +12,7 @@ const Widgets: React.FC = () => {
         <div className="container 2xl:max-w-[1320px] mx-auto px-[12px] relative z-[1]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[25px] items-center">
             <div className="relative">
-              <div className="md:max-w-[600px] lg:max-w-[400px] xl:max-w-[510px] p-[15px] md:p-[25px] xl:py-[27px] xl:px-[34px] rounded-[7px] bg-white/[.54] dark:bg-black/[.54] border border-white/[.10] dark:border-black/[.10] backdrop-blur-[5.400000095367432px]">
+              <div className="md:max-w-[600px] lg:max-w-[400px] xl:max-w-[510px] p-[15px] md:p-[25px] xl:py-[27px] xl:px-[34px] rounded-2xl bg-white/5 border border-white/10 backdrop-blur-[12px]">
                 <Image
                   src="/images/front-pages/order-summary.png"
                   className="inline-block"
@@ -64,22 +64,7 @@ const Widgets: React.FC = () => {
             </div>
           </div>
 
-          <div className="absolute -top-[60px] ltr:left-[65px] rtl:right-[65px] -z-[1] blur-[150px]">
-            <Image
-              src="/images/front-pages/shape1.png"
-              alt="shape1"
-              width={530}
-              height={530}
-            />
-          </div>
-          <div className="absolute -bottom-[30px] ltr:right-[20px] rtl:left-[20px] -z-[1] blur-[125px]">
-            <Image
-              src="/images/front-pages/shape2.png"
-              alt="shape1"
-              width={447}
-              height={453}
-            />
-          </div>
+
         </div>
       </div>
     </>

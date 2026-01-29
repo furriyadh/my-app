@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendUrl } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🔓 إلغاء ربط الحساب الإعلاني...');
-    
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('oauth_access_token')?.value;
-    
+
     if (!accessToken) {
       return NextResponse.json({
         success: false,
@@ -15,9 +16,9 @@ export async function POST(request: NextRequest) {
         message: 'لم يتم العثور على access token'
       }, { status: 401 });
     }
-    
+
     const { customer_id } = await request.json();
-    
+
     if (!customer_id) {
       return NextResponse.json({
         success: false,
@@ -25,16 +26,17 @@ export async function POST(request: NextRequest) {
         message: 'معرف العميل مطلوب'
       }, { status: 400 });
     }
-    
+
     // الاتصال بالباك اند لإلغاء ربط الحساب
-    const response = await fetch(`${getBackendUrl()}/api/mcc/unlink-customer/${customer_id}`, {
-      method: 'DELETE',
+    const response = await fetch(`${getBackendUrl()}/api/unlink-customer`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-      }
+      },
+      body: JSON.stringify({ customer_id })
     });
-    
+
     if (!response.ok) {
       console.error('❌ فشل في إلغاء ربط الحساب:', response.status, response.statusText);
       return NextResponse.json({
@@ -43,9 +45,9 @@ export async function POST(request: NextRequest) {
         message: 'فشل في إلغاء ربط الحساب'
       }, { status: 500 });
     }
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       console.log('✅ تم إلغاء ربط الحساب بنجاح');
       return NextResponse.json({
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
         message: data.message || 'فشل في إلغاء ربط الحساب'
       }, { status: 400 });
     }
-    
+
   } catch (error) {
     console.error('❌ خطأ في إلغاء ربط الحساب:', error);
     return NextResponse.json({

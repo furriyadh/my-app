@@ -15,14 +15,14 @@ const STEP_NAMES = {
   2: { en: 'AI Magic', ar: 'سحر الذكاء' }
 };
 
-const CampaignProgress: React.FC<CampaignProgressProps> = ({ 
+const CampaignProgress: React.FC<CampaignProgressProps> = ({
   currentStep,
   totalSteps = 3
 }) => {
   const stepName = STEP_NAMES[currentStep as keyof typeof STEP_NAMES];
 
   return (
-    <div className="w-full bg-black border-b border-gray-800 py-3 sm:py-4 px-2 sm:px-4">
+    <div className="w-full bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-3 sm:py-4 px-2 sm:px-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-center gap-2 sm:gap-3">
           {/* Progress Dots */}
@@ -45,7 +45,7 @@ const CampaignProgress: React.FC<CampaignProgressProps> = ({
                       w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300
                       ${isCompleted ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30' : ''}
                       ${isCurrent ? 'bg-gradient-to-br from-purple-600 via-blue-600 to-pink-600 text-white shadow-xl shadow-purple-500/50 scale-110 sm:scale-125 ring-2 sm:ring-4 ring-purple-500/20' : ''}
-                      ${isPending ? 'bg-gray-800 text-gray-600 border-2 border-gray-700' : ''}
+                      ${isPending ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-2 border-gray-400 dark:border-gray-700' : ''}
                     `}
                   >
                     {isCompleted ? (
@@ -54,7 +54,7 @@ const CampaignProgress: React.FC<CampaignProgressProps> = ({
                       <span>{index + 1}</span>
                     )}
                   </div>
-                  
+
                   {/* Pulse for current step */}
                   {isCurrent && (
                     <motion.div
@@ -74,11 +74,11 @@ const CampaignProgress: React.FC<CampaignProgressProps> = ({
 
                 {/* Connector Line */}
                 {index < totalSteps - 1 && (
-                  <div className="h-0.5 sm:h-1 w-8 sm:w-16 md:w-24 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-0.5 sm:h-1 w-8 sm:w-16 md:w-24 bg-gray-300 dark:bg-gray-800 rounded-full overflow-hidden">
                     <motion.div
                       className="h-full bg-gradient-to-r from-purple-600 to-pink-600"
                       initial={{ width: '0%' }}
-                      animate={{ 
+                      animate={{
                         width: index < currentStep ? '100%' : '0%'
                       }}
                       transition={{ duration: 0.4, delay: index * 0.05 }}
@@ -92,12 +92,12 @@ const CampaignProgress: React.FC<CampaignProgressProps> = ({
 
         {/* Progress Text */}
         <div className="mt-2 sm:mt-3 text-center">
-          <p className="text-xs sm:text-sm text-gray-400">
-            Step <span className="text-purple-400 font-bold">{currentStep + 1}</span> of {totalSteps}
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            Step <span className="text-purple-600 dark:text-purple-400 font-bold">{currentStep + 1}</span> of {totalSteps}
             {stepName && (
               <>
-                <span className="mx-1 sm:mx-2 text-gray-700">•</span>
-                <span className="text-white font-semibold">{stepName.en}</span>
+                <span className="mx-1 sm:mx-2 text-gray-400 dark:text-gray-700">•</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{stepName.en}</span>
               </>
             )}
           </p>

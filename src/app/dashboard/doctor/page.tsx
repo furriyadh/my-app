@@ -1,4 +1,4 @@
-﻿import Appointments from "@/components/Dashboard/Doctor/Appointments";
+import Appointments from "@/components/Dashboard/Doctor/Appointments";
 import Earnings from "@/components/Dashboard/Doctor/Earnings";
 import IncomeVSExpense from "@/components/Dashboard/Doctor/IncomeVSExpense";
 import MyRecentPatients from "@/components/Dashboard/Doctor/MyRecentPatients";

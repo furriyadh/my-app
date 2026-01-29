@@ -50,9 +50,10 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 }
 
 
-// دالة للحصول على Access Token - تعطي الأولوية لـ User Token (لاكتشاف حسابات المستخدم)
-async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
-  // 1. أولاً: نحاول User OAuth Token (الأصح لاكتشاف حسابات المستخدم الشخصية)
+// 🔒 دالة للحصول على Access Token - تتطلب User Token فقط (لا fallback لـ MCC)
+// تم إزالة MCC fallback لأسباب أمنية - كان يعطي صلاحيات المدير لأي طلب بدون user token
+async function getUserAccessToken(userRefreshToken?: string): Promise<string | null> {
+  // User OAuth Token مطلوب - لا fallback
   if (userRefreshToken) {
     console.log('🔑 محاولة استخدام User OAuth Token (User Context)...');
     const userAccessToken = await refreshAccessToken(userRefreshToken);
@@ -60,23 +61,12 @@ async function getValidAccessToken(userRefreshToken?: string): Promise<string | 
       console.log('✅ تم الحصول على User Access Token بنجاح');
       return userAccessToken;
     }
-    console.warn('⚠️ فشل User Token، سنحاول MCC Token كاحتياطي...');
+    console.error('❌ فشل تجديد User Token');
   }
 
-  // 2. ثانياً: نحاول استخدام MCC refresh token من البيئة (System Context)
-  // هذا مفيد إذا كنا نريد عرض الحسابات المرتبطة بالفعل بالمدير
-  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-
-  if (mccRefreshToken) {
-    console.log('🔑 محاولة استخدام MCC Token من البيئة (System Context)...');
-    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
-    if (mccAccessToken) {
-      console.log('✅ تم الحصول على MCC Access Token بنجاح');
-      return mccAccessToken;
-    }
-  }
-
-  console.error('❌ فشل الحصول على أي Access Token صالح');
+  // ❌ لا نستخدم MCC Token كبديل - هذا خطر أمني
+  // المستخدم يجب أن يكون مصادق عليه للوصول إلى حساباته
+  console.error('❌ لا يوجد User Token صالح - مطلوب تسجيل دخول');
   return null;
 }
 
@@ -95,8 +85,8 @@ export async function GET(request: NextRequest) {
 
     console.log('🔑 Token Source:', adsRefreshToken ? 'ads_refresh_token (Specific)' : 'oauth_refresh_token (Generic)');
 
-    // 🔑 الحصول على Access Token - MCC أولاً
-    const accessToken = await getValidAccessToken(userRefreshToken);
+    // 🔑 الحصول على Access Token - User Token مطلوب
+    const accessToken = await getUserAccessToken(userRefreshToken);
 
     if (!accessToken) {
       console.error('❌ No valid access token available');

@@ -1,4 +1,4 @@
-﻿import MyDrive from "@/components/Apps/FileManager/MyDrive";
+import MyDrive from "@/components/Apps/FileManager/MyDrive";
 import RecentFiles from "@/components/Apps/FileManager/RecentFiles";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";

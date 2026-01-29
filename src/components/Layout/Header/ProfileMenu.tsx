@@ -7,14 +7,23 @@ import { usePathname } from "next/navigation";
 
 const ProfileMenu: React.FC = () => {
   const pathname = usePathname();
+  const [supabase, setSupabase] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
 
   const [active, setActive] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null); // Ref for the dropdown container
- 
+
   const handleDropdownToggle = () => {
     setActive((prevState) => !prevState);
   };
-    
+
   // Handle clicks outside the dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,6 +44,39 @@ const ProfileMenu: React.FC = () => {
     };
   }, []);
 
+  const handleLogout = async () => {
+    // 1. Clear Supabase
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+
+    // 2. Clear LocalStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("cached_google_ads_accounts");
+      localStorage.removeItem("oauth_user_info");
+      localStorage.removeItem("userEmail");
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("account_stats_")) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+    }
+
+    // 3. API Logout
+    try {
+      await fetch("/api/oauth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) { }
+
+    // 4. Redirect
+    window.location.href = "/";
+  };
+
   return (
     <div
       className="relative profile-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0"
@@ -43,9 +85,8 @@ const ProfileMenu: React.FC = () => {
       <button
         type="button"
         onClick={handleDropdownToggle}
-        className={`flex items-center -mx-[5px] relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white ${
-          active ? "active" : ""
-        }`}
+        className={`flex items-center -mx-[5px] relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white ${active ? "active" : ""
+          }`}
       >
         <Image
           src="/images/admin.png"
@@ -82,9 +123,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/my-profile/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/my-profile/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/my-profile/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   account_circle
@@ -95,9 +135,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/apps/chat/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/apps/chat/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/apps/chat/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   chat
@@ -108,9 +147,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/apps/to-do-list/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/apps/to-do-list/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/apps/to-do-list/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   format_list_bulleted
@@ -121,9 +159,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/ecommerce/checkout/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/ecommerce/checkout/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/ecommerce/checkout/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   credit_card
@@ -139,9 +176,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/settings/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/settings/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/settings/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   settings
@@ -152,9 +188,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/faq/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/faq/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/faq/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   support
@@ -165,9 +200,8 @@ const ProfileMenu: React.FC = () => {
             <li>
               <Link
                 href="/authentication/lock-screen/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/authentication/lock-screen/" ? "text-primary-500" : ""
-                }`}
+                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${pathname === "/authentication/lock-screen/" ? "text-primary-500" : ""
+                  }`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   lock
@@ -176,17 +210,15 @@ const ProfileMenu: React.FC = () => {
               </Link>
             </li>
             <li>
-              <Link
-                href="/authentication/logout/"
-                className={`block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500 ${
-                  pathname === "/authentication/logout/" ? "text-primary-500" : ""
-                }`}
+              <button
+                onClick={handleLogout}
+                className={`block w-full text-left relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500`}
               >
                 <i className="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                   logout
                 </i>
                 Logout
-              </Link>
+              </button>
             </li>
           </ul>
         </div>

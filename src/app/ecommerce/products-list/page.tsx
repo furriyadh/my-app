@@ -1,4 +1,4 @@
-﻿import ProductsList from "@/components/eCommerce/ProductsList";
+import ProductsList from "@/components/eCommerce/ProductsList";
 import Link from "next/link";
 
 export default function Page() {

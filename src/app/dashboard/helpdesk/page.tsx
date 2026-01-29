@@ -1,4 +1,4 @@
-﻿import Congratulations from "@/components/Dashboard/HelpDesk/Congratulations";
+import Congratulations from "@/components/Dashboard/HelpDesk/Congratulations";
 import CustomerSatisfaction from "@/components/Dashboard/HelpDesk/CustomerSatisfaction";
 import NewTicketsVSSolvedTickets from "@/components/Dashboard/HelpDesk/NewTicketsVSSolvedTickets";
 import PerformanceOfAgents from "@/components/Dashboard/HelpDesk/PerformanceOfAgents";

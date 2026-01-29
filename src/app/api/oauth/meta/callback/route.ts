@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         const cookieStore = await cookies();
         const savedState = cookieStore.get('meta_oauth_state')?.value;
 
-        let redirectAfter = '/google-ads/integrations/meta-ads';
+        let redirectAfter = '/dashboard/google-ads/integrations/meta-ads';
         if (savedState && stateParam) {
             try {
                 const savedStateData = JSON.parse(savedState);

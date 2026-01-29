@@ -7,7 +7,26 @@ import dynamic from "next/dynamic";
 // Dynamically import react-apexcharts with Next.js dynamic import
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const LeadConversion: React.FC = () => {
+interface LeadConversionProps {
+  title?: string;
+  value?: string;
+  growth?: string;
+  series?: any[];
+  period?: string;
+}
+
+const LeadConversion: React.FC<LeadConversionProps> = ({
+  title = "Lead Conversion",
+  value = "48.79%",
+  growth = "-15%",
+  period = "Last 30 days",
+  series = [
+    {
+      name: "Lead Conversion",
+      data: [3, 6, 7, 6, 9, 10, 7],
+    },
+  ]
+}) => {
   // Chart
   const [isChartLoaded, setChartLoaded] = useState(false);
 
@@ -15,12 +34,7 @@ const LeadConversion: React.FC = () => {
     setChartLoaded(true);
   }, []);
 
-  const series = [
-    {
-      name: "Lead Conversion",
-      data: [3, 6, 7, 6, 9, 10, 7],
-    },
-  ];
+
 
   const options: ApexOptions = {
     chart: {
@@ -109,9 +123,9 @@ const LeadConversion: React.FC = () => {
     <>
       <div className="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
         <div className="trezo-card-content relative">
-          <span className="block">Lead Conversion</span>
+          <span className="block">{title}</span>
 
-          <h5 className="!mb-0 !mt-[3px] !text-[20px]">48.79%</h5>
+          <h5 className="!mb-0 !mt-[3px] !text-[20px]">{value}</h5>
 
           <div className="absolute -top-[28px] ltr:-right-[9px] rtl:-left-[9px] max-w-[120px]">
             {isChartLoaded && (
@@ -126,10 +140,12 @@ const LeadConversion: React.FC = () => {
           </div>
 
           <div className="mt-[25px] md:mt-[34px] flex items-center justify-between">
-            <span className="inline-block text-sm text-danger-700 py-[1px] px-[8.3px] border border-danger-300 bg-danger-100 dark:bg-[#15203c] dark:border-[#172036] rounded-xl">
-              -15%
+            <span className={`inline-block text-sm py-[1px] px-[8.3px] border rounded-xl ${growth.startsWith('+')
+              ? 'text-success-700 border-success-300 bg-success-100 dark:bg-[#15203c] dark:border-[#172036]'
+              : 'text-danger-700 border-danger-300 bg-danger-100 dark:bg-[#20153c] dark:border-[#361717]'}`}>
+              {growth}
             </span>
-            <span className="block text-sm">Last 30 days</span>
+            <span className="block text-sm">{period}</span>
           </div>
         </div>
       </div>

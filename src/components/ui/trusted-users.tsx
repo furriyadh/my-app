@@ -1,73 +1,89 @@
-import React from "react";
-import { Star } from "lucide-react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CountUp } from "@/components/lightswind/count-up";
 
 interface TrustedUsersProps {
-  avatars: string[];
-  rating?: number;
-  totalUsersText?: number;
-  caption?: string;
   className?: string;
-  starColorClass?: string;
-  ringColors?: string[];
+  targetCount?: number;
 }
 
+const avatars = [
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=45",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=46",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=47",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=48",
+];
+
 export const TrustedUsers: React.FC<TrustedUsersProps> = ({
-  avatars,
-  rating = 5,
-  totalUsersText = 1000,
-  caption = "Trusted by",
   className = "",
-  starColorClass = "text-yellow-400",
-  ringColors = [],
+  targetCount = 2847,
 }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const duration = 2000;
+    const steps = 60;
+    const increment = targetCount / steps;
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= targetCount) {
+        setCount(targetCount);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [targetCount]);
+
   return (
     <div
       className={cn(
-        `flex items-center justify-center gap-6 bg-transparent
-          text-foreground py-4 px-4`,
+        "inline-flex items-center gap-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full py-2 px-4 shadow-lg transition-all duration-500 cursor-pointer hover:shadow-[0_0_40px_8px_rgba(139,92,246,0.5),0_0_80px_20px_rgba(139,92,246,0.2)] hover:border-purple-500/50",
         className
       )}
     >
-      <div className="flex -space-x-4">
-        {avatars.map((src, i) => (
+      {/* LIVE Indicator */}
+      <div className="flex items-center gap-1.5">
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+        </span>
+        <span className="text-xs font-bold text-green-400 tracking-wider">LIVE</span>
+      </div>
+
+      {/* Separator */}
+      <div className="h-5 w-[1px] bg-white/20"></div>
+
+      {/* Avatars */}
+      <div className="flex -space-x-2">
+        {avatars.map((avatar, i) => (
           <div
             key={i}
-            className={`w-10 h-10 rounded-full overflow-hidden ring-1 ring-offset-2 ring-offset-black ${
-              ringColors[i] || "ring-blue-900"
-            }`}
+            className="w-6 h-6 rounded-full border-2 border-zinc-900 bg-zinc-800 overflow-hidden"
           >
             <img
-              src={src}
-              alt={`Avatar ${i + 1}`}
+              src={avatar}
+              alt={`User ${i + 1}`}
               className="w-full h-full object-cover"
               loading="lazy"
-              decoding="async"
             />
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col items-start gap-1">
-        <div className="flex gap-1" style={{ color: '#facc15' }}>
-          {Array.from({ length: rating }).map((_, i) => (
-            <Star key={i} fill="currentColor" className="w-4 h-4" style={{ color: '#facc15' }} />
-          ))}
-        </div>
-        <span className="text-white dark:text-white text-xs md:text-md font-medium">
-          {caption}{" "}
-          <CountUp
-            value={totalUsersText}
-            duration={2}
-            separator=","
-            className="ml-1 text-lg"
-            suffix="+"
-            colorScheme="gradient"
-          />
+      {/* Counter */}
+      <div className="flex flex-col">
+        <span className="text-lg font-bold text-white leading-none flex items-center gap-0.5">
+          {count.toLocaleString()}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">+</span>
         </span>
+        <span className="text-[10px] text-zinc-400 font-medium">Users active in the last 24h</span>
       </div>
     </div>
   );
 };
-

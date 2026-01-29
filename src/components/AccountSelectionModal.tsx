@@ -29,9 +29,9 @@ interface UserAccounts {
 interface AccountSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (accounts: {[key: string]: string}) => void;
+  onSelect: (accounts: { [key: string]: string }) => void;
   accounts: UserAccounts;
-  selectedAccounts: {[key: string]: string};
+  selectedAccounts: { [key: string]: string };
   campaignType?: string | null;
 }
 
@@ -43,22 +43,22 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
   selectedAccounts,
   campaignType
 }) => {
-  const [localSelectedAccounts, setLocalSelectedAccounts] = useState<{[key: string]: string}>(selectedAccounts);
+  const [localSelectedAccounts, setLocalSelectedAccounts] = useState<{ [key: string]: string }>(selectedAccounts);
 
   if (!isOpen) return null;
 
   // Determine which account types are required based on campaign type
   const getRequiredAccountTypes = () => {
     const required = ['google_ads']; // Google Ads is always required
-    
+
     if (campaignType === 'shopping') {
       required.push('merchant_center');
     }
-    
+
     if (campaignType === 'video') {
       required.push('youtube');
     }
-    
+
     return required;
   };
 
@@ -85,12 +85,12 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
   const handleSave = () => {
     // Validate required accounts are selected
     const missingRequired = requiredAccountTypes.filter(type => !localSelectedAccounts[type]);
-    
+
     if (missingRequired.length > 0) {
       alert(`Please select the following required accounts: ${missingRequired.join(', ')}`);
       return;
     }
-    
+
     onSelect(localSelectedAccounts);
   };
 
@@ -210,11 +210,10 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                     handleAccountSelect(accountType, account.id);
                   }
                 }}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                  isSelected
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${isSelected
                     ? `border-${color}-500 bg-${color}-50 dark:bg-${color}-900/20`
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -234,7 +233,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center">
                     {isSelected && (
                       <div className={`w-6 h-6 bg-${color}-600 rounded-full flex items-center justify-center`}>
@@ -287,7 +286,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                 </span>
               </div>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                {requiredAccountTypes.length > 1 
+                {requiredAccountTypes.length > 1
                   ? `This campaign type requires: ${requiredAccountTypes.map(type => getAccountTypeName(type)).join(', ')}`
                   : 'Google Ads account is required for all campaigns'
                 }
@@ -297,7 +296,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
 
           {/* Account Sections */}
           <div className="space-y-6">
-            {Object.entries(accounts).map(([accountType, accountList]) => 
+            {Object.entries(accounts).map(([accountType, accountList]) =>
               renderAccountSection(accountType, accountList)
             )}
           </div>
@@ -315,7 +314,18 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                 We couldn't find any Google accounts linked to your profile.
               </p>
               <button
-                onClick={() => window.location.href = '/api/oauth/google'}
+                onClick={() => {
+                  // Open OAuth in popup
+                  const width = 500;
+                  const height = 600;
+                  const left = window.screen.width / 2 - width / 2;
+                  const top = window.screen.height / 2 - height / 2;
+                  window.open(
+                    '/api/oauth/google',
+                    'GoogleOAuthPopup',
+                    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+                  );
+                }}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
                 Connect Google Accounts
@@ -335,7 +345,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                 </span>
               )}
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={onClose}

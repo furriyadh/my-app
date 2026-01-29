@@ -3,7 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import { useTranslation } from "@/lib/hooks/useTranslation";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 const HeroBanner: React.FC = () => {
   const { t, isRTL } = useTranslation();
@@ -21,17 +24,23 @@ const HeroBanner: React.FC = () => {
               {t.hero.subtitle}
             </p>
 
-            <Link
-              href="/"
-              className="inline-block lg:text-[15px] xl:text-[16px] mt-[5px] md:mt-[12px] lg:mt-[20px] xl:mt-[25px] py-[12px] px-[17px] bg-primary-600 text-white rounded-md transition-all font-medium hover:bg-primary-500"
-            >
-              <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={isRTL ? 'rtl' : 'ltr'}>
-                <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
-                  person
-                </i>
-                {t.hero.cta}
-              </span>
-            </Link>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  className="inline-block lg:text-[15px] xl:text-[16px] mt-[5px] md:mt-[12px] lg:mt-[20px] xl:mt-[25px] py-[12px] px-[17px] bg-primary-600 text-white rounded-md transition-all font-medium hover:bg-primary-500"
+                >
+                  <span className="inline-block relative ltr:pl-[25px] rtl:pr-[25px] ltr:md:pl-[29px] rtl:md:pr-[29px]" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 top-1/2 -translate-y-1/2 !text-[20px] md:!text-[24px]">
+                      person
+                    </i>
+                    {t.hero.cta}
+                  </span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                <Login />
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="text-center">
@@ -44,38 +53,7 @@ const HeroBanner: React.FC = () => {
             />
           </div>
 
-          <div className="absolute -z-[1] ltr:-right-[30px] rtl:-left-[30px] bottom-[50px] blur-[150px]">
-            <Image
-              src="/images/front-pages/shape3.png"
-              alt="shape3"
-              width={685}
-              height={685}
-            />
-          </div>
-          <div className="absolute -z-[1] ltr:left-[25px] rtl:right-[25px] -top-[210px] blur-[125px]">
-            <Image
-              src="/images/front-pages/shape2.png"
-              alt="shape3"
-              width={437}
-              height={453}
-            />
-          </div>
-          <div className="absolute -z-[1] ltr:right-[260px] rtl:left-[260px] -top-[125px] blur-[75px]">
-            <Image
-              src="/images/front-pages/shape4.png"
-              alt="shape3"
-              width={170}
-              height={170}
-            />
-          </div>
-          <div className="absolute -z-[1] ltr:-left-[50px] rtl:-right-[50px] bottom-0 blur-[75px]">
-            <Image
-              src="/images/front-pages/shape5.png"
-              alt="shape3"
-              width={658}
-              height={656}
-            />
-          </div>
+
         </div>
       </div>
     </>

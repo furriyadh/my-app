@@ -74,22 +74,42 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     setActive(!active);
   };
 
-  // Define public/auth pages (No Sidebar/Header/Footer)
-  const isPublicModule =
-    pathname === "/" ||
-    pathname === "/coming-soon" ||
-    pathname?.startsWith("/authentication/") ||
-    pathname?.startsWith("/front-pages/") ||
-    pathname?.startsWith("/pdf/") ||
-    pathname?.startsWith("/extra-pages/"); // Add any other public path prefixes here
+  // Define Protected/Dashboard Routes (Show Sidebar/Header/Footer)
+  const protectedRoutes = [
+    '/admin', '/apps', '/billing', '/charts', '/crm', '/crypto-trader', '/dashboard',
+    '/demo-navbar', '/doctor', '/ecommerce', '/events', '/finance', '/forms', '/gallery',
+    '/helpdesk', '/hotel', '/invoices', '/lms', '/maps', '/members',
+    '/my-profile', '/nft', '/notifications', '/onboarding', '/profile', '/project-management',
+    '/quick-test', '/real-estate', '/real-estate-agent', '/restaurant', '/search', '/settings',
+    '/social', '/starter', '/tables', '/timeline', '/ui-elements', '/users', '/widgets'
+  ];
+
+  // Logic: If path starts with any protected route, it's NOT public.
+  // Exception: Authentication and Front Pages are explicitly Public (already covered by not being in protected list? 
+  // No, authentication is not in protected list. So it defaults to Public. Correct.)
+
+  const isProtected = protectedRoutes.some(route => pathname === route || pathname?.startsWith(route + '/'));
+  const isPublicModule = !isProtected;
 
   useEffect(() => {
     // Auth Check for Protected Pages
     if (!isPublicModule && supabase) {
-      const checkAuth = async () => {
+      const checkAuth = async (retries = 3) => {
+        // إعطاء Supabase وقت لاستعادة الجلسة من localStorage
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session && retries > 0) {
+          // إعادة المحاولة بعد تأخير إضافي
+          console.log(`🔄 Session not found, retrying... (${retries} attempts left)`);
+          setTimeout(() => checkAuth(retries - 1), 200);
+          return;
+        }
+
         if (!session) {
-          router.push('/authentication/sign-in');
+          console.log('❌ No session after retries, redirecting to home');
+          router.push('/');
         }
       };
 
@@ -97,7 +117,7 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
         if (event === 'SIGNED_OUT') {
-          router.push('/authentication/sign-in');
+          router.push('/');
         }
       });
 
@@ -105,19 +125,24 @@ const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     }
   }, [isPublicModule, router, supabase]);
 
-  // Loading State
+  // Loading State - Re-added with correct positioning (Center + Above Sidebar)
   if (!isPublicModule && !supabase) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black relative overflow-hidden">
-        <div className="absolute inset-0 opacity-40" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(96, 93, 255, 0.3) 0%, rgba(59, 130, 246, 0.15) 40%, transparent 70%)' }} />
-        <div className="relative z-10"><PrimaryLoader /></div>
+      <div className="fixed inset-0 z-[9999] bg-[#0a0e19] w-screen h-screen overflow-hidden">
+        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <PrimaryLoader />
+        </div>
       </div>
     );
   }
 
+  if (isPublicModule) {
+    return <>{children}</>;
+  }
+
   return (
     <>
-      <div className={`main-content-wrap transition-all ${active ? "active" : ""}`}>
+      <div className={`main-content-wrap transition-all ${active ? "active" : ""} ${isPublicModule ? "!ml-0 !p-0 !w-full" : ""}`}>
         {!isPublicModule && (
           <>
             <SidebarMenu toggleActive={toggleActive} />

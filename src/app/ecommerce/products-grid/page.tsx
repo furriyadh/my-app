@@ -1,4 +1,4 @@
-﻿import ProductsGrid from "@/components/eCommerce/ProductsGrid";
+import ProductsGrid from "@/components/eCommerce/ProductsGrid";
 import Link from "next/link";
 
 export default function Page() {

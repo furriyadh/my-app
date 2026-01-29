@@ -1,4 +1,4 @@
-﻿import Prescriptions from "@/components/Doctor/Prescriptions";
+import Prescriptions from "@/components/Doctor/Prescriptions";
 import Link from "next/link";
 
 export default function Page() {

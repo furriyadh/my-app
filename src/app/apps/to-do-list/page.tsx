@@ -1,4 +1,4 @@
-﻿import ToDoList from "@/components/Apps/ToDoList";
+import ToDoList from "@/components/Apps/ToDoList";
 import Link from "next/link";
 
 export default function Page() {

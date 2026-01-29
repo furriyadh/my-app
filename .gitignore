@@ -137,3 +137,11 @@ secrets.txt
 config.json
 config.yaml
 config.yml
+
+# Build Artifacts
+*.tsbuildinfo
+*.d.ts
+*.d.ts.map
+.next/
+dist/
+build/

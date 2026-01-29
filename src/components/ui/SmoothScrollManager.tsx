@@ -5,6 +5,11 @@ import Lenis from "lenis";
 
 export default function SmoothScrollManager() {
     useEffect(() => {
+        // Disable on mobile/tablet to save Main Thread (significant performance boost)
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            return;
+        }
+
         // "Cinematic" Slow Scroll Settings
         const lenis = new Lenis({
             duration: 1.2,      // Balanced duration (Standard)

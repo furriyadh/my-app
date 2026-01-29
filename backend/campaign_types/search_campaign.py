@@ -1362,7 +1362,7 @@ class SearchCampaignCreator:
                 self._add_image_assets(campaign_resource_name, ad_copies.get('images'))
             
             # 8. إضافة Negative Keywords (لتحسين Relevance و Quality Score)
-            self._add_negative_keywords(campaign_resource_name, keywords)
+            self._add_campaign_negative_keywords(campaign_resource_name, keywords)
             
             print("✅ تم إضافة جميع الأصول الإعلانية (Sitelinks, Callouts, Snippets, Promotions, Images, Negative Keywords)")
             
@@ -1831,8 +1831,8 @@ class SearchCampaignCreator:
         except Exception as e:
             print(f"⚠️ تحذير: فشل في إضافة Image Assets: {e}")
     
-    def _add_negative_keywords(self, campaign_resource_name: str, keywords: list = None):
-        """إضافة كلمات مفتاحية سلبية (Negative Keywords) - لتحسين Quality Score"""
+    def _add_campaign_negative_keywords(self, campaign_resource_name: str, keywords: list = None):
+        """إضافة كلمات مفتاحية سلبية على مستوى الحملة (Negative Keywords) - لتحسين Quality Score"""
         try:
             if not keywords:
                 print("⚠️ لا توجد كلمات مفتاحية لاستخراج الكلمات السلبية منها")

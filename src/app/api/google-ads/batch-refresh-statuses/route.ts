@@ -122,46 +122,46 @@ function mapStatusToDisplay(status: string) {
     return statusMap[status?.toUpperCase()] || statusMap['NOT_LINKED'];
 }
 
-// Fetch live status from Flask Backend (Phase 2)
-async function fetchLiveStatusFromFlask(customerId: string, accessToken: string, refreshToken: string): Promise<{ success: boolean; status?: string; error?: string }> {
+// Fetch live status from Flask Backend (Phase 2) - Now using BATCH sync
+async function fetchLiveStatusesFromFlask(customerIds: string[], accessToken: string, refreshToken: string): Promise<{ success: boolean; results?: Array<{ customer_id: string; status: string; is_ghost?: boolean }>; error?: string }> {
     try {
         const backendUrl = getBackendUrl();
-        console.log(`🔄 Calling Flask backend for account ${customerId}...`);
+        console.log(`🔄 Calling Flask backend for BATCH sync of ${customerIds.length} accounts...`);
 
-        const response = await fetch(`${backendUrl}/api/sync-account-status/${customerId}`, {
+        const response = await fetch(`${backendUrl}/api/sync-all-accounts`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`,
                 'X-Google-Refresh-Token': refreshToken,
             },
-            body: JSON.stringify({ customer_id: customerId }),
+            body: JSON.stringify({ customer_ids: customerIds }),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`❌ Flask backend error for ${customerId}: ${response.status}`, errorText.substring(0, 200));
+            console.error(`❌ Flask backend batch sync error: ${response.status}`, errorText.substring(0, 200));
             return { success: false, error: `HTTP ${response.status}` };
         }
 
         const data = await response.json();
-        console.log(`✅ Flask returned status for ${customerId}: ${data.status || data.api_status}`);
+        console.log(`✅ Flask batch sync returned: ${data.updated || 0} updated, ${data.total || 0} total`);
 
         return {
             success: true,
-            status: data.status || data.api_status || 'UNKNOWN'
+            results: data.results || []
         };
     } catch (error) {
-        console.error(`❌ Flask call failed for ${customerId}:`, error);
+        console.error(`❌ Flask batch sync call failed:`, error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
 }
 
 // Valid statuses that can be saved to Supabase (based on client_requests_status_check constraint)
-const VALID_STATUSES = ['ACTIVE', 'PENDING', 'LINKED', 'ENABLED', 'DISABLED', 'SUSPENDED', 'REJECTED', 'CANCELLED', 'NOT_LINKED'];
+const VALID_STATUSES = ['ACTIVE', 'PENDING', 'LINKED', 'ENABLED', 'DISABLED', 'SUSPENDED', 'REJECTED', 'CANCELLED', 'NOT_LINKED', 'REFRESH_NEEDED'];
 
 // Update Supabase with live status (only if valid)
-async function updateSupabaseStatus(customerId: string, userId: string, newStatus: string): Promise<boolean> {
+async function updateSupabaseStatus(customerId: string, userId: string | null, newStatus: string): Promise<boolean> {
     try {
         // Validate status before saving
         const normalizedStatus = newStatus?.toUpperCase() || '';
@@ -172,7 +172,26 @@ async function updateSupabaseStatus(customerId: string, userId: string, newStatu
 
         const supabase = getSupabaseAdmin();
 
-        const { error } = await supabase
+        // If userId is null, try to find it from customer_id first (for Webhook case)
+        if (!userId) {
+            const { data: request } = await supabase
+                .from('client_requests')
+                .select('user_id')
+                .eq('customer_id', customerId)
+                .single();
+
+            if (request) {
+                userId = request.user_id;
+            } else {
+                console.warn(`⚠️ Could not find user_id for customer ${customerId}`);
+                // Proceeding without user_id usually fails due to RLS if we were client, but we are Admin here.
+                // However, the WHERE clause below might need it? 
+                // Wait, .eq('user_id', userId) is what we used before.
+                // If we don't have userId, we should just update by customerId.
+            }
+        }
+
+        let query = supabase
             .from('client_requests')
             .update({
                 status: normalizedStatus,
@@ -183,8 +202,13 @@ async function updateSupabaseStatus(customerId: string, userId: string, newStatu
                     source: 'batch_refresh_live'
                 }
             })
-            .eq('customer_id', customerId)
-            .eq('user_id', userId);
+            .eq('customer_id', customerId);
+
+        if (userId) {
+            query = query.eq('user_id', userId);
+        }
+
+        const { error } = await query;
 
         if (error) {
             console.error(`❌ Supabase update failed for ${customerId}:`, error);
@@ -250,7 +274,7 @@ export async function GET(request: NextRequest) {
 
         // ===== Phase 2: If forceRefresh, call Flask backend for live status =====
         if (forceRefresh && accounts.length > 0) {
-            console.log('🔄 Phase 2: Calling Flask backend for live status...');
+            console.log('🔄 Phase 2: Calling Flask backend for BATCH live status sync...');
 
             // Get refresh token from cookies
             const refreshTokenFromCookie = cookieStore.get('ads_refresh_token')?.value ||
@@ -265,26 +289,47 @@ export async function GET(request: NextRequest) {
 
                 if (freshAccessToken) {
                     console.log('✅ Fresh access token obtained');
-                    // Call Flask backend for each account in parallel
-                    const liveStatusPromises = accounts.map(async (account) => {
-                        const result = await fetchLiveStatusFromFlask(account.customerId, freshAccessToken, refreshTokenFromCookie);
 
-                        if (result.success && result.status) {
-                            // Update Supabase if status changed
-                            if (result.status !== account.status) {
-                                console.log(`🔄 Status changed for ${account.customerId}: ${account.status} → ${result.status}`);
-                                await updateSupabaseStatus(account.customerId, userId, result.status);
-                            }
-                            return { ...account, status: result.status, liveChecked: true };
+                    // ✅ استخدام BATCH sync بدلاً من استدعاء كل حساب منفرداً
+                    const customerIds = accounts.map(acc => acc.customerId);
+                    const batchResult = await fetchLiveStatusesFromFlask(customerIds, freshAccessToken, refreshTokenFromCookie);
+
+                    if (batchResult.success && batchResult.results) {
+                        // إنشاء map للوصول السريع للنتائج
+                        const resultsMap = new Map<string, { status: string; is_ghost?: boolean }>();
+                        for (const result of batchResult.results) {
+                            // تنظيف customer_id (إزالة الشرطات للمقارنة)
+                            const cleanId = result.customer_id.replace(/-/g, '');
+                            resultsMap.set(cleanId, { status: result.status, is_ghost: result.is_ghost });
                         }
-                        return { ...account, liveChecked: false };
-                    });
 
-                    // Wait for all live status checks to complete
-                    const updatedAccounts = await Promise.all(liveStatusPromises);
-                    accounts = updatedAccounts;
+                        // تحديث الحسابات بالحالات الجديدة
+                        accounts = accounts.map(account => {
+                            const cleanId = account.customerId.replace(/-/g, '');
+                            const liveResult = resultsMap.get(cleanId);
 
-                    console.log(`✅ Phase 2: Live status checked for ${accounts.length} accounts`);
+                            if (liveResult) {
+                                // تحديث الحالة من النتيجة الحية
+                                const newStatus = liveResult.status || account.status;
+                                const isConnected = ['ACTIVE', 'LINKED', 'ENABLED'].includes(newStatus.toUpperCase());
+
+                                console.log(`📋 Batch update: ${account.customerId}: ${account.status} → ${newStatus}`);
+
+                                return {
+                                    ...account,
+                                    status: newStatus,
+                                    isConnected,
+                                    liveChecked: true,
+                                    isGhost: liveResult.is_ghost || false
+                                };
+                            }
+                            return { ...account, liveChecked: false };
+                        });
+
+                        console.log(`✅ Phase 2: BATCH live status checked for ${accounts.length} accounts`);
+                    } else {
+                        console.log('⚠️ Batch sync failed, keeping original statuses');
+                    }
                 } else {
                     console.log('⚠️ Failed to refresh access token');
                 }
@@ -318,5 +363,102 @@ export async function GET(request: NextRequest) {
             error: error instanceof Error ? error.message : 'Unknown error',
             accounts: []
         }, { status: 500 });
+    }
+}
+
+// ✅ [EVENT-DRIVEN] Webhook Listener for Google Cloud Pub/Sub
+// This endpoint receives push notifications from Google Ads
+export async function POST(request: NextRequest) {
+    try {
+        console.log('📨 Webhook: Received Pub/Sub message');
+        console.log('🔍 Webhook Headers:', Object.fromEntries(request.headers.entries()));
+
+        // Clone request to read text body for debugging without consuming the stream for JSON
+        const rawBody = await request.clone().text();
+        console.log('📦 Webhook Raw Body:', rawBody.substring(0, 500)); // Log first 500 chars
+
+        // 1. Token Verification (Security)
+        const token = request.headers.get('Authorization')?.split('Bearer ')[1] ||
+            new URL(request.url).searchParams.get('token');
+
+        const expectedToken = process.env.PUBSUB_VERIFICATION_TOKEN;
+
+        if (expectedToken && token !== expectedToken) {
+            console.error('⛔ Webhook: Invalid token');
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // 2. Parse Body
+        const body = await request.json();
+        let customerId = body.customer_id || body.customerId;
+        let status = body.status || body.newStatus;
+
+        // Support for Standard Google Cloud Pub/Sub Envelope
+        if (body.message && body.message.data) {
+            try {
+                const decodedData = Buffer.from(body.message.data, 'base64').toString('utf-8');
+                const parsedData = JSON.parse(decodedData);
+                console.log('📦 Webhook: Decoded Pub/Sub payload:', JSON.stringify(parsedData, null, 2));
+
+                // Strategy 1: Direct JSON (for testing)
+                if (parsedData.customerId || parsedData.customer_id) {
+                    customerId = parsedData.customerId || parsedData.customer_id;
+                    status = parsedData.status || parsedData.newStatus;
+                }
+                // Strategy 2: Google Cloud Audit Logs (Production)
+                else if (parsedData.protoPayload) {
+                    console.log('🕵️ Detected Audit Log format');
+                    const resourceName = parsedData.protoPayload.resourceName || '';
+                    const methodName = parsedData.protoPayload.methodName || '';
+
+                    // Extract Customer ID (Format: customers/{id}/...)
+                    // Search for 10 digits, possibly with dashes
+                    const idMatch = resourceName.match(/customers\/(\d{3}-?\d{3}-?\d{4}|\d{10})/);
+                    if (idMatch) {
+                        customerId = idMatch[1]; // Get the ID part
+                        console.log(`🎯 Extracted CustomerID from resource: ${customerId}`);
+                    }
+
+                    // Infer Status from Method
+                    if (methodName.includes('CreateCustomerManagerLink')) {
+                        status = 'PENDING'; // Invitation sent/created
+                    } else if (methodName.includes('MutateCustomerManagerLink')) {
+                        status = 'REFRESH_NEEDED';
+                    } else if (methodName.includes('AccountLinkService')) {
+                        // ✅ Support for AccountLinkService (User Request)
+                        console.log('🔗 Detected AccountLinkService event');
+                        status = 'REFRESH_NEEDED';
+                    } else if (methodName.includes('UpdateSink')) {
+                        console.log('⚠️ Ignoring UpdateSink system event');
+                        return NextResponse.json({ success: true, message: 'Ignored system event' }, { status: 200 });
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Webhook: Failed to decode Pub/Sub data', e);
+            }
+        }
+
+        if (!customerId || !status) {
+            console.warn('⚠️ Webhook: Missing customerId or status in payload');
+            return NextResponse.json({ error: 'Missing data or unrecognized event' }, { status: 400 });
+        }
+
+        // 3. Update Supabase
+        console.log(`🔄 Webhook: Updating status for ${customerId} directly to ${status}`);
+
+        // Pass null for userId to let the function find it
+        // If status is REFRESH_NEEDED, Supabase Realtime will broadcast it, 
+        // and the Frontend will trigger a live API fetch.
+        const updated = await updateSupabaseStatus(customerId, null, status);
+
+        if (updated) {
+            return NextResponse.json({ success: true, message: 'Updated' }, { status: 200 });
+        } else {
+            return NextResponse.json({ success: false, message: 'Update failed or invalid status' }, { status: 500 });
+        }
+
+    } catch (error) {
+        console.error('❌ Webhook Error:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

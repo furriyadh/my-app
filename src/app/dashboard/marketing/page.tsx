@@ -1,4 +1,4 @@
-﻿import AdSpend from "@/components/Dashboard/Marketing/AdSpend";
+import AdSpend from "@/components/Dashboard/Marketing/AdSpend";
 import CostPerThousand from "@/components/Dashboard/Marketing/CostPerThousand";
 import CostPerClick from "@/components/Dashboard/Marketing/CostPerClick";
 import ClickThroughRate from "@/components/Dashboard/Marketing/ClickThroughRate";

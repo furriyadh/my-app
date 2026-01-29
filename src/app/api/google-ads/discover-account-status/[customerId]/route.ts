@@ -92,7 +92,10 @@ export async function GET(
         dbStatus = 'ACTIVE';
       } else if (liveStatus === 'PENDING') {
         dbStatus = 'PENDING';
-      } else if (['INACTIVE', 'REFUSED', 'CANCELLED', 'CANCELED', 'NOT_LINKED', 'REJECTED'].includes(liveStatus)) {
+      } else if (['REFUSED', 'CANCELLED', 'CANCELED', 'REJECTED'].includes(liveStatus)) {
+        // ✅ الاحتفاظ بحالة الرفض للـ Frontend ليتمكن من التعرف عليها وتغيير الزر إلى Link
+        dbStatus = 'REJECTED';
+      } else if (['INACTIVE', 'NOT_LINKED'].includes(liveStatus)) {
         dbStatus = 'NOT_LINKED';
       } else {
         // إذا لم نعرف الحالة، نستخدم ما أرجعه Flask إذا كان موجوداً

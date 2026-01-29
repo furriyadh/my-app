@@ -1,4 +1,4 @@
-﻿import Cart from "@/components/eCommerce/Cart";
+import Cart from "@/components/eCommerce/Cart";
 import Link from "next/link";
 
 export default function Page() {

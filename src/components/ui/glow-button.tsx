@@ -219,7 +219,7 @@ const GlowButton: React.FC<GlowButtonProps> = ({
           ></div>
         )}
 
-        <span className="relative z-10 whitespace-nowrap text-lg font-semibold">
+        <span className="relative z-10 whitespace-nowrap text-base font-semibold">
           {children}
         </span>
       </div>

@@ -7,7 +7,26 @@ import dynamic from "next/dynamic";
 // Dynamically import react-apexcharts with Next.js dynamic import
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const TotalOrders: React.FC = () => {
+interface TotalOrdersProps {
+  title?: string;
+  value?: string;
+  growth?: string;
+  series?: any[];
+  period?: string;
+}
+
+const TotalOrders: React.FC<TotalOrdersProps> = ({
+  title = "Total Orders",
+  value = "$72,458",
+  growth = "+25%",
+  period = "Last 90 days",
+  series = [
+    {
+      name: "Total Orders",
+      data: [44, 55, 57, 56, 61, 58, 63],
+    },
+  ]
+}) => {
   // Chart
   const [isChartLoaded, setChartLoaded] = useState(false);
 
@@ -15,12 +34,7 @@ const TotalOrders: React.FC = () => {
     setChartLoaded(true);
   }, []);
 
-  const series = [
-    {
-      name: "Total Orders",
-      data: [44, 55, 57, 56, 61, 58, 63],
-    },
-  ];
+
 
   const options: ApexOptions = {
     chart: {
@@ -98,9 +112,9 @@ const TotalOrders: React.FC = () => {
     <>
       <div className="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
         <div className="trezo-card-content relative">
-          <span className="block">Total Orders</span>
+          <span className="block">{title}</span>
 
-          <h5 className="!mb-0 !mt-[3px] !text-[20px]">$72,458</h5>
+          <h5 className="!mb-0 !mt-[3px] !text-[20px]">{value}</h5>
 
           <div className="absolute -top-[40px] ltr:-right-[9px] rtl:-left-[9px] max-w-[120px]">
             {isChartLoaded && (
@@ -115,10 +129,12 @@ const TotalOrders: React.FC = () => {
           </div>
 
           <div className="mt-[25px] md:mt-[34px] flex items-center justify-between">
-            <span className="inline-block text-sm text-success-700 py-[1px] px-[8.3px] border border-success-300 bg-success-100 dark:bg-[#15203c] dark:border-[#172036] rounded-xl">
-              +25%
+            <span className={`inline-block text-sm py-[1px] px-[8.3px] border rounded-xl ${growth.startsWith('+')
+              ? 'text-success-700 border-success-300 bg-success-100 dark:bg-[#15203c] dark:border-[#172036]'
+              : 'text-danger-700 border-danger-300 bg-danger-100 dark:bg-[#20153c] dark:border-[#361717]'}`}>
+              {growth}
             </span>
-            <span className="block text-sm">Last 90 days</span>
+            <span className="block text-sm">{period}</span>
           </div>
         </div>
       </div>

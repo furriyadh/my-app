@@ -1,4 +1,4 @@
-﻿import EmployeeAttendanceTrends from "@/components/Dashboard/HRM/EmployeeAttendanceTrends";
+import EmployeeAttendanceTrends from "@/components/Dashboard/HRM/EmployeeAttendanceTrends";
 import EmployeeLeaveRequest from "@/components/Dashboard/HRM/EmployeeLeaveRequest";
 import EmployeeList from "@/components/Dashboard/HRM/EmployeeList";
 import EmployeeSalary from "@/components/Dashboard/HRM/EmployeeSalary";

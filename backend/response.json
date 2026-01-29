@@ -1,0 +1,157 @@
+﻿{
+    "api_status":  "PENDING",
+    "customer_id":  "9048409219",
+    "db_status":  "PENDING",
+    "link_details":  {
+                         "all_links_debug":  [
+                                                 {
+                                                     "id":  6477143267,
+                                                     "status":  "PENDING"
+                                                 },
+                                                 {
+                                                     "id":  6477011743,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476629347,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476580701,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476576372,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476554309,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476540611,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476538223,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476535506,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476531418,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476524727,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476518534,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476516763,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476507177,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476505283,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476492612,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476488472,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476449361,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476440968,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476418146,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476366332,
+                                                     "status":  "REFUSED"
+                                                 },
+                                                 {
+                                                     "id":  6476308211,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476305828,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476289311,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476265778,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  6476255172,
+                                                     "status":  "INACTIVE"
+                                                 },
+                                                 {
+                                                     "id":  853235910,
+                                                     "status":  "INACTIVE"
+                                                 }
+                                             ],
+                         "all_statuses":  [
+                                              "PENDING",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "INACTIVE",
+                                              "INACTIVE",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "INACTIVE",
+                                              "INACTIVE",
+                                              "REFUSED",
+                                              "INACTIVE",
+                                              "REFUSED",
+                                              "REFUSED",
+                                              "INACTIVE",
+                                              "REFUSED",
+                                              "INACTIVE",
+                                              "REFUSED",
+                                              "INACTIVE",
+                                              "INACTIVE",
+                                              "INACTIVE",
+                                              "INACTIVE",
+                                              "INACTIVE",
+                                              "INACTIVE"
+                                          ],
+                         "checked_at":  "2025-12-24T17:21:45.261796",
+                         "is_disabled":  false,
+                         "latest_link_id":  "6477143267",
+                         "link_status":  "PENDING",
+                         "mcc_customer_id":  "9252466178",
+                         "method":  "customer_client_link",
+                         "needs_activation":  false,
+                         "raw_status":  "PENDING",
+                         "verified":  false
+                     },
+    "status_changed":  false,
+    "success":  true
+}

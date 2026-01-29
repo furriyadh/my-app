@@ -54,16 +54,16 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
       localStorage.setItem('furriyadh_country', 'US');
 
       if (option === 'own-accounts') {
-        // إعداد OAuth للحسابات الخاصة - ربط حساب موجود - يوجه لـ Google OAuth
+        // إعداد OAuth للحسابات الخاصة - ربط حساب موجود - يوجه لـ Google OAuth في popup
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID || 'your-google-client-id';
-        
+
         // استخدام نفس منطق تحديد redirect_uri المستخدم في الـ API (يدعم التطوير والإنتاج)
         const redirectUri =
           process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI ||
           (typeof window !== 'undefined'
             ? `${window.location.origin}/api/oauth/google/callback`
             : 'http://localhost:3000/api/oauth/google/callback');
-        
+
         const scope = 'openid profile email https://www.googleapis.com/auth/adwords';
         const state = Math.random().toString(36).substring(7);
 
@@ -83,10 +83,35 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
           'state=' + state + '&' +
           'include_granted_scopes=true';
 
-        console.log('Redirecting to Google OAuth:', authUrl);
+        console.log('Opening Google OAuth in popup:', authUrl);
 
-        // إعادة توجيه لـ Google OAuth
-        window.location.href = authUrl;
+        // Open in popup instead of redirect
+        const width = 500;
+        const height = 600;
+        const left = window.screen.width / 2 - width / 2;
+        const top = window.screen.height / 2 - height / 2;
+
+        const popup = window.open(
+          authUrl,
+          "GoogleOAuthPopup",
+          `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+        );
+
+        if (!popup) {
+          alert('Popup blocked! Please allow popups for this site.');
+          setIsLoading(prev => ({ ...prev, [option]: false }));
+          return;
+        }
+
+        // Listen for popup close or success
+        const timer = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(timer);
+            setIsLoading(prev => ({ ...prev, [option]: false }));
+            // Refresh the page to check if OAuth succeeded
+            router.refresh();
+          }
+        }, 1000);
       } else {
         // للخيارات الأخرى والدالك - إنشاء حساب جديد في
         console.log('🚀 Creating real Google Ads account for:', card.title);
@@ -112,7 +137,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
 
         if (result.success) {
           console.log('✅ Real Google Ads account created:', result.customerId);
-          
+
           // حفظ البيانات الجديدة
           localStorage.setItem('customerId', result.customerId);
           localStorage.setItem('accountData', JSON.stringify({
@@ -152,7 +177,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* خلفية مموهة */}
       <div className="absolute inset-0 bg-black/20 backdrop-blur-md" />
-      
+
       {/* النافذة المنبثقة */}
       <div className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* رأس الإغلاق */}
@@ -194,15 +219,14 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                       {card.commission}
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={() => handleSelect(card.id, card)}
                     disabled={isLoading[card.id]}
-                    className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${
-                      card.id === 'own-accounts'
+                    className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 ${card.id === 'own-accounts'
                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    } ${isLoading[card.id] ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                      } ${isLoading[card.id] ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
                   >
                     {isLoading[card.id] ? (
                       <div className="flex items-center justify-center">

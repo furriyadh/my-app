@@ -1,13 +1,25 @@
-import { useMediaQuery } from "react-responsive"
-import { useEffect, useState } from "react"
+
+import * as React from "react"
+
+const MOBILE_BREAKPOINT = 1024
 
 export function useIsMobile() {
-  const isMobileQuery = useMediaQuery({ maxWidth: 1023 })
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = React.useState<boolean>(
+    typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT : false
+  )
 
-  useEffect(() => {
-    setIsMobile(isMobileQuery)
-  }, [isMobileQuery])
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+
+    window.addEventListener('resize', checkMobile)
+    checkMobile() // Initial check
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   return isMobile
 }

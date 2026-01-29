@@ -1,4 +1,4 @@
-﻿import Featured from "@/components/Dashboard/Podcast/Featured";
+import Featured from "@/components/Dashboard/Podcast/Featured";
 import ListenerAnalytics from "@/components/Dashboard/Podcast/ListenerAnalytics";
 import MostPopular from "@/components/Dashboard/Podcast/MostPopular";
 import Player from "@/components/Dashboard/Podcast/Player";

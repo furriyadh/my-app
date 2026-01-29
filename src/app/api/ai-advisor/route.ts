@@ -1,44 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Provider Configuration
-const PROVIDERS = {
-    groq: {
-        name: "Groq",
-        baseUrl: "https://api.groq.com/openai/v1",
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-        apiKey: process.env.GROQ_API_KEY
-    },
-    google: {
-        name: "Google AI",
-        baseUrl: "https://generativelanguage.googleapis.com/v1beta",
-        model: process.env.GOOGLE_MODEL || "gemini-2.5-flash",
-        apiKey: process.env.GOOGLE_AI_STUDIO_KEY
-    },
-    cerebras: {
-        name: "Cerebras",
-        baseUrl: "https://api.cerebras.ai/v1",
-        model: process.env.CEREBRAS_MODEL || "llama3.1-8b",
-        apiKey: process.env.CEREBRAS_API_KEY
-    },
-    cometapi: {
-        name: "CometAPI",
-        baseUrl: "https://api.cometapi.com/v1",
-        model: process.env.COMETAPI_MODEL || "gpt-4o-mini",
-        apiKey: process.env.COMETAPI_API_KEY
-    },
-    openrouter: {
-        name: "OpenRouter",
-        baseUrl: "https://openrouter.ai/api/v1",
-        model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
-        apiKey: process.env.OPENROUTER_API_KEY
-    }
+// CometAPI Configuration Only
+const COMETAPI = {
+    name: "CometAPI",
+    baseUrl: process.env.COMETAPI_BASE_URL || "https://api.cometapi.com/v1",
+    model: process.env.COMETAPI_MODEL || "gpt-4o-mini",
+    apiKey: process.env.COMETAPI_API_KEY
 };
 
 type Message = {
     role: string;
     content: string;
-    images?: string[]; // Base64 strings
 };
+
+// استخراج URL من النص
+function extractUrl(text: string): string | null {
+    // نمط للكشف عن URLs (بدون https أو معها)
+    const urlPattern = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+)(?:\/[^\s]*)?/gi;
+    const match = text.match(urlPattern);
+    if (match && match.length > 0) {
+        let url = match[0];
+        // تنظيف URL
+        url = url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '');
+        return url;
+    }
+    return null;
+}
+
+// تحليل URL باستخدام /api/url/detect
+async function analyzeUrl(url: string, baseUrl: string): Promise<{
+    type: string;
+    suggestedCampaignType: string;
+    details?: { name?: string; storePlatform?: string };
+} | null> {
+    try {
+        const response = await fetch(`${baseUrl}/api/url/detect`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return {
+                type: data.type,
+                suggestedCampaignType: data.suggestedCampaignType,
+                details: data.details
+            };
+        }
+    } catch (error) {
+        console.log('URL analysis skipped:', error);
+    }
+    return null;
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -48,54 +62,178 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
         }
 
+        // استخراج URL من رسالة المستخدم وتحليله
+        const extractedUrl = extractUrl(prompt);
+        let urlAnalysis: { type: string; suggestedCampaignType: string; details?: { name?: string; storePlatform?: string } } | null = null;
+        let urlContext = '';
+
+        if (extractedUrl) {
+            // تحديد base URL للـ API call
+            const protocol = req.headers.get('x-forwarded-proto') || 'http';
+            const host = req.headers.get('host') || 'localhost:3000';
+            const baseUrl = `${protocol}://${host}`;
+
+            urlAnalysis = await analyzeUrl(extractedUrl, baseUrl);
+
+            if (urlAnalysis) {
+                const campaignTypeNames: Record<string, string> = {
+                    'SEARCH': 'حملة بحث (Search)',
+                    'SHOPPING': 'حملة تسوق (Shopping)',
+                    'VIDEO': 'حملة فيديو (Video)',
+                    'APP': 'حملة تطبيق (App)',
+                    'DISPLAY': 'حملة عرض (Display)',
+                    'PERFORMANCE_MAX': 'حملة أداء أقصى (Performance Max)'
+                };
+
+                const typeNames: Record<string, string> = {
+                    'website': 'موقع عادي',
+                    'store': 'متجر إلكتروني',
+                    'video': 'قناة/فيديو يوتيوب',
+                    'app': 'تطبيق جوال'
+                };
+
+                urlContext = `
+🔍 تحليل الرابط المُرسل (${extractedUrl}):
+• نوع الموقع: ${typeNames[urlAnalysis.type] || urlAnalysis.type}
+• نوع الحملة المقترح: ${campaignTypeNames[urlAnalysis.suggestedCampaignType] || urlAnalysis.suggestedCampaignType}
+${urlAnalysis.details?.storePlatform ? `• المنصة: ${urlAnalysis.details.storePlatform}` : ''}
+${urlAnalysis.details?.name ? `• الاسم: ${urlAnalysis.details.name}` : ''}
+
+استخدم هذه المعلومات في ردك لتوضيح أننا نفهم نوع موقعه ونقترح الحملة الأنسب له.
+`;
+            }
+        }
+
         // Build messages for chat completion
         const messages: Message[] = [
             {
                 role: "system",
-                content: `You are the Senior AI Growth Consultant for a premier Google Ads platform.
-Your Core Mission: Identify the User's Goal -> Determine Campaign Type -> Guide them with 3 SIMPLE STEPS in their EXACT LANGUAGE.
+                content: `You are a professional sales consultant at Furriyadh platform for Google Ads campaigns.
 
-🔥 **THE "MIRROR" RULE (LANGUAGE - CRITICAL):**
-- **DETECT user's language.** (Arabic, English, etc.).
-- **SILENT SPELL-CHECK:** The user may have typos (e.g., "بله" instead of "بالله"). mentally correct them before responding.
-- **POLITENESS PROTOCOL:** If the user asks "How are you?" (كيف حالك), ALWAYS reply with "Alhamdulillah, I am ready to help you..." (الحمدلله، أنا مستعد لمساعدتك..).
-- **RESPOND IN THE SAME LANGUAGE ONLY.**
-- **STRICT ARABIC MODE:** If the user speaks Arabic, the response MUST contain **ONLY** Arabic letters, numbers, and Emojis.
-- **⛔ ZERO TOLERANCE FOR LATIN/CYRILLIC:** 
-  - DO NOT write "sUFFICIENT", "пояс", or any English/Russian words.
-  - DO NOT use English words like "Search Campaign" → Write "حملة شبكة البحث" instead.
-  - DO NOT use "Website" → Write "الموقع الإلكتروني".
+🌐 CRITICAL LANGUAGE RULE:
+- DETECT the language of the user's message
+- RESPOND in the SAME language the user used
+- If user writes in English → respond in English
+- If user writes in Arabic → respond in Arabic
+- If user writes in any other language → respond in that language
+- This is the most important rule!
 
-🚫 **PROHIBITIONS:**
-❌ NO "Partner with Google" badges.
-❌ NO "Welcome to our platform" long intros.
-❌ **NO LATIN CHARACTERS IN ARABIC TEXT (Except URLs).**
-❌ NO "Social Media Page" phrasing.
-❌ **NO INVENTED NAMES:** Never call the user by a name unless they explicitly stated it (e.g., "I am Ahmed"). If unknown, say "Hello" or "Welcome".
+${urlContext}
 
-**✅ RESPONSE GUIDELINES (VISUAL & PROFESSIONAL):**
-The response MUST be visually structured and easy to scan.
-- Use Emojis to break up text, but keep it professional (e.g., ✅, 📍, 💰, 🚀, 📈).
-- **NEVER** output a wall of text. Use bullet points.
-- **Greeting:** Keep it simple and direct. Do NOT try to guess who the user is.
+Company Info:
+Furriyadh LTD - Officially registered British company
+Address: Office 7132KR, 182-184 High Street North, East Ham, London E6 2JA
 
-**🎨 VARIATION RULE:**
-- Change the phrasing slightly each time so it doesn't feel robotic.
-- Switch up the intro (e.g., "Great choice!", "This is a smart move.", "Let's get this started.").
+Your goal: Convince the customer to create an ad campaign and clarify how easy and fast the process is.
 
-**🪜 THE 3 CORE STEPS (REQUIRED FORMAT):**
-You MUST list the steps with these specific emojis:
+⚠️ Important formatting rules:
+- Never use asterisks **
+- Don't use markdown formatting
+- Don't use numbered lists (1. 2. 3.)
+- Use bullet points • only when necessary
+- Keep responses natural and conversational
 
-1. 🔗 **[Insert Asset Type]**: [Instruction]
-2. 📍 **Select Location**: [Instruction]
-3. 💰 **Approve Budget**: (Min 20 SAR)
+ما تقدمه المنصة (7 أنواع حملات رسمية من Google مع متطلباتها):
 
-**✨ THE VALUE ADD:**
-Briefly explain *why* this campaign works (use 🎯 or 📈).
+• حملات البحث (Search) - تظهر في نتائج بحث جوجل
+  المتطلبات: 15 عنوان (30 حرف) + 4 أوصاف (90 حرف) + كلمات مفتاحية
 
-🚫 **AVOID ROBOTIC REPETITION:**
-If the user asks 5 different questions, your answers should NOT look like 5 copies of the same form.
-Keep it fresh, expert, and conversational.`
+• حملات التسوق (Shopping) - للمتاجر الإلكترونية
+  المتطلبات: ربط حساب Merchant Center + 15 عنوان + 4 أوصاف + صور المنتجات
+
+• حملات الفيديو (Video) - إعلانات يوتيوب
+  المتطلبات: فيديو يوتيوب + 5 عناوين + 5 أوصاف
+
+• حملات التطبيقات (App) - لترويج تطبيقات الجوال
+  المتطلبات: معرف التطبيق + 5 عناوين (30 حرف) + 5 أوصاف (90 حرف) + صور اختيارية
+
+• حملات العرض (Display) - تظهر في ملايين المواقع والتطبيقات
+  المتطلبات: 5 عناوين + 5 أوصاف + عنوان طويل + صور (1.91:1 + 1:1)
+
+• حملات الأداء الأقصى (Performance Max) - تغطي جميع شبكات جوجل تلقائياً
+  المتطلبات: 15 عنوان + 4 أوصاف + عنوان طويل + 4-10 صور متنوعة
+
+• حملات زيادة الطلب (Demand Gen) - لزيادة الوعي بالعلامة التجارية
+  المتطلبات: 15 عنوان + 4 أوصاف + عنوان طويل + صور
+
+عند الرد على العميل الذي أرسل رابط، اذكر نوع الحملة المقترحة ووضح بإيجاز أن الذكاء الاصطناعي سيتولى إنشاء العناوين والأوصاف والصور تلقائياً.
+
+كيف نختلف عن غيرنا:
+• الذكاء الاصطناعي يحلل موقعك ويختار نوع الحملة الأنسب تلقائياً (من 7 أنواع رسمية)
+• نكتب نسخ إعلانية احترافية بعناوين جذابة وأوصاف مقنعة
+• نستخرج الكلمات المفتاحية الذهبية من موقعك تلقائياً
+• نستهدف المواقع الجغرافية بدقة متناهية
+• الحملة جاهزة في 30 ثانية فقط بدلاً من ساعات العمل اليدوي
+• الحد الأدنى: 20 ريال يومياً فقط
+
+للرد على الشكوك:
+• إذا سأل "أنتم نصابين؟" أو ما شابه: أكد أننا شركة بريطانية مسجلة رسمياً (Furriyadh LTD) ونستخدم Google Ads API الرسمي
+• إذا سأل "ليش أدفعلكم؟": وضح أننا نوفر عليه ساعات من العمل ونضمن إعلانات احترافية مكتوبة بالذكاء الاصطناعي
+• إذا سأل عن الأرباح: لا تعد بأرقام محددة، لكن أكد أن إعلانات جوجل من أفضل طرق الإعلان الرقمي عالمياً
+• إذا قال "أسعاركم غالية" أو "كثير": وضح أن لدينا باقة مجانية للتجربة، وأن توظيف متخصص إعلانات يكلف آلاف الدولارات شهرياً بينما نحن نوفر نفس الخدمة بجزء بسيط من التكلفة، مع ذكاء اصطناعي يعمل 24 ساعة. اقترح البدء بالباقة المجانية أو حساباتنا الموثوقة (20% عمولة فقط بدون رسوم شهرية)
+
+💰 هيكل التسعير (مهم جداً - أجب بدقة):
+طريقتان للدفع:
+
+الطريقة الأولى - الإدارة الذاتية (اشتراك شهري):
+• مجاني: 0$ شهرياً (حملة واحدة + ميزانية 100$)
+• أساسي: 49$ شهرياً (3 حملات + ميزانية غير محدودة)
+• احترافي: 99$ شهرياً (10 حملات + تحسين AI متقدم) - الأفضل
+• وكالة: 249$ شهرياً (حملات غير محدودة + 10 حسابات)
+• مؤسسي: سعر مخصص
+
+الطريقة الثانية - حساباتنا الموثوقة (الأكثر شعبية):
+• عمولة 20% فقط من ميزانية الإعلانات
+• بدون رسوم شهرية
+• حسابات موثوقة بدون خطر إيقاف
+• إعداد كامل بالذكاء الاصطناعي
+
+ملاحظة: الميزانية الإعلانية (20 ريال يومياً كحد أدنى) تذهب لجوجل مباشرة، ونحن نأخذ رسوم الخدمة فقط.
+
+أسلوب ردودك:
+• كن ودوداً ومقنعاً وثق من نفسك
+• اشرح الفوائد بوضوح
+• استخدم "30 ثانية فقط" للتأكيد على السرعة
+• لا تستخدم خطوات مرقمة أو نجوم
+• إيموجي واحد أو اثنين فقط
+• كن مختصراً لكن مقنعاً
+
+مثال رد على "كيف أبدأ حملة؟":
+"مرحباً! 👋
+
+مع Furriyadh، إنشاء حملتك يستغرق 30 ثانية فقط.
+
+أدخل رابط موقعك وسيحلله الذكاء الاصطناعي تلقائياً، ثم يختار أفضل نوع حملة لنشاطك ويكتب إعلانات احترافية بعناوين جذابة.
+
+لا تحتاج أي خبرة سابقة في الإعلانات، نحن نتولى كل شيء.
+
+[BUTTON:🚀 ابدأ حملتي الآن:/dashboard/google-ads/campaigns/website-url]"
+
+مثال رد على "أنتم نصابين؟":
+"نحن Furriyadh LTD، شركة بريطانية مسجلة رسمياً في لندن. ✅
+
+نستخدم Google Ads API الرسمي لإنشاء الحملات مباشرة في حسابك على جوجل.
+
+أنت تتحكم بحسابك بالكامل، ونحن فقط نسهل عملية الإنشاء. يمكنك إيقاف أو تعديل أي حملة في أي وقت من حسابك.
+
+جرب بنفسك بميزانية بسيطة تبدأ من 20 ريال يومياً.
+
+[BUTTON:🚀 جرب الآن:/dashboard/google-ads/campaigns/website-url]"
+
+مثال رد على إرسال رابط (مثلاً lazurde.com):
+"ممتاز! ✅
+
+استلمت رابطك. الذكاء الاصطناعي سيحلل موقعك ويستخرج أفضل الكلمات المفتاحية ويكتب إعلانات احترافية خصيصاً لك.
+
+كل هذا في 30 ثانية فقط.
+
+[BUTTON:🚀 ابدأ حملتي الآن:/dashboard/google-ads/campaigns/website-url?url=lazurde.com]"
+
+⚠️ قواعد الزر المهمة:
+- الزر بالصيغة: [BUTTON:نص الزر القصير:/المسار]
+- نص الزر يكون قصير مثل "🚀 ابدأ حملتي الآن" أو "🚀 جرب الآن"
+- لا تكتب URL في نص الزر نفسه
+- ضع URL في نهاية المسار فقط مثل: ?url=example.com`
             },
             ...conversationHistory.map((msg: any) => ({
                 role: msg.role,
@@ -107,27 +245,39 @@ Keep it fresh, expert, and conversational.`
             }
         ];
 
-        // Try providers in order  
-        const providers = ["groq", "cerebras", "google", "google2", "google3", "cometapi", "openrouter"];
-
-        for (const providerKey of providers) {
-            try {
-                const strategy = await callProvider(providerKey as keyof typeof PROVIDERS | "google2" | "google3", messages);
-                if (strategy) {
-                    const providerName = providerKey === "google2" ? "Google AI (Account 2)" :
-                        providerKey === "google3" ? "Google AI (Account 3)" :
-                            PROVIDERS[providerKey as keyof typeof PROVIDERS]?.name || providerKey;
-
-                    console.log(`✅ Success with ${providerName}`);
-                    return NextResponse.json({ strategy });
-                }
-            } catch (error: any) {
-                console.log(`⚠️ ${providerKey} failed: ${error.message}, trying next...`);
-                continue;
-            }
+        // Call CometAPI
+        const apiKey = COMETAPI.apiKey?.trim();
+        if (!apiKey) {
+            throw new Error("CometAPI API key is not configured");
         }
 
-        throw new Error("All providers failed");
+        const baseUrl = COMETAPI.baseUrl.endsWith('/') ? COMETAPI.baseUrl.slice(0, -1) : COMETAPI.baseUrl;
+
+        const response = await fetch(`${baseUrl}/chat/completions`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: COMETAPI.model,
+                messages: messages,
+                max_tokens: 1000,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error(`CometAPI Error ${response.status}:`, errText);
+            throw new Error(`CometAPI API Error ${response.status}: ${errText.slice(0, 100)}`);
+        }
+
+        const data = await response.json();
+        const strategy = data.choices[0].message.content;
+
+        console.log(`✅ Success with CometAPI (${COMETAPI.model})`);
+        return NextResponse.json({ strategy });
 
     } catch (error) {
         console.error("AI Advisor Error:", error);
@@ -135,137 +285,4 @@ Keep it fresh, expert, and conversational.`
             strategy: "عذراً، حدث خطأ مؤقت. يرجى المحاولة مرة أخرى."
         }, { status: 200 });
     }
-}
-
-async function callProvider(provider: keyof typeof PROVIDERS | "google2" | "google3", messages: Message[]): Promise<string | null> {
-
-    let config: any = PROVIDERS[provider as keyof typeof PROVIDERS];
-
-    // Handle Google Backup Keys
-    if (provider === "google2") {
-        config = { ...PROVIDERS.google, apiKey: process.env.GOOGLE_AI_STUDIO_KEY_2 };
-    } else if (provider === "google3") {
-        config = { ...PROVIDERS.google, apiKey: process.env.GOOGLE_AI_STUDIO_KEY_3 };
-    }
-
-    const apiKey = config.apiKey?.trim();
-    if (!apiKey) return null;
-
-    try {
-        // Special handling for Google AI
-        if (provider.startsWith("google")) {
-            return await callGoogleAI(apiKey, messages, config.model);
-        }
-
-        // Standard OpenAI-compatible providers
-        const baseUrl = config.baseUrl.endsWith('/') ? config.baseUrl.slice(0, -1) : config.baseUrl;
-
-        const response = await fetch(`${baseUrl}/chat/completions`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-                ...(provider === "openrouter" && {
-                    "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://furriyadh.com",
-                    "X-Title": "Furriyadh AI"
-                })
-            },
-            body: JSON.stringify({
-                model: config.model,
-                messages: messages,
-                max_tokens: 800
-            })
-        });
-
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`${config.name} API Error ${response.status}: ${errText.slice(0, 100)}`);
-        }
-
-        const data = await response.json();
-        return data.choices[0].message.content;
-
-    } catch (error) {
-        console.error(`${config.name} error: `, error);
-        throw error;
-    }
-}
-
-async function callGoogleAI(apiKey: string, messages: Message[], model: string): Promise<string | null> {
-    try {
-        const lastMsg = messages[messages.length - 1];
-        const textContext = messages.map(msg => `[${msg.role.toUpperCase()}]: ${msg.content} `).join("\n\n");
-
-        const requestParts: any[] = [{ text: textContext }];
-
-        if (lastMsg.images && lastMsg.images.length > 0) {
-            for (const imgUrl of lastMsg.images) {
-                try {
-                    if (imgUrl.startsWith("data:")) {
-                        const matches = imgUrl.match(/^data:(.+);base64,(.+)$/);
-                        if (matches) {
-                            requestParts.push({
-                                inline_data: {
-                                    mime_type: matches[1],
-                                    data: matches[2]
-                                }
-                            });
-                        }
-                    } else if (imgUrl.startsWith("http")) {
-                        const imgRes = await fetch(imgUrl);
-                        if (!imgRes.ok) throw new Error(`Failed to fetch image: ${imgUrl} `);
-                        const arrayBuffer = await imgRes.arrayBuffer();
-                        const buffer = Buffer.from(arrayBuffer);
-                        const base64Data = buffer.toString('base64');
-                        const mimeType = imgRes.headers.get("content-type") || "image/jpeg";
-
-                        requestParts.push({
-                            inline_data: {
-                                mime_type: mimeType,
-                                data: base64Data
-                            }
-                        });
-                    }
-                } catch (err) {
-                    console.error("Error processing image for backend:", err);
-                }
-            }
-        }
-
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: requestParts
-                    }]
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`Google AI Error ${response.status}: ${errText.slice(0, 100)}`);
-        }
-
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-    } catch (error) {
-        console.error("Google AI error:", error);
-        throw error;
-    }
-}
-
-function getApiKey(provider: keyof typeof PROVIDERS): string | undefined {
-    const keyMap = {
-        groq: process.env.GROQ_API_KEY,
-        google: process.env.GOOGLE_AI_STUDIO_KEY,
-        cerebras: process.env.CEREBRAS_API_KEY,
-        cometapi: process.env.COMETAPI_API_KEY,
-        openrouter: process.env.OPENROUTER_API_KEY,
-    };
-
-    return keyMap[provider];
 }

@@ -2,124 +2,66 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Plus, ChevronDown, Mic, ArrowUp, Sparkles, Brain, ArrowRight, Play
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
 import Link from "next/link";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
-import { Button } from "@/components/ui/Button";
-
-// Typewriter Component
-const TypewriterText = ({ texts, className }: { texts: string[], className?: string }) => {
-  const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [currentText, setCurrentText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const text = texts[currentTextIndex];
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        if (currentText.length < text.length) {
-          setCurrentText(text.slice(0, currentText.length + 1));
-        } else {
-          setTimeout(() => setIsDeleting(true), 2000);
-        }
-      } else {
-        if (currentText.length > 0) {
-          setCurrentText(text.slice(0, currentText.length - 1));
-        } else {
-          setIsDeleting(false);
-          setCurrentTextIndex((prev) => (prev + 1) % texts.length);
-        }
-      }
-    }, isDeleting ? 50 : 100);
-
-    return () => clearTimeout(timeout);
-  }, [currentText, isDeleting, currentTextIndex, texts]);
-
-  return (
-    <span className={className}>
-      {currentText}
-      <span className="animate-pulse">|</span>
-    </span>
-  );
-};
+import TextModifier from "@/components/ui/text-modifier";
+import TextType from "@/components/ui/TextType";
 
 export default function HeroSection() {
-  const [prompt, setPrompt] = useState('');
-  const [isAddPopupOpen, setAddPopupOpen] = useState(false);
-  const [isModelOpen, setModelOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('GPT-4 Turbo');
-  const [isTyping, setIsTyping] = useState(false);
-  const models = ['GPT-4 Turbo', 'Claude 3 Opus', 'Gemini Pro'];
-
-  const addPopupRef = useRef<HTMLDivElement>(null);
-  const modelRef = useRef<HTMLDivElement>(null);
-
-  const typewriterTexts = [
-    "Create a campaign for my restaurant in NYC...",
-    "How to target customers in California?",
-    "Best keywords for my e-commerce store?",
-    "Optimize my Google Ads budget...",
+  const headlines = [
+    "Build your Google Ads with AI magic",
+    "Create campaigns in minutes, not hours",
+    "Let AI optimize your ad performance",
+    "Scale your business with smart ads",
   ];
-
-  const examplePrompts = [
-    "Create a campaign for my restaurant in NYC",
-    "How to target customers in California?",
-    "Best keywords for my e-commerce store?"
-  ];
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (addPopupRef.current && !addPopupRef.current.contains(event.target as Node)) {
-        setAddPopupOpen(false);
-      }
-      if (modelRef.current && !modelRef.current.contains(event.target as Node)) {
-        setModelOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleModelSelect = (model: string) => {
-    setSelectedModel(model);
-    setModelOpen(false);
-  };
-
-  const handleSend = () => {
-    if (!prompt.trim()) return;
-    console.log(`Sending prompt: "${prompt}" with model: ${selectedModel}`);
-  };
 
   return (
-    <section className="relative pt-24 pb-16 px-4 overflow-hidden min-h-[90vh] flex items-center">
-      <div className="container mx-auto max-w-5xl relative z-10">
+    <section className="relative pt-64 pb-8 px-4 overflow-hidden min-h-[45vh] flex items-center">
+      {/* Content - z-30 above Orb, pointer-events-none to pass events to Orb */}
+      <div className="container mx-auto max-w-4xl relative z-30 pointer-events-none">
         {/* Hero Text */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6 backdrop-blur-sm shadow-lg shadow-purple-500/10">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-sm text-purple-300">Powered by Advanced AI</span>
-          </div>
+        <div className="text-center">
+          {/* Small promotional badge - pointer-events-auto for clickability */}
+          <Link
+            href="/pricing"
+            className="pointer-events-auto inline-flex items-center gap-2 px-4 py-1.5 bg-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-full mb-8 hover:bg-purple-600/20 transition-all group"
+          >
+            <span className="text-lg">🚀</span>
+            <span className="text-sm text-zinc-300">Start Free plan - No credit card required</span>
+            <span className="text-zinc-400 dark:text-zinc-400 group-hover:translate-x-0.5 transition-transform">→</span>
+          </Link>
 
-          <h1 className="!mb-6 !text-[32px] md:!text-[42px] lg:!text-[56px] xl:!text-[64px] -tracking-[.5px] md:-tracking-[1px] !leading-[1.1] !font-bold !text-white">
-            <span className="!text-white">
-              AI‑Powered Google Ads Management
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-              Launch High‑Converting Campaigns
-            </span>
+          {/* Main Headline - Static first for SEO/LCP, then Animated */}
+          <h1 className="!mb-6 !text-[32px] md:!text-[44px] lg:!text-[56px] xl:!text-[64px] -tracking-[1px] md:-tracking-[1.5px] !leading-[1.1] !font-semibold text-white min-h-[70px] md:min-h-[100px] lg:min-h-[130px] xl:min-h-[150px]">
+            <TextType
+              text={headlines}
+              typingSpeed={80}
+              deletingSpeed={40}
+              pauseDuration={2500}
+              loop={true}
+              showCursor={true}
+              cursorCharacter="|"
+              cursorClassName="text-purple-500"
+              textColors={["#605dff", "#ad63f6", "#3584fc", "#37d80a"]}
+              initialText={headlines[0]} // Pass first headline to render immediately
+            />
           </h1>
 
-          <p className="text-base md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-            AI‑powered platform to create, manage, and optimize profitable Google Ads campaigns worldwide. Reduce CPC, increase conversions, and maximize your ROAS with smart automation.
+          {/* Subtitle with TextModifier */}
+          <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400 mb-32 max-w-xl mx-auto leading-relaxed">
+            Create high-converting campaigns by{" "}
+            <TextModifier
+              highlightColorClass="bg-purple-500/30"
+              markerColorClass="bg-purple-500"
+              opacity={0.6}
+              animationDuration={0.8}
+              className="text-white"
+            >
+              chatting with AI
+            </TextModifier>
           </p>
         </div>
-
       </div>
     </section>
   );
 }
-

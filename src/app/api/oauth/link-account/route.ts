@@ -1,158 +1,166 @@
+
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { getBackendUrl } from '@/lib/config';
 
-// دالة لتجديد access token
-async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+// 1. Unified Token Logic: Get the best available Refresh Token
+function getUnifiedRefreshToken(): string | undefined {
+  const mccToken = process.env.MCC_REFRESH_TOKEN;
+  const adsToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+
+  // Prioritize token starting with "1//04" (Standard Google User/Offline Token)
+  if (mccToken && mccToken.startsWith('1//04')) return mccToken;
+  if (adsToken && adsToken.startsWith('1//04')) return adsToken;
+
+  // Fallback to whichever is available
+  return mccToken || adsToken;
+}
+
+// 2. Auto-Refresh: Generate a fresh Access Token
+async function generateFreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
-    console.log('🔄 محاولة تجديد access token...');
+    console.log('🔄 Auto-Refreshing Access Token for Link Operation...');
+    const clientId = process.env.GOOGLE_ADS_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      console.error('❌ Missing Google Ads Client ID or Secret in environment variables');
+      return null;
+    }
+
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: process.env.GOOGLE_ADS_CLIENT_ID || '',
-        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET || '',
+        client_id: clientId,
+        client_secret: clientSecret,
         refresh_token: refreshToken,
         grant_type: 'refresh_token'
       })
     });
-    if (response.ok) {
-      const data = await response.json();
-      console.log('✅ تم تجديد access token بنجاح');
-      return data.access_token;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Token Refresh Failed (Status: ${response.status}):`, errorText);
+      return null;
     }
-    console.error('❌ فشل تجديد token:', response.status);
-    return null;
+
+    const data = await response.json();
+    console.log('✅ Access Token generated successfully.');
+    return data.access_token;
+
   } catch (error) {
-    console.error('❌ خطأ في تجديد token:', error);
+    console.error('❌ Network error during token refresh:', error);
     return null;
   }
-}
-
-// دالة للحصول على Access Token - تستخدم MCC Token أولاً
-async function getValidAccessToken(userRefreshToken?: string): Promise<string | null> {
-  // 1. أولاً: نحاول استخدام MCC refresh token من البيئة (الأفضل)
-  const mccRefreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
-
-  if (mccRefreshToken) {
-    console.log('🔑 محاولة استخدام MCC Token من البيئة...');
-    const mccAccessToken = await refreshAccessToken(mccRefreshToken);
-    if (mccAccessToken) {
-      console.log('✅ تم الحصول على MCC Access Token بنجاح');
-      return mccAccessToken;
-    }
-    console.warn('⚠️ فشل MCC Token، سنحاول User Token...');
-  }
-
-  // 2. ثانياً: نحاول User OAuth Token كـ fallback
-  if (userRefreshToken) {
-    console.log('🔑 محاولة استخدام User OAuth Token...');
-    const userAccessToken = await refreshAccessToken(userRefreshToken);
-    if (userAccessToken) {
-      console.log('✅ تم الحصول على User Access Token بنجاح');
-      return userAccessToken;
-    }
-  }
-
-  console.error('❌ فشل الحصول على أي Access Token صالح');
-  return null;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔗 ربط الحساب الإعلاني...');
+    console.log('🔗 Processing Link Account Request (Robust Worker Mode)...');
 
-    const cookieStore = await cookies();
-    const userRefreshToken = cookieStore.get('oauth_refresh_token')?.value;
+    // 1. Get Unified Refresh Token
+    const refreshToken = getUnifiedRefreshToken();
+    if (!refreshToken) {
+      console.error('❌ critical: No valid MCC Refresh Token found in environment.');
+      return NextResponse.json({
+        success: false,
+        error: 'Configuration Error',
+        message: 'System is missing MCC permissions (Token not found).'
+      }, { status: 500 });
+    }
 
-    // 🔑 الحصول على Access Token - MCC أولاً
-    const accessToken = await getValidAccessToken(userRefreshToken);
-
+    // 2. Initial Token Gen
+    let accessToken = await generateFreshAccessToken(refreshToken);
     if (!accessToken) {
       return NextResponse.json({
         success: false,
-        error: 'No access token available',
-        message: 'لم يتم العثور على رمز وصول صالح'
+        error: 'Authentication Failed',
+        message: 'Failed to generate access token for MCC.'
       }, { status: 401 });
     }
 
     const { customer_id, account_name } = await request.json();
-
     if (!customer_id) {
-      return NextResponse.json({
-        success: false,
-        error: 'Customer ID is required',
-        message: 'معرف العميل مطلوب'
-      }, { status: 400 });
+      return NextResponse.json({ success: false, message: 'Customer ID required' }, { status: 400 });
     }
 
-    // الاتصال بالباك اند لربط الحساب (باستخدام متغيرات البيئة فقط)
     const backendUrl = getBackendUrl();
 
-    const response = await fetch(`${backendUrl}/api/link-customer`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        customer_id,
-        account_name
-      })
-    });
+    // Helper to call Backend
+    const performLinkRequest = async (token: string) => {
+      return fetch(`${backendUrl}/api/link-customer`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ customer_id, account_name })
+      });
+    };
 
-    if (!response.ok) {
-      // ✅ قراءة الخطأ الفعلي من Flask بدلاً من رسالة عامة
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (parseError) {
-        errorData = { error: 'Unknown error', message: 'خطأ غير معروف' };
-      }
+    // 3. First Attempt
+    console.log(`📤 Sending Link Request for ${customer_id} to Backend...`);
+    let response = await performLinkRequest(accessToken);
+    let responseData = null;
 
-      console.error('❌ فشل في ربط الحساب:', response.status, errorData);
-
-      // تمرير الخطأ الفعلي للـ Frontend
-      return NextResponse.json({
-        success: false,
-        error: errorData.error || 'Failed to link account',
-        message: errorData.message || 'فشل في ربط الحساب',
-        errors: errorData.errors, // ✅ تمرير تفاصيل الأخطاء
-        error_type: errorData.error_type || 'UNKNOWN'
-      }, { status: response.status });
+    // Read response safely
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      console.error('❌ Failed to parse backend response');
+      return NextResponse.json({ success: false, message: 'Invalid Backend Response' }, { status: 502 });
     }
 
-    const data = await response.json();
+    // 4. Retry Logic (Permission Denied or Auth Error)
+    if (!response.ok) {
+      const errorMsg = JSON.stringify(responseData);
 
-    if (data.success) {
-      console.log('✅ تم ربط الحساب بنجاح');
+      // Detect Permission Error or Auth Error
+      if (response.status === 401 || (responseData.error && responseData.error.includes('PERMISSION_DENIED'))) {
+        console.warn(`⚠️ Request failed (${response.status}). Retrying with fresh token... Error: ${responseData.error}`);
+
+        // Regenerate Token
+        accessToken = await generateFreshAccessToken(refreshToken);
+        if (accessToken) {
+          // Retry Request
+          console.log('🔁 Retrying Link Request...');
+          response = await performLinkRequest(accessToken);
+          // Parse new response
+          try { responseData = await response.json(); } catch (e) { }
+        }
+      }
+    }
+
+    // 5. Final Result Handling
+    if (response.ok && responseData.success) {
+      // ⚠️ STRICT MATRIX: Return actual status from backend (PENDING, ACTIVE, etc.)
+      const actualStatus = responseData.status || 'PENDING';
+      const isPending = actualStatus === 'PENDING' || actualStatus === 'INVITED';
+
+      console.log(`✅ Link Request processed: ${actualStatus} (isPending: ${isPending})`);
+
       return NextResponse.json({
         success: true,
-        message: 'تم ربط الحساب بنجاح'
+        status: actualStatus, // ⚡ Critical for Strict Matrix
+        message: isPending ? 'Invitation sent - awaiting client acceptance' : 'Account linked successfully',
+        data: responseData
       });
     } else {
-      console.error('❌ فشل في ربط الحساب:', data);
+      console.error('❌ Link Failed after attempts:', responseData);
       return NextResponse.json({
         success: false,
-        error: data.error || 'Failed to link account',
-        message: data.message || 'فشل في ربط الحساب'
-      }, { status: 400 });
+        error: responseData?.error || 'Link Failed',
+        message: responseData?.message || 'فشل ربط الحساب',
+        details: responseData
+      }, { status: response.status || 400 });
     }
 
   } catch (error) {
-    console.error('❌ خطأ في ربط الحساب:', error);
+    console.error('❌ Critical Error in Link Route:', error);
     return NextResponse.json({
       success: false,
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'خطأ داخلي في الخادم'
+      error: 'Internal Server Error',
+      message: 'An unexpected error occurred.'
     }, { status: 500 });
   }
-}
-
-export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    success: false,
-    error: 'Method not allowed',
-    message: 'Only POST method is allowed for linking accounts'
-  }, { status: 405 });
 }

@@ -1,4 +1,4 @@
-﻿import AssetsContent from "@/components/Apps/FileManager/AssetsContent";
+import AssetsContent from "@/components/Apps/FileManager/AssetsContent";
 import Sidebar from "@/components/Apps/FileManager/Sidebar";
 import Link from "next/link";
 

@@ -12,7 +12,12 @@ interface HighlightData {
   trendColor: string;
 }
 
-const highlightData: HighlightData[] = [
+interface HighlightsProps {
+  customHighlights?: HighlightData[];
+  dateRangeLabel?: string;
+}
+
+const defaultHighlightData: HighlightData[] = [
   {
     icon: "/images/icons/star.svg",
     title: "Average Client Rating",
@@ -39,7 +44,9 @@ const highlightData: HighlightData[] = [
   },
 ];
 
-const Highlights: React.FC = () => {
+const Highlights: React.FC<HighlightsProps> = ({ customHighlights, dateRangeLabel = "Last 7 days" }) => {
+  const dataToDisplay = customHighlights || defaultHighlightData;
+
   return (
     <>
       <div className="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
@@ -48,13 +55,13 @@ const Highlights: React.FC = () => {
             <h5 className="!mb-0">Highlights</h5>
           </div>
           <div className="trezo-card-subtitle">
-            <span className="block">Last 7 days</span>
+            <span className="block">{dateRangeLabel}</span>
           </div>
         </div>
 
         <div className="trezo-card-content">
           <ul>
-            {highlightData.map((highlight, index) => (
+            {dataToDisplay.map((highlight, index) => (
               <li
                 key={index}
                 className="flex items-center justify-between border-b border-gray-100 dark:border-[#172036] pb-[14px] mb-[14px] last:border-none last:mb-0 last:pb-0"

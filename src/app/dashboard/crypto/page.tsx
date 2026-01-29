@@ -1,4 +1,4 @@
-﻿import CryptocurrencyWatchlist from "@/components/Dashboard/Crypto/CryptocurrencyWatchlist";
+import CryptocurrencyWatchlist from "@/components/Dashboard/Crypto/CryptocurrencyWatchlist";
 import CryptoRankings from "@/components/Dashboard/Crypto/CryptoRankings";
 import Exchange from "@/components/Dashboard/Crypto/Exchange";
 import MarketPriceStatistics from "@/components/Dashboard/Crypto/MarketPriceStatistics";

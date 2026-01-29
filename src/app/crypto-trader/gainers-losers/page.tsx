@@ -1,4 +1,4 @@
-﻿import GainersLosersTable from "@/components/CryptoTrader/GainersLosersTable";
+import GainersLosersTable from "@/components/CryptoTrader/GainersLosersTable";
 import Link from "next/link";
 
 export default function Page() {

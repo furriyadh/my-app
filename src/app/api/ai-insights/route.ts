@@ -103,6 +103,7 @@ async function saveInsightsToCache(
       audience_age: insights.audience_data?.age || [],
       competition_data: insights.competition_data?.impression_share || [],
       keyword_performance: insights.competition_data?.keywords || [],
+      daily_performance: insights.daily_data || [],
       hourly_performance: insights.hourly_data || [],
       weekly_performance: insights.weekly_data || [],
       optimization_score: insights.optimization_score,
@@ -154,6 +155,7 @@ function formatCachedData(cachedData: any) {
       keywords: cachedData.keyword_performance || []
     },
     location_data: cachedData.location_data || [],
+    daily_data: cachedData.daily_performance || [],
     hourly_data: cachedData.hourly_performance || [],
     weekly_data: cachedData.weekly_performance || [],
     optimization_score: cachedData.optimization_score,
@@ -614,6 +616,26 @@ async function fetchDetailedGeoTargets(customerId: string, accessToken: string, 
   return googleAdsQuery(customerId, accessToken, developerToken, query);
 }
 
+// 7. جلب البيانات اليومية (Daily Performance) - للرسوم البيانية
+async function fetchDailyPerformance(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_30_DAYS', campaignId?: string) {
+  const campaignFilter = campaignId ? `AND campaign.id = ${campaignId}` : '';
+  const query = `
+    SELECT
+      segments.date,
+      metrics.impressions,
+      metrics.clicks,
+      metrics.conversions,
+      metrics.cost_micros,
+      metrics.conversions_value
+    FROM campaign
+    WHERE ${dateCondition}
+      ${campaignFilter}
+    ORDER BY segments.date ASC
+  `;
+  console.log(`📅 Fetching Daily Performance for ${customerId}`);
+  return googleAdsQuery(customerId, accessToken, developerToken, query);
+}
+
 // 6. جلب بيانات الساعات (Hour of Day Performance)
 async function fetchHourlyData(customerId: string, accessToken: string, developerToken: string, dateCondition: string = 'segments.date DURING LAST_7_DAYS', campaignId?: string) {
   const campaignFilter = campaignId ? `AND campaign.id = ${campaignId}` : '';
@@ -1025,7 +1047,8 @@ async function fetchAllDataParallel(
       optimizationScore,
       searchTerms,
       adStrength,
-      landingPages
+      landingPages,
+      dailyData // ✅ إضافة نتيجة الدالة الجديدة
     ] = await Promise.all([
       fetchCombinedMetrics(customerId, accessToken, developerToken, dateCondition, campaignId),
       fetchAudienceData(customerId, accessToken, developerToken, dateCondition, campaignId),
@@ -1035,7 +1058,8 @@ async function fetchAllDataParallel(
       fetchOptimizationScore(customerId, accessToken, developerToken, dateCondition, campaignId),
       fetchSearchTerms(customerId, accessToken, developerToken, dateCondition, campaignId),
       fetchAdStrength(customerId, accessToken, developerToken, dateCondition, campaignId),
-      fetchLandingPageExperience(customerId, accessToken, developerToken, dateCondition, campaignId)
+      fetchLandingPageExperience(customerId, accessToken, developerToken, dateCondition, campaignId),
+      fetchDailyPerformance(customerId, accessToken, developerToken, dateCondition, campaignId)
     ]);
 
     console.log(`✅ All data fetched in parallel for ${customerId}`);
@@ -1051,7 +1075,9 @@ async function fetchAllDataParallel(
       optimizationScore,
       searchTerms,
       adStrength,
-      landingPages
+      landingPages,
+      // ✅ استخدام البيانات اليومية من fetchDailyPerformance
+      dailyData: dailyData || []
     };
   } catch (error) {
     console.error(`❌ Error fetching parallel data for ${customerId}:`, error);
@@ -1283,6 +1309,7 @@ export async function GET(request: NextRequest) {
     const locationData: { locationId: string; locationName?: string; campaignId?: string; campaignName?: string; type: string; impressions: number; clicks: number; conversions: number; cost: number }[] = [];
     const hourlyData: Record<number, { impressions: number; clicks: number; conversions: number; cost: number }> = {};
     const weeklyData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number }> = {};
+    const dailyData: Record<string, { impressions: number; clicks: number; conversions: number; cost: number; conversionsValue: number }> = {};
 
     // New data containers
     let optimizationScoreTotal = 0;
@@ -1448,7 +1475,27 @@ export async function GET(request: NextRequest) {
         console.log(`🔍 Total keywords collected for ${customerId}:`, keywordCompetition.length);
         console.log(`🔍 Campaigns with keywords:`, [...new Set(keywordCompetition.map(k => k.campaign))].slice(0, 10));
 
-        // 5. Location Data - Get ALL targeted geo locations from campaigns with names
+        // 5b. Daily Performance (New)
+        // ✅ استخدام data.dailyPerformance_ (اسم مؤقت لأننا عدلنا ترتيب Promise.all)
+        // أو الأفضل، استخدام data.dailyData مباشرة (الاسم الذي أضفناه في fetchAllDataParallel)
+        const dailyPerf = data.dailyData || [];
+        console.log(`📅 Daily data for ${customerId}: ${dailyPerf.length} days`);
+
+        for (const row of dailyPerf) {
+          const date = row.segments?.date;
+          if (date) {
+            if (!dailyData[date]) {
+              dailyData[date] = { impressions: 0, clicks: 0, conversions: 0, cost: 0, conversionsValue: 0 };
+            }
+            dailyData[date].impressions += parseInt(String(row.metrics?.impressions || 0), 10);
+            dailyData[date].clicks += parseInt(String(row.metrics?.clicks || 0), 10);
+            dailyData[date].conversions += parseFloat(String(row.metrics?.conversions || 0));
+            dailyData[date].cost += parseInt(String(row.metrics?.costMicros || 0), 10) / 1000000;
+            dailyData[date].conversionsValue += parseFloat(String(row.metrics?.conversionsValue || 0));
+          }
+        }
+
+        // 5. Optimization Score - Get ALL targeted geo locations from campaigns with names
         try {
           const campaignGeoTargets = data.geoTargets;
           // ✅ تغيير: نحفظ جميع المواقع المستهدفة لكل حملة (وليس واحد فقط)
@@ -1796,150 +1843,9 @@ export async function GET(request: NextRequest) {
               }
             }
 
-            // ✅ إضافة باقي الحملات التي **لم تظهر** في geographic_view (لأنها بدون impressions)
-            for (const [mapCampaignId, geoTargets] of geoTargetMap.entries()) {
-              // ✅ إذا كان هناك فلتر حملة محدد، نتجاهل الحملات الأخرى
-              if (campaignId && mapCampaignId !== campaignId) {
-                continue;
-              }
+            // ✅ تم إزالة إضافة باقي الحملات التي لم تظهر في geographic_view بناءً على طلب المستخدم
+            // (المستخدم لا يريد رؤية مواقع بـ 0 نقرات/ظهور)
 
-              // تحقق إذا كانت الحملة موجودة بالفعل في locationData
-              const existsInLocationData = locationData.some(l => l.campaignId === mapCampaignId);
-              if (!existsInLocationData && geoTargets.length > 0) {
-                // إضافة **كل المواقع** للحملة
-                // ✅ تجميع المواقع حسب المدينة لعرض عدد المناطق
-                const cityGroups = new Map<string, { locationId: string; areasCount: number; type: string }>();
-
-                for (const geoTarget of geoTargets) {
-                  const locationId = geoTarget.geoTargetId;
-                  let locationName = geoTargetNames.get(locationId) || '';
-
-                  // تحديد اسم المدينة
-                  let cityName = '';
-                  let areasCount = 1;
-
-                  if (geoTarget.isProximity && geoTarget.proximityInfo) {
-                    const proximityCity = geoTarget.proximityInfo.cityName?.split(',')[0]?.trim() || '';
-                    cityName = normalizeCityName(proximityCity) || 'Unknown';
-                    areasCount = geoTarget.proximityInfo.areasCount || 1;
-                  } else {
-                    cityName = extractCityName(locationName, locationId, geoTargetNames);
-                  }
-
-                  // إذا كانت المدينة موجودة بالفعل، نزيد العدد
-                  if (cityGroups.has(cityName)) {
-                    const existing = cityGroups.get(cityName)!;
-                    existing.areasCount += areasCount;
-                  } else {
-                    cityGroups.set(cityName, {
-                      locationId,
-                      areasCount,
-                      type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE'
-                    });
-                  }
-                }
-
-                // إضافة المواقع المجمعة
-                for (const [cityName, groupInfo] of cityGroups.entries()) {
-                  const displayName = groupInfo.areasCount > 1
-                    ? `${cityName} (${groupInfo.areasCount} areas)`
-                    : cityName;
-
-                  console.log(`📍 Adding grouped location for ${mapCampaignId}:`, {
-                    locationId: groupInfo.locationId,
-                    locationName: displayName,
-                    areasCount: groupInfo.areasCount,
-                    campaignName: geoTargets[0].campaignName
-                  });
-
-                  locationData.push({
-                    locationId: groupInfo.locationId,
-                    locationName: displayName,
-                    campaignId: mapCampaignId,
-                    campaignName: geoTargets[0].campaignName,
-                    type: groupInfo.type,
-                    impressions: 0,
-                    clicks: 0,
-                    conversions: 0,
-                    cost: 0
-                  });
-                }
-              }
-            }
-          } else if (geoTargetMap.size > 0) {
-            // ✅ Fallback: إذا لم تكن هناك بيانات من geographic_view، نستخدم المواقع المستهدفة مباشرة
-            console.log('⚠️ No geographic_view data, using targeted locations as fallback');
-            for (const [mapCampaignId, geoTargets] of geoTargetMap.entries()) {
-              // ✅ إذا كان هناك فلتر حملة محدد، نتجاهل الحملات الأخرى
-              if (campaignId && mapCampaignId !== campaignId) {
-                continue;
-              }
-
-              if (geoTargets.length > 0) {
-                // ✅ تجميع المواقع حسب المدينة لعرض عدد المناطق
-                const cityGroups = new Map<string, { locationId: string; areasCount: number; type: string }>();
-
-                for (const geoTarget of geoTargets) {
-                  const locationId = geoTarget.geoTargetId;
-                  let locationName = geoTargetNames.get(locationId) || '';
-
-                  // ✅ DEBUG: Log what we're getting from geoTargetNames
-                  const targetType = geoTargetNames.get(`${locationId}_type`) || '';
-                  console.log(`📍 Processing geoTarget ${locationId}: name="${locationName}", type="${targetType}"`);
-
-                  // تحديد اسم المدينة
-                  let cityName = '';
-                  let areasCount = 1;
-
-                  if (geoTarget.isProximity && geoTarget.proximityInfo) {
-                    const proximityCity = geoTarget.proximityInfo.cityName?.split(',')[0]?.trim() || '';
-                    cityName = normalizeCityName(proximityCity) || 'Unknown';
-                    areasCount = geoTarget.proximityInfo.areasCount || 1;
-                  } else {
-                    cityName = extractCityName(locationName, locationId, geoTargetNames);
-                    console.log(`📍 extractCityName result: "${cityName}" (from locationName="${locationName}")`);
-                  }
-
-                  // إذا كانت المدينة موجودة بالفعل، نزيد العدد
-                  if (cityGroups.has(cityName)) {
-                    const existing = cityGroups.get(cityName)!;
-                    existing.areasCount += areasCount;
-                  } else {
-                    cityGroups.set(cityName, {
-                      locationId,
-                      areasCount,
-                      type: geoTarget.isProximity ? 'PROXIMITY' : 'LOCATION_OF_PRESENCE'
-                    });
-                  }
-                }
-
-                // إضافة المواقع المجمعة
-                for (const [cityName, groupInfo] of cityGroups.entries()) {
-                  const displayName = groupInfo.areasCount > 1
-                    ? `${cityName} (${groupInfo.areasCount} areas)`
-                    : cityName;
-
-                  console.log(`📍 Fallback grouped location for ${mapCampaignId}:`, {
-                    locationId: groupInfo.locationId,
-                    locationName: displayName,
-                    areasCount: groupInfo.areasCount,
-                    campaignName: geoTargets[0].campaignName
-                  });
-
-                  locationData.push({
-                    locationId: groupInfo.locationId,
-                    locationName: displayName,
-                    campaignId: mapCampaignId,
-                    campaignName: geoTargets[0].campaignName,
-                    type: groupInfo.type,
-                    impressions: 0,
-                    clicks: 0,
-                    conversions: 0,
-                    cost: 0
-                  });
-                }
-              }
-            }
           }
 
           console.log(`📍 Location data collected: ${locationData.length} locations`);
@@ -2175,6 +2081,16 @@ export async function GET(request: NextRequest) {
 
     console.log('📅 Weekly Data (REAL):', JSON.stringify(weeklyBreakdown));
 
+    // تحويل dailyData إلى array مرتب حسب التاريخ
+    const dailyBreakdown = Object.entries(dailyData)
+      .map(([date, data]) => ({
+        date,
+        ...data
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    console.log('📅 Daily Data (REAL):', dailyBreakdown.length, 'days');
+
     // ✅ فلترة البيانات حسب campaignId إذا كان موجوداً
     let filteredKeywords = keywordCompetition;
     let filteredAdStrength = adStrengthData;
@@ -2222,6 +2138,7 @@ export async function GET(request: NextRequest) {
         keywords: filteredKeywords.sort((a, b) => b.clicks - a.clicks).slice(0, 50) // ✅ ترتيب حسب النقرات
       },
       location_data: locationData,
+      daily_data: dailyBreakdown,
       hourly_data: hourlyBreakdown,
       weekly_data: weeklyBreakdown,
       optimization_score: optimizationScoreCount > 0 ? Math.round(optimizationScoreTotal / optimizationScoreCount) : null,

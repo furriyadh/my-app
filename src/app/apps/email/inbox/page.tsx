@@ -1,4 +1,4 @@
-﻿import Inbox from "@/components/Apps/Email/Inbox";
+import Inbox from "@/components/Apps/Email/Inbox";
 import Sidebar from "@/components/Apps/Email/Sidebar";
 import Link from "next/link";
 

@@ -90,36 +90,78 @@ const nextConfig: NextConfig = {
   },
 
   // Rewrites to proxy requests to Python Backend
+  // Dynamic: Railway in production, localhost in development
   async rewrites() {
+    const BACKEND_URL = process.env.NODE_ENV === 'production'
+      ? (process.env.RAILWAY_BACKEND_URL || 'https://my-app-production-28d2.up.railway.app')
+      : 'http://127.0.0.1:5000';
+
+    console.log(`[next.config] Backend URL: ${BACKEND_URL} (env: ${process.env.NODE_ENV})`);
+
     return [
       {
         source: '/api/youtube/:path*',
-        destination: 'http://127.0.0.1:5000/api/youtube/:path*',
+        destination: `${BACKEND_URL}/api/youtube/:path*`,
       },
       {
         source: '/api/ai-campaign/:path*',
-        destination: 'http://127.0.0.1:5000/api/ai-campaign/:path*',
+        destination: `${BACKEND_URL}/api/ai-campaign/:path*`,
       },
       {
         source: '/api/ai-campaign-flow/:path*',
-        destination: 'http://127.0.0.1:5000/api/ai-campaign-flow/:path*',
+        destination: `${BACKEND_URL}/api/ai-campaign-flow/:path*`,
       },
       {
         source: '/api/user/accounts',
-        destination: 'http://127.0.0.1:5000/api/user/accounts',
+        destination: `${BACKEND_URL}/api/user/accounts`,
       },
       // Add other backend routes if needed (merchant, gtm, etc.)
       {
         source: '/api/merchant/:path*',
-        destination: 'http://127.0.0.1:5000/api/merchant/:path*',
+        destination: `${BACKEND_URL}/api/merchant/:path*`,
       },
       {
         source: '/api/gtm/:path*',
-        destination: 'http://127.0.0.1:5000/api/gtm/:path*',
+        destination: `${BACKEND_URL}/api/gtm/:path*`,
       },
       {
         source: '/api/analytics/:path*',
-        destination: 'http://127.0.0.1:5000/api/analytics/:path*',
+        destination: `${BACKEND_URL}/api/analytics/:path*`,
+      },
+      // ⚡ Zero-Latency Neuro-Link: Status Check Route
+      {
+        source: '/api/check-link-status/:path*',
+        destination: `${BACKEND_URL}/api/check-link-status/:path*`,
+      },
+      // 🧪 Test Endpoint for Socket Simulation
+      {
+        source: '/api/test/:path*',
+        destination: `${BACKEND_URL}/api/test/:path*`,
+      },
+      // ⚡ Webhooks Rewrite - Critical for Pub/Sub Push
+      {
+        source: '/api/webhooks/:path*',
+        destination: `${BACKEND_URL}/api/webhooks/:path*`,
+      },
+      // ⚡ SSE Endpoint for Real-time Status Updates
+      {
+        source: '/api/account-status-stream',
+        destination: `${BACKEND_URL}/api/account-status-stream`,
+      },
+      // 🏥 Neuro-Link Health Check
+      {
+        source: '/api/neuro-link/:path*',
+        destination: `${BACKEND_URL}/api/neuro-link/:path*`,
+      },
+      // Stripe API Proxy
+      {
+        source: '/api/stripe/:path*',
+        destination: `${BACKEND_URL}/api/stripe/:path*`,
+      },
+      // Socket.IO Proxy (for production)
+      {
+        source: '/socket.io/:path*',
+        destination: `${BACKEND_URL}/socket.io/:path*`,
       }
     ];
   },

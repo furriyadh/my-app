@@ -1,6 +1,7 @@
-@import "tailwindcss";
-
-@custom-variant dark (&:where([class=dark], [class=dark] *));
+@import 'tailwindcss';
+@import "tw-animate-css";
+@plugin 'lightswind/plugin';
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-body: "Inter", serif;
@@ -113,7 +114,7 @@
 /** Body */
 html,
 body {
-  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 bg-gray-50 leading-normal dark:bg-[#0a0e19] dark:text-gray-400;
+  @apply font-body text-sm md:text-base !p-0 !overflow-y-auto text-gray-500 bg-white leading-normal dark:bg-[#0a0e19] dark:text-gray-400;
 }
 
 /** Paragraph */
@@ -323,7 +324,7 @@ button {
     }
   }
 }
- 
+
 .main-content-wrap {
   &.active {
     .sidebar-area {
@@ -735,7 +736,7 @@ button {
     .swiper {
       .swiper-pagination {
         @apply mt-[15px] w-auto relative top-0 bottom-0 left-0 ltr:text-left rtl:text-right leading-0;
-  
+
         .swiper-pagination-bullet {
           @apply w-[8px] h-[8px] transition-all rounded-full bg-gray-200 dark:bg-gray-800 mt-0 mb-0 ltr:ml-0 rtl:mr-0 ltr:mr-[5px] rtl:ml-[5px] opacity-100;
 
@@ -1812,5 +1813,30 @@ html[dir="rtl"] {
     &::after {
       @apply text-[30px];
     }
+  }
+}
+
+/*---break--- */
+
+@theme inline {
+  --animate-ripple: ripple var(--duration,2s) ease calc(var(--i, 0)*.2s) infinite;
+  @keyframes ripple {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
+}
+
+/*---break--- */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

@@ -1,4 +1,4 @@
-﻿import ReviewsTable from "@/components/eCommerce/Reviews/ReviewsTable";
+import ReviewsTable from "@/components/eCommerce/Reviews/ReviewsTable";
 import Link from "next/link";
 
 export default function Page() {

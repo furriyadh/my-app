@@ -455,7 +455,7 @@ const RecentCampaigns = () => {
         </div>
 
         <button
-          onClick={() => router.push('/google-ads/campaigns/website-url')}
+          onClick={() => router.push('/dashboard/google-ads/campaigns/website-url')}
           className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -547,7 +547,7 @@ const RecentCampaigns = () => {
             }
           </p>
           <button
-            onClick={() => router.push('/google-ads/campaigns/website-url')}
+            onClick={() => router.push('/dashboard/google-ads/campaigns/website-url')}
             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto"
           >
             <Plus className="w-4 h-4" />

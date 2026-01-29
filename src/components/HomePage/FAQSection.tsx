@@ -24,19 +24,19 @@ const faqData = [
 
 const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answer: string; isOpen: boolean; onClick: () => void }) => {
   return (
-    <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-colors">
+    <div className="border border-zinc-200 dark:border-white/10 rounded-xl overflow-hidden bg-white dark:bg-white/5 backdrop-blur-sm hover:border-purple-500/30 transition-colors shadow-sm dark:shadow-none">
       <button
         onClick={onClick}
         className="w-full p-4 sm:p-5 flex items-center justify-between text-left"
       >
-        <span className="!font-semibold !text-[16px] md:!text-lg !leading-[1.2] text-white pr-3">{question}</span>
-        <ChevronDown className={`w-4 h-4 text-purple-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="!font-semibold !text-[16px] md:!text-lg !leading-[1.2] text-zinc-900 dark:text-white pr-3">{question}</span>
+        <ChevronDown className={`w-4 h-4 text-purple-600 dark:text-purple-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       <div
         className={`grid transition-all duration-200 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
         <div className="overflow-hidden">
-          <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-gray-400 text-sm leading-relaxed">
+          <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
             {answer}
           </div>
         </div>
@@ -49,17 +49,17 @@ export default function FAQSection() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
   return (
-    <section className="py-16 px-4 relative overflow-hidden">
+    <section className="py-16 md:py-20 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-3xl">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full mb-6">
-            <HelpCircle className="w-4 h-4 text-blue-400" />
-            <span className="text-sm text-blue-300">FAQ</span>
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 rounded-full mb-6">
+            <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm text-blue-600 dark:text-blue-300">FAQ</span>
           </div>
-          <h2 className="!mb-3 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold !text-white">
-            Frequently Asked Questions
+          <h2 className="text-3xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight">
+            Frequently Asked <span className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Questions</span>
           </h2>
-          <p className="text-base md:text-lg text-gray-400">
+          <p className="mt-6 text-base md:text-lg text-zinc-600 dark:text-zinc-400">
             Got questions? We've got answers
           </p>
         </div>

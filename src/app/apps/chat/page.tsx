@@ -1,4 +1,4 @@
-﻿import Chat from "@/components/Apps/Chat";
+import Chat from "@/components/Apps/Chat";
 import Sidebar from "@/components/Apps/Chat/Sidebar";
 import Link from "next/link";
 

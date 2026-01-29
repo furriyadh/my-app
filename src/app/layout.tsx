@@ -1,10 +1,4 @@
-﻿// Ø§Ù„Ù…Ø³Ø§Ø±: src/app/layout.tsx
-
-import "material-symbols";
-import "remixicon/fonts/remixicon.css";
-import "react-calendar/dist/Calendar.css";
-import "swiper/css";
-import "swiper/css/bundle";
+// المسار: src/app/layout.tsx
 
 // globals
 import "./globals.css";
@@ -14,7 +8,8 @@ import { CampaignProvider } from "../lib/context/CampaignContext";
 import SessionSyncProvider from "../components/Providers/SessionSyncProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { GoogleTagManager } from '@next/third-parties/google';
+import DelayedGTM from "@/components/Analytics/DelayedGTM";
+import LazyComponents from "@/components/HomePage/LazyComponents";
 
 const inter = Inter({
   variable: "--font-body",
@@ -24,10 +19,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://furriyadh.com'),
   title: {
-    default: "Furriyadh | Google Ads Management & AI Campaigns | Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ",
+    default: "Furriyadh | Google Ads Management & AI Campaigns | ????? ??????? ???? ??????? ?????????",
     template: "%s | Furriyadh - Google Ads Management",
   },
-  description: "Furriyadh is an AI-powered Google Ads management platform that creates, manages, and optimizes profitable campaigns worldwide. Ù…Ù†ØµØ© Ø§Ø­ØªØ±Ø§ÙÙŠØ© Ù„Ø¥Ø¯Ø§Ø±Ø© Ø­Ù…Ù„Ø§Øª Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ (Google Ads) Ù„Ø²ÙŠØ§Ø¯Ø© Ø§Ù„Ù…Ø¨ÙŠØ¹Ø§ØªØŒ ØªÙ‚Ù„ÙŠÙ„ ØªÙƒÙ„ÙØ© Ø§Ù„Ù†Ù‚Ø±Ø©ØŒ ÙˆØªØ­Ø³ÙŠÙ† Ø¹Ø§Ø¦Ø¯ Ø§Ù„Ø¥Ù†ÙØ§Ù‚ Ø§Ù„Ø¥Ø¹Ù„Ø§Ù†ÙŠ.",
+  description: "Furriyadh is a specialized AI-powered Google Ads management platform for Search, Display, Shopping, and Performance Max campaigns. Automate keyword research, ad copywriting, and bid optimization to maximize ROAS and minimize CPC. ???? ???????? ?????? ????? ??????? ???? ?????? ???????? ?????? ???????? ?????? ???? ??????? ????????.",
   keywords: [
     // === ENGLISH KEYWORDS ===
     // Core Google Ads
@@ -41,6 +36,16 @@ export const metadata: Metadata = {
     "Google Ads management platform",
     "AI Google Ads",
     "Google Ads automation",
+    // === HIGH VALUE FEATURES ===
+    "maximize ROAS",
+    "Google Ads ROAS",
+    "minimize cost per click",
+    "AI ad copywriting",
+    "Google Ads AI optimization",
+    "verified Google Ads accounts",
+    "Google Ads suspension protection",
+    "Google Ads agency accounts",
+    "automated A/B testing",
     // PPC & Paid Ads
     "PPC management",
     "paid ads management",
@@ -62,6 +67,11 @@ export const metadata: Metadata = {
     "Performance Max campaigns",
     "Google video ads",
     "Google Maps advertising",
+    // Industries
+    "Real Estate Google Ads",
+    "SaaS Google Ads",
+    "E-commerce Google Ads",
+    "Local business Google Ads",
     // Management & Agency
     "Google Ads agency near me",
     "top Google Ads agency",
@@ -71,139 +81,57 @@ export const metadata: Metadata = {
     "Google Ads tips",
     "how to increase quality score Google Ads",
     // === ARABIC KEYWORDS ===
-    // Ø®Ø¨ÙŠØ± ÙˆÙ…Ø¯ÙŠØ±
-    "Ø®Ø¨ÙŠØ± Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø®Ø¨ÙŠØ± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø®Ø¨ÙŠØ± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø®Ø¨ÙŠØ± Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ù…Ø¯ÙŠØ± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ù…Ø¯ÙŠØ± Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ù…Ø¯ÙŠØ± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ù…Ø­ØªØ±Ù Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ù…Ø­ØªØ±Ù Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ù…ØªØ®ØµØµ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    // Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø¥Ø¹Ù„Ø§Ù† Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¹Ù„Ø§Ù† Ø¬ÙˆØ¬Ù„",
-    "Ø¥Ø¹Ù„Ø§Ù† Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ø¹Ù„Ø§Ù† Ù‚ÙˆÙ‚Ù„",
-    // Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯ ÙˆØ§Ø¯Ø²
-    "Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    "Ø¬ÙˆØ¬Ù„ Ø£Ø¯ÙˆØ±Ø¯",
-    "Ø¬ÙˆØ¬Ù„ Ø§Ø¯Ø²",
-    "Ø¬ÙˆØ¬Ù„ Ø£Ø¯Ø²",
-    "Ù‚ÙˆÙ‚Ù„ Ø§Ø¯Ø²",
-    "Ù‚ÙˆÙ‚Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    "Ù‚ÙˆÙ‚Ù„ Ø£Ø¯ÙˆØ±Ø¯",
-    "Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯Ø²",
-    "Ø¬ÙˆØ¬Ù„ Ø£Ø¯ÙˆÙˆØ±Ø¯Ø²",
-    "Ù‚ÙˆÙ‚Ù„ Ø§Ø¯ÙˆØ±Ø¯Ø²",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ø¯Ø²",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„ Ø§Ø¯Ø²",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    // Ø¥Ø¯Ø§Ø±Ø© ÙˆØ´Ø±ÙƒØ©
-    "Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¯Ø§Ø±Ø© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¯Ø§Ø±Ø© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø¥Ø¯Ø§Ø±Ø© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø´Ø±ÙƒØ© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø´Ø±ÙƒØ© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø´Ø±ÙƒØ© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø´Ø±ÙƒØ© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø®Ø¯Ù…Ø§Øª Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¯Ø§Ø±Ø© Ø­Ù…Ù„Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¯Ø§Ø±Ø© Ø­Ù…Ù„Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ø¯Ø§Ø±Ø© Ø­Ù…Ù„Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø§Ø¹Ù„Ø§Ù†ÙŠØ©",
-    "Ø§Ø¯Ø§Ø±Ø© Ø­Ù…Ù„Ø§Øª Ù‚ÙˆÙ‚Ù„ Ø§Ù„Ø§Ø¹Ù„Ø§Ù†ÙŠØ©",
-    // Ø­Ù…Ù„Ø§Øª
-    "Ø­Ù…Ù„Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø§Ø¹Ù„Ø§Ù†ÙŠØ©",
-    "Ø­Ù…Ù„Ø§Øª Ù‚ÙˆÙ‚Ù„ Ø§Ù„Ø§Ø¹Ù„Ø§Ù†ÙŠØ©",
-    "Ø­Ù…Ù„Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø­Ù…Ù„Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø­Ù…Ù„Ø© Ø§Ø¹Ù„Ø§Ù†ÙŠØ© Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "Ø­Ù…Ù„Ø© Ø§Ø¹Ù„Ø§Ù†ÙŠØ© Ø¹Ù„Ù‰ Ù‚ÙˆÙ‚Ù„",
-    "Ø­Ù…Ù„Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø­Ù…Ù„Ø§Øª Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ù†Ø´Ø§Ø¡ Ø­Ù…Ù„Ø© Ø§Ø¹Ù„Ø§Ù†ÙŠØ© Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    // Ø¥Ù†Ø´Ø§Ø¡ ÙˆØ¹Ù…Ù„
-    "Ø§Ù†Ø´Ø§Ø¡ Ø§Ø¹Ù„Ø§Ù† Ø¬ÙˆØ¬Ù„",
-    "Ø§Ù†Ø´Ø§Ø¡ Ø§Ø¹Ù„Ø§Ù† Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ù†Ø´Ø§Ø¡ Ø¥Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "Ø§Ù†Ø´Ø§Ø¡ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø·Ø±ÙŠÙ‚Ø© Ø¹Ù…Ù„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "ÙƒÙŠÙÙŠØ© Ø¹Ù…Ù„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø·Ø±ÙŠÙ‚Ø© Ø¹Ù…Ù„ Ø§Ø¹Ù„Ø§Ù† Ø¬ÙˆØ¬Ù„",
-    "Ø¹Ù…Ù„ Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "Ø¹Ù…Ù„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø·Ø±ÙŠÙ‚Ø© Ø§Ø¹Ù„Ø§Ù† ÙÙŠ Ù‚ÙˆÙ‚Ù„",
-    "Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "ÙƒÙŠÙÙŠØ© Ø§Ù„Ø§Ø¹Ù„Ø§Ù† ÙÙŠ Ù‚ÙˆÙ‚Ù„",
-    // Ø­Ø³Ø§Ø¨
-    "Ø§Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    "Ø­Ø³Ø§Ø¨ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø­Ø³Ø§Ø¨ Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    "ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    // ØªÙƒÙ„ÙØ© ÙˆØ£Ø³Ø¹Ø§Ø±
-    "ØªÙƒÙ„ÙØ© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø³Ø¹Ø± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø³Ø¹Ø§Ø± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø¥Ø¹Ù„Ø§Ù†Ø§Øª ÙÙŠ Ù‚ÙˆÙ‚Ù„",
-    "ÙƒÙ… ØªÙƒÙ„ÙØ© Ø§Ù„Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "ØªÙƒÙ„ÙØ© Ø§Ø¹Ù„Ø§Ù† Ø¬ÙˆØ¬Ù„",
-    "Ø³Ø¹Ø± Ø§Ù„Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø³Ø¹Ø§Ø± Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ø³Ø¹Ø§Ø± Ø­Ù…Ù„Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯",
-    "ØªÙƒÙ„ÙØ© Ø§Ù„Ø¥Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    // Ø£Ù†ÙˆØ§Ø¹
-    "Ø§Ù†ÙˆØ§Ø¹ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø£Ù†ÙˆØ§Ø¹ Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø§Ù„Ø¨Ø­Ø«",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù…Ø§Ø¨",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ù‚ÙˆÙ‚Ù„ Ù…Ø§Ø¨",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø®Ø±Ø§Ø¦Ø· Ø¬ÙˆØ¬Ù„",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù„Ù„ØªØ³ÙˆÙ‚",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù„Ù„Ù…Ø¨ØªØ¯Ø¦ÙŠÙ†",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù„Ù„Ù…Ø¨ØªØ¯Ø¦ÙŠÙ†",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ù…Ù…ÙˆÙ„Ø©",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ù…Ø¯ÙÙˆØ¹Ø©",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ù…Ø¬Ø§Ù†ÙŠØ©",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ù…Ø¬Ø§Ù†ÙŠØ©",
-    // ØªØ­Ø³ÙŠÙ† ÙˆØ§Ø­ØªØ±Ø§Ù
-    "ØªØ­Ø³ÙŠÙ† Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø­ØªØ±Ø§Ù Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ø£ÙØ¶Ù„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    // Ø¯Ø¹Ù… ÙˆÙ…Ø³Ø§Ø¹Ø¯Ø©
-    "Ø¯Ø¹Ù… Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    "Ù…Ø³Ø§Ø¹Ø¯Ø© Ø§Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
-    // ÙƒÙ„Ù…Ø§Øª Ù…ÙØªØ§Ø­ÙŠØ©
-    "Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯ ÙƒÙ„Ù…Ø§Øª Ù…ÙØªØ§Ø­ÙŠØ©",
-    "Ø¬ÙˆØ¬Ù„ Ø§Ø¯ÙˆØ±Ø¯ Ø§Ù„ÙƒÙ„Ù…Ø§Øª Ø§Ù„Ù…ÙØªØ§Ø­ÙŠØ©",
-    // Ø¹Ø§Ù…
-    "Ø§Ù„Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "Ø§Ù„Ø§Ø¹Ù„Ø§Ù† ÙÙŠ Ø¬ÙˆØ¬Ù„",
-    "Ø§Ù„Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ù„Ø§Ø¹Ù„Ø§Ù† ÙÙŠ Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¹Ù„Ø§Ù† ÙÙŠ Ø¬ÙˆØ¬Ù„",
-    "Ø§Ø¹Ù„Ø§Ù† Ø¹Ù„Ù‰ Ù‚ÙˆÙ‚Ù„",
-    "Ø§Ø¹Ù„Ø§Ù† ÙÙŠ Ù‚ÙˆÙ‚Ù„",
-    "Ø¬ÙˆØ¬Ù„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª",
-    "Ù‚ÙˆÙ‚Ù„ Ø§Ø¹Ù„Ø§Ù†Ø§Øª",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª google",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª google",
-    "google Ø§Ø¹Ù„Ø§Ù†Ø§Øª",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª google ads",
-    "Ø§Ø¹Ù„Ø§Ù†Ø§Øª google adwords",
-    "ØªØ±ÙˆÙŠØ¬ Ø¬ÙˆØ¬Ù„",
-    "Ø¯Ø¹Ø§ÙŠØ§Øª Ø¬ÙˆØ¬Ù„",
-    "ØªØ³ÙˆÙŠÙ‚ Ø¹Ø¨Ø± Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„",
+    // Core Terms & Roles
+    "???? ??????? ????",
+    "???? ??????? ????",
+    "???? ??????? ????",
+    "????? ??????? ????",
+    "?????? ??????? ????",
+    "?????? ??????? ????",
+    "????? ??????? ????",
+    // Ads Variations
+    "??????? ????",
+    "??????? ????",
+    "??????? ?????",
+    "??????? ??????",
+    "??????? ?????? ?????????",
+    // Google Ads / AdWords
+    "???? ???",
+    "???? ???????",
+    "???? ???",
+    "???? ??????? ????",
+    "??? ???? ??????? ????",
+    // Services
+    "????? ????? ??????? ????",
+    "????? ????? ???????",
+    "????? ??????? ????",
+    "????? ???????? ????",
+    "????? ?????? ?????",
+    "????? ????????",
+    "????? ??? ??????",
+    "????? ?????? ??? ???????",
+    // AI & Features
+    "??????? ???? ??????? ?????????",
+    "???? ??????? ??????? ????",
+    "????? ?????? ??????? ????",
+    "???? ???? ??????? ????",
+    "????? ??????? ????",
+    "??????? ???? ???????",
+    "??????? ???? ????????",
+    // Cost & Pricing
+    "????? ??????? ????",
+    "????? ??????? ????",
+    "??? ?????? ?? ????",
+    "??????? ??????? ????",
+    // Support
+    "??? ??????? ????",
+    "????? ??????? ????",
+    "?? ????? ????? ??????",
+    // General
+    "??????? ??? ????",
+    "????? ??? ????? ????",
+    "??? ??????? ????",
+    "????? ??????? ????",
     // Regional targeting - Asia & Africa
     "Google Ads Saudi Arabia",
     "Google Ads UAE",
@@ -217,17 +145,17 @@ export const metadata: Metadata = {
     "Google Ads South Africa",
     "Google Ads Morocco",
     "Google Ads Kenya",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø¥Ù…Ø§Ø±Ø§Øª",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù…ØµØ±",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„ÙƒÙˆÙŠØª",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù‚Ø·Ø±",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø¨Ø­Ø±ÙŠÙ†",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø¹Ù…Ø§Ù†",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø£Ø±Ø¯Ù†",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ù…ØºØ±Ø¨",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø§Ù„Ø¬Ø²Ø§Ø¦Ø±",
-    "Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ ØªÙˆÙ†Ø³",
+    "??????? ???? ????????",
+    "??????? ???? ????????",
+    "??????? ???? ???",
+    "??????? ???? ??????",
+    "??????? ???? ???",
+    "??????? ???? ???????",
+    "??????? ???? ????",
+    "??????? ???? ??????",
+    "??????? ???? ??????",
+    "??????? ???? ???????",
+    "??????? ???? ????",
     "Google Ads Middle East",
     "Google Ads Africa",
     "Google Ads Asia",
@@ -238,8 +166,8 @@ export const metadata: Metadata = {
     canonical: "https://furriyadh.com",
   },
   openGraph: {
-    title: "Furriyadh â€“ AIâ€‘Powered Google Ads Management Platform | Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ",
-    description: "Launch and scale profitable Google Ads campaigns worldwide with Furriyadh's AIâ€‘powered management platform. Ø¥Ø¯Ø§Ø±Ø© Ø§Ø­ØªØ±Ø§ÙÙŠØ© Ù„Ø­Ù…Ù„Ø§Øª Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„ Ù„Ø²ÙŠØ§Ø¯Ø© Ø§Ù„ØªØ­ÙˆÙŠÙ„Ø§Øª ÙˆØªÙ‚Ù„ÙŠÙ„ ØªÙƒÙ„ÙØ© Ø§Ù„Ù†Ù‚Ø±Ø©.",
+    title: "Furriyadh – AI‑Powered Google Ads Management Platform | إدارة إعلانات جوجل بالذكاء الاصطناعي",
+    description: "Launch and scale profitable Google Ads campaigns worldwide with Furriyadh's AI‑powered management platform. إدارة احترافية لحملات إعلانات جوجل لزيادة التحويلات وتقليل تكلفة النقرة.",
     url: "https://furriyadh.com",
     siteName: "Furriyadh",
     type: "website",
@@ -255,7 +183,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Furriyadh â€“ AIâ€‘Powered Google Ads Management Platform",
+    title: "Furriyadh – AI‑Powered Google Ads Management Platform",
     description: "Increase conversions and lower CPC with smart Google Ads management for businesses around the world.",
     images: ["/images/front-pages/dashboard.png"],
     creator: "@furaborsa",
@@ -394,7 +322,7 @@ export default function RootLayout({
                   "name": "Google Ads Campaign Management",
                   "description": "Professional AI-powered Google Ads management services including campaign creation, optimization, keyword research, bid management, and performance analytics.",
                   "areaServed": [
-                    // Asia - Ø§Ù„Ø´Ø±Ù‚ Ø§Ù„Ø£ÙˆØ³Ø·
+                    // Asia - الشرق الأوسط
                     { "@type": "Country", "name": "Saudi Arabia" },
                     { "@type": "Country", "name": "United Arab Emirates" },
                     { "@type": "Country", "name": "Kuwait" },
@@ -407,14 +335,14 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Syria" },
                     { "@type": "Country", "name": "Palestine" },
                     { "@type": "Country", "name": "Yemen" },
-                    // Asia - Ø¬Ù†ÙˆØ¨ Ø¢Ø³ÙŠØ§
+                    // Asia - جنوب آسيا
                     { "@type": "Country", "name": "India" },
                     { "@type": "Country", "name": "Pakistan" },
                     { "@type": "Country", "name": "Bangladesh" },
                     { "@type": "Country", "name": "Sri Lanka" },
                     { "@type": "Country", "name": "Nepal" },
                     { "@type": "Country", "name": "Afghanistan" },
-                    // Asia - Ø¬Ù†ÙˆØ¨ Ø´Ø±Ù‚ Ø¢Ø³ÙŠØ§
+                    // Asia - جنوب شرق آسيا
                     { "@type": "Country", "name": "Indonesia" },
                     { "@type": "Country", "name": "Malaysia" },
                     { "@type": "Country", "name": "Thailand" },
@@ -423,26 +351,26 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Singapore" },
                     { "@type": "Country", "name": "Myanmar" },
                     { "@type": "Country", "name": "Cambodia" },
-                    // Asia - Ø´Ø±Ù‚ Ø¢Ø³ÙŠØ§
+                    // Asia - شرق آسيا
                     { "@type": "Country", "name": "China" },
                     { "@type": "Country", "name": "Japan" },
                     { "@type": "Country", "name": "South Korea" },
                     { "@type": "Country", "name": "Taiwan" },
                     { "@type": "Country", "name": "Hong Kong" },
-                    // Asia - Ø¢Ø³ÙŠØ§ Ø§Ù„ÙˆØ³Ø·Ù‰
+                    // Asia - آسيا الوسطى
                     { "@type": "Country", "name": "Turkey" },
                     { "@type": "Country", "name": "Iran" },
                     { "@type": "Country", "name": "Kazakhstan" },
                     { "@type": "Country", "name": "Uzbekistan" },
                     { "@type": "Country", "name": "Azerbaijan" },
-                    // Africa - Ø´Ù…Ø§Ù„ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - شمال أفريقيا
                     { "@type": "Country", "name": "Egypt" },
                     { "@type": "Country", "name": "Morocco" },
                     { "@type": "Country", "name": "Algeria" },
                     { "@type": "Country", "name": "Tunisia" },
                     { "@type": "Country", "name": "Libya" },
                     { "@type": "Country", "name": "Sudan" },
-                    // Africa - Ø´Ø±Ù‚ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - شرق أفريقيا
                     { "@type": "Country", "name": "Kenya" },
                     { "@type": "Country", "name": "Ethiopia" },
                     { "@type": "Country", "name": "Tanzania" },
@@ -450,7 +378,7 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Rwanda" },
                     { "@type": "Country", "name": "Somalia" },
                     { "@type": "Country", "name": "Djibouti" },
-                    // Africa - ØºØ±Ø¨ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - غرب أفريقيا
                     { "@type": "Country", "name": "Nigeria" },
                     { "@type": "Country", "name": "Ghana" },
                     { "@type": "Country", "name": "Senegal" },
@@ -458,7 +386,7 @@ export default function RootLayout({
                     { "@type": "Country", "name": "Cameroon" },
                     { "@type": "Country", "name": "Mali" },
                     { "@type": "Country", "name": "Mauritania" },
-                    // Africa - Ø¬Ù†ÙˆØ¨ Ø£ÙØ±ÙŠÙ‚ÙŠØ§
+                    // Africa - جنوب أفريقيا
                     { "@type": "Country", "name": "South Africa" },
                     { "@type": "Country", "name": "Zimbabwe" },
                     { "@type": "Country", "name": "Zambia" },
@@ -591,7 +519,7 @@ export default function RootLayout({
                         "name": "Mohammed Hassan"
                       },
                       "datePublished": "2024-12-01",
-                      "reviewBody": "Ù…Ù†ØµØ© Ø±Ø§Ø¦Ø¹Ø© Ù„Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ø¬ÙˆØ¬Ù„. Ø³Ù‡Ù„Ø© Ø§Ù„Ø§Ø³ØªØ®Ø¯Ø§Ù… ÙˆÙ†ØªØ§Ø¦Ø¬ Ù…Ø°Ù‡Ù„Ø©. Ø£Ù†ØµØ­ Ø¨Ù‡Ø§ Ø¨Ø´Ø¯Ø©!",
+                      "reviewBody": "منصة رائعة لإدارة إعلانات جوجل. سهلة الاستخدام ونتائج مذهلة. أنصح بها بشدة!",
                       "reviewRating": {
                         "@type": "Rating",
                         "ratingValue": "5",
@@ -777,7 +705,7 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Script Ù„ØªØ·Ø¨ÙŠÙ‚ RTL Ù‚Ø¨Ù„ Ø±Ø³Ù… Ø§Ù„ØµÙØ­Ø© Ù„ØªØ¬Ù†Ø¨ Ø§Ù„ØªØ¶Ø§Ø±Ø¨ */}
+        {/* Script لضبط الاتجاه واللغة لجميع اللغات المدعومة */}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
@@ -787,16 +715,95 @@ export default function RootLayout({
                   const savedLanguage = localStorage.getItem('selectedLanguage');
                   const savedDir = localStorage.getItem('dirAttribute');
                   
+                  // RTL Languages: Arabic, Hebrew, Persian, Urdu, etc.
+                  // Currently supported RTL: 'ar'
+                  const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+                  
+                  let finalLang = 'en';
+                  let finalDir = 'ltr';
+
+                  if (savedLanguage) {
+                     finalLang = savedLanguage;
+                     // Check if it's an RTL language
+                     if (rtlLanguages.includes(savedLanguage)) {
+                        finalDir = 'rtl';
+                     }
+                  }
+
+                  // Force override if direction is explicitly saved (legacy support)
                   if (savedDir) {
-                    document.documentElement.setAttribute('dir', savedDir);
-                  } else if (savedLanguage === 'ar') {
-                    document.documentElement.setAttribute('dir', 'rtl');
+                    finalDir = savedDir;
+                  } else if (finalLang === 'ar') {
+                    finalDir = 'rtl';
+                  }
+
+                  document.documentElement.setAttribute('dir', finalDir);
+                  document.documentElement.setAttribute('lang', finalLang);
+
+                } catch (e) {
+                  // Fallback
+                  document.documentElement.setAttribute('dir', 'ltr');
+                  document.documentElement.setAttribute('lang', 'en');
+                }
+              })();
+            `,
+          }}
+        />
+        {/* Script ?????? ????? ??? ??? ?????? ????? ?????? */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme');
+                  if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
                   } else {
-                    document.documentElement.setAttribute('dir', 'ltr');
+                    document.documentElement.classList.remove('dark');
                   }
                 } catch (e) {
-                  // ÙÙŠ Ø­Ø§Ù„Ø© Ø¹Ø¯Ù… ÙˆØ¬ÙˆØ¯ localStorageØŒ Ø§Ø³ØªØ®Ø¯Ù… LTR ÙƒØ§ÙØªØ±Ø§Ø¶ÙŠ
-                  document.documentElement.setAttribute('dir', 'ltr');
+                  // ?? ???? ??? ???? localStorage? ?????? ????? ?????? ????????
+                }
+              })();
+            `,
+          }}
+        />
+
+        {/* OAuth Popup Auto-Close: Detects if this is a popup with auth token and closes it */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Only run if we're in a popup AND have an access_token in the URL hash
+                  if (window.opener && window.location.hash && window.location.hash.includes('access_token=')) {
+                    console.log('🔐 OAuth popup detected with token, waiting for Supabase...');
+                    
+                    // Wait for Supabase to process the token (it removes the hash after processing)
+                    var attempts = 0;
+                    var maxAttempts = 30; // 3 seconds max
+                    
+                    var checkInterval = setInterval(function() {
+                      attempts++;
+                      
+                      // Check if hash is gone (Supabase processed it) or max attempts reached
+                      if (!window.location.hash.includes('access_token=') || attempts >= maxAttempts) {
+                        clearInterval(checkInterval);
+                        
+                        // Notify opener
+                        try {
+                          window.opener.postMessage({ type: "SUPABASE_AUTH_SUCCESS" }, "*");
+                        } catch(e) {}
+                        
+                        // Close popup
+                        setTimeout(function() {
+                          window.close();
+                        }, 200);
+                      }
+                    }, 100);
+                  }
+                } catch(e) {
+                  console.error('Popup detection error:', e);
                 }
               })();
             `,
@@ -805,12 +812,6 @@ export default function RootLayout({
         {/* Preload critical resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-
-        {/* Google Maps API - Load globally (Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù…ØªØºÙŠØ± Ø§Ù„Ø¨ÙŠØ¦Ø© ÙÙ‚Ø· Ø¨Ø¯ÙˆÙ† Ù…ÙØªØ§Ø­ Ø§ÙØªØ±Ø§Ø¶ÙŠ ÙÙŠ Ø§Ù„ÙƒÙˆØ¯) */}
-        <script
-          async
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`}
-        />
 
         {/* CRITICAL: Prevent sidebar-open from causing black screen - Inline CSS for maximum priority */}
         <style dangerouslySetInnerHTML={{
@@ -862,12 +863,164 @@ export default function RootLayout({
                 bottom: auto !important;
               }
             }
+            
+            /* DARK MODE FIX: Override for .dark class (globals.css uses [class=dark] which doesn't work with multiple classes) */
+            html.dark,
+            html.dark body {
+              background-color: #0a0e19 !important;
+              color: #9ca3af !important;
+            }
+            html.dark .front-page-body {
+              background-color: #0a0e19 !important;
+            }
+            html.dark .bg-white {
+              background-color: #0a0e19 !important;
+            }
+            html.dark .bg-gray-50 {
+              background-color: #0c1427 !important;
+            }
+            html.dark .text-black {
+              color: #ffffff !important;
+            }
+            html.dark .text-gray-900 {
+              color: #f3f4f6 !important;
+            }
+            html.dark .text-zinc-900 {
+              color: #ffffff !important;
+            }
+            html.dark .text-gray-700 {
+              color: #d1d5db !important;
+            }
+            html.dark .text-gray-600 {
+              color: #9ca3af !important;
+            }
+            html.dark .border-gray-200 {
+              border-color: #172036 !important;
+            }
+            html.dark .border-gray-100 {
+              border-color: #172036 !important;
+            }
+            
+            /* Navbar specific dark mode overrides */
+            html.dark #navbar {
+              background-color: rgba(10, 14, 25, 0.95) !important;
+            }
+            html.dark .bg-white\\/95 {
+              background-color: rgba(10, 14, 25, 0.95) !important;
+            }
+            html.dark .bg-white\\/80 {
+              background-color: rgba(10, 14, 25, 0.8) !important;
+            }
+            html.dark .bg-gray-100 {
+              background-color: rgba(255, 255, 255, 0.05) !important;
+            }
+            html.dark .text-gray-300 {
+              color: #d1d5db !important;
+            }
+            html.dark .text-gray-400 {
+              color: #9ca3af !important;
+            }
+            html.dark .text-gray-500 {
+              color: #6b7280 !important;
+            }
+            html.dark .bg-white\\/5 {
+              background-color: rgba(255, 255, 255, 0.05) !important;
+            }
+            html.dark .border-white\\/10 {
+              border-color: rgba(255, 255, 255, 0.1) !important;
+            }
+            html.dark .hover\:bg-white\\/10:hover {
+              background-color: rgba(255, 255, 255, 0.1) !important;
+            }
+            /* Fix table hover in dark mode */
+            html.dark .hover\:bg-purple-50:hover {
+              background-color: rgba(168, 85, 247, 0.15) !important;
+            }
+            /* Fix badge backgrounds in dark mode */
+            html.dark .bg-purple-50 {
+              background-color: rgba(147, 51, 234, 0.15) !important;
+            }
+            html.dark .bg-blue-50 {
+              background-color: rgba(59, 130, 246, 0.15) !important;
+            }
+            html.dark .bg-cyan-50 {
+              background-color: rgba(6, 182, 212, 0.15) !important;
+            }
+            /* Zinc palette dark mode overrides */
+            html.dark .text-zinc-600 {
+              color: #a1a1aa !important;
+            }
+            html.dark .text-zinc-500 {
+              color: #71717a !important;
+            }
+            html.dark .text-zinc-400 {
+              color: #a1a1aa !important;
+            }
+            html.dark .text-zinc-300 {
+              color: #d4d4d8 !important;
+            }
+            /* bg-zinc-100 override removed to allow Tailwind dark: variants to work */
+            html.dark .bg-zinc-50 {
+              background-color: rgba(255, 255, 255, 0.03) !important;
+            }
+            html.dark .border-zinc-200 {
+              border-color: #27272a !important;
+            }
+            html.dark .border-zinc-100 {
+              border-color: #27272a !important;
+            }
           `
         }} />
 
       </head>
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
-        <GoogleTagManager gtmId="GTM-M3P8KJ2R" />
+        {/* CRITICAL: Apply theme IMMEDIATELY and ENFORCE it to prevent any flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  var applyTheme = function() {
+                    if (theme === 'dark') {
+                      document.documentElement.classList.add('dark');
+                    }
+                  };
+                  
+                  // Apply immediately
+                  applyTheme();
+                  
+                  // Apply again after short delays to override any React hydration
+                  setTimeout(applyTheme, 0);
+                  setTimeout(applyTheme, 10);
+                  setTimeout(applyTheme, 50);
+                  setTimeout(applyTheme, 100);
+                  setTimeout(applyTheme, 200);
+                  setTimeout(applyTheme, 500);
+                  
+                  // Watch for any attempts to remove dark class and re-add it
+                  if (theme === 'dark') {
+                    var observer = new MutationObserver(function(mutations) {
+                      mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                          if (!document.documentElement.classList.contains('dark')) {
+                            document.documentElement.classList.add('dark');
+                          }
+                        }
+                      });
+                    });
+                    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                    
+                    // Stop observing after 3 seconds (after React fully hydrates)
+                    setTimeout(function() { observer.disconnect(); }, 3000);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <DelayedGTM gtmId="GTM-M3P8KJ2R" />
+        <LazyComponents />
         <SessionSyncProvider>
           <CampaignProvider>
             <LayoutProvider>

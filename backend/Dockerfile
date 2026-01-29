@@ -33,9 +33,9 @@ USER app
 # Expose port
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/api/health || exit 1
+# Health check - use PORT environment variable (Railway sets this to 8080)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=5 \
+    CMD curl -f http://localhost:${PORT:-5000}/api/health || exit 1
 
 # Set as start command (explicitly via bash to avoid shebang/line-ending issues)
 CMD ["bash", "./start.sh"]

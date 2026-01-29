@@ -1,4 +1,4 @@
-﻿ 
+ 
 import EventsListTable from "@/components/Events/EventsListTable";
 import Link from "next/link";
 

@@ -1,32 +1,44 @@
-﻿import FaqContent from "@/components/Faq/FaqContent";
-import Link from "next/link";
+"use client";
+
+import { useEffect } from "react";
+import Cta from "@/components/FrontPage/Cta";
+import Footer from "@/components/FrontPage/Footer";
+import Navbar from "@/components/FrontPage/Navbar";
+import Faq from "@/components/FrontPage/Faq";
+import SplashCursor from "@/components/ui/SplashCursor";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 export default function Page() {
-  return (
-    <>
-      <div className="mb-[25px] md:flex items-center justify-between">
-        <h5 className="!mb-0">FAQ&apos;s</h5>
+    const { t, isRTL } = useTranslation();
 
-        <ol className="breadcrumb mt-[12px] md:mt-0">
-          <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <Link
-              href="/dashboard/ecommerce/"
-              className="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500"
-            >
-              <i className="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
-                home
-              </i>
-              Dashboard
-            </Link>
-          </li>
- 
-          <li className="breadcrumb-item inline-block relative text-sm mx-[11px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            FAQ&apos;s
-          </li>
-        </ol>
-      </div>
-      
-      <FaqContent />
-    </>
-  );
+    // Force dark mode on external pages
+    useEffect(() => {
+        document.documentElement.classList.add('dark');
+    }, []);
+
+    return (
+        <>
+            <div className="front-page-body overflow-hidden" dir="ltr">
+                <Navbar />
+                <SplashCursor />
+
+                <div className="pt-[125px] md:pt-[145px] lg:pt-[185px] xl:pt-[195px] text-center relative z-[1]">
+                    <div className="container 2xl:max-w-[1320px] mx-auto px-[12px]">
+                        <h1 className="!mb-0 !leading-[1.2] !text-[32px] md:!text-[40px] lg:!text-[50px] xl:!text-[60px] -tracking-[.5px] md:-tracking-[1px] xl:-tracking-[1.5px] text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                            {t.faq.title}
+                        </h1>
+
+                    </div>
+                </div>
+
+                <div className="relative z-[1]">
+                    <Faq />
+                </div>
+
+                <Cta />
+
+                <Footer />
+            </div>
+        </>
+    );
 }

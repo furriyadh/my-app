@@ -1,10 +1,10 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CreditCard, 
-  TrendingUp, 
+import {
+  CreditCard,
+  TrendingUp,
   TrendingDown,
   Calendar,
   DollarSign,
@@ -64,7 +64,82 @@ interface Subscription {
   features: string[];
 }
 
+import { initializePaddle, Paddle } from '@paddle/paddle-js';
+
+// Paddle Price IDs (To be updated by user from Dashboard > Catalog)
+const PADDLE_PRICE_IDS = {
+  MONTHLY: {
+    BASIC: 'pri_01ke7gzh9508w5j81azc699748',
+    PREMIUM: 'pri_01ke7h6e9d05pt54j0mxs539q2',
+    ENTERPRISE: 'pri_01ke7h8765hth3c99hgbvaaj6r'
+  },
+  YEARLY: {
+    BASIC: 'pri_01ke7hr62ce5rgdndnpwhjz3sh',
+    PREMIUM: 'pri_01ke7hseye96pemfdssn9r5m5t',
+    ENTERPRISE: 'pri_01ke7htrekf52ar328f1esrmp3'
+  }
+};
+
 const BillingPage: React.FC = () => {
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
+  const [paddle, setPaddle] = useState<Paddle>();
+
+  // Initialize Paddle
+  useEffect(() => {
+    initializePaddle({
+      environment: process.env.NEXT_PUBLIC_PADDLE_ENV as 'production' | 'sandbox' || 'production',
+      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
+    }).then((paddleInstance: Paddle | undefined) => {
+      if (paddleInstance) {
+        setPaddle(paddleInstance);
+      }
+    });
+  }, []);
+
+  // Handle Checkout
+  const openCheckout = (priceId: string) => {
+    if (!paddle) {
+      alert('Paddle not initialized yet. Please wait...');
+      return;
+    }
+    paddle.Checkout.open({
+      items: [{ priceId, quantity: 1 }],
+      settings: {
+        displayMode: 'overlay',
+        theme: 'dark',
+        locale: 'en'
+      }
+    });
+  };
+
+  // ... (existing stats/methods/invoices state)
+
+  // Updated Plans Data with Dynamic Pricing
+  const plans = [
+    {
+      name: 'Basic',
+      price: billingInterval === 'monthly' ? 49 : 490,
+      features: ['3 Campaigns', '1 Google Ads Account', 'Unlimited Budget', 'Advanced Reports'],
+      priceId: billingInterval === 'monthly' ? PADDLE_PRICE_IDS.MONTHLY.BASIC : PADDLE_PRICE_IDS.YEARLY.BASIC
+    },
+    {
+      name: 'Pro', // Renamed from Premium to match new naming
+      price: billingInterval === 'monthly' ? 99 : 990,
+      features: ['10 Campaigns', '3 Google Ads Accounts', 'Unlimited Budget', 'Advanced AI Optimization'],
+      priceId: billingInterval === 'monthly' ? PADDLE_PRICE_IDS.MONTHLY.PREMIUM : PADDLE_PRICE_IDS.YEARLY.PREMIUM,
+      current: true
+    },
+    {
+      name: 'Agency', // Renamed from Enterprise to match new naming
+      price: billingInterval === 'monthly' ? 249 : 2490,
+      features: ['Unlimited Campaigns', '10 Google Ads Accounts', 'Client Dashboard', 'White Label'],
+      priceId: billingInterval === 'monthly' ? PADDLE_PRICE_IDS.MONTHLY.ENTERPRISE : PADDLE_PRICE_IDS.YEARLY.ENTERPRISE
+    }
+  ];
+
+
+
+
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
   const [isRTL, setIsRTL] = useState(false);
   const [stats, setStats] = useState<BillingStats>({
@@ -190,7 +265,7 @@ const BillingPage: React.FC = () => {
       className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 p-6 border border-gray-700 hover:border-indigo-500/50 transition-all duration-300 group"
     >
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
-      
+
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-xl bg-gradient-to-br ${trend === 'up' ? 'from-green-500/20 to-emerald-500/20' : 'from-red-500/20 to-orange-500/20'} backdrop-blur-sm`}>
@@ -203,7 +278,7 @@ const BillingPage: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         <p className="text-gray-400 text-sm mb-1">{label}</p>
         <p className="text-3xl font-bold text-white">{value}</p>
       </div>
@@ -213,7 +288,7 @@ const BillingPage: React.FC = () => {
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-gray-950 via-gray-900 to-black" dir="ltr">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
@@ -224,8 +299,8 @@ const BillingPage: React.FC = () => {
               {language === 'ar' ? 'Ø§Ù„ÙÙˆØ§ØªÙŠØ± ÙˆØ§Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª' : 'Billing & Payments'}
             </h1>
             <p className="text-gray-400 text-lg" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-              {language === 'ar' 
-                ? 'Ø¥Ø¯Ø§Ø±Ø© Ø§Ø´ØªØ±Ø§ÙƒÙƒ ÙˆØ§Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª ÙˆØ³Ø¬Ù„ Ø§Ù„ÙÙˆØ§ØªÙŠØ±' 
+              {language === 'ar'
+                ? 'Ø¥Ø¯Ø§Ø±Ø© Ø§Ø´ØªØ±Ø§ÙƒÙƒ ÙˆØ§Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª ÙˆØ³Ø¬Ù„ Ø§Ù„ÙÙˆØ§ØªÙŠØ±'
                 : 'Manage your subscription, payments, and billing history'}
             </p>
           </div>
@@ -308,11 +383,10 @@ const BillingPage: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedTab(tab.id as any)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 whitespace-nowrap ${
-              selectedTab === tab.id
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/50'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 whitespace-nowrap ${selectedTab === tab.id
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/50'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+              }`}
           >
             <tab.icon className="w-5 h-5" />
             {tab.label}
@@ -341,7 +415,7 @@ const BillingPage: React.FC = () => {
                   className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 p-6 border border-gray-700 hover:border-indigo-500/50 transition-all duration-300 group"
                 >
                   <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${rec.color} opacity-10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500`}></div>
-                  
+
                   <div className="relative z-10">
                     <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${rec.color} bg-opacity-20 mb-4`}>
                       <rec.icon className="w-6 h-6 text-white" />
@@ -367,19 +441,18 @@ const BillingPage: React.FC = () => {
                 <h3 className="text-white font-bold text-xl">Monthly Budget Usage</h3>
                 <span className="text-gray-400 text-sm">{budgetUsagePercent}% Used</span>
               </div>
-              
+
               <div className="relative w-full h-4 bg-gray-700 rounded-full overflow-hidden mb-4">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${budgetUsagePercent}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
-                  className={`h-full rounded-full ${
-                    parseFloat(budgetUsagePercent) > 90
-                      ? 'bg-gradient-to-r from-red-500 to-orange-500'
-                      : parseFloat(budgetUsagePercent) > 70
+                  className={`h-full rounded-full ${parseFloat(budgetUsagePercent) > 90
+                    ? 'bg-gradient-to-r from-red-500 to-orange-500'
+                    : parseFloat(budgetUsagePercent) > 70
                       ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
                       : 'bg-gradient-to-r from-green-500 to-emerald-500'
-                  }`}
+                    }`}
                 ></motion.div>
               </div>
 
@@ -421,20 +494,18 @@ const BillingPage: React.FC = () => {
                     className="flex items-center justify-between p-4 rounded-xl bg-gray-800/50 hover:bg-gray-800 transition-all duration-300 cursor-pointer group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-xl ${
-                        invoice.status === 'paid'
-                          ? 'bg-green-500/20'
-                          : invoice.status === 'pending'
+                      <div className={`p-3 rounded-xl ${invoice.status === 'paid'
+                        ? 'bg-green-500/20'
+                        : invoice.status === 'pending'
                           ? 'bg-yellow-500/20'
                           : 'bg-red-500/20'
-                      }`}>
-                        <CheckCircle className={`w-5 h-5 ${
-                          invoice.status === 'paid'
-                            ? 'text-green-400'
-                            : invoice.status === 'pending'
+                        }`}>
+                        <CheckCircle className={`w-5 h-5 ${invoice.status === 'paid'
+                          ? 'text-green-400'
+                          : invoice.status === 'pending'
                             ? 'text-yellow-400'
                             : 'text-red-400'
-                        }`} />
+                          }`} />
                       </div>
                       <div>
                         <p className="text-white font-medium">{invoice.description}</p>
@@ -444,13 +515,12 @@ const BillingPage: React.FC = () => {
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <p className="text-white font-bold text-lg">${invoice.amount.toFixed(2)}</p>
-                        <p className={`text-sm capitalize ${
-                          invoice.status === 'paid'
-                            ? 'text-green-400'
-                            : invoice.status === 'pending'
+                        <p className={`text-sm capitalize ${invoice.status === 'paid'
+                          ? 'text-green-400'
+                          : invoice.status === 'pending'
                             ? 'text-yellow-400'
                             : 'text-red-400'
-                        }`}>{invoice.status}</p>
+                          }`}>{invoice.status}</p>
                       </div>
                       <Download className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                     </div>
@@ -483,7 +553,7 @@ const BillingPage: React.FC = () => {
                       Default
                     </div>
                   )}
-                  
+
                   <div className="flex items-start gap-4 mb-4">
                     <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
                       <CreditCard className="w-8 h-8 text-indigo-400" />
@@ -550,42 +620,39 @@ const BillingPage: React.FC = () => {
                 className="flex items-center justify-between p-6 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer group"
               >
                 <div className="flex items-center gap-6">
-                  <div className={`p-4 rounded-xl ${
-                    invoice.status === 'paid'
-                      ? 'bg-green-500/20'
-                      : invoice.status === 'pending'
+                  <div className={`p-4 rounded-xl ${invoice.status === 'paid'
+                    ? 'bg-green-500/20'
+                    : invoice.status === 'pending'
                       ? 'bg-yellow-500/20'
                       : 'bg-red-500/20'
-                  }`}>
-                    <CheckCircle className={`w-6 h-6 ${
-                      invoice.status === 'paid'
-                        ? 'text-green-400'
-                        : invoice.status === 'pending'
+                    }`}>
+                    <CheckCircle className={`w-6 h-6 ${invoice.status === 'paid'
+                      ? 'text-green-400'
+                      : invoice.status === 'pending'
                         ? 'text-yellow-400'
                         : 'text-red-400'
-                    }`} />
+                      }`} />
                   </div>
                   <div>
                     <p className="text-white font-bold text-lg mb-1">{invoice.description}</p>
                     <p className="text-gray-400">{invoice.id}</p>
-                    <p className="text-gray-500 text-sm mt-1">{new Date(invoice.date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    <p className="text-gray-500 text-sm mt-1">{new Date(invoice.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     })}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <p className="text-white font-bold text-2xl">${invoice.amount.toFixed(2)}</p>
-                    <p className={`text-sm capitalize font-medium ${
-                      invoice.status === 'paid'
-                        ? 'text-green-400'
-                        : invoice.status === 'pending'
+                    <p className={`text-sm capitalize font-medium ${invoice.status === 'paid'
+                      ? 'text-green-400'
+                      : invoice.status === 'pending'
                         ? 'text-yellow-400'
                         : 'text-red-400'
-                    }`}>{invoice.status}</p>
+                      }`}>{invoice.status}</p>
                   </div>
                   <div className="flex gap-2">
                     <motion.button
@@ -617,7 +684,7 @@ const BillingPage: React.FC = () => {
               className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-6">
                   <div>
@@ -679,23 +746,18 @@ const BillingPage: React.FC = () => {
             >
               <h3 className="text-white font-bold text-xl mb-6">Compare Plans</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { name: 'Basic', price: 49, features: ['5 Campaigns', 'Basic Analytics', 'Email Support'] },
-                  { name: 'Premium', price: 150, features: ['Unlimited Campaigns', 'AI Optimization', 'Priority Support'], current: true },
-                  { name: 'Enterprise', price: 499, features: ['Everything in Premium', 'Dedicated Manager', 'Custom Integration'] }
-                ].map((plan, index) => (
+                {plans.map((plan, index) => (
                   <div
                     key={index}
-                    className={`p-6 rounded-xl border-2 ${
-                      plan.current
-                        ? 'border-indigo-500 bg-indigo-500/10'
-                        : 'border-gray-700 bg-gray-800/50'
-                    } transition-all duration-300`}
+                    className={`p-6 rounded-xl border-2 ${plan.current
+                      ? 'border-indigo-500 bg-indigo-500/10'
+                      : 'border-gray-700 bg-gray-800/50'
+                      } transition-all duration-300`}
                   >
                     <h4 className="text-white font-bold text-xl mb-2">{plan.name}</h4>
                     <p className="text-4xl font-bold text-white mb-4">
                       ${plan.price}
-                      <span className="text-gray-400 text-base font-normal">/month</span>
+                      <span className="text-gray-400 text-base font-normal">/{billingInterval === 'monthly' ? 'mo' : 'yr'}</span>
                     </p>
                     <ul className="space-y-3 mb-6">
                       {plan.features.map((feature, idx) => (
@@ -706,14 +768,18 @@ const BillingPage: React.FC = () => {
                       ))}
                     </ul>
                     <button
-                      className={`w-full py-3 rounded-lg font-medium transition-all duration-300 ${
-                        plan.current
-                          ? 'bg-indigo-600 text-white cursor-default'
-                          : 'bg-gray-700 text-white hover:bg-gray-600'
-                      }`}
+                      className={`w-full py-3 rounded-lg font-medium transition-all duration-300 ${plan.current
+                        ? 'bg-indigo-600 text-white cursor-default'
+                        : 'bg-gray-700 text-white hover:bg-gray-600'
+                        }`}
                       disabled={plan.current}
+                      onClick={() => {
+                        if (!plan.current) {
+                          openCheckout(plan.priceId);
+                        }
+                      }}
                     >
-                      {plan.current ? 'Current Plan' : 'Choose Plan'}
+                      {plan.current ? 'Current Plan' : `Subscribe to ${plan.name}`}
                     </button>
                   </div>
                 ))}

@@ -1,4 +1,4 @@
-﻿ 
+ 
 import CreateAnEventForm from "@/components/Events/CreateAnEventForm";
 import Link from "next/link";
 

@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url);
-        const redirectAfter = searchParams.get('redirect_after') || '/google-ads/integrations';
+        const redirectAfter = searchParams.get('redirect_after') || '/dashboard/google-ads/integrations';
 
         // إنشاء state للحماية من CSRF
         const state = crypto.randomBytes(32).toString('base64url');

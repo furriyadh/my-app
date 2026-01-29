@@ -25,18 +25,60 @@ const getCookieOptions = (maxAge: number, httpOnly: boolean = true) => {
 
 export async function POST(request: NextRequest) {
     try {
-        const userInfo = await request.json();
+        // ✅ 1. الحصول على الـ token من الـ Header (الطريقة الآمنة)
+        const authHeader = request.headers.get('Authorization');
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
-        // التحقق من وجود البيانات المطلوبة
-        if (!userInfo.id || !userInfo.email) {
+        let user;
+
+        if (token) {
+            // التحقق باستخدام الـ token الممرر في الهيدر
+            const { createClient } = await import('@supabase/supabase-js');
+            const supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            );
+            const { data, error } = await supabase.auth.getUser(token);
+            if (!error && data.user) {
+                user = data.user;
+            }
+        }
+
+        // ✅ 2. إذا فشل التحقق من الـ token، نجرب الـ cookies (للتوافق مع المتصفحات القديمة)
+        if (!user) {
+            const { createClient } = await import('@/utils/supabase/server');
+            const supabase = await createClient();
+            const { data, error } = await supabase.auth.getUser();
+            if (!error && data.user) {
+                user = data.user;
+            }
+        }
+
+        if (!user) {
+            console.error('❌ Unauthorized sync attempt: No valid session or token');
             return NextResponse.json(
-                { success: false, error: 'Missing required user info (id, email)' },
-                { status: 400 }
+                { success: false, error: 'Unauthorized: Valid Supabase session required' },
+                { status: 401 }
             );
         }
 
-        console.log('🔄 Syncing Supabase session to OAuth cookies...');
-        console.log('👤 User:', { id: userInfo.id, email: userInfo.email, name: userInfo.name });
+        // استخراج البيانات من الـ user object الموثوق به من السيرفر
+        const googleIdentity = user.identities?.find((i: any) => i.provider === 'google');
+        const googleId = googleIdentity?.id ||
+            user.user_metadata?.provider_id ||
+            user.user_metadata?.sub ||
+            user.id;
+
+        const userInfo = {
+            id: googleId,
+            supabaseId: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+            picture: user.user_metadata?.avatar_url || ''
+        };
+
+        console.log('🔄 Syncing authenticated Supabase session to OAuth cookies...');
+        console.log('👤 Authenticated User:', { id: userInfo.id, email: userInfo.email });
 
         const response = NextResponse.json({
             success: true,
@@ -47,8 +89,8 @@ export async function POST(request: NextRequest) {
         const userInfoForCookie = {
             id: userInfo.id,
             email: userInfo.email,
-            name: userInfo.name || userInfo.full_name || '',
-            picture: userInfo.picture || userInfo.avatar_url || ''
+            name: userInfo.name,
+            picture: userInfo.picture
         };
 
         response.cookies.set(
@@ -61,8 +103,8 @@ export async function POST(request: NextRequest) {
 
         // ✅ استعادة OAuth tokens المحفوظة من قاعدة البيانات
         try {
-            const { createClient } = await import('@supabase/supabase-js');
-            const supabaseAdmin = createClient(
+            const { createClient: createAdminClient } = await import('@supabase/supabase-js');
+            const supabaseAdmin = createAdminClient(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!
             );
@@ -91,15 +133,19 @@ export async function POST(request: NextRequest) {
 
                 let accessToken = savedTokens.access_token;
                 const refreshToken = savedTokens.refresh_token;
+                const expiresAt = savedTokens.expires_at ? new Date(savedTokens.expires_at) : null;
+                const now = new Date();
 
-                // ✅ تجديد access_token تلقائياً لأنه غالباً منتهي الصلاحية
-                if (refreshToken) {
+                // Add 5 minutes buffer
+                const needsRefresh = !accessToken || !expiresAt || (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000);
+
+                if (needsRefresh && refreshToken) {
                     try {
                         const clientId = process.env.GOOGLE_ADS_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
                         const clientSecret = process.env.GOOGLE_ADS_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
 
                         if (clientId && clientSecret) {
-                            console.log('🔄 Refreshing access token...');
+                            console.log('🔄 Access token expired or missing, refreshing...');
 
                             const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
                                 method: 'POST',
@@ -118,12 +164,12 @@ export async function POST(request: NextRequest) {
                                 console.log('✅ Access token refreshed successfully');
 
                                 // حفظ الـ access_token الجديد في قاعدة البيانات
-                                const expiresAt = new Date(Date.now() + (tokenData.expires_in || 3600) * 1000);
+                                const newExpiresAt = new Date(Date.now() + (tokenData.expires_in || 3600) * 1000);
                                 await supabaseAdmin
                                     .from('user_oauth_tokens')
                                     .update({
                                         access_token: accessToken,
-                                        expires_at: expiresAt.toISOString(),
+                                        expires_at: newExpiresAt.toISOString(),
                                         updated_at: new Date().toISOString()
                                     })
                                     .eq('id', savedTokens.id);
@@ -136,6 +182,8 @@ export async function POST(request: NextRequest) {
                     } catch (refreshError) {
                         console.error('⚠️ Error refreshing token:', refreshError);
                     }
+                } else {
+                    console.log('✅ Access token is still valid, skipping refresh');
                 }
 
                 // استعادة access_token (الجديد أو القديم)

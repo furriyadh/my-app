@@ -22,7 +22,7 @@ export const API_ENDPOINTS = {
     // The "src/app/accounts/page.tsx" uses "/api/google-ads/accounts".
     // I need to be careful. The moved APIs were specific utilities. The main accounts list might be elsewhere.
     // Let's assume standard prefixes for now based on the moves I DID make.
-    SELECT: '/google-ads/select-ads-account', // Frontend path or API? This is in API_ENDPOINTS.
+    SELECT: '/dashboard/google-ads/select-ads-account', // Frontend path or API? This is in API_ENDPOINTS.
     // Wait, API_ENDPOINTS usually refers to API routes.
     // SELECT: '/accounts/select' -> Was this an API?
     // Let's check where it's used.
@@ -67,21 +67,21 @@ export const API_ENDPOINTS = {
     // I did NOT include `src/app/api/accounts` in the backend moves in my plan.
     // If `src/app/accounts/page.tsx` calls `/api/google-ads/accounts`, and I haven't moved the API yet, then that call might be failing OR it was already pointing to a location I created earlier?
     // Let's start by updating SidebarMenu which DEFINITELY has broken frontend links now.
-    LIST: '/google-ads/accounts',
-    SELECT: '/google-ads/select-ads-account',
-    DETAILS: '/google-ads/accounts/:id',
-    MCC: '/google-ads/mcc'
+    LIST: '/dashboard/google-ads/accounts',
+    SELECT: '/dashboard/google-ads/select-ads-account',
+    DETAILS: '/dashboard/google-ads/accounts/:id',
+    MCC: '/dashboard/google-ads/mcc'
   },
 
   // Campaigns
   CAMPAIGNS: {
-    LIST: '/campaigns',
-    CREATE: '/campaigns',
-    UPDATE: '/campaigns/:id',
-    DELETE: '/campaigns/:id',
-    LAUNCH: '/campaigns/launch',
-    PAUSE: '/campaigns/:id/pause',
-    PERFORMANCE: '/campaigns/:id/performance'
+    LIST: '/dashboard/google-ads/campaigns',
+    CREATE: '/dashboard/google-ads/campaigns',
+    UPDATE: '/dashboard/google-ads/campaigns/:id',
+    DELETE: '/dashboard/google-ads/campaigns/:id',
+    LAUNCH: '/dashboard/google-ads/campaigns/launch',
+    PAUSE: '/dashboard/google-ads/campaigns/:id/pause',
+    PERFORMANCE: '/dashboard/google-ads/campaigns/:id/performance'
   }
 };
 

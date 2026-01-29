@@ -1,4 +1,4 @@
-﻿import CustomersTable from "@/components/eCommerce/Customers/CustomersTable";
+import CustomersTable from "@/components/eCommerce/Customers/CustomersTable";
 import Link from "next/link";
 
 export default function Page() {

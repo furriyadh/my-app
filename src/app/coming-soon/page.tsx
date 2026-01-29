@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
@@ -17,6 +17,11 @@ export default function Page() {
     minutes: "00",
     seconds: "00",
   });
+
+  // Force dark mode on external pages
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   // Listen for language changes
   useEffect(() => {
@@ -59,7 +64,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="coming-soon-content bg-white dark:bg-[#0a0e19] py-[30px] h-screen overflow-x-hidden" dir="ltr">
+      <div className="coming-soon-content relative z-[1] py-[30px] h-screen overflow-x-hidden" dir="ltr">
         <div className="w-full h-full table">
           <div className="table-cell align-middle">
             <div className="mx-auto px-[12.5px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1255px]">
@@ -92,10 +97,10 @@ export default function Page() {
 
                   <div className="my-[17px] md:my-[25px]">
                     <h1 className="!font-semibold !text-[22px] md:!text-xl lg:!text-2xl 2xl:!text-4xl !mb-[5px] md:!mb-[12px]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                      {language === 'ar' ? 'Ù†Ø­Ù† Ù†Ø¹Ù…Ù„ Ø¹Ù„Ù‰ Ø§Ù„Ø¥Ø·Ù„Ø§Ù‚ Ù‚Ø±ÙŠØ¨Ø§Ù‹ØŒ ØªØ±Ù‚Ø¨ÙˆØ§!' : "We're working on launching soon, stay tuned!"}
+                      {language === 'ar' ? 'نحن نعمل على الإطلاق قريباً، ترقبوا!' : "We're working on launching soon, stay tuned!"}
                     </h1>
                     <p className="font-medium leading-[1.5] lg:text-md" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                      {language === 'ar' ? 'Ù‚Ø±ÙŠØ¨Ø§Ù‹ Ø¬Ø¯Ø§Ù‹..' : "We're coming soon.."}
+                      {language === 'ar' ? 'قريباً جداً..' : "We're coming soon.."}
                     </p>
                   </div>
 

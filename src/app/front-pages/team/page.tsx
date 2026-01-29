@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Cta from "@/components/FrontPage/Cta";
 import Footer from "@/components/FrontPage/Footer";
@@ -20,22 +20,7 @@ export default function Page() {
             <h1 className="!mb-0 !leading-[1.2] !text-[32px] md:!text-[40px] lg:!text-[50px] xl:!text-[60px] -tracking-[.5px] md:-tracking-[1px] xl:-tracking-[1.5px]" dir={isRTL ? 'rtl' : 'ltr'}>
               {t.team.title}
             </h1>
-            <div className="absolute bottom-0 -z-[1] ltr:-right-[30px] rtl:-left-[30px] blur-[250px]">
-              <Image
-                src="/images/front-pages/shape3.png"
-                alt="shape3"
-                width={685}
-                height={685}
-              />
-            </div>
-            <div className="absolute -top-[220px] -z-[1] ltr:-left-[50px] rtl:-right-[50px] blur-[150px]">
-              <Image
-                src="/images/front-pages/shape5.png"
-                alt="shape3"
-                width={658}
-                height={656}
-              />
-            </div>
+
           </div>
         </div>
 

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Crown, Users, Sparkles, CheckCircle, Star, Shield } from "lucide-react";
 import Link from "next/link";
 import ElectroBorder from "@/components/ui/electro-border";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Login from "@/components/ui/login";
 
 const PRICING = {
   single: 30,
@@ -19,24 +21,24 @@ export default function PricingSection() {
     <section className="py-16 px-4 relative overflow-hidden">
       <div className="container mx-auto max-w-4xl relative z-10">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/20 rounded-full mb-6">
-            <Crown className="w-4 h-4 text-purple-400" />
-            <span className="text-sm text-purple-300">Simple Pricing</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-600/10 border border-purple-200 dark:border-purple-500/20 rounded-full mb-6">
+            <Crown className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <span className="text-sm text-purple-600 dark:text-purple-300">Simple Pricing</span>
           </div>
-          <h2 className="!mb-3 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] !font-bold !text-white">
+          <h2 className="!mb-0 !text-[24px] md:!text-[28px] lg:!text-[34px] xl:!text-[36px] -tracking-[.5px] md:-tracking-[.6px] lg:-tracking-[.8px] xl:-tracking-[1px] !leading-[1.2] text-zinc-900 dark:text-white">
             Choose Your Google Ads Management Plan
           </h2>
-          <p className="text-base md:text-lg text-gray-400 mb-6">
+          <p className="mt-4 text-zinc-600 dark:text-zinc-400 mb-6">
             Two simple options to get started with AI‑powered Google Ads management and campaign optimization
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1 bg-white/5 rounded-full border border-white/10">
+          <div className="inline-flex items-center gap-4 p-1 bg-zinc-100 dark:bg-white/5 rounded-full border border-zinc-200 dark:border-white/10">
             <button
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2 rounded-full font-medium transition-all ${billingCycle === 'monthly'
                 ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                 }`}
             >
               Monthly
@@ -45,7 +47,7 @@ export default function PricingSection() {
               onClick={() => setBillingCycle('yearly')}
               className={`px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${billingCycle === 'yearly'
                 ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                 }`}
             >
               Yearly
@@ -125,12 +127,18 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link
-                href="/authentication/sign-up"
-                className="block w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-green-500/30"
-              >
-                Start Managing
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className="block w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-green-500/30"
+                  >
+                    Start Managing
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                  <Login />
+                </DialogContent>
+              </Dialog>
             </div>
           </ElectroBorder>
 
@@ -194,12 +202,18 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link
-                href="/authentication/sign-up"
-                className="block w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-purple-500/50"
-              >
-                Get Started - Pay Only When You Spend
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className="block w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-2xl font-semibold text-center transition-all duration-200 shadow-lg shadow-purple-500/50"
+                  >
+                    Get Started - Pay Only When You Spend
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-fit w-auto [&>button]:hidden">
+                  <Login />
+                </DialogContent>
+              </Dialog>
 
               {/* Money-back Guarantee */}
               <p className="text-center text-gray-400 text-sm mt-4 flex items-center justify-center gap-2">

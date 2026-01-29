@@ -22,17 +22,17 @@ const JWT_CONFIG = {
  * Set JWT tokens in HttpOnly cookies
  */
 export function setJWTCookies(
-  accessToken: string, 
+  accessToken: string,
   refreshToken?: string
 ): NextResponse {
   const response = NextResponse.json({ success: true });
-  
+
   // Set access token
   response.cookies.set('authToken', accessToken, {
     ...JWT_CONFIG.cookieOptions,
     maxAge: JWT_CONFIG.accessTokenMaxAge
   });
-  
+
   // Set refresh token if provided
   if (refreshToken) {
     response.cookies.set('refreshToken', refreshToken, {
@@ -40,7 +40,7 @@ export function setJWTCookies(
       maxAge: JWT_CONFIG.refreshTokenMaxAge
     });
   }
-  
+
   return response;
 }
 
@@ -65,10 +65,10 @@ export function getRefreshTokenFromCookie(): string | null {
  */
 export function clearJWTCookies(): NextResponse {
   const response = NextResponse.json({ success: true });
-  
+
   response.cookies.delete('authToken');
   response.cookies.delete('refreshToken');
-  
+
   return response;
 }
 
@@ -84,7 +84,7 @@ export async function verifyJWTWithBackend(token: string): Promise<boolean> {
         'Authorization': `Bearer ${token}`
       }
     });
-    
+
     return response.ok;
   } catch (error) {
     console.error('JWT verification failed:', error);
@@ -98,11 +98,11 @@ export async function verifyJWTWithBackend(token: string): Promise<boolean> {
 export async function refreshJWTToken(): Promise<{ success: boolean; newToken?: string }> {
   try {
     const refreshToken = getRefreshTokenFromCookie();
-    
+
     if (!refreshToken) {
       return { success: false };
     }
-    
+
     const response = await fetch(`${getBackendUrl()}/api/auth/refresh`, {
       method: 'POST',
       headers: {
@@ -110,12 +110,12 @@ export async function refreshJWTToken(): Promise<{ success: boolean; newToken?: 
         'Authorization': `Bearer ${refreshToken}`
       }
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       return { success: true, newToken: data.access_token };
     }
-    
+
     return { success: false };
   } catch (error) {
     console.error('JWT refresh failed:', error);
@@ -128,23 +128,23 @@ export async function refreshJWTToken(): Promise<{ success: boolean; newToken?: 
  */
 export async function checkAuthentication(): Promise<{ authenticated: boolean; user?: any }> {
   const token = getJWTFromCookie();
-  
+
   if (!token) {
     return { authenticated: false };
   }
-  
+
   const isValid = await verifyJWTWithBackend(token);
-  
+
   if (!isValid) {
     // Try to refresh token
     const refreshResult = await refreshJWTToken();
-    
+
     if (refreshResult.success && refreshResult.newToken) {
       return { authenticated: true, user: { token: refreshResult.newToken } };
     }
-    
+
     return { authenticated: false };
   }
-  
+
   return { authenticated: true, user: { token } };
 }

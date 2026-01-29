@@ -1,4 +1,4 @@
-﻿import SellersContent from "@/components/eCommerce/Sellers/SellersContent";
+import SellersContent from "@/components/eCommerce/Sellers/SellersContent";
 import Link from "next/link";
 
 export default function Page() {

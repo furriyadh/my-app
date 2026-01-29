@@ -297,9 +297,47 @@ class GoogleAdsClientManager:
             logger.error(f"❌ فشل في إنشاء العميل بـ token: {e}")
             return None
     
+    def _check_existing_link(self, client, manager_customer_id: str, customer_id: str) -> Optional[Dict[str, Any]]:
+        """
+        التحقق من وجود رابط سابق بين MCC والعميل
+        
+        Returns:
+            Dict مع معلومات الرابط إذا وجد، None إذا لم يوجد
+        """
+        try:
+            ga_service = client.get_service("GoogleAdsService")
+            query = f"""
+                SELECT 
+                    customer_client_link.resource_name,
+                    customer_client_link.client_customer,
+                    customer_client_link.status,
+                    customer_client_link.manager_link_id
+                FROM customer_client_link
+                WHERE customer_client_link.client_customer = 'customers/{customer_id}'
+            """
+            
+            response = ga_service.search(customer_id=manager_customer_id, query=query)
+            
+            for row in response:
+                link = row.customer_client_link
+                status_name = link.status.name if hasattr(link.status, 'name') else str(link.status)
+                logger.info(f"📍 وجدنا رابط موجود: {link.resource_name} - الحالة: {status_name}")
+                return {
+                    "resource_name": link.resource_name,
+                    "status": status_name,
+                    "manager_link_id": link.manager_link_id
+                }
+            
+            return None
+            
+        except Exception as e:
+            logger.warning(f"⚠️ خطأ في البحث عن رابط موجود: {e}")
+            return None
+    
     def link_customer_to_mcc_standard(self, client, manager_customer_id: str, customer_id: str) -> Dict[str, Any]:
         """
         ربط عميل بـ MCC باستخدام الطريقة المعيارية من المكتبة الرسمية
+        يتحقق من وجود رابط سابق ويعيد تفعيله إذا كان INACTIVE
         
         Args:
             client: GoogleAdsClient instance
@@ -310,17 +348,82 @@ class GoogleAdsClientManager:
             Dict يحتوي على نتيجة العملية
         """
         try:
-            # الحصول على خدمة Customer Client Link
+            # الخطوة 1: التحقق من وجود رابط سابق
+            existing_link = self._check_existing_link(client, manager_customer_id, customer_id)
+            
             customer_client_link_service = client.get_service("CustomerClientLinkService")
             
-            # إنشاء العملية
+            if existing_link:
+                existing_status = existing_link.get("status", "UNKNOWN")
+                resource_name = existing_link.get("resource_name")
+                
+                logger.info(f"📋 رابط موجود بحالة: {existing_status}")
+                
+                # إذا كان الرابط ACTIVE بالفعل
+                if existing_status == "ACTIVE":
+                    logger.info(f"✅ الحساب {customer_id} مرتبط بالفعل بـ MCC {manager_customer_id}")
+                    return {
+                        "success": True,
+                        "resource_name": resource_name,
+                        "status": "ALREADY_LINKED",
+                        "message": "الحساب مرتبط بالفعل",
+                        "manager_customer_id": manager_customer_id,
+                        "customer_id": customer_id
+                    }
+                
+                # إذا كان الرابط PENDING بالفعل
+                if existing_status == "PENDING":
+                    logger.info(f"⏳ طلب ربط معلق موجود بالفعل للحساب {customer_id}")
+                    return {
+                        "success": True,
+                        "resource_name": resource_name,
+                        "status": "PENDING_APPROVAL",
+                        "message": "طلب الربط موجود بالفعل وينتظر موافقة العميل",
+                        "manager_customer_id": manager_customer_id,
+                        "customer_id": customer_id
+                    }
+                
+                # إذا كان الرابط INACTIVE أو CANCELLED أو REFUSED -> إعادة إرسال الدعوة
+                if existing_status in ["INACTIVE", "CANCELLED", "REFUSED"]:
+                    logger.info(f"🔄 إعادة تفعيل الرابط من {existing_status} إلى PENDING")
+                    
+                    # استخدام UPDATE بدلاً من CREATE
+                    operation = client.get_type("CustomerClientLinkOperation")
+                    
+                    # تعديل الرابط الموجود
+                    operation.update.resource_name = resource_name
+                    operation.update.status = client.enums.ManagerLinkStatusEnum.PENDING
+                    
+                    # تحديد الحقول المُعدّلة
+                    client.copy_from(
+                        operation.update_mask,
+                        client.get_type("FieldMask")(paths=["status"])
+                    )
+                    
+                    response = customer_client_link_service.mutate_customer_client_link(
+                        customer_id=manager_customer_id,
+                        operation=operation
+                    )
+                    
+                    logger.info(f"✅ تم إعادة إرسال طلب الربط: {response.result.resource_name}")
+                    
+                    return {
+                        "success": True,
+                        "resource_name": response.result.resource_name,
+                        "status": "PENDING_APPROVAL",
+                        "message": "تم إعادة إرسال طلب الربط بنجاح - ينتظر موافقة العميل",
+                        "manager_customer_id": manager_customer_id,
+                        "customer_id": customer_id,
+                        "reactivated_from": existing_status
+                    }
+            
+            # الخطوة 2: إنشاء رابط جديد (لا يوجد رابط سابق)
+            logger.info(f"🔗 إنشاء رابط جديد للعميل {customer_id} مع MCC {manager_customer_id}")
+            
             operation = client.get_type("CustomerClientLinkOperation")
             customer_client_link = operation.create
             customer_client_link.client_customer = f"customers/{customer_id}"
             customer_client_link.status = client.enums.ManagerLinkStatusEnum.PENDING
-            
-            # تنفيذ العملية
-            logger.info(f"🔗 بدء ربط العميل {customer_id} بـ MCC {manager_customer_id}")
             
             response = customer_client_link_service.mutate_customer_client_link(
                 customer_id=manager_customer_id,

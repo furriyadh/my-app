@@ -11,6 +11,44 @@ interface SidebarMenuProps {
 
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
   const pathname = usePathname();
+  const [supabase, setSupabase] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('@/utils/supabase/client').then((module) => {
+        setSupabase(module.supabase);
+      });
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("cached_google_ads_accounts");
+      localStorage.removeItem("oauth_user_info");
+      localStorage.removeItem("userEmail");
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("account_stats_")) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+    }
+
+    try {
+      await fetch("/api/oauth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) { }
+
+    window.location.href = "/";
+  };
 
   // Initialize openIndex to 0 to open the first item by default
   const [openIndex, setOpenIndex] = React.useState<number | null>(0);
@@ -24,17 +62,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
       <div className="sidebar-area bg-white dark:bg-[#0c1427] fixed z-[7] top-0 h-screen transition-all rounded-r-md">
         <div className="logo bg-white dark:bg-[#0c1427] border-b border-gray-100 dark:border-[#172036] px-[25px] pt-[19px] pb-[15px] absolute z-[2] right-0 top-0 left-0">
           <Link
-            href="/dashboard/ecommerce/"
+            href="/dashboard/google-ads/"
             className="transition-none relative flex items-center outline-none"
           >
             <Image
               src="/images/logo-icon.svg"
-              alt="logo-icon"
+              alt="Furriyadh"
               width={26}
               height={26}
             />
             <span className="font-bold text-black dark:text-white relative ltr:ml-[8px] rtl:mr-[8px] top-px text-xl">
-              Trezo
+              Furriyadh
             </span>
           </Link>
 
@@ -50,6 +88,30 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
         <div className="pt-[89px] px-[22px] pb-[20px] h-screen overflow-y-scroll sidebar-custom-scrollbar">
           <div className="accordion">
 
+            {/* AI Assistant Section - Premium Design */}
+            <div className="mb-6">
+              <Link
+                href="/dashboard/"
+                className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 hover:scale-[1.02] ${pathname === "/dashboard/" ? "ring-2 ring-white/30" : ""}`}
+              >
+                {/* Animated background glow */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300" />
+
+                {/* Icon with sparkle animation */}
+                <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm">
+                  <i className="material-symbols-outlined !text-[22px] text-white">auto_awesome</i>
+                </div>
+
+                {/* Text content */}
+                <div className="relative flex-1">
+                  <span className="block font-semibold text-sm">AI Assistant</span>
+                  <span className="block text-[10px] text-white/70">Create campaigns with AI</span>
+                </div>
+
+                {/* Arrow icon */}
+                <i className="material-symbols-outlined relative !text-[18px] text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all">arrow_forward</i>
+              </Link>
+            </div>
 
             <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs">
               Main
@@ -79,8 +141,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/" ? "active" : ""
+                        href="/dashboard/google-ads/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/" ? "active" : ""
                           }`}
                       >
                         Google Ads
@@ -90,654 +152,280 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
                       </Link>
                     </li>
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/ecommerce/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/ecommerce/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         eCommerce
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/crm/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/crm/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         CRM
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/project-management/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/project-management/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Project Management
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/lms/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/lms/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         LMS
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/helpdesk/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/helpdesk/" ? "active" : ""
-                          }`}
-                      >
-                        HelpDesk{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-danger-500 bg-danger-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          Hot
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/analytics/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/analytics/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        HelpDesk
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Analytics
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/crypto/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/crypto/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Crypto
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/sales/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/sales/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Sales
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/hospital/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/hospital/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Hospital
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/hrm/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/hrm/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         HRM
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/school/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/school/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         School
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/call-center/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/call-center/" ? "active" : ""
-                          }`}
-                      >
-                        Call Center{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-success-600 bg-success-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          Popular
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/marketing/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/marketing/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Call Center
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Marketing
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/nft/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/nft/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         NFT
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/saas/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/saas/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         SaaS
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/real-estate/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/real-estate/" ? "active" : ""
-                          }`}
-                      >
-                        Real Estate{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-purple-500 bg-purple-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          Top
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/shipment/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/shipment/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Real Estate
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Shipment
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/finance/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/finance/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Finance
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/pos-system/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/pos-system/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         POS System
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/podcast/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/podcast/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Podcast
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/social-media/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/social-media/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Social Media
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/doctor/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/doctor/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Doctor
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/beauty-salon/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/beauty-salon/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Beauty Salon
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/store-analysis/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/store-analysis/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Store Analysis
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/restaurant/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/restaurant/" ? "active" : ""
-                          }`}
-                      >
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
                         Restaurant
-                      </Link>
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
+                        </span>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/hotel/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/hotel/" ? "active" : ""
-                          }`}
-                      >
-                        Hotel{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-orange-500 bg-orange-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          New
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Hotel
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/real-estate-agent/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/real-estate-agent/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Real Estate Agent{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-orange-500 bg-orange-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          New
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Real Estate Agent
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/credit-card/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/credit-card/" ? "active" : ""
-                          }`}
-                      >
-                        Credit Card{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-orange-500 bg-orange-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          New
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Credit Card
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/crypto-trader/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/crypto-trader/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Crypto Trader{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-orange-500 bg-orange-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          New
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Crypto Trader
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/dashboard/crypto-performance/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/crypto-performance/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Crypto Perf.{" "}
-                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-[8px] rtl:mr-[8px] text-orange-500 bg-orange-100 dark:bg-[#ffffff14] inline-block rounded-sm">
-                          New
+                      <div className="sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] w-full text-left cursor-not-allowed opacity-60">
+                        Crypto Perf.
+                        <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                          Soon
                         </span>
-                      </Link>
+                      </div>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 1 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(1)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  note_stack
-                </i>
-                <span className="title leading-none">Fornt Pages</span>
-              </button>
 
-              <div
-                className={`accordion-collapse ${openIndex === 1 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/" ? "active" : ""
-                          }`}
-                      >
-                        Home
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/front-pages/features/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/front-pages/features/" ? "active" : ""
-                          }`}
-                      >
-                        Features
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/front-pages/team/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/front-pages/team/" ? "active" : ""
-                          }`}
-                      >
-                        Our Team
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/front-pages/faq/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/front-pages/faq/" ? "active" : ""
-                          }`}
-                      >
-                        FAQ’s
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/front-pages/contact/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/front-pages/contact/" ? "active" : ""
-                          }`}
-                      >
-                        Contact
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs [&:not(:first-child)]:mt-[22px]">
-              Apps
-            </span>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/apps/to-do-list/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/to-do-list/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  format_list_bulleted
-                </i>
-                <span className="title leading-none">To Do List</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/apps/calendar/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/calendar/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  date_range
-                </i>
-                <span className="title leading-none">Calendar</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/apps/contacts/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/contacts/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  contact_page
-                </i>
-                <span className="title leading-none">Contacts</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/apps/chat/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/chat/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  chat
-                </i>
-                <span className="title leading-none">Chat</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 2 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(2)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  mail
-                </i>
-                <span className="title leading-none">Email</span>
-                <span className="rounded-full font-medium inline-block text-center w-[20px] h-[20px] text-[11px] leading-[20px] text-success-500 bg-success-50 dark:bg-[#ffffff14] ltr:ml-auto rtl:mr-auto">
-                  3
-                </span>
-              </button>
-
-              <div
-                className={`accordion-collapse ${openIndex === 2 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/email/inbox/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/email/inbox/" ? "active" : ""
-                          }`}
-                      >
-                        Inbox
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/email/compose/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/email/compose/" ? "active" : ""
-                          }`}
-                      >
-                        Compose
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/email/read/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/email/read/" ? "active" : ""
-                          }`}
-                      >
-                        Read
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/apps/kanban-board/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/kanban-board/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  team_dashboard
-                </i>
-                <span className="title leading-none">Kanban Board</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 3 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(3)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  folder_open
-                </i>
-                <span className="title leading-none">File Manager</span>
-                <span className="rounded-full font-medium inline-block text-center w-[20px] h-[20px] text-[11px] leading-[20px] text-danger-500 bg-danger-50 dark:bg-[#ffffff14] ltr:ml-auto rtl:mr-auto">
-                  7
-                </span>
-              </button>
-
-              <div
-                className={`accordion-collapse ${openIndex === 3 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/my-drive/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/my-drive/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        My Drive
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/assets/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/assets/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Assets
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/projects/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/projects/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Projects
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/personal/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/personal/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Personal
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/applications/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/applications/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Applications
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/documents/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/documents/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Documents
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/apps/file-manager/media/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/media/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Media
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
 
             <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs [&:not(:first-child)]:mt-[22px]">
               PAGES
@@ -764,8 +452,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/campaigns/website-url/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname?.includes("/google-ads/campaigns/") ? "active" : ""
+                        href="/dashboard/google-ads/campaigns/website-url/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname?.includes("/dashboard/google-ads/campaigns/") ? "active" : ""
                           }`}
                       >
                         Create Campaign
@@ -774,8 +462,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/integrations/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/integrations/" ? "active" : ""
+                        href="/dashboard/google-ads/integrations/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/integrations/" ? "active" : ""
                           }`}
                       >
                         Integrations
@@ -786,11 +474,21 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/google-ads/assets/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/google-ads/assets/" ? "active" : ""
+                        href="/dashboard/google-ads/assets/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/assets/" ? "active" : ""
                           }`}
                       >
                         Assets
+                      </Link>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/dashboard/google-ads/billing/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/dashboard/google-ads/billing/" ? "active" : ""
+                          }`}
+                      >
+                        Billing
                       </Link>
                     </li>
                   </ul>
@@ -799,17 +497,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 4 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(4)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   shopping_cart
                 </i>
                 <span className="title leading-none">eCommerce</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 4 ? "open" : "hidden"
@@ -1034,17 +732,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 5 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(5)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   handshake
                 </i>
                 <span className="title leading-none">CRM</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 5 ? "open" : "hidden"
@@ -1097,17 +795,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 6 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(6)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   description
                 </i>
                 <span className="title leading-none">Project Management</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 6 ? "open" : "hidden"
@@ -1204,17 +902,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 7 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(7)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   auto_stories
                 </i>
                 <span className="title leading-none">LMS</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 7 ? "open" : "hidden"
@@ -1287,17 +985,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 8 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(8)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   support
                 </i>
                 <span className="title leading-none">HelpDesk</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 8 ? "open" : "hidden"
@@ -1352,17 +1050,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 9 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(9)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   store
                 </i>
                 <span className="title leading-none">NFT Marketplace</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 9 ? "open" : "hidden"
@@ -1455,17 +1153,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 10 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(10)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   real_estate_agent
                 </i>
                 <span className="title leading-none">Real Estate</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 10 ? "open" : "hidden"
@@ -1556,17 +1254,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 11 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(11)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   calculate
                 </i>
                 <span className="title leading-none">Finance</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 11 ? "open" : "hidden"
@@ -1599,17 +1297,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 12 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(12)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   badge
                 </i>
                 <span className="title leading-none">Doctor</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 12 ? "open" : "hidden"
@@ -1686,17 +1384,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 13 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(13)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   lunch_dining
                 </i>
                 <span className="title leading-none">Restaurant</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 13 ? "open" : "hidden"
@@ -1731,17 +1429,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 14 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(14)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   hotel
                 </i>
                 <span className="title leading-none">Hotel</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 14 ? "open" : "hidden"
@@ -1784,17 +1482,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 15 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(15)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   location_away
                 </i>
                 <span className="title leading-none">Real Estate Agent</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 15 ? "open" : "hidden"
@@ -1831,17 +1529,17 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 16 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(16)}
+              <div
+                className="accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative text-left cursor-not-allowed opacity-60"
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   paid
                 </i>
                 <span className="title leading-none">Crypto Trader</span>
-              </button>
+                <span className="text-[10px] font-medium py-[1px] px-[8px] ltr:ml-auto rtl:mr-auto text-white bg-gray-400 inline-block rounded-sm">
+                  Soon
+                </span>
+              </div>
 
               <div
                 className={`accordion-collapse ${openIndex === 16 ? "open" : "hidden"
@@ -2192,226 +1890,107 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs [&:not(:first-child)]:mt-[22px]">
-              MODULES
+              Apps
             </span>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 22 ? "open" : ""
+              <Link
+                href="/apps/to-do-list/"
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/to-do-list/" ? "active" : ""
                   }`}
-                type="button"
-                onClick={() => toggleAccordion(22)}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  emoji_emotions
+                  format_list_bulleted
                 </i>
-                <span className="title leading-none">Icons</span>
-              </button>
+                <span className="title leading-none">To Do List</span>
+              </Link>
+            </div>
 
-              <div
-                className={`accordion-collapse ${openIndex === 22 ? "open" : "hidden"
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/apps/calendar/"
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/calendar/" ? "active" : ""
                   }`}
               >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/icons/material-symbols/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/icons/material-symbols/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Material Symbols
-                      </Link>
-                    </li>
+                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
+                  date_range
+                </i>
+                <span className="title leading-none">Calendar</span>
+              </Link>
+            </div>
 
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/icons/remixicon/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/icons/remixicon/" ? "active" : ""
-                          }`}
-                      >
-                        RemixIcon
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/apps/contacts/"
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/contacts/" ? "active" : ""
+                  }`}
+              >
+                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
+                  contact_page
+                </i>
+                <span className="title leading-none">Contacts</span>
+              </Link>
+            </div>
+
+            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
+              <Link
+                href="/apps/chat/"
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/chat/" ? "active" : ""
+                  }`}
+              >
+                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
+                  chat
+                </i>
+                <span className="title leading-none">Chat</span>
+              </Link>
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 23 ? "open" : ""
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 2 ? "open" : ""
                   }`}
                 type="button"
-                onClick={() => toggleAccordion(23)}
+                onClick={() => toggleAccordion(2)}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  qr_code_scanner
+                  mail
                 </i>
-                <span className="title leading-none">UI Elements</span>
+                <span className="title leading-none">Email</span>
               </button>
 
               <div
-                className={`accordion-collapse ${openIndex === 23 ? "open" : "hidden"
+                className={`accordion-collapse ${openIndex === 2 ? "open" : "hidden"
                   }`}
               >
                 <div className="pt-[4px]">
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/ui-elements/alerts/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/alerts/" ? "active" : ""
+                        href="/apps/email/inbox/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/email/inbox/" ? "active" : ""
                           }`}
                       >
-                        Alerts
+                        Inbox
                       </Link>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/ui-elements/avatars/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/avatars/" ? "active" : ""
+                        href="/apps/email/compose/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/email/compose/" ? "active" : ""
                           }`}
                       >
-                        Avatars
+                        Compose
                       </Link>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/ui-elements/accordion/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/accordion/" ? "active" : ""
+                        href="/apps/email/read/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/email/read/" ? "active" : ""
                           }`}
                       >
-                        Accordion
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/badges/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/badges/" ? "active" : ""
-                          }`}
-                      >
-                        Badges
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/buttons/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/buttons/" ? "active" : ""
-                          }`}
-                      >
-                        Buttons
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/breadcrumb/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/breadcrumb/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Breadcrumb
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/dropdowns/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/dropdowns/" ? "active" : ""
-                          }`}
-                      >
-                        Dropdowns
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/images/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/images/" ? "active" : ""
-                          }`}
-                      >
-                        Images
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/modal/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/modal/" ? "active" : ""
-                          }`}
-                      >
-                        Modal
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/pagination/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/pagination/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Pagination
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/progress/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/progress/" ? "active" : ""
-                          }`}
-                      >
-                        Progress
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/tooltips/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/tooltips/" ? "active" : ""
-                          }`}
-                      >
-                        Tooltips
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/tabs/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/tabs/" ? "active" : ""
-                          }`}
-                      >
-                        Tabs
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/typography/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/typography/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Typography
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/ui-elements/videos/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/ui-elements/videos/" ? "active" : ""
-                          }`}
-                      >
-                        Videos
+                        Read
                       </Link>
                     </li>
                   </ul>
@@ -2421,77 +2000,117 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <Link
-                href="/tables/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/tables/" ? "active" : ""
+                href="/apps/kanban-board/"
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/apps/kanban-board/" ? "active" : ""
                   }`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  table_chart
+                  team_dashboard
                 </i>
-                <span className="title leading-none">Tables</span>
+                <span className="title leading-none">Kanban Board</span>
               </Link>
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 24 ? "open" : ""
+                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 3 ? "open" : ""
                   }`}
                 type="button"
-                onClick={() => toggleAccordion(24)}
+                onClick={() => toggleAccordion(3)}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  forum
+                  folder_open
                 </i>
-                <span className="title leading-none">Forms</span>
+                <span className="title leading-none">File Manager</span>
               </button>
 
               <div
-                className={`accordion-collapse ${openIndex === 24 ? "open" : "hidden"
+                className={`accordion-collapse ${openIndex === 3 ? "open" : "hidden"
                   }`}
               >
                 <div className="pt-[4px]">
                   <ul className="sidebar-sub-menu">
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/forms/input-select/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/forms/input-select/" ? "active" : ""
-                          }`}
-                      >
-                        Input & Select
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/forms/checkboxes-radios/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/forms/checkboxes-radios/"
+                        href="/apps/file-manager/my-drive/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/my-drive/"
                           ? "active"
                           : ""
                           }`}
                       >
-                        Checkboxes & Radios
+                        My Drive
                       </Link>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/forms/rich-text-editor/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/forms/rich-text-editor/"
+                        href="/apps/file-manager/assets/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/assets/"
                           ? "active"
                           : ""
                           }`}
                       >
-                        Rich Text Editor
+                        Assets
                       </Link>
                     </li>
 
                     <li className="sidemenu-item mb-[4px] last:mb-0">
                       <Link
-                        href="/forms/file-uploader/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/forms/file-uploader/" ? "active" : ""
+                        href="/apps/file-manager/projects/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/projects/"
+                          ? "active"
+                          : ""
                           }`}
                       >
-                        File Uploader
+                        Projects
+                      </Link>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/apps/file-manager/personal/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/personal/"
+                          ? "active"
+                          : ""
+                          }`}
+                      >
+                        Personal
+                      </Link>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/apps/file-manager/applications/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/applications/"
+                          ? "active"
+                          : ""
+                          }`}
+                      >
+                        Applications
+                      </Link>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/apps/file-manager/documents/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/documents/"
+                          ? "active"
+                          : ""
+                          }`}
+                      >
+                        Documents
+                      </Link>
+                    </li>
+
+                    <li className="sidemenu-item mb-[4px] last:mb-0">
+                      <Link
+                        href="/apps/file-manager/media/"
+                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/apps/file-manager/media/"
+                          ? "active"
+                          : ""
+                          }`}
+                      >
+                        Media
                       </Link>
                     </li>
                   </ul>
@@ -2499,421 +2118,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
               </div>
             </div>
 
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 25 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(25)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  pie_chart
-                </i>
-                <span className="title leading-none">Charts</span>
-              </button>
 
-              <div
-                className={`accordion-collapse ${openIndex === 25 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/line/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/line/" ? "active" : ""
-                          }`}
-                      >
-                        Line
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/area/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/area/" ? "active" : ""
-                          }`}
-                      >
-                        Area
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/column/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/column/" ? "active" : ""
-                          }`}
-                      >
-                        Column
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/mixed/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/mixed/" ? "active" : ""
-                          }`}
-                      >
-                        Mixed
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/radialbar/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/radialbar/" ? "active" : ""
-                          }`}
-                      >
-                        RadialBar
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/radar/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/radar/" ? "active" : ""
-                          }`}
-                      >
-                        Radar
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/pie/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/pie/" ? "active" : ""
-                          }`}
-                      >
-                        Pie
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/polar/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/polar/" ? "active" : ""
-                          }`}
-                      >
-                        Polar
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/charts/more/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/charts/more/" ? "active" : ""
-                          }`}
-                      >
-                        More
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 26 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(26)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  lock_open
-                </i>
-                <span className="title leading-none">Authentication</span>
-              </button>
-
-              <div
-                className={`accordion-collapse ${openIndex === 26 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/sign-in/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/sign-in/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Sign In
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/sign-up/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/sign-up/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Sign Up
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/forgot-password/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/forgot-password/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Forgot Password
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/reset-password/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/reset-password/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Reset Password
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/confirm-email/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/confirm-email/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Confirm Email
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/lock-screen/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/lock-screen/"
-                          ? "active"
-                          : ""
-                          }`}
-                      >
-                        Lock Screen
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/authentication/logout/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/authentication/logout/" ? "active" : ""
-                          }`}
-                      >
-                        Logout
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 27 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(27)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  content_copy
-                </i>
-                <span className="title leading-none">Extra Pages</span>
-              </button>
-
-              <div
-                className={`accordion-collapse ${openIndex === 27 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/pricing/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/pricing/" ? "active" : ""
-                          }`}
-                      >
-                        Pricing
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/timeline/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/timeline/" ? "active" : ""
-                          }`}
-                      >
-                        Timeline
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/faq/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/faq/" ? "active" : ""
-                          }`}
-                      >
-                        FAQ
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/gallery/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/gallery/" ? "active" : ""
-                          }`}
-                      >
-                        Gallery
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/testimonials/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/testimonials/" ? "active" : ""
-                          }`}
-                      >
-                        Testimonials
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/search/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/search/" ? "active" : ""
-                          }`}
-                      >
-                        Search
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/coming-soon/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/coming-soon/" ? "active" : ""
-                          }`}
-                      >
-                        Coming Soon
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/blank-page/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/blank-page/" ? "active" : ""
-                          }`}
-                      >
-                        Blank Page
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <button
-                className={`accordion-button toggle flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${openIndex === 28 ? "open" : ""
-                  }`}
-                type="button"
-                onClick={() => toggleAccordion(28)}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  error
-                </i>
-                <span className="title leading-none">Errors</span>
-              </button>
-
-              <div
-                className={`accordion-collapse ${openIndex === 28 ? "open" : "hidden"
-                  }`}
-              >
-                <div className="pt-[4px]">
-                  <ul className="sidebar-sub-menu">
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/not-found/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/not-found/" ? "active" : ""
-                          }`}
-                      >
-                        404 Error Page
-                      </Link>
-                    </li>
-
-                    <li className="sidemenu-item mb-[4px] last:mb-0">
-                      <Link
-                        href="/internal-error/"
-                        className={`sidemenu-link rounded-md flex items-center relative transition-all font-medium text-gray-500 dark:text-gray-400 py-[9px] ltr:pl-[38px] ltr:pr-[30px] rtl:pr-[38px] rtl:pl-[30px] hover:text-primary-500 hover:bg-primary-50 w-full text-left dark:hover:bg-[#15203c] ${pathname === "/internal-error/" ? "active" : ""
-                          }`}
-                      >
-                        Internal Error
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/widgets/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/widgets/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  widgets
-                </i>
-                <span className="title leading-none">Widgets</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/maps/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/maps/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  map
-                </i>
-                <span className="title leading-none">Maps</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/notifications/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/notifications/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  notifications
-                </i>
-                <span className="title leading-none">Notifications</span>
-              </Link>
-            </div>
-
-            <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/members/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/members/" ? "active" : ""
-                  }`}
-              >
-                <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
-                  people
-                </i>
-                <span className="title leading-none">Members</span>
-              </Link>
-            </div>
 
             <span className="block relative font-medium uppercase text-gray-400 mb-[8px] text-xs [&:not(:first-child)]:mt-[22px]">
               Others
@@ -2921,8 +2126,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
               <Link
-                href="/my-profile/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/my-profile/" ? "active" : ""
+                href="/profile/user-profile/"
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/profile/user-profile/" ? "active" : ""
                   }`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
@@ -3012,16 +2217,16 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ toggleActive }) => {
             </div>
 
             <div className="accordion-item rounded-md text-black dark:text-white mb-[5px] whitespace-nowrap">
-              <Link
-                href="/"
-                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c] ${pathname === "/" ? "active" : ""
-                  }`}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className={`accordion-button flex items-center transition-all py-[9px] ltr:pl-[14px] ltr:pr-[30px] rtl:pr-[14px] rtl:pl-[30px] rounded-md font-medium w-full relative hover:bg-gray-50 text-left dark:hover:bg-[#15203c]`}
               >
                 <i className="material-symbols-outlined transition-all text-gray-500 dark:text-gray-400 ltr:mr-[7px] rtl:ml-[7px] !text-[22px] leading-none relative -top-px">
                   logout
                 </i>
                 <span className="title leading-none">Logout</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

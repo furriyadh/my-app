@@ -8,8 +8,8 @@ export default {
     // Or if using `src` directory:
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  // Explicitly set dark mode to a class that is NEVER used to force light mode
-  darkMode: ['class', '.force-light-mode'],
+  // Use standard 'dark' class on html element for dark mode
+  darkMode: 'class',
   safelist: [
     'animate-canopy-horizontal',
     'animate-canopy-vertical',

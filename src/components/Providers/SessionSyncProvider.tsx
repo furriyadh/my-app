@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 /**
@@ -10,6 +11,7 @@ import { createClient } from "@/utils/supabase/client";
  * هذا يضمن أن الـ API routes تعمل بشكل صحيح حتى بعد OAuth callback
  * 
  * ✅ يقوم أيضاً بتجديد access_token تلقائياً كل 50 دقيقة
+ * ✅ يستمع لـ auth:logout events من authFetch ويتعامل معها
  */
 export default function SessionSyncProvider({
     children,
@@ -18,6 +20,46 @@ export default function SessionSyncProvider({
 }) {
     const syncedRef = useRef(false);
     const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const router = useRouter();
+
+    // 🔒 استماع لـ logout events من authFetch
+    useEffect(() => {
+        const handleLogout = async () => {
+            console.log('🚪 Auth logout event received - clearing session...');
+
+            try {
+                // مسح الـ session من Supabase
+                const supabase = createClient();
+                await supabase.auth.signOut();
+
+                // مسح OAuth cookies
+                await fetch('/api/oauth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                // مسح localStorage
+                localStorage.removeItem('cached_google_ads_accounts');
+                localStorage.removeItem('oauth_user_info');
+                localStorage.removeItem('userEmail');
+
+                console.log('✅ Session cleared, redirecting to login...');
+
+                // التوجيه لصفحة الـ Home
+                router.push('/');
+            } catch (error) {
+                console.error('❌ Error during logout:', error);
+                // في حالة الخطأ، نوجه للـ Home على أي حال
+                router.push('/');
+            }
+        };
+
+        window.addEventListener('auth:logout', handleLogout);
+
+        return () => {
+            window.removeEventListener('auth:logout', handleLogout);
+        };
+    }, [router]);
 
     useEffect(() => {
         // تجنب المزامنة المتكررة
@@ -32,8 +74,33 @@ export default function SessionSyncProvider({
                     // التحقق من وجود oauth_user_info cookie
                     const hasOAuthCookie = document.cookie.includes('oauth_user_info');
 
-                    if (!hasOAuthCookie) {
-                        console.log("🔄 Session found but OAuth cookie missing, syncing...");
+                    // 🔧 التحقق من أن الـ cookie للمستخدم الصحيح
+                    let needsSync = !hasOAuthCookie;
+
+                    if (hasOAuthCookie) {
+                        try {
+                            const cookieStr = document.cookie
+                                .split('; ')
+                                .find(row => row.startsWith('oauth_user_info='));
+
+                            if (cookieStr) {
+                                const cookieValue = decodeURIComponent(cookieStr.split('=')[1]);
+                                const cookieUser = JSON.parse(cookieValue);
+
+                                // 🔑 مقارنة الـ email - إذا كان مختلف، نحتاج مزامنة!
+                                if (cookieUser.email !== session.user.email) {
+                                    console.log('⚠️ User changed! Cookie:', cookieUser.email, 'Session:', session.user.email);
+                                    needsSync = true;
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('⚠️ Error parsing oauth_user_info cookie:', e);
+                            needsSync = true;
+                        }
+                    }
+
+                    if (needsSync) {
+                        console.log("🔄 Session found but OAuth cookie missing/outdated, syncing...");
 
                         // جلب Google ID من identities أو user_metadata
                         const user = session.user;
@@ -43,11 +110,14 @@ export default function SessionSyncProvider({
                             user.user_metadata?.sub ||
                             user.id;
 
-                        console.log("🔑 Using ID for sync:", { supabaseId: user.id, googleId });
+                        console.log("🔑 Using ID for sync:", { supabaseId: user.id, googleId, email: user.email });
 
                         await fetch('/api/auth/sync-session', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${session.access_token}`
+                            },
                             body: JSON.stringify({
                                 id: googleId,
                                 supabaseId: user.id,
